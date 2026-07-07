@@ -67,7 +67,9 @@
   border-radius: 2px;
   background: var(--border);
   opacity: 0;
-  transition: opacity 0.15s ease, background 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    background 0.15s ease;
 }
 .group:hover .split-handle::after,
 .split-handle:hover::after {
@@ -138,7 +140,9 @@
   clip-path: var(--blk-clip);
   filter: drop-shadow(0 2px 2px hsl(0 0% 0% / 0.16));
   cursor: grab;
-  transition: transform 0.12s ease, filter 0.12s ease;
+  transition:
+    transform 0.12s ease,
+    filter 0.12s ease;
 }
 .blk:active {
   cursor: grabbing;
@@ -177,7 +181,9 @@
   width: 1rem;
   border-radius: 4px;
   color: var(--text-3);
-  transition: background 0.12s ease, color 0.12s ease;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
 }
 .blk-step:hover:not(:disabled) {
   background: var(--surface-2);
@@ -191,22 +197,29 @@
 .blk--tab {
   --blk-clip: polygon(
     0 0,
-    calc(50% - var(--blk-w)) 0, calc(50% - var(--blk-w)) var(--blk-d),
-    calc(50% + var(--blk-w)) var(--blk-d), calc(50% + var(--blk-w)) 0,
+    calc(50% - var(--blk-w)) 0,
+    calc(50% - var(--blk-w)) var(--blk-d),
+    calc(50% + var(--blk-w)) var(--blk-d),
+    calc(50% + var(--blk-w)) 0,
     100% 0,
     100% calc(100% - var(--blk-d)),
-    calc(50% + var(--blk-w)) calc(100% - var(--blk-d)), calc(50% + var(--blk-w)) 100%,
-    calc(50% - var(--blk-w)) 100%, calc(50% - var(--blk-w)) calc(100% - var(--blk-d)),
+    calc(50% + var(--blk-w)) calc(100% - var(--blk-d)),
+    calc(50% + var(--blk-w)) 100%,
+    calc(50% - var(--blk-w)) 100%,
+    calc(50% - var(--blk-w)) calc(100% - var(--blk-d)),
     0 calc(100% - var(--blk-d))
   );
 }
 /* signature — flat top (it starts a function), tab bottom. */
 .blk--start {
   --blk-clip: polygon(
-    0 0, 100% 0,
+    0 0,
+    100% 0,
     100% calc(100% - var(--blk-d)),
-    calc(50% + var(--blk-w)) calc(100% - var(--blk-d)), calc(50% + var(--blk-w)) 100%,
-    calc(50% - var(--blk-w)) 100%, calc(50% - var(--blk-w)) calc(100% - var(--blk-d)),
+    calc(50% + var(--blk-w)) calc(100% - var(--blk-d)),
+    calc(50% + var(--blk-w)) 100%,
+    calc(50% - var(--blk-w)) 100%,
+    calc(50% - var(--blk-w)) calc(100% - var(--blk-d)),
     0 calc(100% - var(--blk-d))
   );
 }
@@ -214,8 +227,10 @@
 .blk--return {
   --blk-clip: polygon(
     0 0,
-    calc(50% - var(--blk-w)) 0, calc(50% - var(--blk-w)) var(--blk-d),
-    calc(50% + var(--blk-w)) var(--blk-d), calc(50% + var(--blk-w)) 0,
+    calc(50% - var(--blk-w)) 0,
+    calc(50% - var(--blk-w)) var(--blk-d),
+    calc(50% + var(--blk-w)) var(--blk-d),
+    calc(50% + var(--blk-w)) 0,
     100% 0,
     100% calc(100% - var(--blk-d)),
     50% 100%,
@@ -225,13 +240,19 @@
 /* branch — chamfered top corners (a decision), socket top, tab bottom. */
 .blk--branch {
   --blk-clip: polygon(
-    0 9px, 9px 0,
-    calc(50% - var(--blk-w)) 0, calc(50% - var(--blk-w)) var(--blk-d),
-    calc(50% + var(--blk-w)) var(--blk-d), calc(50% + var(--blk-w)) 0,
-    calc(100% - 9px) 0, 100% 9px,
+    0 9px,
+    9px 0,
+    calc(50% - var(--blk-w)) 0,
+    calc(50% - var(--blk-w)) var(--blk-d),
+    calc(50% + var(--blk-w)) var(--blk-d),
+    calc(50% + var(--blk-w)) 0,
+    calc(100% - 9px) 0,
+    100% 9px,
     100% calc(100% - var(--blk-d)),
-    calc(50% + var(--blk-w)) calc(100% - var(--blk-d)), calc(50% + var(--blk-w)) 100%,
-    calc(50% - var(--blk-w)) 100%, calc(50% - var(--blk-w)) calc(100% - var(--blk-d)),
+    calc(50% + var(--blk-w)) calc(100% - var(--blk-d)),
+    calc(50% + var(--blk-w)) 100%,
+    calc(50% - var(--blk-w)) 100%,
+    calc(50% - var(--blk-w)) calc(100% - var(--blk-d)),
     0 calc(100% - var(--blk-d))
   );
 }

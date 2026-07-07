@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -14,7 +20,15 @@ import {
   VizStatStrip,
   type RailStep,
 } from '../../../_shared/vizKit';
-import { IconBit, IconBucket, IconDup, IconGhost, IconRange, IconSpark, IconXor } from '../../../_shared/vizIcons';
+import {
+  IconBit,
+  IconBucket,
+  IconDup,
+  IconGhost,
+  IconRange,
+  IconSpark,
+  IconXor,
+} from '../../../_shared/vizIcons';
 
 interface DupMissInput {
   nums: number[];
@@ -43,7 +57,8 @@ interface DupMissState {
   done: boolean;
 }
 
-function record({ nums }: DupMissInput): Frame<DupMissState>[] {  const n = nums.length;
+function record({ nums }: DupMissInput): Frame<DupMissState>[] {
+  const n = nums.length;
 
   let xorAll = 0;
   let rightBit: number | null = null;
@@ -51,21 +66,21 @@ function record({ nums }: DupMissInput): Frame<DupMissState>[] {  const n = nums
   let y = 0;
 
   const { emit, frames } = createRecorder<DupMissState>(() => ({
-        nums,
-        n,
-        phase: 'init',
-        xorAll,
-        scanI: null,
-        expectVal: null,
-        rightBit,
-        x,
-        y,
-        bucketVal: null,
-        bucketHasBit: null,
-        dup: null,
-        missing: null,
-        done: false
-      }));
+    nums,
+    n,
+    phase: 'init',
+    xorAll,
+    scanI: null,
+    expectVal: null,
+    rightBit,
+    x,
+    y,
+    bucketVal: null,
+    bucketHasBit: null,
+    dup: null,
+    missing: null,
+    done: false,
+  }));
 
   const bin = (v: number) => '0b' + v.toString(2);
 
@@ -197,7 +212,12 @@ function View({ frame }: PluginViewProps<DupMissState>) {
     <>
       <RailSteps steps={PHASE_STEPS} activeId={s.phase} />
       <RailGroup label="answer">
-        <RailStat k="dup" icon={<IconDup />} v={s.dup ?? '…'} tone={s.dup !== null ? 'bad' : undefined} />
+        <RailStat
+          k="dup"
+          icon={<IconDup />}
+          v={s.dup ?? '…'}
+          tone={s.dup !== null ? 'bad' : undefined}
+        />
         <RailStat
           k="missing"
           icon={<IconGhost />}
@@ -270,132 +290,131 @@ function Inspector({ frame }: InspectorProps<DupMissState>) {
 export const manifestId = 'prep-arrays-find-duplicate-and-missing';
 export const title = 'Find duplicate and missing';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Find duplicate and missing\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Find duplicate and missing"?',
     choices: [
       {
-        label: "XOR + math — fits this problem",
-        correct: true
+        label: 'XOR + math — fits this problem',
+        correct: true,
       },
       {
-        label: "Two pointers swap — different approach"
+        label: 'Two pointers swap — different approach',
       },
       {
-        label: "Boyer-Moore voting — different approach"
+        label: 'Boyer-Moore voting — different approach',
       },
       {
-        label: "Sliding window — different approach"
-      }
+        label: 'Sliding window — different approach',
+      },
     ],
-    explain: "XOR all numbers and 1..n leaves dup^missing; a set bit splits them into two buckets"
+    explain: 'XOR all numbers and 1..n leaves dup^missing; a set bit splits them into two buckets',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Find duplicate and missing), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Find duplicate and missing), what strategy is established?',
     choices: [
       {
-        label: "XOR all numbers and 1..n leaves — described in INIT caption",
-        correct: true
+        label: 'XOR all numbers and 1..n leaves — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Find the duplicate and the missing value. The array should hold 1.. exactly once, but one number appears twice and another is absent. XOR every index 1.. with every array value: matched numbers cancel, leaving dup XOR missing. O(n) time, O(1) space."
+    explain:
+      'Find the duplicate and the missing value. The array should hold 1.. exactly once, but one number appears twice and another is absent. XOR every index 1.. with every array value: matched numbers cancel, leaving dup XOR missing. O(n) time, O(1) space.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"RIGHT_BIT\" step (rightBit=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "RIGHT_BIT" step (rightBit=), what happens?',
     choices: [
       {
-        label: "xorAll = () equals dup XOR — this move caption",
-        correct: true
+        label: 'xorAll = () equals dup XOR — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "xorAll =  () equals dup XOR missing. Its lowest set bit is rightBit = xorAll & -xorAll =  (). dup and missing differ in this bit, so it splits them into two buckets."
+    explain:
+      'xorAll =  () equals dup XOR missing. Its lowest set bit is rightBit = xorAll & -xorAll =  (). dup and missing differ in this bit, so it splits them into two buckets.',
   },
   {
-    id: "state",
-    prompt: "What does the `scanI` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `scanI` field track in the visualization state?',
     choices: [
       {
-        label: "index into nums currently folded — updated each frame",
-        correct: true
+        label: 'index into nums currently folded — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `scanI` in sync: index into nums currently folded in"
+    explain: 'The recorder keeps `scanI` in sync: index into nums currently folded in',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Find duplicate and missing\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Find duplicate and missing"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
+        label: 'O(log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n+m) time, O(1) space — wrong order of growth"
-      }
+        label: 'O(n+m) time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). xor 1..n and arr; rightBit=x&-x; xor each bucket; nums[x-1]==x decides order"
+    explain:
+      'O(n). O(1). xor 1..n and arr; rightBit=x&-x; xor each bucket; nums[x-1]==x decides order',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Answer: is the duplicate — final DONE caption",
-        correct: true
+        label: 'Answer: is the duplicate — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Answer:  is the duplicate and  is the missing value. Done in one pass over the data with only a handful of integers — O(n) time, O(1) space."
-  }
+    explain:
+      'Answer:  is the duplicate and  is the missing value. Done in one pass over the data with only a handful of integers — O(n) time, O(1) space.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

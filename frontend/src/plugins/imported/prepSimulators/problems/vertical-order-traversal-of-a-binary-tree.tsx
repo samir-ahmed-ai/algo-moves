@@ -1,8 +1,23 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 // The tree is provided in level-order (heap layout): children of index i are
 // 2i+1 (left) and 2i+2 (right); `null` marks an absent slot. TreeBoard consumes
@@ -48,21 +63,27 @@ function record({ tree }: VerticalInput): Frame<VerticalState>[] {
       .map(([c, pts]) => [c, pts.map((p) => ({ ...p }))]);
 
   const { emit, frames } = createRecorder<VerticalState>(() => ({
-        tree,
-        visited: visited.slice(),
-        current: null,
-        queue: queue.slice(),
-        colOf: [...colByNode.entries()],
-        rowOf: [...rowByNode.entries()],
-        buckets: bucketEntries(),
-        currentCol: null,
-        sortingCol: null,
-        result: null,
-        done: false
-      }));
+    tree,
+    visited: visited.slice(),
+    current: null,
+    queue: queue.slice(),
+    colOf: [...colByNode.entries()],
+    rowOf: [...rowByNode.entries()],
+    buckets: bucketEntries(),
+    currentCol: null,
+    sortingCol: null,
+    result: null,
+    done: false,
+  }));
 
   if (tree.length === 0 || tree[0] == null) {
-    emit('DONE', 'empty', 'The tree is empty, so the vertical order traversal is an empty list.', { done: true }, 'bad');
+    emit(
+      'DONE',
+      'empty',
+      'The tree is empty, so the vertical order traversal is an empty list.',
+      { done: true },
+      'bad',
+    );
     return frames;
   }
 
@@ -178,7 +199,11 @@ function View({ frame }: PluginViewProps<VerticalState>) {
     <>
       <RailGroup label="scan">
         <RailStat k="node" v={s.current !== null ? (s.tree[s.current] ?? '—') : '—'} />
-        <RailStat k="col" v={s.currentCol ?? (s.sortingCol !== null ? `sort ${s.sortingCol}` : '—')} tone={s.currentCol !== null ? 'accent' : undefined} />
+        <RailStat
+          k="col"
+          v={s.currentCol ?? (s.sortingCol !== null ? `sort ${s.sortingCol}` : '—')}
+          tone={s.currentCol !== null ? 'accent' : undefined}
+        />
       </RailGroup>
       <RailStack label="queue" items={queueItems} topLabel="front" highlightEnd="bottom" />
       <RailStack label="columns" items={bucketItems.length > 0 ? bucketItems : []} />
@@ -215,112 +240,110 @@ function Inspector({ frame }: InspectorProps<VerticalState>) {
 export const manifestId = 'prep-trees-vertical-order-traversal-of-a-binary-tree';
 export const title = 'Vertical Order Traversal of a Binary Tree';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Vertical Order Traversal of a Binary Tree\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Vertical Order Traversal of a Binary Tree"?',
     choices: [
       {
-        label: "BFS + Sort per column — fits this problem",
-        correct: true
+        label: 'BFS + Sort per column — fits this problem',
+        correct: true,
       },
       {
-        label: "BST range check — different approach"
+        label: 'BST range check — different approach',
       },
       {
-        label: "DFS right-first — different approach"
+        label: 'DFS right-first — different approach',
       },
       {
-        label: "DFS path — different approach"
-      }
+        label: 'DFS path — different approach',
+      },
     ],
-    explain: "BFS tracking `(row, col)` for each node. Group by column."
+    explain: 'BFS tracking `(row, col)` for each node. Group by column.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"ENQUEUE\" step (→(,)), what happens?",
+    id: 'key-step',
+    prompt: 'On the "ENQUEUE" step (→(,)), what happens?',
     choices: [
       {
-        label: "Node has a left child . — this move caption",
-        correct: true
+        label: 'Node has a left child . — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Node  has a left child . A left child goes one row down and one column left, to (row , col ). Enqueue it."
+    explain:
+      'Node  has a left child . A left child goes one row down and one column left, to (row , col ). Enqueue it.',
   },
   {
-    id: "state",
-    prompt: "What does the `visited` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `visited` field track in the visualization state?',
     choices: [
       {
-        label: "node indices already dequeued + — updated each frame",
-        correct: true
+        label: 'node indices already dequeued + — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `visited` in sync: node indices already dequeued + recorded"
+    explain: 'The recorder keeps `visited` in sync: node indices already dequeued + recorded',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Vertical Order Traversal of a Binary Tree\"?",
+    id: 'complexity',
+    prompt:
+      'What are the time and space complexities for "Vertical Order Traversal of a Binary Tree"?',
     choices: [
       {
-        label: "O(n log n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n log n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
+        label: 'O(log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(1) amortized time, O(h) space — wrong order of growth"
+        label: 'O(1) amortized time, O(h) space — wrong order of growth',
       },
       {
-        label: "O(m+n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(m+n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n log n). O(n). BFS tracking `(row, col)` for each node. Group by column.; Within each column, sort by `(row, value)`."
+    explain:
+      'O(n log n). O(n). BFS tracking `(row, col)` for each node. Group by column.; Within each column, sort by `(row, value)`.',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Reading the sorted columns left — final DONE caption",
-        correct: true
+        label: 'Reading the sorted columns left — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Reading the sorted columns left to right gives the answer: ${result.map((c) => "
-  }
+    explain: 'Reading the sorted columns left to right gives the answer: ${result.map((c) => ',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

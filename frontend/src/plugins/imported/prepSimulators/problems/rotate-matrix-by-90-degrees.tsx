@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -28,15 +34,15 @@ function record({ mat }: RotateInput): Frame<RotateState>[] {
   const n = mat.length;
   const grid = mat.map((row) => row.slice());
   const { emit, frames } = createRecorder<RotateState>(() => ({
-        mat: grid.map((row) => row.slice()),
-        n,
-        ring: null,
-        j: null,
-        corners: [],
-        active: null,
-        source: null,
-        done: false
-      }));
+    mat: grid.map((row) => row.slice()),
+    n,
+    ring: null,
+    j: null,
+    corners: [],
+    active: null,
+    source: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -148,7 +154,12 @@ function View({ frame }: PluginViewProps<RotateState>) {
             )}
           </>
         )}
-        {s.done && <>{' · '}<span className="font-mono text-good">rotated</span></>}
+        {s.done && (
+          <>
+            {' · '}
+            <span className="font-mono text-good">rotated</span>
+          </>
+        )}
       </div>
       <GridBoard grid={s.mat} active={s.active} cellTone={cellTone} />
       <div className={cn('mt-1', vizText.sm, 'text-ink3')}>
@@ -177,132 +188,128 @@ function Inspector({ frame }: InspectorProps<RotateState>) {
 export const manifestId = 'prep-matrices-rotate-matrix-by-90-degrees';
 export const title = 'Rotate matrix by 90 degrees';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Rotate matrix by 90 degrees\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Rotate matrix by 90 degrees"?',
     choices: [
       {
-        label: "Layer-by-layer 90° rotation — fits this problem",
-        correct: true
+        label: 'Layer-by-layer 90° rotation — fits this problem',
+        correct: true,
       },
       {
-        label: "Simulation — different approach"
+        label: 'Simulation — different approach',
       },
       {
-        label: "Boundary Simulation — different approach"
+        label: 'Boundary Simulation — different approach',
       },
       {
-        label: "4-direction DP — different approach"
-      }
+        label: '4-direction DP — different approach',
+      },
     ],
-    explain: "Rotate ring by ring with a 4-corner cyclic swap"
+    explain: 'Rotate ring by ring with a 4-corner cyclic swap',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Rotate matrix by 90 degrees), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Rotate matrix by 90 degrees), what strategy is established?',
     choices: [
       {
-        label: "Rotate ring by ring — described in INIT caption",
-        correct: true
+        label: 'Rotate ring by ring — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Rotate the × matrix 90° clockwise in place. We peel it ring by ring; within each ring a single temp lets us cycle four cells at a time (top ← left ← bottom ← right ← saved top)."
+    explain:
+      'Rotate the × matrix 90° clockwise in place. We peel it ring by ring; within each ring a single temp lets us cycle four cells at a time (top ← left ← bottom ← right ← saved top).',
   },
   {
-    id: "key-step",
-    prompt: "On the \"MOVE\" step (left←bottom), what happens?",
+    id: 'key-step',
+    prompt: 'On the "MOVE" step (left←bottom), what happens?',
     choices: [
       {
-        label: "Left gets the bottom value: mat[][] — this move caption",
-        correct: true
+        label: 'Left gets the bottom value: mat[][] — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Left gets the bottom value: mat[][] ← mat[][] = ."
+    explain: 'Left gets the bottom value: mat[][] ← mat[][] = .',
   },
   {
-    id: "state",
-    prompt: "What does the `ring` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `ring` field track in the visualization state?',
     choices: [
       {
-        label: "which layer (i) we — updated each frame",
-        correct: true
+        label: 'which layer (i) we — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `ring` in sync: which layer (i) we are rotating"
+    explain: 'The recorder keeps `ring` in sync: which layer (i) we are rotating',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Rotate matrix by 90 degrees\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Rotate matrix by 90 degrees"?',
     choices: [
       {
-        label: "O(m·n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(m·n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
+        label: 'O(log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(max(m,n)) space — wrong order of growth"
+        label: 'O(m·n) time, O(max(m,n)) space — wrong order of growth',
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(m·n). O(1). per ring: top <- left <- bottom <- right <- tmp"
+    explain: 'O(m·n). O(1). per ring: top <- left <- bottom <- right <- tmp',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Right gets the saved top value: — final DONE caption",
-        correct: true
+        label: 'Right gets the saved top value: — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Right gets the saved top value: mat[][] ← tmp = . The 4-cycle is complete."
-  }
+    explain: 'Right gets the saved top value: mat[][] ← tmp = . The 4-cycle is complete.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

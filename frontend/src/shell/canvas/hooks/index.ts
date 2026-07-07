@@ -4,5 +4,7 @@ export * from './useCanvasHistory';
 export * from './useCanvasKeyboardShortcuts';
 export * from './useCanvasLayoutPersistence';
 export * from './useCanvasLifecycle';
+export * from './useCanvasStageWorkspace';
+export * from './useCanvasStageMenus';
 export * from './useCanvasNodeMutations';
 export * from './useFitContentSize';

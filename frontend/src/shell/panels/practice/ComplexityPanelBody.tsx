@@ -19,7 +19,11 @@ export function ComplexityPanelBody() {
   const formattedAnswer = answer ? formatComplexityChoice(answer) : null;
   if (!answer) {
     return (
-      <EmptyState icon={<TrendingUp className="h-5 w-5" />} title="No complexity data" hint="This problem's tags have no pattern card yet." />
+      <EmptyState
+        icon={<TrendingUp className="h-5 w-5" />}
+        title="No complexity data"
+        hint="This problem's tags have no pattern card yet."
+      />
     );
   }
   const answered = picked !== null;
@@ -29,9 +33,21 @@ export function ComplexityPanelBody() {
       <Section title={`Complexity of ${item.title}`} bordered={false}>
         <div className="flex flex-col gap-1.5">
           {choices.map((c) => {
-            const state = !answered ? 'idle' : c === formattedAnswer ? 'correct' : c === picked ? 'wrong' : 'dim';
+            const state = !answered
+              ? 'idle'
+              : c === formattedAnswer
+                ? 'correct'
+                : c === picked
+                  ? 'wrong'
+                  : 'dim';
             return (
-              <Option key={c} state={state} disabled={answered} mono={false} onClick={() => setPicked(c)}>
+              <Option
+                key={c}
+                state={state}
+                disabled={answered}
+                mono={false}
+                onClick={() => setPicked(c)}
+              >
                 <QuizChoiceLabel label={c} size="studio" state={state} />
               </Option>
             );
@@ -41,7 +57,11 @@ export function ComplexityPanelBody() {
       {answered && (
         <div className="flex flex-col gap-2">
           <Hint>{cards.find((c) => c.complexity.includes(answer))?.complexity}</Hint>
-          {wrong && <p className="text-[length:var(--fs-xs)] text-bad">Start over — pick the right complexity.</p>}
+          {wrong && (
+            <p className="text-[length:var(--fs-xs)] text-bad">
+              Start over — pick the right complexity.
+            </p>
+          )}
           <Btn
             variant="primary"
             size="sm"

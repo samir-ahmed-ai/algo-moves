@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  RailGroup,
+  RailResult,
+  RailStat,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+} from '../../../_shared/vizKit';
 
 interface ReInput {
   s: string;
@@ -20,28 +33,50 @@ interface ReState {
 function record({ s, p }: ReInput): Frame<ReState>[] {
   const m = s.length;
   const n = p.length;
-  const dp: (boolean | null)[][] = Array.from({ length: m + 1 }, () => new Array<boolean | null>(n + 1).fill(null));
+  const dp: (boolean | null)[][] = Array.from({ length: m + 1 }, () =>
+    new Array<boolean | null>(n + 1).fill(null),
+  );
   const { emit, frames } = createRecorder<ReState>(() => ({
-        s: s,
-        p: p,
-        dp: dp.map((r) => r.slice()),
-        cur: null,
-        done: false
-      }));
+    s: s,
+    p: p,
+    dp: dp.map((r) => r.slice()),
+    cur: null,
+    done: false,
+  }));
 
-  emit('INIT', `"${s}" ~ "${p}"`, `Regular Expression Matching: does the whole string "${s}" match the pattern "${p}", where '.' matches any single char and '*' means zero-or-more of the preceding element? dp[i][j] is true when the first i chars of s match the first j chars of p.`, { cur: null });
+  emit(
+    'INIT',
+    `"${s}" ~ "${p}"`,
+    `Regular Expression Matching: does the whole string "${s}" match the pattern "${p}", where '.' matches any single char and '*' means zero-or-more of the preceding element? dp[i][j] is true when the first i chars of s match the first j chars of p.`,
+    { cur: null },
+  );
 
   dp[0][0] = true;
-  emit('BASE', `dp[0][0]=✓`, `Base case: an empty string matches an empty pattern, so dp[0][0] = true.`, { cur: [0, 0] });
+  emit(
+    'BASE',
+    `dp[0][0]=✓`,
+    `Base case: an empty string matches an empty pattern, so dp[0][0] = true.`,
+    { cur: [0, 0] },
+  );
 
   // First row: empty string vs non-empty pattern. Only "x*" groups can match "".
   for (let j = 1; j <= n; j++) {
     if (p[j - 1] === '*') {
       dp[0][j] = dp[0][j - 2] ?? false;
-      emit('BASE', `dp[0][${j}]=${dp[0][j] ? '✓' : '✗'}`, `Empty string row: '${p[j - 1]}' lets the group "${p[j - 2]}*" match zero times, so dp[0][${j}] copies dp[0][${j - 2}] = ${dp[0][j - 2] ? 'true' : 'false'} → ${dp[0][j] ? 'true' : 'false'}.`, { cur: [0, j] });
+      emit(
+        'BASE',
+        `dp[0][${j}]=${dp[0][j] ? '✓' : '✗'}`,
+        `Empty string row: '${p[j - 1]}' lets the group "${p[j - 2]}*" match zero times, so dp[0][${j}] copies dp[0][${j - 2}] = ${dp[0][j - 2] ? 'true' : 'false'} → ${dp[0][j] ? 'true' : 'false'}.`,
+        { cur: [0, j] },
+      );
     } else {
       dp[0][j] = false;
-      emit('BASE', `dp[0][${j}]=✗`, `Empty string row: pattern char '${p[j - 1]}' is not '*', so it must consume a char that the empty string lacks — dp[0][${j}] = false.`, { cur: [0, j] });
+      emit(
+        'BASE',
+        `dp[0][${j}]=✗`,
+        `Empty string row: pattern char '${p[j - 1]}' is not '*', so it must consume a char that the empty string lacks — dp[0][${j}] = false.`,
+        { cur: [0, j] },
+      );
     }
   }
 
@@ -55,17 +90,33 @@ function record({ s, p }: ReInput): Frame<ReState>[] {
         const charMatches = prev === '.' || prev === sc;
         const more = charMatches ? (dp[i - 1][j] ?? false) : false;
         dp[i][j] = zero || more;
-        emit('FILL', `dp[${i}][${j}]=${dp[i][j] ? '✓' : '✗'}`, `'*' on group "${prev}*": use it zero times → dp[${i}][${j - 2}] = ${zero}, OR (since '${prev}' ${charMatches ? `matches '${sc}'` : `does not match '${sc}'`}) consume '${sc}' and reuse the star → ${charMatches ? `dp[${i - 1}][${j}] = ${more}` : 'unavailable'}. dp[${i}][${j}] = ${dp[i][j]}.`, { cur: [i, j] });
+        emit(
+          'FILL',
+          `dp[${i}][${j}]=${dp[i][j] ? '✓' : '✗'}`,
+          `'*' on group "${prev}*": use it zero times → dp[${i}][${j - 2}] = ${zero}, OR (since '${prev}' ${charMatches ? `matches '${sc}'` : `does not match '${sc}'`}) consume '${sc}' and reuse the star → ${charMatches ? `dp[${i - 1}][${j}] = ${more}` : 'unavailable'}. dp[${i}][${j}] = ${dp[i][j]}.`,
+          { cur: [i, j] },
+        );
       } else {
         const charMatches = pc === '.' || pc === sc;
         dp[i][j] = charMatches ? (dp[i - 1][j - 1] ?? false) : false;
-        emit('FILL', `dp[${i}][${j}]=${dp[i][j] ? '✓' : '✗'}`, `'${pc}' ${charMatches ? `matches '${sc}'` : `does not match '${sc}'`}: ${charMatches ? `carry the diagonal dp[${i - 1}][${j - 1}] = ${dp[i - 1][j - 1]}` : 'no match here'}. dp[${i}][${j}] = ${dp[i][j]}.`, { cur: [i, j] });
+        emit(
+          'FILL',
+          `dp[${i}][${j}]=${dp[i][j] ? '✓' : '✗'}`,
+          `'${pc}' ${charMatches ? `matches '${sc}'` : `does not match '${sc}'`}: ${charMatches ? `carry the diagonal dp[${i - 1}][${j - 1}] = ${dp[i - 1][j - 1]}` : 'no match here'}. dp[${i}][${j}] = ${dp[i][j]}.`,
+          { cur: [i, j] },
+        );
       }
     }
   }
 
   const ans = dp[m][n] ?? false;
-  emit('DONE', ans ? 'match ✓' : 'no match ✗', `The table is full. dp[${m}][${n}] = ${ans}, so "${s}" ${ans ? 'matches' : 'does not match'} "${p}".`, { cur: [m, n] , done: true }, 'good');
+  emit(
+    'DONE',
+    ans ? 'match ✓' : 'no match ✗',
+    `The table is full. dp[${m}][${n}] = ${ans}, so "${s}" ${ans ? 'matches' : 'does not match'} "${p}".`,
+    { cur: [m, n], done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -73,7 +124,9 @@ function buildDisplay(state: ReState): (number | string)[][] {
   const m = state.s.length;
   const n = state.p.length;
   // +2 for header row (pattern chars) and header col (string chars), with an ε corner.
-  const display: (number | string)[][] = Array.from({ length: m + 2 }, () => new Array<number | string>(n + 2).fill(''));
+  const display: (number | string)[][] = Array.from({ length: m + 2 }, () =>
+    new Array<number | string>(n + 2).fill(''),
+  );
   display[0][1] = 'ε';
   for (let j = 0; j < n; j++) display[0][j + 2] = state.p[j];
   display[1][0] = 'ε';
@@ -105,13 +158,25 @@ function View({ frame }: PluginViewProps<ReState>) {
   const ansDone = final !== null;
   const ansLabel = final === null ? '…' : final ? 'match' : 'no match';
   return (
-    <VizStage rail={<>
-      <RailGroup label="cell">
-        <RailStat k="pos" v={s.cur ? `dp[${s.cur[0]}][${s.cur[1]}]` : '—'} />
-        <RailStat k="val" v={cellStr} tone={cellVal === true ? 'good' : cellVal === false ? 'bad' : undefined} />
-      </RailGroup>
-      <RailResult label="answer" value={ansLabel} tone={ansDone ? (final ? 'good' : 'bad') : 'accent'} />
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="cell">
+            <RailStat k="pos" v={s.cur ? `dp[${s.cur[0]}][${s.cur[1]}]` : '—'} />
+            <RailStat
+              k="val"
+              v={cellStr}
+              tone={cellVal === true ? 'good' : cellVal === false ? 'bad' : undefined}
+            />
+          </RailGroup>
+          <RailResult
+            label="answer"
+            value={ansLabel}
+            tone={ansDone ? (final ? 'good' : 'bad') : 'accent'}
+          />
+        </>
+      }
+    >
       <GridBoard grid={display} cellTone={cellTone} active={displayActive} cellSize={36} />
     </VizStage>
   );

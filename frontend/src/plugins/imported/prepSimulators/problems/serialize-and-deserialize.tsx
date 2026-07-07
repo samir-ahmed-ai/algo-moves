@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -29,16 +35,16 @@ const NIL = -1;
 
 function record({ tree }: SerdeInput): Frame<SerdeState>[] {
   const { emit, frames } = createRecorder<SerdeState>(() => ({
-        tree,
-        phase: 'serialize',
-        parts: [],
-        queue: [],
-        active: null,
-        visited: [],
-        cursor: 0,
-        built: [],
-        done: false
-      }));
+    tree,
+    phase: 'serialize',
+    parts: [],
+    queue: [],
+    active: null,
+    visited: [],
+    cursor: 0,
+    built: [],
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -54,7 +60,13 @@ function record({ tree }: SerdeInput): Frame<SerdeState>[] {
   let queue: number[] = tree.length > 0 && tree[0] != null ? [0] : [];
 
   if (queue.length === 0) {
-    emit('EMPTY', 'root is nil', 'The tree is empty, so serialization is the empty string and there is nothing to rebuild.', { phase: 'done', done: true }, 'bad');
+    emit(
+      'EMPTY',
+      'root is nil',
+      'The tree is empty, so serialization is the empty string and there is nothing to rebuild.',
+      { phase: 'done', done: true },
+      'bad',
+    );
     return frames;
   }
 
@@ -177,8 +189,7 @@ function record({ tree }: SerdeInput): Frame<SerdeState>[] {
 function View({ frame }: PluginViewProps<SerdeState>) {
   const s = frame.state;
   // During deserialize/done, show the tree being rebuilt; otherwise the original.
-  const boardTree: (number | string | null)[] =
-    s.phase === 'serialize' ? s.tree : s.built;
+  const boardTree: (number | string | null)[] = s.phase === 'serialize' ? s.tree : s.built;
   const visited = new Set(s.visited);
   const nodeClass = (i: number) =>
     s.active === i ? 'team-1' : visited.has(i) ? 'team-2' : 'team-0';
@@ -211,9 +222,15 @@ function Inspector({ frame }: InspectorProps<SerdeState>) {
     <VarGrid>
       <InspectorRow k="phase" v={s.phase} />
       <InspectorRow k="CSV len" v={s.parts.length} />
-      <InspectorRow k="queue" v={s.queue.length ? s.queue.map((q) => (q === NIL ? '#' : q)).join(',') : '—'} />
+      <InspectorRow
+        k="queue"
+        v={s.queue.length ? s.queue.map((q) => (q === NIL ? '#' : q)).join(',') : '—'}
+      />
       <InspectorRow k="read cursor" v={s.phase === 'serialize' ? '—' : s.cursor} />
-      <InspectorRow k="nodes built" v={s.phase === 'serialize' ? '—' : s.built.filter((x) => x != null).length} />
+      <InspectorRow
+        k="nodes built"
+        v={s.phase === 'serialize' ? '—' : s.built.filter((x) => x != null).length}
+      />
       <InspectorRow k="active slot" v={s.active ?? '—'} />
     </VarGrid>
   );
@@ -243,112 +260,110 @@ function serializeBFS(tree: (number | null)[]): string {
   return parts.join(',');
 }
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Serialize and deserialize\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Serialize and deserialize"?',
     choices: [
       {
-        label: "BFS serialize — fits this problem",
-        correct: true
+        label: 'BFS serialize — fits this problem',
+        correct: true,
       },
       {
-        label: "Mid divide BST — different approach"
+        label: 'Mid divide BST — different approach',
       },
       {
-        label: "Two Paths + LCA via Common Prefix — different approach"
+        label: 'Two Paths + LCA via Common Prefix — different approach',
       },
       {
-        label: "BST Walk — different approach"
-      }
+        label: 'BST Walk — different approach',
+      },
     ],
-    explain: "Level-order encode to CSV with # for nils; rebuild by preorder index"
+    explain: 'Level-order encode to CSV with # for nils; rebuild by preorder index',
   },
   {
-    id: "key-step",
-    prompt: "On the \"BUILD\" step (node ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "BUILD" step (node ), what happens?',
     choices: [
       {
-        label: "Read token \"\" at position : — this move caption",
-        correct: true
+        label: 'Read token "" at position : — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Read token \"\" at position : create node , then recurse to build its left subtree, then its right subtree (preorder)."
+    explain:
+      'Read token "" at position : create node , then recurse to build its left subtree, then its right subtree (preorder).',
   },
   {
-    id: "state",
-    prompt: "What does the `tree` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `tree` field track in the visualization state?',
     choices: [
       {
-        label: "original tree (level-order), stays fixed — updated each frame",
-        correct: true
+        label: 'original tree (level-order), stays fixed — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `tree` in sync: original tree (level-order), stays fixed for the board"
+    explain:
+      'The recorder keeps `tree` in sync: original tree (level-order), stays fixed for the board',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Serialize and deserialize\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Serialize and deserialize"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n) time, O(h) space — wrong order of growth"
+        label: 'O(n) time, O(h) space — wrong order of growth',
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). BFS join vals (# for nil); deserialize via recursive index walk"
+    explain: 'O(n). O(n). BFS join vals (# for nil); deserialize via recursive index walk',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Read token \"\" at position : — final DONE caption",
-        correct: true
+        label: 'Read token "" at position : — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Read token \"\" at position : create node , then recurse to build its left subtree, then its right subtree (preorder)."
-  }
+    explain:
+      'Read token "" at position : create node , then recurse to build its left subtree, then its right subtree (preorder).',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -363,8 +378,6 @@ export const simulator: ProblemSimulator = {
     const first = frames[0]?.state as SerdeState | undefined;
     if (!first) return { ok: false, label: 'no frames' };
     const data = serializeBFS(first.tree);
-    return data
-      ? { ok: true, label: `"${data}"` }
-      : { ok: false, label: 'empty tree' };
+    return data ? { ok: true, label: `"${data}"` } : { ok: false, label: 'empty tree' };
   },
 };

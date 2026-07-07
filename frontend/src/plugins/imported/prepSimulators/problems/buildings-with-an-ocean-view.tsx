@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import { QueueTape } from '../../../../components/board/QueueTape';
@@ -20,20 +26,21 @@ interface BuildingsState {
   done: boolean;
 }
 
-function record({ heights }: BuildingsInput): Frame<BuildingsState>[] {  const n = heights.length;
+function record({ heights }: BuildingsInput): Frame<BuildingsState>[] {
+  const n = heights.length;
   const view = new Array<boolean>(n).fill(false);
   const resRev: number[] = [];
   let maxH = 0;
 
   const { emit, frames } = createRecorder<BuildingsState>(() => ({
-        heights,
-        i: null,
-        maxH,
-        view: view.slice(),
-        resRev: resRev.slice(),
-        result: null,
-        done: false
-      }));
+    heights,
+    i: null,
+    maxH,
+    view: view.slice(),
+    resRev: resRev.slice(),
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -97,8 +104,7 @@ function View({ frame }: PluginViewProps<BuildingsState>) {
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
-        ocean is to the right → · maxH ={' '}
-        <span className="font-mono text-ink">{s.maxH}</span>
+        ocean is to the right → · maxH = <span className="font-mono text-ink">{s.maxH}</span>
       </div>
       <ArrayRow values={s.heights} cellTone={tone} pointers={pointers} windowRange={null} />
       <div className={cn('mt-1', vizText.sm, 'text-ink3')}>height per building (index below)</div>
@@ -123,10 +129,7 @@ function Inspector({ frame }: InspectorProps<BuildingsState>) {
       <InspectorRow k="heights[i]" v={s.i !== null ? s.heights[s.i] : '—'} />
       <InspectorRow k="maxH" v={s.maxH} />
       <InspectorRow k="views so far" v={s.resRev.length} />
-      <InspectorRow
-        k="result"
-        v={s.result ? `[${s.result.join(', ')}]` : s.done ? 'none' : '…'}
-      />
+      <InspectorRow k="result" v={s.result ? `[${s.result.join(', ')}]` : s.done ? 'none' : '…'} />
     </VarGrid>
   );
 }
@@ -134,132 +137,132 @@ function Inspector({ frame }: InspectorProps<BuildingsState>) {
 export const manifestId = 'prep-stacks-queues-buildings-with-an-ocean-view';
 export const title = 'Buildings With an Ocean View';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Buildings With an Ocean View\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Buildings With an Ocean View"?',
     choices: [
       {
-        label: "Right-to-Left Max Scan — fits this problem",
-        correct: true
+        label: 'Right-to-Left Max Scan — fits this problem',
+        correct: true,
       },
       {
-        label: "Stack — different approach"
+        label: 'Stack — different approach',
       },
       {
-        label: "Postfix evaluation stack — different approach"
+        label: 'Postfix evaluation stack — different approach',
       },
       {
-        label: "Stack with auxiliary min stack — different approach"
-      }
+        label: 'Stack with auxiliary min stack — different approach',
+      },
     ],
-    explain: "Scan right-to-left tracking `maxH`; if `heights[i] > maxH`, building `i` has a view"
+    explain: 'Scan right-to-left tracking `maxH`; if `heights[i] > maxH`, building `i` has a view',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Buildings With an Ocean View), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Buildings With an Ocean View), what strategy is established?',
     choices: [
       {
-        label: "Scan right-to-left tracking `maxH`; — described in INIT caption",
-        correct: true
+        label: 'Scan right-to-left tracking `maxH`; — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Buildings With an Ocean View: the ocean is to the right. A building sees the ocean only if every building to its right is strictly shorter. Scan right-to-left tracking maxH (the tallest seen so far); any building taller than maxH has a clear view."
+    explain:
+      'Buildings With an Ocean View: the ocean is to the right. A building sees the ocean only if every building to its right is strictly shorter. Scan right-to-left tracking maxH (the tallest seen so far); any building taller than maxH has a clear view.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"VIEW\" step (+), what happens?",
+    id: 'key-step',
+    prompt: 'On the "VIEW" step (+), what happens?',
     choices: [
       {
-        label: "> , so nothing — this move caption",
-        correct: true
+        label: '> , so nothing — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: " > , so nothing to the right blocks building  — it has an ocean view. Record index  and raise maxH to ."
+    explain:
+      ' > , so nothing to the right blocks building  — it has an ocean view. Record index  and raise maxH to .',
   },
   {
-    id: "state",
-    prompt: "What does the `i` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: "current building under inspection — updated each frame",
-        correct: true
+        label: 'current building under inspection — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `i` in sync: current building under inspection (scanning right→left)"
+    explain:
+      'The recorder keeps `i` in sync: current building under inspection (scanning right→left)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Buildings With an Ocean View\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Buildings With an Ocean View"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(1) amortized time, O(n) space — wrong order of growth"
+        label: 'O(1) amortized time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). Scan right-to-left tracking `maxH`; if `heights[i] > maxH`, building `i` has a view; Collect indices in reverse, then reverse the result at the end"
+    explain:
+      'O(n). O(n). Scan right-to-left tracking `maxH`; if `heights[i] > maxH`, building `i` has a view; Collect indices in reverse, then reverse the result at the end',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Scan complete. We collected — final DONE caption",
-        correct: true
+        label: 'Scan complete. We collected — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Scan complete. We collected the view-having indices right-to-left, so reverse them into ascending order: []. These are the buildings with an ocean view."
-  }
+    explain:
+      'Scan complete. We collected the view-having indices right-to-left, so reverse them into ascending order: []. These are the buildings with an ocean view.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

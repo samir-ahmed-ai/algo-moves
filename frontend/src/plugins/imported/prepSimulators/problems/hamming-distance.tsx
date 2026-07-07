@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -41,7 +47,8 @@ function colOf(b: number, width: number): number {
   return width - 1 - b;
 }
 
-function record({ x, y }: HammingInput): Frame<HammingState>[] {  const width = bitWidth(x, y);
+function record({ x, y }: HammingInput): Frame<HammingState>[] {
+  const width = bitWidth(x, y);
   const xBits = toBits(x, width);
   const yBits = toBits(y, width);
 
@@ -50,17 +57,17 @@ function record({ x, y }: HammingInput): Frame<HammingState>[] {  const width = 
   const noXor: string[] = new Array<string>(width).fill('·');
 
   const { emit, frames } = createRecorder<HammingState>(() => ({
-        x,
-        y,
-        width,
-        xBits,
-        yBits,
-        xorBits: noXor,
-        scanned: null,
-        clearAt: null,
-        count,
-        done: false
-      }));
+    x,
+    y,
+    width,
+    xBits,
+    yBits,
+    xorBits: noXor,
+    scanned: null,
+    clearAt: null,
+    count,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -146,10 +153,22 @@ function View({ frame }: PluginViewProps<HammingState>) {
       </div>
 
       <div className={cn('mt-1 font-mono', vizText.xs, 'text-ink3')}>x</div>
-      <ArrayRow values={s.xBits} cellTone={xTone} pointers={[]} windowRange={null} label={bitLabel} />
+      <ArrayRow
+        values={s.xBits}
+        cellTone={xTone}
+        pointers={[]}
+        windowRange={null}
+        label={bitLabel}
+      />
 
       <div className={cn('mt-1 font-mono', vizText.xs, 'text-ink3')}>y</div>
-      <ArrayRow values={s.yBits} cellTone={yTone} pointers={[]} windowRange={null} label={bitLabel} />
+      <ArrayRow
+        values={s.yBits}
+        cellTone={yTone}
+        pointers={[]}
+        windowRange={null}
+        label={bitLabel}
+      />
 
       <div className={cn('mt-1 font-mono', vizText.xs, 'text-ink3')}>xor = x ^ y</div>
       <ArrayRow
@@ -185,132 +204,130 @@ function Inspector({ frame }: InspectorProps<HammingState>) {
 export const manifestId = 'prep-math-hamming-distance';
 export const title = 'Hamming distance';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Hamming distance\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Hamming distance"?',
     choices: [
       {
-        label: "XOR + popcount — fits this problem",
-        correct: true
+        label: 'XOR + popcount — fits this problem',
+        correct: true,
       },
       {
-        label: "Greedy roman numeral — different approach"
+        label: 'Greedy roman numeral — different approach',
       },
       {
-        label: "Sort + Sliding Window (atan2) — different approach"
+        label: 'Sort + Sliding Window (atan2) — different approach',
       },
       {
-        label: "Binary string addition — different approach"
-      }
+        label: 'Binary string addition — different approach',
+      },
     ],
-    explain: "x^y highlights the differing bits; count them"
+    explain: 'x^y highlights the differing bits; count them',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Hamming distance), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Hamming distance), what strategy is established?',
     choices: [
       {
-        label: "x^y highlights the differing bits; count — described in INIT caption",
-        correct: true
+        label: 'x^y highlights the differing bits; count — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Hamming distance counts the bit positions where x and y differ. x =  = ₂ and y =  = ₂ (shown MSB first). We compare them one bit at a time using XOR."
+    explain:
+      'Hamming distance counts the bit positions where x and y differ. x =  = ₂ and y =  = ₂ (shown MSB first). We compare them one bit at a time using XOR.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"POP\" step (count=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "POP" step (count=), what happens?',
     choices: [
       {
-        label: "Brian Kernighan trick: xor &= xor — this move caption",
-        correct: true
+        label: 'Brian Kernighan trick: xor &= xor — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Brian Kernighan trick: xor &= xor − 1 clears the lowest set 1-bit (position ). Each clear is one differing bit, so bump count to . xor is now ₂."
+    explain:
+      'Brian Kernighan trick: xor &= xor − 1 clears the lowest set 1-bit (position ). Each clear is one differing bit, so bump count to . xor is now ₂.',
   },
   {
-    id: "state",
-    prompt: "What does the `width` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `width` field track in the visualization state?',
     choices: [
       {
-        label: "number of bit columns rendered — updated each frame",
-        correct: true
+        label: 'number of bit columns rendered — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `width` in sync: number of bit columns rendered (MSB first)"
+    explain: 'The recorder keeps `width` in sync: number of bit columns rendered (MSB first)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Hamming distance\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Hamming distance"?',
     choices: [
       {
-        label: "O(1) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(1) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(log n) time, O(log n) space — wrong order of growth"
+        label: 'O(log n) time, O(log n) space — wrong order of growth',
       },
       {
-        label: "O(sqrt(n)) time, O(1) space — wrong order of growth"
+        label: 'O(sqrt(n)) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(1) space — wrong order of growth"
-      }
+        label: 'O(log n) time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(1). O(1). xor=x^y; popcount via xor&=xor-1"
+    explain: 'O(1). O(1). xor=x^y; popcount via xor&=xor-1',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "xor reached 0, so every differing — final DONE caption",
-        correct: true
+        label: 'xor reached 0, so every differing — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "xor reached 0, so every differing bit has been counted. The Hamming distance between  and  is . Runs in O(1) time and O(1) space for fixed-width ints."
-  }
+    explain:
+      'xor reached 0, so every differing bit has been counted. The Hamming distance between  and  is . Runs in O(1) time and O(1) space for fixed-width ints.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

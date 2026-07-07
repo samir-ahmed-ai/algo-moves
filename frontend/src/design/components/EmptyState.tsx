@@ -4,7 +4,15 @@ import { nodeText } from '@/design/typography';
 const cx = (...parts: (string | false | undefined)[]) => parts.filter(Boolean).join(' ');
 
 /** Designed empty / placeholder state — shared across shell and canvas panels. */
-export function EmptyState({ icon, title, hint }: { icon?: ReactNode; title: string; hint?: string }) {
+export function EmptyState({
+  icon,
+  title,
+  hint,
+}: {
+  icon?: ReactNode;
+  title: string;
+  hint?: string;
+}) {
   return (
     <div className="flex flex-col items-center gap-1.5 px-3 py-5 text-center">
       {icon && (

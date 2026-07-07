@@ -26,9 +26,7 @@ if (!jsonMatch) {
   process.exit(1);
 }
 const entries = JSON.parse(jsonMatch[1]);
-const entry = entries.find(
-  (e) => e.id === query || e.slug === query || e.id.endsWith(`-${query}`),
-);
+const entry = entries.find((e) => e.id === query || e.slug === query || e.id.endsWith(`-${query}`));
 if (!entry) {
   console.error(`No prep manifest entry for "${query}"`);
   process.exit(1);

@@ -18,11 +18,14 @@ export function createPadGrid(rows = 4, cols = 8): PadGridState {
   };
 }
 
-export function toggleCell(state: PadGridState, row: number, col: number, shiftKey = false): PadGridState {
+export function toggleCell(
+  state: PadGridState,
+  row: number,
+  col: number,
+  shiftKey = false,
+): PadGridState {
   const key = `${row},${col}`;
-  const cells = state.cells.map((r, ri) =>
-    r.map((c, ci) => (ri === row && ci === col ? !c : c)),
-  );
+  const cells = state.cells.map((r, ri) => r.map((c, ci) => (ri === row && ci === col ? !c : c)));
   const selected = new Set(state.selected);
   if (shiftKey) {
     if (selected.has(key)) selected.delete(key);
@@ -46,7 +49,7 @@ export function padGridToArray(state: PadGridState): number[] {
     if (mod === 'repeat' && colValues.length) {
       colValues = [...colValues, ...colValues];
     } else if (mod === 'euclid' && colValues.length === 0) {
-      colValues = euclideanPattern(state.rows, c % 3 + 2, c % 5 + 3);
+      colValues = euclideanPattern(state.rows, (c % 3) + 2, (c % 5) + 3);
     }
     out.push(...colValues);
   }
@@ -56,7 +59,10 @@ export function padGridToArray(state: PadGridState): number[] {
 function euclideanPattern(steps: number, pulses: number, rotation: number): number[] {
   const pattern: number[] = [];
   for (let i = 0; i < steps; i++) {
-    if (Math.floor(((i + rotation) * pulses) / steps) !== Math.floor(((i + rotation - 1) * pulses) / steps)) {
+    if (
+      Math.floor(((i + rotation) * pulses) / steps) !==
+      Math.floor(((i + rotation - 1) * pulses) / steps)
+    ) {
       pattern.push(i + 1);
     }
   }

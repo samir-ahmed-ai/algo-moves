@@ -50,7 +50,13 @@ export function recordScene(p: PrepProblem): Frame<PrepSceneState>[] {
     tone?: 'good' | 'bad',
   ) => frames.push({ move: { type, note, caption, tone }, state: { p, stageIdx, reveal } });
 
-  push(-1, 0, 'TITLE', p.pattern || 'scene', `“${p.title}” — picture the scene, watch it run, then lock in the line.`);
+  push(
+    -1,
+    0,
+    'TITLE',
+    p.pattern || 'scene',
+    `“${p.title}” — picture the scene, watch it run, then lock in the line.`,
+  );
 
   STAGES.forEach((stage, si) => {
     const ws = words(stage.pick(p));
@@ -101,7 +107,10 @@ function StageCard({
       }}
     >
       <div
-        className={cn('mb-1.5 flex items-center gap-1.5 font-medium uppercase tracking-wide', vizText.xs)}
+        className={cn(
+          'mb-1.5 flex items-center gap-1.5 font-medium uppercase tracking-wide',
+          vizText.xs,
+        )}
         style={{ color: active ? 'var(--accent)' : done ? 'var(--good)' : 'var(--text-3)' }}
       >
         <Icon className="h-3.5 w-3.5" />
@@ -126,13 +135,19 @@ export function SceneView({ frame }: PluginViewProps<PrepSceneState>) {
     <div className="board-area flex flex-col gap-2.5">
       <div className="flex flex-wrap items-center gap-2">
         <span
-          className={cn('inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 font-medium', vizText.sm)}
+          className={cn(
+            'inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 font-medium',
+            vizText.sm,
+          )}
           style={{ background: 'var(--accent-bg)', color: 'var(--accent)' }}
         >
           <Film className="h-3.5 w-3.5" /> {p.topicTitle}
         </span>
         {p.pattern && (
-          <span className={cn('rounded-md px-2 py-0.5 text-ink2', vizText.sm)} style={{ background: 'var(--surface-2)' }}>
+          <span
+            className={cn('rounded-md px-2 py-0.5 text-ink2', vizText.sm)}
+            style={{ background: 'var(--surface-2)' }}
+          >
             {p.pattern}
           </span>
         )}
@@ -145,7 +160,9 @@ export function SceneView({ frame }: PluginViewProps<PrepSceneState>) {
         >
           <Clapperboard className="mb-2 h-7 w-7 text-accent" />
           <div className={cn('font-semibold text-ink', vizText.expr)}>{p.title}</div>
-          <div className={cn('mt-1 max-w-[42ch] text-ink3', vizText.sm)}>Play to reveal the scene →</div>
+          <div className={cn('mt-1 max-w-[42ch] text-ink3', vizText.sm)}>
+            Play to reveal the scene →
+          </div>
         </div>
       ) : (
         STAGES.map((stage, i) => <StageCard key={stage.key} stage={stage} index={i} state={s} />)
@@ -159,7 +176,10 @@ export function SceneView({ frame }: PluginViewProps<PrepSceneState>) {
           opacity: complexity ? 1 : 0.5,
         }}
       >
-        <Timer className="h-3.5 w-3.5" style={{ color: complexity ? 'var(--good)' : 'var(--text-3)' }} />
+        <Timer
+          className="h-3.5 w-3.5"
+          style={{ color: complexity ? 'var(--good)' : 'var(--text-3)' }}
+        />
         <span className={cn(vizText.base, 'text-ink2')}>
           <span className="font-mono text-ink">{p.time || '—'}</span> time ·{' '}
           <span className="font-mono text-ink">{p.space || '—'}</span> space
@@ -179,13 +199,18 @@ export function SceneInspector({ frame }: InspectorProps<PrepSceneState>) {
     <VarGrid>
       <InspectorRow k="topic" v={p.topicTitle} />
       <InspectorRow k="pattern" v={p.pattern || '—'} />
-      <InspectorRow k="stage" v={stage < 0 ? 'intro' : stage >= STAGES.length ? 'complexity' : STAGES[stage].label} />
+      <InspectorRow
+        k="stage"
+        v={stage < 0 ? 'intro' : stage >= STAGES.length ? 'complexity' : STAGES[stage].label}
+      />
       <InspectorRow k="time" v={p.time || '—'} />
       <InspectorRow k="space" v={p.space || '—'} />
       {p.memorize && (
         <details className="mt-2 rounded-md border border-edge bg-panel2/40 px-2 py-1.5">
           <summary className={cn('cursor-pointer', vizText.xs, 'text-ink3')}>Memorize</summary>
-          <p className={cn('nodrag mt-1.5 font-mono leading-relaxed text-ink2', vizText.xs)}>{p.memorize}</p>
+          <p className={cn('nodrag mt-1.5 font-mono leading-relaxed text-ink2', vizText.xs)}>
+            {p.memorize}
+          </p>
         </details>
       )}
       {p.acquired && (

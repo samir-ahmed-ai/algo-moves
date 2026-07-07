@@ -18,7 +18,10 @@ import {
   useCanvasStatic,
 } from '@/shell/canvas';
 import { ProblemPanelBody } from '@/shell/panels/problem/ProblemPanelBody';
-import { OverviewContentColumn, OverviewProblemColumn } from '@/shell/panels/problem/overviewColumns';
+import {
+  OverviewContentColumn,
+  OverviewProblemColumn,
+} from '@/shell/panels/problem/overviewColumns';
 import { StudioSplitLayout } from '@/shell/panels/problem/studioSplitLayout';
 import { useOverviewView } from '@/shell/panels/problem/useOverviewView';
 import { CodeStudioProvider, useCodeStudioContent } from './CodeStudio';
@@ -62,7 +65,16 @@ export function ProblemPage({
       selectedNode,
       setSelectedNode,
     }),
-    [plugin, item, inputId, setInputId, customInput, setCustomInput, inputFrameCounts, selectedNode],
+    [
+      plugin,
+      item,
+      inputId,
+      setInputId,
+      customInput,
+      setCustomInput,
+      inputFrameCounts,
+      selectedNode,
+    ],
   );
   const frameValue = useMemo(
     () => buildFrameContextValue(frames, player, frame),

@@ -1,8 +1,23 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, VarGrid, VizEmpty, VizStage, RailStack, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailStack,
+  RailGroup,
+  RailStat,
+  RailResult,
+} from '../../../_shared/vizKit';
 
 interface HeightInput {
   // Level-order array of the binary tree; null marks an absent slot.
@@ -20,51 +35,88 @@ interface HeightState {
   finished: boolean;
 }
 
-function record({ tree }: HeightInput): Frame<HeightState>[] {  const heights: (number | null)[] = tree.map(() => null);
+function record({ tree }: HeightInput): Frame<HeightState>[] {
+  const heights: (number | null)[] = tree.map(() => null);
   const visiting: number[] = [];
   const done: number[] = [];
 
   const { emit, frames } = createRecorder<HeightState>(() => ({
-        tree: tree,
-        visiting: visiting.slice(),
-        done: done.slice(),
-        heights: heights.slice(),
-        current: null,
-        answer: null,
-        finished: false
-      }));
+    tree: tree,
+    visiting: visiting.slice(),
+    done: done.slice(),
+    heights: heights.slice(),
+    current: null,
+    answer: null,
+    finished: false,
+  }));
 
   const label = (i: number) => (tree[i] == null ? '·' : String(tree[i]));
 
   // Post-order height: nil -> 0; otherwise 1 + max(height(left), height(right)).
   const getHeight = (i: number): number => {
     if (i >= tree.length || tree[i] == null) {
-      emit('NIL', 'nil → 0', `Reached an empty (nil) child, which contributes height 0. This is the base case that stops the recursion.`, { current: null, answer: null, finished: false });
+      emit(
+        'NIL',
+        'nil → 0',
+        `Reached an empty (nil) child, which contributes height 0. This is the base case that stops the recursion.`,
+        { current: null, answer: null, finished: false },
+      );
       return 0;
     }
 
     visiting.push(i);
-    emit('ENTER', `visit ${label(i)}`, `Enter node ${label(i)}. Before we can size it we must first recurse into its left subtree, then its right subtree — this is the post-order shape.`, { current: i, answer: null, finished: false });
+    emit(
+      'ENTER',
+      `visit ${label(i)}`,
+      `Enter node ${label(i)}. Before we can size it we must first recurse into its left subtree, then its right subtree — this is the post-order shape.`,
+      { current: i, answer: null, finished: false },
+    );
 
     const l = getHeight(2 * i + 1);
-    emit('LEFT', `L(${label(i)})=${l}`, `Left subtree of node ${label(i)} has height ${l}. Now measure its right subtree.`, { current: i, answer: null, finished: false });
+    emit(
+      'LEFT',
+      `L(${label(i)})=${l}`,
+      `Left subtree of node ${label(i)} has height ${l}. Now measure its right subtree.`,
+      { current: i, answer: null, finished: false },
+    );
 
     const r = getHeight(2 * i + 2);
-    emit('RIGHT', `R(${label(i)})=${r}`, `Right subtree of node ${label(i)} has height ${r}. Node ${label(i)} is 1 plus the taller child.`, { current: i, answer: null, finished: false });
+    emit(
+      'RIGHT',
+      `R(${label(i)})=${r}`,
+      `Right subtree of node ${label(i)} has height ${r}. Node ${label(i)} is 1 plus the taller child.`,
+      { current: i, answer: null, finished: false },
+    );
 
     const h = (l > r ? l : r) + 1;
     heights[i] = h;
     visiting.pop();
     done.push(i);
-    emit('HEIGHT', `h(${label(i)})=${h}`, `height(${label(i)}) = 1 + max(L=${l}, R=${r}) = ${h}. This value bubbles back up to node ${label(i)}'s parent.`, { current: i, answer: null, finished: false });
+    emit(
+      'HEIGHT',
+      `h(${label(i)})=${h}`,
+      `height(${label(i)}) = 1 + max(L=${l}, R=${r}) = ${h}. This value bubbles back up to node ${label(i)}'s parent.`,
+      { current: i, answer: null, finished: false },
+    );
     return h;
   };
 
-  emit('INIT', 'get height', `Get Height computes how many levels the tree has. We recurse to the deepest leaves first (post-order): every nil returns 0, and each node returns 1 + the height of its taller child.`, { current: tree.length > 0 ? 0 : null, answer: null, finished: false });
+  emit(
+    'INIT',
+    'get height',
+    `Get Height computes how many levels the tree has. We recurse to the deepest leaves first (post-order): every nil returns 0, and each node returns 1 + the height of its taller child.`,
+    { current: tree.length > 0 ? 0 : null, answer: null, finished: false },
+  );
 
   const answer = getHeight(0);
 
-  emit('DONE', `height = ${answer}`, `Every subtree has been measured. The root returns ${answer}, so the tree's height is ${answer}. Time O(n) — each node is visited once; Space O(h) for the recursion stack.`, { current: tree.length > 0 ? 0 : null, answer: answer, finished: true }, 'good');
+  emit(
+    'DONE',
+    `height = ${answer}`,
+    `Every subtree has been measured. The root returns ${answer}, so the tree's height is ${answer}. Time O(n) — each node is visited once; Space O(h) for the recursion stack.`,
+    { current: tree.length > 0 ? 0 : null, answer: answer, finished: true },
+    'good',
+  );
 
   return frames;
 }
@@ -88,9 +140,7 @@ function View({ frame }: PluginViewProps<HeightState>) {
   const curHeight =
     s.current !== null && s.heights[s.current] != null ? String(s.heights[s.current]) : '…';
   const answerVal = s.answer !== null ? s.answer : s.finished ? 0 : '…';
-  const callStack = s.visiting.map((i) =>
-    s.tree[i] != null ? String(s.tree[i]) : '·',
-  );
+  const callStack = s.visiting.map((i) => (s.tree[i] != null ? String(s.tree[i]) : '·'));
   const rail = (
     <>
       <RailStack label="call stack" items={callStack} />
@@ -130,112 +180,108 @@ function Inspector({ frame }: InspectorProps<HeightState>) {
 export const manifestId = 'prep-trees-get-height';
 export const title = 'Get height';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Get height\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Get height"?',
     choices: [
       {
-        label: "Post-order height — fits this problem",
-        correct: true
+        label: 'Post-order height — fits this problem',
+        correct: true,
       },
       {
-        label: "Same tree check — different approach"
+        label: 'Same tree check — different approach',
       },
       {
-        label: "Stack iterative — different approach"
+        label: 'Stack iterative — different approach',
       },
       {
-        label: "BFS rightmost — different approach"
-      }
+        label: 'BFS rightmost — different approach',
+      },
     ],
-    explain: "Height is 1 plus the taller child"
+    explain: 'Height is 1 plus the taller child',
   },
   {
-    id: "key-step",
-    prompt: "On the \"RIGHT\" step (R()=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "RIGHT" step (R()=), what happens?',
     choices: [
       {
-        label: "Right subtree of node has height — this move caption",
-        correct: true
+        label: 'Right subtree of node has height — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Right subtree of node  has height . Node  is 1 plus the taller child."
+    explain: 'Right subtree of node  has height . Node  is 1 plus the taller child.',
   },
   {
-    id: "state",
-    prompt: "What does the `current` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `current` field track in the visualization state?',
     choices: [
       {
-        label: "node index we are looking — updated each frame",
-        correct: true
+        label: 'node index we are looking — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `current` in sync: node index we are looking at right now"
+    explain: 'The recorder keeps `current` in sync: node index we are looking at right now',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Get height\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Get height"?',
     choices: [
       {
-        label: "O(n) time, O(h) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(h) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
+        label: 'O(n²) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
+        label: 'O(n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(h). nil->0; return 1+max(L,R)"
+    explain: 'O(n). O(h). nil->0; return 1+max(L,R)',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Every subtree has been measured. — final DONE caption",
-        correct: true
+        label: 'Every subtree has been measured. — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Every subtree has been measured. The root returns , so the tree's height is . Time O(n) — each node is visited once; Space O(h) for the recursion stack."
-  }
+    explain:
+      "Every subtree has been measured. The root returns , so the tree's height is . Time O(n) — each node is visited once; Space O(h) for the recursion stack.",
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

@@ -1,12 +1,16 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
 
-type LruOp =
-  | { kind: 'get'; key: number }
-  | { kind: 'put'; key: number; val: number };
+type LruOp = { kind: 'get'; key: number } | { kind: 'put'; key: number; val: number };
 
 interface LruInput {
   cap: number;
@@ -28,7 +32,8 @@ interface LruState {
   done: boolean;
 }
 
-function record({ cap, ops }: LruInput): Frame<LruState>[] {  const cache = new Map<number, LruNode>();
+function record({ cap, ops }: LruInput): Frame<LruState>[] {
+  const cache = new Map<number, LruNode>();
   let list: LruNode[] = [];
 
   const remove = (n: LruNode) => {
@@ -40,14 +45,14 @@ function record({ cap, ops }: LruInput): Frame<LruState>[] {  const cache = new 
   };
 
   const { emit, frames } = createRecorder<LruState>(() => ({
-        cap,
-        list: list.map((x) => ({ ...x })),
-        op: '',
-        out: null,
-        evicted: null,
-        touched: null,
-        done: false
-      }));
+    cap,
+    list: list.map((x) => ({ ...x })),
+    op: '',
+    out: null,
+    evicted: null,
+    touched: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -152,7 +157,9 @@ function View({ frame }: PluginViewProps<LruState>) {
               className={cn(
                 'rounded border px-2 py-0.5 font-mono',
                 vizText.sm,
-                n.key === s.touched ? 'border-accent bg-accentbg text-accent' : 'border-edge text-ink',
+                n.key === s.touched
+                  ? 'border-accent bg-accentbg text-accent'
+                  : 'border-edge text-ink',
                 i === s.list.length - 1 && s.list.length > 0 ? 'opacity-80' : '',
               )}
             >
@@ -182,7 +189,14 @@ function Inspector({ frame }: InspectorProps<LruState>) {
       <InspectorRow k="op" v={s.op || '—'} />
       <InspectorRow k="returned" v={s.out ?? '—'} />
       <InspectorRow k="MRU" v={s.list[0] ? `${s.list[0].key}:${s.list[0].val}` : '—'} />
-      <InspectorRow k="LRU" v={s.list[s.list.length - 1] ? `${s.list[s.list.length - 1].key}:${s.list[s.list.length - 1].val}` : '—'} />
+      <InspectorRow
+        k="LRU"
+        v={
+          s.list[s.list.length - 1]
+            ? `${s.list[s.list.length - 1].key}:${s.list[s.list.length - 1].val}`
+            : '—'
+        }
+      />
     </VarGrid>
   );
 }
@@ -190,132 +204,130 @@ function Inspector({ frame }: InspectorProps<LruState>) {
 export const manifestId = 'prep-design-lru-cache';
 export const title = 'LRU Cache';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"LRU Cache\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "LRU Cache"?',
     choices: [
       {
-        label: "Hash map + doubly linked list LRU — fits this problem",
-        correct: true
+        label: 'Hash map + doubly linked list LRU — fits this problem',
+        correct: true,
       },
       {
-        label: "Round-robin load balancer — different approach"
+        label: 'Round-robin load balancer — different approach',
       },
       {
-        label: "Copy-on-write version snapshots — different approach"
+        label: 'Copy-on-write version snapshots — different approach',
       },
       {
-        label: "Trie dictionary + spell suggest — different approach"
-      }
+        label: 'Trie dictionary + spell suggest — different approach',
+      },
     ],
-    explain: "Map key->node; the list keeps MRU at the front, LRU at the tail"
+    explain: 'Map key->node; the list keeps MRU at the front, LRU at the tail',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (LRU Cache), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (LRU Cache), what strategy is established?',
     choices: [
       {
-        label: "Map key->node; the list keeps MRU — described in INIT caption",
-        correct: true
+        label: 'Map key->node; the list keeps MRU — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "LRU Cache (capacity ): a hash map points to nodes in a doubly-linked list. MRU sits at the front, LRU at the tail. Get/Put move a node to the front; Put evicts tail.prev when full."
+    explain:
+      'LRU Cache (capacity ): a hash map points to nodes in a doubly-linked list. MRU sits at the front, LRU at the tail. Get/Put move a node to the front; Put evicts tail.prev when full.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"PUT\" step (put = update), what happens?",
+    id: 'key-step',
+    prompt: 'On the "PUT" step (put = update), what happens?',
     choices: [
       {
-        label: "Put(, ): key exists — update — this move caption",
-        correct: true
+        label: 'Put(, ): key exists — update — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Put(, ): key exists — update value and move to MRU front."
+    explain: 'Put(, ): key exists — update value and move to MRU front.',
   },
   {
-    id: "state",
-    prompt: "What does the `cap` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `cap` field track in the visualization state?',
     choices: [
       {
-        label: "Field cap in state — updated each frame",
-        correct: true
+        label: 'Field cap in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `cap` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `cap` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"LRU Cache\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "LRU Cache"?',
     choices: [
       {
-        label: "O(1) get/put time, O(capacity) space — standard bounds here",
-        correct: true
+        label: 'O(1) get/put time, O(capacity) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(1) time, O(servers) space — wrong order of growth"
+        label: 'O(1) time, O(servers) space — wrong order of growth',
       },
       {
-        label: "O(m+n) time, O(n) space — wrong order of growth"
+        label: 'O(m+n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(versions) get time, O(changes) space — wrong order of growth"
-      }
+        label: 'O(versions) get time, O(changes) space — wrong order of growth',
+      },
     ],
-    explain: "O(1) get/put. O(capacity). get/put -> remove+insertFront; over capacity -> evict tail.prev"
+    explain:
+      'O(1) get/put. O(capacity). get/put -> remove+insertFront; over capacity -> evict tail.prev',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Done. Final order MRU → LRU: — final DONE caption",
-        correct: true
+        label: 'Done. Final order MRU → LRU: — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Done. Final order MRU → LRU: ${list.map((n) => "
-  }
+    explain: 'Done. Final order MRU → LRU: ${list.map((n) => ',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -340,6 +352,8 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as LruState | undefined;
-    return s?.done ? { ok: true, label: `${s.list.length} in cache` } : { ok: false, label: 'incomplete' };
+    return s?.done
+      ? { ok: true, label: `${s.list.length} in cache` }
+      : { ok: false, label: 'incomplete' };
   },
 };

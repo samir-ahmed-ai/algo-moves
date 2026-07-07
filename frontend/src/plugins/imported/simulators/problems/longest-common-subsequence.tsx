@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface LCSInput {
   a: string;
@@ -30,8 +43,13 @@ function record({ a, b }: LCSInput): Frame<LCSState>[] {
     done: false,
   }));
 
-  const snap = (type: string, note: string, caption: string, cur: [number, number] | null, tone?: 'good') =>
-    emit(type, note, caption, { cur, done: type === 'DONE' }, tone);
+  const snap = (
+    type: string,
+    note: string,
+    caption: string,
+    cur: [number, number] | null,
+    tone?: 'good',
+  ) => emit(type, note, caption, { cur, done: type === 'DONE' }, tone);
 
   snap(
     'INIT',
@@ -42,11 +60,21 @@ function record({ a, b }: LCSInput): Frame<LCSState>[] {
 
   for (let j = 0; j <= n; j++) {
     dp[0][j] = 0;
-    snap('BASE', `dp[0][${j}]=0`, `Base case: with 0 chars of "${a}" the LCS is empty, so dp[0][${j}] = 0.`, [0, j]);
+    snap(
+      'BASE',
+      `dp[0][${j}]=0`,
+      `Base case: with 0 chars of "${a}" the LCS is empty, so dp[0][${j}] = 0.`,
+      [0, j],
+    );
   }
   for (let i = 1; i <= m; i++) {
     dp[i][0] = 0;
-    snap('BASE', `dp[${i}][0]=0`, `Base case: with 0 chars of "${b}" the LCS is empty, so dp[${i}][0] = 0.`, [i, 0]);
+    snap(
+      'BASE',
+      `dp[${i}][0]=0`,
+      `Base case: with 0 chars of "${b}" the LCS is empty, so dp[${i}][0] = 0.`,
+      [i, 0],
+    );
   }
 
   for (let i = 1; i <= m; i++) {
@@ -88,7 +116,9 @@ function record({ a, b }: LCSInput): Frame<LCSState>[] {
 function buildDisplay(s: LCSState): (number | string)[][] {
   const m = s.a.length;
   const n = s.b.length;
-  const display: (number | string)[][] = Array.from({ length: m + 2 }, () => new Array<number | string>(n + 2).fill(''));
+  const display: (number | string)[][] = Array.from({ length: m + 2 }, () =>
+    new Array<number | string>(n + 2).fill(''),
+  );
   display[0][1] = 'ε';
   for (let j = 0; j < n; j++) display[0][j + 2] = s.b[j];
   display[1][0] = 'ε';

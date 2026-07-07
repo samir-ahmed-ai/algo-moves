@@ -3,7 +3,13 @@ import { readShareFromUrl } from '@/store/navigation/shareState';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { readStorageJson } from '@/store/persistence/storage';
 import { workspaceSessionMeta } from '@/lib/session';
-import type { CanvasAddPanel, CanvasHudProps, CanvasProjectApi, LayoutDir, WorkspaceDefaults } from './workspace';
+import type {
+  CanvasAddPanel,
+  CanvasHudProps,
+  CanvasProjectApi,
+  LayoutDir,
+  WorkspaceDefaults,
+} from './workspace';
 import { DEFAULTS_KEY } from './workspaceConstants';
 import {
   WorkspaceAppearanceContext,
@@ -93,7 +99,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   return (
     <WorkspaceAppearanceContext.Provider value={appearanceValue}>
       <WorkspaceChromeContext.Provider value={chromeValue}>
-        <WorkspaceNavigationContext.Provider value={navigationValue}>{children}</WorkspaceNavigationContext.Provider>
+        <WorkspaceNavigationContext.Provider value={navigationValue}>
+          {children}
+        </WorkspaceNavigationContext.Provider>
       </WorkspaceChromeContext.Provider>
     </WorkspaceAppearanceContext.Provider>
   );

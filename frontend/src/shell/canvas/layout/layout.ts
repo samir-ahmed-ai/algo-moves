@@ -29,3 +29,4 @@ export * from './layoutPresets';
 export * from './layoutWiring';
 export * from './layoutAlgorithms';
 export * from './edgeStyles';
+export * from './canvasSnap';

@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  RailGroup,
+  RailResult,
+  RailStat,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+} from '../../../_shared/vizKit';
 
 interface SquaresInput {
   n: number;
@@ -22,18 +35,27 @@ const EMPTY = -1;
 function record({ n }: SquaresInput): Frame<SquaresState>[] {
   const dp = new Array<number>(n + 1).fill(EMPTY);
   const { emit, frames } = createRecorder<SquaresState>(() => ({
-        n: n,
-        dp: dp.slice(),
-        i: null,
-        from: null,
-        sq: null,
-        done: false
-      }));
+    n: n,
+    dp: dp.slice(),
+    i: null,
+    from: null,
+    sq: null,
+    done: false,
+  }));
 
-  emit('INIT', `n=${n}`, `Perfect Squares: the fewest perfect-square numbers (1, 4, 9, 16, …) that sum to ${n}. dp[i] = the minimum count of squares summing to i, built up from i = 0.`, { i: null, from: null, sq: null });
+  emit(
+    'INIT',
+    `n=${n}`,
+    `Perfect Squares: the fewest perfect-square numbers (1, 4, 9, 16, …) that sum to ${n}. dp[i] = the minimum count of squares summing to i, built up from i = 0.`,
+    { i: null, from: null, sq: null },
+  );
 
   dp[0] = 0;
-  emit('BASE', 'dp[0]=0', `Base case: 0 needs no squares at all. dp[0] = 0.`, { i: 0, from: null, sq: null });
+  emit('BASE', 'dp[0]=0', `Base case: 0 needs no squares at all. dp[0] = 0.`, {
+    i: 0,
+    from: null,
+    sq: null,
+  });
 
   for (let i = 1; i <= n; i++) {
     // Worst case: i copies of the square 1, i.e. dp[i] starts at i.
@@ -49,11 +71,22 @@ function record({ n }: SquaresInput): Frame<SquaresState>[] {
       }
     }
     dp[i] = best;
-    emit('FILL', `dp[${i}]=${best}`, `Best for ${i}: peel off the square ${bestSq} (=${Math.round(Math.sqrt(bestSq))}²) as the last term, leaving ${bestFrom}, so dp[${i}] = dp[${bestFrom}] (=${dp[bestFrom]}) + 1 = ${best}.`, { i: i, from: bestFrom, sq: bestSq });
+    emit(
+      'FILL',
+      `dp[${i}]=${best}`,
+      `Best for ${i}: peel off the square ${bestSq} (=${Math.round(Math.sqrt(bestSq))}²) as the last term, leaving ${bestFrom}, so dp[${i}] = dp[${bestFrom}] (=${dp[bestFrom]}) + 1 = ${best}.`,
+      { i: i, from: bestFrom, sq: bestSq },
+    );
   }
 
   const answer = dp[n];
-  emit('DONE', `${answer} squares`, `The table is full. dp[${n}] = ${answer}, so the fewest perfect squares summing to ${n} is ${answer}.`, { i: n, from: null, sq: null , done: true }, 'good');
+  emit(
+    'DONE',
+    `${answer} squares`,
+    `The table is full. dp[${n}] = ${answer}, so the fewest perfect squares summing to ${n} is ${answer}.`,
+    { i: n, from: null, sq: null, done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -62,7 +95,8 @@ function View({ frame }: PluginViewProps<SquaresState>) {
   const cells = s.dp.map((v) => (v === EMPTY ? '·' : v));
   const pointers: ArrayPointer[] = [];
   if (s.i !== null) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
-  if (s.from !== null) pointers.push({ i: s.from, label: `i−${s.sq}`, tone: 'warn', place: 'below' });
+  if (s.from !== null)
+    pointers.push({ i: s.from, label: `i−${s.sq}`, tone: 'warn', place: 'below' });
   const tone = (i: number) => (s.i === i ? 'found' : s.dp[i] !== EMPTY ? 'match' : '');
   const known = s.dp[s.n] !== EMPTY;
   const ans = known ? s.dp[s.n] : '…';
@@ -76,7 +110,11 @@ function View({ frame }: PluginViewProps<SquaresState>) {
         <RailStat k="dp[i−sq]" v={cell(s.from)} tone="warn" />
         <RailStat k="dp[i]" v={cell(s.i)} />
       </RailGroup>
-      <RailResult label="answer" value={known ? `${ans} squares` : '…filling'} tone={known ? 'good' : 'accent'} />
+      <RailResult
+        label="answer"
+        value={known ? `${ans} squares` : '…filling'}
+        tone={known ? 'good' : 'accent'}
+      />
     </>
   );
   return (

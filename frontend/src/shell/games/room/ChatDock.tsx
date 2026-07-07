@@ -7,20 +7,34 @@ import { useRoomComms } from '../net/useRoomComms';
 import { usePopoverDismiss } from '@/shell/ui/usePopoverDismiss';
 
 const REACTIONS = [
-  '👍', '👎', '❤️', '🔥', '😂', '😮',
-  '😢', '🎉', '👏', '🧠', '😤', '💀',
-  '🎯', '⚡', '🏆', '💪', '😎', '🤔',
-  '😱', '🙈', '🤝', '👀', '💯', '🫡',
+  '👍',
+  '👎',
+  '❤️',
+  '🔥',
+  '😂',
+  '😮',
+  '😢',
+  '🎉',
+  '👏',
+  '🧠',
+  '😤',
+  '💀',
+  '🎯',
+  '⚡',
+  '🏆',
+  '💪',
+  '😎',
+  '🤔',
+  '😱',
+  '🙈',
+  '🤝',
+  '👀',
+  '💯',
+  '🫡',
 ] as const;
 
 /** Compact emoji grid that opens on hover or tap. */
-function ReactionPicker({
-  onPick,
-  label,
-}: {
-  onPick: (emoji: string) => void;
-  label: string;
-}) {
+function ReactionPicker({ onPick, label }: { onPick: (emoji: string) => void; label: string }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   usePopoverDismiss(rootRef, open, () => setOpen(false));
@@ -150,16 +164,15 @@ export function ChatDock() {
             aria-live="polite"
           >
             {messages.length === 0 ? (
-              <p className="py-3 text-center text-[length:var(--fs-tight)] text-ink3">{t.room.chatPlaceholder}</p>
+              <p className="py-3 text-center text-[length:var(--fs-tight)] text-ink3">
+                {t.room.chatPlaceholder}
+              </p>
             ) : (
               <ul className="flex flex-col gap-1">
                 {messages.map((m) => {
                   const isSelf = m.fromId === self?.id;
                   return (
-                    <li
-                      key={m.id}
-                      className={cn('flex', isSelf ? 'justify-end' : 'justify-start')}
-                    >
+                    <li key={m.id} className={cn('flex', isSelf ? 'justify-end' : 'justify-start')}>
                       <div
                         className={cn(
                           'max-w-[88%] rounded-2xl px-2.5 py-1 text-sm leading-snug',

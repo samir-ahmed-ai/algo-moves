@@ -39,7 +39,8 @@ describe('deckModel', () => {
     for (const block of deck.blocks) {
       const asm = block.cards.some((c) => c.kind === 'reassemble');
       const pieces = block.cards.find((c) => c.kind === 'reassemble');
-      if (asm) expect(pieces && 'pieces' in pieces && pieces.pieces.length).toBeGreaterThanOrEqual(2);
+      if (asm)
+        expect(pieces && 'pieces' in pieces && pieces.pieces.length).toBeGreaterThanOrEqual(2);
     }
   });
 

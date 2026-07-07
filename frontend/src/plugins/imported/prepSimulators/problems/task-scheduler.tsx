@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -22,20 +28,21 @@ interface TaskSchedulerState {
   done: boolean;
 }
 
-function record({ tasks, n }: TaskSchedulerInput): Frame<TaskSchedulerState>[] {  const freq = new Map<string, number>();
+function record({ tasks, n }: TaskSchedulerInput): Frame<TaskSchedulerState>[] {
+  const freq = new Map<string, number>();
   let maxF = 0;
 
   const { emit, frames } = createRecorder<TaskSchedulerState>(() => ({
-        tasks,
-        n,
-        i: null,
-        freq: [...freq.entries()],
-        maxF,
-        cntMax: null,
-        idle: null,
-        result: null,
-        done: false
-      }));
+    tasks,
+    n,
+    i: null,
+    freq: [...freq.entries()],
+    maxF,
+    cntMax: null,
+    idle: null,
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -107,10 +114,7 @@ function View({ frame }: PluginViewProps<TaskSchedulerState>) {
   const pointers: ArrayPointer[] = [];
   if (s.i !== null) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
   const tone = (i: number) => (s.i === i ? 'match' : '');
-  const freqLine =
-    s.freq.length === 0
-      ? '∅'
-      : s.freq.map(([v, f]) => `${v}:${f}`).join(', ');
+  const freqLine = s.freq.length === 0 ? '∅' : s.freq.map(([v, f]) => `${v}:${f}`).join(', ');
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
@@ -177,132 +181,130 @@ function computeAnswer(tasks: string[], n: number): number {
   return idle < tasks.length ? tasks.length : idle;
 }
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Task scheduler\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Task scheduler"?',
     choices: [
       {
-        label: "Heap + math — fits this problem",
-        correct: true
+        label: 'Heap + math — fits this problem',
+        correct: true,
       },
       {
-        label: "Two pointers — different approach"
+        label: 'Two pointers — different approach',
       },
       {
-        label: "Monotonic stack — different approach"
+        label: 'Monotonic stack — different approach',
       },
       {
-        label: "Reverse segments — different approach"
-      }
+        label: 'Reverse segments — different approach',
+      },
     ],
-    explain: "Hottest task lays a grid of (maxF-1) cooldown gaps to fill"
+    explain: 'Hottest task lays a grid of (maxF-1) cooldown gaps to fill',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Task scheduler), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Task scheduler), what strategy is established?',
     choices: [
       {
-        label: "Hottest task lays a grid — described in INIT caption",
-        correct: true
+        label: 'Hottest task lays a grid — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Task Scheduler: identical tasks must be separated by a cooldown of  slots. Instead of simulating the schedule, we use the math trick: the most frequent task forces a skeleton of gaps that every other task slots into."
+    explain:
+      'Task Scheduler: identical tasks must be separated by a cooldown of  slots. Instead of simulating the schedule, we use the math trick: the most frequent task forces a skeleton of gaps that every other task slots into.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"FORMULA\" step (idle=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "FORMULA" step (idle=), what happens?',
     choices: [
       {
-        label: "Lay the busiest task ( copies) — this move caption",
-        correct: true
+        label: 'Lay the busiest task ( copies) — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Lay the busiest task ( copies) as  full rows of width n+1, then add the tied tasks on the last row: idle = (maxF−1)·n + cntMax = (−1)· +  = . This is the schedule length when cooldown gaps dominate."
+    explain:
+      'Lay the busiest task ( copies) as  full rows of width n+1, then add the tied tasks on the last row: idle = (maxF−1)·n + cntMax = (−1)· +  = . This is the schedule length when cooldown gaps dominate.',
   },
   {
-    id: "state",
-    prompt: "What does the `i` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: "index currently being counted — updated each frame",
-        correct: true
+        label: 'index currently being counted — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `i` in sync: index currently being counted"
+    explain: 'The recorder keeps `i` in sync: index currently being counted',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Task scheduler\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Task scheduler"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n+m) time, O(1) space — wrong order of growth"
+        label: 'O(n+m) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n²) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). idle=(maxF-1)*n+countMax; ans=max(len(tasks),idle)"
+    explain: 'O(n). O(1). idle=(maxF-1)*n+countMax; ans=max(len(tasks),idle)',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "idle () is at least len(tasks) — final DONE caption",
-        correct: true
+        label: 'idle () is at least len(tasks) — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "idle () is at least len(tasks) (), so cooldown gaps force the CPU to wait. The answer is the grid size, ."
-  }
+    explain:
+      'idle () is at least len(tasks) (), so cooldown gaps force the CPU to wait. The answer is the grid size, .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

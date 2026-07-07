@@ -29,7 +29,13 @@ export function GistArcCaption({
         <OrbitFitText text={side} pathId={pathId} slot="side" className="move-orbit-side" dy={8} />
       )}
       {cur && (
-        <OrbitFitText text={cur} pathId={pathId} slot="center" className="move-orbit-current" dy={-9} />
+        <OrbitFitText
+          text={cur}
+          pathId={pathId}
+          slot="center"
+          className="move-orbit-current"
+          dy={-9}
+        />
       )}
     </svg>
   );

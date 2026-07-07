@@ -78,7 +78,14 @@ export function TreeBoard({
   }
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} width={width} height={height} role="img" aria-label="tree board" style={style}>
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      width={width}
+      height={height}
+      role="img"
+      aria-label="tree board"
+      style={style}
+    >
       {edges}
       {tree.map((v, i) => {
         if (v == null) return null;
@@ -97,7 +104,13 @@ export function TreeBoard({
             style={onNodeClick ? { cursor: 'pointer' } : undefined}
           >
             <circle cx={cx} cy={cy} r={nodeRadius} style={ring} />
-            <text x={cx} y={cy + 4} textAnchor="middle" className="node-label" style={{ fontSize: 'var(--node-fs-xs, 12px)' }}>
+            <text
+              x={cx}
+              y={cy + 4}
+              textAnchor="middle"
+              className="node-label"
+              style={{ fontSize: 'var(--node-fs-xs, 12px)' }}
+            >
               {v}
             </text>
           </g>

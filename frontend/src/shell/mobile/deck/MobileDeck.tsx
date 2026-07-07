@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import { ChevronLeft, Layers } from 'lucide-react';
 import { catalog, type Topic } from '../../../content';
 import { useWorkspace } from '@/store/workspace';
@@ -10,7 +18,13 @@ import { scheduleReview } from '@/store/persistence/srs';
 import { clearMobileSession, loadMobileSession, saveMobileSession } from '../mobileSession';
 import { useSwipe } from './useSwipe';
 import { newQuizRunSeed } from '@/lib/quiz';
-import { AnimateCardView, CompleteScreen, GistCardView, QuizCardView, ReassembleCardView } from './MobileCards';
+import {
+  AnimateCardView,
+  CompleteScreen,
+  GistCardView,
+  QuizCardView,
+  ReassembleCardView,
+} from './MobileCards';
 
 function initialIndices(
   topicId: string,
@@ -153,10 +167,13 @@ export function MobileDeck({
     setQuizAttempt((n) => n + 1);
   }, [blocks, pIdx]);
 
-  const onAnswered = useCallback((correct: boolean) => {
-    const itemId = blocks[pIdx]?.item.id;
-    if (itemId) scheduleReview(itemId, correct);
-  }, [blocks, pIdx]);
+  const onAnswered = useCallback(
+    (correct: boolean) => {
+      const itemId = blocks[pIdx]?.item.id;
+      if (itemId) scheduleReview(itemId, correct);
+    },
+    [blocks, pIdx],
+  );
 
   const restart = useCallback(() => {
     setDir(1);
@@ -210,8 +227,14 @@ export function MobileDeck({
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 px-8 text-center">
         <Layers className="h-10 w-10 text-ink3" />
-        <p className="text-[length:var(--fs-title)] font-medium text-ink2">No drillable problems here yet</p>
-        <button type="button" onClick={onExit} className="rounded-full bg-accent px-5 py-2.5 text-[length:var(--fs)] font-semibold text-white">
+        <p className="text-[length:var(--fs-title)] font-medium text-ink2">
+          No drillable problems here yet
+        </p>
+        <button
+          type="button"
+          onClick={onExit}
+          className="rounded-full bg-accent px-5 py-2.5 text-[length:var(--fs)] font-semibold text-white"
+        >
           Back to categories
         </button>
       </div>
@@ -222,11 +245,17 @@ export function MobileDeck({
     <div className="flex min-h-0 flex-1 flex-col" data-density="ultra">
       <div className="shrink-0 px-3 pt-2">
         <div className="flex items-center gap-2">
-          <button type="button" onClick={onExit} className="grid h-8 w-8 place-items-center rounded-full text-ink3 hover:bg-panel2 hover:text-ink">
+          <button
+            type="button"
+            onClick={onExit}
+            className="grid h-8 w-8 place-items-center rounded-full text-ink3 hover:bg-panel2 hover:text-ink"
+          >
             <ChevronLeft className="h-5 w-5" />
           </button>
           <div className="min-w-0 flex-1">
-            <div className="truncate text-[length:var(--fs-sm)] font-semibold text-ink">{topic.title}</div>
+            <div className="truncate text-[length:var(--fs-sm)] font-semibold text-ink">
+              {topic.title}
+            </div>
             <div className="text-[length:var(--fs-tight)] text-ink3">
               {done ? 'Topic complete' : `Problem ${pIdx + 1} of ${blocks.length}`}
             </div>
@@ -234,7 +263,14 @@ export function MobileDeck({
           {headerRight}
         </div>
         {!done && block && (
-          <div className="mt-2 flex items-center gap-1" role="progressbar" aria-valuenow={cIdx + 1} aria-valuemin={1} aria-valuemax={block.cards.length} aria-label={`Step ${cIdx + 1} of ${block.cards.length}`}>
+          <div
+            className="mt-2 flex items-center gap-1"
+            role="progressbar"
+            aria-valuenow={cIdx + 1}
+            aria-valuemin={1}
+            aria-valuemax={block.cards.length}
+            aria-label={`Step ${cIdx + 1} of ${block.cards.length}`}
+          >
             {block.cards.map((c, i) => (
               <span
                 key={c.key}
@@ -252,7 +288,12 @@ export function MobileDeck({
                   )}
                   style={{
                     width: i < cIdx ? '100%' : i === cIdx ? '60%' : '0%',
-                    background: i <= cIdx ? (c.kind === 'quiz' ? 'var(--good)' : 'var(--accent)') : 'transparent',
+                    background:
+                      i <= cIdx
+                        ? c.kind === 'quiz'
+                          ? 'var(--good)'
+                          : 'var(--accent)'
+                        : 'transparent',
                   }}
                 />
               </span>
@@ -261,13 +302,23 @@ export function MobileDeck({
         )}
       </div>
 
-      <div {...swipe.bind} className="mobile-deck-viewport relative flex min-h-0 flex-1 flex-col" style={{ touchAction: 'pan-y' }}>
+      <div
+        {...swipe.bind}
+        className="mobile-deck-viewport relative flex min-h-0 flex-1 flex-col"
+        style={{ touchAction: 'pan-y' }}
+      >
         <div
           key={done ? 'done' : `${pIdx}:${cIdx}`}
-          className={cn('flex min-h-0 flex-1 flex-col', !swipe.dragging && (dir === 1 ? 'mobile-card-enter-next' : 'mobile-card-enter-prev'))}
+          className={cn(
+            'flex min-h-0 flex-1 flex-col',
+            !swipe.dragging && (dir === 1 ? 'mobile-card-enter-next' : 'mobile-card-enter-prev'),
+          )}
           style={
             swipe.dragging
-              ? { transform: `translateX(${swipe.dx}px)`, opacity: 1 - Math.min(Math.abs(swipe.dx) / 520, 0.3) }
+              ? {
+                  transform: `translateX(${swipe.dx}px)`,
+                  opacity: 1 - Math.min(Math.abs(swipe.dx) / 520, 0.3),
+                }
               : undefined
           }
         >
@@ -282,9 +333,21 @@ export function MobileDeck({
               nextCategoryTitle={nextTopic?.title}
             />
           ) : block && card?.kind === 'gist' ? (
-            <GistCardView card={card} block={block} problemIndex={pIdx} problemCount={blocks.length} onContinue={advance} />
+            <GistCardView
+              card={card}
+              block={block}
+              problemIndex={pIdx}
+              problemCount={blocks.length}
+              onContinue={advance}
+            />
           ) : block && card?.kind === 'animate' ? (
-            <AnimateCardView block={block} problemIndex={pIdx} problemCount={blocks.length} onContinue={advance} onOpenStudio={openStudio} />
+            <AnimateCardView
+              block={block}
+              problemIndex={pIdx}
+              problemCount={blocks.length}
+              onContinue={advance}
+              onOpenStudio={openStudio}
+            />
           ) : block && card?.kind === 'quiz' ? (
             <QuizCardView
               card={card}
@@ -305,7 +368,13 @@ export function MobileDeck({
               }}
             />
           ) : block && card?.kind === 'reassemble' ? (
-            <ReassembleCardView card={card} block={block} onComplete={advance} onSkip={advance} onOpenStudio={openStudio} />
+            <ReassembleCardView
+              card={card}
+              block={block}
+              onComplete={advance}
+              onSkip={advance}
+              onOpenStudio={openStudio}
+            />
           ) : null}
         </div>
       </div>

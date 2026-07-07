@@ -7,7 +7,19 @@ import {
   PREDICT_MASTERY_FOCUS_MS,
   TIME_LIMIT,
 } from '../shared/practiceConstants';
-import { useCanvasActions, useCanvasFrame, useCanvasStatic, Banner, Btn, Chip, EmptyState, Hint, Label, Option, nodeText } from '@/shell/canvas';
+import {
+  useCanvasActions,
+  useCanvasFrame,
+  useCanvasStatic,
+  Banner,
+  Btn,
+  Chip,
+  EmptyState,
+  Hint,
+  Label,
+  Option,
+  nodeText,
+} from '@/shell/canvas';
 import { buildShuffledChoices } from '@/lib/quiz';
 
 /** #33 Predict-the-next-move: a generic challenge built from the recorder frames. */
@@ -74,7 +86,11 @@ export function PredictPanelBody() {
 
   if (frames.length < 2 || !answer) {
     return (
-      <EmptyState icon={<Lightbulb className="h-5 w-5" />} title="Too short to predict" hint="Pick a longer problem." />
+      <EmptyState
+        icon={<Lightbulb className="h-5 w-5" />}
+        title="Too short to predict"
+        hint="Pick a longer problem."
+      />
     );
   }
 
@@ -128,7 +144,13 @@ export function PredictPanelBody() {
       <Label>What is the next move?</Label>
       <div className="flex flex-col gap-1.5">
         {choices.map((t) => {
-          const state = !answered ? 'idle' : t === answer ? 'correct' : t === picked ? 'wrong' : 'dim';
+          const state = !answered
+            ? 'idle'
+            : t === answer
+              ? 'correct'
+              : t === picked
+                ? 'wrong'
+                : 'dim';
           return (
             <Option key={t} state={state} disabled={answered} onClick={() => pick(t)}>
               {t.toLowerCase()}

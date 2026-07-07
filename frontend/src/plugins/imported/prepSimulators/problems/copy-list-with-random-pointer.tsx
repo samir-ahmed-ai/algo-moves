@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -33,7 +39,8 @@ interface CopyListState {
   done: boolean;
 }
 
-function record({ vals, random }: CopyListInput): Frame<CopyListState>[] {  const n = vals.length;
+function record({ vals, random }: CopyListInput): Frame<CopyListState>[] {
+  const n = vals.length;
 
   // Build the interweaved slot model up front so the View always has a stable
   // array; passes mutate `slots[].random` and we snapshot per frame.
@@ -46,14 +53,14 @@ function record({ vals, random }: CopyListInput): Frame<CopyListState>[] {  cons
   const cloneVals: number[] = [];
 
   const { emit, frames } = createRecorder<CopyListState>(() => ({
-        slots: slots.map((sl) => ({ ...sl })),
-        pass: 1,
-        cur: null,
-        ranSrc: null,
-        ranDst: null,
-        cloneVals: cloneVals.slice(),
-        done: false
-      }));
+    slots: slots.map((sl) => ({ ...sl })),
+    pass: 1,
+    cur: null,
+    ranSrc: null,
+    ranDst: null,
+    cloneVals: cloneVals.slice(),
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -166,8 +173,7 @@ function View({ frame }: PluginViewProps<CopyListState>) {
         </div>
       )}
       <div className={cn('mt-1 font-mono', s.done ? 'text-good' : 'text-ink3', vizText.base)}>
-        copy → [{s.cloneVals.join(', ')}]
-        {!s.done && s.pass < 3 ? ' …building' : ''}
+        copy → [{s.cloneVals.join(', ')}]{!s.done && s.pass < 3 ? ' …building' : ''}
       </div>
     </div>
   );
@@ -181,10 +187,7 @@ function Inspector({ frame }: InspectorProps<CopyListState>) {
     <VarGrid>
       <InspectorRow k="pass" v={s.pass} />
       <InspectorRow k="cur slot" v={s.cur ?? '—'} />
-      <InspectorRow
-        k="cur node"
-        v={curSl ? `${curSl.val}${curSl.orig ? '' : "'"}` : '—'}
-      />
+      <InspectorRow k="cur node" v={curSl ? `${curSl.val}${curSl.orig ? '' : "'"}` : '—'} />
       <InspectorRow k="random src" v={s.ranSrc ?? '—'} />
       <InspectorRow k="random dst" v={s.ranDst ?? '—'} />
       <InspectorRow k="copy length" v={s.cloneVals.length} />
@@ -196,139 +199,139 @@ function Inspector({ frame }: InspectorProps<CopyListState>) {
 export const manifestId = 'prep-linked-lists-copy-list-with-random-pointer';
 export const title = 'Copy List with Random Pointer';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Copy List with Random Pointer\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Copy List with Random Pointer"?',
     choices: [
       {
-        label: "Interweave (3-pass, no map) — fits this problem",
-        correct: true
+        label: 'Interweave (3-pass, no map) — fits this problem',
+        correct: true,
       },
       {
-        label: "DLL walk delete — different approach"
+        label: 'DLL walk delete — different approach',
       },
       {
-        label: "Merge sort list — different approach"
+        label: 'Merge sort list — different approach',
       },
       {
-        label: "DFS flatten — different approach"
-      }
+        label: 'DFS flatten — different approach',
+      },
     ],
-    explain: "**Interweave** technique (O(1) space, no hashmap): insert cloned node right after each original"
+    explain:
+      '**Interweave** technique (O(1) space, no hashmap): insert cloned node right after each original',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Copy List with Random Pointer), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Copy List with Random Pointer), what strategy is established?',
     choices: [
       {
-        label: "**Interweave** technique (O(1) space — described in INIT caption",
-        correct: true
+        label: '**Interweave** technique (O(1) space — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Copy List with Random Pointer using the Interweave trick (O(1) extra space, no hash map). Each clone is woven in right after its original so we can find it in place. The chain below already shows clones (lighter cells) sitting after each original."
+    explain:
+      'Copy List with Random Pointer using the Interweave trick (O(1) extra space, no hash map). Each clone is woven in right after its original so we can find it in place. The chain below already shows clones (lighter cells) sitting after each original.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"RANDOM\" step (clone→), what happens?",
+    id: 'key-step',
+    prompt: 'On the "RANDOM" step (clone→), what happens?',
     choices: [
       {
-        label: "Original .Random points at original (slot — this move caption",
-        correct: true
+        label: 'Original .Random points at original (slot — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Original .Random points at original  (slot ). Its clone must point at the COPY of , which is the next slot (). Set clone.Random = original.Random.Next."
+    explain:
+      'Original .Random points at original  (slot ). Its clone must point at the COPY of , which is the next slot (). Set clone.Random = original.Random.Next.',
   },
   {
-    id: "state",
-    prompt: "What does the `cur` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `cur` field track in the visualization state?',
     choices: [
       {
-        label: "current slot under inspection — updated each frame",
-        correct: true
+        label: 'current slot under inspection — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `cur` in sync: current slot under inspection"
+    explain: 'The recorder keeps `cur` in sync: current slot under inspection',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Copy List with Random Pointer\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Copy List with Random Pointer"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
+        label: 'O(log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(max(n,m)) time, O(1) space — wrong order of growth"
+        label: 'O(max(n,m)) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). **Interweave** technique (O(1) space, no hashmap): insert cloned node right after each original; Pass 2: set `curr.Next.Random = curr.Random.Next` (clone's rand"
+    explain:
+      "O(n). O(1). **Interweave** technique (O(1) space, no hashmap): insert cloned node right after each original; Pass 2: set `curr.Next.Random = curr.Random.Next` (clone's rand",
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Done — the deep copy [] — final DONE caption",
-        correct: true
+        label: 'Done — the deep copy [] — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Done — the deep copy [] is fully detached with its own Next and Random pointers, all in O(n) time and O(1) extra space."
-  }
+    explain:
+      'Done — the deep copy [] is fully detached with its own Next and Random pointers, all in O(n) time and O(1) extra space.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
   inputs: [
     {
       id: 'cl1',
-      label: "[7,13,11,10] rnd→[∅,0,3,2]",
+      label: '[7,13,11,10] rnd→[∅,0,3,2]',
       value: { vals: [7, 13, 11, 10], random: [null, 0, 3, 2] },
     },
     {

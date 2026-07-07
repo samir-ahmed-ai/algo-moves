@@ -164,21 +164,29 @@ func main() {
       quiz: [
         {
           id: 'ortb-server-drain',
-          prompt: 'Why must a bidder HTTP handler always drain and close r.Body even when returning HTTP 204?',
+          prompt:
+            'Why must a bidder HTTP handler always drain and close r.Body even when returning HTTP 204?',
           choices: [
-            { label: 'TCP keep-alive — drain body to allow connection reuse for next request', correct: true },
+            {
+              label: 'TCP keep-alive — drain body to allow connection reuse for next request',
+              correct: true,
+            },
             { label: 'Complete response — ensures exchange gets full body before close' },
             { label: 'Retry prevention claim — draining body does not prevent retries' },
             { label: 'Spec requirement claim — spec does not mandate explicit body ack' },
           ],
           explain:
-            'Go\'s net/http uses persistent connections by default. If a handler returns without consuming the request body, the server cannot reuse the connection for the next request — it must tear down the TCP connection instead. With 1M+ requests/sec the TCP connection churn this causes is catastrophic. Always defer r.Body.Close() and read (or discard with io.Copy(io.Discard, r.Body)).',
+            "Go's net/http uses persistent connections by default. If a handler returns without consuming the request body, the server cannot reuse the connection for the next request — it must tear down the TCP connection instead. With 1M+ requests/sec the TCP connection churn this causes is catastrophic. Always defer r.Body.Close() and read (or discard with io.Copy(io.Discard, r.Body)).",
         },
         {
           id: 'ortb-server-content-type',
-          prompt: 'An exchange sends a BidRequest with Content-Type: application/json. Your bidder responds without setting a Content-Type. The exchange may:',
+          prompt:
+            'An exchange sends a BidRequest with Content-Type: application/json. Your bidder responds without setting a Content-Type. The exchange may:',
           choices: [
-            { label: 'Parse failure — exchange rejects or warns on wrong Content-Type', correct: true },
+            {
+              label: 'Parse failure — exchange rejects or warns on wrong Content-Type',
+              correct: true,
+            },
             { label: 'Auto-detect claim — exchanges do not always auto-detect Content-Type' },
             { label: 'HTTP 415 claim — some exchanges return 415 on wrong Content-Type' },
             { label: 'Mirror header claim — response Content-Type must be set explicitly' },
@@ -188,22 +196,26 @@ func main() {
         },
         {
           id: 'ortb-server-readtimeout',
-          prompt: 'Your bidder http.Server has ReadTimeout=5s and the exchange tmax=100ms. Why set ReadTimeout much higher than tmax?',
+          prompt:
+            'Your bidder http.Server has ReadTimeout=5s and the exchange tmax=100ms. Why set ReadTimeout much higher than tmax?',
           choices: [
-            { label: 'ReadTimeout vs tmax — covers request read; tmax is DSP processing budget', correct: true },
+            {
+              label: 'ReadTimeout vs tmax — covers request read; tmax is DSP processing budget',
+              correct: true,
+            },
             { label: 'They are the same thing — ReadTimeout should equal tmax' },
             { label: 'Read-not-write claim — ReadTimeout covers request reading, not write' },
             { label: 'Lower-than-tmax claim — ReadTimeout should exceed tmax, not be lower' },
           ],
           explain:
-            'ReadTimeout governs how long the server waits for the client to send the full request (headers + body). BidRequests can be large (enriched with user data) and the exchange → bidder connection may be slow on a bad network day. tmax is the bidder\'s own logic deadline for computing and returning a bid. They are independent concerns: ReadTimeout protects against slow/broken exchange connections; internal bid computation is time-bounded by a context.WithDeadline derived from tmax.',
+            "ReadTimeout governs how long the server waits for the client to send the full request (headers + body). BidRequests can be large (enriched with user data) and the exchange → bidder connection may be slow on a bad network day. tmax is the bidder's own logic deadline for computing and returning a bid. They are independent concerns: ReadTimeout protects against slow/broken exchange connections; internal bid computation is time-bounded by a context.WithDeadline derived from tmax.",
         },
       ],
       design: {
         prompt:
           'Your bidder needs to handle 50,000 concurrent bid requests per second with p99 < 5 ms processing time. How do you architect the Go server to achieve this?',
         answer:
-          '1. HTTP server: use net/http with GOMAXPROCS = num_CPUs; Go\'s goroutine-per-request model handles 50k concurrent requests with ~50k goroutines (each ~8 KB stack = ~400 MB — acceptable).\n2. In-process caching: preload all campaign rules, targeting criteria, and frequency caps into in-memory data structures (sync.Map or read-optimised RWMutex map). Never make synchronous DB or Redis calls in the hot path.\n3. JSON decode optimisation: use a pooled json.Decoder (sync.Pool) to avoid allocations. Consider protobuf for high-traffic exchanges.\n4. Pre-allocated response pools: pool BidResponse + Bid objects via sync.Pool to reduce GC pressure.\n5. Connection management: configure http.Transport with MaxIdleConnsPerHost and tune SO_REUSEPORT for multi-core socket distribution.\n6. Profile: use runtime/pprof + go test -bench to identify allocations. Target < 1000 bytes allocated per request.',
+          "1. HTTP server: use net/http with GOMAXPROCS = num_CPUs; Go's goroutine-per-request model handles 50k concurrent requests with ~50k goroutines (each ~8 KB stack = ~400 MB — acceptable).\n2. In-process caching: preload all campaign rules, targeting criteria, and frequency caps into in-memory data structures (sync.Map or read-optimised RWMutex map). Never make synchronous DB or Redis calls in the hot path.\n3. JSON decode optimisation: use a pooled json.Decoder (sync.Pool) to avoid allocations. Consider protobuf for high-traffic exchanges.\n4. Pre-allocated response pools: pool BidResponse + Bid objects via sync.Pool to reduce GC pressure.\n5. Connection management: configure http.Transport with MaxIdleConnsPerHost and tune SO_REUSEPORT for multi-core socket distribution.\n6. Profile: use runtime/pprof + go test -bench to identify allocations. Target < 1000 bytes allocated per request.",
       },
       keyPoints: [
         'Always drain r.Body + defer r.Body.Close() to enable TCP keep-alive connection reuse.',
@@ -367,9 +379,13 @@ func main() {
       quiz: [
         {
           id: 'ortb-decision-order',
-          prompt: 'In a bid decision pipeline, why should cheap/fast filters run before expensive ones?',
+          prompt:
+            'In a bid decision pipeline, why should cheap/fast filters run before expensive ones?',
           choices: [
-            { label: 'Cheap checks first — fast-failing filters eliminate most imps cheaply', correct: true },
+            {
+              label: 'Cheap checks first — fast-failing filters eliminate most imps cheaply',
+              correct: true,
+            },
             { label: 'Spec mandate claim — OpenRTB spec does not mandate evaluation order' },
             { label: 'Higher CPM claim — cheap checks do not directly raise bid CPM' },
             { label: 'Scheduler claim — Go scheduler does not prioritise cheaper goroutines' },
@@ -379,22 +395,30 @@ func main() {
         },
         {
           id: 'ortb-decision-multi-campaign',
-          prompt: 'Your DSP has 100 active campaigns that all match a given impression. What value should the bidder submit as Bid.price?',
+          prompt:
+            'Your DSP has 100 active campaigns that all match a given impression. What value should the bidder submit as Bid.price?',
           choices: [
-            { label: 'The highest CPM among all matching campaigns — submit the maximum value', correct: true },
+            {
+              label: 'The highest CPM among all matching campaigns — submit the maximum value',
+              correct: true,
+            },
             { label: 'Average CPM claim — averaging campaigns does not maximise DSP yield' },
             { label: 'Multi-bid claim — OpenRTB allows only one bid per SeatBid per imp' },
             { label: 'The floor price — let the exchange determine the clearing CPM' },
           ],
           explain:
-            'An exchange accepts one bid per seat per impression. Submit the highest CPM your DSP can justify across matching campaigns — this maximises win probability. Use that campaign\'s creative in Bid.adm and CrID. If you need separate creatives per advertiser (competitive separation), you may submit multiple SeatBid entries with different seat IDs, but most implementations just use the top-CPM campaign.',
+            "An exchange accepts one bid per seat per impression. Submit the highest CPM your DSP can justify across matching campaigns — this maximises win probability. Use that campaign's creative in Bid.adm and CrID. If you need separate creatives per advertiser (competitive separation), you may submit multiple SeatBid entries with different seat IDs, but most implementations just use the top-CPM campaign.",
         },
         {
           id: 'ortb-decision-floor',
-          prompt: 'Your campaign\'s model predicts CPM=$2.00 but the Imp.bidfloor is $2.50. The correct action is:',
+          prompt:
+            "Your campaign's model predicts CPM=$2.00 but the Imp.bidfloor is $2.50. The correct action is:",
           choices: [
-            { label: 'No-bid — bidding below floor will be rejected by the exchange anyway', correct: true },
-            { label: 'Bid $2.50 claim — exchange can\'t infer true value from your bid price' },
+            {
+              label: 'No-bid — bidding below floor will be rejected by the exchange anyway',
+              correct: true,
+            },
+            { label: "Bid $2.50 claim — exchange can't infer true value from your bid price" },
             { label: 'Bid $2.00 claim — exchange does not round bids up to meet the floor' },
             { label: 'Bid $0 claim — exchange needs bids above the floor price, not at zero' },
           ],
@@ -562,9 +586,13 @@ func main() {
       quiz: [
         {
           id: 'ortb-conc-context-derive',
-          prompt: 'In an HTTP bidder handler, what should be used as the parent context for bid processing?',
+          prompt:
+            'In an HTTP bidder handler, what should be used as the parent context for bid processing?',
           choices: [
-            { label: 'r.Context() — cancellation propagates if exchange closes connection', correct: true },
+            {
+              label: 'r.Context() — cancellation propagates if exchange closes connection',
+              correct: true,
+            },
             { label: 'context.Background() — bid runs independently of request lifecycle' },
             { label: 'context.TODO() — until a proper parent is established' },
             { label: 'Global context claim — shared global context ignores per-request cancels' },
@@ -574,9 +602,13 @@ func main() {
         },
         {
           id: 'ortb-conc-rwmutex',
-          prompt: 'Why is sync.RWMutex more appropriate than sync.Mutex for a campaign cache accessed 100k times/sec?',
+          prompt:
+            'Why is sync.RWMutex more appropriate than sync.Mutex for a campaign cache accessed 100k times/sec?',
           choices: [
-            { label: 'RWMutex benefit — concurrent readers OK; Mutex serialises all access', correct: true },
+            {
+              label: 'RWMutex benefit — concurrent readers OK; Mutex serialises all access',
+              correct: true,
+            },
             { label: 'Always faster claim — Mutex outperforms RWMutex in write-heavy code' },
             { label: 'sync.Mutex does not support concurrent access — only RWMutex does' },
             { label: 'Map requirement claim — Mutex also works for maps; RWMutex not required' },
@@ -586,11 +618,12 @@ func main() {
         },
         {
           id: 'ortb-conc-goroutine-leak',
-          prompt: 'A bidder goroutine blocks on a channel receive with no context or timeout. If the exchange closes the connection, the goroutine will:',
+          prompt:
+            'A bidder goroutine blocks on a channel receive with no context or timeout. If the exchange closes the connection, the goroutine will:',
           choices: [
             { label: 'Leak — block forever; goroutines accumulate until OOM', correct: true },
-            { label: 'GC claim — goroutines are not GC\'d; they must exit or be cancelled' },
-            { label: 'Panic claim — goroutines don\'t panic; they block indefinitely' },
+            { label: "GC claim — goroutines are not GC'd; they must exit or be cancelled" },
+            { label: "Panic claim — goroutines don't panic; they block indefinitely" },
             { label: 'Parent cancel claim — goroutine parent exit does not cancel children' },
           ],
           explain:
@@ -616,7 +649,8 @@ func main() {
       title: 'Benchmarking the Hot Path',
       difficulty: 'Hard',
       tags: ['benchmark', 'pprof', 'allocations', 'JSON', 'performance', 'Go'],
-      summary: 'go test -bench, pprof CPU/memory profiling, and minimising allocations in JSON decode.',
+      summary:
+        'go test -bench, pprof CPU/memory profiling, and minimising allocations in JSON decode.',
       pattern: 'Profiling + benchmark',
       visual:
         'go test -bench=. -benchmem → ns/op + B/op + allocs/op. pprof: go tool pprof cpu.prof → top / list. Optimise: sync.Pool for decoder, reuse slices, avoid interface boxing.',
@@ -713,11 +747,15 @@ func main() {
       quiz: [
         {
           id: 'ortb-bench-allocopt',
-          prompt: 'In a Go benchmark, -benchmem reports "1024 B/op 8 allocs/op". To reduce allocations in the JSON decode path, which technique is most effective?',
+          prompt:
+            'In a Go benchmark, -benchmem reports "1024 B/op 8 allocs/op". To reduce allocations in the JSON decode path, which technique is most effective?',
           choices: [
-            { label: 'sync.Pool — reuse json.Decoder instances to cut allocations per request', correct: true },
-            { label: 'High GOGC claim — defers GC but doesn\'t reduce allocation count' },
-            { label: 'go:noinline claim — prevents inlining; doesn\'t reduce allocs' },
+            {
+              label: 'sync.Pool — reuse json.Decoder instances to cut allocations per request',
+              correct: true,
+            },
+            { label: "High GOGC claim — defers GC but doesn't reduce allocation count" },
+            { label: "go:noinline claim — prevents inlining; doesn't reduce allocs" },
             { label: 'Marshal claim — Marshal encodes, not decodes; wrong function' },
           ],
           explain:
@@ -725,9 +763,13 @@ func main() {
         },
         {
           id: 'ortb-bench-pprof',
-          prompt: 'You run: go test -bench=BenchmarkBidder -cpuprofile=cpu.prof. How do you identify the hottest function?',
+          prompt:
+            'You run: go test -bench=BenchmarkBidder -cpuprofile=cpu.prof. How do you identify the hottest function?',
           choices: [
-            { label: 'go tool pprof — type "top" for top CPU functions by cumulative time', correct: true },
+            {
+              label: 'go tool pprof — type "top" for top CPU functions by cumulative time',
+              correct: true,
+            },
             { label: 'go vet -profile claim — go vet does not accept pprof profiles' },
             { label: 'Text editor claim — pprof files are binary; use go tool pprof' },
             { label: 'go build -pprof claim — go build does not read pprof profiles' },
@@ -737,9 +779,13 @@ func main() {
         },
         {
           id: 'ortb-bench-prealloc',
-          prompt: 'make([]Bid, 0, len(req.Imp)) instead of var bids []Bid reduces allocations because:',
+          prompt:
+            'make([]Bid, 0, len(req.Imp)) instead of var bids []Bid reduces allocations because:',
           choices: [
-            { label: 'Pre-alloc capacity — avoids slice growth and backing-array copies', correct: true },
+            {
+              label: 'Pre-alloc capacity — avoids slice growth and backing-array copies',
+              correct: true,
+            },
             { label: 'GC avoidance claim — make still allocates on heap; GC still scans' },
             { label: 'GC hint claim — len() is used for capacity hint, not GC scanning' },
             { label: 'Stack alloc claim — slice with cap always allocates on the heap' },

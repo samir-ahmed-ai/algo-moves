@@ -8,13 +8,21 @@ export function CheatPanelBody() {
   const cards = patternsForTags(item.tags);
   if (cards.length === 0) {
     return (
-      <EmptyState icon={<ScrollText className="h-5 w-5" />} title="No cheat sheet" hint="This problem's tags have no pattern card yet." />
+      <EmptyState
+        icon={<ScrollText className="h-5 w-5" />}
+        title="No cheat sheet"
+        hint="This problem's tags have no pattern card yet."
+      />
     );
   }
   return (
     <div className="flex flex-col">
       {cards.map((c) => (
-        <DefRow key={c.id} term={c.title} meta={<Chip mono>{c.complexity.split('|')[0].trim()}</Chip>}>
+        <DefRow
+          key={c.id}
+          term={c.title}
+          meta={<Chip mono>{c.complexity.split('|')[0].trim()}</Chip>}
+        >
           {c.idea}
         </DefRow>
       ))}

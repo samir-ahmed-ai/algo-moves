@@ -4,8 +4,15 @@
 /* ------------------------------ HUD round dots ---------------------------- */
 
 @keyframes impDotPulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.35); opacity: 0.65; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.65;
+  }
 }
 .imp-dot-current {
   background: var(--accent-bg);
@@ -15,8 +22,12 @@
 
 /* round dot fills with a coin flip when its round is fixed */
 @keyframes impDotFlip {
-  from { transform: rotateX(90deg); }
-  to { transform: rotateX(0deg); }
+  from {
+    transform: rotateX(90deg);
+  }
+  to {
+    transform: rotateX(0deg);
+  }
 }
 .imp-dot-flip {
   animation: impDotFlip 300ms ease-out;
@@ -25,9 +36,18 @@
 /* -------------------------------- heart pop -------------------------------- */
 
 @keyframes impHeartPop {
-  0% { transform: scale(1); opacity: 1; }
-  45% { transform: scale(1.4); opacity: 1; }
-  100% { transform: scale(0); opacity: 0; }
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  45% {
+    transform: scale(1.4);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
 }
 .imp-heart-pop {
   animation: impHeartPop 300ms ease-in forwards;
@@ -42,7 +62,9 @@
   filter: drop-shadow(0 8px 18px hsl(0 0% 0% / 0.3));
 }
 @keyframes impAccentFlash {
-  from { background: var(--accent-bg); }
+  from {
+    background: var(--accent-bg);
+  }
 }
 .imp-lift .blk-face {
   animation: impAccentFlash 320ms ease-out;
@@ -53,8 +75,12 @@
 
 /* healed block: the mutant code crossfades to the truth */
 @keyframes impHeal {
-  from { opacity: 0.2; }
-  to { opacity: 1; }
+  from {
+    opacity: 0.2;
+  }
+  to {
+    opacity: 1;
+  }
 }
 .imp-heal {
   animation: impHeal 160ms ease-out;
@@ -62,8 +88,14 @@
 
 /* next round crossfades in */
 @keyframes impRoundIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 .imp-round-in {
   animation: impRoundIn 260ms ease-out;
@@ -120,5 +152,7 @@
   /* imp-heal and imp-round-in stay — they are already plain crossfades */
 }
 @keyframes impHeartFade {
-  to { opacity: 0; }
+  to {
+    opacity: 0;
+  }
 }

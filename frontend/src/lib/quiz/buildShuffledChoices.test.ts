@@ -9,7 +9,13 @@ describe('buildShuffledChoices', () => {
   it('is byte-identical to the original inline formula', () => {
     for (const round of [0, 1, 2, 7]) {
       const inline = shuffleSeeded(
-        [ANSWER, ...shuffleSeeded(POOL.filter((p) => p !== ANSWER), round).slice(0, 3)],
+        [
+          ANSWER,
+          ...shuffleSeeded(
+            POOL.filter((p) => p !== ANSWER),
+            round,
+          ).slice(0, 3),
+        ],
         round + 1,
       );
       expect(buildShuffledChoices(ANSWER, POOL, round)).toEqual(inline);
@@ -30,6 +36,8 @@ describe('buildShuffledChoices', () => {
 
   it('is deterministic within a round and varies across rounds', () => {
     expect(buildShuffledChoices(ANSWER, POOL, 5)).toEqual(buildShuffledChoices(ANSWER, POOL, 5));
-    expect(buildShuffledChoices(ANSWER, POOL, 0)).not.toEqual(buildShuffledChoices(ANSWER, POOL, 1));
+    expect(buildShuffledChoices(ANSWER, POOL, 0)).not.toEqual(
+      buildShuffledChoices(ANSWER, POOL, 1),
+    );
   });
 });

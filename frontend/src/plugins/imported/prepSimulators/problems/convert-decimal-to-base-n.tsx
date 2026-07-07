@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -26,21 +32,22 @@ interface ConvertState {
   done: boolean;
 }
 
-function record({ n, base }: ConvertInput): Frame<ConvertState>[] {  const collected: string[] = [];
+function record({ n, base }: ConvertInput): Frame<ConvertState>[] {
+  const collected: string[] = [];
 
   const { emit, frames } = createRecorder<ConvertState>(() => ({
-        n,
-        base,
-        neg: n < 0,
-        cur: 0,
-        rem: null,
-        digit: null,
-        collected: collected.slice(),
-        reversing: false,
-        swap: null,
-        result: null,
-        done: false
-      }));
+    n,
+    base,
+    neg: n < 0,
+    cur: 0,
+    rem: null,
+    digit: null,
+    collected: collected.slice(),
+    reversing: false,
+    swap: null,
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -161,7 +168,9 @@ function View({ frame }: PluginViewProps<ConvertState>) {
       )}
       <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} />
       <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.reversing ? 'digits reversed → most-significant first' : 'remainders collected least-significant first'}
+        {s.reversing
+          ? 'digits reversed → most-significant first'
+          : 'remainders collected least-significant first'}
       </div>
       {s.result !== null && (
         <div className={cn('mt-1 font-mono text-good', vizText.base)}>→ "{s.result}"</div>
@@ -202,132 +211,130 @@ function compute(n: number, base: number): string {
 export const manifestId = 'prep-math-convert-decimal-to-base-n';
 export const title = 'Convert decimal to base N';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Convert decimal to base N\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Convert decimal to base N"?',
     choices: [
       {
-        label: "Base conversion repeated divmod — fits this problem",
-        correct: true
+        label: 'Base conversion repeated divmod — fits this problem',
+        correct: true,
       },
       {
-        label: "Strobogrammatic map — different approach"
+        label: 'Strobogrammatic map — different approach',
       },
       {
-        label: "Primality trial division — different approach"
+        label: 'Primality trial division — different approach',
       },
       {
-        label: "Gauss sum XOR trick — different approach"
-      }
+        label: 'Gauss sum XOR trick — different approach',
+      },
     ],
-    explain: "Repeated divmod; collect remainders, then reverse"
+    explain: 'Repeated divmod; collect remainders, then reverse',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Convert decimal to base N), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Convert decimal to base N), what strategy is established?',
     choices: [
       {
-        label: "Repeated divmod; collect remainders, then — described in INIT caption",
-        correct: true
+        label: 'Repeated divmod; collect remainders, then — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Convert  to base  by repeated divmod: at each step take n %  as the next digit (least-significant first), then divide n by . The digits come out reversed, so we flip them at the end."
+    explain:
+      'Convert  to base  by repeated divmod: at each step take n %  as the next digit (least-significant first), then divide n by . The digits come out reversed, so we flip them at the end.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"COLLECTED\" step ( digits), what happens?",
+    id: 'key-step',
+    prompt: 'On the "COLLECTED" step ( digits), what happens?',
     choices: [
       {
-        label: "n has been divided down — this move caption",
-        correct: true
+        label: 'n has been divided down — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "n has been divided down to 0. The collected digits [] are least-significant first, so the number reads correctly only once reversed."
+    explain:
+      'n has been divided down to 0. The collected digits [] are least-significant first, so the number reads correctly only once reversed.',
   },
   {
-    id: "state",
-    prompt: "What does the `n` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `n` field track in the visualization state?',
     choices: [
       {
-        label: "original decimal input — updated each frame",
-        correct: true
+        label: 'original decimal input — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `n` in sync: original decimal input"
+    explain: 'The recorder keeps `n` in sync: original decimal input',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Convert decimal to base N\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Convert decimal to base N"?',
     choices: [
       {
-        label: "O(log n) time, O(log n) space — standard bounds here",
-        correct: true
+        label: 'O(log n) time, O(log n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(m·n) time, O(m+n) space — wrong order of growth"
+        label: 'O(m·n) time, O(m+n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(1) space — wrong order of growth"
+        label: 'O(n) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(log x) time, O(1) space — wrong order of growth"
-      }
+        label: 'O(log x) time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(log n). O(log n). out+=digits[n%base]; n/=base; reverse"
+    explain: 'O(log n). O(log n). out+=digits[n%base]; n/=base; reverse',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Reverse in place: swap positions — final DONE caption",
-        correct: true
+        label: 'Reverse in place: swap positions — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Reverse in place: swap positions  and  so the most-significant digit moves to the front. Now []."
-  }
+    explain:
+      'Reverse in place: swap positions  and  so the most-significant digit moves to the front. Now [].',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

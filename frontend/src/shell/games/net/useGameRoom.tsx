@@ -6,4 +6,4 @@ export {
   type GameRoomApi,
   type RoomApi,
   type RoomStatus,
-} from '../../realtime/useRoom';
+} from '@/shell/realtime/useRoom';

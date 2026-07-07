@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { Loader2, LogIn, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useAuth } from './AuthProvider';
-import { Avatar } from '@/shell/games/ui/Avatar';
+import { Avatar } from '@/design/components';
 import { authStrings as s } from './strings';
 import { AuthPopover, AuthUserMenu } from './AuthPopover';
 
@@ -55,20 +55,24 @@ export function AuthButton({
           onClick={() => setMenuOpen((open) => !open)}
           className={cn(
             'inline-flex items-center gap-2 border border-edge bg-panel2 px-2 text-ink3 transition-all hover:bg-panel hover:text-ink touch-manipulation',
-            isHeader
-              ? 'min-h-0 rounded-md py-1.5'
-              : 'min-h-9 rounded-xl',
+            isHeader ? 'min-h-0 rounded-md py-1.5' : 'min-h-9 rounded-xl',
             menuOpen && 'border-accent/40 ring-2 ring-accent/15',
             compact || isHeader ? 'max-w-[8rem]' : 'max-w-[10rem]',
           )}
           title={profile.display_name}
         >
-          <Avatar seed={profile.avatar_seed} name={profile.display_name} size={isHeader ? 20 : 24} />
+          <Avatar
+            seed={profile.avatar_seed}
+            name={profile.display_name}
+            size={isHeader ? 20 : 24}
+          />
           {!compact && !isHeader ? (
             <span className="truncate text-sm font-semibold text-ink">{profile.display_name}</span>
           ) : null}
           {isHeader && !compact ? (
-            <span className="hidden truncate text-xs font-medium text-ink sm:inline">{profile.display_name}</span>
+            <span className="hidden truncate text-xs font-medium text-ink sm:inline">
+              {profile.display_name}
+            </span>
           ) : null}
         </button>
         <AuthUserMenu

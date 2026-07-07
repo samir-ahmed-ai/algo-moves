@@ -77,9 +77,13 @@ func main() {
       quiz: [
         {
           id: 'ortb-req-required',
-          prompt: 'Which fields in the top-level BidRequest are strictly required by the OpenRTB spec?',
+          prompt:
+            'Which fields in the top-level BidRequest are strictly required by the OpenRTB spec?',
           choices: [
-            { label: 'id + imp[] — only required fields; everything else is optional', correct: true },
+            {
+              label: 'id + imp[] — only required fields; everything else is optional',
+              correct: true,
+            },
             { label: 'id + site/app + device — three objects always required' },
             { label: 'id + imp + tmax — deadline is mandatory in the spec' },
             { label: 'Required fields — user and auction type also required alongside id+imp' },
@@ -89,9 +93,13 @@ func main() {
         },
         {
           id: 'ortb-req-at-default',
-          prompt: 'If the "at" (auction type) field is absent from a BidRequest, what should a bidder assume?',
+          prompt:
+            'If the "at" (auction type) field is absent from a BidRequest, what should a bidder assume?',
           choices: [
-            { label: 'at=2 default — spec default is second-price when at is absent', correct: true },
+            {
+              label: 'at=2 default — spec default is second-price when at is absent',
+              correct: true,
+            },
             { label: 'First-price absence — absence means the newest format' },
             { label: 'Fixed-price deal — at is only omitted for guaranteed deals' },
             { label: 'Unknown — bidder must reject the request' },
@@ -131,7 +139,8 @@ func main() {
       title: 'Impression Object & Ad Formats',
       difficulty: 'Medium',
       tags: ['imp', 'banner', 'video', 'native', 'audio', 'pmp', 'OpenRTB'],
-      summary: 'The Imp object describes the ad slot: format (banner/video/native/audio), floor price, and deals.',
+      summary:
+        'The Imp object describes the ad slot: format (banner/video/native/audio), floor price, and deals.',
       pattern: 'Impression + format union',
       visual:
         'Imp{id, banner|video|native|audio, bidfloor, bidfloorcur, secure, instl, tagid, pmp{deals[]}} — exactly one format sub-object should be set (or multiple for multi-format).',
@@ -226,9 +235,13 @@ func main() {
       quiz: [
         {
           id: 'ortb-imp-format-multi',
-          prompt: 'A publisher wants to accept either a 300×250 banner OR a 320×50 banner on the same slot. How should they express this in the Imp object?',
+          prompt:
+            'A publisher wants to accept either a 300×250 banner OR a 320×50 banner on the same slot. How should they express this in the Imp object?',
           choices: [
-            { label: 'Banner.format array — lists all acceptable sizes for the slot', correct: true },
+            {
+              label: 'Banner.format array — lists all acceptable sizes for the slot',
+              correct: true,
+            },
             { label: 'Two Imp objects — creates two independent auctions, not one slot' },
             { label: 'Largest declared — DSP does not auto-scale banners to smaller sizes' },
             { label: 'Two BidRequests — each BidRequest is a separate auction entirely' },
@@ -238,9 +251,13 @@ func main() {
         },
         {
           id: 'ortb-imp-pmp',
-          prompt: 'When Imp.pmp.private_auction = 1, a bidder that does NOT hold a deal for this impression should:',
+          prompt:
+            'When Imp.pmp.private_auction = 1, a bidder that does NOT hold a deal for this impression should:',
           choices: [
-            { label: 'No-bid required — only deal bids accepted when private_auction=1', correct: true },
+            {
+              label: 'No-bid required — only deal bids accepted when private_auction=1',
+              correct: true,
+            },
             { label: 'Bid at floor — private_auction=1 just means a higher floor price' },
             { label: 'Bid normally — private_auction is a hint, not a hard rule' },
             { label: 'Call exchange API — to request a temporary deal on the fly' },
@@ -252,7 +269,10 @@ func main() {
           id: 'ortb-imp-secure',
           prompt: 'What must a bidder ensure when Imp.secure = 1?',
           choices: [
-            { label: 'HTTPS required — all markup URLs (adm, nurl, pixels) must use HTTPS', correct: true },
+            {
+              label: 'HTTPS required — all markup URLs (adm, nurl, pixels) must use HTTPS',
+              correct: true,
+            },
             { label: 'TLS bid claim — the bid itself must be TLS-encrypted before sending' },
             { label: 'GDPR claim — secure=1 implies GDPR scope and consent requirement' },
             { label: 'Price flag claim — secure is a pricing flag, not a URL requirement' },
@@ -281,7 +301,8 @@ func main() {
       title: 'Site, App, Device & User Context',
       difficulty: 'Medium',
       tags: ['site', 'app', 'device', 'user', 'geo', 'OpenRTB', 'context'],
-      summary: 'Publisher context (Site/App) and buyer data (Device/User) objects that fuel targeting.',
+      summary:
+        'Publisher context (Site/App) and buyer data (Device/User) objects that fuel targeting.',
       pattern: 'Context objects',
       visual:
         'Site{page, domain, publisher{id}} or App{bundle, storeurl, publisher{id}} + Device{ua, ip, os, geo{lat,lon,country}} + User{id, buyeruid, yob, gender, data[]}.',
@@ -378,46 +399,56 @@ func main() {
       quiz: [
         {
           id: 'ortb-context-site-vs-app',
-          prompt: 'Which BidRequest context object should be present for a mobile game served in-app?',
+          prompt:
+            'Which BidRequest context object should be present for a mobile game served in-app?',
           choices: [
-            { label: 'App — with bundle (reverse-domain package name) and optionally storeurl', correct: true },
+            {
+              label: 'App — with bundle (reverse-domain package name) and optionally storeurl',
+              correct: true,
+            },
             { label: 'Web-only claim — all inventory is web-based regardless of platform' },
             { label: 'Both present — Site and App may coexist in one BidRequest' },
             { label: 'Neither — in-app inventory uses the Dooh object instead' },
           ],
           explain:
-            'App is for non-browser environments: iOS/Android apps, OTT/CTV apps. Site is for browser-based web inventory. Only one of the two should be present per BidRequest (the spec says both may be sent but that\'s a publisher error). Bundle is the app\'s package name (e.g. com.example.game) and is the primary identifier for app inventory.',
+            "App is for non-browser environments: iOS/Android apps, OTT/CTV apps. Site is for browser-based web inventory. Only one of the two should be present per BidRequest (the spec says both may be sent but that's a publisher error). Bundle is the app's package name (e.g. com.example.game) and is the primary identifier for app inventory.",
         },
         {
           id: 'ortb-context-buyeruid',
           prompt: 'What is the purpose of User.buyeruid in a BidRequest?',
           choices: [
-            { label: "buyeruid — DSP's user ID obtained via cookie sync with the exchange", correct: true },
+            {
+              label: "buyeruid — DSP's user ID obtained via cookie sync with the exchange",
+              correct: true,
+            },
             { label: 'Exchange UID claim — exchange-assigned persistent user identifier' },
             { label: 'UID2 token claim — it holds the IAB UID2 token for cookieless identity' },
             { label: 'SSP account claim — it is the SSP account ID for the publisher' },
           ],
           explain:
-            'buyeruid is populated by the exchange from its cookie sync table: when a user visits publisher.com, the exchange and DSP perform a pixel-based cookie sync to map exchange user IDs to DSP user IDs. The exchange then embeds the DSP\'s user ID in buyeruid so the DSP\'s bidder can look up that user\'s segments in its own database without a synchronous network call.',
+            "buyeruid is populated by the exchange from its cookie sync table: when a user visits publisher.com, the exchange and DSP perform a pixel-based cookie sync to map exchange user IDs to DSP user IDs. The exchange then embeds the DSP's user ID in buyeruid so the DSP's bidder can look up that user's segments in its own database without a synchronous network call.",
         },
         {
           id: 'ortb-context-device-ifa',
           prompt: 'Device.ifa in an OpenRTB BidRequest contains:',
           choices: [
-            { label: "Device.ifa — advertising identifier (IDFA on iOS, GAID on Android)", correct: true },
+            {
+              label: 'Device.ifa — advertising identifier (IDFA on iOS, GAID on Android)',
+              correct: true,
+            },
             { label: 'IP address claim — Device.ip holds IP, not Device.ifa' },
             { label: 'Fingerprint claim — Device.ifa is the ad ID, not a fingerprint hash' },
             { label: 'Carrier ID claim — carrier subscriber ID is in Device.carrier' },
           ],
           explain:
-            'IFA (Identifier For Advertising) is the resettable advertising ID issued by the OS. On iOS it\'s IDFA (Identifier for Advertisers); on Android it\'s GAID (Google Advertising ID). Publishers set Device.lmt (limit ad tracking) = 1 when the user has opted out. With iOS 14.5+ (ATT framework), most users opt out, making IFA largely unavailable on iOS.',
+            "IFA (Identifier For Advertising) is the resettable advertising ID issued by the OS. On iOS it's IDFA (Identifier for Advertisers); on Android it's GAID (Google Advertising ID). Publishers set Device.lmt (limit ad tracking) = 1 when the user has opted out. With iOS 14.5+ (ATT framework), most users opt out, making IFA largely unavailable on iOS.",
         },
       ],
       design: {
         prompt:
           'Your DSP receives bid requests with User.buyeruid missing for ~40% of traffic (cookieless browsers, ATT-opted-out iOS). How do you handle audience targeting for this traffic?',
         answer:
-          '1. Contextual targeting — use Site.page, Site.cat, App.bundle, Device.os, Geo.country/region for non-audience-based targeting. This works without cookies or device IDs.\n2. Probabilistic identity — hashed email (HEM) or UID2 token in User.eids when available (from CTV or logged-in environments).\n3. Cohort-based targeting — leverage Topics API (web) or SKAdNetwork (iOS) signals where available.\n4. Lookalike expansion — use first-party data segments from the advertiser\'s CRM to build lookalike models; bid on users who match on non-ID features.\n5. Adjust CPM floors — deprioritise unmatched traffic or apply lower CPMs since targeting fidelity is lower.',
+          "1. Contextual targeting — use Site.page, Site.cat, App.bundle, Device.os, Geo.country/region for non-audience-based targeting. This works without cookies or device IDs.\n2. Probabilistic identity — hashed email (HEM) or UID2 token in User.eids when available (from CTV or logged-in environments).\n3. Cohort-based targeting — leverage Topics API (web) or SKAdNetwork (iOS) signals where available.\n4. Lookalike expansion — use first-party data segments from the advertiser's CRM to build lookalike models; bid on users who match on non-ID features.\n5. Adjust CPM floors — deprioritise unmatched traffic or apply lower CPMs since targeting fidelity is lower.",
       },
       keyPoints: [
         'Site for web inventory, App for in-app (bundle = package name); only one present per BidRequest.',
@@ -432,7 +463,8 @@ func main() {
       title: 'OpenRTB 2.6 New Fields',
       difficulty: 'Hard',
       tags: ['OpenRTB-2.6', 'pod-bidding', 'podid', 'poddur', 'plcmt', 'CTV', 'channel'],
-      summary: 'Pod bidding (poddur/podid/mincpmpersec), plcmt, and channel/network for CTV in 2.6.',
+      summary:
+        'Pod bidding (poddur/podid/mincpmpersec), plcmt, and channel/network for CTV in 2.6.',
       pattern: 'ORTB 2.6 CTV additions',
       visual:
         'Video.podid groups a commercial break; Video.poddur = break length in sec; Video.mincpmpersec = minimum CPM per second; Video.plcmt replaces old Video.placement for in-stream/companion/interstitial.',
@@ -522,9 +554,13 @@ func main() {
       quiz: [
         {
           id: 'ortb-26-mincpmpersec',
-          prompt: 'A Video imp has mincpmpersec=0.08. A bidder wants to serve a 20-second ad. What is the minimum bid.price the exchange will accept?',
+          prompt:
+            'A Video imp has mincpmpersec=0.08. A bidder wants to serve a 20-second ad. What is the minimum bid.price the exchange will accept?',
           choices: [
-            { label: '$1.60 CPM — minimum bid for 20s ad at $0.08/sec (20 × $0.08)', correct: true },
+            {
+              label: '$1.60 CPM — minimum bid for 20s ad at $0.08/sec (20 × $0.08)',
+              correct: true,
+            },
             { label: '$0.08 CPM — mincpmpersec is per-impression not per-second' },
             { label: '$0.80 CPM — spec divides mincpmpersec by 10 claim' },
             { label: 'bidfloor enforced — mincpmpersec is advisory and not strictly enforced' },
@@ -536,7 +572,10 @@ func main() {
           id: 'ortb-26-plcmt',
           prompt: 'Video.plcmt=1 in OpenRTB 2.6 means the video ad will run:',
           choices: [
-            { label: 'plcmt=1 — in-stream; pre/mid/post-roll alongside streaming video', correct: true },
+            {
+              label: 'plcmt=1 — in-stream; pre/mid/post-roll alongside streaming video',
+              correct: true,
+            },
             { label: 'In-banner claim — plcmt=2 is in-banner, not plcmt=1' },
             { label: 'Interstitial claim — plcmt=5 is interstitial, not plcmt=1' },
             { label: 'In-article claim — plcmt=3 is in-article, not plcmt=1' },
@@ -548,7 +587,10 @@ func main() {
           id: 'ortb-26-podseq',
           prompt: 'Video.podseq in a dynamic ad pod can be set to indicate:',
           choices: [
-            { label: 'Pod position — 1=first slot, 2=any middle, 3=last in the break', correct: true },
+            {
+              label: 'Pod position — 1=first slot, 2=any middle, 3=last in the break',
+              correct: true,
+            },
             { label: 'Pod sequence — sequence number of the pod within content stream' },
             { label: 'Min ads claim — minimum number of ads in the pod' },
             { label: 'Tie-break claim — bid rank used for tie-breaking within the pod' },
@@ -561,7 +603,7 @@ func main() {
         prompt:
           'You are building a CTV SSP that supports dynamic ad pods. A publisher has a 90-second commercial break. How do you construct the OpenRTB BidRequests for this break, and how do you assemble the final pod from winning bids?',
         answer:
-          '1. Construction: split the 90-second break into multiple Video Imp objects sharing the same podid. Set poddur=90 and mincpmpersec based on publisher floor. MaxSeq=3 (e.g. max 3 ads of 30s each). Send separate podseq=1, podseq=2, podseq=3 imps.\n2. Competitive separation: use bseat or deal constraints to ensure the same advertiser domain doesn\'t win two consecutive slots (competitive separation rules).\n3. Auction: run first-price auction per slot; the winning bids fill the pod. Sum of durations must not exceed poddur=90.\n4. Assembly: sort winning ads by podseq position; concatenate creative playback URLs into the VAST ad pod structure returned to the CTV player.\n5. Reconciliation: fire nurl per winning bid, track actual impression per slot with separate burl calls.',
+          "1. Construction: split the 90-second break into multiple Video Imp objects sharing the same podid. Set poddur=90 and mincpmpersec based on publisher floor. MaxSeq=3 (e.g. max 3 ads of 30s each). Send separate podseq=1, podseq=2, podseq=3 imps.\n2. Competitive separation: use bseat or deal constraints to ensure the same advertiser domain doesn't win two consecutive slots (competitive separation rules).\n3. Auction: run first-price auction per slot; the winning bids fill the pod. Sum of durations must not exceed poddur=90.\n4. Assembly: sort winning ads by podseq position; concatenate creative playback URLs into the VAST ad pod structure returned to the CTV player.\n5. Reconciliation: fire nurl per winning bid, track actual impression per slot with separate burl calls.",
       },
       keyPoints: [
         'Pod bidding in ORTB 2.6: poddur = break duration (seconds), mincpmpersec = CPM per second floor, podid = break identifier.',

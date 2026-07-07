@@ -36,7 +36,7 @@ import { chromeText } from '../../chromeUi';
 import { sidePanelTabs } from '../layout/layout';
 import { widgetsForTab } from '../widgets/registry';
 import { WidgetSection } from '../widgets/WidgetSection';
-import { useCanvasCollabOptional } from '../collab/CanvasCollabProvider';
+import { useCanvasCollabOptional } from '@/shell/collab';
 
 const MODES: { id: CanvasMode; label: string; icon: ReactNode }[] = [
   { id: 'visualize', label: 'Visualize', icon: <Eye className="h-3 w-3" /> },
@@ -92,17 +92,35 @@ function RightCollapsedRail({
       className="unified-right-sidebar flex h-full shrink-0 flex-col items-center gap-px border-l border-edge bg-panel py-1"
       style={{ width: SIDEBAR_RAIL_W }}
     >
-      <button type="button" onClick={onExpand} title="Expand sidebar" aria-label="Expand sidebar" className={btn}>
+      <button
+        type="button"
+        onClick={onExpand}
+        title="Expand sidebar"
+        aria-label="Expand sidebar"
+        className={btn}
+      >
         <PanelRight className="h-3 w-3" />
       </button>
-      <CollapsedRailButton title="Analysis" ariaLabel="Open analysis" onClick={() => onOpenTab('analysis')}>
+      <CollapsedRailButton
+        title="Analysis"
+        ariaLabel="Open analysis"
+        onClick={() => onOpenTab('analysis')}
+      >
         <Activity className="h-3 w-3" style={{ color: panelAccent('replay') }} />
       </CollapsedRailButton>
-      <CollapsedRailButton title="Canvas" ariaLabel="Open canvas settings" onClick={() => onOpenTab('canvas')}>
+      <CollapsedRailButton
+        title="Canvas"
+        ariaLabel="Open canvas settings"
+        onClick={() => onOpenTab('canvas')}
+      >
         <Sliders className="h-3 w-3" />
       </CollapsedRailButton>
       {!showTransport && (
-        <CollapsedRailButton title="Transport" ariaLabel="Open transport" onClick={() => onOpenTab('canvas')}>
+        <CollapsedRailButton
+          title="Transport"
+          ariaLabel="Open transport"
+          onClick={() => onOpenTab('canvas')}
+        >
           <Play className="h-3 w-3" />
         </CollapsedRailButton>
       )}
@@ -133,7 +151,11 @@ function RightCollapsedRail({
           <span className="grid h-3 w-3 place-items-center">{nodeIcon(t.id)}</span>
         </CollapsedRailButton>
       ))}
-      <CollapsedRailButton title="More" ariaLabel="Open more settings" onClick={() => onOpenTab('more')}>
+      <CollapsedRailButton
+        title="More"
+        ariaLabel="Open more settings"
+        onClick={() => onOpenTab('more')}
+      >
         <MoreHorizontal className="h-3 w-3" />
       </CollapsedRailButton>
     </div>
@@ -219,7 +241,11 @@ export function UnifiedRightSidebar() {
         { id: 'analysis' as const, label: 'Analysis', icon: <Activity className="h-3 w-3" /> },
         { id: 'canvas' as const, label: 'Canvas', icon: <Sliders className="h-3 w-3" /> },
         { id: 'selection' as const, label: 'Selection', icon: <Paintbrush className="h-3 w-3" /> },
-        { id: 'collab' as const, label: 'Collab', icon: <Users className={cn('h-3 w-3', collabActive && 'text-good')} /> },
+        {
+          id: 'collab' as const,
+          label: 'Collab',
+          icon: <Users className={cn('h-3 w-3', collabActive && 'text-good')} />,
+        },
         { id: 'more' as const, label: 'More', icon: <MoreHorizontal className="h-3 w-3" /> },
       ] satisfies { id: RightSidebarTab; label: string; icon: ReactNode }[],
     [collabActive],
@@ -251,7 +277,12 @@ export function UnifiedRightSidebar() {
       style={isMobile ? undefined : { width: wide ? SIDEBAR_WIDE_W : SIDEBAR_W }}
     >
       <header className="flex shrink-0 items-center gap-[var(--gap)] border-b border-edge px-[var(--hpad)] py-[var(--gap)]">
-        <span className={cn('min-w-0 flex-1 truncate font-semibold leading-tight text-ink', chromeText.xs)}>
+        <span
+          className={cn(
+            'min-w-0 flex-1 truncate font-semibold leading-tight text-ink',
+            chromeText.xs,
+          )}
+        >
           {TAB_LABELS[rightTab]}
         </span>
         <Chip tone="accent" mono className={cn('!px-1 !py-px', chromeText.xs)}>
@@ -267,7 +298,9 @@ export function UnifiedRightSidebar() {
               className={cn(
                 chromeText.xs,
                 `flex min-h-[var(--row)] items-center justify-center gap-0.5 px-1 py-0 font-medium transition-colors ${RADIUS_CTRL}`,
-                mode === m.id ? 'bg-accent text-white shadow-sm' : 'text-ink2 hover:bg-panel2 hover:text-ink',
+                mode === m.id
+                  ? 'bg-accent text-white shadow-sm'
+                  : 'text-ink2 hover:bg-panel2 hover:text-ink',
               )}
             >
               {m.icon}
@@ -317,12 +350,19 @@ export function UnifiedRightSidebar() {
           <div className="flex flex-col gap-2 px-[var(--hpad)]">
             {!showGlobalTransport && (
               <section>
-                <p className={cn('mb-[var(--gap)] font-medium text-ink2', chromeText.xs)}>Transport</p>
+                <p className={cn('mb-[var(--gap)] font-medium text-ink2', chromeText.xs)}>
+                  Transport
+                </p>
                 <TransportBar compact />
               </section>
             )}
             <section>
-              <p className={cn('mb-[var(--gap)] flex items-center gap-[var(--gap)] font-medium text-ink2', chromeText.xs)}>
+              <p
+                className={cn(
+                  'mb-[var(--gap)] flex items-center gap-[var(--gap)] font-medium text-ink2',
+                  chromeText.xs,
+                )}
+              >
                 <Sliders className="h-3 w-3" />
                 Properties
               </p>
@@ -333,7 +373,12 @@ export function UnifiedRightSidebar() {
               <CanvasActionsBody />
             </section>
             <section>
-              <p className={cn('mb-[var(--gap)] flex items-center gap-[var(--gap)] font-medium text-ink2', chromeText.xs)}>
+              <p
+                className={cn(
+                  'mb-[var(--gap)] flex items-center gap-[var(--gap)] font-medium text-ink2',
+                  chromeText.xs,
+                )}
+              >
                 <SlidersHorizontal className="h-3 w-3" />
                 Panels
               </p>
@@ -368,7 +413,9 @@ export function UnifiedRightSidebar() {
                   className={cn(
                     chromeText.sm,
                     `flex min-h-[var(--row)] flex-1 items-center justify-center gap-0.5 px-1 py-0 font-medium transition-colors ${RADIUS_CTRL}`,
-                    mode === m.id ? 'bg-accent text-white shadow-sm' : 'text-ink2 hover:bg-panel2 hover:text-ink',
+                    mode === m.id
+                      ? 'bg-accent text-white shadow-sm'
+                      : 'text-ink2 hover:bg-panel2 hover:text-ink',
                   )}
                 >
                   {m.icon}

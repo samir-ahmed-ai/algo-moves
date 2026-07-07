@@ -1,8 +1,24 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, vizText, CharCell } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  vizText,
+  CharCell,
+} from '../../../_shared/vizKit';
 
 interface CSSInput {
   chars: string;
@@ -18,38 +34,66 @@ interface CSSState {
   done: boolean;
 }
 
-function record({ chars, k }: CSSInput): Frame<CSSState>[] {  const charset = [...chars];
+function record({ chars, k }: CSSInput): Frame<CSSState>[] {
+  const charset = [...chars];
   let path = '';
   const results: string[] = [];
 
   const { emit, frames } = createRecorder<CSSState>(() => ({
-        chars: chars,
-        k: k,
-        path: path,
-        active: null,
-        results: results.slice(),
-        done: false
-      }));
+    chars: chars,
+    k: k,
+    path: path,
+    active: null,
+    results: results.slice(),
+    done: false,
+  }));
 
-  emit('INIT', `"${chars}", k=${k}`, `Build every length-${k} string over the characters {${charset.join(', ')}}, reusing characters freely. Extend the path one character at a time; when it reaches length ${k}, record it, then backtrack to try the next character. There are ${charset.length}^${k} = ${charset.length ** k} strings.`, { active: null });
+  emit(
+    'INIT',
+    `"${chars}", k=${k}`,
+    `Build every length-${k} string over the characters {${charset.join(', ')}}, reusing characters freely. Extend the path one character at a time; when it reaches length ${k}, record it, then backtrack to try the next character. There are ${charset.length}^${k} = ${charset.length ** k} strings.`,
+    { active: null },
+  );
 
   const backtrack = () => {
     if (path.length === k) {
       results.push(path);
-      emit('RECORD', `+${path}`, `Path reached length ${k} — record the string "${path}" (${results.length} so far).`, { active: null }, 'good');
+      emit(
+        'RECORD',
+        `+${path}`,
+        `Path reached length ${k} — record the string "${path}" (${results.length} so far).`,
+        { active: null },
+        'good',
+      );
       return;
     }
     for (const ch of charset) {
       path += ch;
-      emit('CHOOSE', `append ${ch}`, `Append '${ch}' at position ${path.length} → "${path}". Recurse to fill the rest.`, { active: ch });
+      emit(
+        'CHOOSE',
+        `append ${ch}`,
+        `Append '${ch}' at position ${path.length} → "${path}". Recurse to fill the rest.`,
+        { active: ch },
+      );
       backtrack();
       path = path.slice(0, -1);
-      emit('BACKTRACK', `drop ${ch}`, `Backtrack: remove the trailing '${ch}' → "${path}" and try the next character.`, { active: ch });
+      emit(
+        'BACKTRACK',
+        `drop ${ch}`,
+        `Backtrack: remove the trailing '${ch}' → "${path}" and try the next character.`,
+        { active: ch },
+      );
     }
   };
 
   backtrack();
-  emit('DONE', `${results.length} strings`, `All branches explored — ${results.length} length-${k} strings over {${charset.join(', ')}}.`, { active: null , done: true }, 'good');
+  emit(
+    'DONE',
+    `${results.length} strings`,
+    `All branches explored — ${results.length} length-${k} strings over {${charset.join(', ')}}.`,
+    { active: null, done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -69,7 +113,8 @@ function View({ frame }: PluginViewProps<CSSState>) {
   return (
     <VizStage rail={rail}>
       <div className={cn(vizText.sm, 'text-ink3')}>
-        charset = <span className="font-mono text-ink">{[...s.chars].join(' ')}</span> · length k = {s.k}
+        charset = <span className="font-mono text-ink">{[...s.chars].join(' ')}</span> · length k ={' '}
+        {s.k}
       </div>
       <div className={cn('mt-3', vizText.sm, 'text-ink3')}>partial string</div>
       <div className="mt-1 flex gap-1">

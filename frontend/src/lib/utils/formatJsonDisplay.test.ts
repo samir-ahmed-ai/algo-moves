@@ -21,9 +21,14 @@ describe('formatJsonDisplay', () => {
   });
 
   it('puts each composite array element on its own line without splitting inner values', () => {
-    expect(formatJsonDisplay({ edges: [[0, 1, 2], [0, 3, 6]] })).toBe(
-      '{\n  "edges": [\n    [0, 1, 2],\n    [0, 3, 6]\n  ]\n}',
-    );
+    expect(
+      formatJsonDisplay({
+        edges: [
+          [0, 1, 2],
+          [0, 3, 6],
+        ],
+      }),
+    ).toBe('{\n  "edges": [\n    [0, 1, 2],\n    [0, 3, 6]\n  ]\n}');
   });
 
   it('pretty-prints compact JSON strings', () => {

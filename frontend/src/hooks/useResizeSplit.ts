@@ -74,7 +74,8 @@ export function useResizeSplit({
 
   const handleProps = {
     role: 'separator' as const,
-    'aria-orientation': (direction === 'horizontal' ? 'vertical' : 'horizontal') as 'vertical' | 'horizontal',
+    'aria-orientation': (direction === 'horizontal' ? 'vertical' : 'horizontal') as
+      'vertical' | 'horizontal',
     'aria-valuenow': Math.round(splitPct),
     'aria-valuemin': minPct,
     'aria-valuemax': maxPct,

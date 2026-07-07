@@ -18,7 +18,9 @@ const diffIdx = args.indexOf('--difficulty');
 const difficulty = diffIdx >= 0 ? args[diffIdx + 1] : 'Easy';
 
 if (!id || !/^[a-z][a-z0-9-]*$/.test(id)) {
-  console.error('Usage: npm run new-problem -- <kebab-id> "Title" [--difficulty Easy|Medium|Hard] [--dry-run]');
+  console.error(
+    'Usage: npm run new-problem -- <kebab-id> "Title" [--difficulty Easy|Medium|Hard] [--dry-run]',
+  );
   console.error('  <kebab-id> must be lower-kebab-case, e.g. "two-sum".');
   process.exit(1);
 }

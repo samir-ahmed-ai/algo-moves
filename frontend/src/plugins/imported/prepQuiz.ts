@@ -12,7 +12,7 @@ function hashSeed(s: string): number {
 /** Deterministic pseudo-shuffle — stable across reloads for a given seed. */
 function seededOrder<T>(items: T[], seed: number): T[] {
   return items
-    .map((item, i) => ({ item, k: (Math.imul(seed + i, 2654435761) >>> 0) }))
+    .map((item, i) => ({ item, k: Math.imul(seed + i, 2654435761) >>> 0 }))
     .sort((a, b) => a.k - b.k)
     .map(({ item }) => item);
 }
@@ -50,7 +50,10 @@ function buildChoices(
  * (approach pattern + Big-O time) when a simulator ships no hand-authored
  * practice quiz. No question references a specific language or the solution code.
  */
-export function defaultPrepQuiz(p: PrepProblem, siblings: PrepProblem[] = PREP_DATA): QuizQuestion[] {
+export function defaultPrepQuiz(
+  p: PrepProblem,
+  siblings: PrepProblem[] = PREP_DATA,
+): QuizQuestion[] {
   const seed = hashSeed(p.id);
   const topicPeers = siblings.filter((s) => s.topic === p.topic && s.id !== p.id);
   const coursePeers = siblings.filter((s) => s.course === p.course && s.id !== p.id);

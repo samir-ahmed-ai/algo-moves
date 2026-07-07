@@ -42,7 +42,8 @@ export function TransportBar({
     const slug = item.title.replace(/[^\w.-]+/g, '-').toLowerCase() || 'frame';
     await exportRunSnapshot(target, 'gif', {
       filename: `${slug}-step-${player.index + 1}`,
-      backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || undefined,
+      backgroundColor:
+        getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || undefined,
     });
   }, [item.title, player.index]);
 
@@ -65,12 +66,21 @@ export function TransportBar({
           CHROME_BTN,
         )}
       >
-        {player.isPlaying ? <Pause className={icon} aria-hidden /> : <Play className={icon} aria-hidden />}
+        {player.isPlaying ? (
+          <Pause className={icon} aria-hidden />
+        ) : (
+          <Play className={icon} aria-hidden />
+        )}
       </button>
       <HudBtn nodrag variant="solid" onClick={player.next} title="Step forward">
         <SkipForward className={icon} aria-hidden />
       </HudBtn>
-      <HudBtn nodrag variant="solid" onClick={() => player.goTo(player.total - 1)} title="Jump to end">
+      <HudBtn
+        nodrag
+        variant="solid"
+        onClick={() => player.goTo(player.total - 1)}
+        title="Jump to end"
+      >
         <RotateCcw className={cn(icon, 'rotate-180')} aria-hidden />
       </HudBtn>
     </>
@@ -78,7 +88,10 @@ export function TransportBar({
 
   const speedControl = (
     <label
-      className={cn('nodrag flex px-0.5', vertical ? 'flex-col items-center gap-1' : 'items-center gap-0.5')}
+      className={cn(
+        'nodrag flex px-0.5',
+        vertical ? 'flex-col items-center gap-1' : 'items-center gap-0.5',
+      )}
       title="Playback speed"
     >
       <span className="sr-only">Playback speed</span>

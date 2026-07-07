@@ -131,7 +131,18 @@ export function useReassembleLogic({
       }, WRONG_MS);
       return false;
     },
-    [expected, done, completing, placed, tray, mistakes, pieces.length, emitProgress, resetOnWrong, reset],
+    [
+      expected,
+      done,
+      completing,
+      placed,
+      tray,
+      mistakes,
+      pieces.length,
+      emitProgress,
+      resetOnWrong,
+      reset,
+    ],
   );
 
   useEffect(() => {

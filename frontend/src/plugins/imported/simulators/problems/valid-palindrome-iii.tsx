@@ -1,8 +1,24 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, VarGrid, VizEmpty, vizText, DpCell, DpHeader, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  vizText,
+  DpCell,
+  DpHeader,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+} from '../../../_shared/vizKit';
 
 interface VP3Input {
   s: string;
@@ -21,19 +37,29 @@ function record({ s, k }: VP3Input): Frame<VP3State>[] {
   const n = s.length;
   const dp: number[][] = Array.from({ length: n }, () => new Array<number>(n).fill(-1));
   const { emit, frames } = createRecorder<VP3State>(() => ({
-        s: s,
-        k: k,
-        dp: dp.map((r) => r.slice()),
-        cur: null,
-        done: false
-      }));
+    s: s,
+    k: k,
+    dp: dp.map((r) => r.slice()),
+    cur: null,
+    done: false,
+  }));
 
-  emit('INIT', `s="${s}", k=${k}`, `Valid Palindrome III: "${s}" is k-palindrome if removing at most k = ${k} characters makes it a palindrome. The fewest removals needed is n − LPS(s), so we compute the LPS table where dp[i][j] is the longest palindromic subsequence in s[i..j], then check (n − dp[0][n−1]) ≤ k.`, { cur: null });
+  emit(
+    'INIT',
+    `s="${s}", k=${k}`,
+    `Valid Palindrome III: "${s}" is k-palindrome if removing at most k = ${k} characters makes it a palindrome. The fewest removals needed is n − LPS(s), so we compute the LPS table where dp[i][j] is the longest palindromic subsequence in s[i..j], then check (n − dp[0][n−1]) ≤ k.`,
+    { cur: null },
+  );
 
   // Base diagonal: single characters are palindromes of length 1.
   for (let i = 0; i < n; i++) {
     dp[i][i] = 1;
-    emit('BASE', `dp[${i}][${i}]=1`, `Base case: the single character "${s[i]}" is a palindrome of length 1, so dp[${i}][${i}] = 1.`, { cur: [i, i] });
+    emit(
+      'BASE',
+      `dp[${i}][${i}]=1`,
+      `Base case: the single character "${s[i]}" is a palindrome of length 1, so dp[${i}][${i}] = 1.`,
+      { cur: [i, i] },
+    );
   }
 
   // Fill by increasing substring length (len = 2..n).
@@ -43,12 +69,22 @@ function record({ s, k }: VP3Input): Frame<VP3State>[] {
       if (s[i] === s[j]) {
         const inner = len === 2 ? 0 : dp[i + 1][j - 1];
         dp[i][j] = inner + 2;
-        emit('MATCH', `dp[${i}][${j}]=${dp[i][j]}`, `s[${i}]="${s[i]}" matches s[${j}]="${s[j]}": wrap them around the inner result dp[${i + 1}][${j - 1}] = ${inner}, so dp[${i}][${j}] = ${inner} + 2 = ${dp[i][j]}.`, { cur: [i, j] });
+        emit(
+          'MATCH',
+          `dp[${i}][${j}]=${dp[i][j]}`,
+          `s[${i}]="${s[i]}" matches s[${j}]="${s[j]}": wrap them around the inner result dp[${i + 1}][${j - 1}] = ${inner}, so dp[${i}][${j}] = ${inner} + 2 = ${dp[i][j]}.`,
+          { cur: [i, j] },
+        );
       } else {
         const drop = dp[i + 1][j];
         const keep = dp[i][j - 1];
         dp[i][j] = Math.max(drop, keep);
-        emit('SKIP', `dp[${i}][${j}]=${dp[i][j]}`, `s[${i}]="${s[i]}" ≠ s[${j}]="${s[j]}": take the better of dropping the left end dp[${i + 1}][${j}] = ${drop} or the right end dp[${i}][${j - 1}] = ${keep}, so dp[${i}][${j}] = ${dp[i][j]}.`, { cur: [i, j] });
+        emit(
+          'SKIP',
+          `dp[${i}][${j}]=${dp[i][j]}`,
+          `s[${i}]="${s[i]}" ≠ s[${j}]="${s[j]}": take the better of dropping the left end dp[${i + 1}][${j}] = ${drop} or the right end dp[${i}][${j - 1}] = ${keep}, so dp[${i}][${j}] = ${dp[i][j]}.`,
+          { cur: [i, j] },
+        );
       }
     }
   }
@@ -56,7 +92,12 @@ function record({ s, k }: VP3Input): Frame<VP3State>[] {
   const lps = n > 0 ? dp[0][n - 1] : 0;
   const removals = n - lps;
   const ok = removals <= k;
-  emit('DONE', ok ? `true (${removals} ≤ ${k})` : `false (${removals} > ${k})`, `LPS("${s}") = dp[0][${n - 1}] = ${lps}, so the fewest removals to make a palindrome is n − LPS = ${n} − ${lps} = ${removals}. Since ${removals} ${ok ? '≤' : '>'} k = ${k}, "${s}" is ${ok ? '' : 'not '}a ${k}-palindrome → ${ok ? 'true' : 'false'}.`, { cur: n > 0 ? [0, n - 1] : null , done: true });
+  emit(
+    'DONE',
+    ok ? `true (${removals} ≤ ${k})` : `false (${removals} > ${k})`,
+    `LPS("${s}") = dp[0][${n - 1}] = ${lps}, so the fewest removals to make a palindrome is n − LPS = ${n} − ${lps} = ${removals}. Since ${removals} ${ok ? '≤' : '>'} k = ${k}, "${s}" is ${ok ? '' : 'not '}a ${k}-palindrome → ${ok ? 'true' : 'false'}.`,
+    { cur: n > 0 ? [0, n - 1] : null, done: true },
+  );
   return frames;
 }
 
@@ -112,10 +153,18 @@ function View({ frame }: PluginViewProps<VP3State>) {
               </DpHeader>
             ))}
           </div>
-          <GridBoard grid={display} cellTone={cellTone} label={(r, c) => (c < r ? '' : display[r][c])} active={st.cur} cellSize={40} />
+          <GridBoard
+            grid={display}
+            cellTone={cellTone}
+            label={(r, c) => (c < r ? '' : display[r][c])}
+            active={st.cur}
+            cellSize={40}
+          />
         </div>
       </div>
-      <div className={vizText.xs + ' text-ink3'}>dp[i][j] = LPS of s[i..j]; answer uses dp[0][{n - 1}].</div>
+      <div className={vizText.xs + ' text-ink3'}>
+        dp[i][j] = LPS of s[i..j]; answer uses dp[0][{n - 1}].
+      </div>
     </VizStage>
   );
 }
@@ -139,7 +188,10 @@ function Inspector({ frame }: InspectorProps<VP3State>) {
       <InspectorRow k="substring" v={st.cur ? `"${sub}"` : '—'} />
       <InspectorRow k="LPS" v={lps === null ? '…filling' : lps} />
       <InspectorRow k="n − LPS" v={removals === null ? '—' : removals} />
-      <InspectorRow k="answer" v={removals === null ? '…filling' : removals <= st.k ? 'true' : 'false'} />
+      <InspectorRow
+        k="answer"
+        v={removals === null ? '…filling' : removals <= st.k ? 'true' : 'false'}
+      />
     </VarGrid>
   );
 }

@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { conceptOverviewProblemPct, isConceptCourse } from './conceptCourse';
-import { OVERVIEW_PROBLEM_CONCEPT_DEFAULT, OVERVIEW_PROBLEM_DEFAULT } from '@/lib/editor/resizeSplit';
+import {
+  OVERVIEW_PROBLEM_CONCEPT_DEFAULT,
+  OVERVIEW_PROBLEM_DEFAULT,
+} from '@/lib/editor/resizeSplit';
 
 describe('isConceptCourse', () => {
   it('recognises Go and OpenRTB concept courses', () => {
@@ -16,7 +19,9 @@ describe('isConceptCourse', () => {
 
 describe('conceptOverviewProblemPct', () => {
   it('widens the layout when still on the algorithm default', () => {
-    expect(conceptOverviewProblemPct(OVERVIEW_PROBLEM_DEFAULT)).toBe(OVERVIEW_PROBLEM_CONCEPT_DEFAULT);
+    expect(conceptOverviewProblemPct(OVERVIEW_PROBLEM_DEFAULT)).toBe(
+      OVERVIEW_PROBLEM_CONCEPT_DEFAULT,
+    );
   });
 
   it('preserves a user-customised split', () => {

@@ -6,7 +6,12 @@ import { getEffect, type EffectDataMap } from '../../../effects/registry';
 import { effectTraceSnippet } from '../../../effects/registry';
 import type { PanelRunState } from '../../../core/panelRegistry';
 import { Btn, nodeIconGlyph, nodeText } from '../ui/nodeui';
-import { NodeHeader, NodeHeaderAction, NodeHeaderActions, NodeHeaderTitle } from '@/shell/panels/NodeHeader';
+import {
+  NodeHeader,
+  NodeHeaderAction,
+  NodeHeaderActions,
+  NodeHeaderTitle,
+} from '@/shell/panels/NodeHeader';
 import { handleDotClass, portHandleStyle } from '../edges/canvasHandles';
 import { useConnectedComponentsOptional } from '@/lib/canvas';
 import { EffectControls } from '../../../effects/components/EffectControls';
@@ -90,12 +95,24 @@ export function EffectNode({ id, data, selected }: NodeProps<EffectFlowNode>) {
         'hover:ring-1 hover:ring-[color-mix(in_srgb,var(--ring)_25%,transparent)]',
       )}
     >
-      <Handle type="target" position={Position.Left} className={handleDotClass} style={portHandleStyle(Position.Left)} />
+      <Handle
+        type="target"
+        position={Position.Left}
+        className={handleDotClass}
+        style={portHandleStyle(Position.Left)}
+      />
       <NodeHeader>
         <NodeHeaderTitle>{data.title ?? effect?.meta.title ?? effectId}</NodeHeaderTitle>
         <NodeHeaderActions>
-          <NodeHeaderAction onClick={toggleRun} title={runState === 'running' ? 'Pause chain' : 'Run chain'}>
-            {runState === 'running' ? <Pause className={nodeIconGlyph} /> : <Play className={nodeIconGlyph} />}
+          <NodeHeaderAction
+            onClick={toggleRun}
+            title={runState === 'running' ? 'Pause chain' : 'Run chain'}
+          >
+            {runState === 'running' ? (
+              <Pause className={nodeIconGlyph} />
+            ) : (
+              <Play className={nodeIconGlyph} />
+            )}
           </NodeHeaderAction>
           <NodeHeaderAction onClick={() => deleteElements({ nodes: [{ id }] })} title="Delete">
             <Trash2 className={nodeIconGlyph} />
@@ -104,12 +121,21 @@ export function EffectNode({ id, data, selected }: NodeProps<EffectFlowNode>) {
       </NodeHeader>
       <div className="nodrag flex flex-col gap-[var(--node-gap,0.5rem)] p-[var(--node-px,0.75rem)]">
         <span className={cn('font-mono text-ink3', nodeText.xs)}>{snippet}</span>
-        <EffectControls effectId={effectId} data={data.effectData ?? {}} onChange={onEffectDataChange} />
+        <EffectControls
+          effectId={effectId}
+          data={data.effectData ?? {}}
+          onChange={onEffectDataChange}
+        />
         <Btn variant="quiet" size="sm" onClick={() => updateData({ runState: 'stopped' })}>
           Stop chain
         </Btn>
       </div>
-      <Handle type="source" position={Position.Right} className={handleDotClass} style={portHandleStyle(Position.Right)} />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className={handleDotClass}
+        style={portHandleStyle(Position.Right)}
+      />
     </div>
   );
 }

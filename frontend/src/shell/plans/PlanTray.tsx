@@ -146,7 +146,11 @@ function ItemRow({
       </button>
 
       <span
-        className={cn('flex-1 truncate text-ink', chromeText.sm, completed && 'line-through text-ink3')}
+        className={cn(
+          'flex-1 truncate text-ink',
+          chromeText.sm,
+          completed && 'line-through text-ink3',
+        )}
         title={label}
       >
         <span className="mr-1.5 text-ink3">{index + 1}.</span>
@@ -167,7 +171,13 @@ function ItemRow({
 
 // ─── Shared tray body (header, stats, list, footer) ──────────────────────────────
 
-function TrayBody({ onCollapse, collapseIcon }: { onCollapse: () => void; collapseIcon: ReactIcon }) {
+function TrayBody({
+  onCollapse,
+  collapseIcon,
+}: {
+  onCollapse: () => void;
+  collapseIcon: ReactIcon;
+}) {
   const {
     activePlan,
     itemIds,
@@ -216,13 +226,25 @@ function TrayBody({ onCollapse, collapseIcon }: { onCollapse: () => void; collap
       </div>
 
       {/* Stats row */}
-      <div className={cn('flex items-center gap-2 border-b border-edge px-3 py-2 text-ink3', chromeText.xs)}>
+      <div
+        className={cn(
+          'flex items-center gap-2 border-b border-edge px-3 py-2 text-ink3',
+          chromeText.xs,
+        )}
+      >
         <span>
-          {itemIds.length === 0 ? 'No problems added' : `${completedCount} / ${itemIds.length} done`}
+          {itemIds.length === 0
+            ? 'No problems added'
+            : `${completedCount} / ${itemIds.length} done`}
         </span>
         {saving && <Loader2 className="h-3 w-3 animate-spin" />}
         {!saving && itemIds.length > 0 && (
-          <button type="button" onClick={save} className="ml-auto text-accent hover:underline" title="Save now">
+          <button
+            type="button"
+            onClick={save}
+            className="ml-auto text-accent hover:underline"
+            title="Save now"
+          >
             <CloudUpload className="h-3.5 w-3.5" />
           </button>
         )}

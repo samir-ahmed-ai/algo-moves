@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { NaryTreeBoard, type NaryNode } from '../../../../components/board/NaryTreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -23,18 +29,19 @@ interface LevelState {
   done: boolean;
 }
 
-function record({ nodes }: NaryInput): Frame<LevelState>[] {  const tree = nodes ?? [];
+function record({ nodes }: NaryInput): Frame<LevelState>[] {
+  const tree = nodes ?? [];
 
   const { emit, frames } = createRecorder<LevelState>(() => ({
-        nodes: tree,
-        level: [],
-        next: [],
-        cur: null,
-        visited: [],
-        res: [],
-        depth: 0,
-        done: false
-      }));
+    nodes: tree,
+    level: [],
+    next: [],
+    cur: null,
+    visited: [],
+    res: [],
+    depth: 0,
+    done: false,
+  }));
 
   if (nodes === null || tree.length === 0) {
     emit(
@@ -100,10 +107,16 @@ function record({ nodes }: NaryInput): Frame<LevelState>[] {  const tree = nodes
       `[${row.join(',')}]`,
       `Level ${depth} is complete: [${row.join(
         ', ',
-      )}]. The next frontier holds ${next.length} node${next.length === 1 ? '' : 's'} (${next
-        .map((c) => tree[c].val)
-        .join(', ') || 'none'}). Advance to it.`,
-      { level: next.slice(), next: [], visited: visited.slice(), res: res.map((r) => r.slice()), depth },
+      )}]. The next frontier holds ${next.length} node${next.length === 1 ? '' : 's'} (${
+        next.map((c) => tree[c].val).join(', ') || 'none'
+      }). Advance to it.`,
+      {
+        level: next.slice(),
+        next: [],
+        visited: visited.slice(),
+        res: res.map((r) => r.slice()),
+        depth,
+      },
     );
 
     level = next;
@@ -116,7 +129,14 @@ function record({ nodes }: NaryInput): Frame<LevelState>[] {  const tree = nodes
     `The frontier is empty, so every node has been placed. The level order is ${JSON.stringify(
       res,
     )} — ${res.length} level${res.length === 1 ? '' : 's'}. Time O(n), Space O(n).`,
-    { level: [], next: [], visited: visited.slice(), res: res.map((r) => r.slice()), depth, done: true },
+    {
+      level: [],
+      next: [],
+      visited: visited.slice(),
+      res: res.map((r) => r.slice()),
+      depth,
+      done: true,
+    },
     'good',
   );
 
@@ -157,7 +177,12 @@ function View({ frame }: PluginViewProps<LevelState>) {
       {s.nodes.length === 0 ? (
         <div className={cn('py-3 font-mono', vizText.base, 'text-ink3')}>empty tree</div>
       ) : (
-        <NaryTreeBoard nodes={naryNodes} nodeClass={nodeClass} activeNode={s.cur} highlightNode={s.cur} />
+        <NaryTreeBoard
+          nodes={naryNodes}
+          nodeClass={nodeClass}
+          activeNode={s.cur}
+          highlightNode={s.cur}
+        />
       )}
       <div className={cn('mt-1 font-mono', vizText.sm, s.done ? 'text-good' : 'text-ink3')}>
         {s.res.length === 0 ? '[]' : `[${s.res.map((r) => `[${r.join(',')}]`).join(', ')}]`}
@@ -214,132 +239,130 @@ const SAMPLE_B: NaryInput = {
   ],
 };
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Level order\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Level order"?',
     choices: [
       {
-        label: "N-ary BFS level order — fits this problem",
-        correct: true
+        label: 'N-ary BFS level order — fits this problem',
+        correct: true,
       },
       {
-        label: "Tree build + iterative pre-order — different approach"
+        label: 'Tree build + iterative pre-order — different approach',
       },
       {
-        label: "DFS with max tracking — different approach"
+        label: 'DFS with max tracking — different approach',
       },
       {
-        label: "BFS + Sort per column — different approach"
-      }
+        label: 'BFS + Sort per column — different approach',
+      },
     ],
-    explain: "Process the whole frontier, gathering all children into the next level"
+    explain: 'Process the whole frontier, gathering all children into the next level',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Level order), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Level order), what strategy is established?',
     choices: [
       {
-        label: "Process the whole frontier, gathering — described in INIT caption",
-        correct: true
+        label: 'Process the whole frontier, gathering — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Level order BFS: process the whole current frontier one level at a time. Start the frontier with just the root ()."
+    explain:
+      'Level order BFS: process the whole current frontier one level at a time. Start the frontier with just the root ().',
   },
   {
-    id: "key-step",
-    prompt: "On the \"READ\" step (+), what happens?",
+    id: 'key-step',
+    prompt: 'On the "READ" step (+), what happens?',
     choices: [
       {
-        label: "Read node : append its value — this move caption",
-        correct: true
+        label: 'Read node : append its value — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Read node : append its value to the level- row and push its  child () onto the next frontier."
+    explain:
+      'Read node : append its value to the level- row and push its  child () onto the next frontier.',
   },
   {
-    id: "state",
-    prompt: "What does the `nodes` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `nodes` field track in the visualization state?',
     choices: [
       {
-        label: "the whole tree, flat — updated each frame",
-        correct: true
+        label: 'the whole tree, flat — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `nodes` in sync: the whole tree, flat"
+    explain: 'The recorder keeps `nodes` in sync: the whole tree, flat',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Level order\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Level order"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(h) time, O(1) space — wrong order of growth"
+        label: 'O(h) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
+        label: 'O(log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(1) amortized time, O(h) space — wrong order of growth"
-      }
+        label: 'O(1) amortized time, O(h) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). row = frontier vals; next frontier = all children"
+    explain: 'O(n). O(n). row = frontier vals; next frontier = all children',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "The frontier is empty, so every — final DONE caption",
-        correct: true
+        label: 'The frontier is empty, so every — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "The frontier is empty, so every node has been placed. The level order is  —  level. Time O(n), Space O(n)."
-  }
+    explain:
+      'The frontier is empty, so every node has been placed. The level order is  —  level. Time O(n), Space O(n).',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

@@ -4,11 +4,7 @@ import { cn } from '@/lib/utils/cn';
 import { useWorkspace } from '@/store/workspace';
 import { ACCENTS } from '../layout/layout';
 import type { PanelFlowNode, PanelNodeData } from '@/core/panelFlowTypes';
-import {
-  patchPanelStyle,
-  type PanelCornerStyle,
-  type PanelNodeStyle,
-} from '../nodes/panelStyle';
+import { patchPanelStyle, type PanelCornerStyle, type PanelNodeStyle } from '../nodes/panelStyle';
 import { Btn, RADIUS_CTRL } from './nodeui';
 import { chromeText } from '../../chromeUi';
 import { InsField, InsGrid, InsSection, InsSelect } from './inspectorUi';
@@ -99,8 +95,13 @@ export function NodePropertiesBody() {
   return (
     <div className="flex flex-col gap-3 px-[var(--hpad)] pb-1">
       <div className="flex items-center gap-1.5">
-        <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: style.stroke ?? data.accent ?? 'var(--accent)' }} />
-        <span className={cn('min-w-0 flex-1 truncate font-medium text-ink', chromeText.sm)}>{data.title || kind}</span>
+        <span
+          className="h-2 w-2 shrink-0 rounded-full"
+          style={{ background: style.stroke ?? data.accent ?? 'var(--accent)' }}
+        />
+        <span className={cn('min-w-0 flex-1 truncate font-medium text-ink', chromeText.sm)}>
+          {data.title || kind}
+        </span>
         {data.locked && <span className={cn('shrink-0 text-ink3', chromeText.xs)}>locked</span>}
       </div>
 
@@ -197,7 +198,9 @@ export function NodePropertiesBody() {
                 className={cn(
                   `border px-1.5 py-0.5 font-medium transition-colors ${RADIUS_CTRL}`,
                   chromeText.xs,
-                  active ? 'border-accent bg-accentbg text-accent' : 'border-edge text-ink2 hover:text-ink',
+                  active
+                    ? 'border-accent bg-accentbg text-accent'
+                    : 'border-edge text-ink2 hover:text-ink',
                 )}
               >
                 {f.label}

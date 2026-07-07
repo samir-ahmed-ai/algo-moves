@@ -59,7 +59,11 @@ function ProblemCard({
         isBuilding && inPlan && 'border-accent/60 ring-1 ring-accent/20',
       )}
     >
-      <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[3px]" style={{ background: railColor }} />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[3px]"
+        style={{ background: railColor }}
+      />
       {isMastered && (
         <>
           <span
@@ -91,12 +95,22 @@ function ProblemCard({
         </button>
       )}
 
-      <span aria-hidden className="pointer-events-none absolute left-1.5 top-2 h-2 w-2 border-l border-t border-edge2 opacity-60" />
-      <span aria-hidden className="pointer-events-none absolute bottom-1.5 right-1.5 h-2 w-2 border-b border-r border-edge2 opacity-60" />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute left-1.5 top-2 h-2 w-2 border-l border-t border-edge2 opacity-60"
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute bottom-1.5 right-1.5 h-2 w-2 border-b border-r border-edge2 opacity-60"
+      />
 
       <div className="relative flex flex-1 flex-col items-center justify-center px-3 pb-3 pt-4">
         <div className="relative grid flex-1 place-items-center">
-          <span aria-hidden className="pointer-events-none absolute inset-1 opacity-[0.1]" style={{ ...gridStyle, backgroundSize: '10px 10px' }} />
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-1 opacity-[0.1]"
+            style={{ ...gridStyle, backgroundSize: '10px 10px' }}
+          />
           <svg
             viewBox="0 0 48 48"
             className="relative h-[60px] w-[60px] text-ink2 transition-all duration-200 group-hover:scale-110 group-hover:text-accent group-hover:drop-shadow-[0_0_8px_var(--accent-bg)]"
@@ -110,20 +124,36 @@ function ProblemCard({
           />
         </div>
 
-        <div className={cn('mt-2 line-clamp-1 font-medium leading-snug text-ink2 group-hover:text-ink', chromeText.base)}>
+        <div
+          className={cn(
+            'mt-2 line-clamp-1 font-medium leading-snug text-ink2 group-hover:text-ink',
+            chromeText.base,
+          )}
+        >
           {item.title}
         </div>
         {item.summary && (
-          <p className={cn('mt-1 line-clamp-2 leading-snug text-ink3', chromeText.sm)}>{item.summary}</p>
+          <p className={cn('mt-1 line-clamp-2 leading-snug text-ink3', chromeText.sm)}>
+            {item.summary}
+          </p>
         )}
         {item.difficulty && (
-          <Chip tone={difficultyTone(item.difficulty)} mono className={cn('mt-1 !px-1 !py-px', chromeText['2xs'])}>
+          <Chip
+            tone={difficultyTone(item.difficulty)}
+            mono
+            className={cn('mt-1 !px-1 !py-px', chromeText['2xs'])}
+          >
             {item.difficulty}
           </Chip>
         )}
         {st.attempts > 0 && (
           <div className="mt-1.5 w-full px-1">
-            <Meter value={st.correct} max={st.attempts} tone={isMastered ? 'good' : 'default'} height={4} />
+            <Meter
+              value={st.correct}
+              max={st.attempts}
+              tone={isMastered ? 'good' : 'default'}
+              height={4}
+            />
             <div className="mt-0.5">
               <Pill>
                 {pct}% · {st.attempts} tries
@@ -178,7 +208,11 @@ export function ProblemGrid({
                 onClick={() => toggleDiff(d)}
                 className={cn('transition-opacity', !active && diffFilter.size > 0 && 'opacity-40')}
               >
-                <Chip tone={difficultyTone(d)} mono className={cn('!px-1.5 !py-px cursor-pointer', chromeText.xs)}>
+                <Chip
+                  tone={difficultyTone(d)}
+                  mono
+                  className={cn('!px-1.5 !py-px cursor-pointer', chromeText.xs)}
+                >
                   {d} · {count}
                 </Chip>
               </button>

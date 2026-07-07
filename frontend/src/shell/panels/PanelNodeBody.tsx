@@ -1,4 +1,9 @@
-import { CodeStudioProvider, CodeStudioBody, CodeStudioFooter, CodeStudioToolbar } from '@/shell/study/CodeStudio';
+import {
+  CodeStudioProvider,
+  CodeStudioBody,
+  CodeStudioFooter,
+  CodeStudioToolbar,
+} from '@/shell/study/CodeStudio';
 import { CollabCodeStudioBody, CollabCodeStudioToolbar } from '@/shell/study/CollabCodeStudio';
 import { SubDocSyncProvider } from '@/shell/canvas';
 import { PanelBody as PanelBodyShell } from '@/shell/canvas/ui/nodeui';
@@ -120,7 +125,11 @@ export function PanelNodeBody({
           style={!isViz && bodyCap ? { maxWidth: bodyCap } : undefined}
         >
           {isViz ? (
-            <VizPanelBody nodeId={headerProps.id} showBigO={showBigO} onBigOOpenChange={onBigOOpenChange} />
+            <VizPanelBody
+              nodeId={headerProps.id}
+              showBigO={showBigO}
+              onBigOOpenChange={onBigOOpenChange}
+            />
           ) : (
             <PanelBody kind={data.kind} />
           )}

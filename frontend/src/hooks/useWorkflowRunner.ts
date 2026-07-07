@@ -18,7 +18,12 @@ export interface WorkflowRunnerInput {
  * Debounced workflow runner — re-transforms frames when graph or input changes.
  * Strudel's useWorkflowRunner analogue for Algo Moves.
  */
-export function useWorkflowRunner({ baseFrames, nodes, edges, immediate }: WorkflowRunnerInput): Frame[] {
+export function useWorkflowRunner({
+  baseFrames,
+  nodes,
+  edges,
+  immediate,
+}: WorkflowRunnerInput): Frame[] {
   const replay = useReplayStoreOptional();
   const debounceRef = useRef<number | null>(null);
 

@@ -118,10 +118,12 @@ export function recallEditorMenuItems(
       onClick: () => setEditorPrefs({ splitPct: 50 }),
     },
     {
-      label: editorPrefs.recallCompact !== false ? 'Spacious editor chrome' : 'Compact editor chrome',
+      label:
+        editorPrefs.recallCompact !== false ? 'Spacious editor chrome' : 'Compact editor chrome',
       icon: <Minimize2 className="h-3.5 w-3.5" />,
       active: editorPrefs.recallCompact !== false,
-      onClick: () => setEditorPrefs({ recallCompact: editorPrefs.recallCompact !== false ? false : true }),
+      onClick: () =>
+        setEditorPrefs({ recallCompact: editorPrefs.recallCompact !== false ? false : true }),
     },
   ];
 }

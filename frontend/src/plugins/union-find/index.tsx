@@ -1,4 +1,10 @@
-import { definePlugin, type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../core/types';
+import {
+  definePlugin,
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../core/types';
 import { GraphBoard } from '../../components/board/GraphBoard';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, badCases } from './cases';
@@ -160,16 +166,22 @@ function View({ frame }: PluginViewProps<UFState>) {
     tone: 'good' as const,
   }));
   return (
-    <VizStage rail={
-      <>
-        <RailGroup label="scan">
-          <RailStat k="considered" v={`${considered}/${s.sortedEdges.length}`} />
-          <RailStat k="sets" v={sets} />
-        </RailGroup>
-        <RailStack label="MST edges" items={mstEdgeItems} />
-        <RailResult label="weight" value={s.mstWeight} tone={s.status === 'done' ? 'good' : 'accent'} />
-      </>
-    }>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="scan">
+            <RailStat k="considered" v={`${considered}/${s.sortedEdges.length}`} />
+            <RailStat k="sets" v={sets} />
+          </RailGroup>
+          <RailStack label="MST edges" items={mstEdgeItems} />
+          <RailResult
+            label="weight"
+            value={s.mstWeight}
+            tone={s.status === 'done' ? 'good' : 'accent'}
+          />
+        </>
+      }
+    >
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -318,7 +330,7 @@ const verdict = (frames: Frame<UFState>[]) => {
 };
 
 const casesIntro =
-  "Kruskal sorts edges by weight and walks them cheapest-first. An edge is accepted only when find() shows its endpoints sit in different sets; if they already share a root, adding it would close a cycle, so it is skipped. After n-1 accepts every node shares one root.";
+  'Kruskal sorts edges by weight and walks them cheapest-first. An edge is accepted only when find() shows its endpoints sit in different sets; if they already share a root, adding it would close a cycle, so it is skipped. After n-1 accepts every node shares one root.';
 
 const teaching = wireTeachingStack({
   record,

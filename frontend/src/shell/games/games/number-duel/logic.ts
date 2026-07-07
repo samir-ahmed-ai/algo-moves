@@ -74,9 +74,7 @@ export interface Range {
  * floor); 'lower' means aim below (drop the ceiling). Powers the shrinking
  * range bar so the guesser sees the noose tighten with every clue.
  */
-export function narrowedRange(
-  feedback: { value: number; result: GuessResult }[],
-): Range {
+export function narrowedRange(feedback: { value: number; result: GuessResult }[]): Range {
   let min = MIN_NUMBER;
   let max = MAX_NUMBER;
   for (const { value, result } of feedback) {

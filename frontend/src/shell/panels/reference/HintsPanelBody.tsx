@@ -2,16 +2,30 @@ import { useState } from 'react';
 import { Lightbulb } from 'lucide-react';
 import { patternsForTags } from '../../../content';
 
-import { useCanvasStatic, Banner, Btn, ControlsAccordion, EmptyState, Hint, Meter } from '@/shell/canvas';
+import {
+  useCanvasStatic,
+  Banner,
+  Btn,
+  ControlsAccordion,
+  EmptyState,
+  Hint,
+  Meter,
+} from '@/shell/canvas';
 /** #40 Hint ladder: reveal progressively deeper hints. */
 export function HintsPanelBody() {
   const { item } = useCanvasStatic();
   const cards = patternsForTags(item.tags);
-  const hints = [item.summary, ...cards.flatMap((c) => [c.idea, c.whenToUse, c.complexity])].filter(Boolean) as string[];
+  const hints = [item.summary, ...cards.flatMap((c) => [c.idea, c.whenToUse, c.complexity])].filter(
+    Boolean,
+  ) as string[];
   const [shown, setShown] = useState(1);
   if (hints.length === 0) {
     return (
-      <EmptyState icon={<Lightbulb className="h-5 w-5" />} title="No hints yet" hint="This problem's tags have no hint cards." />
+      <EmptyState
+        icon={<Lightbulb className="h-5 w-5" />}
+        title="No hints yet"
+        hint="This problem's tags have no hint cards."
+      />
     );
   }
   return (
@@ -34,7 +48,12 @@ export function HintsPanelBody() {
         </div>
       </ControlsAccordion>
       {shown < hints.length ? (
-        <Btn variant="primary" size="sm" onClick={() => setShown((s) => s + 1)} className="self-start">
+        <Btn
+          variant="primary"
+          size="sm"
+          onClick={() => setShown((s) => s + 1)}
+          className="self-start"
+        >
           Reveal next ({shown}/{hints.length})
         </Btn>
       ) : (

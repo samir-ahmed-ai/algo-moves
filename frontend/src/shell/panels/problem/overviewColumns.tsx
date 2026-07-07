@@ -62,7 +62,12 @@ export function OverviewProblemColumn({
     <ProblemStatementColumn
       className={className}
       toolbar={
-        <OverviewViewSwitch view={view} onView={onView} hasRecall={hasRecall} className="mt-2 shrink-0" />
+        <OverviewViewSwitch
+          view={view}
+          onView={onView}
+          hasRecall={hasRecall}
+          className="mt-2 shrink-0"
+        />
       }
     >
       {children}

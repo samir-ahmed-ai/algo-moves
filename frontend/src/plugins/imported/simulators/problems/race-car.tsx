@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  RailGroup,
+  RailResult,
+  RailStat,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+} from '../../../_shared/vizKit';
 
 interface RaceInput {
   target: number;
@@ -21,17 +34,27 @@ const INF = 1 << 30;
 function record({ target }: RaceInput): Frame<RaceState>[] {
   const dp = new Array<number>(target + 1).fill(INF);
   const { emit, frames } = createRecorder<RaceState>(() => ({
-        target: target,
-        dp: dp.slice(),
-        t: null,
-        from: null,
-        done: false
-      }));
+    target: target,
+    dp: dp.slice(),
+    t: null,
+    from: null,
+    done: false,
+  }));
 
-  emit('INIT', `target=${target}`, `Race Car: starting at position 0 with speed +1, find the fewest A (accelerate) / R (reverse) instructions to land exactly on ${target}. dp[t] = fewest instructions to reach position t, built up from t = 0.`, { t: null, from: null });
+  emit(
+    'INIT',
+    `target=${target}`,
+    `Race Car: starting at position 0 with speed +1, find the fewest A (accelerate) / R (reverse) instructions to land exactly on ${target}. dp[t] = fewest instructions to reach position t, built up from t = 0.`,
+    { t: null, from: null },
+  );
 
   dp[0] = 0;
-  emit('BASE', 'dp[0]=0', `Base case: you already start at position 0, so dp[0] = 0 instructions.`, { t: 0, from: null });
+  emit(
+    'BASE',
+    'dp[0]=0',
+    `Base case: you already start at position 0, so dp[0] = 0 instructions.`,
+    { t: 0, from: null },
+  );
 
   for (let t = 1; t <= target; t++) {
     let best = INF;
@@ -69,12 +92,23 @@ function record({ target }: RaceInput): Frame<RaceState>[] {
 
     dp[t] = best;
     const reused = dp[bestFrom as number];
-    emit('FILL', `dp[${t}]=${best}`, bestFrom === 0
+    emit(
+      'FILL',
+      `dp[${t}]=${best}`,
+      bestFrom === 0
         ? `Position ${t} = 2^${k} − 1 exactly, so ${k} accelerations (${'A'.repeat(k)}) land on it: dp[${t}] = ${best}.`
-        : `Best plan for position ${t}: a sequence of A/R moves reuses dp[${bestFrom}] (=${reused}); the extra instructions bring the total to dp[${t}] = ${best}.`, { t: t, from: bestFrom });
+        : `Best plan for position ${t}: a sequence of A/R moves reuses dp[${bestFrom}] (=${reused}); the extra instructions bring the total to dp[${t}] = ${best}.`,
+      { t: t, from: bestFrom },
+    );
   }
 
-  emit('DONE', `${dp[target]} instructions`, `The table is full. dp[${target}] = ${dp[target]}, so the fewest A/R instructions to reach ${target} is ${dp[target]}.`, { t: target, from: null , done: true }, 'good');
+  emit(
+    'DONE',
+    `${dp[target]} instructions`,
+    `The table is full. dp[${target}] = ${dp[target]}, so the fewest A/R instructions to reach ${target} is ${dp[target]}.`,
+    { t: target, from: null, done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -110,7 +144,8 @@ function View({ frame }: PluginViewProps<RaceState>) {
 function Inspector({ frame }: InspectorProps<RaceState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cell = (idx: number) => (idx >= 0 && idx < s.dp.length ? (s.dp[idx] >= INF ? '∞' : s.dp[idx]) : '—');
+  const cell = (idx: number) =>
+    idx >= 0 && idx < s.dp.length ? (s.dp[idx] >= INF ? '∞' : s.dp[idx]) : '—';
   const done = s.dp[s.target] < INF;
   return (
     <VarGrid>

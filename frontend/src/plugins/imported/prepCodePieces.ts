@@ -1,5 +1,10 @@
 import type { CodePiece } from '../../core/types';
-import { mergeBraceOnlyPieces, stripPreamblePieces, MIN_REASSEMBLE_PIECES, assembleDraft } from '@/lib/code';
+import {
+  mergeBraceOnlyPieces,
+  stripPreamblePieces,
+  MIN_REASSEMBLE_PIECES,
+  assembleDraft,
+} from '@/lib/code';
 
 const MIN_PIECES = 4;
 

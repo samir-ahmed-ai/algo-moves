@@ -11,7 +11,8 @@ export const creativesTags: GoTopic = {
       title: 'Banner HTML & MRAID',
       difficulty: 'Easy',
       tags: ['banner', 'HTML', 'MRAID', 'creative', 'SafeFrame', 'adm'],
-      summary: 'Banner creative markup in adm: plain HTML, MRAID for mobile rich media, and SafeFrame.',
+      summary:
+        'Banner creative markup in adm: plain HTML, MRAID for mobile rich media, and SafeFrame.',
       pattern: 'Banner creative',
       visual:
         'Bid.adm contains HTML markup. Browser renders in iframe/SafeFrame. MRAID API for mobile in-app expandable/interstitial. Mtype=1 (banner). Creative in CDN. Secure=1 → HTTPS URLs only.',
@@ -121,9 +122,13 @@ func main() {
       quiz: [
         {
           id: 'ortb-banner-mraid',
-          prompt: 'MRAID (Mobile Rich Media Ad Interface Definitions) is needed for banner ads because:',
+          prompt:
+            'MRAID (Mobile Rich Media Ad Interface Definitions) is needed for banner ads because:',
           choices: [
-            { label: 'Native SDK bridge — MRAID gives in-app WebView expand/close/open APIs', correct: true },
+            {
+              label: 'Native SDK bridge — MRAID gives in-app WebView expand/close/open APIs',
+              correct: true,
+            },
             { label: 'iOS requirement — MRAID is not mandatory for all iOS banner ads' },
             { label: 'HTTPS enforcement — MRAID does not handle HTTPS policy for creatives' },
             { label: 'Video standard claim — VAST handles video; MRAID covers rich-media' },
@@ -135,19 +140,26 @@ func main() {
           id: 'ortb-banner-safeframe',
           prompt: 'What does a SafeFrame provide for banner ads on web pages?',
           choices: [
-            { label: 'Isolated iframe — prevents creative accessing publisher DOM or cookies', correct: true },
+            {
+              label: 'Isolated iframe — prevents creative accessing publisher DOM or cookies',
+              correct: true,
+            },
             { label: 'Slot overflow claim — SafeFrame sandboxes; it does not enlarge the slot' },
             { label: 'Server-side render claim — SafeFrame is browser-side, not server-side' },
             { label: 'Encryption claim — SafeFrame is an iframe sandbox, not encryption' },
           ],
           explain:
-            'SafeFrame is an IAB standard for a sandboxed iframe with a controlled communication channel ($sf.ext API). It prevents creative JavaScript from accessing the parent page\'s DOM, cookies, or localStorage — protecting user privacy and publisher page security. Publishers use SafeFrame as a secure container for third-party ad creatives.',
+            "SafeFrame is an IAB standard for a sandboxed iframe with a controlled communication channel ($sf.ext API). It prevents creative JavaScript from accessing the parent page's DOM, cookies, or localStorage — protecting user privacy and publisher page security. Publishers use SafeFrame as a secure container for third-party ad creatives.",
         },
         {
           id: 'ortb-banner-mtype',
-          prompt: 'A bid response sets mtype=1. What should the exchange/publisher ad server do with the adm?',
+          prompt:
+            'A bid response sets mtype=1. What should the exchange/publisher ad server do with the adm?',
           choices: [
-            { label: 'Render as banner HTML — mtype=1 routes adm to iframe or SafeFrame', correct: true },
+            {
+              label: 'Render as banner HTML — mtype=1 routes adm to iframe or SafeFrame',
+              correct: true,
+            },
             { label: 'Pass to VAST player — mtype=2 routes adm to a video player instead' },
             { label: 'Parse as native — mtype=4 routes adm to the native JSON parser' },
             { label: 'Send to MRAID — MRAID handles in-app rich-media, not audio playback' },
@@ -175,7 +187,8 @@ func main() {
       title: 'VAST Video Ad Serving Template',
       difficulty: 'Hard',
       tags: ['VAST', 'video', 'VPAID', 'InLine', 'Wrapper', 'tracking-events'],
-      summary: 'VAST XML structure: Ad, InLine/Wrapper, Impression, Linear, MediaFiles, TrackingEvents.',
+      summary:
+        'VAST XML structure: Ad, InLine/Wrapper, Impression, Linear, MediaFiles, TrackingEvents.',
       pattern: 'VAST XML structure',
       visual:
         'VAST{Ad{InLine{Impression[],Creatives{Creative{Linear{Duration, MediaFiles[],TrackingEvents[]}}}}}}. Wrapper wraps another VAST URL for ad podding. TrackingEvents fire on: start, firstQuartile, midpoint, thirdQuartile, complete.',
@@ -292,7 +305,10 @@ func main() {
           id: 'ortb-vast-inline-vs-wrapper',
           prompt: 'A VAST Wrapper ad differs from a VAST InLine ad in that:',
           choices: [
-            { label: 'Wrapper chains — VASTAdTagURI redirect; InLine has the actual assets', correct: true },
+            {
+              label: 'Wrapper chains — VASTAdTagURI redirect; InLine has the actual assets',
+              correct: true,
+            },
             { label: 'HTML5 vs Flash claim — both InLine and Wrapper support HTML5 video' },
             { label: 'Tracking events claim — InLine also supports TrackingEvents elements' },
             { label: 'Position claim — Wrapper and InLine do not encode ad break positions' },
@@ -302,15 +318,19 @@ func main() {
         },
         {
           id: 'ortb-vast-tracking-quartile',
-          prompt: 'A user starts a 30-second video ad but closes the player at the 20-second mark. Which tracking events should fire?',
+          prompt:
+            'A user starts a 30-second video ad but closes the player at the 20-second mark. Which tracking events should fire?',
           choices: [
-            { label: '3 quartile events fire — start, firstQuartile, midpoint; complete missed', correct: true },
+            {
+              label: '3 quartile events fire — start, firstQuartile, midpoint; complete missed',
+              correct: true,
+            },
             { label: 'Start+complete events claim — quartile events are required by VAST spec' },
             { label: 'complete on close claim — complete fires at 100%, not on player close' },
             { label: 'firstQuartile claim — player stops at 20s, past the 25% mark' },
           ],
           explain:
-            'VAST tracking events are fired at specific percentage marks of the ad duration: start (first frame), firstQuartile (25%), midpoint (50%), thirdQuartile (75%), complete (100%). At 20 seconds of a 30-second ad, the player has passed 66%, so start (0%), firstQuartile (7.5s), and midpoint (15s) fire. thirdQuartile fires at 22.5s — the user closed at 20s so it doesn\'t fire. complete doesn\'t fire.',
+            "VAST tracking events are fired at specific percentage marks of the ad duration: start (first frame), firstQuartile (25%), midpoint (50%), thirdQuartile (75%), complete (100%). At 20 seconds of a 30-second ad, the player has passed 66%, so start (0%), firstQuartile (7.5s), and midpoint (15s) fire. thirdQuartile fires at 22.5s — the user closed at 20s so it doesn't fire. complete doesn't fire.",
         },
         {
           id: 'ortb-vast-mtype',
@@ -329,7 +349,7 @@ func main() {
         prompt:
           'A publisher uses a VAST Wrapper chain where each hop adds 20–30 ms latency (DNS + TLS + HTTP). With a 5-hop chain, this adds 100–150 ms before the video starts playing. How would you reduce this latency?',
         answer:
-          '1. Limit chain depth: enforce a maximum wrapper chain depth (e.g. 3 hops) in the SSP\'s VAST parser. Reject chains > 3 hops and treat as no-fill.\n2. Server-side chain resolution: instead of the browser/player resolving each VAST hop, have the exchange resolve the chain server-side and return the final InLine VAST to the player. Eliminates all wrapper DNS/TLS overhead.\n3. VAST pre-fetch: start resolving VAST before the ad break starts (pre-fetch during content playback). The player buffers the resolved VAST so by break time it\'s already resolved.\n4. HTTPS + HTTP/2: all VAST hops over HTTPS with HTTP/2 multiplexing reduces TLS handshake overhead.\n5. CDN caching: intermediate VAST Wrappers that don\'t change per request (e.g. verification layers) can be served from CDN with short TTLs (30–60 seconds).',
+          "1. Limit chain depth: enforce a maximum wrapper chain depth (e.g. 3 hops) in the SSP's VAST parser. Reject chains > 3 hops and treat as no-fill.\n2. Server-side chain resolution: instead of the browser/player resolving each VAST hop, have the exchange resolve the chain server-side and return the final InLine VAST to the player. Eliminates all wrapper DNS/TLS overhead.\n3. VAST pre-fetch: start resolving VAST before the ad break starts (pre-fetch during content playback). The player buffers the resolved VAST so by break time it's already resolved.\n4. HTTPS + HTTP/2: all VAST hops over HTTPS with HTTP/2 multiplexing reduces TLS handshake overhead.\n5. CDN caching: intermediate VAST Wrappers that don't change per request (e.g. verification layers) can be served from CDN with short TTLs (30–60 seconds).",
       },
       keyPoints: [
         'VAST InLine: contains actual ad assets (MediaFiles, tracking, clickthrough). Wrapper: redirects to another VAST URL.',
@@ -344,7 +364,8 @@ func main() {
       title: 'Native Ad Markup',
       difficulty: 'Medium',
       tags: ['native', 'OpenRTB-native', 'assets', 'title', 'image', 'link', 'mtype'],
-      summary: 'OpenRTB Native spec: request/response JSON, asset types, and rendering by publisher.',
+      summary:
+        'OpenRTB Native spec: request/response JSON, asset types, and rendering by publisher.',
       pattern: 'Native markup',
       visual:
         'BidRequest.Imp.Native.request = serialised Native request JSON. BidResponse.Bid.adm = serialised Native response JSON. Assets: title, img (icon/main), data (sponsored by, desc, rating). Link = click destination.',
@@ -460,15 +481,19 @@ func main() {
       quiz: [
         {
           id: 'ortb-native-who-renders',
-          prompt: 'Who is responsible for rendering a native ad from the OpenRTB Native response JSON?',
+          prompt:
+            'Who is responsible for rendering a native ad from the OpenRTB Native response JSON?',
           choices: [
-            { label: 'Publisher renders — assembles native assets into its own page design', correct: true },
+            {
+              label: 'Publisher renders — assembles native assets into its own page design',
+              correct: true,
+            },
             { label: 'DSP pre-renders claim — DSPs supply raw JSON, not pre-rendered HTML' },
             { label: 'Exchange converts claim — exchange passes native JSON as-is to the SSP' },
             { label: 'Browser built-in claim — browsers have no native ad rendering support' },
           ],
           explain:
-            'This is the defining property of native advertising: the publisher controls rendering. The native JSON provides raw assets (title text, image URL, description, link) and the publisher\'s template styles them to match its editorial look and feel. Two publishers showing the same native ad will present it differently.',
+            "This is the defining property of native advertising: the publisher controls rendering. The native JSON provides raw assets (title text, image URL, description, link) and the publisher's template styles them to match its editorial look and feel. Two publishers showing the same native ad will present it differently.",
         },
         {
           id: 'ortb-native-asset-type',
@@ -486,7 +511,10 @@ func main() {
           id: 'ortb-native-imptrackers',
           prompt: 'In a NativeResponse, imptrackers[] contains:',
           choices: [
-            { label: 'Client-side imp pixels — publisher fires these on native unit render', correct: true },
+            {
+              label: 'Client-side imp pixels — publisher fires these on native unit render',
+              correct: true,
+            },
             { label: 'Win-notice URLs — exchange fires win notices, not imptrackers' },
             { label: 'Click destinations — link.url handles click URLs, not imptrackers' },
             { label: 'Asset cache URLs — imptrackers are tracking pixels, not CDN cache URLs' },
@@ -497,7 +525,7 @@ func main() {
       ],
       design: {
         prompt:
-          'A publisher\'s native template requires a 15-character title and a 600×315 image. A DSP submits a native bid with a 25-character title and a 1200×628 image. How should the publisher/exchange handle this?',
+          "A publisher's native template requires a 15-character title and a 600×315 image. A DSP submits a native bid with a 25-character title and a 1200×628 image. How should the publisher/exchange handle this?",
         answer:
           '1. Title truncation: if the native spec says publisher needs max 15 chars and the DSP provides 25, the publisher should truncate to 15 characters with an ellipsis ("...") as per the OpenRTB Native spec guidelines. Don\'t reject the bid — truncation is allowed for excess length.\n2. Image scaling: publishers are responsible for resizing/cropping images to their display dimensions. A 1200×628 image can be scaled down to 600×315 (same 1.91:1 aspect ratio). The publisher\'s native template CSS handles this.\n3. Exchange validation: if an asset marked required=1 in the request is missing from the response, the exchange should reject the bid (invalid native response). For size mismatches, accept and let the publisher handle rendering.\n4. Required vs optional: if an optional asset (required=0) is missing, publishers use a fallback (e.g. no description text). Never reject a bid for missing optional assets.',
       },

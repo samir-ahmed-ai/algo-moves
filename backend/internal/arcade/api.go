@@ -1,110 +1,94 @@
+// Package arcade wires domain HTTP handlers into a single deployable API surface.
 package arcade
 
 import (
 	"context"
-	"database/sql"
-	"log"
 	"net/http"
-	"os"
-	"strings"
 
-	"github.com/alexedwards/scs/v2"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"algomoves/gameserver/internal/canvas"
+	"algomoves/gameserver/internal/content"
+	"algomoves/gameserver/internal/games"
+	"algomoves/gameserver/internal/interview"
+	"algomoves/gameserver/internal/arcade/ai"
+	"algomoves/gameserver/internal/platform"
+	"algomoves/gameserver/internal/prep"
 )
 
-// Service bundles the arcade store and HTTP handlers.
+// Service is the public facade over platform persistence and domain handlers.
 type Service struct {
-	store    *Store
-	sessions *scs.SessionManager
-	sqlDB    *sql.DB
+	*platform.Service
+	ai *ai.Client
+	games     *games.Handler
+	interview *interview.Handler
+	content   *content.Handler
+	canvas    *canvas.Handler
+	prep      *prep.Handler
 }
 
-func (s *Service) Store() *Store {
-	if s == nil {
-		return nil
-	}
-	return s.store
-}
-
+// Open connects optional Postgres persistence and domain handlers.
 func Open(ctx context.Context) (*Service, error) {
-	url := strings.TrimSpace(os.Getenv("DATABASE_URL"))
-	if url == "" {
-		return nil, nil
-	}
-	pool, err := pgxpool.New(ctx, url)
-	if err != nil {
+	svc, err := platform.Open(ctx)
+	if err != nil || svc == nil {
 		return nil, err
 	}
-	if err := pool.Ping(ctx); err != nil {
-		pool.Close()
-		return nil, err
-	}
-	if envEnabled("RUN_MIGRATIONS") {
-		if err := Migrate(ctx, pool); err != nil {
-			pool.Close()
-			return nil, err
-		}
-		if err := SeedAchievements(ctx, pool); err != nil {
-			pool.Close()
-			return nil, err
-		}
-		log.Printf("arcade: migrations and achievement seed applied")
-	}
-	if envEnabled("RUN_CONTENT_SEED") {
-		if err := SeedContent(ctx, pool); err != nil {
-			pool.Close()
-			return nil, err
-		}
-		log.Printf("arcade: learning content seed applied")
-	}
-	log.Printf("arcade: connected to postgres")
-	svc := &Service{store: NewStore(pool)}
-	if sm, db, err := newSessionManager(url); err != nil {
-		log.Printf("arcade: session manager disabled: %v", err)
-	} else {
-		svc.sessions = sm
-		svc.sqlDB = db
-	}
-	return svc, nil
+	return &Service{
+		Service:   svc,
+		games:     games.NewHandler(svc.Store(), svc),
+		interview: interview.NewHandler(svc.Store(), svc),
+		content:   content.NewHandler(svc.Store()),
+		canvas:    canvas.NewHandler(svc.Store(), svc),
+		prep:      prep.NewHandler(svc.Store(), svc),
+	}, nil
 }
 
-func (s *Service) Enabled() bool { return s != nil && s.store != nil }
-
-func (s *Service) Close() {
-	if s != nil {
-		if s.sqlDB != nil {
-			s.sqlDB.Close()
-		}
-		if s.store != nil && s.store.pool != nil {
-			s.store.pool.Close()
-		}
-	}
+func (s *Service) BootstrapPlatformAdmin(ctx context.Context) {
+	platform.BootstrapPlatformAdmin(ctx, s.Store())
 }
 
-// Register mounts /api/* routes on mux. Handlers are wrapped for CORS by server.
+func (s *Service) SessionMiddleware(next http.Handler) http.Handler {
+	return s.Service.SessionMiddleware(next)
+}
+
+type route struct {
+	pattern string
+	handler http.HandlerFunc
+}
+
 func (s *Service) Register(mux *http.ServeMux) {
-	mux.HandleFunc("/api/auth/guest", s.handleGuest)
-	mux.HandleFunc("/api/auth/signup", s.handleSignup)
-	mux.HandleFunc("/api/auth/login", s.handleLogin)
-	mux.HandleFunc("/api/auth/logout", s.handleLogout)
-	mux.HandleFunc("/api/auth/me", s.handleMe)
-	mux.HandleFunc("/api/profiles/", s.handleProfiles)
-	mux.HandleFunc("/api/stats/me", s.handleStatsMe)
-	mux.HandleFunc("/api/matches/me", s.handleMatchesMe)
-	mux.HandleFunc("/api/matches", s.handleSubmitMatch)
-	mux.HandleFunc("/api/leaderboard/", s.handleLeaderboard)
-	mux.HandleFunc("/api/achievements", s.handleAchievements)
-	mux.HandleFunc("/api/achievements/", s.handleAchievementAction)
-	mux.HandleFunc("/api/rooms/", s.handleRooms)
-	mux.HandleFunc("/api/friends", s.handleFriends)
-	mux.HandleFunc("/api/daily-challenge", s.handleDailyChallenge)
-	mux.HandleFunc("/api/daily-challenge/score", s.handleDailyScore)
-	mux.HandleFunc("/api/canvases", s.handleCanvases)
-	mux.HandleFunc("/api/canvases/", s.handleCanvas)
-	mux.HandleFunc("/api/interviews", s.handleInterviews)
-	mux.HandleFunc("/api/interviews/", s.handleInterview)
-	mux.HandleFunc("/api/content/catalog", s.handleContentCatalog)
-	mux.HandleFunc("/api/content/problems/", s.handleContentProblem)
-	mux.HandleFunc("/api/prep-plans", s.handlePrepPlans)
-	mux.HandleFunc("/api/prep-plans/", s.handlePrepPlan)
+	for _, r := range s.routes() {
+		mux.HandleFunc(r.pattern, r.handler)
+	}
+}
+
+func (s *Service) routes() []route {
+	return []route{
+		{"/api/auth/guest", s.HandleGuest},
+		{"/api/auth/signup", s.HandleSignup},
+		{"/api/auth/login", s.HandleLogin},
+		{"/api/auth/logout", s.HandleLogout},
+		{"/api/auth/me", s.HandleMe},
+		{"/api/profiles/", s.HandleProfiles},
+		{"/api/stats/me", s.games.HandleStatsMe},
+		{"/api/matches/me", s.games.HandleMatchesMe},
+		{"/api/matches", s.games.HandleSubmitMatch},
+		{"/api/leaderboard/", s.games.HandleLeaderboard},
+		{"/api/achievements", s.games.HandleAchievements},
+		{"/api/achievements/", s.games.HandleAchievementAction},
+		{"/api/rooms/", s.games.HandleRooms},
+		{"/api/friends", s.games.HandleFriends},
+		{"/api/daily-challenge", s.games.HandleDailyChallenge},
+		{"/api/daily-challenge/score", s.games.HandleDailyScore},
+		{"/api/games", s.games.HandleGames},
+		{"/api/games/", s.games.HandleGames},
+		{"/api/canvases", s.canvas.HandleCanvases},
+		{"/api/canvases/", s.canvas.HandleCanvas},
+		{"/api/interviews", s.interview.HandleInterviews},
+		{"/api/interviews/", s.interview.HandleInterview},
+		{"/api/content/catalog", s.content.HandleContentCatalog},
+		{"/api/content/problems/", s.content.HandleContentProblem},
+		{"/api/prep-plans", s.prep.HandlePrepPlans},
+		{"/api/prep-plans/", s.prep.HandlePrepPlan},
+		{"/api/resumes", s.HandleResumes},
+		{"/api/resumes/", s.HandleResume},
+	}
 }

@@ -20,11 +20,18 @@ describe('resolveWorkspaceSurface', () => {
 
   it.each([
     { activeTrackId: 'data-structures', activeCategoryId: null, expected: 'track-board' },
-    { activeTrackId: 'data-structures', activeCategoryId: 'two-pointers', expected: 'category-board' },
+    {
+      activeTrackId: 'data-structures',
+      activeCategoryId: 'two-pointers',
+      expected: 'category-board',
+    },
     { activeTrackId: null, activeCategoryId: 'two-pointers', expected: 'category-board' },
-  ] as const)('routes browsing state to $expected', ({ activeTrackId, activeCategoryId, expected }) => {
-    expect(surface({ activeTrackId, activeCategoryId, problemFocused: false })).toBe(expected);
-  });
+  ] as const)(
+    'routes browsing state to $expected',
+    ({ activeTrackId, activeCategoryId, expected }) => {
+      expect(surface({ activeTrackId, activeCategoryId, problemFocused: false })).toBe(expected);
+    },
+  );
 
   it('routes problem-backed visualize mode to the canvas surface', () => {
     expect(surface({ mode: 'visualize' })).toBe('canvas');
@@ -38,9 +45,14 @@ describe('resolveWorkspaceSurface', () => {
     { pluginLoading: true, expected: 'loading' },
     { runtimeError: true, expected: 'error' },
     { pluginLoading: false, expected: 'empty' },
-  ] as const)('routes unavailable problem-backed visualize mode to $expected', ({ pluginLoading, runtimeError, expected }) => {
-    expect(surface({ mode: 'visualize', ready: false, pluginLoading: !!pluginLoading, runtimeError })).toBe(expected);
-  });
+  ] as const)(
+    'routes unavailable problem-backed visualize mode to $expected',
+    ({ pluginLoading, runtimeError, expected }) => {
+      expect(
+        surface({ mode: 'visualize', ready: false, pluginLoading: !!pluginLoading, runtimeError }),
+      ).toBe(expected);
+    },
+  );
 
   it.each([
     { mode: 'play' as CanvasMode, expected: 'play' },
@@ -62,15 +74,24 @@ describe('resolveWorkspaceFallbackTarget', () => {
     { activeTrackId: 'data-structures', activeCategoryId: null, expected: 'catalog' },
     { activeTrackId: null, activeCategoryId: 'arrays', expected: 'catalog' },
     { activeTrackId: null, activeCategoryId: null, expected: 'home' },
-  ] as const)('routes fallback actions to $expected', ({ activeTrackId, activeCategoryId, expected }) => {
-    expect(resolveWorkspaceFallbackTarget({ activeTrackId, activeCategoryId })).toBe(expected);
-  });
+  ] as const)(
+    'routes fallback actions to $expected',
+    ({ activeTrackId, activeCategoryId, expected }) => {
+      expect(resolveWorkspaceFallbackTarget({ activeTrackId, activeCategoryId })).toBe(expected);
+    },
+  );
 });
 
 describe('resolveRuntimeErrorRecovery', () => {
   it.each([
-    { input: { customInput: { nums: [1] }, inputId: 'sample', firstInputId: 'sample' }, expected: 'reset-custom-input' },
-    { input: { customInput: null, inputId: 'other', firstInputId: 'sample' }, expected: 'first-sample' },
+    {
+      input: { customInput: { nums: [1] }, inputId: 'sample', firstInputId: 'sample' },
+      expected: 'reset-custom-input',
+    },
+    {
+      input: { customInput: null, inputId: 'other', firstInputId: 'sample' },
+      expected: 'first-sample',
+    },
     { input: { customInput: null, inputId: 'sample', firstInputId: 'sample' }, expected: 'none' },
     { input: { customInput: null, inputId: 'sample', firstInputId: undefined }, expected: 'none' },
   ] as const)('returns $expected', ({ input, expected }) => {
@@ -133,14 +154,18 @@ describe('ModeRouter fallbacks', () => {
   });
 
   it('renders an unavailable state instead of a blank workspace', () => {
-    const html = renderToStaticMarkup(createElement(ModeRouter, { ...props, activeCategoryId: 'arrays', pluginLoading: false }));
+    const html = renderToStaticMarkup(
+      createElement(ModeRouter, { ...props, activeCategoryId: 'arrays', pluginLoading: false }),
+    );
     expect(html).toContain('Preview unavailable');
     expect(html).toContain('not bound to an interactive preview');
     expect(html).toContain('Back to catalog');
   });
 
   it('renders recorder failures as a runtime error state', () => {
-    const html = renderToStaticMarkup(createElement(ModeRouter, { ...props, pluginLoading: false, runtimeError: 'bad input' }));
+    const html = renderToStaticMarkup(
+      createElement(ModeRouter, { ...props, pluginLoading: false, runtimeError: 'bad input' }),
+    );
     expect(html).toContain('role="status"');
     expect(html).toContain('Preview could not render');
     expect(html).toContain('bad input');
@@ -173,7 +198,9 @@ describe('ModeRouter fallbacks', () => {
   });
 
   it('sends unavailable standalone context back home', () => {
-    const html = renderToStaticMarkup(createElement(ModeRouter, { ...props, pluginLoading: false }));
+    const html = renderToStaticMarkup(
+      createElement(ModeRouter, { ...props, pluginLoading: false }),
+    );
     expect(html).toContain('Preview unavailable');
     expect(html).toContain('Go home');
   });

@@ -7,7 +7,15 @@ import { blockKind, BLOCK_META } from '@/lib/code';
 import type { CodePiece } from '@/lib/code';
 import type { AssembleGameProps, AssembleGameStatsStore } from './types';
 import { commitBestMs, mergeGameStats, readBestMs } from './gameProgress';
-import { createVelocityTracker, diffTokens, formatSecs, hashString, memoryStatsStore, mulberry32, mutateCode } from './gameShared';
+import {
+  createVelocityTracker,
+  diffTokens,
+  formatSecs,
+  hashString,
+  memoryStatsStore,
+  mulberry32,
+  mutateCode,
+} from './gameShared';
 import type { DiffToken } from './gameShared';
 import {
   ConfettiBurst,
@@ -73,7 +81,13 @@ function plainLines(code: string): DiffToken[][] {
   return code.split('\n').map((l) => (l ? [{ text: l, changed: false }] : []));
 }
 
-export function SnapCallGame({ pieces, storageKey, stats, onComplete, onContinue }: AssembleGameProps) {
+export function SnapCallGame({
+  pieces,
+  storageKey,
+  stats,
+  onComplete,
+  onContinue,
+}: AssembleGameProps) {
   const reduced = usePrefersReducedMotion();
   const statsStore = useMemo(() => stats ?? memoryStatsStore(), [stats]);
 
@@ -87,7 +101,9 @@ export function SnapCallGame({ pieces, storageKey, stats, onComplete, onContinue
   const [magnifier, setMagnifier] = useState(false);
   const magnifierRef = useRef(false);
   magnifierRef.current = magnifier;
-  const [docHidden, setDocHidden] = useState(() => typeof document !== 'undefined' && document.hidden);
+  const [docHidden, setDocHidden] = useState(
+    () => typeof document !== 'undefined' && document.hidden,
+  );
   const [caption, setCaption] = useState<string | null>(null);
   const [showDiff, setShowDiff] = useState(false);
   const [slotFlash, setSlotFlash] = useState<'good' | 'bad' | null>(null);
@@ -189,7 +205,9 @@ export function SnapCallGame({ pieces, storageKey, stats, onComplete, onContinue
     const all = piecesRef.current;
     const placed = placedIdxRef.current;
     const n = dealCounterRef.current++;
-    const rand = mulberry32((hashString(storageKeyRef.current) ^ Math.imul(n + 1, 0x9e3779b1) ^ runSaltRef.current) >>> 0);
+    const rand = mulberry32(
+      (hashString(storageKeyRef.current) ^ Math.imul(n + 1, 0x9e3779b1) ^ runSaltRef.current) >>> 0,
+    );
     const truth = all[placed];
     const ahead = all.length - placed - 1;
     const durMs = n < 2 ? FIRST_DEAL_MS : DEAL_MS;
@@ -415,7 +433,9 @@ export function SnapCallGame({ pieces, storageKey, stats, onComplete, onContinue
 
       if (real) {
         // Teach-why: the real line auto-places muted so the program never stalls.
-        setAriaMsg(viaTimeout ? 'Time up — that was the real line' : 'Wrong — that was the real line');
+        setAriaMsg(
+          viaTimeout ? 'Time up — that was the real line' : 'Wrong — that was the real line',
+        );
         after(300, () => {
           setCaption('That was the real line');
           const won = placePiece(true);
@@ -423,7 +443,9 @@ export function SnapCallGame({ pieces, storageKey, stats, onComplete, onContinue
           if (!won) after(520, () => dealNext());
         });
       } else if (d.decoyKind === 'mutant') {
-        setAriaMsg(viaTimeout ? 'Time up — that line was a fake' : 'Wrong — spot the mutated tokens');
+        setAriaMsg(
+          viaTimeout ? 'Time up — that line was a fake' : 'Wrong — spot the mutated tokens',
+        );
         setShowDiff(true);
         after(820, () => dealNext());
       } else {
@@ -466,7 +488,8 @@ export function SnapCallGame({ pieces, storageKey, stats, onComplete, onContinue
       if (!dealRef.current || (phaseRef.current !== 'deal' && phaseRef.current !== 'drag')) return;
       const now = Date.now();
       const anchor = pauseStartRef.current ?? now;
-      const remainingMs = dealDurRef.current - (anchor - dealStartRef.current - pausedAccumRef.current);
+      const remainingMs =
+        dealDurRef.current - (anchor - dealStartRef.current - pausedAccumRef.current);
       const shown = Math.max(0, remainingMs) / 1000;
       if (Math.abs(shown - lastShownRemainRef.current) >= 0.05) {
         lastShownRemainRef.current = shown;
@@ -533,7 +556,10 @@ export function SnapCallGame({ pieces, storageKey, stats, onComplete, onContinue
     dealNext();
   }, [cancelDrag, clearPending, dealNext]);
 
-  const signature = useMemo(() => `${storageKey}::${pieces.map((p) => p.id).join('|')}`, [pieces, storageKey]);
+  const signature = useMemo(
+    () => `${storageKey}::${pieces.map((p) => p.id).join('|')}`,
+    [pieces, storageKey],
+  );
   useEffect(() => {
     if (piecesRef.current.length === 0) return;
     startRun();
@@ -541,7 +567,10 @@ export function SnapCallGame({ pieces, storageKey, stats, onComplete, onContinue
 
   useEffect(() => {
     if (placedIdx === 0) return;
-    slotRef.current?.scrollIntoView({ block: 'nearest', behavior: reducedRef.current ? 'auto' : 'smooth' });
+    slotRef.current?.scrollIntoView({
+      block: 'nearest',
+      behavior: reducedRef.current ? 'auto' : 'smooth',
+    });
   }, [placedIdx]);
 
   /* ----------------------------- pointer gestures --------------------------- */
@@ -648,7 +677,11 @@ export function SnapCallGame({ pieces, storageKey, stats, onComplete, onContinue
   /* --------------------------------- render --------------------------------- */
 
   if (pieces.length === 0) {
-    return <div className="rounded-md border border-edge bg-panel2 p-3 text-[13px] text-ink2">No puzzle pieces available.</div>;
+    return (
+      <div className="rounded-md border border-edge bg-panel2 p-3 text-[13px] text-ink2">
+        No puzzle pieces available.
+      </div>
+    );
   }
 
   const meta = deal ? BLOCK_META[blockKind(deal.piece)] : null;
@@ -719,7 +752,9 @@ export function SnapCallGame({ pieces, storageKey, stats, onComplete, onContinue
             <div
               key={p.id}
               className={cn('blk-row', seamActive && 'snap-seam')}
-              style={seamActive ? ({ '--snap-seam-delay': `${i * 40}ms` } as CSSProperties) : undefined}
+              style={
+                seamActive ? ({ '--snap-seam-delay': `${i * 40}ms` } as CSSProperties) : undefined
+              }
             >
               <GameBlock
                 piece={p}
@@ -731,7 +766,10 @@ export function SnapCallGame({ pieces, storageKey, stats, onComplete, onContinue
           ))}
           {placedIdx < pieces.length && (
             <div ref={slotRef} className={cn(placedIdx > 0 && 'mt-1')}>
-              <GhostSlot piece={pieces[placedIdx]} lines={pieces[placedIdx].code.split('\n').length} />
+              <GhostSlot
+                piece={pieces[placedIdx]}
+                lines={pieces[placedIdx].code.split('\n').length}
+              />
             </div>
           )}
         </div>
@@ -743,7 +781,11 @@ export function SnapCallGame({ pieces, storageKey, stats, onComplete, onContinue
       </div>
 
       {/* Action zone — candidate deck + judgment pills. */}
-      <div data-noswipe className="relative flex shrink-0 flex-col px-1 pb-2" style={{ maxHeight: '45%' }}>
+      <div
+        data-noswipe
+        className="relative flex shrink-0 flex-col px-1 pb-2"
+        style={{ maxHeight: '45%' }}
+      >
         <div className="flex h-5 shrink-0 items-center justify-center">
           {caption && <span className="snap-caption text-[12px] text-ink3">{caption}</span>}
         </div>
@@ -782,11 +824,23 @@ export function SnapCallGame({ pieces, storageKey, stats, onComplete, onContinue
               onPointerUp={onCardPointerUp}
               onPointerCancel={onCardPointerCancel}
             >
-              <div className="flex items-start gap-2.5 overflow-hidden p-3 pr-10" style={{ maxHeight: '40vh' }}>
-                <span className="shrink-0 font-mono text-[28px] leading-none" style={{ color: meta.text }} aria-hidden>
+              <div
+                className="flex items-start gap-2.5 overflow-hidden p-3 pr-10"
+                style={{ maxHeight: '40vh' }}
+              >
+                <span
+                  className="shrink-0 font-mono text-[28px] leading-none"
+                  style={{ color: meta.text }}
+                  aria-hidden
+                >
                   {meta.glyph}
                 </span>
-                <div className={cn('min-w-0 flex-1 font-mono text-[12px] leading-[1.55] text-ink', clamped && 'snap-fade')}>
+                <div
+                  className={cn(
+                    'min-w-0 flex-1 font-mono text-[12px] leading-[1.55] text-ink',
+                    clamped && 'snap-fade',
+                  )}
+                >
                   {codeLines.map((line, i) => (
                     <div key={i} className="snap-line">
                       {line.length === 0
@@ -858,7 +912,9 @@ export function SnapCallGame({ pieces, storageKey, stats, onComplete, onContinue
         </div>
       </div>
 
-      {magnifier && deal && <MagnifierSheet piece={deal.piece} onClose={() => setMagnifier(false)} />}
+      {magnifier && deal && (
+        <MagnifierSheet piece={deal.piece} onClose={() => setMagnifier(false)} />
+      )}
 
       {winStage === 'card' && winStats && (
         <div className="absolute inset-0 z-40 grid place-items-center bg-bg/70 p-4" data-noswipe>
@@ -874,7 +930,9 @@ export function SnapCallGame({ pieces, storageKey, stats, onComplete, onContinue
             ]}
             badges={[{ icon: Award, label: 'Perfect Call', earned: winStats.misses === 0 }]}
             newBest={winStats.newBest}
-            primaryLabel={bestMs !== null ? `Play again — beat ${formatSecs(bestMs)}` : 'Play again'}
+            primaryLabel={
+              bestMs !== null ? `Play again — beat ${formatSecs(bestMs)}` : 'Play again'
+            }
             onPrimary={startRun}
             secondaryLabel={onContinue ? 'Continue' : undefined}
             onSecondary={onContinue}

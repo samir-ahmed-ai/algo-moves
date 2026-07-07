@@ -1,5 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Handle, NodeResizer, NodeToolbar, Position, useReactFlow, useUpdateNodeInternals, type NodeProps } from '@xyflow/react';
+import {
+  Handle,
+  NodeResizer,
+  NodeToolbar,
+  Position,
+  useReactFlow,
+  useUpdateNodeInternals,
+  type NodeProps,
+} from '@xyflow/react';
 import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
 import { panelAccent } from '@/core/panelAccent';
@@ -31,7 +39,17 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
   const chrome = panelNodeChrome(kind);
   const kindAccent = panelAccent(data.kind);
   const accent = panelStroke(nodeStyle, data.accent ?? kindAccent);
-  const { dir, mode, density, present, tweaks, sidePanelTab, setSidePanelTab, setRightOpen, setRightTab } = useWorkspace();
+  const {
+    dir,
+    mode,
+    density,
+    present,
+    tweaks,
+    sidePanelTab,
+    setSidePanelTab,
+    setRightOpen,
+    setRightTab,
+  } = useWorkspace();
   const { plugin, item } = useCanvasStatic();
   const isViz = data.kind === 'viz';
   const isWhiteboard = data.kind === 'whiteboard';
@@ -44,7 +62,8 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
   const collapsed = !!data.collapsed;
   const showSourceHandle = !collapsed;
   const locked = !!data.locked;
-  const headerDensity: HeaderDensity = density === 'spacious' ? 'spacious' : density === 'ultra' ? 'ultra' : 'compact';
+  const headerDensity: HeaderDensity =
+    density === 'spacious' ? 'spacious' : density === 'ultra' ? 'ultra' : 'compact';
   const maxPanelW = layoutFixedWidth(kind);
   const bodyCap = layoutCap(kind);
   const narrowBody = nodeTier(kind) === 'narrow';
@@ -52,7 +71,12 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
   const hasLayoutHost = !!data.layoutSlots?.some(Boolean);
   const layoutHostMode = mode === 'visualize' && (!!data.layoutHost || hasLayoutHost);
   const isSlottedChild = data.slotIndex != null && mode === 'visualize';
-  const panelRef = useFitContentSize(id, kind, collapsed, !snapFill && !layoutHostMode && !isSlottedChild);
+  const panelRef = useFitContentSize(
+    id,
+    kind,
+    collapsed,
+    !snapFill && !layoutHostMode && !isSlottedChild,
+  );
   const inViewport = useNodeInViewport(id);
   const renderHeavyBody = inViewport || selected || collapsed;
   const [showBigO, setShowBigO] = useState(false);
@@ -90,10 +114,25 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
     }
   };
   const isQuiz = data.kind === 'quiz';
-  const showSideToggle = sideTabs.length > 0 && (isWorkbench || isProblem || isViz || isCodeLike || isQuiz);
+  const showSideToggle =
+    sideTabs.length > 0 && (isWorkbench || isProblem || isViz || isCodeLike || isQuiz);
   const sideLabel = sideTabs[0]?.label ?? 'panel';
-  const targetPos = mode === 'visualize' ? Position.Left : mode === 'learn' ? Position.Top : dir === 'LR' ? Position.Left : Position.Top;
-  const sourcePos = mode === 'visualize' ? Position.Right : mode === 'learn' ? Position.Bottom : dir === 'LR' ? Position.Right : Position.Bottom;
+  const targetPos =
+    mode === 'visualize'
+      ? Position.Left
+      : mode === 'learn'
+        ? Position.Top
+        : dir === 'LR'
+          ? Position.Left
+          : Position.Top;
+  const sourcePos =
+    mode === 'visualize'
+      ? Position.Right
+      : mode === 'learn'
+        ? Position.Bottom
+        : dir === 'LR'
+          ? Position.Right
+          : Position.Bottom;
   const handleCls = handleDotClass;
 
   const vizCanvas = isViz && mode === 'visualize';
@@ -101,7 +140,8 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
   const showNodeTransport = vizCanvas && (present || tweaks.controls);
   const visualizeFlush =
     mode === 'visualize' && (isWorkbench || isProblem || isViz || isCodeLike || isWhiteboard);
-  const flushBody = vizCanvas || boardCanvas || (mode === 'visualize' && (isProblem || isWorkbench));
+  const flushBody =
+    vizCanvas || boardCanvas || (mode === 'visualize' && (isProblem || isWorkbench));
   const bodyFlex = !!(chrome.bodyFlex || chrome.codeLike);
 
   const headerProps = {
@@ -123,107 +163,121 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
 
   return (
     <>
-    {showNodeTransport && (
-      <NodeToolbar
-        nodeId={id}
-        position={Position.Top}
-        offset={12}
-        isVisible={selected && !collapsed}
-        className="nowheel nodrag"
-      >
-        <TransportBar />
-      </NodeToolbar>
-    )}
-    <div
-      ref={panelRef}
-      data-panel-kind={kind}
-      className={cn(
-        'panel-node relative flex flex-col overflow-visible rounded-[var(--radius)] bg-panel text-ink transition-[box-shadow,ring-color]',
-        snapFill ? 'h-full min-h-0' : 'h-auto',
-        hasLayoutHost && 'min-h-0',
-        layoutHostMode && 'overflow-visible',
-        isSlottedChild && 'overflow-hidden shadow-[var(--shadow-md)]',
-        isCodeLike && !collapsed && 'min-h-0 flex-1',
-        chrome.panelMinClass && !collapsed && chrome.panelMinClass,
-        'w-full',
-        selected && 'selected',
-        chainTint && `ring-1 ${chainTint}`,
-        'hover:ring-1 hover:ring-[color-mix(in_srgb,var(--ring)_25%,transparent)]',
-        locked && !nodeStyle?.opacity && 'opacity-95',
+      {showNodeTransport && (
+        <NodeToolbar
+          nodeId={id}
+          position={Position.Top}
+          offset={12}
+          isVisible={selected && !collapsed}
+          className="nowheel nodrag"
+        >
+          <TransportBar />
+        </NodeToolbar>
       )}
-      style={{
-        borderRadius: panelBorderRadius(nodeStyle?.corners),
-        opacity: nodeStyle?.opacity != null ? panelOpacity(nodeStyle) : locked ? 0.95 : undefined,
-        backgroundColor: panelFill(nodeStyle),
-        ...(width != null ? { width: Math.max(width, layoutHostMode ? HOST_MIN_WIDTH : 0) } : layoutHostMode ? { width: HOST_MIN_WIDTH } : {}),
-        ...(snapFill && height != null ? { height, minHeight: height } : {}),
-        ...(layoutHostMode && !snapFill
-          ? { height: Math.max(height ?? 0, HOST_MIN_HEIGHT), minHeight: HOST_MIN_HEIGHT }
-          : {}),
-      }}
-    >
-      {!collapsed && !locked && (
-        <NodeResizer
-          color="var(--accent)"
-          isVisible={selected}
-          {...(maxPanelW != null ? { maxWidth: maxPanelW } : {})}
-          handleClassName="!h-2 !w-2 !rounded-sm !border-accent !bg-panel"
-        />
-      )}
-
       <div
+        ref={panelRef}
+        data-panel-kind={kind}
         className={cn(
-          'panel-node__body relative z-0 flex min-h-0 flex-col rounded-[inherit]',
-          !renderHeavyBody && 'panel-node__body--deferred',
-          visualizeFlush
-            ? 'gap-0 px-[var(--node-px,0.75rem)]'
-            : 'gap-[var(--node-gap,0.5rem)] px-[var(--node-px,0.75rem)] pb-[var(--node-py,0.5625rem)]',
-          bodyFlex && !collapsed && 'min-h-0 flex-1 overflow-hidden',
-          chrome.bodyMinClass && !collapsed && `${chrome.bodyMinClass} flex-1 overflow-hidden`,
-          snapFill && !collapsed && 'min-h-0 flex-1 overflow-hidden',
-          layoutHostMode && !collapsed && 'min-h-0 flex-1 overflow-visible',
-          !vizCanvas && !boardCanvas && !snapFill && !layoutHostMode && 'overflow-hidden',
+          'panel-node relative flex flex-col overflow-visible rounded-[var(--radius)] bg-panel text-ink transition-[box-shadow,ring-color]',
+          snapFill ? 'h-full min-h-0' : 'h-auto',
+          hasLayoutHost && 'min-h-0',
+          layoutHostMode && 'overflow-visible',
+          isSlottedChild && 'overflow-hidden shadow-[var(--shadow-md)]',
+          isCodeLike && !collapsed && 'min-h-0 flex-1',
+          chrome.panelMinClass && !collapsed && chrome.panelMinClass,
+          'w-full',
+          selected && 'selected',
+          chainTint && `ring-1 ${chainTint}`,
+          'hover:ring-1 hover:ring-[color-mix(in_srgb,var(--ring)_25%,transparent)]',
+          locked && !nodeStyle?.opacity && 'opacity-95',
         )}
+        style={{
+          borderRadius: panelBorderRadius(nodeStyle?.corners),
+          opacity: nodeStyle?.opacity != null ? panelOpacity(nodeStyle) : locked ? 0.95 : undefined,
+          backgroundColor: panelFill(nodeStyle),
+          ...(width != null
+            ? { width: Math.max(width, layoutHostMode ? HOST_MIN_WIDTH : 0) }
+            : layoutHostMode
+              ? { width: HOST_MIN_WIDTH }
+              : {}),
+          ...(snapFill && height != null ? { height, minHeight: height } : {}),
+          ...(layoutHostMode && !snapFill
+            ? { height: Math.max(height ?? 0, HOST_MIN_HEIGHT), minHeight: HOST_MIN_HEIGHT }
+            : {}),
+        }}
       >
-        {!renderHeavyBody ? (
-          <div className="min-h-[3rem] flex-1 rounded-[inherit] bg-panel2/20" aria-hidden />
+        {!collapsed && !locked && (
+          <NodeResizer
+            color="var(--accent)"
+            isVisible={selected}
+            {...(maxPanelW != null ? { maxWidth: maxPanelW } : {})}
+            handleClassName="!h-2 !w-2 !rounded-sm !border-accent !bg-panel"
+          />
+        )}
+
+        <div
+          className={cn(
+            'panel-node__body relative z-0 flex min-h-0 flex-col rounded-[inherit]',
+            !renderHeavyBody && 'panel-node__body--deferred',
+            visualizeFlush
+              ? 'gap-0 px-[var(--node-px,0.75rem)]'
+              : 'gap-[var(--node-gap,0.5rem)] px-[var(--node-px,0.75rem)] pb-[var(--node-py,0.5625rem)]',
+            bodyFlex && !collapsed && 'min-h-0 flex-1 overflow-hidden',
+            chrome.bodyMinClass && !collapsed && `${chrome.bodyMinClass} flex-1 overflow-hidden`,
+            snapFill && !collapsed && 'min-h-0 flex-1 overflow-hidden',
+            layoutHostMode && !collapsed && 'min-h-0 flex-1 overflow-visible',
+            !vizCanvas && !boardCanvas && !snapFill && !layoutHostMode && 'overflow-hidden',
+          )}
+        >
+          {!renderHeavyBody ? (
+            <div className="min-h-[3rem] flex-1 rounded-[inherit] bg-panel2/20" aria-hidden />
+          ) : (
+            <PanelNodeBodySlot
+              id={id}
+              data={data}
+              headerProps={headerProps}
+              headerDensity={headerDensity}
+              flushBody={flushBody}
+              vizCanvas={vizCanvas}
+              boardCanvas={boardCanvas}
+              narrowBody={narrowBody}
+              bodyCap={bodyCap}
+              showBigO={showBigO}
+              onBigOOpenChange={setShowBigO}
+              collapsed={collapsed}
+              layoutHostMode={layoutHostMode}
+            />
+          )}
+        </div>
+
+        {vizCanvas ? (
+          <Handle
+            id={VIZ_INPUT_HANDLE}
+            type="target"
+            position={targetPos}
+            className={handleCls}
+            style={portHandleStyle(targetPos)}
+          />
         ) : (
-          <PanelNodeBodySlot
-            id={id}
-            data={data}
-            headerProps={headerProps}
-            headerDensity={headerDensity}
-            flushBody={flushBody}
-            vizCanvas={vizCanvas}
-            boardCanvas={boardCanvas}
-            narrowBody={narrowBody}
-            bodyCap={bodyCap}
-            showBigO={showBigO}
-            onBigOOpenChange={setShowBigO}
-            collapsed={collapsed}
-            layoutHostMode={layoutHostMode}
+          showTargetHandle && (
+            <Handle
+              type="target"
+              position={targetPos}
+              className={handleCls}
+              style={portHandleStyle(targetPos)}
+            />
+          )
+        )}
+
+        {!collapsed && showSourceHandle && !chrome.hideSourceHandle && (
+          <Handle
+            type="source"
+            position={sourcePos}
+            className={handleCls}
+            style={portHandleStyle(sourcePos)}
           />
         )}
       </div>
-
-      {vizCanvas ? (
-        <Handle
-          id={VIZ_INPUT_HANDLE}
-          type="target"
-          position={targetPos}
-          className={handleCls}
-          style={portHandleStyle(targetPos)}
-        />
-      ) : (
-        showTargetHandle && (
-          <Handle type="target" position={targetPos} className={handleCls} style={portHandleStyle(targetPos)} />
-        )
-      )}
-
-      {!collapsed && showSourceHandle && !chrome.hideSourceHandle && (
-        <Handle type="source" position={sourcePos} className={handleCls} style={portHandleStyle(sourcePos)} />
-      )}
-    </div>
     </>
   );
 }

@@ -1,14 +1,13 @@
 import { Fragment, useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { EditorView } from '@codemirror/view';
+import { Check, Copy, Keyboard, RotateCcw, SkipForward, WrapText } from 'lucide-react';
 import {
-  Check,
-  Copy,
-  Keyboard,
-  RotateCcw,
-  SkipForward,
-  WrapText,
-} from 'lucide-react';
-import { useCanvasStatic, nodeIconGlyph, PanelHeaderAction, PanelHeaderMenu, useQuizHostRelay } from '@/shell/canvas';
+  useCanvasStatic,
+  nodeIconGlyph,
+  PanelHeaderAction,
+  PanelHeaderMenu,
+  useQuizHostRelay,
+} from '@/shell/canvas';
 import { ReassemblePane } from '../../components/puzzle/ReassemblePane';
 import { CodeStudioQuiz } from './CodeStudioQuiz';
 import { patternsForTags } from '../../content';
@@ -76,7 +75,12 @@ function PhaseStepper({
   if (seq.length < 2) return null;
   const curIdx = seq.indexOf(phase);
   return (
-    <div className={cn('nodrag flex h-6 shrink-0 items-center gap-0.5 rounded-md bg-panel2 p-0.5 font-medium', chromeText.sm)}>
+    <div
+      className={cn(
+        'nodrag flex h-6 shrink-0 items-center gap-0.5 rounded-md bg-panel2 p-0.5 font-medium',
+        chromeText.sm,
+      )}
+    >
       {seq.map((p, idx) => {
         const done = idx < curIdx;
         const active = idx === curIdx;
@@ -292,14 +296,18 @@ export function CodeStudioProvider({
   );
 
   if (variants.length === 0) {
-    return <p className={cn('px-3 py-2 text-ink3', chromeText.base)}>No source for this problem.</p>;
+    return (
+      <p className={cn('px-3 py-2 text-ink3', chromeText.base)}>No source for this problem.</p>
+    );
   }
 
   return (
     <CodeStudioContentContext.Provider value={contentValue}>
       <CodeStudioPhaseContext.Provider value={phaseValue}>
         <CodeStudioDraftContext.Provider value={draftValue}>
-          <CodeStudioEditorContext.Provider value={editorValue}>{children}</CodeStudioEditorContext.Provider>
+          <CodeStudioEditorContext.Provider value={editorValue}>
+            {children}
+          </CodeStudioEditorContext.Provider>
         </CodeStudioDraftContext.Provider>
       </CodeStudioPhaseContext.Provider>
     </CodeStudioContentContext.Provider>
@@ -355,9 +363,18 @@ function recallExtrasOverflow({
 /** Inline header controls — icon-only with tooltips. */
 export function CodeStudioToolbar() {
   const { variants, active, setActive, code } = useCodeStudioContent();
-  const { blind, setBlind, peek, setPeek, persistDraft, timerRunning, setTimerRunning, timerLabel } =
-    useCodeStudioDraft();
-  const { copied, copyRef, editorPrefs, setEditorPrefs, draftViewRef, formatBothRef, foldBothRef } = useCodeStudioEditor();
+  const {
+    blind,
+    setBlind,
+    peek,
+    setPeek,
+    persistDraft,
+    timerRunning,
+    setTimerRunning,
+    timerLabel,
+  } = useCodeStudioDraft();
+  const { copied, copyRef, editorPrefs, setEditorPrefs, draftViewRef, formatBothRef, foldBothRef } =
+    useCodeStudioEditor();
   const {
     phase,
     phaseSeq,
@@ -371,7 +388,14 @@ export function CodeStudioToolbar() {
   } = useCodeStudioPhase();
 
   if (phaseLocked) {
-    const extras = recallExtrasOverflow({ copied, copyRef, hasReassemble, hasQuiz, resetReassemble, goToPhase });
+    const extras = recallExtrasOverflow({
+      copied,
+      copyRef,
+      hasReassemble,
+      hasQuiz,
+      resetReassemble,
+      goToPhase,
+    });
     return (
       <>
         <HeaderLangTabs variants={variants} active={active} onPick={setActive} />
@@ -394,14 +418,22 @@ export function CodeStudioToolbar() {
               formatBothRef={formatBothRef}
               foldBothRef={foldBothRef}
               lang={code?.lang}
-              trailing={extras.length > 0 ? <PanelHeaderMenu title="More actions" items={extras} /> : undefined}
+              trailing={
+                extras.length > 0 ? (
+                  <PanelHeaderMenu title="More actions" items={extras} />
+                ) : undefined
+              }
             />
           </>
         ) : (
           hasReassemble && (
             <>
               <ToolbarDivider />
-              <PanelHeaderAction variant="ghost" title="Restart structure" onClick={resetReassemble}>
+              <PanelHeaderAction
+                variant="ghost"
+                title="Restart structure"
+                onClick={resetReassemble}
+              >
                 <RotateCcw className={nodeIconGlyph} />
               </PanelHeaderAction>
             </>
@@ -411,7 +443,14 @@ export function CodeStudioToolbar() {
     );
   }
 
-  const extras = recallExtrasOverflow({ copied, copyRef, hasReassemble, hasQuiz, resetReassemble, goToPhase });
+  const extras = recallExtrasOverflow({
+    copied,
+    copyRef,
+    hasReassemble,
+    hasQuiz,
+    resetReassemble,
+    goToPhase,
+  });
 
   const structureOverflow = [
     {
@@ -461,13 +500,21 @@ export function CodeStudioToolbar() {
             formatBothRef={formatBothRef}
             foldBothRef={foldBothRef}
             lang={code?.lang}
-            trailing={extras.length > 0 ? <PanelHeaderMenu title="More actions" items={extras} /> : undefined}
+            trailing={
+              extras.length > 0 ? (
+                <PanelHeaderMenu title="More actions" items={extras} />
+              ) : undefined
+            }
           />
         </>
       ) : (
         <>
           <ToolbarDivider />
-          <PanelHeaderAction variant="ghost" title={`Skip to ${nextLabel}`} onClick={() => advance()}>
+          <PanelHeaderAction
+            variant="ghost"
+            title={`Skip to ${nextLabel}`}
+            onClick={() => advance()}
+          >
             <SkipForward className={nodeIconGlyph} />
           </PanelHeaderAction>
           {hasReassemble && (
@@ -476,7 +523,11 @@ export function CodeStudioToolbar() {
             </PanelHeaderAction>
           )}
           {!hasReassemble && hasQuiz && (
-            <PanelHeaderAction variant="ghost" title="Retake the quiz" onClick={() => goToPhase('quiz')}>
+            <PanelHeaderAction
+              variant="ghost"
+              title="Retake the quiz"
+              onClick={() => goToPhase('quiz')}
+            >
               <RotateCcw className={nodeIconGlyph} />
             </PanelHeaderAction>
           )}
@@ -490,7 +541,8 @@ export function CodeStudioToolbar() {
 export function CodeStudioBody() {
   const { reference, code, theme, active } = useCodeStudioContent();
   const { draft, blind, peek, persistDraft } = useCodeStudioDraft();
-  const { editorPrefs, setEditorPrefs, draftViewRef, formatBothRef, foldBothRef } = useCodeStudioEditor();
+  const { editorPrefs, setEditorPrefs, draftViewRef, formatBothRef, foldBothRef } =
+    useCodeStudioEditor();
   const {
     phase,
     phaseTransition,
@@ -590,25 +642,44 @@ export function CodeStudioFooter() {
         </span>
       )}
       {phase === 'recall' && timerRunning && (
-        <span className={cn('rounded-md bg-panel2 px-2 py-0.5 font-mono tabular-nums text-ink2', chromeText.sm)}>
+        <span
+          className={cn(
+            'rounded-md bg-panel2 px-2 py-0.5 font-mono tabular-nums text-ink2',
+            chromeText.sm,
+          )}
+        >
           {timerLabel}
         </span>
       )}
       {stat.streak > 0 && (
-        <span className={cn('rounded-md bg-goodbg px-2 py-0.5 text-good', chromeText.sm)}>streak {stat.streak}</span>
+        <span className={cn('rounded-md bg-goodbg px-2 py-0.5 text-good', chromeText.sm)}>
+          streak {stat.streak}
+        </span>
       )}
       <span className="flex-1" />
       {timeLabel && (
-        <span className={cn('rounded-md border border-edge bg-panel2 px-2 py-0.5 font-mono text-ink', chromeText.sm)}>
+        <span
+          className={cn(
+            'rounded-md border border-edge bg-panel2 px-2 py-0.5 font-mono text-ink',
+            chromeText.sm,
+          )}
+        >
           Time {timeLabel}
         </span>
       )}
       {spaceLabel && (
-        <span className={cn('rounded-md border border-edge bg-panel2 px-2 py-0.5 font-mono text-ink', chromeText.sm)}>
+        <span
+          className={cn(
+            'rounded-md border border-edge bg-panel2 px-2 py-0.5 font-mono text-ink',
+            chromeText.sm,
+          )}
+        >
           Space {spaceLabel}
         </span>
       )}
-      {!timeLabel && !spaceLabel && <span className={cn('text-ink3', chromeText.sm)}>No complexity in source</span>}
+      {!timeLabel && !spaceLabel && (
+        <span className={cn('text-ink3', chromeText.sm)}>No complexity in source</span>
+      )}
     </div>
   );
 }

@@ -54,7 +54,13 @@ export function filterKnownNodes(nodes: Node[]): Node[] {
     }
     if (n.type === 'panel') {
       const kind = (n.data as { kind?: string })?.kind;
-      return kind != null && (getPanelConfig(kind) != null || kind.startsWith('cases') || kind === 'quiz' || kind === 'simulate');
+      return (
+        kind != null &&
+        (getPanelConfig(kind) != null ||
+          kind.startsWith('cases') ||
+          kind === 'quiz' ||
+          kind === 'simulate')
+      );
     }
     return false;
   });
@@ -95,7 +101,10 @@ export function projectStateFromJson(json: string): ProjectState | null {
   }
 }
 
-export function downloadProjectState(state: ProjectState, filename = 'algo-moves-project.json'): void {
+export function downloadProjectState(
+  state: ProjectState,
+  filename = 'algo-moves-project.json',
+): void {
   const blob = new Blob([projectStateToJson(state)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

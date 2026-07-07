@@ -21,7 +21,9 @@ export function QuizChoiceLabel({
     size === 'mobile' ? 'text-[14.5px]' : 'text-[13px]',
     complexity && 'font-mono text-accent',
     code && 'rounded-md bg-panel2/80 px-1.5 py-0.5 font-mono text-[12.5px]',
-    !complexity && !code && (state === 'correct' ? 'text-good' : state === 'wrong' ? 'text-bad' : 'text-ink'),
+    !complexity &&
+      !code &&
+      (state === 'correct' ? 'text-good' : state === 'wrong' ? 'text-bad' : 'text-ink'),
     state === 'dim' && 'opacity-70',
   );
 

@@ -39,7 +39,11 @@ function ScoreRing({ score, total }: { score: number; total: number }) {
   const c = 2 * Math.PI * r;
   const tone = pct === 1 ? 'var(--good)' : pct >= 0.5 ? 'var(--accent)' : 'var(--bad)';
   return (
-    <div className="relative grid h-[84px] w-[84px] place-items-center" role="img" aria-label={`Score ${score} out of ${total}`}>
+    <div
+      className="relative grid h-[84px] w-[84px] place-items-center"
+      role="img"
+      aria-label={`Score ${score} out of ${total}`}
+    >
       <svg viewBox="0 0 72 72" className="h-[84px] w-[84px] -rotate-90" aria-hidden>
         <circle cx="36" cy="36" r={r} fill="none" stroke="var(--surface-2)" strokeWidth="6" />
         <circle
@@ -57,14 +61,24 @@ function ScoreRing({ score, total }: { score: number; total: number }) {
         />
       </svg>
       <div className="absolute flex flex-col items-center leading-none">
-        <span className={cn('font-mono font-semibold tabular-nums text-ink', chromeText.title)}>{score}</span>
+        <span className={cn('font-mono font-semibold tabular-nums text-ink', chromeText.title)}>
+          {score}
+        </span>
         <span className={cn('font-mono text-ink3', chromeText.sm)}>/ {total}</span>
       </div>
     </div>
   );
 }
 
-export function CodeStudioQuiz({ quiz, itemId, initial, nextLabel, onProgress, onContinue, onAnswer }: CodeStudioQuizProps) {
+export function CodeStudioQuiz({
+  quiz,
+  itemId,
+  initial,
+  nextLabel,
+  onProgress,
+  onContinue,
+  onAnswer,
+}: CodeStudioQuizProps) {
   const isMobile = useIsMobile();
   const total = quiz.length;
   const [i, setI] = useState(() => Math.min(initial?.index ?? 0, Math.max(total - 1, 0)));
@@ -207,17 +221,29 @@ export function CodeStudioQuiz({ quiz, itemId, initial, nextLabel, onProgress, o
       aria-label="Concept check quiz"
       role="region"
     >
-      <div key={done ? 'results' : `q-${i}`} className="code-studio-quiz-step flex min-h-0 flex-1 flex-col">
+      <div
+        key={done ? 'results' : `q-${i}`}
+        className="code-studio-quiz-step flex min-h-0 flex-1 flex-col"
+      >
         {done ? (
-          <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-3 py-6 text-center" role="status" aria-live="polite">
+          <div
+            className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-3 py-6 text-center"
+            role="status"
+            aria-live="polite"
+          >
             <ScoreRing score={score} total={total} />
-            <p className={cn('max-w-[280px] leading-snug text-ink2', chromeText.sm)}>{scoreMessage(score, total)}</p>
+            <p className={cn('max-w-[280px] leading-snug text-ink2', chromeText.sm)}>
+              {scoreMessage(score, total)}
+            </p>
             <div className="flex shrink-0 flex-nowrap items-center gap-2">
               <button
                 type="button"
                 onClick={restart}
                 title="Retry quiz"
-                className={cn('nodrag inline-flex items-center gap-1 rounded-md border border-edge px-2.5 py-1.5 text-ink2 transition-colors hover:border-accent hover:text-ink', chromeText.tight)}
+                className={cn(
+                  'nodrag inline-flex items-center gap-1 rounded-md border border-edge px-2.5 py-1.5 text-ink2 transition-colors hover:border-accent hover:text-ink',
+                  chromeText.tight,
+                )}
               >
                 <RotateCcw className="h-3.5 w-3.5" /> {isMobile ? 'Retry' : 'Retry quiz'}
               </button>
@@ -225,7 +251,10 @@ export function CodeStudioQuiz({ quiz, itemId, initial, nextLabel, onProgress, o
                 type="button"
                 onClick={() => onContinue(score)}
                 title={`Continue to ${nextLabel}`}
-                className={cn('nodrag inline-flex items-center gap-1 rounded-md bg-accent px-3 py-1.5 font-medium text-white transition-opacity hover:opacity-90', chromeText.tight)}
+                className={cn(
+                  'nodrag inline-flex items-center gap-1 rounded-md bg-accent px-3 py-1.5 font-medium text-white transition-opacity hover:opacity-90',
+                  chromeText.tight,
+                )}
               >
                 {isMobile ? 'Continue' : `Continue to ${nextLabel}`}
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -245,18 +274,31 @@ export function CodeStudioQuiz({ quiz, itemId, initial, nextLabel, onProgress, o
                     : idx === i
                       ? 'bg-accent'
                       : 'bg-edge';
-                  return <span key={idx} className={cn('h-1 flex-1 rounded-full transition-colors', cls)} />;
+                  return (
+                    <span
+                      key={idx}
+                      className={cn('h-1 flex-1 rounded-full transition-colors', cls)}
+                    />
+                  );
                 })}
               </div>
               <span className={cn('shrink-0 font-mono tabular-nums text-ink3', chromeText.sm)}>
                 {i + 1}/{total}
               </span>
-              <span className={cn('shrink-0 rounded bg-panel2 px-1.5 py-px font-mono tabular-nums text-ink2', chromeText.sm)}>
+              <span
+                className={cn(
+                  'shrink-0 rounded bg-panel2 px-1.5 py-px font-mono tabular-nums text-ink2',
+                  chromeText.sm,
+                )}
+              >
                 {score}✓
               </span>
             </div>
 
-            <p className={cn('font-medium leading-snug text-ink', chromeText.base)} id={`quiz-q-${i}`}>
+            <p
+              className={cn('font-medium leading-snug text-ink', chromeText.base)}
+              id={`quiz-q-${i}`}
+            >
               {q.prompt}
             </p>
 
@@ -280,7 +322,8 @@ export function CodeStudioQuiz({ quiz, itemId, initial, nextLabel, onProgress, o
                     disabled={answered}
                     className={cn(
                       'quiz-choice nodrag flex items-start gap-2 rounded-lg border px-2 py-1.5 text-left transition-all',
-                      state === 'idle' && 'border-edge bg-panel2/40 text-ink hover:border-accent/60 hover:bg-panel2',
+                      state === 'idle' &&
+                        'border-edge bg-panel2/40 text-ink hover:border-accent/60 hover:bg-panel2',
                       state === 'correct' && 'quiz-choice-correct border-good bg-goodbg text-good',
                       state === 'wrong' && 'border-bad bg-badbg text-bad',
                       state === 'dim' && 'border-edge text-ink3 opacity-50',
@@ -340,7 +383,10 @@ export function CodeStudioQuiz({ quiz, itemId, initial, nextLabel, onProgress, o
                 <button
                   type="button"
                   onClick={afterAnswer}
-                  className={cn('nodrag mt-0.5 inline-flex w-fit items-center gap-0.5 self-end rounded-md bg-accent px-2.5 py-1 font-medium text-white transition-opacity hover:opacity-90', chromeText.sm)}
+                  className={cn(
+                    'nodrag mt-0.5 inline-flex w-fit items-center gap-0.5 self-end rounded-md bg-accent px-2.5 py-1 font-medium text-white transition-opacity hover:opacity-90',
+                    chromeText.sm,
+                  )}
                 >
                   {isCorrect ? (last ? 'See score' : 'Next') : 'Try again'}
                   <ArrowRight className="h-3 w-3" />

@@ -22,7 +22,8 @@ function consumeDraftSoftReload(): boolean {
 
 function isNavigationReload(): boolean {
   if (typeof performance === 'undefined') return false;
-  const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+  const nav = performance.getEntriesByType('navigation')[0] as
+    PerformanceNavigationTiming | undefined;
   return nav?.type === 'reload';
 }
 

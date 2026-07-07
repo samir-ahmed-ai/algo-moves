@@ -51,7 +51,12 @@ export function CollabCodeStudioToolbar() {
         </button>
       ))}
       <span className="mx-0.5 h-3 w-px bg-edge" aria-hidden />
-      <button type="button" onClick={copy} className="rounded-md p-1 text-ink3 transition-colors hover:text-ink" title="Copy">
+      <button
+        type="button"
+        onClick={copy}
+        className="rounded-md p-1 text-ink3 transition-colors hover:text-ink"
+        title="Copy"
+      >
         <Copy className="h-3 w-3" />
       </button>
       {copied && <span className={cn('text-good', chromeText.xs)}>Copied</span>}
@@ -59,7 +64,10 @@ export function CollabCodeStudioToolbar() {
         <button
           type="button"
           onClick={() => sync.setLocked(!sync.locked)}
-          className={cn('rounded-md p-1 text-ink3 transition-colors hover:text-ink', sync.locked && 'text-bad')}
+          className={cn(
+            'rounded-md p-1 text-ink3 transition-colors hover:text-ink',
+            sync.locked && 'text-bad',
+          )}
           title={sync.locked ? 'Unlock editor' : 'Lock editor for candidates'}
         >
           {sync.locked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
@@ -119,7 +127,10 @@ export function CollabCodeStudioBody() {
             {remoteCursorLines.map((c) => (
               <span
                 key={c.name}
-                className={cn('inline-flex items-center gap-0.5 rounded-sm px-1 py-px', chromeText.xs)}
+                className={cn(
+                  'inline-flex items-center gap-0.5 rounded-sm px-1 py-px',
+                  chromeText.xs,
+                )}
                 style={{ backgroundColor: `${c.color}20`, color: c.color }}
               >
                 L{c.line} {c.name}
@@ -130,7 +141,11 @@ export function CollabCodeStudioBody() {
         <button
           type="button"
           onClick={() => setWrap((v) => !v)}
-          className={cn('ml-auto rounded px-1.5 py-0.5 text-ink3 hover:text-ink', chromeText.xs, wrap && 'text-accent')}
+          className={cn(
+            'ml-auto rounded px-1.5 py-0.5 text-ink3 hover:text-ink',
+            chromeText.xs,
+            wrap && 'text-accent',
+          )}
         >
           Wrap {wrap ? 'on' : 'off'}
         </button>
@@ -143,7 +158,9 @@ export function CollabCodeStudioBody() {
         dark={sync.dark}
         minHeight="280px"
         onChange={onChange}
-        onView={(v) => { viewRef.current = v; }}
+        onView={(v) => {
+          viewRef.current = v;
+        }}
         className="h-full min-h-0 flex-1"
       />
     </div>

@@ -1,7 +1,16 @@
-import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
+import {
+  definePlugin,
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+} from '../../core/types';
 import { ArrayBars, type BarTone } from '../../components/board/ArrayBars';
 import { wireTeachingStack } from '../_shared/pluginKit';
-import { createSelectionSortRecorder, type SortInput, type SelectionSortState as SortState } from '../_shared/sortRecorder';
+import {
+  createSelectionSortRecorder,
+  type SortInput,
+  type SelectionSortState as SortState,
+} from '../_shared/sortRecorder';
 import { verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
@@ -9,33 +18,83 @@ import { SortInspector } from '../_shared/sortInspector';
 import { VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 
 function record({ values: initial }: SortInput): Frame<SortState>[] {
-  const { values, n, frames, emit, incCompare, incSwap, setSortedUpto } = createSelectionSortRecorder(initial);
+  const { values, n, frames, emit, incCompare, incSwap, setSortedUpto } =
+    createSelectionSortRecorder(initial);
 
-  emit('INIT', `n=${n}`, `Selection sort: each round, scan the unsorted suffix to find the smallest value, then swap it to the front. The prefix stays sorted.`, null, null);
+  emit(
+    'INIT',
+    `n=${n}`,
+    `Selection sort: each round, scan the unsorted suffix to find the smallest value, then swap it to the front. The prefix stays sorted.`,
+    null,
+    null,
+  );
 
   for (let i = 0; i < n - 1; i++) {
     let minIdx = i;
-    emit('MIN', `min=${minIdx}`, `Start round ${i + 1}: assume the smallest of the unsorted part is at ${minIdx} (value ${values[minIdx]}).`, null, minIdx);
+    emit(
+      'MIN',
+      `min=${minIdx}`,
+      `Start round ${i + 1}: assume the smallest of the unsorted part is at ${minIdx} (value ${values[minIdx]}).`,
+      null,
+      minIdx,
+    );
     for (let j = i + 1; j < n; j++) {
       incCompare();
-      emit('SCAN', `${values[j]} ? ${values[minIdx]}`, `Compare ${values[j]} at index ${j} against the current minimum ${values[minIdx]}.`, j, minIdx);
+      emit(
+        'SCAN',
+        `${values[j]} ? ${values[minIdx]}`,
+        `Compare ${values[j]} at index ${j} against the current minimum ${values[minIdx]}.`,
+        j,
+        minIdx,
+      );
       if (values[j] < values[minIdx]) {
         minIdx = j;
-        emit('MIN', `min=${minIdx}`, `${values[j]} is smaller, so the new minimum is at index ${minIdx}.`, null, minIdx);
+        emit(
+          'MIN',
+          `min=${minIdx}`,
+          `${values[j]} is smaller, so the new minimum is at index ${minIdx}.`,
+          null,
+          minIdx,
+        );
       }
     }
     if (minIdx !== i) {
       [values[i], values[minIdx]] = [values[minIdx], values[i]];
       incSwap();
-      emit('SWAP', `swap ${i}↔${minIdx}`, `Swap the minimum into position ${i}. It now holds its final value.`, null, i);
+      emit(
+        'SWAP',
+        `swap ${i}↔${minIdx}`,
+        `Swap the minimum into position ${i}. It now holds its final value.`,
+        null,
+        i,
+      );
     } else {
-      emit('SWAP', `min already @${i}`, `The minimum is already at index ${i}, so no swap is needed.`, null, i);
+      emit(
+        'SWAP',
+        `min already @${i}`,
+        `The minimum is already at index ${i}, so no swap is needed.`,
+        null,
+        i,
+      );
     }
     setSortedUpto(i + 1);
-    emit('LOCK', `sorted ${i + 1}`, `Index ${i} is locked in. The sorted prefix now spans the first ${i + 1} element${i === 0 ? '' : 's'}.`, null, null);
+    emit(
+      'LOCK',
+      `sorted ${i + 1}`,
+      `Index ${i} is locked in. The sorted prefix now spans the first ${i + 1} element${i === 0 ? '' : 's'}.`,
+      null,
+      null,
+    );
   }
   setSortedUpto(n);
-  emit('DONE', 'sorted ✓', `Only one element remains, so it's already in place — the array is fully sorted.`, null, null, 'good');
+  emit(
+    'DONE',
+    'sorted ✓',
+    `Only one element remains, so it's already in place — the array is fully sorted.`,
+    null,
+    null,
+    'good',
+  );
   return frames;
 }
 
@@ -49,17 +108,21 @@ function View({ frame }: PluginViewProps<SortState>) {
     return 'idle';
   };
   return (
-    <VizStage rail={<>
-      <RailGroup label="round">
-        <RailStat k="min@" v={s.minIdx ?? '—'} tone="accent" />
-        <RailStat k="sorted" v={s.sortedUpto} tone={s.sortedUpto > 0 ? 'good' : undefined} />
-      </RailGroup>
-      <RailGroup label="stats">
-        <RailStat k="cmps" v={s.comparisons} />
-        <RailStat k="swaps" v={s.swaps} />
-      </RailGroup>
-      {done && <RailResult label="result" value="sorted ✓" tone="good" />}
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="round">
+            <RailStat k="min@" v={s.minIdx ?? '—'} tone="accent" />
+            <RailStat k="sorted" v={s.sortedUpto} tone={s.sortedUpto > 0 ? 'good' : undefined} />
+          </RailGroup>
+          <RailGroup label="stats">
+            <RailStat k="cmps" v={s.comparisons} />
+            <RailStat k="swaps" v={s.swaps} />
+          </RailGroup>
+          {done && <RailResult label="result" value="sorted ✓" tone="good" />}
+        </>
+      }
+    >
       <ArrayBars values={s.values} tone={tone} height={242} />
     </VizStage>
   );
@@ -129,8 +192,22 @@ const inputs = [
 ];
 const verdict = verdictAlwaysOk('sorted');
 const teaching = wireTeachingStack({
-  record, View, inputs, verdict,
-  practice: { quiz, codePieces, cases: { good: goodCases, bad: badCases, intro, goodLabel: 'selection passes', badLabel: 'worst cases' }, simulateQuestion: 'Which index is chosen as the minimum next?' },
+  record,
+  View,
+  inputs,
+  verdict,
+  practice: {
+    quiz,
+    codePieces,
+    cases: {
+      good: goodCases,
+      bad: badCases,
+      intro,
+      goodLabel: 'selection passes',
+      badLabel: 'worst cases',
+    },
+    simulateQuestion: 'Which index is chosen as the minimum next?',
+  },
 });
 
 export const selectionSortPlugin = definePlugin<SortInput, SortState>({
@@ -139,7 +216,8 @@ export const selectionSortPlugin = definePlugin<SortInput, SortState>({
     title: 'Selection sort',
     difficulty: 'Easy',
     tags: ['array', 'sorting'],
-    summary: 'Each round, scan the unsorted suffix for its minimum and swap it into the next slot; the prefix grows sorted one element at a time.',
+    summary:
+      'Each round, scan the unsorted suffix for its minimum and swap it into the next slot; the prefix grows sorted one element at a time.',
     source: 'https://en.wikipedia.org/wiki/Selection_sort',
   },
   inputs,

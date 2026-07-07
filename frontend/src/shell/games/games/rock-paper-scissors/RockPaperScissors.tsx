@@ -6,7 +6,15 @@ import { useMatchReporter } from '../../net/useMatchReporter';
 import { Avatar } from '../../ui/Avatar';
 import { Confetti, CountdownRing } from '../../ui/effects';
 import { usePrefersReducedMotion } from '../../ui/hooks';
-import { ChoiceCard, GameArena, GameBody, ResultBanner, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
+import {
+  ChoiceCard,
+  GameArena,
+  GameBody,
+  ResultBanner,
+  TouchButton,
+  TurnBadge,
+  WaitingForPeer,
+} from '../../ui/gamesUi';
 import { hapticError, hapticSuccess } from '@/lib/utils/haptic';
 import { playCue } from '@/lib/utils/audio';
 import { cn } from '@/lib/utils/cn';
@@ -124,7 +132,9 @@ export function RockPaperScissors() {
 
   // Picks for the active round, and how many active players have locked in.
   const roundPicks = picksByRound[round] ?? {};
-  const lockedCount = Object.keys(roundPicks).filter((id) => roster.some((p) => p.id === id)).length;
+  const lockedCount = Object.keys(roundPicks).filter((id) =>
+    roster.some((p) => p.id === id),
+  ).length;
   const allLockedIn = roster.length >= 2 && lockedCount >= roster.length;
 
   // Once every seat has thrown, count down before revealing.
@@ -188,10 +198,7 @@ export function RockPaperScissors() {
     const t = setTimeout(() => {
       const done = isNPlayer
         ? npMatchOver(roundRef.current + 1)
-        : matchOver(
-            scoresRef.current[self?.id ?? ''] ?? 0,
-            scoresRef.current[peer?.id ?? ''] ?? 0,
-          );
+        : matchOver(scoresRef.current[self?.id ?? ''] ?? 0, scoresRef.current[peer?.id ?? ''] ?? 0);
       if (done) {
         setPhase('over');
       } else {
@@ -210,7 +217,7 @@ export function RockPaperScissors() {
     return matchPlacements(filled);
   }, [roster, scores]);
 
-  const myPlacement = self ? placements.find((p) => p.id === self.id)?.placement ?? null : null;
+  const myPlacement = self ? (placements.find((p) => p.id === self.id)?.placement ?? null) : null;
   const iWon = myPlacement === 1;
 
   useEffect(() => {
@@ -225,9 +232,7 @@ export function RockPaperScissors() {
     }
     if (reportedRef.current) return;
     reportedRef.current = true;
-    void report(
-      placements.map((p) => ({ peerId: p.id, placement: p.placement, score: p.score })),
-    );
+    void report(placements.map((p) => ({ peerId: p.id, placement: p.placement, score: p.score })));
   }, [phase, iWon, isSpectator, placements, report]);
 
   const pick = (c: Choice) => {
@@ -280,7 +285,11 @@ export function RockPaperScissors() {
       <GameBody className="relative">
         <Confetti fire={fireConfetti} />
         <Scoreboard roster={roster} scores={scores} selfId={self?.id} taunts={{}} />
-        <ResultBanner tone={isSpectator ? 'draw' : iWon ? 'win' : 'lose'} title={title} detail={detail} />
+        <ResultBanner
+          tone={isSpectator ? 'draw' : iWon ? 'win' : 'lose'}
+          title={title}
+          detail={detail}
+        />
         {!isSpectator ? (
           <TouchButton variant="primary" size="md" className="w-full" onClick={rematch}>
             {strings.rematch}
@@ -309,93 +318,121 @@ export function RockPaperScissors() {
       </p>
 
       <GameArena accent="#f59e0b">
-      {isNPlayer ? (
-        <div className="grid grid-cols-2 gap-2">
-          {roster.map((p) => {
-            const theirPick = roundPicks[p.id];
-            const showFace = p.id === self?.id || revealing;
-            return (
-              <Hand
-                key={p.id}
-                label={p.id === self?.id ? strings.you : p.name}
-                emoji={theirPick ? (showFace ? emojiFor(theirPick) : '🔒') : phase === 'countdown' ? '🔒' : '❔'}
-                locked={!!theirPick}
-                revealed={revealing}
-                taunt={taunts[p.id]}
-                reduced={reduced}
-              />
-            );
-          })}
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-2">
-          <Hand
-            label={self?.name ?? strings.you}
-            emoji={myPick ? emojiFor(myPick) : '⏳'}
-            locked={!!myPick}
-            revealed
-            taunt={self ? taunts[self.id] : undefined}
-            reduced={reduced}
-          />
-          <Hand
-            label={peer?.name ?? strings.partner}
-            emoji={
-              peer && roundPicks[peer.id]
-                ? revealing
-                  ? emojiFor(roundPicks[peer.id])
-                  : '🔒'
-                : '❔'
-            }
-            locked={!!(peer && roundPicks[peer.id])}
-            revealed={revealing}
-            taunt={peer ? taunts[peer.id] : undefined}
-            reduced={reduced}
-          />
-        </div>
-      )}
-
-      {phase === 'countdown' ? (
-        <div className="flex flex-col items-center gap-1.5">
-          <CountdownRing progress={count / COUNTDOWN_SECS} size={44} tone="accent" label={String(count)} />
-          <TurnBadge tone="wait">{strings.getReady}</TurnBadge>
-        </div>
-      ) : revealing ? (
-        <div className="flex flex-col items-center gap-2">
-          {twoPlayerOutcome ? (
-            <p className="text-center text-sm font-bold">
-              {twoPlayerOutcome === 'win'
-                ? strings.youTakeIt
-                : twoPlayerOutcome === 'lose'
-                  ? strings.theyGotYou
-                  : strings.tie}
-            </p>
-          ) : (
-            <p className="text-center text-sm font-semibold text-ink2">{strings.roundLabel(round + 1, totalRounds)}</p>
-          )}
-          {!isSpectator ? (
-            <TauntBar taunts={strings.taunts} onFling={flingTaunt} label={strings.sendTaunt} />
-          ) : null}
-        </div>
-      ) : isSpectator ? (
-        <div className="flex flex-col items-center gap-2">
-          <TurnBadge tone="wait">{strings.spectating}</TurnBadge>
-          <p className="text-xs text-ink3">{strings.waitingField(Math.max(0, roster.length - lockedCount))}</p>
-        </div>
-      ) : (
-        <div className="flex flex-col items-center gap-2">
-          <TurnBadge tone={myPick ? 'wait' : 'you'}>
-            {myPick ? (isNPlayer ? strings.waitingField(roster.length - lockedCount) : strings.lockedIn) : strings.makeMove}
-          </TurnBadge>
-          <div className="grid w-full grid-cols-3 gap-1.5">
-            {CHOICES.map((c) => (
-              <ChoiceCard key={c.id} selected={myPick === c.id} disabled={!!myPick} onClick={() => pick(c.id)}>
-                <span className="text-2xl leading-none">{c.emoji}</span>
-                <span className="text-[length:var(--fs-2xs)] font-semibold">{strings.choiceLabel[c.id]}</span>
-              </ChoiceCard>
-            ))}
+        {isNPlayer ? (
+          <div className="grid grid-cols-2 gap-2">
+            {roster.map((p) => {
+              const theirPick = roundPicks[p.id];
+              const showFace = p.id === self?.id || revealing;
+              return (
+                <Hand
+                  key={p.id}
+                  label={p.id === self?.id ? strings.you : p.name}
+                  emoji={
+                    theirPick
+                      ? showFace
+                        ? emojiFor(theirPick)
+                        : '🔒'
+                      : phase === 'countdown'
+                        ? '🔒'
+                        : '❔'
+                  }
+                  locked={!!theirPick}
+                  revealed={revealing}
+                  taunt={taunts[p.id]}
+                  reduced={reduced}
+                />
+              );
+            })}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="grid grid-cols-2 gap-2">
+            <Hand
+              label={self?.name ?? strings.you}
+              emoji={myPick ? emojiFor(myPick) : '⏳'}
+              locked={!!myPick}
+              revealed
+              taunt={self ? taunts[self.id] : undefined}
+              reduced={reduced}
+            />
+            <Hand
+              label={peer?.name ?? strings.partner}
+              emoji={
+                peer && roundPicks[peer.id]
+                  ? revealing
+                    ? emojiFor(roundPicks[peer.id])
+                    : '🔒'
+                  : '❔'
+              }
+              locked={!!(peer && roundPicks[peer.id])}
+              revealed={revealing}
+              taunt={peer ? taunts[peer.id] : undefined}
+              reduced={reduced}
+            />
+          </div>
+        )}
+
+        {phase === 'countdown' ? (
+          <div className="flex flex-col items-center gap-1.5">
+            <CountdownRing
+              progress={count / COUNTDOWN_SECS}
+              size={44}
+              tone="accent"
+              label={String(count)}
+            />
+            <TurnBadge tone="wait">{strings.getReady}</TurnBadge>
+          </div>
+        ) : revealing ? (
+          <div className="flex flex-col items-center gap-2">
+            {twoPlayerOutcome ? (
+              <p className="text-center text-sm font-bold">
+                {twoPlayerOutcome === 'win'
+                  ? strings.youTakeIt
+                  : twoPlayerOutcome === 'lose'
+                    ? strings.theyGotYou
+                    : strings.tie}
+              </p>
+            ) : (
+              <p className="text-center text-sm font-semibold text-ink2">
+                {strings.roundLabel(round + 1, totalRounds)}
+              </p>
+            )}
+            {!isSpectator ? (
+              <TauntBar taunts={strings.taunts} onFling={flingTaunt} label={strings.sendTaunt} />
+            ) : null}
+          </div>
+        ) : isSpectator ? (
+          <div className="flex flex-col items-center gap-2">
+            <TurnBadge tone="wait">{strings.spectating}</TurnBadge>
+            <p className="text-xs text-ink3">
+              {strings.waitingField(Math.max(0, roster.length - lockedCount))}
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-2">
+            <TurnBadge tone={myPick ? 'wait' : 'you'}>
+              {myPick
+                ? isNPlayer
+                  ? strings.waitingField(roster.length - lockedCount)
+                  : strings.lockedIn
+                : strings.makeMove}
+            </TurnBadge>
+            <div className="grid w-full grid-cols-3 gap-1.5">
+              {CHOICES.map((c) => (
+                <ChoiceCard
+                  key={c.id}
+                  selected={myPick === c.id}
+                  disabled={!!myPick}
+                  onClick={() => pick(c.id)}
+                >
+                  <span className="text-2xl leading-none">{c.emoji}</span>
+                  <span className="text-[length:var(--fs-2xs)] font-semibold">
+                    {strings.choiceLabel[c.id]}
+                  </span>
+                </ChoiceCard>
+              ))}
+            </div>
+          </div>
+        )}
       </GameArena>
     </GameBody>
   );
@@ -419,7 +456,13 @@ function Scoreboard({
       <div className="flex items-center justify-center gap-3 text-center">
         <PlayerScore player={a} score={scores[a?.id] ?? 0} isSelf={a?.id === selfId} />
         <span className="text-xs font-semibold text-ink3">vs</span>
-        <PlayerScore player={b} score={scores[b?.id] ?? 0} isSelf={b?.id === selfId} align="right" muted />
+        <PlayerScore
+          player={b}
+          score={scores[b?.id] ?? 0}
+          isSelf={b?.id === selfId}
+          align="right"
+          muted
+        />
       </div>
     );
   }
@@ -435,7 +478,9 @@ function Scoreboard({
         >
           <Avatar seed={p.id} name={p.name} size={20} />
           <span className="max-w-20 truncate text-xs font-semibold text-ink2">{p.name}</span>
-          <span className="font-mono text-sm font-bold tabular-nums text-accent">{scores[p.id] ?? 0}</span>
+          <span className="font-mono text-sm font-bold tabular-nums text-accent">
+            {scores[p.id] ?? 0}
+          </span>
           {taunts[p.id] ? <span className="text-sm leading-none">{taunts[p.id]}</span> : null}
         </div>
       ))}
@@ -458,11 +503,28 @@ function PlayerScore({
 }) {
   return (
     <div className={cn('min-w-0 flex-1', align === 'right' && 'text-right')}>
-      <div className="flex items-center gap-1.5" style={align === 'right' ? { justifyContent: 'flex-end' } : undefined}>
-        {player ? <Avatar seed={player.id} name={player.name} size={22} ring={isSelf ? 'var(--accent)' : undefined} /> : null}
+      <div
+        className="flex items-center gap-1.5"
+        style={align === 'right' ? { justifyContent: 'flex-end' } : undefined}
+      >
+        {player ? (
+          <Avatar
+            seed={player.id}
+            name={player.name}
+            size={22}
+            ring={isSelf ? 'var(--accent)' : undefined}
+          />
+        ) : null}
         <span className="truncate text-sm font-semibold text-ink">{player?.name ?? '—'}</span>
       </div>
-      <div className={cn('font-mono text-xl font-bold tabular-nums', muted ? 'text-ink2' : 'text-accent')}>{score}</div>
+      <div
+        className={cn(
+          'font-mono text-xl font-bold tabular-nums',
+          muted ? 'text-ink2' : 'text-accent',
+        )}
+      >
+        {score}
+      </div>
     </div>
   );
 }
@@ -501,12 +563,19 @@ function Hand({
     <div
       className={cn(
         'relative flex flex-col items-center gap-1 rounded-xl border p-2 transition-colors',
-        revealed ? 'border-accent/40 bg-accentbg' : locked ? 'border-edge2 bg-panel2' : 'border-edge bg-panel',
+        revealed
+          ? 'border-accent/40 bg-accentbg'
+          : locked
+            ? 'border-edge2 bg-panel2'
+            : 'border-edge bg-panel',
       )}
     >
       {taunt ? (
         <span
-          className={cn('absolute -top-2 right-1 text-2xl leading-none', !reduced && 'animate-bounce')}
+          className={cn(
+            'absolute -top-2 right-1 text-2xl leading-none',
+            !reduced && 'animate-bounce',
+          )}
           aria-hidden
         >
           {taunt}
@@ -521,10 +590,20 @@ function Hand({
 }
 
 /** Row of one-tap taunt emojis flung during the reveal beat. */
-function TauntBar({ taunts, onFling, label }: { taunts: string[]; onFling: (e: string) => void; label: string }) {
+function TauntBar({
+  taunts,
+  onFling,
+  label,
+}: {
+  taunts: string[];
+  onFling: (e: string) => void;
+  label: string;
+}) {
   return (
     <div className="flex flex-col items-center gap-1.5">
-      <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">{label}</span>
+      <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">
+        {label}
+      </span>
       <div className="flex gap-1.5">
         {taunts.map((e) => (
           <button

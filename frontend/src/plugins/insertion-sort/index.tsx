@@ -1,6 +1,15 @@
-import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
+import {
+  definePlugin,
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+} from '../../core/types';
 import { wireTeachingStack } from '../_shared/pluginKit';
-import { createInsertionSortRecorder, type SortInput, type InsertionSortState as SortState } from '../_shared/sortRecorder';
+import {
+  createInsertionSortRecorder,
+  type SortInput,
+  type InsertionSortState as SortState,
+} from '../_shared/sortRecorder';
 import { verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
@@ -9,7 +18,8 @@ import { InspectorRow, VizStage, RailGroup, RailStat, RailResult } from '../_sha
 import { SortInspector } from '../_shared/sortInspector';
 
 function record({ values: initial }: SortInput): Frame<SortState>[] {
-  const { values, n, frames, emit, incCompare, incShift, setSortedUpto } = createInsertionSortRecorder(initial);
+  const { values, n, frames, emit, incCompare, incShift, setSortedUpto } =
+    createInsertionSortRecorder(initial);
 
   emit(
     'INIT',
@@ -69,7 +79,15 @@ function record({ values: initial }: SortInput): Frame<SortState>[] {
   }
 
   setSortedUpto(n);
-  emit('DONE', 'sorted ✓', `Every key has been inserted into its place — the array is sorted.`, null, null, null, 'good');
+  emit(
+    'DONE',
+    'sorted ✓',
+    `Every key has been inserted into its place — the array is sorted.`,
+    null,
+    null,
+    null,
+    'good',
+  );
   return frames;
 }
 
@@ -83,19 +101,23 @@ function View({ frame }: PluginViewProps<SortState>) {
     return 'idle';
   };
   return (
-    <VizStage rail={<>
-      <RailGroup label="scan">
-        <RailStat k="key" v={s.key ?? '—'} tone="accent" />
-        <RailStat k="keyIdx" v={s.keyIdx ?? '—'} />
-        <RailStat k="compare" v={s.compare ?? '—'} />
-      </RailGroup>
-      <RailGroup label="progress">
-        <RailStat k="sorted" v={s.sortedUpto} tone={s.sortedUpto > 0 ? 'good' : undefined} />
-        <RailStat k="cmps" v={s.comparisons} />
-        <RailStat k="shifts" v={s.shifts} />
-      </RailGroup>
-      {done && <RailResult label="result" value="sorted ✓" tone="good" />}
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="scan">
+            <RailStat k="key" v={s.key ?? '—'} tone="accent" />
+            <RailStat k="keyIdx" v={s.keyIdx ?? '—'} />
+            <RailStat k="compare" v={s.compare ?? '—'} />
+          </RailGroup>
+          <RailGroup label="progress">
+            <RailStat k="sorted" v={s.sortedUpto} tone={s.sortedUpto > 0 ? 'good' : undefined} />
+            <RailStat k="cmps" v={s.comparisons} />
+            <RailStat k="shifts" v={s.shifts} />
+          </RailGroup>
+          {done && <RailResult label="result" value="sorted ✓" tone="good" />}
+        </>
+      }
+    >
       <ArrayBars values={s.values} tone={tone} height={242} />
     </VizStage>
   );
@@ -155,14 +177,22 @@ function insertionSort(nums: number[]): void {
 `;
 
 const inputs = [
-    { id: 'mix', label: '[5, 2, 8, 1, 9, 3]', value: { values: [5, 2, 8, 1, 9, 3] } },
-    { id: 'rev', label: '[7, 6, 5, 4, 3] · worst', value: { values: [7, 6, 5, 4, 3] } },
-    { id: 'near', label: '[1, 2, 4, 3, 5] · best', value: { values: [1, 2, 4, 3, 5] } },
-  ];
+  { id: 'mix', label: '[5, 2, 8, 1, 9, 3]', value: { values: [5, 2, 8, 1, 9, 3] } },
+  { id: 'rev', label: '[7, 6, 5, 4, 3] · worst', value: { values: [7, 6, 5, 4, 3] } },
+  { id: 'near', label: '[1, 2, 4, 3, 5] · best', value: { values: [1, 2, 4, 3, 5] } },
+];
 const verdict = verdictAlwaysOk('sorted');
 const teaching = wireTeachingStack({
-  record, View, inputs, verdict,
-  practice: { quiz, codePieces, cases: { good: goodCases, bad: badCases, intro, goodLabel: 'insertion steps' }, simulateQuestion: 'Which element is inserted into the sorted prefix next?' },
+  record,
+  View,
+  inputs,
+  verdict,
+  practice: {
+    quiz,
+    codePieces,
+    cases: { good: goodCases, bad: badCases, intro, goodLabel: 'insertion steps' },
+    simulateQuestion: 'Which element is inserted into the sorted prefix next?',
+  },
 });
 
 export const insertionSortPlugin = definePlugin<SortInput, SortState>({
@@ -171,7 +201,8 @@ export const insertionSortPlugin = definePlugin<SortInput, SortState>({
     title: 'Insertion sort',
     difficulty: 'Easy',
     tags: ['array', 'sorting'],
-    summary: 'Grow a sorted prefix: take each next element as a key, shift larger sorted elements right, then drop the key into the gap.',
+    summary:
+      'Grow a sorted prefix: take each next element as a key, shift larger sorted elements right, then drop the key into the gap.',
     source: 'https://en.wikipedia.org/wiki/Insertion_sort',
   },
   inputs,

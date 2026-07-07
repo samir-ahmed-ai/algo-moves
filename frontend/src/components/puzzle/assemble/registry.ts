@@ -11,9 +11,27 @@ import { OneStrokeGame } from './OneStrokeGame';
  * REPRODUCE the structure (One Stroke).
  */
 export const ASSEMBLE_GAMES: AssembleGameDef[] = [
-  { id: 'snap-call', name: 'Snap Call', tagline: 'Flick right if real, left if fake', icon: Zap, Component: SnapCallGame },
-  { id: 'imposter', name: 'Imposter', tagline: 'One block is lying. Find it.', icon: Bug, Component: ImposterGame },
-  { id: 'one-stroke', name: 'One Stroke', tagline: 'Trace the program in one swipe', icon: Route, Component: OneStrokeGame },
+  {
+    id: 'snap-call',
+    name: 'Snap Call',
+    tagline: 'Flick right if real, left if fake',
+    icon: Zap,
+    Component: SnapCallGame,
+  },
+  {
+    id: 'imposter',
+    name: 'Imposter',
+    tagline: 'One block is lying. Find it.',
+    icon: Bug,
+    Component: ImposterGame,
+  },
+  {
+    id: 'one-stroke',
+    name: 'One Stroke',
+    tagline: 'Trace the program in one swipe',
+    icon: Route,
+    Component: OneStrokeGame,
+  },
 ];
 
 /** Stable per-problem default so a topic run rotates through all three games. */

@@ -70,8 +70,12 @@ function RailStat({ icon, value, label }: { icon: ReactNode; value: ReactNode; l
         {icon}
       </span>
       <div className="min-w-0">
-        <div className="font-mono text-base font-semibold tabular-nums leading-none text-ink">{value}</div>
-        <div className="mt-1 truncate text-[length:var(--fs-2xs)] uppercase tracking-wide text-ink3">{label}</div>
+        <div className="font-mono text-base font-semibold tabular-nums leading-none text-ink">
+          {value}
+        </div>
+        <div className="mt-1 truncate text-[length:var(--fs-2xs)] uppercase tracking-wide text-ink3">
+          {label}
+        </div>
       </div>
     </div>
   );
@@ -225,6 +229,7 @@ export function LandingPage() {
     enterVim,
     enterGames,
     enterPlans,
+    enterResumes,
   } = useWorkspace();
   const isMobile = useIsMobile();
   const isDesktop = useMediaQuery('(min-width: 1024px)');
@@ -235,7 +240,10 @@ export function LandingPage() {
   const totals = useMemo(() => {
     const mastered = problems.filter((i) => statFor(progress, i.id).mastered).length;
     const attempted = problems.filter((i) => statFor(progress, i.id).attempts > 0).length;
-    const bestStreak = problems.reduce((m, i) => Math.max(m, statFor(progress, i.id).bestStreak), 0);
+    const bestStreak = problems.reduce(
+      (m, i) => Math.max(m, statFor(progress, i.id).bestStreak),
+      0,
+    );
     return { mastered, attempted, bestStreak };
   }, [problems, progress]);
 
@@ -265,6 +273,7 @@ export function LandingPage() {
     else if (id === 'games') enterGames();
     else if (id === 'vim') enterVim();
     else if (id === 'plans') enterPlans();
+    else if (id === 'resumes') enterResumes();
   };
 
   const specializedTrackGroups = useMemo(
@@ -301,10 +310,7 @@ export function LandingPage() {
   ] as const;
 
   return (
-    <div
-      data-density={density}
-      className="ws-scroll h-full w-full overflow-y-auto bg-bg text-ink"
-    >
+    <div data-density={density} className="ws-scroll h-full w-full overflow-y-auto bg-bg text-ink">
       {/* sticky header — all breakpoints */}
       <header className="sticky top-0 z-30 border-b border-edge bg-bg/90 pt-[env(safe-area-inset-top,0px)] backdrop-blur">
         <div className="flex items-center gap-2 px-4 py-2.5 sm:px-6">
@@ -353,7 +359,13 @@ export function LandingPage() {
                 value={theme}
                 onChange={(v) => setTheme(v as 'light' | 'dark')}
                 panelTitle="Theme"
-                triggerIcon={theme === 'dark' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+                triggerIcon={
+                  theme === 'dark' ? (
+                    <Moon className="h-3.5 w-3.5" />
+                  ) : (
+                    <Sun className="h-3.5 w-3.5" />
+                  )
+                }
                 triggerAriaLabel="Theme"
                 compact
                 align="right"
@@ -380,7 +392,10 @@ export function LandingPage() {
       <div className="lg:grid lg:grid-cols-[minmax(440px,1fr)_minmax(280px,480px)]">
         {/* ---------------------------------------------------------- left rail */}
         <aside className="relative border-b border-edge lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r lg:[scrollbar-gutter:stable]">
-          <div aria-hidden className="landing-hero-glow pointer-events-none absolute inset-0 opacity-60" />
+          <div
+            aria-hidden
+            className="landing-hero-glow pointer-events-none absolute inset-0 opacity-60"
+          />
           <div className="relative flex min-h-full flex-col gap-[var(--gap)] px-[var(--hpad)] py-[var(--pad)] sm:gap-2 sm:px-6 sm:py-4">
             {/* hero copy — two columns on desktop */}
             <div className="@container lg:grid lg:grid-cols-2 lg:items-end lg:gap-x-4">
@@ -393,8 +408,8 @@ export function LandingPage() {
                 </h1>
               </div>
               <p className="mt-2 text-sm leading-relaxed text-ink2 sm:mt-3 lg:mt-0 lg:pb-0.5">
-                {problems.length}+ interview problems as step-by-step replays — visualize, learn, and
-                drill until they stick.
+                {problems.length}+ interview problems as step-by-step replays — visualize, learn,
+                and drill until they stick.
               </p>
             </div>
 
@@ -431,54 +446,51 @@ export function LandingPage() {
             </div>
 
             {/* continue + Vim Dojo — two columns on desktop */}
-            <div
-              className={cn(
-                'lg:grid lg:gap-3',
-                lastItem ? 'lg:grid-cols-2' : 'lg:grid-cols-1',
-              )}
-            >
+            <div className={cn('lg:grid lg:gap-3', lastItem ? 'lg:grid-cols-2' : 'lg:grid-cols-1')}>
               {lastItem ? (
                 <button
                   type="button"
                   onClick={() => openItem(lastItem.id)}
                   className="group flex w-full items-center gap-3 rounded-xl border border-edge bg-panel/60 p-3 text-left transition-all hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-md)]"
                 >
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-edge bg-panel2 text-ink2">
-                  {glyphFor(lastItem) ? (
-                    <Glyph
-                      markup={glyphFor(lastItem)!}
-                      className="h-6 w-6 transition-colors group-hover:text-accent"
-                    />
-                  ) : (
-                    <LayoutGrid className="h-5 w-5" />
-                  )}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-center gap-1.5">
-                    <span className="truncate text-sm font-semibold text-ink">{lastItem.title}</span>
-                    {lastItem.difficulty && (
-                      <Chip
-                        tone={
-                          lastItem.difficulty === 'Easy'
-                            ? 'good'
-                            : lastItem.difficulty === 'Hard'
-                              ? 'bad'
-                              : 'accent'
-                        }
-                      >
-                        {lastItem.difficulty}
-                      </Chip>
-                    )}
-                    {statFor(progress, lastItem.id).mastered && (
-                      <Trophy className="h-3.5 w-3.5 text-good" aria-label="mastered" />
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-edge bg-panel2 text-ink2">
+                    {glyphFor(lastItem) ? (
+                      <Glyph
+                        markup={glyphFor(lastItem)!}
+                        className="h-6 w-6 transition-colors group-hover:text-accent"
+                      />
+                    ) : (
+                      <LayoutGrid className="h-5 w-5" />
                     )}
                   </span>
-                  <span className="mt-0.5 block truncate text-xs text-ink3">
-                    Continue · {lastBrowseCrumb?.track?.title}
-                    {lastBrowseCrumb?.category ? ` › ${lastBrowseCrumb.category.title}` : ''}
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center gap-1.5">
+                      <span className="truncate text-sm font-semibold text-ink">
+                        {lastItem.title}
+                      </span>
+                      {lastItem.difficulty && (
+                        <Chip
+                          tone={
+                            lastItem.difficulty === 'Easy'
+                              ? 'good'
+                              : lastItem.difficulty === 'Hard'
+                                ? 'bad'
+                                : 'accent'
+                          }
+                        >
+                          {lastItem.difficulty}
+                        </Chip>
+                      )}
+                      {statFor(progress, lastItem.id).mastered && (
+                        <Trophy className="h-3.5 w-3.5 text-good" aria-label="mastered" />
+                      )}
+                    </span>
+                    <span className="mt-0.5 block truncate text-xs text-ink3">
+                      Continue · {lastBrowseCrumb?.track?.title}
+                      {lastBrowseCrumb?.category ? ` › ${lastBrowseCrumb.category.title}` : ''}
+                    </span>
                   </span>
-                </span>
-                <ArrowRight className="h-4 w-4 shrink-0 text-accent transition-transform group-hover:translate-x-0.5" />
+                  <ArrowRight className="h-4 w-4 shrink-0 text-accent transition-transform group-hover:translate-x-0.5" />
                 </button>
               ) : null}
               <div
@@ -512,7 +524,11 @@ export function LandingPage() {
               </p>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-3">
                 <RailStat icon={<BookOpen />} value={getTracks().length} label="Tracks" />
-                <RailStat icon={<LayoutGrid />} value={getAllCategories().length} label="Categories" />
+                <RailStat
+                  icon={<LayoutGrid />}
+                  value={getAllCategories().length}
+                  label="Categories"
+                />
                 <RailStat icon={<Code2 />} value={problems.length} label="Problems" />
                 <RailStat icon={<Target />} value={totals.attempted} label="Attempted" />
                 <RailStat icon={<Trophy />} value={totals.mastered} label="Mastered" />
@@ -587,8 +603,8 @@ export function LandingPage() {
               Follow the roadmap, move by move
             </h2>
             <p className="mx-auto mt-1 max-w-sm pb-2 text-sm leading-relaxed text-ink2 sm:pb-3">
-              Every part of Algo Moves as one journey — from your first interview problem all the way
-              to two-player games.
+              Every part of Algo Moves as one journey — from your first interview problem all the
+              way to two-player games.
             </p>
           </div>
           <RoadmapCanvas

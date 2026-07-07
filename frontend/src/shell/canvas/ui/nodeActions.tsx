@@ -86,7 +86,12 @@ export function PanelHeaderMenu({
 
   return (
     <div ref={ref} className="relative">
-      <PanelHeaderAction variant="toggle" active={open} title={title} onClick={() => setOpen((o) => !o)}>
+      <PanelHeaderAction
+        variant="toggle"
+        active={open}
+        title={title}
+        onClick={() => setOpen((o) => !o)}
+      >
         <MoreVertical className={nodeIconGlyph} />
       </PanelHeaderAction>
       {open && (
@@ -102,11 +107,20 @@ export function PanelHeaderMenu({
                 setOpen(false);
               }}
               className={cn(
-                cn('flex w-full items-center gap-1.5 px-2 py-1 text-left transition-colors disabled:opacity-40', nodeText.sm),
-                it.danger ? 'text-bad hover:bg-badbg/40' : 'text-ink2 hover:bg-panel2 hover:text-ink',
+                cn(
+                  'flex w-full items-center gap-1.5 px-2 py-1 text-left transition-colors disabled:opacity-40',
+                  nodeText.sm,
+                ),
+                it.danger
+                  ? 'text-bad hover:bg-badbg/40'
+                  : 'text-ink2 hover:bg-panel2 hover:text-ink',
               )}
             >
-              {it.icon && <span className="grid h-4 w-4 shrink-0 place-items-center text-ink3">{it.icon}</span>}
+              {it.icon && (
+                <span className="grid h-4 w-4 shrink-0 place-items-center text-ink3">
+                  {it.icon}
+                </span>
+              )}
               {it.label}
             </button>
           ))}

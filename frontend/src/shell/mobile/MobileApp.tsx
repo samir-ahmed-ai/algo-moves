@@ -125,7 +125,10 @@ export function MobileApp() {
       setActiveCategoryId(catId);
       const track = activeTrackId ?? 'interview-prep';
       setActiveTrackId(track);
-      writeMobileHash({ trackId: track, categoryId: catId, itemId: startItemId }, { replace: false });
+      writeMobileHash(
+        { trackId: track, categoryId: catId, itemId: startItemId },
+        { replace: false },
+      );
     } else {
       writeMobileHash({ topicId: topic.id, itemId: startItemId }, { replace: false });
     }
@@ -140,9 +143,12 @@ export function MobileApp() {
     } else {
       const catId = activeCategoryId;
       const track = activeTrackId;
-      writeMobileHash(catId && track ? { trackId: track, categoryId: catId } : track ? { trackId: track } : null, {
-        replace: true,
-      });
+      writeMobileHash(
+        catId && track ? { trackId: track, categoryId: catId } : track ? { trackId: track } : null,
+        {
+          replace: true,
+        },
+      );
     }
   };
 
@@ -152,7 +158,8 @@ export function MobileApp() {
     if (t) {
       setActiveTopicId(topicId);
       setTarget({ topic: t, initialPIdx: 0, initialCIdx: 0 });
-      if (catId && activeTrackId) writeMobileHash({ trackId: activeTrackId, categoryId: catId }, { replace: false });
+      if (catId && activeTrackId)
+        writeMobileHash({ trackId: activeTrackId, categoryId: catId }, { replace: false });
       else writeMobileHash({ topicId }, { replace: false });
     }
   };
@@ -218,7 +225,9 @@ export function MobileApp() {
               </button>
               <div className="flex flex-1 items-center justify-center gap-1.5">
                 <BrandLogo size="sm" />
-                <span className="text-[length:var(--fs)] font-semibold tracking-tight">Algo Moves</span>
+                <span className="text-[length:var(--fs)] font-semibold tracking-tight">
+                  Algo Moves
+                </span>
               </div>
               {ThemeBtn}
               <AuthButton compact />

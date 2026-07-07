@@ -71,7 +71,14 @@ export type ColorTokens = Pick<
 
 export type ChromeTokens = Pick<
   AlgoTokens,
-  'radius' | 'sans' | 'mono' | 'shadow-sm' | 'shadow-md' | 'shadow-lg' | 'shadow-xl' | 'border-width'
+  | 'radius'
+  | 'sans'
+  | 'mono'
+  | 'shadow-sm'
+  | 'shadow-md'
+  | 'shadow-lg'
+  | 'shadow-xl'
+  | 'border-width'
 >;
 
 const COLOR_KEYS: (keyof ColorTokens)[] = [

@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+} from '../../../_shared/vizKit';
 
 interface UPInput {
   m: number; // rows
@@ -28,8 +41,13 @@ function record({ m, n }: UPInput): Frame<UPState>[] {
     done: false,
   }));
 
-  const snap = (type: string, note: string, caption: string, cur: [number, number] | null, tone?: 'good') =>
-    emit(type, note, caption, { cur, done: type === 'DONE' }, tone);
+  const snap = (
+    type: string,
+    note: string,
+    caption: string,
+    cur: [number, number] | null,
+    tone?: 'good',
+  ) => emit(type, note, caption, { cur, done: type === 'DONE' }, tone);
 
   snap(
     'INIT',
@@ -42,13 +60,28 @@ function record({ m, n }: UPInput): Frame<UPState>[] {
     for (let j = 0; j < n; j++) {
       if (i === 0 && j === 0) {
         dp[i][j] = 1;
-        snap('BASE', `dp[0][0]=1`, `Base case: there is exactly 1 way to be at the start cell (0, 0).`, [i, j]);
+        snap(
+          'BASE',
+          `dp[0][0]=1`,
+          `Base case: there is exactly 1 way to be at the start cell (0, 0).`,
+          [i, j],
+        );
       } else if (i === 0) {
         dp[i][j] = 1;
-        snap('EDGE', `dp[0][${j}]=1`, `Top row: cell (0, ${j}) is only reachable by moving right the whole way — 1 path.`, [i, j]);
+        snap(
+          'EDGE',
+          `dp[0][${j}]=1`,
+          `Top row: cell (0, ${j}) is only reachable by moving right the whole way — 1 path.`,
+          [i, j],
+        );
       } else if (j === 0) {
         dp[i][j] = 1;
-        snap('EDGE', `dp[${i}][0]=1`, `Left column: cell (${i}, 0) is only reachable by moving down the whole way — 1 path.`, [i, j]);
+        snap(
+          'EDGE',
+          `dp[${i}][0]=1`,
+          `Left column: cell (${i}, 0) is only reachable by moving down the whole way — 1 path.`,
+          [i, j],
+        );
       } else {
         const up = dp[i - 1][j];
         const left = dp[i][j - 1];
@@ -63,7 +96,13 @@ function record({ m, n }: UPInput): Frame<UPState>[] {
     }
   }
 
-  snap('DONE', `${dp[m - 1][n - 1]} paths`, `The grid is full. dp[${m - 1}][${n - 1}] = ${dp[m - 1][n - 1]}, so there are ${dp[m - 1][n - 1]} unique paths.`, [m - 1, n - 1], 'good');
+  snap(
+    'DONE',
+    `${dp[m - 1][n - 1]} paths`,
+    `The grid is full. dp[${m - 1}][${n - 1}] = ${dp[m - 1][n - 1]}, so there are ${dp[m - 1][n - 1]} unique paths.`,
+    [m - 1, n - 1],
+    'good',
+  );
   return frames;
 }
 

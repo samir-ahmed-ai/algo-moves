@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -35,14 +41,14 @@ function highestSetIndex(bits: number[]): number | null {
 
 function record({ n }: LogTwoInput): Frame<LogTwoState>[] {
   const { emit, frames } = createRecorder<LogTwoState>(() => ({
-        original: n,
-        bits: toBits(Math.max(n, 0)),
-        current: n,
-        count: 0,
-        msb: null,
-        done: false,
-        invalid: false
-      }));
+    original: n,
+    bits: toBits(Math.max(n, 0)),
+    current: n,
+    count: 0,
+    msb: null,
+    done: false,
+    invalid: false,
+  }));
 
   if (n <= 0) {
     emit(
@@ -113,8 +119,7 @@ function View({ frame }: PluginViewProps<LogTwoState>) {
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
         n = <span className="font-mono text-ink">{s.original}</span>
-        {' · '}current ={' '}
-        <span className="font-mono text-ink">{s.invalid ? '—' : s.current}</span>
+        {' · '}current = <span className="font-mono text-ink">{s.invalid ? '—' : s.current}</span>
       </div>
       {s.invalid ? (
         <div className={cn('mt-2 font-mono text-bad', vizText.base)}>n ≤ 0 → return -1</div>
@@ -165,132 +170,130 @@ function computeLogTwo(n: number): number {
   return bits;
 }
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Log two\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Log two"?',
     choices: [
       {
-        label: "Integer log base 2 — fits this problem",
-        correct: true
+        label: 'Integer log base 2 — fits this problem',
+        correct: true,
       },
       {
-        label: "Fibonacci iterative — different approach"
+        label: 'Fibonacci iterative — different approach',
       },
       {
-        label: "Greedy (last occurrence) — different approach"
+        label: 'Greedy (last occurrence) — different approach',
       },
       {
-        label: "Bijective base-26 encoding — different approach"
-      }
+        label: 'Bijective base-26 encoding — different approach',
+      },
     ],
-    explain: "Shift right until 1; count the shifts"
+    explain: 'Shift right until 1; count the shifts',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Log two), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Log two), what strategy is established?',
     choices: [
       {
-        label: "Shift right until 1; count — described in INIT caption",
-        correct: true
+        label: 'Shift right until 1; count — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "We want floor(log2()): how many times can we halve  (integer division) before we hit 1? Each halving is one right-shift n >>= 1, and we count the shifts. Start with bits = 0."
+    explain:
+      'We want floor(log2()): how many times can we halve  (integer division) before we hit 1? Each halving is one right-shift n >>= 1, and we count the shifts. Start with bits = 0.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"COUNT\" step (bits=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "COUNT" step (bits=), what happens?',
     choices: [
       {
-        label: "After the shift current = — this move caption",
-        correct: true
+        label: 'After the shift current = — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "After the shift current =  and we increment the shift count to bits = . The highest set bit has moved down one position."
+    explain:
+      'After the shift current =  and we increment the shift count to bits = . The highest set bit has moved down one position.',
   },
   {
-    id: "state",
-    prompt: "What does the `original` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `original` field track in the visualization state?',
     choices: [
       {
-        label: "the starting n (never mutated) — updated each frame",
-        correct: true
+        label: 'the starting n (never mutated) — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `original` in sync: the starting n (never mutated)"
+    explain: 'The recorder keeps `original` in sync: the starting n (never mutated)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Log two\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Log two"?',
     choices: [
       {
-        label: "O(log n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(log n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(reservations) time, O(reserved rows) — wrong order of growth"
+        label: 'O(reservations) time, O(reserved rows) — wrong order of growth',
       },
       {
-        label: "O(log x) time, O(1) space — wrong order of growth"
+        label: 'O(log x) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(log n). O(1). bits=0; while n>1 { n>>=1; bits++ }"
+    explain: 'O(log n). O(1). bits=0; while n>1 { n>>=1; bits++ }',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "current = is no longer greater — final DONE caption",
-        correct: true
+        label: 'current = is no longer greater — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "current =  is no longer greater than 1, so the loop stops. We performed  right-shift to reduce  down to 1, so floor(log2()) = ."
-  }
+    explain:
+      'current =  is no longer greater than 1, so the loop stops. We performed  right-shift to reduce  down to 1, so floor(log2()) = .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

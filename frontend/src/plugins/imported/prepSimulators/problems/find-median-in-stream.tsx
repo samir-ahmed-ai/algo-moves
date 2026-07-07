@@ -1,6 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, VarGrid, VizEmpty, VizStage, RailStack, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailStack,
+  RailGroup,
+  RailStat,
+  RailResult,
+} from '../../../_shared/vizKit';
 import type { DualHeapMedianState } from '../../../_shared/dualHeapMedianRecord';
 import { recordDualHeapMedian } from '../../../_shared/dualHeapMedianRecord';
 import { DualHeapBoard } from '../../../_shared/dualHeapBoard';
@@ -14,9 +29,10 @@ type MedianStreamState = DualHeapMedianState & { medians: number[] };
 function record({ nums }: MedianStreamInput): Frame<MedianStreamState>[] {
   return recordDualHeapMedian(nums, {
     initCaption:
-      'Find median in stream: max-heap `low` holds the smaller half, min-heap `high` the larger. pushLow(v), move low\'s top to high, rebalance if needed.',
+      "Find median in stream: max-heap `low` holds the smaller half, min-heap `high` the larger. pushLow(v), move low's top to high, rebalance if needed.",
     trackMedians: true,
-    doneCaption: (_final, medians) => `Stream complete. Median after each add: [${medians.join(', ')}].`,
+    doneCaption: (_final, medians) =>
+      `Stream complete. Median after each add: [${medians.join(', ')}].`,
   }) as Frame<MedianStreamState>[];
 }
 
@@ -63,52 +79,48 @@ function Inspector({ frame }: InspectorProps<MedianStreamState>) {
 export const manifestId = 'prep-streams-io-find-median-in-stream';
 export const title = 'Find median in stream';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Find median in stream\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Find median in stream"?',
     choices: [
       {
-        label: "Two heaps median — fits this problem",
-        correct: true
+        label: 'Two heaps median — fits this problem',
+        correct: true,
       },
       {
-        label: "Recursive directory walk — different approach"
+        label: 'Recursive directory walk — different approach',
       },
       {
-        label: "K-way merge with min-heap — different approach"
+        label: 'K-way merge with min-heap — different approach',
       },
       {
-        label: "String builder scan — different approach"
-      }
+        label: 'String builder scan — different approach',
+      },
     ],
-    explain: "Max-heap holds the low half, min-heap the high half, kept balanced"
+    explain: 'Max-heap holds the low half, min-heap the high half, kept balanced',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Find median in stream\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Find median in stream"?',
     choices: [
       {
-        label: "O(log n) per add time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(log n) per add time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(file size) time, O(1) space — wrong order of growth"
+        label: 'O(file size) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(1) per item time, O(1) space — wrong order of growth"
-      }
+        label: 'O(1) per item time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(log n) per add. O(n). push low, move its top to high, rebalance; median from the tops"
-  }
+    explain:
+      'O(log n) per add. O(n). push low, move its top to high, rebalance; median from the tops',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

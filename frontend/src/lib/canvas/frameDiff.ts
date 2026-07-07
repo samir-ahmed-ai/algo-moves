@@ -16,7 +16,9 @@ export function diffFrameStates(
 
 export function buildFrameContextValue(frames: Frame[], player: Player, frame: Frame) {
   const prevState =
-    player.index > 0 ? (frames[player.index - 1]?.state as Record<string, unknown> | undefined) : undefined;
+    player.index > 0
+      ? (frames[player.index - 1]?.state as Record<string, unknown> | undefined)
+      : undefined;
   const curState = frame.state as Record<string, unknown> | undefined;
   return {
     frames,

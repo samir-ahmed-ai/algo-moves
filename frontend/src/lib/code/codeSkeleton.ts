@@ -27,8 +27,8 @@ export function extractSkeleton(ref: string): string {
       let depth = 1;
       while (i < lines.length && depth > 0) {
         const t = lines[i].trim();
-        if (t.includes('{')) depth += (t.match(/\{/g)?.length ?? 0);
-        if (t.includes('}')) depth -= (t.match(/\}/g)?.length ?? 0);
+        if (t.includes('{')) depth += t.match(/\{/g)?.length ?? 0;
+        if (t.includes('}')) depth -= t.match(/\}/g)?.length ?? 0;
         i++;
       }
       continue;

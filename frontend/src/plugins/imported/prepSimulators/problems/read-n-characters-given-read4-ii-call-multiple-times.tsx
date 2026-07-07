@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -22,7 +28,8 @@ interface Read4State {
   done: boolean;
 }
 
-function record({ chunks, reads }: Read4Input): Frame<Read4State>[] {  let chunkIdx = 0;
+function record({ chunks, reads }: Read4Input): Frame<Read4State>[] {
+  let chunkIdx = 0;
   let buf4 = '';
   let i4 = 0;
   let n4 = 0;
@@ -35,16 +42,16 @@ function record({ chunks, reads }: Read4Input): Frame<Read4State>[] {  let chunk
   };
 
   const { emit, frames } = createRecorder<Read4State>(() => ({
-        chunks: [...chunks],
-        chunkIdx,
-        buf4,
-        i4,
-        n4,
-        readN: 0,
-        out: '',
-        op: '',
-        done: false
-      }));
+    chunks: [...chunks],
+    chunkIdx,
+    buf4,
+    i4,
+    n4,
+    readN: 0,
+    out: '',
+    op: '',
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -96,7 +103,9 @@ function View({ frame }: PluginViewProps<Read4State>) {
       <div className={cn('mt-2', vizText.sm, 'text-ink3')}>
         buf4: &quot;{s.buf4 || '—'}&quot; · i4={s.i4} n4={s.n4}
       </div>
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>read4 chunks ({s.chunkIdx}/{s.chunks.length} used)</div>
+      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>
+        read4 chunks ({s.chunkIdx}/{s.chunks.length} used)
+      </div>
       <div className="mt-1 flex flex-wrap gap-1">
         {s.chunks.map((c, i) => (
           <span
@@ -104,7 +113,11 @@ function View({ frame }: PluginViewProps<Read4State>) {
             className={cn(
               'rounded border px-2 py-0.5 font-mono',
               vizText.sm,
-              i < s.chunkIdx ? 'border-edge text-ink3 line-through' : i === s.chunkIdx ? 'border-accent bg-accentbg' : 'border-edge',
+              i < s.chunkIdx
+                ? 'border-edge text-ink3 line-through'
+                : i === s.chunkIdx
+                  ? 'border-accent bg-accentbg'
+                  : 'border-edge',
             )}
           >
             {c}
@@ -131,112 +144,110 @@ function Inspector({ frame }: InspectorProps<Read4State>) {
 export const manifestId = 'prep-design-read-n-characters-given-read4-ii-call-multiple-times';
 export const title = 'Read N Characters Given read4 II Call Multiple Times';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Read N Characters Given Read4 II - Call Multiple Times\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Read N Characters Given Read4 II - Call Multiple Times"?',
     choices: [
       {
-        label: "Design — fits this problem",
-        correct: true
+        label: 'Design — fits this problem',
+        correct: true,
       },
       {
-        label: "Log parsing aggregation — different approach"
+        label: 'Log parsing aggregation — different approach',
       },
       {
-        label: "Copy-on-write version snapshots — different approach"
+        label: 'Copy-on-write version snapshots — different approach',
       },
       {
-        label: "Stack — different approach"
-      }
+        label: 'Stack — different approach',
+      },
     ],
-    explain: "See Read N Characters Given Read4 Ii Call Multiple Times pattern"
+    explain: 'See Read N Characters Given Read4 Ii Call Multiple Times pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Read N Characters Given Read4 II - Call Multiple Times), what strategy is established?",
+    id: 'init',
+    prompt:
+      'At the start of a run (Read N Characters Given Read4 II - Call Multiple Times), what strategy is established?',
     choices: [
       {
-        label: "See Read N Characters Given Read4 — described in INIT caption",
-        correct: true
+        label: 'See Read N Characters Given Read4 — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Read4 II: internal buf4 buffer. When i4==n4, call read4() to refill. Copy chars into user buf until n chars or EOF."
+    explain:
+      'Read4 II: internal buf4 buffer. When i4==n4, call read4() to refill. Copy chars into user buf until n chars or EOF.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"READ\" step ( chars), what happens?",
+    id: 'key-step',
+    prompt: 'On the "READ" step ( chars), what happens?',
     choices: [
       {
-        label: "Read(buf, ): copied char(s) \"\" — this move caption",
-        correct: true
+        label: 'Read(buf, ): copied char(s) "" — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Read(buf, ): copied  char(s) \"\" from buf4."
+    explain: 'Read(buf, ): copied  char(s) "" from buf4.',
   },
   {
-    id: "state",
-    prompt: "What does the `chunks` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `chunks` field track in the visualization state?',
     choices: [
       {
-        label: "Field chunks in state — updated each frame",
-        correct: true
+        label: 'Field chunks in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `chunks` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `chunks` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Read(buf, ): copied char(s) \"\" — final DONE caption",
-        correct: true
+        label: 'Read(buf, ): copied char(s) "" — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Read(buf, ): copied  char(s) \"\" from buf4."
-  }
+    explain: 'Read(buf, ): copied  char(s) "" from buf4.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

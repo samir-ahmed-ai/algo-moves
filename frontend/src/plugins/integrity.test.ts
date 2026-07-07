@@ -21,10 +21,32 @@ const plugins = await loadAllPlugins();
 const pluginById = new Map(plugins.map((p) => [p.meta.id, p]));
 
 const BUILTIN_PANELS = new Set([
-  'workbench', 'replay', 'inspector', 'metrics', 'bigo', 'predict', 'mastery',
-  'mistakes', 'explain', 'badges', 'bookmarks', 'editor', 'pattern', 'glossary',
-  'diff', 'watch', 'hints', 'path', 'cheatsheet', 'projects', 'notes', 'complexity',
-  'edgecases', 'code', 'scratch', 'copy',
+  'workbench',
+  'replay',
+  'inspector',
+  'metrics',
+  'bigo',
+  'predict',
+  'mastery',
+  'mistakes',
+  'explain',
+  'badges',
+  'bookmarks',
+  'editor',
+  'pattern',
+  'glossary',
+  'diff',
+  'watch',
+  'hints',
+  'path',
+  'cheatsheet',
+  'projects',
+  'notes',
+  'complexity',
+  'edgecases',
+  'code',
+  'scratch',
+  'copy',
 ]);
 
 function curatedPluginIds(): string[] {
@@ -75,23 +97,32 @@ describe('generated plugin meta is in sync with implementations', () => {
         drift.push(`${p.meta.id}: no generated meta entry — run npm run build-plugin-meta`);
         continue;
       }
-      if (gen.title !== p.meta.title) drift.push(`${p.meta.id}: title "${gen.title}" ≠ "${p.meta.title}"`);
-      if (gen.difficulty !== p.meta.difficulty) drift.push(`${p.meta.id}: difficulty "${gen.difficulty}" ≠ "${p.meta.difficulty}"`);
+      if (gen.title !== p.meta.title)
+        drift.push(`${p.meta.id}: title "${gen.title}" ≠ "${p.meta.title}"`);
+      if (gen.difficulty !== p.meta.difficulty)
+        drift.push(`${p.meta.id}: difficulty "${gen.difficulty}" ≠ "${p.meta.difficulty}"`);
       if (gen.summary !== p.meta.summary) drift.push(`${p.meta.id}: summary drift`);
-      if ((gen.source ?? undefined) !== (p.meta.source ?? undefined)) drift.push(`${p.meta.id}: source drift`);
-      if (JSON.stringify(gen.tags) !== JSON.stringify(p.meta.tags)) drift.push(`${p.meta.id}: tags drift`);
+      if ((gen.source ?? undefined) !== (p.meta.source ?? undefined))
+        drift.push(`${p.meta.id}: source drift`);
+      if (JSON.stringify(gen.tags) !== JSON.stringify(p.meta.tags))
+        drift.push(`${p.meta.id}: tags drift`);
     }
     expect(drift, drift.join('\n')).toEqual([]);
   });
 
   it('no generated meta entry is orphaned', () => {
     const orphans = PLUGIN_META.filter((m) => !pluginById.has(m.id)).map((m) => m.id);
-    expect(orphans, `orphaned meta entries (no loadable plugin): ${orphans.join(', ')}`).toEqual([]);
+    expect(orphans, `orphaned meta entries (no loadable plugin): ${orphans.join(', ')}`).toEqual(
+      [],
+    );
   });
 
   it('every plugin has a generated problem brief', () => {
     const missing = PLUGIN_META.filter((m) => !GENERATED_PROBLEM_BRIEFS[m.id]).map((m) => m.id);
-    expect(missing, `missing briefs — run npm run build-problem-briefs: ${missing.join(', ')}`).toEqual([]);
+    expect(
+      missing,
+      `missing briefs — run npm run build-problem-briefs: ${missing.join(', ')}`,
+    ).toEqual([]);
   });
 });
 
@@ -118,7 +149,9 @@ describe('curated course plugins have learn stack', () => {
       const p = pluginById.get(id);
       expect(p).toBeDefined();
       const hasQuiz = (p!.quiz?.length ?? 0) > 0;
-      const hasPracticeTabs = (p!.tabs ?? []).some((t) => t.mode === 'practice' || t.mode === 'learn');
+      const hasPracticeTabs = (p!.tabs ?? []).some(
+        (t) => t.mode === 'practice' || t.mode === 'learn',
+      );
       expect(hasQuiz || hasPracticeTabs, `${id} missing learn stack`).toBe(true);
     });
   }
@@ -215,14 +248,23 @@ describe('visualizer View structure', () => {
 
   for (const plugin of plugins) {
     // imp-*, prep-*, go-* and ortb-* are factory-generated (View lives in factory/prepScene/sim files), not folder plugins.
-    if (plugin.meta.id.startsWith('imp-') || plugin.meta.id.startsWith('prep-') || plugin.meta.id.startsWith('go-') || plugin.meta.id.startsWith('ortb-')) continue;
+    if (
+      plugin.meta.id.startsWith('imp-') ||
+      plugin.meta.id.startsWith('prep-') ||
+      plugin.meta.id.startsWith('go-') ||
+      plugin.meta.id.startsWith('ortb-')
+    )
+      continue;
     const nativePath = `./${plugin.meta.id}/index.tsx`;
     it(`native ${plugin.meta.id} View uses board-area`, () => {
       const src = nativeSources[nativePath];
       expect(src, plugin.meta.id).toBeDefined();
       expect(src!, plugin.meta.id).toMatch(/className="board-area|(<VizStage)|(<ArrayPatternView)/);
       if (usesAbsolutePosition(src!)) {
-        expect(hasMinWidthConstraint(src!), `${plugin.meta.id} absolute layout needs minWidth`).toBe(true);
+        expect(
+          hasMinWidthConstraint(src!),
+          `${plugin.meta.id} absolute layout needs minWidth`,
+        ).toBe(true);
       }
     });
   }
@@ -300,13 +342,6 @@ describe('quiz correctness', () => {
   });
 });
 
-function terminalFrameOk(frames: { move: { type: string; tone?: string } }[]): boolean {
-  const last = frames[frames.length - 1]?.move;
-  if (!last) return false;
-  const t = last.type.toUpperCase();
-  return t === 'DONE' || last.tone === 'good';
-}
-
 describe('prep simulator quality', () => {
   const bad: string[] = [];
   for (const plugin of plugins) {
@@ -318,10 +353,8 @@ describe('prep simulator quality', () => {
         bad.push(`${tag}: empty recording`);
         continue;
       }
-      const hasTerminal = terminalFrameOk(frames);
-      const hasVerdict = !!plugin.verdict?.(frames);
-      if (frames.length < 3 && !hasTerminal && !hasVerdict) {
-        bad.push(`${tag}: only ${frames.length} frame(s), no DONE/good or verdict`);
+      if (frames.length < 3) {
+        bad.push(`${tag}: only ${frames.length} frame(s), need >= 3`);
       }
       const v = plugin.verdict?.(frames);
       if (v && (typeof v.ok !== 'boolean' || typeof v.label !== 'string')) {
@@ -329,7 +362,7 @@ describe('prep simulator quality', () => {
       }
     }
   }
-  it('prep simulators emit frames with terminal DONE or verdict', () => {
+  it('prep simulators emit >= 3 frames with terminal DONE or verdict', () => {
     expect(bad, bad.slice(0, 12).join('\n')).toEqual([]);
   });
 });
@@ -374,7 +407,9 @@ describe('verdict truthfulness sampling', () => {
         bad.push(`${plugin.meta.id} · "${input.label}": missing verdict`);
         continue;
       }
-      const expected = stateImpliesVerdictOk(frames[frames.length - 1]?.state as Record<string, unknown>);
+      const expected = stateImpliesVerdictOk(
+        frames[frames.length - 1]?.state as Record<string, unknown>,
+      );
       if (expected !== null && v.ok !== expected) {
         bad.push(`${plugin.meta.id} · "${input.label}": verdict.ok=${v.ok} expected ${expected}`);
       }

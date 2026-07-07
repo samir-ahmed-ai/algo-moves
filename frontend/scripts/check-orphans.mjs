@@ -18,7 +18,12 @@ function walk(dir) {
   for (const name of readdirSync(dir)) {
     const p = join(dir, name);
     if (statSync(p).isDirectory()) out.push(...walk(p));
-    else if (EXTS.some((e) => p.endsWith(e)) && !p.endsWith('.d.ts') && !/\.test\.(t|j)sx?$/.test(p)) out.push(p);
+    else if (
+      EXTS.some((e) => p.endsWith(e)) &&
+      !p.endsWith('.d.ts') &&
+      !/\.test\.(t|j)sx?$/.test(p)
+    )
+      out.push(p);
   }
   return out;
 }
@@ -26,10 +31,15 @@ function walk(dir) {
 /** Resolve a relative or `@/`-aliased import specifier to an absolute file path (trying ext + /index). */
 function resolveImport(fromFile, spec) {
   let base;
-  if (spec.startsWith('@/')) base = resolve(srcDir, spec.slice(2)); // '@/' → src/
+  if (spec.startsWith('@/'))
+    base = resolve(srcDir, spec.slice(2)); // '@/' → src/
   else if (spec.startsWith('.')) base = resolve(dirname(fromFile), spec);
   else return null;
-  const candidates = [base, ...EXTS.map((e) => base + e), ...EXTS.map((e) => join(base, 'index' + e))];
+  const candidates = [
+    base,
+    ...EXTS.map((e) => base + e),
+    ...EXTS.map((e) => join(base, 'index' + e)),
+  ];
   return candidates.find((c) => existsSync(c) && statSync(c).isFile()) ?? null;
 }
 
@@ -51,7 +61,8 @@ function resolveGlob(fromFile, pattern) {
   return files.filter((c) => rx.test(c));
 }
 
-const importRe = /\b(?:import|export)\b[^'"]*?from\s*['"]([^'"]+)['"]|\bimport\(\s*['"]([^'"]+)['"]\s*\)/g;
+const importRe =
+  /\b(?:import|export)\b[^'"]*?from\s*['"]([^'"]+)['"]|\bimport\(\s*['"]([^'"]+)['"]\s*\)/g;
 const sideEffectImportRe = /\bimport\s*['"]([^'"]+)['"]/g;
 const globRe = /import\.meta\.glob\s*(?:<[^>]*>)?\s*\(\s*['"]([^'"]+)['"]/g;
 const graph = new Map(); // file -> Set(imported files)

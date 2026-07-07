@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -28,13 +34,13 @@ interface DeleteNodeState {
 
 function record({ list, target }: DeleteNodeInput): Frame<DeleteNodeState>[] {
   const { emit, frames } = createRecorder<DeleteNodeState>(() => ({
-        chain: list.slice(),
-        node: null,
-        next: null,
-        copied: false,
-        removed: false,
-        done: false
-      }));
+    chain: list.slice(),
+    node: null,
+    next: null,
+    copied: false,
+    removed: false,
+    done: false,
+  }));
 
   // Work on a mutable copy so the View can show the chain shrinking.
   const chain = list.slice();
@@ -119,9 +125,15 @@ function Inspector({ frame }: InspectorProps<DeleteNodeState>) {
   return (
     <VarGrid>
       <InspectorRow k="node idx" v={s.node ?? '—'} />
-      <InspectorRow k="node.Val" v={s.node !== null && s.node < s.chain.length ? s.chain[s.node] : '—'} />
+      <InspectorRow
+        k="node.Val"
+        v={s.node !== null && s.node < s.chain.length ? s.chain[s.node] : '—'}
+      />
       <InspectorRow k="next idx" v={s.next ?? '—'} />
-      <InspectorRow k="next.Val" v={s.next !== null && s.next < s.chain.length ? s.chain[s.next] : '—'} />
+      <InspectorRow
+        k="next.Val"
+        v={s.next !== null && s.next < s.chain.length ? s.chain[s.next] : '—'}
+      />
       <InspectorRow k="copied" v={s.copied ? 'yes' : 'no'} />
       <InspectorRow k="list length" v={s.chain.length} />
     </VarGrid>
@@ -131,132 +143,131 @@ function Inspector({ frame }: InspectorProps<DeleteNodeState>) {
 export const manifestId = 'prep-linked-lists-delete-node';
 export const title = 'Delete node';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Delete node\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Delete node"?',
     choices: [
       {
-        label: "Copy next then delete — fits this problem",
-        correct: true
+        label: 'Copy next then delete — fits this problem',
+        correct: true,
       },
       {
-        label: "Hash map clone — different approach"
+        label: 'Hash map clone — different approach',
       },
       {
-        label: "Merge sort list — different approach"
+        label: 'Merge sort list — different approach',
       },
       {
-        label: "DFS flatten — different approach"
-      }
+        label: 'DFS flatten — different approach',
+      },
     ],
-    explain: "Steal the next node's value, then skip over it"
+    explain: "Steal the next node's value, then skip over it",
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Delete node), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Delete node), what strategy is established?',
     choices: [
       {
         label: "Steal the next node's value, then — described in INIT caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "We are handed only a pointer to the node at index  (value ) — we cannot see the head or the previous node. The trick: copy the next node's value over this one, then unlink the next node."
+    explain:
+      "We are handed only a pointer to the node at index  (value ) — we cannot see the head or the previous node. The trick: copy the next node's value over this one, then unlink the next node.",
   },
   {
-    id: "key-step",
-    prompt: "On the \"COPY\" step (node.Val = ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "COPY" step (node.Val = ), what happens?',
     choices: [
       {
         label: "Steal the successor's value: node.Val = — this move caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Steal the successor's value: node.Val = node.Next.Val, so the node at index  now holds . The original value  is gone, but a duplicate of  now sits at two places."
+    explain:
+      "Steal the successor's value: node.Val = node.Next.Val, so the node at index  now holds . The original value  is gone, but a duplicate of  now sits at two places.",
   },
   {
-    id: "state",
-    prompt: "What does the `chain` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `chain` field track in the visualization state?',
     choices: [
       {
-        label: "Field chain in state — updated each frame",
-        correct: true
+        label: 'Field chain in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `chain` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `chain` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Delete node\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Delete node"?',
     choices: [
       {
-        label: "O(1) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(1) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
+        label: 'O(log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(max(n,m)) time, O(1) space — wrong order of growth"
+        label: 'O(max(n,m)) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(1). O(1). node.Val=next.Val; node.Next=next.Next"
+    explain: 'O(1). O(1). node.Val=next.Val; node.Next=next.Next',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Now relink past the successor: node.Next — final DONE caption",
-        correct: true
+        label: 'Now relink past the successor: node.Next — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Now relink past the successor: node.Next = node.Next.Next. The duplicate node is unlinked, leaving exactly one copy of . The list is one shorter and the target is effectively deleted."
-  }
+    explain:
+      'Now relink past the successor: node.Next = node.Next.Next. The duplicate node is unlinked, leaving exactly one copy of . The list is one shorter and the target is effectively deleted.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

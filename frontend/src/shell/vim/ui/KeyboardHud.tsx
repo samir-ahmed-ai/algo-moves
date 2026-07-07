@@ -17,7 +17,13 @@ function KeyCombo({
 }) {
   if (!label) {
     return (
-      <div className={cn('vim-key-hud__combo', `vim-key-hud__combo--${variant}`, 'vim-key-hud__combo--empty')}>
+      <div
+        className={cn(
+          'vim-key-hud__combo',
+          `vim-key-hud__combo--${variant}`,
+          'vim-key-hud__combo--empty',
+        )}
+      >
         <kbd className="vim-key-hud__cap" aria-hidden>
           ·
         </kbd>
@@ -38,7 +44,11 @@ function KeyCombo({
     >
       {parts.map((part, i) => (
         <Fragment key={`${part}-${i}`}>
-          {i > 0 ? <span className="vim-key-hud__plus" aria-hidden>+</span> : null}
+          {i > 0 ? (
+            <span className="vim-key-hud__plus" aria-hidden>
+              +
+            </span>
+          ) : null}
           <kbd className="vim-key-hud__cap">{part}</kbd>
         </Fragment>
       ))}

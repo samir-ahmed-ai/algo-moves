@@ -69,7 +69,10 @@ const HYBRID_LABELS: Record<HybridThemeId, string> = {
 
 export const THEME_META: ThemeMeta[] = THEME_PRESETS.map((id) => ({
   id,
-  label: (BASE_LABELS as Record<string, string>)[id] ?? (HYBRID_LABELS as Record<string, string>)[id] ?? id,
+  label:
+    (BASE_LABELS as Record<string, string>)[id] ??
+    (HYBRID_LABELS as Record<string, string>)[id] ??
+    id,
   swatch: themeSources[id]?.swatch ?? 'oklch(0.5 0 0)',
   kind: BASE_THEME_IDS.includes(id as BaseThemeId) ? 'base' : 'hybrid',
 }));

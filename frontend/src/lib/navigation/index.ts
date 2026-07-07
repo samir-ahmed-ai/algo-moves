@@ -4,6 +4,6 @@
  * per-page state. Pure parse/write helpers — no React, no store, no shell.
  */
 export * from './appRoute';
-export * from './mobileHash';
-export * from './vimHash';
-export * from './gamesHash';
+export * from './mobileRoute';
+export * from './vimRoute';
+export * from './gamesRoute';

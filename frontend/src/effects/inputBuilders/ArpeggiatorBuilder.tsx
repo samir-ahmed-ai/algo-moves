@@ -31,13 +31,27 @@ export function ArpeggiatorBuilder({ onApply }: { onApply: (values: number[]) =>
     <div className="nodrag flex flex-col gap-2">
       <Field label="Range">
         <div className="flex gap-2">
-          <input type="number" value={start} onChange={(e) => setStart(Number(e.target.value))} className="w-16 rounded border border-edge bg-panel2 px-1" />
+          <input
+            type="number"
+            value={start}
+            onChange={(e) => setStart(Number(e.target.value))}
+            className="w-16 rounded border border-edge bg-panel2 px-1"
+          />
           <span>→</span>
-          <input type="number" value={end} onChange={(e) => setEnd(Number(e.target.value))} className="w-16 rounded border border-edge bg-panel2 px-1" />
+          <input
+            type="number"
+            value={end}
+            onChange={(e) => setEnd(Number(e.target.value))}
+            className="w-16 rounded border border-edge bg-panel2 px-1"
+          />
         </div>
       </Field>
       <Field label="Direction">
-        <select value={dir} onChange={(e) => setDir(e.target.value as typeof dir)} className="w-full rounded border border-edge bg-panel2 px-2 py-1">
+        <select
+          value={dir}
+          onChange={(e) => setDir(e.target.value as typeof dir)}
+          className="w-full rounded border border-edge bg-panel2 px-2 py-1"
+        >
           {DIRECTIONS.map((d) => (
             <option key={d} value={d}>
               {d}

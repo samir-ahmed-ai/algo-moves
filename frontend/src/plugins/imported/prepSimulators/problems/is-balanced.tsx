@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -26,21 +32,22 @@ interface BalancedState {
 
 const has = (tree: Cell[], i: number) => i >= 0 && i < tree.length && tree[i] != null;
 
-function record({ tree }: BalancedInput): Frame<BalancedState>[] {  const done: number[] = [];
+function record({ tree }: BalancedInput): Frame<BalancedState>[] {
+  const done: number[] = [];
   const heights: Record<number, number> = {};
   let bad: number | null = null;
 
   const { emit, frames } = createRecorder<BalancedState>(() => ({
-        tree,
-        visiting: null,
-        current: null,
-        done: done.slice(),
-        heights: { ...heights },
-        l: null,
-        r: null,
-        bad,
-        answer: null
-      }));
+    tree,
+    visiting: null,
+    current: null,
+    done: done.slice(),
+    heights: { ...heights },
+    l: null,
+    r: null,
+    bad,
+    answer: null,
+  }));
 
   emit(
     'INIT',
@@ -142,10 +149,8 @@ function View({ frame }: PluginViewProps<BalancedState>) {
     return 'team-0';
   };
   const active = s.current ?? s.visiting;
-  const verdictText =
-    s.answer === null ? '…checking' : s.answer ? 'balanced ✓' : 'NOT balanced ✕';
-  const verdictCls =
-    s.answer === null ? 'text-ink' : s.answer ? 'text-good' : 'text-bad';
+  const verdictText = s.answer === null ? '…checking' : s.answer ? 'balanced ✓' : 'NOT balanced ✕';
+  const verdictCls = s.answer === null ? 'text-ink' : s.answer ? 'text-good' : 'text-bad';
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
@@ -175,10 +180,7 @@ function Inspector({ frame }: InspectorProps<BalancedState>) {
       <InspectorRow k="left height (L)" v={s.l ?? '—'} />
       <InspectorRow k="right height (R)" v={s.r ?? '—'} />
       <InspectorRow k="heights done" v={s.done.length} />
-      <InspectorRow
-        k="imbalance at"
-        v={s.bad !== null ? (s.tree[s.bad] ?? s.bad) : '—'}
-      />
+      <InspectorRow k="imbalance at" v={s.bad !== null ? (s.tree[s.bad] ?? s.bad) : '—'} />
       <InspectorRow
         k="answer"
         v={s.answer === null ? '…' : s.answer ? 'balanced' : 'not balanced'}
@@ -204,112 +206,108 @@ function computeBalanced(tree: Cell[]): boolean {
   return check(0) !== -1;
 }
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Is balanced\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Is balanced"?',
     choices: [
       {
-        label: "Balance check — fits this problem",
-        correct: true
+        label: 'Balance check — fits this problem',
+        correct: true,
       },
       {
-        label: "LCA + heights — different approach"
+        label: 'LCA + heights — different approach',
       },
       {
-        label: "Same tree check — different approach"
+        label: 'Same tree check — different approach',
       },
       {
-        label: "Stack iterative — different approach"
-      }
+        label: 'Stack iterative — different approach',
+      },
     ],
-    explain: "Height-return doubles as a flag: -1 means imbalance found"
+    explain: 'Height-return doubles as a flag: -1 means imbalance found',
   },
   {
-    id: "key-step",
-    prompt: "On the \"RIGHT\" step (R=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "RIGHT" step (R=), what happens?',
     choices: [
       {
-        label: "Right subtree of node has height — this move caption",
-        correct: true
+        label: 'Right subtree of node has height — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Right subtree of node  has height . Compare the two: is | − | ≤ 1?"
+    explain: 'Right subtree of node  has height . Compare the two: is | − | ≤ 1?',
   },
   {
-    id: "state",
-    prompt: "What does the `visiting` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `visiting` field track in the visualization state?',
     choices: [
       {
-        label: "node whose subtree we — updated each frame",
-        correct: true
+        label: 'node whose subtree we — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `visiting` in sync: node whose subtree we are currently entering"
+    explain: 'The recorder keeps `visiting` in sync: node whose subtree we are currently entering',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Is balanced\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Is balanced"?',
     choices: [
       {
-        label: "O(n) time, O(h) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(h) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n) time, O(1) space — wrong order of growth"
+        label: 'O(n) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
+        label: 'O(n²) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(h). child -1 or |L-R|>1 -> return -1"
+    explain: 'O(n). O(h). child -1 or |L-R|>1 -> return -1',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Node is balanced here (| − — final DONE caption",
-        correct: true
+        label: 'Node is balanced here (| − — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Node  is balanced here (| − | ≤ 1). Its height is max(, ) + 1 = , which we return to its parent."
-  }
+    explain:
+      'Node  is balanced here (| − | ≤ 1). Its height is max(, ) + 1 = , which we return to its parent.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

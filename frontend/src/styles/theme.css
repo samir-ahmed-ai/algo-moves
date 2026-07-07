@@ -62,48 +62,48 @@
 }
 
 :root.dark {
-    --bg: #1f1e1b;
-    --surface: #2a2925;
-    --surface-2: #34322d;
-    --border: #3d3b35;
-    --border-strong: #4f4d45;
-    --text: #ece9e1;
-    --text-2: #a8a59b;
-    --text-3: #76746b;
-    --accent: #6fa8ec;
-    --accent-bg: #15314f;
+  --bg: #1f1e1b;
+  --surface: #2a2925;
+  --surface-2: #34322d;
+  --border: #3d3b35;
+  --border-strong: #4f4d45;
+  --text: #ece9e1;
+  --text-2: #a8a59b;
+  --text-3: #76746b;
+  --accent: #6fa8ec;
+  --accent-bg: #15314f;
 
-    --team0-bg: #34322d;
-    --team0-stroke: #76746b;
-    --team1-bg: #0f3b30;
-    --team1-stroke: #5dcaa5;
-    --team1-text: #9fe1cb;
-    --team2-bg: #4a1b0c;
-    --team2-stroke: #f0997b;
-    --team2-text: #f5c4b3;
+  --team0-bg: #34322d;
+  --team0-stroke: #76746b;
+  --team1-bg: #0f3b30;
+  --team1-stroke: #5dcaa5;
+  --team1-text: #9fe1cb;
+  --team2-bg: #4a1b0c;
+  --team2-stroke: #f0997b;
+  --team2-text: #f5c4b3;
 
-    --edge: #4f4d45;
-    --good: #97c459;
-    --good-bg: #1b3309;
-    --bad: #f09595;
-    --bad-bg: #3a1414;
+  --edge: #4f4d45;
+  --good: #97c459;
+  --good-bg: #1b3309;
+  --bad: #f09595;
+  --bad-bg: #3a1414;
 
-    --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.2);
-    --shadow-md: 0 2px 4px hsl(0 0% 0% / 0.25);
-    --shadow-lg: 0 4px 6px hsl(0 0% 0% / 0.3);
-    --shadow-xl: 0 8px 10px hsl(0 0% 0% / 0.35);
-    --node-shadow: 0 1px 2px hsl(0 0% 0% / 0.12), 0 8px 24px hsl(0 0% 0% / 0.22);
-    --node-shadow-hover: 0 2px 4px hsl(0 0% 0% / 0.16), 0 12px 32px hsl(0 0% 0% / 0.28);
-    --node-shadow-selected: 0 4px 8px hsl(0 0% 0% / 0.2), 0 16px 40px hsl(0 0% 0% / 0.34);
+  --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.2);
+  --shadow-md: 0 2px 4px hsl(0 0% 0% / 0.25);
+  --shadow-lg: 0 4px 6px hsl(0 0% 0% / 0.3);
+  --shadow-xl: 0 8px 10px hsl(0 0% 0% / 0.35);
+  --node-shadow: 0 1px 2px hsl(0 0% 0% / 0.12), 0 8px 24px hsl(0 0% 0% / 0.22);
+  --node-shadow-hover: 0 2px 4px hsl(0 0% 0% / 0.16), 0 12px 32px hsl(0 0% 0% / 0.28);
+  --node-shadow-selected: 0 4px 8px hsl(0 0% 0% / 0.2), 0 16px 40px hsl(0 0% 0% / 0.34);
 
-    --json-key: #9cdcfe;
-    --json-str: #ce9178;
-    --json-num: #b5cea8;
-    --json-lit: #569cd6;
-    --json-punct: var(--text-3);
+  --json-key: #9cdcfe;
+  --json-str: #ce9178;
+  --json-num: #b5cea8;
+  --json-lit: #569cd6;
+  --json-punct: var(--text-3);
 
-    --grid-blocked-bg: #141c17;
-    --grid-blocked-image: url('/assets/grid-rock-dark.svg');
+  --grid-blocked-bg: #141c17;
+  --grid-blocked-image: url('/assets/grid-rock-dark.svg');
 }
 
 * {
@@ -741,12 +741,16 @@ button {
   stroke-width: 1;
   opacity: 0.3;
   pointer-events: none;
-  transition: cx 0.2s ease, cy 0.2s ease;
+  transition:
+    cx 0.2s ease,
+    cy 0.2s ease;
 }
 .move-orbit-cursor {
   fill: var(--accent);
   pointer-events: none;
-  transition: cx 0.2s ease, cy 0.2s ease;
+  transition:
+    cx 0.2s ease,
+    cy 0.2s ease;
 }
 .move-orbit-caption.move-orbit-current,
 .move-orbit-current {
@@ -1069,7 +1073,10 @@ circle {
   border-radius: 999px;
   border: 1.5px solid var(--border-strong);
   cursor: pointer;
-  transition: background 0.1s ease, border-color 0.1s ease, transform 0.1s ease;
+  transition:
+    background 0.1s ease,
+    border-color 0.1s ease,
+    transform 0.1s ease;
 }
 .bp-dot:hover {
   border-color: var(--bad);
@@ -1371,7 +1378,9 @@ circle {
   height: 100%;
   border-radius: 999px;
   background: var(--accent);
-  transition: width 0.2s ease, background 0.2s ease;
+  transition:
+    width 0.2s ease,
+    background 0.2s ease;
 }
 .code-studio-reassemble .reassemble-progress-fill.reassemble-progress-done {
   background: var(--good);
@@ -1428,7 +1437,9 @@ circle {
   border-radius: var(--radius);
   padding: var(--space-2);
   margin-bottom: var(--space-2);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 .code-studio-reassemble .assembled-drag-over {
   border-color: var(--accent);
@@ -1709,7 +1720,10 @@ circle {
   border-radius: var(--radius);
   background: var(--surface);
   color: var(--text-2);
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
 }
 .code-blueprint-close:focus-visible {
   outline: 2px solid var(--accent);
@@ -1857,7 +1871,11 @@ circle {
   animation: quizCorrectPulse 0.45s ease-out;
 }
 .quiz-choice {
-  transition: border-color 0.18s ease, background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+  transition:
+    border-color 0.18s ease,
+    background-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease;
 }
 .quiz-choice-correct {
   animation: quizCorrectPulse 0.45s ease-out;
@@ -1968,7 +1986,11 @@ circle {
   padding: 10px 12px;
   font-size: var(--fs-sm, 13px);
   color: var(--text);
-  transition: border-color 0.18s ease, background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+  transition:
+    border-color 0.18s ease,
+    background-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease;
 }
 .sim-option:hover {
   border-color: var(--accent);
@@ -1999,7 +2021,6 @@ circle {
   gap: 12px;
 }
 
-
 /* ---- ArrayBars (sorting) ---- */
 .bars {
   display: flex;
@@ -2026,7 +2047,10 @@ circle {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  transition: height 0.18s ease, background 0.12s ease, border-color 0.12s ease;
+  transition:
+    height 0.18s ease,
+    background 0.12s ease,
+    border-color 0.12s ease;
 }
 .bar-val {
   font-family: var(--mono);
@@ -2162,7 +2186,10 @@ circle {
   font-family: var(--mono);
   font-size: var(--viz-cell, 12px);
   color: var(--text-2);
-  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease;
 }
 .grid-cell.water {
   background: var(--surface-2);
@@ -2297,7 +2324,9 @@ circle {
 }
 .algo-canvas .react-flow__edge-path {
   stroke-width: var(--edge-stroke-width, 1.5);
-  transition: stroke 0.12s ease, stroke-width 0.12s ease;
+  transition:
+    stroke 0.12s ease,
+    stroke-width 0.12s ease;
 }
 .algo-canvas .react-flow__edge:hover:not(.selected) .react-flow__edge-path {
   stroke: color-mix(in srgb, var(--edge) 80%, var(--text-3)) !important;
@@ -2333,7 +2362,11 @@ circle {
   color: var(--text-2);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.12s ease, background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+  transition:
+    opacity 0.12s ease,
+    background 0.12s ease,
+    color 0.12s ease,
+    border-color 0.12s ease;
 }
 .edge-delete--on {
   opacity: 1;
@@ -2481,7 +2514,9 @@ circle {
 .vim-hud-node {
   pointer-events: auto;
   box-shadow: var(--vim-elev-shadow, var(--node-shadow));
-  transition: box-shadow 0.22s ease, transform 0.22s ease;
+  transition:
+    box-shadow 0.22s ease,
+    transform 0.22s ease;
 }
 
 .vim-orbit-node:hover,
@@ -2756,7 +2791,10 @@ circle {
   font-size: var(--fs-2xs, 0.625rem);
   font-weight: 500;
   color: var(--ink2);
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .vim-btn:hover {
@@ -2824,7 +2862,11 @@ circle {
   color: var(--ink2);
   box-shadow: var(--vim-elev-shadow, var(--node-shadow));
   backdrop-filter: blur(8px);
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
 }
 
 .vim-orbit-edge-btn:hover {
@@ -2922,8 +2964,16 @@ circle {
 
 .auth-modal-glow {
   background:
-    radial-gradient(ellipse 80% 100% at 50% -20%, color-mix(in srgb, var(--accent) 22%, transparent), transparent),
-    radial-gradient(ellipse 60% 80% at 50% 0%, color-mix(in srgb, var(--accent-bg) 55%, transparent), transparent);
+    radial-gradient(
+      ellipse 80% 100% at 50% -20%,
+      color-mix(in srgb, var(--accent) 22%, transparent),
+      transparent
+    ),
+    radial-gradient(
+      ellipse 60% 80% at 50% 0%,
+      color-mix(in srgb, var(--accent-bg) 55%, transparent),
+      transparent
+    );
   mask-image: linear-gradient(to bottom, black 40%, transparent);
 }
 

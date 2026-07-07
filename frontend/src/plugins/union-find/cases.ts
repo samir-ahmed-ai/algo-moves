@@ -22,7 +22,8 @@ export const goodCases: WorkedCase<UFInput>[] = [
     inputLabel: 'n=3 · edges (0,1,1) (1,2,2) (0,2,3)',
     returns: 'MST weight = 3',
     tone: 'ok',
-    question: 'Three edges, but the spanning tree only needs two — which one is skipped and how does the disjoint-set know?',
+    question:
+      'Three edges, but the spanning tree only needs two — which one is skipped and how does the disjoint-set know?',
     answer:
       'Sorted ascending: (0,1,1) unions {0,1}, (1,2,2) unions {0,1,2}. Now find(0) and find(2) return the same root, so (0,2,3) is a same-set edge — accepting it would close a cycle, so it is rejected. MST = {(0,1),(1,2)}, weight 1+2 = 3.',
   },
@@ -112,7 +113,8 @@ export const badCases: WorkedCase<UFInput>[] = [
     inputLabel: 'n=4 · ring of 1s + two long chords',
     returns: 'rejects 2 edges',
     tone: 'bad',
-    question: 'After the three weight-1 edges connect everything, what happens to (0,3,5) and (0,2,9)?',
+    question:
+      'After the three weight-1 edges connect everything, what happens to (0,3,5) and (0,2,9)?',
     answer:
       'The three cheapest edges already link {0,1,2,3} into one set with 3 edges (n-1). For (0,3,5), find(0) == find(3); for (0,2,9), find(0) == find(2) — both are same-set edges that would create a cycle, so the disjoint-set rejects them. This is exactly how union-find prevents cycles: union only fires when the two roots differ.',
   },

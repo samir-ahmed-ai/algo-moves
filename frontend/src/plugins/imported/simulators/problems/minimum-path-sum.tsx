@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  RailGroup,
+  RailResult,
+  RailStat,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+} from '../../../_shared/vizKit';
 
 interface MPSInput {
   grid: number[][];
@@ -31,8 +44,13 @@ function record({ grid }: MPSInput): Frame<MPSState>[] {
     done: false,
   }));
 
-  const snap = (type: string, note: string, caption: string, cur: [number, number] | null, tone?: 'good') =>
-    emit(type, note, caption, { cur, done: type === 'DONE' }, tone);
+  const snap = (
+    type: string,
+    note: string,
+    caption: string,
+    cur: [number, number] | null,
+    tone?: 'good',
+  ) => emit(type, note, caption, { cur, done: type === 'DONE' }, tone);
 
   snap(
     'INIT',
@@ -43,7 +61,12 @@ function record({ grid }: MPSInput): Frame<MPSState>[] {
 
   // Base cell.
   dp[0][0] = grid[0][0];
-  snap('BASE', `dp[0][0]=${dp[0][0]}`, `Base case: the only way to be at the start (0, 0) is to start there, so dp[0][0] = grid[0][0] = ${grid[0][0]}.`, [0, 0]);
+  snap(
+    'BASE',
+    `dp[0][0]=${dp[0][0]}`,
+    `Base case: the only way to be at the start (0, 0) is to start there, so dp[0][0] = grid[0][0] = ${grid[0][0]}.`,
+    [0, 0],
+  );
 
   // First row: prefix sums (only reachable from the left).
   for (let c = 1; c < n; c++) {
@@ -73,7 +96,8 @@ function record({ grid }: MPSInput): Frame<MPSState>[] {
       const up = dp[r - 1][c];
       const left = dp[r][c - 1];
       const cheaper = Math.min(up, left);
-      const fromLabel = up <= left ? `above (${r - 1}, ${c}) = ${up}` : `the left (${r}, ${c - 1}) = ${left}`;
+      const fromLabel =
+        up <= left ? `above (${r - 1}, ${c}) = ${up}` : `the left (${r}, ${c - 1}) = ${left}`;
       dp[r][c] = grid[r][c] + cheaper;
       snap(
         'FILL',
@@ -147,12 +171,23 @@ export const simulator: ProblemSimulator = {
     {
       id: 'g3x3',
       label: '[[1,3,1],[1,5,1],[4,2,1]]',
-      value: { grid: [[1, 3, 1], [1, 5, 1], [4, 2, 1]] },
+      value: {
+        grid: [
+          [1, 3, 1],
+          [1, 5, 1],
+          [4, 2, 1],
+        ],
+      },
     },
     {
       id: 'g2x3',
       label: '[[1,2,3],[4,5,6]]',
-      value: { grid: [[1, 2, 3], [4, 5, 6]] },
+      value: {
+        grid: [
+          [1, 2, 3],
+          [4, 5, 6],
+        ],
+      },
     },
   ] satisfies SampleInput<MPSInput>[],
   record,

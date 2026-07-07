@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
@@ -29,16 +35,16 @@ function record({ prices }: StocksInput): Frame<StocksState>[] {
   let bestSellIdx: number | null = null;
 
   const { emit, frames } = createRecorder<StocksState>(() => ({
-        prices,
-        i: null,
-        minIdx,
-        minP: Number.isFinite(minP) ? minP : null,
-        profit: null,
-        best,
-        bestBuyIdx,
-        bestSellIdx,
-        done: false
-      }));
+    prices,
+    i: null,
+    minIdx,
+    minP: Number.isFinite(minP) ? minP : null,
+    profit: null,
+    best,
+    bestBuyIdx,
+    bestSellIdx,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -109,7 +115,8 @@ function View({ frame }: PluginViewProps<StocksState>) {
 
   const pointers: ArrayPointer[] = [];
   if (s.i !== null) pointers.push({ i: s.i, label: 'sell?', tone: 'accent', place: 'above' });
-  if (s.minIdx !== null) pointers.push({ i: s.minIdx, label: 'minP', tone: 'warn', place: 'below' });
+  if (s.minIdx !== null)
+    pointers.push({ i: s.minIdx, label: 'minP', tone: 'warn', place: 'below' });
   if (s.done && s.bestBuyIdx !== null && s.bestBuyIdx !== s.minIdx)
     pointers.push({ i: s.bestBuyIdx, label: 'buy', tone: 'good', place: 'below' });
   if (s.bestSellIdx !== null)
@@ -129,8 +136,7 @@ function View({ frame }: PluginViewProps<StocksState>) {
         {' · '}best = <span className="font-mono text-ink">{s.best}</span>
         {s.profit !== null && !s.done && (
           <>
-            {' · '}profit here ={' '}
-            <span className="font-mono text-ink">{s.profit}</span>
+            {' · '}profit here = <span className="font-mono text-ink">{s.profit}</span>
           </>
         )}
       </div>
@@ -158,7 +164,11 @@ function Inspector({ frame }: InspectorProps<StocksState>) {
       <InspectorRow k="best" v={s.best} />
       <InspectorRow
         k="best trade"
-        v={s.bestBuyIdx !== null && s.bestSellIdx !== null ? `buy ${s.bestBuyIdx} → sell ${s.bestSellIdx}` : '—'}
+        v={
+          s.bestBuyIdx !== null && s.bestSellIdx !== null
+            ? `buy ${s.bestBuyIdx} → sell ${s.bestSellIdx}`
+            : '—'
+        }
       />
     </VarGrid>
   );
@@ -167,112 +177,108 @@ function Inspector({ frame }: InspectorProps<StocksState>) {
 export const manifestId = 'prep-arrays-max-profit-selling-stocks';
 export const title = 'Max profit selling stocks';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Max profit selling stocks\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Max profit selling stocks"?',
     choices: [
       {
-        label: "One pass min price — fits this problem",
-        correct: true
+        label: 'One pass min price — fits this problem',
+        correct: true,
       },
       {
-        label: "Monotonic stack — different approach"
+        label: 'Monotonic stack — different approach',
       },
       {
-        label: "Reverse segments — different approach"
+        label: 'Reverse segments — different approach',
       },
       {
-        label: "Boyer-Moore voting — different approach"
-      }
+        label: 'Boyer-Moore voting — different approach',
+      },
     ],
-    explain: "Walk prices remembering the cheapest buy behind you"
+    explain: 'Walk prices remembering the cheapest buy behind you',
   },
   {
-    id: "key-step",
-    prompt: "On the \"NEW_BEST\" step (best=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "NEW_BEST" step (best=), what happens?',
     choices: [
       {
-        label: "Selling on day for after buying — this move caption",
-        correct: true
+        label: 'Selling on day for after buying — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Selling on day  for  after buying at minP =  yields  −  = , beating the old best. best = ."
+    explain:
+      'Selling on day  for  after buying at minP =  yields  −  = , beating the old best. best = .',
   },
   {
-    id: "state",
-    prompt: "What does the `i` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: "current day being inspected — updated each frame",
-        correct: true
+        label: 'current day being inspected — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `i` in sync: current day being inspected (the candidate sell day)"
+    explain: 'The recorder keeps `i` in sync: current day being inspected (the candidate sell day)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Max profit selling stocks\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Max profit selling stocks"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m+n) time, O(n) space — wrong order of growth"
+        label: 'O(m+n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). minP=min(minP,p); best=max(best,p-minP)"
+    explain: 'O(n). O(1). minP=min(minP,p); best=max(best,p-minP)',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Selling on day gives − = — final DONE caption",
-        correct: true
+        label: 'Selling on day gives − = — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Selling on day  gives  −  = , which does not beat best = . Keep the best as-is."
-  }
+    explain: 'Selling on day  gives  −  = , which does not beat best = . Keep the best as-is.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

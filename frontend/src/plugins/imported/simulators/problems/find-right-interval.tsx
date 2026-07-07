@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface FriInput {
   intervals: [number, number][];
@@ -22,7 +36,8 @@ interface FriState {
   done: boolean;
 }
 
-function record({ intervals }: FriInput): Frame<FriState>[] {  const n = intervals.length;
+function record({ intervals }: FriInput): Frame<FriState>[] {
+  const n = intervals.length;
 
   // sort starts ascending, remembering each start's original interval index
   const order = intervals.map((iv, i) => ({ start: iv[0], i })).sort((a, b) => a.start - b.start);
@@ -38,20 +53,25 @@ function record({ intervals }: FriInput): Frame<FriState>[] {  const n = interva
   let res = -1;
 
   const { emit, frames } = createRecorder<FriState>(() => ({
-        intervals: intervals,
-        starts: starts,
-        origIdx: origIdx,
-        cur: cur,
-        key: key,
-        lo: lo,
-        hi: hi,
-        mid: mid,
-        res: res,
-        answers: answers.slice(),
-        done: false
-      }));
+    intervals: intervals,
+    starts: starts,
+    origIdx: origIdx,
+    cur: cur,
+    key: key,
+    lo: lo,
+    hi: hi,
+    mid: mid,
+    res: res,
+    answers: answers.slice(),
+    done: false,
+  }));
 
-  emit('INIT', `${n} intervals`, `For each interval, find the interval whose start is the smallest value ≥ this interval's end. Sort the starts ascending (shown below, each labelled with its original index) and binary-search them: the answer is the index of the first start that is still ≥ the end.`, {});
+  emit(
+    'INIT',
+    `${n} intervals`,
+    `For each interval, find the interval whose start is the smallest value ≥ this interval's end. Sort the starts ascending (shown below, each labelled with its original index) and binary-search them: the answer is the index of the first start that is still ≥ the end.`,
+    {},
+  );
 
   for (let p = 0; p < n; p++) {
     cur = p;
@@ -60,7 +80,12 @@ function record({ intervals }: FriInput): Frame<FriState>[] {  const n = interva
     hi = n - 1;
     mid = null;
     res = -1;
-    emit('INTERVAL', `interval ${p} → end ${key}`, `Interval ${p} = [${intervals[p][0]}, ${intervals[p][1]}]. Binary-search the sorted starts for the smallest start ≥ ${key} (its end).`, {});
+    emit(
+      'INTERVAL',
+      `interval ${p} → end ${key}`,
+      `Interval ${p} = [${intervals[p][0]}, ${intervals[p][1]}]. Binary-search the sorted starts for the smallest start ≥ ${key} (its end).`,
+      {},
+    );
 
     while (lo <= hi) {
       mid = (lo + hi) >> 1;
@@ -68,26 +93,52 @@ function record({ intervals }: FriInput): Frame<FriState>[] {  const n = interva
       if (starts[mid] >= key) {
         res = mid;
         hi = mid - 1;
-        emit('LEFT', `res=${mid}`, `${starts[mid]} ≥ ${key}, so this start qualifies — remember it (res = ${mid}) and keep searching left for an even smaller qualifying start. Set hi = ${hi}.`, {});
+        emit(
+          'LEFT',
+          `res=${mid}`,
+          `${starts[mid]} ≥ ${key}, so this start qualifies — remember it (res = ${mid}) and keep searching left for an even smaller qualifying start. Set hi = ${hi}.`,
+          {},
+        );
       } else {
         lo = mid + 1;
-        emit('RIGHT', `lo=${lo}`, `${starts[mid]} < ${key}, too small — the answer must be further right. Set lo = ${lo}.`, {});
+        emit(
+          'RIGHT',
+          `lo=${lo}`,
+          `${starts[mid]} < ${key}, too small — the answer must be further right. Set lo = ${lo}.`,
+          {},
+        );
       }
     }
 
     mid = null;
     if (res === -1) {
       answers[p] = -1;
-      emit('NONE', `interval ${p} → -1`, `No start is ≥ ${key}, so interval ${p} has no right interval. Answer = -1.`, {});
+      emit(
+        'NONE',
+        `interval ${p} → -1`,
+        `No start is ≥ ${key}, so interval ${p} has no right interval. Answer = -1.`,
+        {},
+      );
     } else {
       answers[p] = origIdx[res];
-      emit('PICK', `interval ${p} → ${origIdx[res]}`, `The smallest qualifying start is starts[${res}] = ${starts[res]}, which belongs to original interval ${origIdx[res]}. Answer for interval ${p} = ${origIdx[res]}.`, {});
+      emit(
+        'PICK',
+        `interval ${p} → ${origIdx[res]}`,
+        `The smallest qualifying start is starts[${res}] = ${starts[res]}, which belongs to original interval ${origIdx[res]}. Answer for interval ${p} = ${origIdx[res]}.`,
+        {},
+      );
     }
   }
 
   cur = -1;
   mid = null;
-  emit('DONE', 'finished', `Every interval resolved. Right-interval indices = [${answers.map((a) => a ?? -1).join(', ')}].`, { done: true }, 'good');
+  emit(
+    'DONE',
+    'finished',
+    `Every interval resolved. Right-interval indices = [${answers.map((a) => a ?? -1).join(', ')}].`,
+    { done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -117,7 +168,10 @@ function View({ frame }: PluginViewProps<FriState>) {
   const rail = (
     <>
       <RailGroup label="binary search">
-        <RailStat k="interval" v={s.cur >= 0 ? `[${s.intervals[s.cur][0]},${s.intervals[s.cur][1]}]` : '—'} />
+        <RailStat
+          k="interval"
+          v={s.cur >= 0 ? `[${s.intervals[s.cur][0]},${s.intervals[s.cur][1]}]` : '—'}
+        />
         <RailStat k="end" v={s.cur >= 0 ? s.key : '—'} tone="accent" />
         <RailStat k="lo" v={s.lo} />
         <RailStat k="hi" v={s.hi} />
@@ -137,7 +191,12 @@ function View({ frame }: PluginViewProps<FriState>) {
   return (
     <VizStage rail={rail} railWidth={150}>
       <div className="text-ink3 text-sm mb-1">{header}</div>
-      <ArrayRow values={s.starts} cellTone={tone} pointers={pointers} label={(i) => `→${s.origIdx[i]}`} />
+      <ArrayRow
+        values={s.starts}
+        cellTone={tone}
+        pointers={pointers}
+        label={(i) => `→${s.origIdx[i]}`}
+      />
     </VizStage>
   );
 }
@@ -147,7 +206,10 @@ function Inspector({ frame }: InspectorProps<FriState>) {
   const s = frame.state;
   return (
     <VarGrid>
-      <InspectorRow k="interval" v={s.cur >= 0 ? `[${s.intervals[s.cur][0]}, ${s.intervals[s.cur][1]}]` : '—'} />
+      <InspectorRow
+        k="interval"
+        v={s.cur >= 0 ? `[${s.intervals[s.cur][0]}, ${s.intervals[s.cur][1]}]` : '—'}
+      />
       <InspectorRow k="end (key)" v={s.cur >= 0 ? s.key : '—'} />
       <InspectorRow k="lo" v={s.lo} />
       <InspectorRow k="hi" v={s.hi} />
@@ -162,8 +224,28 @@ export const title = 'Find Right Interval';
 
 export const simulator: ProblemSimulator = {
   inputs: [
-    { id: 'fri1', label: '[[3,4],[2,3],[1,2]] → [-1,0,1]', value: { intervals: [[3, 4], [2, 3], [1, 2]] } },
-    { id: 'fri2', label: '[[1,4],[2,3],[3,4]] → [-1,2,-1]', value: { intervals: [[1, 4], [2, 3], [3, 4]] } },
+    {
+      id: 'fri1',
+      label: '[[3,4],[2,3],[1,2]] → [-1,0,1]',
+      value: {
+        intervals: [
+          [3, 4],
+          [2, 3],
+          [1, 2],
+        ],
+      },
+    },
+    {
+      id: 'fri2',
+      label: '[[1,4],[2,3],[3,4]] → [-1,2,-1]',
+      value: {
+        intervals: [
+          [1, 4],
+          [2, 3],
+          [3, 4],
+        ],
+      },
+    },
   ] satisfies SampleInput<FriInput>[],
   record,
   View,

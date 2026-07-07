@@ -1,8 +1,23 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  vizText,
+} from '../../../_shared/vizKit';
 
 interface DecodeInput {
   digits: string;
@@ -25,23 +40,35 @@ function letterFor(code: string): string | null {
   return String.fromCharCode(64 + n);
 }
 
-function record({ digits }: DecodeInput): Frame<DecodeState>[] {  const results: string[] = [];
+function record({ digits }: DecodeInput): Frame<DecodeState>[] {
+  const results: string[] = [];
 
   const { emit, frames } = createRecorder<DecodeState>(() => ({
-        digits: digits,
-        results: results.slice(),
-        idx: null,
-        span: null,
-        path: '',
-        done: false
-      }));
+    digits: digits,
+    results: results.slice(),
+    idx: null,
+    span: null,
+    path: '',
+    done: false,
+  }));
 
-  emit('INIT', `"${digits}"`, `Decode the digit string "${digits}" into letters where 1→A, 2→B, … 26→Z. At each position try taking 1 digit, then taking 2 digits (when 10–26), and recurse on the rest.`, { idx: 0, span: null, path: '' });
+  emit(
+    'INIT',
+    `"${digits}"`,
+    `Decode the digit string "${digits}" into letters where 1→A, 2→B, … 26→Z. At each position try taking 1 digit, then taking 2 digits (when 10–26), and recurse on the rest.`,
+    { idx: 0, span: null, path: '' },
+  );
 
   const decode = (idx: number, path: string) => {
     if (idx === digits.length) {
       results.push(path);
-      emit('RECORD', `+"${path}"`, `Reached the end of the string — record the decoding "${path}" (${results.length} so far).`, { idx: null, span: null, path: path }, 'good');
+      emit(
+        'RECORD',
+        `+"${path}"`,
+        `Reached the end of the string — record the decoding "${path}" (${results.length} so far).`,
+        { idx: null, span: null, path: path },
+        'good',
+      );
       return;
     }
     for (const len of [1, 2]) {
@@ -49,17 +76,39 @@ function record({ digits }: DecodeInput): Frame<DecodeState>[] {  const results:
       const code = digits.slice(idx, idx + len);
       const letter = letterFor(code);
       if (letter === null) {
-        emit('SKIP', `${code} ✗`, `Take ${len} digit${len > 1 ? 's' : ''} "${code}" at position ${idx}: ${code} is not in 1–26, so it maps to no letter — skip this branch.`, { idx: idx, span: len, path: path }, 'bad');
+        emit(
+          'SKIP',
+          `${code} ✗`,
+          `Take ${len} digit${len > 1 ? 's' : ''} "${code}" at position ${idx}: ${code} is not in 1–26, so it maps to no letter — skip this branch.`,
+          { idx: idx, span: len, path: path },
+          'bad',
+        );
         continue;
       }
-      emit('CHOOSE', `${code}→${letter}`, `Take ${len} digit${len > 1 ? 's' : ''} "${code}" at position ${idx} → "${letter}". Decoded prefix is now "${path + letter}"; recurse on the remaining "${digits.slice(idx + len) || '∅'}".`, { idx: idx, span: len, path: path + letter });
+      emit(
+        'CHOOSE',
+        `${code}→${letter}`,
+        `Take ${len} digit${len > 1 ? 's' : ''} "${code}" at position ${idx} → "${letter}". Decoded prefix is now "${path + letter}"; recurse on the remaining "${digits.slice(idx + len) || '∅'}".`,
+        { idx: idx, span: len, path: path + letter },
+      );
       decode(idx + len, path + letter);
-      emit('BACKTRACK', `undo ${letter}`, `Backtrack: drop "${letter}" so the next branch decodes position ${idx} differently. Prefix is back to "${path || '∅'}".`, { idx: idx, span: len, path: path });
+      emit(
+        'BACKTRACK',
+        `undo ${letter}`,
+        `Backtrack: drop "${letter}" so the next branch decodes position ${idx} differently. Prefix is back to "${path || '∅'}".`,
+        { idx: idx, span: len, path: path },
+      );
     }
   };
 
   decode(0, '');
-  emit('DONE', `${results.length} decodings`, `All branches explored — "${digits}" has ${results.length} decoding${results.length === 1 ? '' : 's'}: ${results.map((r) => `"${r}"`).join(', ')}.`, { idx: null, span: null, path: '' , done: true }, 'good');
+  emit(
+    'DONE',
+    `${results.length} decodings`,
+    `All branches explored — "${digits}" has ${results.length} decoding${results.length === 1 ? '' : 's'}: ${results.map((r) => `"${r}"`).join(', ')}.`,
+    { idx: null, span: null, path: '', done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -72,13 +121,13 @@ function View({ frame }: PluginViewProps<DecodeState>) {
         <RailStat k="prefix" v={s.path || '∅'} tone="accent" />
         <RailStat k="remaining" v={s.idx !== null ? s.digits.slice(s.idx) || '∅' : '—'} />
       </RailGroup>
-      <RailStack
-        label="decodings"
-        items={s.results.map((r) => `"${r}"`)}
-        topLabel="latest"
-      />
+      <RailStack label="decodings" items={s.results.map((r) => `"${r}"`)} topLabel="latest" />
       {s.done && (
-        <RailResult label="total" value={s.results.length} tone={s.results.length > 0 ? 'good' : 'bad'} />
+        <RailResult
+          label="total"
+          value={s.results.length}
+          tone={s.results.length > 0 ? 'good' : 'bad'}
+        />
       )}
     </>
   );
@@ -91,7 +140,10 @@ function View({ frame }: PluginViewProps<DecodeState>) {
           return (
             <span
               key={i}
-              className={cn('inline-flex h-7 w-7 items-center justify-center rounded font-mono', vizText.base)}
+              className={cn(
+                'inline-flex h-7 w-7 items-center justify-center rounded font-mono',
+                vizText.base,
+              )}
               style={{
                 background: active ? 'var(--accent-bg)' : 'var(--surface-2)',
                 color: consumed ? 'var(--text-3)' : 'var(--text)',

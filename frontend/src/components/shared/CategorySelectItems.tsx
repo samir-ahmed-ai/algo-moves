@@ -22,7 +22,10 @@ export function CategorySelectItems<T extends string>({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value as T)}
-      className={cn('nodrag w-full rounded border border-edge bg-panel2 px-2 py-1.5 text-ink outline-none focus:border-accent', nodeText.sm)}
+      className={cn(
+        'nodrag w-full rounded border border-edge bg-panel2 px-2 py-1.5 text-ink outline-none focus:border-accent',
+        nodeText.sm,
+      )}
     >
       <option value="">{placeholder}</option>
       {categories.map((cat) => (
@@ -58,7 +61,10 @@ export function CategorySelectList({
                 key={item.id}
                 type="button"
                 onClick={() => onPick(item.id)}
-                className={cn('rounded border border-transparent px-2 py-1 text-left text-ink2 hover:border-edge hover:bg-panel2', nodeText.sm)}
+                className={cn(
+                  'rounded border border-transparent px-2 py-1 text-left text-ink2 hover:border-edge hover:bg-panel2',
+                  nodeText.sm,
+                )}
               >
                 {item.label}
               </button>

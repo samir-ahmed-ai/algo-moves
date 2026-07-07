@@ -7,12 +7,7 @@ import {
 
 /** Top-level browse tracks — the entry points for organizing content. */
 export type TrackId =
-  | 'data-structures'
-  | 'algorithms'
-  | 'design'
-  | 'go'
-  | 'openrtb'
-  | 'interview-prep';
+  'data-structures' | 'algorithms' | 'design' | 'go' | 'openrtb' | 'interview-prep';
 
 export interface BrowseCategorySource {
   courseId: string;
@@ -64,10 +59,7 @@ const CATEGORIES: BrowseCategory[] = [
     description:
       'Linear sequences are the foundation of most algorithm problems; master in-place manipulation with two-pointer and sliding-window sweeps. Recognizing sorted-order structure and index arithmetic unlocks clean O(n) solutions.',
     icon: 'Table',
-    sources: [
-      { courseId: 'arrays', topicIds: ['searching'] },
-      { courseId: 'prep-arrays' },
-    ],
+    sources: [{ courseId: 'arrays', topicIds: ['searching'] }, { courseId: 'prep-arrays' }],
   },
   {
     id: 'strings',
@@ -192,10 +184,7 @@ const CATEGORIES: BrowseCategory[] = [
     title: 'Sorting',
     summary: 'Comparison sorts, merge sort, quicksort, and heap sort.',
     icon: 'ArrowDownUp',
-    sources: [
-      { courseId: 'arrays', topicIds: ['sorting'] },
-      { courseId: 'prep-sorting' },
-    ],
+    sources: [{ courseId: 'arrays', topicIds: ['sorting'] }, { courseId: 'prep-sorting' }],
   },
   {
     id: 'intervals',
@@ -236,26 +225,22 @@ const CATEGORIES: BrowseCategory[] = [
   },
 
   // —— Go (Senior) —— one category per Go course topic, generated from the course.
-  ...goBrowseCategories.map(
-    (c): BrowseCategory => ({
-      id: c.id,
-      title: c.title,
-      summary: c.summary,
-      icon: c.icon,
-      sources: [{ courseId: GO_COURSE_ID, topicIds: [c.courseTopicId] }],
-    }),
-  ),
+  ...goBrowseCategories.map((c): BrowseCategory => ({
+    id: c.id,
+    title: c.title,
+    summary: c.summary,
+    icon: c.icon,
+    sources: [{ courseId: GO_COURSE_ID, topicIds: [c.courseTopicId] }],
+  })),
 
   // —— OpenRTB —— one category per OpenRTB course topic, generated from the course.
-  ...openrtbBrowseCategories.map(
-    (c): BrowseCategory => ({
-      id: c.id,
-      title: c.title,
-      summary: c.summary,
-      icon: c.icon,
-      sources: [{ courseId: OPENRTB_COURSE_ID, topicIds: [c.courseTopicId] }],
-    }),
-  ),
+  ...openrtbBrowseCategories.map((c): BrowseCategory => ({
+    id: c.id,
+    title: c.title,
+    summary: c.summary,
+    icon: c.icon,
+    sources: [{ courseId: OPENRTB_COURSE_ID, topicIds: [c.courseTopicId] }],
+  })),
 ];
 
 const categoryById = new Map(CATEGORIES.map((c) => [c.id, c]));
@@ -271,13 +256,30 @@ export function getAllCategories(): BrowseCategory[] {
 /* ------------------------------------------------------------------ tracks */
 
 const DS_IDS = [
-  'arrays', 'strings', 'hash-maps', 'linked-lists', 'stacks-queues',
-  'trees', 'tries', 'heaps', 'matrices', 'database',
+  'arrays',
+  'strings',
+  'hash-maps',
+  'linked-lists',
+  'stacks-queues',
+  'trees',
+  'tries',
+  'heaps',
+  'matrices',
+  'database',
 ] as const;
 
 const ALG_IDS = [
-  'backtracking', 'graphs', 'binary-search', 'dynamic-programming', 'greedy',
-  'sliding-window', 'sorting', 'intervals', 'prefix-sum', 'math', 'streams-io',
+  'backtracking',
+  'graphs',
+  'binary-search',
+  'dynamic-programming',
+  'greedy',
+  'sliding-window',
+  'sorting',
+  'intervals',
+  'prefix-sum',
+  'math',
+  'streams-io',
 ] as const;
 
 const DESIGN_IDS = ['design'] as const;
@@ -409,7 +411,11 @@ export function getCategoryPrerequisites(categoryId: string): string[] {
 export type MasteryLookup = (itemId: string) => boolean;
 
 /** True when every explicit item prereq is mastered (or there are none). */
-export function isItemUnlocked(itemId: string, graph: Map<string, string[]>, isMastered: MasteryLookup): boolean {
+export function isItemUnlocked(
+  itemId: string,
+  graph: Map<string, string[]>,
+  isMastered: MasteryLookup,
+): boolean {
   const prereqs = graph.get(itemId) ?? [];
   return prereqs.every((p) => isMastered(p));
 }

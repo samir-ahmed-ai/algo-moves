@@ -1,4 +1,9 @@
-import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
+import {
+  definePlugin,
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+} from '../../core/types';
 import { ArrayBars, type BarTone } from '../../components/board/ArrayBars';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { createSortRecorder, type SortInput, type SortState } from '../_shared/sortRecorder';
@@ -9,29 +14,61 @@ import { SortInspector } from '../_shared/sortInspector';
 import { VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
 
 function record({ values: initial }: SortInput): Frame<SortState>[] {
-  const { values, n, emit, frames, incCompare, incSwap, setSortedFrom } = createSortRecorder(initial);
+  const { values, n, emit, frames, incCompare, incSwap, setSortedFrom } =
+    createSortRecorder(initial);
 
-  emit('INIT', `n=${n}`, `Bubble sort: repeatedly walk the array, swapping adjacent out-of-order pairs. The largest unsorted value "bubbles" to the end each pass.`, null, null);
+  emit(
+    'INIT',
+    `n=${n}`,
+    `Bubble sort: repeatedly walk the array, swapping adjacent out-of-order pairs. The largest unsorted value "bubbles" to the end each pass.`,
+    null,
+    null,
+  );
 
   for (let i = 0; i < n - 1; i++) {
     let didSwap = false;
     for (let j = 0; j < n - 1 - i; j++) {
       incCompare();
-      emit('CMP', `${values[j]} ? ${values[j + 1]}`, `Compare the adjacent pair at ${j} and ${j + 1}: ${values[j]} vs ${values[j + 1]}.`, [j, j + 1], null);
+      emit(
+        'CMP',
+        `${values[j]} ? ${values[j + 1]}`,
+        `Compare the adjacent pair at ${j} and ${j + 1}: ${values[j]} vs ${values[j + 1]}.`,
+        [j, j + 1],
+        null,
+      );
       if (values[j] > values[j + 1]) {
         [values[j], values[j + 1]] = [values[j + 1], values[j]];
         incSwap();
         didSwap = true;
-        emit('SWAP', `swap ${j}↔${j + 1}`, `${values[j + 1]} was bigger, so swap them. The larger value moves one step right.`, null, [j, j + 1]);
+        emit(
+          'SWAP',
+          `swap ${j}↔${j + 1}`,
+          `${values[j + 1]} was bigger, so swap them. The larger value moves one step right.`,
+          null,
+          [j, j + 1],
+        );
       }
     }
     setSortedFrom(n - 1 - i);
     const tail = n - 1 - i;
-    emit('LOCK', `pass ${i + 1} done`, `Pass ${i + 1} finished — index ${tail} now holds its final value. The tail is sorted.`, null, null);
+    emit(
+      'LOCK',
+      `pass ${i + 1} done`,
+      `Pass ${i + 1} finished — index ${tail} now holds its final value. The tail is sorted.`,
+      null,
+      null,
+    );
     if (!didSwap) break;
   }
   setSortedFrom(0);
-  emit('DONE', 'sorted ✓', `A full pass made no swaps, so the array is sorted.`, null, null, 'good');
+  emit(
+    'DONE',
+    'sorted ✓',
+    `A full pass made no swaps, so the array is sorted.`,
+    null,
+    null,
+    'good',
+  );
   return frames;
 }
 
@@ -45,13 +82,17 @@ function View({ frame }: PluginViewProps<SortState>) {
     return 'idle';
   };
   return (
-    <VizStage rail={<>
-      <RailGroup label="ops">
-        <RailStat k="cmp" v={s.comparisons} />
-        <RailStat k="swaps" v={s.swaps} />
-      </RailGroup>
-      {done && <RailResult label="result" value="sorted ✓" tone="good" />}
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="ops">
+            <RailStat k="cmp" v={s.comparisons} />
+            <RailStat k="swaps" v={s.swaps} />
+          </RailGroup>
+          {done && <RailResult label="result" value="sorted ✓" tone="good" />}
+        </>
+      }
+    >
       <ArrayBars values={s.values} tone={tone} height={242} />
     </VizStage>
   );
@@ -128,7 +169,13 @@ const teaching = wireTeachingStack({
   practice: {
     quiz,
     codePieces,
-    cases: { good: goodCases, bad: badCases, intro, goodLabel: 'bubble passes', badLabel: 'worst cases' },
+    cases: {
+      good: goodCases,
+      bad: badCases,
+      intro,
+      goodLabel: 'bubble passes',
+      badLabel: 'worst cases',
+    },
     simulateQuestion: 'Which adjacent pair is compared or swapped next?',
   },
 });
@@ -139,7 +186,8 @@ export const bubbleSortPlugin = definePlugin<SortInput, SortState>({
     title: 'Bubble sort',
     difficulty: 'Easy',
     tags: ['array', 'sorting'],
-    summary: 'Walk the array swapping adjacent out-of-order pairs; each pass floats the next-largest value to its final slot.',
+    summary:
+      'Walk the array swapping adjacent out-of-order pairs; each pass floats the next-largest value to its final slot.',
     source: 'https://en.wikipedia.org/wiki/Bubble_sort',
   },
   inputs,

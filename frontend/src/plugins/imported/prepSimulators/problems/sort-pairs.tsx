@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -22,7 +28,8 @@ interface SortPairsState {
   done: boolean;
 }
 
-function record({ pairs }: SortPairsInput): Frame<SortPairsState>[] {  const inputMap = new Map<string, string>(pairs);
+function record({ pairs }: SortPairsInput): Frame<SortPairsState>[] {
+  const inputMap = new Map<string, string>(pairs);
   const keys = pairs.map(([k]) => k);
 
   let dest: string[] = [];
@@ -30,16 +37,16 @@ function record({ pairs }: SortPairsInput): Frame<SortPairsState>[] {  const inp
   let route: string[] = [];
 
   const { emit, frames } = createRecorder<SortPairsState>(() => ({
-        pairs,
-        keys,
-        dest: [...dest],
-        start,
-        scanKey: null,
-        cur: null,
-        next: null,
-        route: [...route],
-        done: false
-      }));
+    pairs,
+    keys,
+    dest: [...dest],
+    start,
+    scanKey: null,
+    cur: null,
+    next: null,
+    route: [...route],
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -144,8 +151,7 @@ function View({ frame }: PluginViewProps<SortPairsState>) {
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
-        keys (head =
-        <span className="font-mono text-ink"> {s.start ?? '?'}</span>)
+        keys (head =<span className="font-mono text-ink"> {s.start ?? '?'}</span>)
       </div>
       <ArrayRow values={s.keys} cellTone={tone} pointers={pointers} windowRange={null} />
       <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
@@ -185,132 +191,130 @@ function Inspector({ frame }: InspectorProps<SortPairsState>) {
 export const manifestId = 'prep-hash-maps-sort-pairs';
 export const title = 'Sort pairs';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Sort pairs\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Sort pairs"?',
     choices: [
       {
-        label: "Hash map chain reconstruction — fits this problem",
-        correct: true
+        label: 'Hash map chain reconstruction — fits this problem',
+        correct: true,
       },
       {
-        label: "Quickselect / partition — different approach"
+        label: 'Quickselect / partition — different approach',
       },
       {
-        label: "Sweep line / delta map — different approach"
+        label: 'Sweep line / delta map — different approach',
       },
       {
-        label: "Frequency map + bucket sort — different approach"
-      }
+        label: 'Frequency map + bucket sort — different approach',
+      },
     ],
-    explain: "key->next chain; the head is the key that is never a value"
+    explain: 'key->next chain; the head is the key that is never a value',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Sort pairs), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Sort pairs), what strategy is established?',
     choices: [
       {
-        label: "key->next chain; the head — described in INIT caption",
-        correct: true
+        label: 'key->next chain; the head — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Sort pairs: each entry links a key to its next value. We rebuild the single chain by finding the head (a key that never appears as a value) and walking the map from there."
+    explain:
+      'Sort pairs: each entry links a key to its next value. We rebuild the single chain by finding the head (a key that never appears as a value) and walking the map from there.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"SCAN\" step ( in dest), what happens?",
+    id: 'key-step',
+    prompt: 'On the "SCAN" step ( in dest), what happens?',
     choices: [
       {
-        label: "\"\" is also a destination — this move caption",
-        correct: true
+        label: '"" is also a destination — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "\"\" is also a destination, so something points to it — it is not the head. Keep looking."
+    explain:
+      '"" is also a destination, so something points to it — it is not the head. Keep looking.',
   },
   {
-    id: "state",
-    prompt: "What does the `pairs` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `pairs` field track in the visualization state?',
     choices: [
       {
-        label: "the raw key->next links — updated each frame",
-        correct: true
+        label: 'the raw key->next links — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `pairs` in sync: the raw key->next links"
+    explain: 'The recorder keeps `pairs` in sync: the raw key->next links',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Sort pairs\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Sort pairs"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
+        label: 'O(log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m+n) time, O(n) space — wrong order of growth"
+        label: 'O(m+n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(1) per op time, O(n) space — wrong order of growth"
-      }
+        label: 'O(1) per op time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). find start not in dest; walk the map building 'a-b'"
+    explain: "O(n). O(n). find start not in dest; walk the map building 'a-b'",
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Done. The reconstructed route is [] — final DONE caption",
-        correct: true
+        label: 'Done. The reconstructed route is [] — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Done. The reconstructed route is [] — one pass to find destinations, one to find the head, one to walk the chain: Time O(n), Space O(n)."
-  }
+    explain:
+      'Done. The reconstructed route is [] — one pass to find destinations, one to find the head, one to walk the chain: Time O(n), Space O(n).',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

@@ -5,7 +5,14 @@ import { useNarration, useSoundCues } from '@/hooks';
 import { cn } from '@/lib/utils/cn';
 import { WorkspaceMenu } from './workspace/WorkspaceMenu';
 import { MobileSwipeReturn } from './mobile/deck/MobileSwipeReturn';
-import { CommandPalette, ModeRouter, PresentationModeHint, ShortcutsOverlay, useWorkspaceKeyboard, useWorkspaceRuntime } from '@/shell/workspace/index';
+import {
+  CommandPalette,
+  ModeRouter,
+  PresentationModeHint,
+  ShortcutsOverlay,
+  useWorkspaceKeyboard,
+  useWorkspaceRuntime,
+} from '@/shell/workspace/index';
 import { SettingsDialog, MobileTransportSheet } from '@/shell/canvas';
 import { PlanTray } from './plans/PlanTray';
 import { PlanRunner } from './plans/PlanRunner';
@@ -31,8 +38,19 @@ export function Workspace() {
   const narrate = tweaks.narrate;
   const [helpOpen, setHelpOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const { item, plugin, pluginLoading, inputId, customInput, setCustomInput, selectInput, frames, runtimeError, player, frame } =
-    useWorkspaceRuntime(activeItemId);
+  const {
+    item,
+    plugin,
+    pluginLoading,
+    inputId,
+    customInput,
+    setCustomInput,
+    selectInput,
+    frames,
+    runtimeError,
+    player,
+    frame,
+  } = useWorkspaceRuntime(activeItemId);
 
   const { isRunning, itemIds, runnerIndex, prevItem, nextItem } = usePlan();
 
@@ -134,7 +152,10 @@ export function Workspace() {
 
       {helpOpen && <ShortcutsOverlay onClose={() => setHelpOpen(false)} />}
       {paletteOpen && <CommandPalette inputId={inputId} onClose={() => setPaletteOpen(false)} />}
-      <MobileTransportSheet open={mobileTransportOpen} onClose={() => setMobileTransportOpen(false)} />
+      <MobileTransportSheet
+        open={mobileTransportOpen}
+        onClose={() => setMobileTransportOpen(false)}
+      />
       <MobileSwipeReturn />
       <SettingsDialog />
     </div>

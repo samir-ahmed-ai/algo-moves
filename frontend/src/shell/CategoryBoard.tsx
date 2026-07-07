@@ -61,10 +61,18 @@ export function CategoryBoard({
 
   return (
     <div className="relative h-full overflow-auto p-[var(--pad)]">
-      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.15]" style={gridStyle} />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.15]"
+        style={gridStyle}
+      />
 
       <div className="relative">
-        <BrowseBreadcrumb trackId={trackId} categoryId={categoryId} onBack={() => setActiveCategoryId(null)} />
+        <BrowseBreadcrumb
+          trackId={trackId}
+          categoryId={categoryId}
+          onBack={() => setActiveCategoryId(null)}
+        />
 
         <div className="relative mb-2 flex items-center gap-[var(--gap)] overflow-hidden rounded-lg border border-edge bg-panel px-[var(--hpad)] py-[var(--pad)]">
           <div
@@ -81,7 +89,9 @@ export function CategoryBoard({
               {total} {total === 1 ? 'PROBLEM' : 'PROBLEMS'}
             </Label>
             <h2 className={cn('truncate font-medium text-ink', chromeText.base)}>{heading}</h2>
-            {blurb && <p className={cn('mt-0.5 line-clamp-1 text-ink2', chromeText.tight)}>{blurb}</p>}
+            {blurb && (
+              <p className={cn('mt-0.5 line-clamp-1 text-ink2', chromeText.tight)}>{blurb}</p>
+            )}
             {category?.description && (
               <p className={cn('mt-1.5 max-w-3xl leading-relaxed text-ink2', chromeText.sm)}>
                 {category.description}
@@ -105,7 +115,12 @@ export function CategoryBoard({
                   const n = d === 'Easy' ? easy : d === 'Medium' ? med : hard;
                   if (n === 0) return null;
                   return (
-                    <Chip key={d} tone={difficultyTone(d)} mono className={cn('!px-1.5 !py-px', chromeText.xs)}>
+                    <Chip
+                      key={d}
+                      tone={difficultyTone(d)}
+                      mono
+                      className={cn('!px-1.5 !py-px', chromeText.xs)}
+                    >
                       {d[0]}·{n}
                     </Chip>
                   );
@@ -153,13 +168,27 @@ export function TrackCategoryBoard({ trackId }: { trackId: TrackId }) {
 
   return (
     <div className="relative h-full overflow-auto p-[var(--pad)]">
-      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.15]" style={gridStyle} />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.15]"
+        style={gridStyle}
+      />
       <div className="relative">
-        <BrowseBreadcrumb trackId={trackId} onBack={() => { setActiveTrackId(null); setProblemFocused(false); }} />
+        <BrowseBreadcrumb
+          trackId={trackId}
+          onBack={() => {
+            setActiveTrackId(null);
+            setProblemFocused(false);
+          }}
+        />
         <div className="relative mb-2 overflow-hidden rounded-lg border border-edge bg-panel px-[var(--hpad)] py-[var(--pad)]">
           <Label className="font-mono tracking-[0.12em]">PICK A CATEGORY</Label>
-          <h2 className={cn('font-medium text-ink', chromeText.base)}>{track?.title ?? 'Browse'}</h2>
-          {track?.summary && <p className={cn('mt-0.5 text-ink2', chromeText.tight)}>{track.summary}</p>}
+          <h2 className={cn('font-medium text-ink', chromeText.base)}>
+            {track?.title ?? 'Browse'}
+          </h2>
+          {track?.summary && (
+            <p className={cn('mt-0.5 text-ink2', chromeText.tight)}>{track.summary}</p>
+          )}
         </div>
         <div className="relative mb-3">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink3" />
@@ -173,7 +202,13 @@ export function TrackCategoryBoard({ trackId }: { trackId: TrackId }) {
         {filteredCategories.length === 0 ? (
           <p className="px-1 py-8 text-center text-sm text-ink3">No matching categories.</p>
         ) : (
-          <CategoryGrid categories={filteredCategories} onPick={(id) => { setActiveCategoryId(id); setProblemFocused(false); }} />
+          <CategoryGrid
+            categories={filteredCategories}
+            onPick={(id) => {
+              setActiveCategoryId(id);
+              setProblemFocused(false);
+            }}
+          />
         )}
       </div>
     </div>

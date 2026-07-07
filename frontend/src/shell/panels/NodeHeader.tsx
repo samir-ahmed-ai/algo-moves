@@ -17,14 +17,39 @@ export function NodeHeader({ children, className }: { children: ReactNode; class
   );
 }
 
-export function NodeHeaderTitle({ children, className }: { children: ReactNode; className?: string }) {
+export function NodeHeaderTitle({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
-    <span className={cn('min-w-0 flex-1 font-semibold text-ink', nodeTextWrap, nodeText.title, className)}>{children}</span>
+    <span
+      className={cn(
+        'min-w-0 flex-1 font-semibold text-ink',
+        nodeTextWrap,
+        nodeText.title,
+        className,
+      )}
+    >
+      {children}
+    </span>
   );
 }
 
-export function NodeHeaderActions({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('nodrag ml-auto flex shrink-0 items-center gap-1', className)}>{children}</div>;
+export function NodeHeaderActions({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn('nodrag ml-auto flex shrink-0 items-center gap-1', className)}>
+      {children}
+    </div>
+  );
 }
 
 export function NodeHeaderAction({

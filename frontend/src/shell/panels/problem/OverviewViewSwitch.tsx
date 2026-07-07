@@ -17,7 +17,12 @@ export function OverviewViewSwitch({
   if (!hasRecall) return null;
 
   return (
-    <div className={cn('flex items-center gap-0.5 rounded-md border border-edge bg-panel2/50 p-0.5', className)}>
+    <div
+      className={cn(
+        'flex items-center gap-0.5 rounded-md border border-edge bg-panel2/50 p-0.5',
+        className,
+      )}
+    >
       <TabBtn
         active={view === 'animate'}
         onClick={() => onView('animate')}

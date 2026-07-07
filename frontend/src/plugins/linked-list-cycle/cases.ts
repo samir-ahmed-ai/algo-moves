@@ -10,7 +10,8 @@ export const goodCases: WorkedCase<CycleInput>[] = [
     returns: 'slow meets fast inside cycle',
     tone: 'ok',
     question: 'Why move slow one step and fast two steps?',
-    answer: 'Inside a cycle the fast pointer gains one node on slow each lap. They must meet within cycle length steps — O(n) time, O(1) space.',
+    answer:
+      'Inside a cycle the fast pointer gains one node on slow each lap. They must meet within cycle length steps — O(n) time, O(1) space.',
   },
 ];
 
@@ -22,9 +23,11 @@ export const badCases: WorkedCase<CycleInput>[] = [
     inputLabel: 'list 1→2→3→null',
     returns: 'fast reaches null — no cycle',
     tone: 'bad',
-    question: 'When does Floyd\'s algorithm return false?',
-    answer: 'If fast (or fast.next) becomes null, the list is acyclic. No need for a second phase to find the entrance.',
+    question: "When does Floyd's algorithm return false?",
+    answer:
+      'If fast (or fast.next) becomes null, the list is acyclic. No need for a second phase to find the entrance.',
   },
 ];
 
-export const intro = "Floyd's tortoise and hare: if there is a cycle, fast and slow must eventually meet.";
+export const intro =
+  "Floyd's tortoise and hare: if there is a cycle, fast and slow must eventually meet.";

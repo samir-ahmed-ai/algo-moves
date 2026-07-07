@@ -40,7 +40,7 @@ describe('formatEditorText on messy code', () => {
       doc: messy,
       extensions: [...indentExtensionsForLang('js'), ...(langExt ? [langExt] : [])],
     });
-    const formatted = formatEditorText(state, 'go');
+    const formatted = formatEditorText(state, 'javascript');
     expect(formatted).toMatch(/^\s+return 1;/m);
   });
 });

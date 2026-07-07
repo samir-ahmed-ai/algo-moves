@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface ShortestInput {
   nums: number[];
@@ -96,10 +110,8 @@ function View({ frame }: PluginViewProps<ShortestState>) {
     pointers.push({ i: s.l, label: 'l', tone: 'accent', place: 'below' });
     if (s.r !== null) pointers.push({ i: s.r, label: 'r', tone: 'good', place: 'above' });
   }
-  const windowRange: [number, number] | null =
-    hasWindow && s.r !== null ? [s.l, s.r] : null;
-  const tone = (i: number) =>
-    hasWindow && s.r !== null && i >= s.l && i <= s.r ? 'match' : '';
+  const windowRange: [number, number] | null = hasWindow && s.r !== null ? [s.l, s.r] : null;
+  const tone = (i: number) => (hasWindow && s.r !== null && i >= s.l && i <= s.r ? 'match' : '');
 
   const bestLabel = s.done ? (s.best === 0 ? 'none' : s.best) : s.best === 0 ? '…' : s.best;
   const winLabel = hasWindow && s.r !== null ? `[${s.l}..${s.r}]` : '—';
@@ -119,7 +131,11 @@ function View({ frame }: PluginViewProps<ShortestState>) {
         {s.windowLen !== null && <RailStat k="recorded" v={s.windowLen} tone="good" />}
       </RailGroup>
       {(s.best > 0 || s.done) && (
-        <RailResult label="best" value={bestLabel} tone={s.done ? (s.best === 0 ? 'bad' : 'good') : 'accent'} />
+        <RailResult
+          label="best"
+          value={bestLabel}
+          tone={s.done ? (s.best === 0 ? 'bad' : 'good') : 'accent'}
+        />
       )}
     </>
   );
@@ -142,7 +158,10 @@ function Inspector({ frame }: InspectorProps<ShortestState>) {
       <InspectorRow k="r" v={s.r ?? '—'} />
       <InspectorRow k="window" v={hasWindow && s.r !== null ? `[${s.l}..${s.r}]` : '—'} />
       <InspectorRow k="sum" v={s.sum} />
-      <InspectorRow k="best" v={s.done ? (s.best === 0 ? 'none' : s.best) : s.best === 0 ? '…' : s.best} />
+      <InspectorRow
+        k="best"
+        v={s.done ? (s.best === 0 ? 'none' : s.best) : s.best === 0 ? '…' : s.best}
+      />
     </VarGrid>
   );
 }
@@ -150,132 +169,128 @@ function Inspector({ frame }: InspectorProps<ShortestState>) {
 export const manifestId = 'prep-strings-shortest-subarray-contains-all';
 export const title = 'Shortest subarray contains all';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Shortest subarray contains all\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Shortest subarray contains all"?',
     choices: [
       {
-        label: "Sliding window — fits this problem",
-        correct: true
+        label: 'Sliding window — fits this problem',
+        correct: true,
       },
       {
-        label: "Sort + Wrap-around — different approach"
+        label: 'Sort + Wrap-around — different approach',
       },
       {
-        label: "Adjacent swap — different approach"
+        label: 'Adjacent swap — different approach',
       },
       {
-        label: "Bijection map — different approach"
-      }
+        label: 'Bijection map — different approach',
+      },
     ],
-    explain: "Grow right, shrink left while the running sum still reaches target"
+    explain: 'Grow right, shrink left while the running sum still reaches target',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Shortest subarray contains all), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Shortest subarray contains all), what strategy is established?',
     choices: [
       {
-        label: "Grow right, shrink left while — described in INIT caption",
-        correct: true
+        label: 'Grow right, shrink left while — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Shortest subarray reaching a target sum. Slide a window: grow the right edge to add elements, and shrink from the left while the window sum still reaches , recording the smallest length seen."
+    explain:
+      'Shortest subarray reaching a target sum. Slide a window: grow the right edge to add elements, and shrink from the left while the window sum still reaches , recording the smallest length seen.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"GROW\" step (+nums[]=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "GROW" step (+nums[]=), what happens?',
     choices: [
       {
-        label: "Grow the window: add nums[] = — this move caption",
-        correct: true
+        label: 'Grow the window: add nums[] = — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Grow the window: add nums[] = . The window is [..] with sum ."
+    explain: 'Grow the window: add nums[] = . The window is [..] with sum .',
   },
   {
-    id: "state",
-    prompt: "What does the `l` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `l` field track in the visualization state?',
     choices: [
       {
-        label: "left edge of the window — updated each frame",
-        correct: true
+        label: 'left edge of the window — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `l` in sync: left edge of the window"
+    explain: 'The recorder keeps `l` in sync: left edge of the window',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Shortest subarray contains all\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Shortest subarray contains all"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n^2) time, O(n) space — wrong order of growth"
+        label: 'O(n^2) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n·L) time, O(n·L) space — wrong order of growth"
+        label: 'O(n·L) time, O(n·L) space — wrong order of growth',
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). sum>=target -> record r-l+1, sum-=nums[l], l++"
+    explain: 'O(n). O(n). sum>=target -> record r-l+1, sum-=nums[l], l++',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Grow the window: add nums[] = — final DONE caption",
-        correct: true
+        label: 'Grow the window: add nums[] = — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Grow the window: add nums[] = . The window is [..] with sum ."
-  }
+    explain: 'Grow the window: add nums[] = . The window is [..] with sum .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -289,8 +304,6 @@ export const simulator: ProblemSimulator = {
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as ShortestState | undefined;
     const answer = s ? s.best : 0;
-    return answer > 0
-      ? { ok: true, label: `len ${answer}` }
-      : { ok: false, label: 'no subarray' };
+    return answer > 0 ? { ok: true, label: `len ${answer}` } : { ok: false, label: 'no subarray' };
   },
 };

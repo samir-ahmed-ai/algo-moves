@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface KnapInput {
   weights: number[];
@@ -21,21 +34,33 @@ interface KnapState {
 
 function record({ weights, values, capacity }: KnapInput): Frame<KnapState>[] {
   const n = weights.length;
-  const dp: number[][] = Array.from({ length: n + 1 }, () => new Array<number>(capacity + 1).fill(-1));
+  const dp: number[][] = Array.from({ length: n + 1 }, () =>
+    new Array<number>(capacity + 1).fill(-1),
+  );
   const { emit, frames } = createRecorder<KnapState>(() => ({
-        weights: weights,
-        values: values,
-        capacity: capacity,
-        dp: dp.map((r) => r.slice()),
-        cur: null,
-        done: false
-      }));
+    weights: weights,
+    values: values,
+    capacity: capacity,
+    dp: dp.map((r) => r.slice()),
+    cur: null,
+    done: false,
+  }));
 
-  emit('INIT', `${n} items, cap ${capacity}`, `0/1 Knapsack: pick a subset of items (each used at most once) to maximize value within capacity ${capacity}. dp[i][w] = the best value using only the first i items within capacity w. Rows are items (weights {${weights.join(', ')}}, values {${values.join(', ')}}); columns are capacity 0..${capacity}.`, { cur: null });
+  emit(
+    'INIT',
+    `${n} items, cap ${capacity}`,
+    `0/1 Knapsack: pick a subset of items (each used at most once) to maximize value within capacity ${capacity}. dp[i][w] = the best value using only the first i items within capacity w. Rows are items (weights {${weights.join(', ')}}, values {${values.join(', ')}}); columns are capacity 0..${capacity}.`,
+    { cur: null },
+  );
 
   // Base row: zero items → value 0 for every capacity.
   for (let w = 0; w <= capacity; w++) dp[0][w] = 0;
-  emit('BASE', 'row 0 = 0', `Base case: with 0 items there is nothing to pack, so dp[0][w] = 0 for every capacity w from 0 to ${capacity}.`, { cur: [0, capacity] });
+  emit(
+    'BASE',
+    'row 0 = 0',
+    `Base case: with 0 items there is nothing to pack, so dp[0][w] = 0 for every capacity w from 0 to ${capacity}.`,
+    { cur: [0, capacity] },
+  );
 
   for (let i = 1; i <= n; i++) {
     const wt = weights[i - 1];
@@ -46,16 +71,32 @@ function record({ weights, values, capacity }: KnapInput): Frame<KnapState>[] {
         const take = dp[i - 1][w - wt] + val;
         dp[i][w] = Math.max(skip, take);
         const tookIt = take >= skip;
-        emit('FILL', `dp[${i}][${w}]=${dp[i][w]}`, `Item ${i} (weight ${wt}, value ${val}) fits in capacity ${w}: skip it for dp[${i - 1}][${w}] = ${skip}, or take it for dp[${i - 1}][${w - wt}] + ${val} = ${take}. dp[${i}][${w}] = max(${skip}, ${take}) = ${dp[i][w]}${tookIt ? ' (take it)' : ' (skip it)'}.`, { cur: [i, w] });
+        emit(
+          'FILL',
+          `dp[${i}][${w}]=${dp[i][w]}`,
+          `Item ${i} (weight ${wt}, value ${val}) fits in capacity ${w}: skip it for dp[${i - 1}][${w}] = ${skip}, or take it for dp[${i - 1}][${w - wt}] + ${val} = ${take}. dp[${i}][${w}] = max(${skip}, ${take}) = ${dp[i][w]}${tookIt ? ' (take it)' : ' (skip it)'}.`,
+          { cur: [i, w] },
+        );
       } else {
         dp[i][w] = skip;
-        emit('FILL', `dp[${i}][${w}]=${dp[i][w]}`, `Item ${i} (weight ${wt}) is too heavy for capacity ${w}, so we must skip it: dp[${i}][${w}] = dp[${i - 1}][${w}] = ${skip}.`, { cur: [i, w] });
+        emit(
+          'FILL',
+          `dp[${i}][${w}]=${dp[i][w]}`,
+          `Item ${i} (weight ${wt}) is too heavy for capacity ${w}, so we must skip it: dp[${i}][${w}] = dp[${i - 1}][${w}] = ${skip}.`,
+          { cur: [i, w] },
+        );
       }
     }
   }
 
   const ans = dp[n][capacity];
-  emit('DONE', `value ${ans}`, `The table is full. dp[${n}][${capacity}] = ${ans}, so the best value we can pack within capacity ${capacity} is ${ans}.`, { cur: [n, capacity] , done: true }, 'good');
+  emit(
+    'DONE',
+    `value ${ans}`,
+    `The table is full. dp[${n}][${capacity}] = ${ans}, so the best value we can pack within capacity ${capacity} is ${ans}.`,
+    { cur: [n, capacity], done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -91,7 +132,10 @@ function View({ frame }: PluginViewProps<KnapState>) {
   const wt = i >= 1 ? s.weights[i - 1] : null;
   const val = i >= 1 ? s.values[i - 1] : null;
   const skip = i >= 1 && w >= 0 && s.dp[i - 1]?.[w] >= 0 ? s.dp[i - 1][w] : null;
-  const take = i >= 1 && wt !== null && wt <= w && s.dp[i - 1]?.[w - wt] >= 0 ? s.dp[i - 1][w - wt] + s.values[i - 1] : null;
+  const take =
+    i >= 1 && wt !== null && wt <= w && s.dp[i - 1]?.[w - wt] >= 0
+      ? s.dp[i - 1][w - wt] + s.values[i - 1]
+      : null;
   const rail = (
     <>
       {s.cur && (
@@ -118,8 +162,7 @@ function Inspector({ frame }: InspectorProps<KnapState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const n = s.weights.length;
-  const cell = (i: number, w: number) =>
-    i >= 0 && w >= 0 && s.dp[i]?.[w] >= 0 ? s.dp[i][w] : '—';
+  const cell = (i: number, w: number) => (i >= 0 && w >= 0 && s.dp[i]?.[w] >= 0 ? s.dp[i][w] : '—');
   const done = s.dp[n][s.capacity] >= 0;
   const i = s.cur ? s.cur[0] : -1;
   const w = s.cur ? s.cur[1] : -1;
@@ -132,7 +175,11 @@ function Inspector({ frame }: InspectorProps<KnapState>) {
       <InspectorRow k="skip = dp[i−1][w]" v={i >= 1 ? cell(i - 1, w) : '—'} />
       <InspectorRow
         k="take = dp[i−1][w−wt]+v"
-        v={i >= 1 && wt !== null && wt <= w && s.dp[i - 1]?.[w - wt] >= 0 ? s.dp[i - 1][w - wt] + s.values[i - 1] : '—'}
+        v={
+          i >= 1 && wt !== null && wt <= w && s.dp[i - 1]?.[w - wt] >= 0
+            ? s.dp[i - 1][w - wt] + s.values[i - 1]
+            : '—'
+        }
       />
       <InspectorRow k="answer" v={done ? `value ${s.dp[n][s.capacity]}` : '…filling'} />
     </VarGrid>

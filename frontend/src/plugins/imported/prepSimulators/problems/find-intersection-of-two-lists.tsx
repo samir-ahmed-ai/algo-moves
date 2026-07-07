@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -90,22 +96,28 @@ function buildChain(input: IntersectInput): {
 function record(input: IntersectInput): Frame<IntersectState>[] {
   const { cells, headA, headB, nextOf, junctionStart, lenA } = buildChain(input);
   const { emit, frames } = createRecorder<IntersectState>(() => ({
-        cells,
-        lenA,
-        junctionStart,
-        pa: null,
-        pb: null,
-        steps: 0,
-        resultId: null,
-        done: false
-      }));
+    cells,
+    lenA,
+    junctionStart,
+    pa: null,
+    pb: null,
+    steps: 0,
+    resultId: null,
+    done: false,
+  }));
 
   const idAt = (idx: number | null): number | null => (idx === null ? null : cells[idx].id);
   const label = (idx: number | null) => (idx === null ? 'nil' : `node ${cells[idx].val}`);
 
   // Mirror the Go guard: if either list is empty there is no intersection.
   if (headA === null || headB === null) {
-    emit('INIT', 'empty list', 'One of the lists is empty, so there is no node where they can intersect. Return nil.', { done: true }, 'bad');
+    emit(
+      'INIT',
+      'empty list',
+      'One of the lists is empty, so there is no node where they can intersect. Return nil.',
+      { done: true },
+      'bad',
+    );
     return frames;
   }
 
@@ -127,7 +139,12 @@ function record(input: IntersectInput): Frame<IntersectState>[] {
     // Advance pa: Next, or jump to B's head when it falls off the end.
     if (pa === null) {
       pa = headB;
-      emit('JUMP_A', 'pa → B head', `pa reached the end of list A (nil), so it jumps to list B's head (${label(pa)}). This is the reset that equalises the two path lengths.`, { pa, pb, steps });
+      emit(
+        'JUMP_A',
+        'pa → B head',
+        `pa reached the end of list A (nil), so it jumps to list B's head (${label(pa)}). This is the reset that equalises the two path lengths.`,
+        { pa, pb, steps },
+      );
     } else {
       pa = nextOf(pa);
       emit('STEP_A', 'pa = pa.Next', `pa advances one node to ${label(pa)}.`, { pa, pb, steps });
@@ -136,7 +153,12 @@ function record(input: IntersectInput): Frame<IntersectState>[] {
     // Advance pb: Next, or jump to A's head when it falls off the end.
     if (pb === null) {
       pb = headA;
-      emit('JUMP_B', 'pb → A head', `pb reached the end of list B (nil), so it jumps to list A's head (${label(pb)}). Now both pointers have the SAME remaining distance to the junction.`, { pa, pb, steps });
+      emit(
+        'JUMP_B',
+        'pb → A head',
+        `pb reached the end of list B (nil), so it jumps to list A's head (${label(pb)}). Now both pointers have the SAME remaining distance to the junction.`,
+        { pa, pb, steps },
+      );
     } else {
       pb = nextOf(pb);
       emit('STEP_B', 'pb = pb.Next', `pb advances one node to ${label(pb)}.`, { pa, pb, steps });
@@ -206,14 +228,29 @@ function View({ frame }: PluginViewProps<IntersectState>) {
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
-        A nodes + shared tail (★) on the left · B's exclusive prefix on the right · meeting node turns green
+        A nodes + shared tail (★) on the left · B's exclusive prefix on the right · meeting node
+        turns green
       </div>
-      <ArrayRow values={values} cellTone={tone} pointers={pointers} windowRange={null} label={cellLabel} />
+      <ArrayRow
+        values={values}
+        cellTone={tone}
+        pointers={pointers}
+        windowRange={null}
+        label={cellLabel}
+      />
       <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        {s.junctionStart >= 0 ? '→ both lists merge at the ★ tail' : '→ no shared tail (lists are disjoint)'}
+        {s.junctionStart >= 0
+          ? '→ both lists merge at the ★ tail'
+          : '→ no shared tail (lists are disjoint)'}
       </div>
       {s.done && (
-        <div className={cn('mt-1 font-mono', vizText.base, s.resultId !== null ? 'text-good' : 'text-ink3')}>
+        <div
+          className={cn(
+            'mt-1 font-mono',
+            vizText.base,
+            s.resultId !== null ? 'text-good' : 'text-ink3',
+          )}
+        >
           {s.resultId !== null
             ? `→ intersection at node ${s.cells.find((c) => c.id === s.resultId)?.val}`
             : '→ nil (no intersection)'}
@@ -231,11 +268,20 @@ function Inspector({ frame }: InspectorProps<IntersectState>) {
     <VarGrid>
       <InspectorRow k="pa" v={at(s.pa)} />
       <InspectorRow k="pb" v={at(s.pb)} />
-      <InspectorRow k="pa == pb" v={s.pa !== null && s.pb !== null && s.cells[s.pa].id === s.cells[s.pb].id ? 'yes' : 'no'} />
+      <InspectorRow
+        k="pa == pb"
+        v={s.pa !== null && s.pb !== null && s.cells[s.pa].id === s.cells[s.pb].id ? 'yes' : 'no'}
+      />
       <InspectorRow k="hops" v={s.steps} />
       <InspectorRow
         k="result"
-        v={s.resultId !== null ? `node ${s.cells.find((c) => c.id === s.resultId)?.val}` : s.done ? 'nil' : '…'}
+        v={
+          s.resultId !== null
+            ? `node ${s.cells.find((c) => c.id === s.resultId)?.val}`
+            : s.done
+              ? 'nil'
+              : '…'
+        }
       />
     </VarGrid>
   );
@@ -244,112 +290,109 @@ function Inspector({ frame }: InspectorProps<IntersectState>) {
 export const manifestId = 'prep-linked-lists-find-intersection-of-two-lists';
 export const title = 'Find intersection of two lists';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Find intersection of two lists\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Find intersection of two lists"?',
     choices: [
       {
-        label: "Two pointers reset — fits this problem",
-        correct: true
+        label: 'Two pointers reset — fits this problem',
+        correct: true,
       },
       {
-        label: "Josephus simulation — different approach"
+        label: 'Josephus simulation — different approach',
       },
       {
-        label: "Interweave (3-pass, no map) — different approach"
+        label: 'Interweave (3-pass, no map) — different approach',
       },
       {
-        label: "Iterative Group Reversal — different approach"
-      }
+        label: 'Iterative Group Reversal — different approach',
+      },
     ],
-    explain: "Each pointer hops to the other list's head; they meet at the junction"
+    explain: "Each pointer hops to the other list's head; they meet at the junction",
   },
   {
-    id: "key-step",
-    prompt: "On the \"FOUND\" step (node ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "FOUND" step (node ), what happens?',
     choices: [
       {
-        label: "pa == pb at the shared — this move caption",
-        correct: true
+        label: 'pa == pb at the shared — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "pa == pb at the shared node  — that is the intersection where both lists merge. Return it."
+    explain:
+      'pa == pb at the shared node  — that is the intersection where both lists merge. Return it.',
   },
   {
-    id: "state",
-    prompt: "What does the `cells` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `cells` field track in the visualization state?',
     choices: [
       {
-        label: "the rendered chain, left → — updated each frame",
-        correct: true
+        label: 'the rendered chain, left → — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `cells` in sync: the rendered chain, left → right"
+    explain: 'The recorder keeps `cells` in sync: the rendered chain, left → right',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Find intersection of two lists\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Find intersection of two lists"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(1) time, O(1) space — wrong order of growth"
+        label: 'O(1) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
+        label: 'O(1) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). pa: a then b, pb: b then a, until pa==pb"
+    explain: 'O(n). O(1). pa: a then b, pb: b then a, until pa==pb',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "pa == pb at the shared — final DONE caption",
-        correct: true
+        label: 'pa == pb at the shared — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "pa == pb at the shared node  — that is the intersection where both lists merge. Return it."
-  }
+    explain:
+      'pa == pb at the shared node  — that is the intersection where both lists merge. Return it.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

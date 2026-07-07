@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -21,20 +27,21 @@ interface LongestUniqueState {
 }
 
 function record({ s }: LongestUniqueInput): Frame<LongestUniqueState>[] {
-  const chars = s.split('');  const last = new Map<string, number>();
+  const chars = s.split('');
+  const last = new Map<string, number>();
   let l = 0;
   let best = 0;
 
   const { emit, frames } = createRecorder<LongestUniqueState>(() => ({
-        chars,
-        l,
-        r: null,
-        jumped: null,
-        last: [...last.entries()],
-        windowLen: null,
-        best,
-        done: false
-      }));
+    chars,
+    l,
+    r: null,
+    jumped: null,
+    last: [...last.entries()],
+    windowLen: null,
+    best,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -98,8 +105,7 @@ function View({ frame }: PluginViewProps<LongestUniqueState>) {
     pointers.push({ i: s.l, label: 'l', tone: 'accent', place: 'above' });
     pointers.push({ i: s.r, label: 'r', tone: 'good', place: 'below' });
   }
-  const win: [number, number] | null =
-    s.r !== null && s.r >= s.l ? [s.l, s.r] : null;
+  const win: [number, number] | null = s.r !== null && s.r >= s.l ? [s.l, s.r] : null;
   const tone = (i: number) => {
     if (s.jumped !== null && i === s.jumped) return 'dead';
     if (win && i >= win[0] && i <= win[1]) return 'in-window';
@@ -109,10 +115,8 @@ function View({ frame }: PluginViewProps<LongestUniqueState>) {
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
-        best ={' '}
-        <span className="font-mono text-ink">{s.best}</span>
-        {' · '}window len ={' '}
-        <span className="font-mono text-ink">{lenLabel}</span>
+        best = <span className="font-mono text-ink">{s.best}</span>
+        {' · '}window len = <span className="font-mono text-ink">{lenLabel}</span>
       </div>
       <ArrayRow values={s.chars} cellTone={tone} pointers={pointers} windowRange={win} />
       <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
@@ -121,7 +125,9 @@ function View({ frame }: PluginViewProps<LongestUniqueState>) {
         {'}'}
       </div>
       {s.done && (
-        <div className={cn('mt-1 font-mono text-good', vizText.base)}>→ longest unique = {s.best}</div>
+        <div className={cn('mt-1 font-mono text-good', vizText.base)}>
+          → longest unique = {s.best}
+        </div>
       )}
     </div>
   );
@@ -146,132 +152,129 @@ function Inspector({ frame }: InspectorProps<LongestUniqueState>) {
 export const manifestId = 'prep-strings-longest-substring-with-unique';
 export const title = 'Longest substring with unique';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Longest substring with unique\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Longest substring with unique"?',
     choices: [
       {
-        label: "Sliding window — fits this problem",
-        correct: true
+        label: 'Sliding window — fits this problem',
+        correct: true,
       },
       {
-        label: "Split + Reverse — different approach"
+        label: 'Split + Reverse — different approach',
       },
       {
-        label: "Sliding window freq — different approach"
+        label: 'Sliding window freq — different approach',
       },
       {
-        label: "Counter — different approach"
-      }
+        label: 'Counter — different approach',
+      },
     ],
-    explain: "Window jumps its left edge past the last duplicate"
+    explain: 'Window jumps its left edge past the last duplicate',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Longest substring with unique), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Longest substring with unique), what strategy is established?',
     choices: [
       {
-        label: "Window jumps its left edge past — described in INIT caption",
-        correct: true
+        label: 'Window jumps its left edge past — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Longest substring with all-unique characters. Slide a window over \"\" with left edge l and right edge r, remembering the last index each character appeared at. Whenever the incoming character was already inside the window, jump l past that old copy so the window stays duplicate-free."
+    explain:
+      'Longest substring with all-unique characters. Slide a window over "" with left edge l and right edge r, remembering the last index each character appeared at. Whenever the incoming character was already inside the window, jump l past that old copy so the window stays duplicate-free.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"READ\" step (read ''), what happens?",
+    id: 'key-step',
+    prompt: 'On the "READ" step (read \'\'), what happens?',
     choices: [
       {
         label: "Read '' at index . — this move caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Read '' at index . It is not present in the current window [..], so the window is still all-unique — no need to move l."
+    explain:
+      "Read '' at index . It is not present in the current window [..], so the window is still all-unique — no need to move l.",
   },
   {
-    id: "state",
-    prompt: "What does the `l` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `l` field track in the visualization state?',
     choices: [
       {
-        label: "left edge of the current — updated each frame",
-        correct: true
+        label: 'left edge of the current — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `l` in sync: left edge of the current window"
+    explain: 'The recorder keeps `l` in sync: left edge of the current window',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Longest substring with unique\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Longest substring with unique"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O( time, O(words) space — wrong order of growth"
+        label: 'O( time, O(words) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). last[c]>=l -> l=last[c]+1; track r-l+1"
+    explain: 'O(n). O(1). last[c]>=l -> l=last[c]+1; track r-l+1',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Scanned the whole string. The longest — final DONE caption",
-        correct: true
+        label: 'Scanned the whole string. The longest — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Scanned the whole string. The longest window that stayed all-unique had length ."
-  }
+    explain: 'Scanned the whole string. The longest window that stayed all-unique had length .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

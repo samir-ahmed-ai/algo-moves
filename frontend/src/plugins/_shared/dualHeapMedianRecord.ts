@@ -1,12 +1,6 @@
 import type { Frame } from '../../core/types';
 import { createRecorder } from './createRecorder';
-import {
-  maxHeapPop,
-  maxHeapPush,
-  medianFromHeaps,
-  minHeapPop,
-  minHeapPush,
-} from './dualHeapBoard';
+import { maxHeapPop, maxHeapPush, medianFromHeaps, minHeapPop, minHeapPush } from './dualHeapBoard';
 
 export interface DualHeapMedianState {
   low: number[];
@@ -50,7 +44,11 @@ export function recordDualHeapMedian(
   emit('INIT', 'dual heaps', options.initCaption, {});
 
   for (const v of nums) {
-    emit('ADD', `push ${v} to low`, `Add ${v}: pushLow into max-heap low.`, { op: `add ${v}`, added: v, highlightLow: true });
+    emit('ADD', `push ${v} to low`, `Add ${v}: pushLow into max-heap low.`, {
+      op: `add ${v}`,
+      added: v,
+      highlightLow: true,
+    });
     low = maxHeapPush(low, v);
     let moved: number;
     [low, moved] = maxHeapPop(low);
@@ -88,7 +86,9 @@ export function recordDualHeapMedian(
     );
   }
 
-  const finalMed = options.trackMedians ? (medians[medians.length - 1] ?? null) : medianFromHeaps(low, high);
+  const finalMed = options.trackMedians
+    ? (medians[medians.length - 1] ?? null)
+    : medianFromHeaps(low, high);
   emit(
     'DONE',
     finalMed !== null ? `median ${finalMed}` : 'empty',

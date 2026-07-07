@@ -111,18 +111,30 @@ export function MobileBrowse({
                   : 'border-edge bg-panel text-ink3 active:bg-panel2',
               )}
             >
-              {inPlan ? <CheckCircle2 className="h-3.5 w-3.5" /> : <BookmarkPlus className="h-3.5 w-3.5" />}
+              {inPlan ? (
+                <CheckCircle2 className="h-3.5 w-3.5" />
+              ) : (
+                <BookmarkPlus className="h-3.5 w-3.5" />
+              )}
             </button>
           )}
           <ProblemGlyph item={it} className="mt-0.5 h-7 w-7 shrink-0 text-ink2" />
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-[length:var(--fs)] font-medium text-ink">{it.title}</span>
+            <span className="block truncate text-[length:var(--fs)] font-medium text-ink">
+              {it.title}
+            </span>
             {it.summary && (
-              <span className="mt-0.5 block line-clamp-2 text-[length:var(--fs-xs)] leading-snug text-ink3">{it.summary}</span>
+              <span className="mt-0.5 block line-clamp-2 text-[length:var(--fs-xs)] leading-snug text-ink3">
+                {it.summary}
+              </span>
             )}
           </span>
           {it.difficulty && (
-            <Chip tone={difficultyTone(it.difficulty)} mono className="!px-1.5 !py-0 shrink-0 text-[length:var(--fs-2xs)]">
+            <Chip
+              tone={difficultyTone(it.difficulty)}
+              mono
+              className="!px-1.5 !py-0 shrink-0 text-[length:var(--fs-2xs)]"
+            >
               {it.difficulty}
             </Chip>
           )}
@@ -139,11 +151,17 @@ export function MobileBrowse({
         <span
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-60"
-          style={{ background: 'radial-gradient(70% 90% at 90% 0%, var(--accent-bg) 0%, transparent 60%)' }}
+          style={{
+            background: 'radial-gradient(70% 90% at 90% 0%, var(--accent-bg) 0%, transparent 60%)',
+          }}
         />
         <div className="relative">
-          <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-ink">Swipe to master</h1>
-          <p className="mt-1 text-[length:var(--fs-sm)] text-ink2">Pick a track, then a category — animate, quiz, rebuild.</p>
+          <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-ink">
+            Swipe to master
+          </h1>
+          <p className="mt-1 text-[length:var(--fs-sm)] text-ink2">
+            Pick a track, then a category — animate, quiz, rebuild.
+          </p>
           {resumeTopic && resumeCategoryId && !activeCategoryId && (
             <button
               type="button"
@@ -152,7 +170,9 @@ export function MobileBrowse({
             >
               <Play className="h-4 w-4" />
               Continue {resumeTopic.title}
-              <span className="text-[length:var(--fs-xs)] font-normal opacity-90">· problem {(resume!.pIdx ?? 0) + 1}</span>
+              <span className="text-[length:var(--fs-xs)] font-normal opacity-90">
+                · problem {(resume!.pIdx ?? 0) + 1}
+              </span>
             </button>
           )}
           <div className="mt-3 flex items-center gap-2">
@@ -226,8 +246,12 @@ export function MobileBrowse({
         <div className="mt-4">
           <BrowseBreadcrumb trackId={activeTrackId} onBack={backFromTrack} />
           <div className="mb-3 px-1">
-            <h2 className="text-[16px] font-semibold text-ink">{getTrackById(activeTrackId)?.title}</h2>
-            <p className="text-[length:var(--fs-xs)] text-ink3">{getTrackById(activeTrackId)?.summary}</p>
+            <h2 className="text-[16px] font-semibold text-ink">
+              {getTrackById(activeTrackId)?.title}
+            </h2>
+            <p className="text-[length:var(--fs-xs)] text-ink3">
+              {getTrackById(activeTrackId)?.summary}
+            </p>
           </div>
           {q && searchResults ? (
             <div className="flex flex-col gap-2">
@@ -258,7 +282,9 @@ export function MobileBrowse({
             <div className="flex flex-col gap-4">
               {searchResults.categories.length > 0 && (
                 <section>
-                  <h2 className="mb-2 px-1 text-[length:var(--fs-xs)] font-semibold uppercase tracking-wide text-ink3">Categories</h2>
+                  <h2 className="mb-2 px-1 text-[length:var(--fs-xs)] font-semibold uppercase tracking-wide text-ink3">
+                    Categories
+                  </h2>
                   <div className="flex flex-col gap-2">
                     {searchResults.categories.map((cat) => (
                       <button
@@ -279,7 +305,9 @@ export function MobileBrowse({
               )}
               {searchResults.items.length > 0 && (
                 <section>
-                  <h2 className="mb-2 px-1 text-[length:var(--fs-xs)] font-semibold uppercase tracking-wide text-ink3">Problems</h2>
+                  <h2 className="mb-2 px-1 text-[length:var(--fs-xs)] font-semibold uppercase tracking-wide text-ink3">
+                    Problems
+                  </h2>
                   <ul className="overflow-hidden rounded-2xl border border-edge bg-panel">
                     {searchResults.items.slice(0, 20).map((it) => {
                       const cat = searchResults.categories.find((c) =>
@@ -291,7 +319,9 @@ export function MobileBrowse({
                 </section>
               )}
               {searchResults.categories.length === 0 && searchResults.items.length === 0 && (
-                <p className="px-1 py-8 text-center text-[length:var(--fs)] text-ink3">No matches for “{query}”.</p>
+                <p className="px-1 py-8 text-center text-[length:var(--fs)] text-ink3">
+                  No matches for “{query}”.
+                </p>
               )}
             </div>
           ) : (

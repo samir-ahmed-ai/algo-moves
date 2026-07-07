@@ -14,7 +14,13 @@ export interface PuzzlePieceShellProps {
 }
 
 /** Puzzle-shaped shell around syntax-colored code for the reassemble drill. */
-export function PuzzlePieceShell({ piece, lang = 'go', wrap = false, mode = 'tray', className }: PuzzlePieceShellProps) {
+export function PuzzlePieceShell({
+  piece,
+  lang = 'go',
+  wrap = false,
+  mode = 'tray',
+  className,
+}: PuzzlePieceShellProps) {
   const meta = pieceRoleMeta(piece);
   const display = dedentForDisplay(piece.code);
 

@@ -15,7 +15,12 @@ export function SearchInput({
 }) {
   return (
     <div className="relative">
-      <Search className={cn('pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-ink3', nodeIconGlyph)} />
+      <Search
+        className={cn(
+          'pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-ink3',
+          nodeIconGlyph,
+        )}
+      />
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -98,8 +103,19 @@ export function CheckRow({
   children: ReactNode;
 }) {
   return (
-    <label className={cn('nodrag flex cursor-pointer items-center gap-2 px-1.5 py-1 text-ink2 transition-colors hover:bg-panel2', nodeText.base, RADIUS_CTRL)}>
-      <input type="checkbox" checked={checked} onChange={onChange} className="size-[var(--node-icon-glyph)] accent-[var(--accent)]" />
+    <label
+      className={cn(
+        'nodrag flex cursor-pointer items-center gap-2 px-1.5 py-1 text-ink2 transition-colors hover:bg-panel2',
+        nodeText.base,
+        RADIUS_CTRL,
+      )}
+    >
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={onChange}
+        className="size-[var(--node-icon-glyph)] accent-[var(--accent)]"
+      />
       <span className={cn('min-w-0 flex-1', checked && 'text-ink3 line-through')}>{children}</span>
     </label>
   );

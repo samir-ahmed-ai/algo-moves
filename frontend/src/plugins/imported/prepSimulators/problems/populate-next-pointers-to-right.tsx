@@ -1,8 +1,23 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 // The tree is a level-order array; children of i live at 2i+1 and 2i+2, and a
 // null marks an absent slot. The algorithm wires each node's `next` pointer to
@@ -42,7 +57,13 @@ function record({ tree }: PopulateInput): Frame<PopulateState>[] {
   }));
 
   if (!present(0)) {
-    emit('DONE', 'empty', 'The tree is empty, so there is nothing to connect.', { done: true }, 'bad');
+    emit(
+      'DONE',
+      'empty',
+      'The tree is empty, so there is nothing to connect.',
+      { done: true },
+      'bad',
+    );
     return frames;
   }
 
@@ -147,11 +168,7 @@ function View({ frame }: PluginViewProps<PopulateState>) {
         <RailStat k="leftmost" v={label(s.leftmost)} />
         <RailStat k="cur" v={label(s.cur)} tone="accent" />
       </RailGroup>
-      <RailStack
-        label="next links"
-        items={links}
-        highlightEnd="bottom"
-      />
+      <RailStack label="next links" items={links} highlightEnd="bottom" />
       <RailGroup label="progress">
         <RailStat k="wired" v={wired} tone={wired > 0 ? 'good' : undefined} />
       </RailGroup>
@@ -161,7 +178,12 @@ function View({ frame }: PluginViewProps<PopulateState>) {
 
   return (
     <VizStage rail={rail} railWidth={150}>
-      <TreeBoard tree={cells} nodeClass={nodeClass} activeNode={s.cur} highlightChild={s.wiredChild} />
+      <TreeBoard
+        tree={cells}
+        nodeClass={nodeClass}
+        activeNode={s.cur}
+        highlightChild={s.wiredChild}
+      />
     </VizStage>
   );
 }
@@ -188,112 +210,108 @@ function Inspector({ frame }: InspectorProps<PopulateState>) {
 export const manifestId = 'prep-trees-populate-next-pointers-to-right';
 export const title = 'Populate next pointers to right';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Populate next pointers to right\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Populate next pointers to right"?',
     choices: [
       {
-        label: "Level order connect — fits this problem",
-        correct: true
+        label: 'Level order connect — fits this problem',
+        correct: true,
       },
       {
-        label: "Same tree check — different approach"
+        label: 'Same tree check — different approach',
       },
       {
-        label: "BFS + Column Map — different approach"
+        label: 'BFS + Column Map — different approach',
       },
       {
-        label: "Column map BFS — different approach"
-      }
+        label: 'Column map BFS — different approach',
+      },
     ],
-    explain: "Use the next-links of the current level to wire the children below"
+    explain: 'Use the next-links of the current level to wire the children below',
   },
   {
-    id: "key-step",
-    prompt: "On the \"WIRE_GAP\" step (→), what happens?",
+    id: 'key-step',
+    prompt: 'On the "WIRE_GAP" step (→), what happens?',
     choices: [
       {
-        label: "Node has a right neighbour () — this move caption",
-        correct: true
+        label: 'Node has a right neighbour () — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Node  has a right neighbour () on this level, so bridge the gap: right child .next = that neighbour's left child ."
+    explain:
+      "Node  has a right neighbour () on this level, so bridge the gap: right child .next = that neighbour's left child .",
   },
   {
-    id: "state",
-    prompt: "What does the `leftmost` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `leftmost` field track in the visualization state?',
     choices: [
       {
-        label: "start of the level currently — updated each frame",
-        correct: true
+        label: 'start of the level currently — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `leftmost` in sync: start of the level currently being wired"
+    explain: 'The recorder keeps `leftmost` in sync: start of the level currently being wired',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Populate next pointers to right\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Populate next pointers to right"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n³) time, O(n) space — wrong order of growth"
+        label: 'O(n³) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
+        label: 'O(n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(1) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). left.Next=right; right.Next=cur.Next.Left; drop to leftmost"
+    explain: 'O(n). O(1). left.Next=right; right.Next=cur.Next.Left; drop to leftmost',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
         label: "Follow node 's next-link — final DONE caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Follow node 's next-link to its right neighbour  and keep wiring the level below."
-  }
+    explain: "Follow node 's next-link to its right neighbour  and keep wiring the level below.",
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

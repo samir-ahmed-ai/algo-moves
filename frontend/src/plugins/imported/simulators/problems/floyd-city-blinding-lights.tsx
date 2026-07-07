@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 const INF = 1e9;
 
@@ -33,31 +46,52 @@ function record(input: FloydInput): Frame<FloydState>[] {
   );
   for (const [u, v, w] of input.edges) dist[u][v] = w;
   const { emit, frames } = createRecorder<FloydState>(() => ({
-        dist: dist.map((r) => r.slice()),
-        src: input.src,
-        dst: input.dst,
-        k: null,
-        cell: null,
-        done: false
-      }));
+    dist: dist.map((r) => r.slice()),
+    src: input.src,
+    dst: input.dst,
+    k: null,
+    cell: null,
+    done: false,
+  }));
 
-  emit('INIT', `${n}×${n} matrix`, `Floyd-Warshall builds an ${n}×${n} all-pairs shortest-distance matrix. Start with the direct-edge weights (∞ where no edge, 0 on the diagonal), then for each intermediate node k let every pair (i, j) route through k if that is cheaper.`, { k: null, cell: null });
+  emit(
+    'INIT',
+    `${n}×${n} matrix`,
+    `Floyd-Warshall builds an ${n}×${n} all-pairs shortest-distance matrix. Start with the direct-edge weights (∞ where no edge, 0 on the diagonal), then for each intermediate node k let every pair (i, j) route through k if that is cheaper.`,
+    { k: null, cell: null },
+  );
 
   for (let k = 0; k < n; k++) {
-    emit('PHASE', `via k=${k}`, `Open intermediate node k=${k}: test whether routing any pair i → ${k} → j is shorter than the best i → j found so far.`, { k: k, cell: null });
+    emit(
+      'PHASE',
+      `via k=${k}`,
+      `Open intermediate node k=${k}: test whether routing any pair i → ${k} → j is shorter than the best i → j found so far.`,
+      { k: k, cell: null },
+    );
     for (let i = 0; i < n; i++) {
       for (let j = 0; j < n; j++) {
         const through = dist[i][k] + dist[k][j];
         if (through < dist[i][j]) {
           const prev = dist[i][j];
           dist[i][j] = through;
-          emit('RELAX', `(${i},${j})=${through}`, `dist[${i}][${j}]: ${i}→${k}→${j} costs ${fmt(dist[i][k])}+${fmt(dist[k][j])}=${through}, beating the old ${fmt(prev)}. Update dist[${i}][${j}] to ${through}.`, { k: k, cell: [i, j] });
+          emit(
+            'RELAX',
+            `(${i},${j})=${through}`,
+            `dist[${i}][${j}]: ${i}→${k}→${j} costs ${fmt(dist[i][k])}+${fmt(dist[k][j])}=${through}, beating the old ${fmt(prev)}. Update dist[${i}][${j}] to ${through}.`,
+            { k: k, cell: [i, j] },
+          );
         }
       }
     }
   }
 
-  emit('DONE', `dist[${input.src}][${input.dst}]=${fmt(dist[input.src][input.dst])}`, `Matrix complete. The queried shortest distance from ${input.src} to ${input.dst} is ${fmt(dist[input.src][input.dst])}.`, { k: null, cell: [input.src, input.dst] , done: true }, 'good');
+  emit(
+    'DONE',
+    `dist[${input.src}][${input.dst}]=${fmt(dist[input.src][input.dst])}`,
+    `Matrix complete. The queried shortest distance from ${input.src} to ${input.dst} is ${fmt(dist[input.src][input.dst])}.`,
+    { k: null, cell: [input.src, input.dst], done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -71,7 +105,11 @@ function View({ frame }: PluginViewProps<FloydState>) {
         <RailStat k="k" v={s.k ?? '—'} tone={s.k !== null ? 'accent' : undefined} />
         <RailStat k="cell" v={s.cell ? `(${s.cell[0]},${s.cell[1]})` : '—'} />
       </RailGroup>
-      <RailResult label={`dist[${s.src}][${s.dst}]`} value={ans} tone={s.done ? 'good' : 'accent'} />
+      <RailResult
+        label={`dist[${s.src}][${s.dst}]`}
+        value={ans}
+        tone={s.done ? 'good' : 'accent'}
+      />
     </>
   );
   return (
@@ -122,7 +160,9 @@ export const manifestId = 'imp-4-floyd-city-of-blinding-lights';
 export const title = 'Floyd City of Blinding Lights';
 
 export const simulator: ProblemSimulator = {
-  inputs: [{ id: 'g4', label: '4 nodes · query 0→3', value: G4 }] satisfies SampleInput<FloydInput>[],
+  inputs: [
+    { id: 'g4', label: '4 nodes · query 0→3', value: G4 },
+  ] satisfies SampleInput<FloydInput>[],
   record,
   View,
   Inspector,

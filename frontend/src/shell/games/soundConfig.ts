@@ -13,8 +13,7 @@ let configured = false;
 export function ensureSoundConfig(): void {
   if (configured) return;
   configured = true;
-  configureSoundPersistence(
-    readStorageText(STORAGE_KEYS.GAMES_MUTED) === '1',
-    (muted) => writeStorageText(STORAGE_KEYS.GAMES_MUTED, muted ? '1' : '0'),
+  configureSoundPersistence(readStorageText(STORAGE_KEYS.GAMES_MUTED) === '1', (muted) =>
+    writeStorageText(STORAGE_KEYS.GAMES_MUTED, muted ? '1' : '0'),
   );
 }

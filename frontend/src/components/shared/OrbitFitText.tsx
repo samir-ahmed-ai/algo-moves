@@ -9,7 +9,9 @@ import {
 } from './orbitArc';
 
 function prefersReducedMotion(): boolean {
-  return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return (
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
 }
 
 /** Arc caption: start big, shrink (and wrap) until the text fits from arc start to end. */

@@ -33,7 +33,9 @@ describe('panelStyle', () => {
 
   it('patches and clears style', () => {
     expect(patchPanelStyle(undefined, { opacity: 60 })).toEqual({ opacity: 60 });
-    expect(patchPanelStyle({ opacity: 60, corners: 'sharp' }, { opacity: undefined })).toEqual({ corners: 'sharp' });
+    expect(patchPanelStyle({ opacity: 60, corners: 'sharp' }, { opacity: undefined })).toEqual({
+      corners: 'sharp',
+    });
     expect(patchPanelStyle({ opacity: 60 }, null)).toBeUndefined();
   });
 

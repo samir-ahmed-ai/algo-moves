@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface StairsInput {
   n: number;
@@ -22,31 +35,57 @@ const EMPTY = -1;
 function record({ n }: StairsInput): Frame<StairsState>[] {
   const dp = new Array<number>(n + 1).fill(EMPTY);
   const { emit, frames } = createRecorder<StairsState>(() => ({
-        n: n,
-        dp: dp.slice(),
-        i: null,
-        one: null,
-        two: null,
-        done: false
-      }));
+    n: n,
+    dp: dp.slice(),
+    i: null,
+    one: null,
+    two: null,
+    done: false,
+  }));
 
-  emit('INIT', `n=${n}`, `Climbing Stairs: each move climbs 1 or 2 steps, so we count the distinct ways to reach the top of ${n} steps. dp[i] = the number of ways to reach step i, built up from i = 0.`, { i: null, one: null, two: null });
+  emit(
+    'INIT',
+    `n=${n}`,
+    `Climbing Stairs: each move climbs 1 or 2 steps, so we count the distinct ways to reach the top of ${n} steps. dp[i] = the number of ways to reach step i, built up from i = 0.`,
+    { i: null, one: null, two: null },
+  );
 
   dp[0] = 1;
-  emit('BASE', 'dp[0]=1', `Base case: there is one way to be at the ground (step 0) — do nothing. dp[0] = 1.`, { i: 0, one: null, two: null });
+  emit(
+    'BASE',
+    'dp[0]=1',
+    `Base case: there is one way to be at the ground (step 0) — do nothing. dp[0] = 1.`,
+    { i: 0, one: null, two: null },
+  );
 
   if (n >= 1) {
     dp[1] = 1;
-    emit('BASE', 'dp[1]=1', `Base case: step 1 is reached only by a single 1-step move. dp[1] = 1.`, { i: 1, one: null, two: null });
+    emit(
+      'BASE',
+      'dp[1]=1',
+      `Base case: step 1 is reached only by a single 1-step move. dp[1] = 1.`,
+      { i: 1, one: null, two: null },
+    );
   }
 
   for (let i = 2; i <= n; i++) {
     dp[i] = dp[i - 1] + dp[i - 2];
-    emit('FILL', `dp[${i}]=${dp[i]}`, `Step ${i} is reached either from step ${i - 1} (one step up) or step ${i - 2} (two steps up), so dp[${i}] = dp[${i - 1}] (=${dp[i - 1]}) + dp[${i - 2}] (=${dp[i - 2]}) = ${dp[i]}.`, { i: i, one: i - 1, two: i - 2 });
+    emit(
+      'FILL',
+      `dp[${i}]=${dp[i]}`,
+      `Step ${i} is reached either from step ${i - 1} (one step up) or step ${i - 2} (two steps up), so dp[${i}] = dp[${i - 1}] (=${dp[i - 1]}) + dp[${i - 2}] (=${dp[i - 2]}) = ${dp[i]}.`,
+      { i: i, one: i - 1, two: i - 2 },
+    );
   }
 
   const answer = dp[n];
-  emit('DONE', `${answer} ways`, `The table is full. dp[${n}] = ${answer}, so there are ${answer} distinct ways to climb ${n} steps.`, { i: n, one: null, two: null , done: true }, 'good');
+  emit(
+    'DONE',
+    `${answer} ways`,
+    `The table is full. dp[${n}] = ${answer}, so there are ${answer} distinct ways to climb ${n} steps.`,
+    { i: n, one: null, two: null, done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -72,7 +111,11 @@ function View({ frame }: PluginViewProps<StairsState>) {
         <RailStat k="dp[i−2]" v={cell(s.two)} tone="warn" />
         <RailStat k="dp[i]" v={cell(s.i)} tone="accent" />
       </RailGroup>
-      <RailResult label="answer" value={known ? `${s.dp[s.n]} ways` : '…'} tone={known ? 'good' : 'accent'} />
+      <RailResult
+        label="answer"
+        value={known ? `${s.dp[s.n]} ways` : '…'}
+        tone={known ? 'good' : 'accent'}
+      />
     </>
   );
   return (

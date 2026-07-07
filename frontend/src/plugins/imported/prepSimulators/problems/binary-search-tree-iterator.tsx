@@ -1,7 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, RailGroup, RailResult, RailStack, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  RailGroup,
+  RailResult,
+  RailStack,
+  RailStat,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+} from '../../../_shared/vizKit';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 
 interface BstInput {
@@ -22,7 +37,8 @@ interface BstState {
 const L = (i: number) => 2 * i + 1;
 const R = (i: number) => 2 * i + 2;
 
-function record({ tree }: BstInput): Frame<BstState>[] {  const stack: number[] = [];
+function record({ tree }: BstInput): Frame<BstState>[] {
+  const stack: number[] = [];
   const done: number[] = [];
   const output: number[] = [];
 
@@ -43,18 +59,38 @@ function record({ tree }: BstInput): Frame<BstState>[] {  const stack: number[] 
   const pushLeft = (start: number) => {
     let node = start;
     if (!exists(node)) {
-      emit('PUSH_NONE', 'null spine', `pushLeft on an empty subtree: nothing to push. The left-spine walk stops immediately.`, { active: null });
+      emit(
+        'PUSH_NONE',
+        'null spine',
+        `pushLeft on an empty subtree: nothing to push. The left-spine walk stops immediately.`,
+        { active: null },
+      );
       return;
     }
     while (exists(node)) {
       stack.push(node);
-      emit('PUSH', `push ${val(node)}`, `pushLeft: push node ${val(node)} onto the stack, then follow its LEFT child. This buries larger ancestors under their smaller left descendants so the smallest sits on top.`, { active: node });
+      emit(
+        'PUSH',
+        `push ${val(node)}`,
+        `pushLeft: push node ${val(node)} onto the stack, then follow its LEFT child. This buries larger ancestors under their smaller left descendants so the smallest sits on top.`,
+        { active: node },
+      );
       node = L(node);
     }
-    emit('SPINE_DONE', 'left spine done', `Reached a null left child, so the left spine is fully on the stack. The stack top is now the next-smallest unvisited value.`, { active: stack[stack.length - 1] ?? null });
+    emit(
+      'SPINE_DONE',
+      'left spine done',
+      `Reached a null left child, so the left spine is fully on the stack. The stack top is now the next-smallest unvisited value.`,
+      { active: stack[stack.length - 1] ?? null },
+    );
   };
 
-  emit('INIT', 'build iterator', `BST Iterator: an in-order walk driven by an explicit stack of the left spine. Constructor calls pushLeft(root); each Next() pops the top, then pushLeft(top.Right).`, { active: exists(0) ? 0 : null });
+  emit(
+    'INIT',
+    'build iterator',
+    `BST Iterator: an in-order walk driven by an explicit stack of the left spine. Constructor calls pushLeft(root); each Next() pops the top, then pushLeft(top.Right).`,
+    { active: exists(0) ? 0 : null },
+  );
 
   // Constructor: pushLeft(root)
   pushLeft(0);
@@ -62,17 +98,34 @@ function record({ tree }: BstInput): Frame<BstState>[] {  const stack: number[] 
   // Drive the iterator: HasNext() / Next() until the stack drains.
   while (stack.length > 0) {
     const top = stack[stack.length - 1];
-    emit('HASNEXT', 'hasNext = true', `HasNext(): the stack is non-empty, so there is another value to yield. The top of the stack, ${val(top)}, is the next smallest.`, { active: top });
+    emit(
+      'HASNEXT',
+      'hasNext = true',
+      `HasNext(): the stack is non-empty, so there is another value to yield. The top of the stack, ${val(top)}, is the next smallest.`,
+      { active: top },
+    );
     // Next(): pop top
     stack.pop();
     done.push(top);
     output.push(val(top));
-    emit('NEXT', `yield ${val(top)}`, `Next(): pop ${val(top)} and emit it — the in-order sequence so far is [${output.join(', ')}]. Now open its RIGHT subtree.`, { active: top }, 'good');
+    emit(
+      'NEXT',
+      `yield ${val(top)}`,
+      `Next(): pop ${val(top)} and emit it — the in-order sequence so far is [${output.join(', ')}]. Now open its RIGHT subtree.`,
+      { active: top },
+      'good',
+    );
     // pushLeft(top.Right)
     pushLeft(R(top));
   }
 
-  emit('FINISHED', `[${output.join(', ')}]`, `HasNext() is now false and the stack is empty. The iterator produced the full sorted order [${output.join(', ')}] using only O(h) stack space.`, { active: null }, 'good');
+  emit(
+    'FINISHED',
+    `[${output.join(', ')}]`,
+    `HasNext() is now false and the stack is empty. The iterator produced the full sorted order [${output.join(', ')}] using only O(h) stack space.`,
+    { active: null },
+    'good',
+  );
   return frames;
 }
 
@@ -110,8 +163,7 @@ function View({ frame }: PluginViewProps<BstState>) {
 function Inspector({ frame }: InspectorProps<BstState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const topVal =
-    s.stack.length > 0 ? (s.tree[s.stack[s.stack.length - 1]] as number) : '—';
+  const topVal = s.stack.length > 0 ? (s.tree[s.stack[s.stack.length - 1]] as number) : '—';
   return (
     <VarGrid>
       <InspectorRow k="stack depth" v={s.stack.length} />
@@ -126,112 +178,110 @@ function Inspector({ frame }: InspectorProps<BstState>) {
 export const manifestId = 'prep-trees-binary-search-tree-iterator';
 export const title = 'Binary Search Tree Iterator';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Binary Search Tree Iterator\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Binary Search Tree Iterator"?',
     choices: [
       {
-        label: "Controlled Inorder (stack of left spine) — fits this problem",
-        correct: true
+        label: 'Controlled Inorder (stack of left spine) — fits this problem',
+        correct: true,
       },
       {
-        label: "Recursive DFS — different approach"
+        label: 'Recursive DFS — different approach',
       },
       {
-        label: "Inorder simulation — different approach"
+        label: 'Inorder simulation — different approach',
       },
       {
-        label: "Two Paths + LCA via Common Prefix — different approach"
-      }
+        label: 'Two Paths + LCA via Common Prefix — different approach',
+      },
     ],
-    explain: "Maintain a stack; `pushLeft` pushes a node and all its left children"
+    explain: 'Maintain a stack; `pushLeft` pushes a node and all its left children',
   },
   {
-    id: "key-step",
-    prompt: "On the \"NEXT\" step (yield ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "NEXT" step (yield ), what happens?',
     choices: [
       {
-        label: "Matches recorder caption — this move caption",
-        correct: true
+        label: 'Matches recorder caption — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Next(): pop  and emit it — the in-order sequence so far is []. Now open its RIGHT subtree."
+    explain:
+      'Next(): pop  and emit it — the in-order sequence so far is []. Now open its RIGHT subtree.',
   },
   {
-    id: "state",
-    prompt: "What does the `stack` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `stack` field track in the visualization state?',
     choices: [
       {
-        label: "node indices on the controlled — updated each frame",
-        correct: true
+        label: 'node indices on the controlled — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `stack` in sync: node indices on the controlled stack, bottom→top"
+    explain: 'The recorder keeps `stack` in sync: node indices on the controlled stack, bottom→top',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Binary Search Tree Iterator\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Binary Search Tree Iterator"?',
     choices: [
       {
-        label: "O(1) amortized time, O(h) space — standard bounds here",
-        correct: true
+        label: 'O(1) amortized time, O(h) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
+        label: 'O(n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(1) amortized. O(h). Maintain a stack; `pushLeft` pushes a node and all its left children; `Next()`: pop top, call `pushLeft(top.Right)`, return value"
+    explain:
+      'O(1) amortized. O(h). Maintain a stack; `pushLeft` pushes a node and all its left children; `Next()`: pop top, call `pushLeft(top.Right)`, return value',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "HasNext() is now false — final DONE caption",
-        correct: true
+        label: 'HasNext() is now false — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "HasNext() is now false and the stack is empty. The iterator produced the full sorted order [] using only O(h) stack space."
-  }
+    explain:
+      'HasNext() is now false and the stack is empty. The iterator produced the full sorted order [] using only O(h) stack space.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

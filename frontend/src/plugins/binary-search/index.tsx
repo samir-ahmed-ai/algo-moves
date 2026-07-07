@@ -1,10 +1,24 @@
-import { definePlugin, type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../core/types';
+import {
+  definePlugin,
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../core/types';
 import { verdictLastFrameTone } from '../_shared/verdictKit';
 import { ArrayRow, type ArrayPointer } from '../../components/board/ArrayRow';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, badCases } from './cases';
 import { quiz, codePieces } from './practice';
-import { InspectorRow, VizEmpty, VizInspector, VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
+import {
+  InspectorRow,
+  VizEmpty,
+  VizInspector,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+} from '../_shared/vizKit';
 
 export interface BinInput {
   values: number[];
@@ -29,7 +43,13 @@ function record({ values, target }: BinInput): Frame<BinState>[] {
   let hi = values.length - 1;
   let found: number | null = null;
 
-  const emit = (type: string, note: string, caption: string, mid: number | null, tone?: 'good' | 'bad') =>
+  const emit = (
+    type: string,
+    note: string,
+    caption: string,
+    mid: number | null,
+    tone?: 'good' | 'bad',
+  ) =>
     frames.push({
       move: { type, note, caption, tone },
       state: { values, target, lo, hi, mid, found, dead: dead.slice(), done: tone != null },
@@ -44,24 +64,51 @@ function record({ values, target }: BinInput): Frame<BinState>[] {
 
   while (lo <= hi) {
     const mid = (lo + hi) >> 1;
-    emit('MID', `mid=${mid}`, `Look at the middle of the live window: mid=${mid}, value ${values[mid]}.`, mid);
+    emit(
+      'MID',
+      `mid=${mid}`,
+      `Look at the middle of the live window: mid=${mid}, value ${values[mid]}.`,
+      mid,
+    );
     if (values[mid] === target) {
       found = mid;
-      emit('FOUND', `found @${mid}`, `values[${mid}] = ${target}. Target found at index ${mid}.`, mid, 'good');
+      emit(
+        'FOUND',
+        `found @${mid}`,
+        `values[${mid}] = ${target}. Target found at index ${mid}.`,
+        mid,
+        'good',
+      );
       return frames;
     }
     if (values[mid] < target) {
       for (let i = lo; i <= mid; i++) dead[i] = true;
       lo = mid + 1;
-      emit('RIGHT', `lo=${lo}`, `${values[mid]} < ${target}, so the target must be to the right. Discard everything up to mid and set lo = ${lo}.`, mid);
+      emit(
+        'RIGHT',
+        `lo=${lo}`,
+        `${values[mid]} < ${target}, so the target must be to the right. Discard everything up to mid and set lo = ${lo}.`,
+        mid,
+      );
     } else {
       for (let i = mid; i <= hi; i++) dead[i] = true;
       hi = mid - 1;
-      emit('LEFT', `hi=${hi}`, `${values[mid]} > ${target}, so the target must be to the left. Discard everything from mid up and set hi = ${hi}.`, mid);
+      emit(
+        'LEFT',
+        `hi=${hi}`,
+        `${values[mid]} > ${target}, so the target must be to the left. Discard everything from mid up and set hi = ${hi}.`,
+        mid,
+      );
     }
   }
 
-  emit('MISS', 'absent', `lo passed hi with no match — ${target} is not in the array. Return -1.`, null, 'bad');
+  emit(
+    'MISS',
+    'absent',
+    `lo passed hi with no match — ${target} is not in the array. Return -1.`,
+    null,
+    'bad',
+  );
   return frames;
 }
 
@@ -84,16 +131,20 @@ function View({ frame }: PluginViewProps<BinState>) {
   const resultValue = s.found !== null ? `index ${s.found}` : s.done ? '-1 (absent)' : '…';
   const resultTone = s.found !== null ? 'good' : s.done ? 'bad' : 'accent';
   return (
-    <VizStage rail={<>
-      <RailGroup label="pointers">
-        <RailStat k="target" v={s.target} tone="accent" />
-        <RailStat k="lo" v={s.lo} />
-        <RailStat k="hi" v={s.hi} />
-        <RailStat k="mid" v={s.mid ?? '—'} />
-        <RailStat k="window" v={width} />
-      </RailGroup>
-      {s.done && <RailResult label="result" value={resultValue} tone={resultTone} />}
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="pointers">
+            <RailStat k="target" v={s.target} tone="accent" />
+            <RailStat k="lo" v={s.lo} />
+            <RailStat k="hi" v={s.hi} />
+            <RailStat k="mid" v={s.mid ?? '—'} />
+            <RailStat k="window" v={width} />
+          </RailGroup>
+          {s.done && <RailResult label="result" value={resultValue} tone={resultTone} />}
+        </>
+      }
+    >
       <ArrayRow values={s.values} cellTone={tone} pointers={pointers} />
     </VizStage>
   );
@@ -110,7 +161,10 @@ function Inspector({ frame }: InspectorProps<BinState>) {
       <InspectorRow k="hi" v={s.hi} />
       <InspectorRow k="mid" v={s.mid ?? '—'} />
       <InspectorRow k="window size" v={width} />
-      <InspectorRow k="result" v={s.found !== null ? `index ${s.found}` : s.done ? '-1 (absent)' : '…searching'} />
+      <InspectorRow
+        k="result"
+        v={s.found !== null ? `index ${s.found}` : s.done ? '-1 (absent)' : '…searching'}
+      />
     </VizInspector>
   );
 }
@@ -166,9 +220,21 @@ function search(nums: number[], target: number): number {
 `;
 
 const inputs: SampleInput<BinInput>[] = [
-  { id: 'hit', label: 'find 9 · present', value: { values: [1, 3, 4, 6, 8, 9, 11, 14, 17], target: 9 } },
-  { id: 'miss', label: 'find 7 · absent', value: { values: [1, 3, 4, 6, 8, 9, 11, 14, 17], target: 7 } },
-  { id: 'first', label: 'find 2 · edge', value: { values: [2, 5, 8, 12, 16, 23, 38, 56, 72, 91], target: 2 } },
+  {
+    id: 'hit',
+    label: 'find 9 · present',
+    value: { values: [1, 3, 4, 6, 8, 9, 11, 14, 17], target: 9 },
+  },
+  {
+    id: 'miss',
+    label: 'find 7 · absent',
+    value: { values: [1, 3, 4, 6, 8, 9, 11, 14, 17], target: 7 },
+  },
+  {
+    id: 'first',
+    label: 'find 2 · edge',
+    value: { values: [2, 5, 8, 12, 16, 23, 38, 56, 72, 91], target: 2 },
+  },
 ];
 
 const verdict = verdictLastFrameTone('found', 'absent');
@@ -202,7 +268,8 @@ export const binarySearchPlugin = definePlugin<BinInput, BinState>({
     difficulty: 'Easy',
     tags: ['array', 'binary-search'],
     source: 'https://leetcode.com/problems/binary-search/',
-    summary: 'Halve a sorted window each step: compare the middle, then keep the side that can contain the target.',
+    summary:
+      'Halve a sorted window each step: compare the middle, then keep the side that can contain the target.',
   },
   inputs,
   record,
@@ -218,6 +285,9 @@ export const binarySearchPlugin = definePlugin<BinInput, BinState>({
   quiz,
   tabs: teaching.tabs,
   wires: teaching.wires,
-  editable: [{ key: 'values', label: 'Sorted array', type: 'numberArray', min: 0, max: 99 }, { key: 'target', label: 'Target', type: 'number', min: 0, max: 99 }],
+  editable: [
+    { key: 'values', label: 'Sorted array', type: 'numberArray', min: 0, max: 99 },
+    { key: 'target', label: 'Target', type: 'number', min: 0, max: 99 },
+  ],
   inputBuilders: ['pad', 'arpeggiator', 'custom'],
 });

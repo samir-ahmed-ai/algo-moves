@@ -44,7 +44,11 @@ export function Confetti({ fire, count = 28 }: { fire: boolean; count?: number }
             opacity: 0,
           },
         ],
-        { duration: 900 + Math.random() * 500, easing: 'cubic-bezier(0.2,0.6,0.2,1)', fill: 'forwards' },
+        {
+          duration: 900 + Math.random() * 500,
+          easing: 'cubic-bezier(0.2,0.6,0.2,1)',
+          fill: 'forwards',
+        },
       );
     }
     const timer = setTimeout(() => pieces.forEach((p) => p.remove()), 1600);
@@ -54,7 +58,13 @@ export function Confetti({ fire, count = 28 }: { fire: boolean; count?: number }
     };
   }, [fire, reduced, count]);
 
-  return <div ref={ref} className="pointer-events-none absolute inset-0 z-30 overflow-visible" aria-hidden />;
+  return (
+    <div
+      ref={ref}
+      className="pointer-events-none absolute inset-0 z-30 overflow-visible"
+      aria-hidden
+    />
+  );
 }
 
 /**
@@ -81,7 +91,14 @@ export function CountdownRing({
   return (
     <span className="relative inline-grid place-items-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--edge)" strokeWidth={stroke} />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          stroke="var(--edge)"
+          strokeWidth={stroke}
+        />
         <circle
           cx={size / 2}
           cy={size / 2}

@@ -1,8 +1,23 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { ArrayBars, type BarTone } from '../../../../components/board/ArrayBars';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface TopKInput {
   nums: number[];
@@ -124,7 +139,11 @@ function View({ frame }: PluginViewProps<TopKState>) {
     <>
       <RailGroup label="scan">
         <RailStat k="k" v={s.k} />
-        <RailStat k="freq" v={s.scanFreq ?? '—'} tone={s.scanFreq !== null && !s.done ? 'accent' : undefined} />
+        <RailStat
+          k="freq"
+          v={s.scanFreq ?? '—'}
+          tone={s.scanFreq !== null && !s.done ? 'accent' : undefined}
+        />
       </RailGroup>
       <RailStack label="result" items={s.result.map(String)} />
       {s.done && <RailResult label="answer" value={`[${s.result.join(', ')}]`} tone="good" />}
@@ -182,132 +201,133 @@ function computeAnswer(nums: number[], k: number): number[] {
 export const manifestId = 'prep-sorting-top-k-frequent-elements';
 export const title = 'Top K Frequent Elements';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Top K Frequent Elements\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Top K Frequent Elements"?',
     choices: [
       {
-        label: "Bucket Sort — fits this problem",
-        correct: true
+        label: 'Bucket Sort — fits this problem',
+        correct: true,
       },
       {
-        label: "Sort Frequencies + Greedy — different approach"
+        label: 'Sort Frequencies + Greedy — different approach',
       },
       {
-        label: "Sort + Two Pointers — different approach"
+        label: 'Sort + Two Pointers — different approach',
       },
       {
-        label: "Sort (attack desc, defense asc) + Max — different approach"
-      }
+        label: 'Sort (attack desc, defense asc) + Max — different approach',
+      },
     ],
-    explain: "Count frequencies with a map, then use **bucket sort**: `buckets[freq]` holds elements with that frequency"
+    explain:
+      'Count frequencies with a map, then use **bucket sort**: `buckets[freq]` holds elements with that frequency',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Top K Frequent Elements), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Top K Frequent Elements), what strategy is established?',
     choices: [
       {
-        label: "Count frequencies with a map, then — described in INIT caption",
-        correct: true
+        label: 'Count frequencies with a map, then — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Top K Frequent Elements: return the  value that appear most often in the array. We count frequencies in O(n), then bucket-sort by count so we never need to sort the values themselves."
+    explain:
+      'Top K Frequent Elements: return the  value that appear most often in the array. We count frequencies in O(n), then bucket-sort by count so we never need to sort the values themselves.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"BUCKETS\" step (0..), what happens?",
+    id: 'key-step',
+    prompt: 'On the "BUCKETS" step (0..), what happens?',
     choices: [
       {
-        label: "Bucket sort: place each element — this move caption",
-        correct: true
+        label: 'Bucket sort: place each element — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Bucket sort: place each element into buckets[freq], where the index is its frequency. There are at most n+1 =  buckets, so this is O(n) — no comparison sort needed."
+    explain:
+      'Bucket sort: place each element into buckets[freq], where the index is its frequency. There are at most n+1 =  buckets, so this is O(n) — no comparison sort needed.',
   },
   {
-    id: "state",
-    prompt: "What does the `nums` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `nums` field track in the visualization state?',
     choices: [
       {
-        label: "Field nums in state — updated each frame",
-        correct: true
+        label: 'Field nums in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `nums` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `nums` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Top K Frequent Elements\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Top K Frequent Elements"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m+n) time, O(n) space — wrong order of growth"
+        label: 'O(m+n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n log n) time, O(1) space — wrong order of growth"
-      }
+        label: 'O(n log n) time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). Count frequencies with a map, then use **bucket sort**: `buckets[freq]` holds elements with that frequency; Iterate buckets from highest to lowest, collect unti"
+    explain:
+      'O(n). O(n). Count frequencies with a map, then use **bucket sort**: `buckets[freq]` holds elements with that frequency; Iterate buckets from highest to lowest, collect unti',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Walked every bucket. Fewer than k — final DONE caption",
-        correct: true
+        label: 'Walked every bucket. Fewer than k — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Walked every bucket. Fewer than k distinct values existed, so the answer is everything collected: []."
-  }
+    explain:
+      'Walked every bucket. Fewer than k distinct values existed, so the answer is everything collected: [].',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

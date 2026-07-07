@@ -8,7 +8,21 @@ import { buildMinimalProjectState, type ProjectState } from '@/store/project-sta
 import { cn } from '@/lib/utils/cn';
 import { CHROME_BTN } from '../../chrome';
 
-import { ShareUrlPopover, SaveProjectDialog, Btn, EmptyState, Field, nodeIconGlyph, Row, Section, TextInput, Pill, nodeText, nodeTextWrap, RADIUS_CTRL } from '@/shell/canvas';
+import {
+  ShareUrlPopover,
+  SaveProjectDialog,
+  Btn,
+  EmptyState,
+  Field,
+  nodeIconGlyph,
+  Row,
+  Section,
+  TextInput,
+  Pill,
+  nodeText,
+  nodeTextWrap,
+  RADIUS_CTRL,
+} from '@/shell/canvas';
 /** Projects: save/load named workspace snapshots with full canvas state when available. */
 export function ProjectsPanelBody() {
   const ws = useWorkspace();
@@ -35,7 +49,8 @@ export function ProjectsPanelBody() {
     } else if (s.item && catalog.getItem(s.item)) {
       ws.openProblem(s.item);
       if (s.mode === 'play') ws.setMode('play');
-      else if (s.mode === 'learn' || s.mode === 'practice' || s.mode === 'code') ws.setMode('learn');
+      else if (s.mode === 'learn' || s.mode === 'practice' || s.mode === 'code')
+        ws.setMode('learn');
     } else if (s.mode === 'visualize') {
       ws.enterCanvas();
     } else if (s.mode === 'learn' || s.mode === 'practice' || s.mode === 'code') {
@@ -62,7 +77,10 @@ export function ProjectsPanelBody() {
         <ShareUrlPopover state={projectState} dense />
         <SaveProjectDialog state={projectState} />
       </div>
-      <Field label="New workspace" hint="Captures problem · mode · theme · canvas when on visualize">
+      <Field
+        label="New workspace"
+        hint="Captures problem · mode · theme · canvas when on visualize"
+      >
         <div className="flex gap-1.5">
           <TextInput
             value={name}
@@ -77,13 +95,22 @@ export function ProjectsPanelBody() {
         </div>
       </Field>
       {names.length === 0 ? (
-        <EmptyState icon={<FolderOpen />} title="No saved workspaces" hint="Name the current setup and Save." />
+        <EmptyState
+          icon={<FolderOpen />}
+          title="No saved workspaces"
+          hint="Name the current setup and Save."
+        />
       ) : (
         <Section title="Saved" right={<Pill>{names.length}</Pill>}>
           <div className="flex flex-col">
             {names.map((n) => (
-              <Row key={n} className="justify-between gap-1.5 border-t border-edge py-1.5 first:border-t-0">
-                <span className={cn('min-w-0 flex-1 text-ink', nodeTextWrap, nodeText.sm)}>{n}</span>
+              <Row
+                key={n}
+                className="justify-between gap-1.5 border-t border-edge py-1.5 first:border-t-0"
+              >
+                <span className={cn('min-w-0 flex-1 text-ink', nodeTextWrap, nodeText.sm)}>
+                  {n}
+                </span>
                 <Btn variant="ghost" size="xs" onClick={() => apply(projects[n])}>
                   Load
                 </Btn>

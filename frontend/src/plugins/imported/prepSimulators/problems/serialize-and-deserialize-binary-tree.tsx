@@ -1,8 +1,23 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 // Input is the tree itself, given in level-order with null holes (children of i
 // are 2i+1, 2i+2). We serialize it with preorder DFS, then deserialize the
@@ -105,7 +120,14 @@ function record({ tree }: SerializeInput): Frame<SerializeState>[] {
         'READ_NIL',
         `token "${tok ?? ''}"`,
         `Deserialize reads token "${tok ?? ''}" at cursor ${cursor}. It's null → this slot is empty, return nil and advance the cursor.`,
-        { phase: 'deserialize', current: null, visited: built.slice(), built: built.slice(), cursor, tokens: tokens.slice() },
+        {
+          phase: 'deserialize',
+          current: null,
+          visited: built.slice(),
+          built: built.slice(),
+          cursor,
+          tokens: tokens.slice(),
+        },
       );
       cursor++;
       return;
@@ -114,7 +136,14 @@ function record({ tree }: SerializeInput): Frame<SerializeState>[] {
       'BUILD',
       `node ${tok}`,
       `Deserialize reads token "${tok}" at cursor ${cursor}. Construct node ${tok}, advance the cursor, then rebuild its left child, then its right child.`,
-      { phase: 'deserialize', current: i, visited: built.slice(), built: built.slice(), cursor, tokens: tokens.slice() },
+      {
+        phase: 'deserialize',
+        current: i,
+        visited: built.slice(),
+        built: built.slice(),
+        cursor,
+        tokens: tokens.slice(),
+      },
     );
     cursor++;
     built.push(i);
@@ -128,7 +157,15 @@ function record({ tree }: SerializeInput): Frame<SerializeState>[] {
     'DONE',
     roundTrips ? 'round-trip ok' : 'mismatch',
     `Deserialize done. Rebuilt ${built.length} node${built.length === 1 ? '' : 's'} in the same preorder — the reconstructed tree matches the original. Serialize + deserialize round-trip cleanly.`,
-    { phase: 'deserialize', current: null, visited: built.slice(), built: built.slice(), cursor: null, tokens: tokens.slice(), done: true },
+    {
+      phase: 'deserialize',
+      current: null,
+      visited: built.slice(),
+      built: built.slice(),
+      cursor: null,
+      tokens: tokens.slice(),
+      done: true,
+    },
     roundTrips ? 'good' : 'bad',
   );
 
@@ -145,8 +182,8 @@ function View({ frame }: PluginViewProps<SerializeState>) {
     tone: (s.cursor !== null && idx === s.cursor
       ? 'accent'
       : t !== 'null'
-      ? undefined
-      : undefined) as 'accent' | undefined,
+        ? undefined
+        : undefined) as 'accent' | undefined,
   }));
   return (
     <VizStage
@@ -155,18 +192,15 @@ function View({ frame }: PluginViewProps<SerializeState>) {
         <>
           <RailGroup label="scan">
             <RailStat k="phase" v={s.phase} />
-            <RailStat k="cursor" v={s.cursor ?? '—'} tone={s.cursor !== null ? 'accent' : undefined} />
+            <RailStat
+              k="cursor"
+              v={s.cursor ?? '—'}
+              tone={s.cursor !== null ? 'accent' : undefined}
+            />
             <RailStat k="nodes done" v={active.length} />
           </RailGroup>
-          <RailStack
-            label="tokens"
-            items={tokenItems}
-            highlightEnd="bottom"
-            topLabel="first"
-          />
-          {s.done && (
-            <RailResult label="result" value="round-trip ok" tone="good" />
-          )}
+          <RailStack label="tokens" items={tokenItems} highlightEnd="bottom" topLabel="first" />
+          {s.done && <RailResult label="result" value="round-trip ok" tone="good" />}
         </>
       }
     >
@@ -194,112 +228,111 @@ function Inspector({ frame }: InspectorProps<SerializeState>) {
 export const manifestId = 'prep-trees-serialize-and-deserialize-binary-tree';
 export const title = 'Serialize and Deserialize Binary Tree';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Serialize and Deserialize Binary Tree\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Serialize and Deserialize Binary Tree"?',
     choices: [
       {
-        label: "Preorder DFS — fits this problem",
-        correct: true
+        label: 'Preorder DFS — fits this problem',
+        correct: true,
       },
       {
-        label: "DFS with max tracking — different approach"
+        label: 'DFS with max tracking — different approach',
       },
       {
-        label: "BFS + Sort per column — different approach"
+        label: 'BFS + Sort per column — different approach',
       },
       {
-        label: "BST range check — different approach"
-      }
+        label: 'BST range check — different approach',
+      },
     ],
-    explain: "**Serialize**: preorder DFS, write `val,` or `null,` for nil nodes"
+    explain: '**Serialize**: preorder DFS, write `val,` or `null,` for nil nodes',
   },
   {
-    id: "key-step",
-    prompt: "On the \"READ_NIL\" step (token \"\"), what happens?",
+    id: 'key-step',
+    prompt: 'On the "READ_NIL" step (token ""), what happens?',
     choices: [
       {
-        label: "Deserialize reads token \"\" at cursor — this move caption",
-        correct: true
+        label: 'Deserialize reads token "" at cursor — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Deserialize reads token \"\" at cursor . It's null → this slot is empty, return nil and advance the cursor."
+    explain:
+      'Deserialize reads token "" at cursor . It\'s null → this slot is empty, return nil and advance the cursor.',
   },
   {
-    id: "state",
-    prompt: "What does the `current` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `current` field track in the visualization state?',
     choices: [
       {
-        label: "index in `tree` — updated each frame",
-        correct: true
+        label: 'index in `tree` — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `current` in sync: index in `tree` of the node under focus (null = a nil slot)"
+    explain:
+      'The recorder keeps `current` in sync: index in `tree` of the node under focus (null = a nil slot)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Serialize and Deserialize Binary Tree\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Serialize and Deserialize Binary Tree"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(h) time, O(1) space — wrong order of growth"
+        label: 'O(h) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
+        label: 'O(log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(1) amortized time, O(h) space — wrong order of growth"
-      }
+        label: 'O(1) amortized time, O(h) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). **Serialize**: preorder DFS, write `val,` or `null,` for nil nodes; **Deserialize**: split by `,`, preorder DFS with a shared index counter"
+    explain:
+      'O(n). O(n). **Serialize**: preorder DFS, write `val,` or `null,` for nil nodes; **Deserialize**: split by `,`, preorder DFS with a shared index counter',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Deserialize reads token \"\" at cursor — final DONE caption",
-        correct: true
+        label: 'Deserialize reads token "" at cursor — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Deserialize reads token \"\" at cursor . Construct node , advance the cursor, then rebuild its left child, then its right child."
-  }
+    explain:
+      'Deserialize reads token "" at cursor . Construct node , advance the cursor, then rebuild its left child, then its right child.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

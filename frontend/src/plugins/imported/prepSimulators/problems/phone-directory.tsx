@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -31,17 +37,18 @@ function emptyPhoneNode(): PhoneNode {
   return { children: {}, names: [] };
 }
 
-function record({ ops }: PhoneInput): Frame<PhoneState>[] {  const contacts: Record<string, string> = {};
+function record({ ops }: PhoneInput): Frame<PhoneState>[] {
+  const contacts: Record<string, string> = {};
   const root = emptyPhoneNode();
 
   const { emit, frames } = createRecorder<PhoneState>(() => ({
-        contacts: { ...contacts },
-        suggestions: [],
-        op: '',
-        result: '',
-        found: null,
-        done: false
-      }));
+    contacts: { ...contacts },
+    suggestions: [],
+    op: '',
+    result: '',
+    found: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -92,7 +99,13 @@ function record({ ops }: PhoneInput): Frame<PhoneState>[] {  const contacts: Rec
     }
   }
 
-  emit('DONE', `${Object.keys(contacts).length} contacts`, `Done.`, { op: 'done', done: true }, 'good');
+  emit(
+    'DONE',
+    `${Object.keys(contacts).length} contacts`,
+    `Done.`,
+    { op: 'done', done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -108,13 +121,18 @@ function View({ frame }: PluginViewProps<PhoneState>) {
       <div className={cn('mt-2', vizText.sm, 'text-ink3')}>{entries.length} contact(s)</div>
       <div className="mt-1 space-y-1">
         {entries.map(([num, name]) => (
-          <div key={num} className={cn('rounded border border-edge px-2 py-0.5 font-mono', vizText.sm)}>
+          <div
+            key={num}
+            className={cn('rounded border border-edge px-2 py-0.5 font-mono', vizText.sm)}
+          >
             {num} → {name}
           </div>
         ))}
       </div>
       {s.suggestions.length > 0 && (
-        <div className={cn('mt-2', vizText.sm, 'text-good')}>suggest: {s.suggestions.join(', ')}</div>
+        <div className={cn('mt-2', vizText.sm, 'text-good')}>
+          suggest: {s.suggestions.join(', ')}
+        </div>
       )}
     </div>
   );
@@ -136,112 +154,109 @@ function Inspector({ frame }: InspectorProps<PhoneState>) {
 export const manifestId = 'prep-design-phone-directory';
 export const title = 'Phone directory';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Phone directory\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Phone directory"?',
     choices: [
       {
-        label: "Trie phone directory autocomplete — fits this problem",
-        correct: true
+        label: 'Trie phone directory autocomplete — fits this problem',
+        correct: true,
       },
       {
-        label: "Log parsing aggregation — different approach"
+        label: 'Log parsing aggregation — different approach',
       },
       {
-        label: "Stack — different approach"
+        label: 'Stack — different approach',
       },
       {
-        label: "Two Heaps — different approach"
-      }
+        label: 'Two Heaps — different approach',
+      },
     ],
-    explain: "Map number->name plus a digit trie holding names for prefix suggestions"
+    explain: 'Map number->name plus a digit trie holding names for prefix suggestions',
   },
   {
-    id: "key-step",
-    prompt: "On the \"ADD\" step (→), what happens?",
+    id: 'key-step',
+    prompt: 'On the "ADD" step (→), what happens?',
     choices: [
       {
-        label: "addContact(\"\", \"\"): store in map — this move caption",
-        correct: true
+        label: 'addContact("", ""): store in map — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "addContact(\"\", \"\"): store in map and append name along digit trie path."
+    explain: 'addContact("", ""): store in map and append name along digit trie path.',
   },
   {
-    id: "state",
-    prompt: "What does the `contacts` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `contacts` field track in the visualization state?',
     choices: [
       {
-        label: "Field contacts in state — updated each frame",
-        correct: true
+        label: 'Field contacts in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `contacts` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `contacts` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Phone directory\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Phone directory"?',
     choices: [
       {
-        label: "O(digits) time, O(contacts) space — standard bounds here",
-        correct: true
+        label: 'O(digits) time, O(contacts) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(lines) time, O(unique keys) space — wrong order of growth"
+        label: 'O(lines) time, O(unique keys) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
+        label: 'O(1) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(digits). O(contacts). store contacts; each digit node keeps names; suggest returns node.names"
+    explain:
+      'O(digits). O(contacts). store contacts; each digit node keeps names; suggest returns node.names',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Done. — final DONE caption",
-        correct: true
+        label: 'Done. — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Done."
-  }
+    explain: 'Done.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -264,6 +279,8 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as PhoneState | undefined;
-    return s?.done ? { ok: true, label: `${Object.keys(s.contacts).length} contacts` } : { ok: false, label: 'incomplete' };
+    return s?.done
+      ? { ok: true, label: `${Object.keys(s.contacts).length} contacts` }
+      : { ok: false, label: 'incomplete' };
   },
 };

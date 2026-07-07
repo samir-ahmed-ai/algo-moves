@@ -1,4 +1,9 @@
-import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
+import {
+  definePlugin,
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+} from '../../core/types';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, intro } from './cases';
@@ -100,7 +105,18 @@ function View({ frame }: PluginViewProps<ListState>) {
     if (target > i) {
       const sx = x1 + r;
       const ex = x2 - r;
-      return <line key={`e${i}`} x1={sx} y1={cy} x2={ex} y2={cy} stroke="var(--edge)" strokeWidth={2} markerEnd="url(#rll-arrow)" />;
+      return (
+        <line
+          key={`e${i}`}
+          x1={sx}
+          y1={cy}
+          x2={ex}
+          y2={cy}
+          stroke="var(--edge)"
+          strokeWidth={2}
+          markerEnd="url(#rll-arrow)"
+        />
+      );
     }
     // backward pointer: arc above the row so it stays readable
     const sx = x1 - r;
@@ -128,17 +144,29 @@ function View({ frame }: PluginViewProps<ListState>) {
         <RailStat k="curr" v={show(s.curr)} tone={s.curr !== null ? 'accent' : undefined} />
         <RailStat k="next" v={show(s.nextPtr)} />
       </RailGroup>
-      {s.done && (
-        <RailResult label="head" value={show(s.head)} tone="good" />
-      )}
+      {s.done && <RailResult label="head" value={show(s.head)} tone="good" />}
     </>
   );
 
   return (
     <VizStage rail={rail}>
-      <svg role="img" aria-label="linked list" viewBox={`0 0 ${width} ${height}`} width={width} height={height}>
+      <svg
+        role="img"
+        aria-label="linked list"
+        viewBox={`0 0 ${width} ${height}`}
+        width={width}
+        height={height}
+      >
         <defs>
-          <marker id="rll-arrow" viewBox="0 0 10 10" refX={9} refY={5} markerWidth={7} markerHeight={7} orient="auto-start-reverse">
+          <marker
+            id="rll-arrow"
+            viewBox="0 0 10 10"
+            refX={9}
+            refY={5}
+            markerWidth={7}
+            markerHeight={7}
+            orient="auto-start-reverse"
+          >
             <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--edge)" />
           </marker>
         </defs>
@@ -146,7 +174,13 @@ function View({ frame }: PluginViewProps<ListState>) {
         {s.values.map((v, i) => (
           <g key={`n${i}`}>
             <circle className={tone(i)} cx={cx(i)} cy={cy} r={r} />
-            <text className="node-label" x={cx(i)} y={cy} textAnchor="middle" dominantBaseline="central">
+            <text
+              className="node-label"
+              x={cx(i)}
+              y={cy}
+              textAnchor="middle"
+              dominantBaseline="central"
+            >
               {v}
             </text>
           </g>
@@ -208,15 +242,22 @@ func reverseList(head *ListNode) *ListNode {
 }
 `;
 
-
 const inputs = [
-    { id: 'five', label: '1 2 3 4 5', value: { values: [1, 2, 3, 4, 5] } },
-    { id: 'four', label: '7 1 9 4', value: { values: [7, 1, 9, 4] } },
-  ];
+  { id: 'five', label: '1 2 3 4 5', value: { values: [1, 2, 3, 4, 5] } },
+  { id: 'four', label: '7 1 9 4', value: { values: [7, 1, 9, 4] } },
+];
 const verdict = verdictAlwaysOk('reversed');
 const teaching = wireTeachingStack({
-  record, View, inputs, verdict,
-  practice: { quiz, codePieces, cases: { good: goodCases, intro, goodLabel: 'pointer moves' }, simulateQuestion: 'Which pointer moves next?' },
+  record,
+  View,
+  inputs,
+  verdict,
+  practice: {
+    quiz,
+    codePieces,
+    cases: { good: goodCases, intro, goodLabel: 'pointer moves' },
+    simulateQuestion: 'Which pointer moves next?',
+  },
 });
 
 export const reverseLinkedListPlugin = definePlugin<ListInput, ListState>({
@@ -226,7 +267,8 @@ export const reverseLinkedListPlugin = definePlugin<ListInput, ListState>({
     difficulty: 'Easy',
     tags: ['linked-list'],
     source: 'https://leetcode.com/problems/reverse-linked-list/',
-    summary: 'Walk the list once, flipping each node’s next pointer to its predecessor; the old tail becomes the new head.',
+    summary:
+      'Walk the list once, flipping each node’s next pointer to its predecessor; the old tail becomes the new head.',
   },
   inputs,
   record,

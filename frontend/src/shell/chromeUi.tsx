@@ -51,13 +51,7 @@ export function ChromeKbd({
 }
 
 /** Uppercase token badge (action, panel, problem, …). */
-export function ChromeToken({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
+export function ChromeToken({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <span
       className={cn(

@@ -41,7 +41,8 @@ export const SURFACE_VIEW_GROUPS: FeatureGroup[] = [
         title: 'Present',
         subtitle: 'Focus mode',
         detailTitle: 'Presentation mode',
-        detailDescription: 'Hides chrome and maximises the problem surface for presenting or focusing.',
+        detailDescription:
+          'Hides chrome and maximises the problem surface for presenting or focusing.',
       },
     ],
   },

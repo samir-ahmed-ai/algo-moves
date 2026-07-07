@@ -1,4 +1,17 @@
-import { Activity, BarChart3, Contrast, Download, Gauge, Info, ScanSearch, Settings, Sparkles, Sun, Moon, ExternalLink } from 'lucide-react';
+import {
+  Activity,
+  BarChart3,
+  Contrast,
+  Download,
+  Gauge,
+  Info,
+  ScanSearch,
+  Settings,
+  Sparkles,
+  Sun,
+  Moon,
+  ExternalLink,
+} from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useWorkspace } from '@/store/workspace';
 import { chromeText } from '../../chromeUi';
@@ -13,7 +26,9 @@ import type { CanvasWidget } from './types';
 /** `n / total` step badge shared by the Replay section. */
 function ReplayBadge() {
   const { frames, player } = useCanvasFrame();
-  return <SectionBadge>{frames.length ? `${player.index + 1} / ${frames.length}` : '0'}</SectionBadge>;
+  return (
+    <SectionBadge>{frames.length ? `${player.index + 1} / ${frames.length}` : '0'}</SectionBadge>
+  );
 }
 
 function ReplayBody() {
@@ -53,7 +68,8 @@ function MetricsBodyWrap() {
 async function exportCanvasPng(filename: string) {
   const el = document.querySelector('.react-flow') as HTMLElement | null;
   if (!el) return;
-  const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#ffffff';
+  const bgColor =
+    getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#ffffff';
   try {
     const { toPng } = await import('html-to-image');
     const dataUrl = await toPng(el, {
@@ -75,7 +91,10 @@ function AppearanceBody() {
   const { item } = useCanvasStatic();
   return (
     <div className="flex flex-wrap gap-0.5 px-[var(--hpad)]">
-      <HudBtn onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}>
+      <HudBtn
+        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+        title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+      >
         {theme === 'dark' ? <Sun /> : <Moon />}
       </HudBtn>
       <HudBtn onClick={cycleDensity} title={`Density: ${density}`} active={density === 'ultra'}>
@@ -99,13 +118,18 @@ function AboutBody() {
   const { item } = useCanvasStatic();
   const { setSettingsOpen } = useWorkspace();
   return (
-    <div className={cn('flex flex-col gap-1.5 px-[var(--hpad)] leading-snug text-ink2', chromeText.sm)}>
+    <div
+      className={cn('flex flex-col gap-1.5 px-[var(--hpad)] leading-snug text-ink2', chromeText.sm)}
+    >
       <p className={cn('font-medium text-ink', chromeText.sm)}>{item.title}</p>
       {item.summary && <p className={cn('text-ink3', chromeText.sm)}>{item.summary}</p>}
       <button
         type="button"
         onClick={() => setSettingsOpen(true)}
-        className={cn(`inline-flex items-center gap-1 border border-edge px-1.5 py-1 text-ink2 transition-colors hover:border-accent hover:text-accent ${RADIUS_CTRL}`, chromeText.sm)}
+        className={cn(
+          `inline-flex items-center gap-1 border border-edge px-1.5 py-1 text-ink2 transition-colors hover:border-accent hover:text-accent ${RADIUS_CTRL}`,
+          chromeText.sm,
+        )}
       >
         <Settings className="h-2.5 w-2.5" />
         Settings
@@ -118,7 +142,15 @@ function AboutBody() {
         <span>· ←/→ step, space plays; toggle snap-to-grid in the Canvas tab.</span>
       </div>
       {item.source && (
-        <a href={item.source.url} target="_blank" rel="noreferrer" className={cn('inline-flex items-center gap-1 text-accent hover:underline', chromeText.sm)}>
+        <a
+          href={item.source.url}
+          target="_blank"
+          rel="noreferrer"
+          className={cn(
+            'inline-flex items-center gap-1 text-accent hover:underline',
+            chromeText.sm,
+          )}
+        >
           {item.source.label}
           <ExternalLink className="h-3 w-3" />
         </a>
@@ -129,9 +161,52 @@ function AboutBody() {
 
 /** The stock sidebar sections, now expressed as registered widgets. */
 export const BUILTIN_WIDGETS: CanvasWidget[] = [
-  { id: 'replay', title: 'Replay', icon: <Activity className="h-3 w-3" />, tab: 'analysis', order: 10, Body: ReplayBody, Badge: ReplayBadge, maxHeightClass: SECTION_MAX.replay },
-  { id: 'inspector', title: 'Inspector', icon: <ScanSearch className="h-3 w-3" />, tab: 'analysis', order: 20, Body: InspectorBody, Badge: InspectorBadge, maxHeightClass: SECTION_MAX.inspector },
-  { id: 'metrics', title: 'Metrics', icon: <BarChart3 className="h-3 w-3" />, tab: 'analysis', order: 30, Body: MetricsBodyWrap, Badge: MetricsBadge, maxHeightClass: SECTION_MAX.metrics },
-  { id: 'appearance', title: 'Appearance', icon: <Sparkles className="h-3 w-3" />, tab: 'more', order: 10, Body: AppearanceBody, maxHeightClass: SECTION_MAX.appearance },
-  { id: 'about', title: 'About', icon: <Info className="h-3 w-3" />, tab: 'more', order: 20, Body: AboutBody, maxHeightClass: SECTION_MAX.about },
+  {
+    id: 'replay',
+    title: 'Replay',
+    icon: <Activity className="h-3 w-3" />,
+    tab: 'analysis',
+    order: 10,
+    Body: ReplayBody,
+    Badge: ReplayBadge,
+    maxHeightClass: SECTION_MAX.replay,
+  },
+  {
+    id: 'inspector',
+    title: 'Inspector',
+    icon: <ScanSearch className="h-3 w-3" />,
+    tab: 'analysis',
+    order: 20,
+    Body: InspectorBody,
+    Badge: InspectorBadge,
+    maxHeightClass: SECTION_MAX.inspector,
+  },
+  {
+    id: 'metrics',
+    title: 'Metrics',
+    icon: <BarChart3 className="h-3 w-3" />,
+    tab: 'analysis',
+    order: 30,
+    Body: MetricsBodyWrap,
+    Badge: MetricsBadge,
+    maxHeightClass: SECTION_MAX.metrics,
+  },
+  {
+    id: 'appearance',
+    title: 'Appearance',
+    icon: <Sparkles className="h-3 w-3" />,
+    tab: 'more',
+    order: 10,
+    Body: AppearanceBody,
+    maxHeightClass: SECTION_MAX.appearance,
+  },
+  {
+    id: 'about',
+    title: 'About',
+    icon: <Info className="h-3 w-3" />,
+    tab: 'more',
+    order: 20,
+    Body: AboutBody,
+    maxHeightClass: SECTION_MAX.about,
+  },
 ];

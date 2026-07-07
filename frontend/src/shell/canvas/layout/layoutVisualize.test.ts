@@ -2,10 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { PanelFlowNode, PanelNodeData } from '@/core/panelFlowTypes';
 import { CANVAS_MARGIN, layoutVisualizeCanvas } from './layout';
 
-function panel(
-  kind: string,
-  overrides: Partial<PanelFlowNode> = {},
-): PanelFlowNode {
+function panel(kind: string, overrides: Partial<PanelFlowNode> = {}): PanelFlowNode {
   return {
     id: kind,
     type: 'panel',

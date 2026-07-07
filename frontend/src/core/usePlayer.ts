@@ -80,8 +80,18 @@ export function usePlayer(total: number): Player {
     if (!isPlaying) return;
     const ms = Math.max(MIN_MS, Math.round(BASE_MS / speed));
     timer.current = window.setInterval(() => {
-      const { index: i, loopStart: ls, loopEnd: le, breakpoints: bps, reversed: rev } = latest.current;
-      const nextI = rev ? Math.max(i - 1, 0) : le !== null && i >= le ? ls ?? 0 : Math.min(i + 1, total - 1);
+      const {
+        index: i,
+        loopStart: ls,
+        loopEnd: le,
+        breakpoints: bps,
+        reversed: rev,
+      } = latest.current;
+      const nextI = rev
+        ? Math.max(i - 1, 0)
+        : le !== null && i >= le
+          ? (ls ?? 0)
+          : Math.min(i + 1, total - 1);
       if (nextI === i) return; // at a boundary — the auto-stop effect handles it
       setIndex(nextI);
       if (bps.has(nextI)) setPlaying(false); // hit a breakpoint

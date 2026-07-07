@@ -1,4 +1,8 @@
-import { arcadeFetch } from './arcadeClient';
+import { arcadeFetch } from '@/platform/api/arcadeClient';
+import {
+  getProfile as getProfileApi,
+  updateProfile as updateProfileApi,
+} from '@/platform/api/profileApi';
 import type {
   Achievement,
   DailyChallenge,
@@ -20,7 +24,7 @@ import type {
 // ---- profiles -------------------------------------------------------------
 
 export async function getProfile(id: string): Promise<Profile | null> {
-  return arcadeFetch<Profile>(`/api/profiles/${id}`, { auth: false });
+  return getProfileApi(id);
 }
 
 export async function getProfilesByIds(ids: string[]): Promise<Profile[]> {
@@ -33,10 +37,7 @@ export async function updateProfile(
   patch: Partial<Pick<Profile, 'display_name' | 'avatar_seed' | 'is_anonymous'>>,
 ): Promise<Profile | null> {
   void id;
-  return arcadeFetch<Profile>('/api/profiles/me', {
-    method: 'PATCH',
-    body: JSON.stringify(patch),
-  });
+  return updateProfileApi(id, patch);
 }
 
 // ---- stats & history ------------------------------------------------------
@@ -52,7 +53,9 @@ export async function getMatchHistory(profileId: string, limit = 25): Promise<Ma
   return (await arcadeFetch<MatchHistoryEntry[]>('/api/matches/me')) ?? [];
 }
 
-export async function submitMatchResult(input: MatchResultInput): Promise<SubmitMatchResult | null> {
+export async function submitMatchResult(
+  input: MatchResultInput,
+): Promise<SubmitMatchResult | null> {
   return arcadeFetch<SubmitMatchResult>('/api/matches', {
     method: 'POST',
     auth: false,
@@ -74,11 +77,19 @@ export async function submitMatchResult(input: MatchResultInput): Promise<Submit
 // ---- leaderboards ---------------------------------------------------------
 
 export async function leaderboardGame(gameId: string, limit = 50): Promise<LeaderboardEntry[]> {
-  return (await arcadeFetch<LeaderboardEntry[]>(`/api/leaderboard/game/${gameId}?limit=${limit}`, { auth: false })) ?? [];
+  return (
+    (await arcadeFetch<LeaderboardEntry[]>(`/api/leaderboard/game/${gameId}?limit=${limit}`, {
+      auth: false,
+    })) ?? []
+  );
 }
 
 export async function leaderboardGlobal(limit = 50): Promise<LeaderboardEntry[]> {
-  return (await arcadeFetch<LeaderboardEntry[]>(`/api/leaderboard/global?limit=${limit}`, { auth: false })) ?? [];
+  return (
+    (await arcadeFetch<LeaderboardEntry[]>(`/api/leaderboard/global?limit=${limit}`, {
+      auth: false,
+    })) ?? []
+  );
 }
 
 export async function leaderboardRecent(
@@ -88,7 +99,10 @@ export async function leaderboardRecent(
 ): Promise<LeaderboardEntry[]> {
   const params = new URLSearchParams({ since: sinceIso, limit: String(limit) });
   if (gameId) params.set('game', gameId);
-  return (await arcadeFetch<LeaderboardEntry[]>(`/api/leaderboard/recent?${params}`, { auth: false })) ?? [];
+  return (
+    (await arcadeFetch<LeaderboardEntry[]>(`/api/leaderboard/recent?${params}`, { auth: false })) ??
+    []
+  );
 }
 
 // ---- achievements ---------------------------------------------------------
@@ -108,7 +122,9 @@ export async function unlockAchievement(achievementId: string): Promise<void> {
 
 // ---- rooms ----------------------------------------------------------------
 
-export async function upsertRoom(row: Partial<RoomRow> & { code: string }): Promise<RoomRow | null> {
+export async function upsertRoom(
+  row: Partial<RoomRow> & { code: string },
+): Promise<RoomRow | null> {
   return arcadeFetch<RoomRow>(`/api/rooms/${row.code}`, {
     method: 'PUT',
     body: JSON.stringify({ ...row, last_active_at: new Date().toISOString() }),

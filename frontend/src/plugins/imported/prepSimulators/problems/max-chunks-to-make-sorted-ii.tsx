@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayBars, type BarTone } from '../../../../components/board/ArrayBars';
 import type { ProblemSimulator } from '../types';
@@ -20,18 +26,19 @@ interface ChunksState {
   done: boolean;
 }
 
-function record({ arr }: ChunksInput): Frame<ChunksState>[] {  const stack: number[] = [];
+function record({ arr }: ChunksInput): Frame<ChunksState>[] {
+  const stack: number[] = [];
 
   const { emit, frames } = createRecorder<ChunksState>(() => ({
-        arr,
-        i: null,
-        val: null,
-        mx: null,
-        stack: stack.slice(),
-        poppedTop: null,
-        pushedThisStep: false,
-        done: false
-      }));
+    arr,
+    i: null,
+    val: null,
+    mx: null,
+    stack: stack.slice(),
+    poppedTop: null,
+    pushedThisStep: false,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -94,16 +101,13 @@ function View({ frame }: PluginViewProps<ChunksState>) {
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
-        chunks so far ={' '}
-        <span className="font-mono text-ink">{s.stack.length}</span>
+        chunks so far = <span className="font-mono text-ink">{s.stack.length}</span>
         {s.val !== null && !s.done && (
           <>
-            {' · '}val ={' '}
-            <span className="font-mono text-ink">{s.val}</span>
+            {' · '}val = <span className="font-mono text-ink">{s.val}</span>
             {s.mx !== null && (
               <>
-                {' · '}running max ={' '}
-                <span className="font-mono text-ink">{s.mx}</span>
+                {' · '}running max = <span className="font-mono text-ink">{s.mx}</span>
               </>
             )}
           </>
@@ -115,7 +119,9 @@ function View({ frame }: PluginViewProps<ChunksState>) {
         {s.poppedTop !== null && <span className="text-bad"> (popped {s.poppedTop})</span>}
       </div>
       {s.done && (
-        <div className={cn('mt-1 font-mono text-good', vizText.base)}>→ {s.stack.length} chunks</div>
+        <div className={cn('mt-1 font-mono text-good', vizText.base)}>
+          → {s.stack.length} chunks
+        </div>
       )}
     </div>
   );
@@ -139,132 +145,131 @@ function Inspector({ frame }: InspectorProps<ChunksState>) {
 export const manifestId = 'prep-sorting-max-chunks-to-make-sorted-ii';
 export const title = 'Max Chunks To Make Sorted II';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Max Chunks To Make Sorted II\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Max Chunks To Make Sorted II"?',
     choices: [
       {
-        label: "Monotonic Stack — fits this problem",
-        correct: true
+        label: 'Monotonic Stack — fits this problem',
+        correct: true,
       },
       {
-        label: "Bucket Sort — different approach"
+        label: 'Bucket Sort — different approach',
       },
       {
-        label: "Sort Frequencies + Greedy — different approach"
+        label: 'Sort Frequencies + Greedy — different approach',
       },
       {
-        label: "Sort (attack desc, defense asc) + Max — different approach"
-      }
+        label: 'Sort (attack desc, defense asc) + Max — different approach',
+      },
     ],
-    explain: "Use a **monotonic stack** storing the max of each chunk"
+    explain: 'Use a **monotonic stack** storing the max of each chunk',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Max Chunks To Make Sorted II), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Max Chunks To Make Sorted II), what strategy is established?',
     choices: [
       {
-        label: "Use a **monotonic stack** storing — described in INIT caption",
-        correct: true
+        label: 'Use a **monotonic stack** storing — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Max Chunks To Make Sorted II: split the array into the most chunks so that sorting each chunk independently yields the fully sorted array. We keep a monotonic stack where each entry is the max of one chunk; the final stack size is the answer."
+    explain:
+      'Max Chunks To Make Sorted II: split the array into the most chunks so that sorting each chunk independently yields the fully sorted array. We keep a monotonic stack where each entry is the max of one chunk; the final stack size is the answer.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"MERGE\" step (pop ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "MERGE" step (pop ), what happens?',
     choices: [
       {
-        label: "The top chunk-max is greater than — this move caption",
-        correct: true
+        label: 'The top chunk-max is greater than — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "The top chunk-max  is greater than , so  can't begin a new chunk — that chunk must absorb it. Pop  and fold it into the running max: max becomes ."
+    explain:
+      "The top chunk-max  is greater than , so  can't begin a new chunk — that chunk must absorb it. Pop  and fold it into the running max: max becomes .",
   },
   {
-    id: "state",
-    prompt: "What does the `i` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: "current index being processed — updated each frame",
-        correct: true
+        label: 'current index being processed — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `i` in sync: current index being processed"
+    explain: 'The recorder keeps `i` in sync: current index being processed',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Max Chunks To Make Sorted II\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Max Chunks To Make Sorted II"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
+        label: 'O(log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n·log n·C) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n·log n·C) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). Use a **monotonic stack** storing the max of each chunk; For each `val`: if `val < stack top`, merge chunks (pop) keeping the largest max, then push that max"
+    explain:
+      'O(n). O(n). Use a **monotonic stack** storing the max of each chunk; For each `val`: if `val < stack top`, merge chunks (pop) keeping the largest max, then push that max',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Every element is placed. The stack — final DONE caption",
-        correct: true
+        label: 'Every element is placed. The stack — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Every element is placed. The stack holds  chunk-maxima, so the array can be cut into at most  chunk that each sort independently into the final sorted order."
-  }
+    explain:
+      'Every element is placed. The stack holds  chunk-maxima, so the array can be cut into at most  chunk that each sort independently into the final sorted order.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

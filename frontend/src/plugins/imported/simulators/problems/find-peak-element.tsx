@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface PeakInput {
   values: number[];
@@ -18,21 +31,22 @@ interface PeakState {
   done: boolean;
 }
 
-function record({ values }: PeakInput): Frame<PeakState>[] {  const n = values.length;
+function record({ values }: PeakInput): Frame<PeakState>[] {
+  const n = values.length;
   const dead = new Array<boolean>(n).fill(false);
   let lo = 0;
   let hi = n - 1;
   let peak: number | null = null;
 
   const { emit, frames } = createRecorder<PeakState>(() => ({
-        values: values,
-        lo: lo,
-        hi: hi,
-        dead: dead.slice(),
-        peak: peak,
-        mid: null,
-        done: false
-      }));
+    values: values,
+    lo: lo,
+    hi: hi,
+    dead: dead.slice(),
+    peak: peak,
+    mid: null,
+    done: false,
+  }));
   const emitDone = (
     type: string,
     note: string,
@@ -41,24 +55,50 @@ function record({ values }: PeakInput): Frame<PeakState>[] {  const n = values.l
     tone?: 'good' | 'bad',
   ) => emit(type, note, caption, { ...partial, done: true }, tone);
 
-  emit('INIT', `lo=0 hi=${hi}`, `Find any peak (an element greater than both neighbours) in [${values.join(', ')}]. Treat out-of-bounds as -∞. At each step compare values[mid] with values[mid+1]: walk uphill toward a peak. The slope guarantees one always exists in the chosen half.`, { mid: null });
+  emit(
+    'INIT',
+    `lo=0 hi=${hi}`,
+    `Find any peak (an element greater than both neighbours) in [${values.join(', ')}]. Treat out-of-bounds as -∞. At each step compare values[mid] with values[mid+1]: walk uphill toward a peak. The slope guarantees one always exists in the chosen half.`,
+    { mid: null },
+  );
 
   while (lo < hi) {
     const mid = (lo + hi) >> 1;
-    emit('MID', `mid=${mid}`, `Middle of the live window: mid=${mid}, value ${values[mid]}. Compare with its right neighbour values[${mid + 1}] = ${values[mid + 1]}.`, { mid: mid });
+    emit(
+      'MID',
+      `mid=${mid}`,
+      `Middle of the live window: mid=${mid}, value ${values[mid]}. Compare with its right neighbour values[${mid + 1}] = ${values[mid + 1]}.`,
+      { mid: mid },
+    );
     if (values[mid] > values[mid + 1]) {
       for (let i = mid + 1; i <= hi; i++) dead[i] = true;
       hi = mid;
-      emit('LEFT', `hi=${hi}`, `values[${mid}] = ${values[mid]} > values[${mid + 1}] = ${values[mid + 1]}: the slope goes down to the right, so a peak sits at mid or to its left. Set hi = ${hi}.`, { mid: mid });
+      emit(
+        'LEFT',
+        `hi=${hi}`,
+        `values[${mid}] = ${values[mid]} > values[${mid + 1}] = ${values[mid + 1]}: the slope goes down to the right, so a peak sits at mid or to its left. Set hi = ${hi}.`,
+        { mid: mid },
+      );
     } else {
       for (let i = lo; i <= mid; i++) dead[i] = true;
       lo = mid + 1;
-      emit('RIGHT', `lo=${lo}`, `values[${mid}] = ${values[mid]} < values[${mid + 1}] = ${values[mid + 1]}: the slope rises to the right, so a peak lies strictly to the right. Set lo = ${lo}.`, { mid: mid });
+      emit(
+        'RIGHT',
+        `lo=${lo}`,
+        `values[${mid}] = ${values[mid]} < values[${mid + 1}] = ${values[mid + 1]}: the slope rises to the right, so a peak lies strictly to the right. Set lo = ${lo}.`,
+        { mid: mid },
+      );
     }
   }
 
   peak = lo;
-  emitDone('DONE', `peak @${peak}`, `lo and hi met at index ${lo} (value ${values[lo]}) — a peak. Return index ${peak}.`, { mid: lo }, 'good');
+  emitDone(
+    'DONE',
+    `peak @${peak}`,
+    `lo and hi met at index ${lo} (value ${values[lo]}) — a peak. Return index ${peak}.`,
+    { mid: lo },
+    'good',
+  );
   return frames;
 }
 
@@ -101,7 +141,10 @@ function Inspector({ frame }: InspectorProps<PeakState>) {
       <InspectorRow k="lo" v={s.lo} />
       <InspectorRow k="hi" v={s.hi} />
       <InspectorRow k="mid" v={s.mid ?? '—'} />
-      <InspectorRow k="result" v={s.peak !== null ? `index ${s.peak} (value ${s.values[s.peak]})` : '…searching'} />
+      <InspectorRow
+        k="result"
+        v={s.peak !== null ? `index ${s.peak} (value ${s.values[s.peak]})` : '…searching'}
+      />
     </VarGrid>
   );
 }

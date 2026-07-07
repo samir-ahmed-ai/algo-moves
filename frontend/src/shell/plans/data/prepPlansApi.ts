@@ -1,4 +1,4 @@
-import { arcadeFetch } from '@/shell/games/data/arcadeClient';
+import { arcadeFetch } from '@/platform';
 
 export interface PrepPlanItem {
   itemId: string;

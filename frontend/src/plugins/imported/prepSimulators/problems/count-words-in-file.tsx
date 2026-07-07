@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -21,15 +27,16 @@ function countWords(text: string): string[] {
 }
 
 function record({ text }: CountWordsInput): Frame<CountWordsState>[] {
-  const words = countWords(text);  let count = 0;
+  const words = countWords(text);
+  let count = 0;
 
   const { emit, frames } = createRecorder<CountWordsState>(() => ({
-        text,
-        words,
-        wordIdx: null,
-        count,
-        done: false
-      }));
+    text,
+    words,
+    wordIdx: null,
+    count,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -39,7 +46,13 @@ function record({ text }: CountWordsInput): Frame<CountWordsState>[] {
   );
 
   if (words.length === 0) {
-    emit('DONE', 'count=0', `Empty file — scanner finds no tokens, count stays 0.`, { count: 0, done: true }, 'good');
+    emit(
+      'DONE',
+      'count=0',
+      `Empty file — scanner finds no tokens, count stays 0.`,
+      { count: 0, done: true },
+      'good',
+    );
     return frames;
   }
 
@@ -71,9 +84,7 @@ function View({ frame }: PluginViewProps<CountWordsState>) {
       <div className={cn('rounded border border-line bg-surface2 p-2 font-mono', vizText.sm)}>
         {s.text || '(empty)'}
       </div>
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>
-        words ({s.words.length})
-      </div>
+      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>words ({s.words.length})</div>
       <div className="flex flex-wrap gap-1">
         {s.words.map((w, i) => (
           <span
@@ -81,16 +92,18 @@ function View({ frame }: PluginViewProps<CountWordsState>) {
             className={cn(
               'rounded px-1.5 py-0.5 font-mono',
               vizText.sm,
-              s.wordIdx === i ? 'bg-accentbg text-accent' : i < (s.wordIdx ?? -1) ? 'bg-surface2 text-ink3' : 'bg-surface2 text-ink',
+              s.wordIdx === i
+                ? 'bg-accentbg text-accent'
+                : i < (s.wordIdx ?? -1)
+                  ? 'bg-surface2 text-ink3'
+                  : 'bg-surface2 text-ink',
             )}
           >
             {w}
           </span>
         ))}
       </div>
-      <div className={cn('mt-2 font-mono text-good', vizText.base)}>
-        count = {s.count}
-      </div>
+      <div className={cn('mt-2 font-mono text-good', vizText.base)}>count = {s.count}</div>
     </div>
   );
 }
@@ -111,112 +124,108 @@ function Inspector({ frame }: InspectorProps<CountWordsState>) {
 export const manifestId = 'prep-streams-io-count-words-in-file';
 export const title = 'Count words in file';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Count words in file\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Count words in file"?',
     choices: [
       {
-        label: "Scanner word tokenization — fits this problem",
-        correct: true
+        label: 'Scanner word tokenization — fits this problem',
+        correct: true,
       },
       {
-        label: "Two heaps median — different approach"
+        label: 'Two heaps median — different approach',
       },
       {
-        label: "Buffered line iterator — different approach"
+        label: 'Buffered line iterator — different approach',
       },
       {
-        label: "Token bucket rate limiter — different approach"
-      }
+        label: 'Token bucket rate limiter — different approach',
+      },
     ],
-    explain: "Scanner splits the file on whitespace; count each Scan() hit"
+    explain: 'Scanner splits the file on whitespace; count each Scan() hit',
   },
   {
-    id: "key-step",
-    prompt: "On the \"SCAN\" step (word : \"\"), what happens?",
+    id: 'key-step',
+    prompt: 'On the "SCAN" step (word : ""), what happens?',
     choices: [
       {
-        label: "\\ — this move caption",
-        correct: true
+        label: '\\ — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "\\"
+    explain: '\\',
   },
   {
-    id: "state",
-    prompt: "What does the `text` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `text` field track in the visualization state?',
     choices: [
       {
-        label: "Field text in state — updated each frame",
-        correct: true
+        label: 'Field text in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `text` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `text` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Count words in file\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Count words in file"?',
     choices: [
       {
-        label: "O(file size) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(file size) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
+        label: 'O(n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(entries) time, O(matches) space — wrong order of growth"
-      }
+        label: 'O(entries) time, O(matches) space — wrong order of growth',
+      },
     ],
-    explain: "O(file size). O(1). bufio.ScanWords; ++ per Scan()"
+    explain: 'O(file size). O(1). bufio.ScanWords; ++ per Scan()',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Scanner exhausted. Total word count = — final DONE caption",
-        correct: true
+        label: 'Scanner exhausted. Total word count = — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Scanner exhausted. Total word count = ."
-  }
+    explain: 'Scanner exhausted. Total word count = .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

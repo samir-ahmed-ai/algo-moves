@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { createPortal } from 'react-dom';
 import { LayoutGrid } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
@@ -14,12 +21,7 @@ import {
   subscribeLayoutDropTarget,
 } from '@/shell/canvas/layout/layoutDropState';
 import type { PanelFlowNode } from '@/core/panelFlowTypes';
-import {
-  PanelHeaderAction,
-  RADIUS_SHELL,
-  nodeIconGlyph,
-  nodeText,
-} from './nodeui';
+import { PanelHeaderAction, RADIUS_SHELL, nodeIconGlyph, nodeText } from './nodeui';
 
 const CELL =
   'grid h-8 w-8 place-items-center rounded-md border border-transparent text-ink3 transition-colors hover:border-edge hover:bg-panel2 hover:text-ink';
@@ -39,7 +41,15 @@ function SlotIcon({ slotIndex, filled }: { slotIndex: number; filled: boolean })
         strokeWidth="0.75"
         opacity="0.35"
       />
-      <rect x={x} y={y} width={w} height={h} rx="0.25" fill="currentColor" opacity={filled ? 1 : 0.25} />
+      <rect
+        x={x}
+        y={y}
+        width={w}
+        height={h}
+        rx="0.25"
+        fill="currentColor"
+        opacity={filled ? 1 : 0.25}
+      />
     </svg>
   );
 }
@@ -82,10 +92,11 @@ export function PanelHeaderLayoutMenu({
   }, [open]);
 
   const activateHost = useCallback(() => {
-    setNodes((nds) =>
-      nds.map((n) =>
-        n.id === hostId ? { ...n, data: { ...n.data, layoutHost: true } } : n,
-      ) as PanelFlowNode[],
+    setNodes(
+      (nds) =>
+        nds.map((n) =>
+          n.id === hostId ? { ...n, data: { ...n.data, layoutHost: true } } : n,
+        ) as PanelFlowNode[],
     );
   }, [hostId, setNodes]);
 
@@ -134,15 +145,14 @@ export function PanelHeaderLayoutMenu({
             const child = childId ? getNode(childId) : null;
             const title = (child?.data as { title?: string } | undefined)?.title;
             const filled = !!childId;
-            const isDrop =
-              dropTarget?.hostId === hostId && dropTarget.slotIndex === slotIndex;
+            const isDrop = dropTarget?.hostId === hostId && dropTarget.slotIndex === slotIndex;
             return (
               <button
                 key={slotIndex}
                 type="button"
                 data-layout-slot={slotIndex}
                 data-layout-host={hostId}
-                title={filled ? title ?? childId : `Slot ${slotIndex + 1}`}
+                title={filled ? (title ?? childId) : `Slot ${slotIndex + 1}`}
                 onClick={() => pickSlot(slotIndex)}
                 className={cn(
                   CELL,
@@ -162,12 +172,12 @@ export function PanelHeaderLayoutMenu({
   return (
     <div ref={anchorRef} className="relative">
       <PanelHeaderAction
-          variant="toggle"
-          active={open || hasSlots || !!slots}
-          title="Layout slots"
-          onClick={toggle}
-        >
-          <LayoutGrid className={nodeIconGlyph} />
+        variant="toggle"
+        active={open || hasSlots || !!slots}
+        title="Layout slots"
+        onClick={toggle}
+      >
+        <LayoutGrid className={nodeIconGlyph} />
       </PanelHeaderAction>
       {typeof document !== 'undefined' && popover ? createPortal(popover, document.body) : null}
     </div>

@@ -1,7 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 
 interface MergeInput {
@@ -112,9 +127,21 @@ function View({ frame }: PluginViewProps<MergeState>) {
   if (s.j !== null) l2Pointers.push({ i: s.j, label: 'l2', tone: 'warn', place: 'above' });
 
   const l1Tone = (idx: number) =>
-    s.i !== null && idx === s.i ? 'match' : s.i !== null && idx < s.i ? 'dead' : s.i === null ? 'dead' : '';
+    s.i !== null && idx === s.i
+      ? 'match'
+      : s.i !== null && idx < s.i
+        ? 'dead'
+        : s.i === null
+          ? 'dead'
+          : '';
   const l2Tone = (idx: number) =>
-    s.j !== null && idx === s.j ? 'match' : s.j !== null && idx < s.j ? 'dead' : s.j === null ? 'dead' : '';
+    s.j !== null && idx === s.j
+      ? 'match'
+      : s.j !== null && idx < s.j
+        ? 'dead'
+        : s.j === null
+          ? 'dead'
+          : '';
 
   const headVal = (vals: number[], idx: number | null) =>
     idx !== null && idx >= 0 && idx < vals.length ? String(vals[idx]) : 'nil';
@@ -135,9 +162,7 @@ function View({ frame }: PluginViewProps<MergeState>) {
         <RailStat k="l2" v={headVal(s.l2, s.j)} tone={s.j !== null ? 'warn' : undefined} />
         <RailStat k="from" v={s.from ?? '—'} />
       </RailGroup>
-      {s.done && (
-        <RailResult label="merged" value={`[${s.merged.join(', ')}]`} tone="good" />
-      )}
+      {s.done && <RailResult label="merged" value={`[${s.merged.join(', ')}]`} tone="good" />}
     </>
   );
 
@@ -174,132 +199,130 @@ function isSorted(a: number[]): boolean {
 export const manifestId = 'prep-linked-lists-merge-two-sorted-lists';
 export const title = 'Merge two sorted lists';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Merge two sorted lists\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Merge two sorted lists"?',
     choices: [
       {
-        label: "Merge two lists — fits this problem",
-        correct: true
+        label: 'Merge two lists — fits this problem',
+        correct: true,
       },
       {
-        label: "Josephus simulation — different approach"
+        label: 'Josephus simulation — different approach',
       },
       {
-        label: "Hash map clone — different approach"
+        label: 'Hash map clone — different approach',
       },
       {
-        label: "Merge sort list — different approach"
-      }
+        label: 'Merge sort list — different approach',
+      },
     ],
-    explain: "Zip two sorted lists, always attaching the smaller head"
+    explain: 'Zip two sorted lists, always attaching the smaller head',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Merge two sorted lists), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Merge two sorted lists), what strategy is established?',
     choices: [
       {
-        label: "Zip two sorted lists, always attaching — described in INIT caption",
-        correct: true
+        label: 'Zip two sorted lists, always attaching — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Merge two sorted lists: zip them into one sorted chain. We keep a dummy head and a cur pointer, then repeatedly attach the smaller of the two current heads. List 1 = [], list 2 = []."
+    explain:
+      'Merge two sorted lists: zip them into one sorted chain. We keep a dummy head and a cur pointer, then repeatedly attach the smaller of the two current heads. List 1 = [], list 2 = [].',
   },
   {
-    id: "key-step",
-    prompt: "On the \"ATTACH_L2\" step (take ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "ATTACH_L2" step (take ), what happens?',
     choices: [
       {
         label: "l2's head () is smaller — this move caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "l2's head () is smaller or equal, so attach it and advance l2's head. cur moves to the appended node."
+    explain:
+      "l2's head () is smaller or equal, so attach it and advance l2's head. cur moves to the appended node.",
   },
   {
-    id: "state",
-    prompt: "What does the `l1` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `l1` field track in the visualization state?',
     choices: [
       {
-        label: "original list 1 values (left→right — updated each frame",
-        correct: true
+        label: 'original list 1 values (left→right — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `l1` in sync: original list 1 values (left→right chain)"
+    explain: 'The recorder keeps `l1` in sync: original list 1 values (left→right chain)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Merge two sorted lists\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Merge two sorted lists"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n³) time, O(n) space — wrong order of growth"
+        label: 'O(n³) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(h) space — wrong order of growth"
+        label: 'O(n) time, O(h) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(log n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). dummy; while both attach min; append leftover"
+    explain: 'O(n). O(1). dummy; while both attach min; append leftover',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "One list ran out — final DONE caption",
-        correct: true
+        label: 'One list ran out — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "One list ran out, so the merge is complete. Return dummy.Next — the fully merged sorted chain []."
-  }
+    explain:
+      'One list ran out, so the merge is complete. Return dummy.Next — the fully merged sorted chain [].',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

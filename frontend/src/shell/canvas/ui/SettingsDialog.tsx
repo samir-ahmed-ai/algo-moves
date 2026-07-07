@@ -1,8 +1,18 @@
 import { useEffect } from 'react';
 import { X, Settings } from 'lucide-react';
-import { useWorkspace, saveDefaults, type WorkspaceDefaults, type Density } from '@/store/workspace';
+import {
+  useWorkspace,
+  saveDefaults,
+  type WorkspaceDefaults,
+  type Density,
+} from '@/store/workspace';
 import { THEME_META, type ThemePreset } from '../../../styles/themes/registry';
-import { LAYOUT_PRESETS, type LayoutPreset, type BgVariant, type EdgePathType } from '../layout/layout';
+import {
+  LAYOUT_PRESETS,
+  type LayoutPreset,
+  type BgVariant,
+  type EdgePathType,
+} from '../layout/layout';
 import { Toggle } from '../../ui';
 import { Field, RADIUS_CTRL } from './nodeui';
 import { cn } from '@/lib/utils/cn';
@@ -26,7 +36,9 @@ function Segmented<T extends string>({
           onClick={() => onChange(o.v)}
           className={cn(
             `${RADIUS_CTRL} border px-1.5 py-0.5 font-medium transition-colors`,
-            value === o.v ? 'border-accent bg-accentbg text-accent' : 'border-edge text-ink2 hover:text-ink',
+            value === o.v
+              ? 'border-accent bg-accentbg text-accent'
+              : 'border-edge text-ink2 hover:text-ink',
           )}
         >
           {o.label}
@@ -121,10 +133,15 @@ export function SettingsDialog() {
                   onClick={() => setThemePreset(t.id as ThemePreset)}
                   className={cn(
                     `flex items-center gap-1.5 border px-2 py-1 text-left${RADIUS_CTRL}`,
-                    themePreset === t.id ? 'border-accent bg-accentbg' : 'border-edge hover:border-accent/40',
+                    themePreset === t.id
+                      ? 'border-accent bg-accentbg'
+                      : 'border-edge hover:border-accent/40',
                   )}
                 >
-                  <span className="h-4 w-4 shrink-0 rounded-full border border-edge" style={{ background: t.swatch }} />
+                  <span
+                    className="h-4 w-4 shrink-0 rounded-full border border-edge"
+                    style={{ background: t.swatch }}
+                  />
                   <span className="truncate">{t.label}</span>
                 </button>
               ))}
@@ -170,9 +187,21 @@ export function SettingsDialog() {
           )}
 
           <div className="-mx-1 border-t border-edge pt-3">
-            <Toggle label="Sound cues" checked={tweaks.sound} onChange={() => toggleTweak('sound')} />
-            <Toggle label="Narration" checked={tweaks.narrate} onChange={() => toggleTweak('narrate')} />
-            <Toggle label="Animations" checked={tweaks.animate} onChange={() => toggleTweak('animate')} />
+            <Toggle
+              label="Sound cues"
+              checked={tweaks.sound}
+              onChange={() => toggleTweak('sound')}
+            />
+            <Toggle
+              label="Narration"
+              checked={tweaks.narrate}
+              onChange={() => toggleTweak('narrate')}
+            />
+            <Toggle
+              label="Animations"
+              checked={tweaks.animate}
+              onChange={() => toggleTweak('animate')}
+            />
           </div>
         </div>
 
@@ -187,7 +216,10 @@ export function SettingsDialog() {
           <button
             type="button"
             onClick={persist}
-            className={cn(`bg-accent px-2.5 py-1 font-medium text-white hover:opacity-90 ${RADIUS_CTRL}`, chromeText.sm)}
+            className={cn(
+              `bg-accent px-2.5 py-1 font-medium text-white hover:opacity-90 ${RADIUS_CTRL}`,
+              chromeText.sm,
+            )}
           >
             Save defaults
           </button>

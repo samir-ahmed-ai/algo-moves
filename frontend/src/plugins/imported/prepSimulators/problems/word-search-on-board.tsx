@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -28,7 +34,8 @@ const DIRS: [number, number][] = [
   [-1, 0],
 ];
 
-function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {  const m = board.length;
+function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
+  const m = board.length;
   const n = board[0]?.length ?? 0;
   const visited: boolean[][] = board.map((row) => row.map(() => false));
 
@@ -43,15 +50,15 @@ function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {  c
   };
 
   const { emit, frames } = createRecorder<WordSearchState>(() => ({
-        board,
-        word,
-        idx: 0,
-        active: null,
-        path: pathCells(),
-        fail: null,
-        found: false,
-        done: false
-      }));
+    board,
+    word,
+    idx: 0,
+    active: null,
+    path: pathCells(),
+    fail: null,
+    found: false,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -168,8 +175,7 @@ function View({ frame }: PluginViewProps<WordSearchState>) {
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
-        word ={' '}
-        <span className="font-mono text-good">{matched || '·'}</span>
+        word = <span className="font-mono text-good">{matched || '·'}</span>
         <span className="font-mono text-ink3">{remaining}</span>
         {' · '}matched <span className="font-mono text-ink">{s.idx}</span>/
         <span className="font-mono text-ink">{s.word.length}</span>
@@ -226,132 +232,130 @@ function solve({ board, word }: WordSearchInput): boolean {
 export const manifestId = 'prep-matrices-word-search-on-board';
 export const title = 'Word search on board';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Word search on board\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Word search on board"?',
     choices: [
       {
-        label: "Backtracking word search — fits this problem",
-        correct: true
+        label: 'Backtracking word search — fits this problem',
+        correct: true,
       },
       {
-        label: "Simulation — different approach"
+        label: 'Simulation — different approach',
       },
       {
-        label: "Staircase search from top-right — different approach"
+        label: 'Staircase search from top-right — different approach',
       },
       {
-        label: "4-direction DP — different approach"
-      }
+        label: '4-direction DP — different approach',
+      },
     ],
-    explain: "DFS from each cell matching the word index, marking and unmarking visited"
+    explain: 'DFS from each cell matching the word index, marking and unmarking visited',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Word search on board), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Word search on board), what strategy is established?',
     choices: [
       {
-        label: "DFS from each cell matching — described in INIT caption",
-        correct: true
+        label: 'DFS from each cell matching — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Word search: try to spell \"\" by walking neighbours (up/down/left/right) on the board, never reusing a cell. We launch a DFS from every cell and backtrack on failure. Time O(m·n·4^s), Space O(s)."
+    explain:
+      'Word search: try to spell "" by walking neighbours (up/down/left/right) on the board, never reusing a cell. We launch a DFS from every cell and backtrack on failure. Time O(m·n·4^s), Space O(s).',
   },
   {
-    id: "key-step",
-    prompt: "On the \"MARK\" step ('' @(,)), what happens?",
+    id: 'key-step',
+    prompt: 'On the "MARK" step (\'\' @(,)), what happens?',
     choices: [
       {
         label: "board[][]='' matches word[]=''. Mark — this move caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "board[][]='' matches word[]=''. Mark it visited and look for word[]='' among its neighbours."
+    explain:
+      "board[][]='' matches word[]=''. Mark it visited and look for word[]='' among its neighbours.",
   },
   {
-    id: "state",
-    prompt: "What does the `idx` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `idx` field track in the visualization state?',
     choices: [
       {
-        label: "how many characters matched — updated each frame",
-        correct: true
+        label: 'how many characters matched — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `idx` in sync: how many characters matched so far (word[idx] is the next target)"
+    explain:
+      'The recorder keeps `idx` in sync: how many characters matched so far (word[idx] is the next target)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Word search on board\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Word search on board"?',
     choices: [
       {
-        label: "O(m·n·4^s) time, O(s) space — standard bounds here",
-        correct: true
+        label: 'O(m·n·4^s) time, O(s) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
+        label: 'O(log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(1) space — wrong order of growth"
+        label: 'O(m·n) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(m·n·4^s). O(s). idx==len -> true; mark, recurse 4-dir, unmark on fail"
+    explain: 'O(m·n·4^s). O(s). idx==len -> true; mark, recurse 4-dir, unmark on fail',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Launch a fresh DFS from cell — final DONE caption",
-        correct: true
+        label: 'Launch a fresh DFS from cell — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Launch a fresh DFS from cell (,)='', attempting to match word[0]='' here."
-  }
+    explain: "Launch a fresh DFS from cell (,)='', attempting to match word[0]='' here.",
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

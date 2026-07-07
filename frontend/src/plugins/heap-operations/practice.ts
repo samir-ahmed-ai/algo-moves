@@ -18,8 +18,16 @@ export const quiz: QuizQuestion[] = [
 export const codePieces: CodePiece[] = [
   { id: 'insert', code: 'func (h *IntHeap) Push(x int) {', role: 'append and sift up' },
   { id: 'append', code: '\t*h = append(*h, x)', role: 'place new leaf at end' },
-  { id: 'sift-up', code: '\tfor i := len(*h) - 1; i > 0; {', role: 'bubble up while smaller than parent' },
+  {
+    id: 'sift-up',
+    code: '\tfor i := len(*h) - 1; i > 0; {',
+    role: 'bubble up while smaller than parent',
+  },
   { id: 'pop', code: 'func (h *IntHeap) Pop() int {', role: 'remove minimum (root)' },
-  { id: 'swap-root', code: '\troot := (*h)[0]\n\t(*h)[0] = (*h)[len(*h)-1]', role: 'move last leaf to root' },
+  {
+    id: 'swap-root',
+    code: '\troot := (*h)[0]\n\t(*h)[0] = (*h)[len(*h)-1]',
+    role: 'move last leaf to root',
+  },
   { id: 'sift-down', code: '\t// sift down from index 0', role: 'restore heap property' },
 ];

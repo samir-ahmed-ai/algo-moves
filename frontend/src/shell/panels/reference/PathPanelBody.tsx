@@ -4,7 +4,16 @@ import { useWorkspace } from '@/store/workspace';
 import { useProgress, statFor } from '@/store/persistence';
 import { cn } from '@/lib/utils/cn';
 
-import { useCanvasStatic, Chip, Hint, Meter, nodeIconGlyph, nodeTextWrap, Pill, Row } from '@/shell/canvas';
+import {
+  useCanvasStatic,
+  Chip,
+  Hint,
+  Meter,
+  nodeIconGlyph,
+  nodeTextWrap,
+  Pill,
+  Row,
+} from '@/shell/canvas';
 /** #62 Learning path: ordered sequence with mastery + jump-to. */
 export function PathPanelBody() {
   const { item } = useCanvasStatic();
@@ -31,15 +40,15 @@ export function PathPanelBody() {
           const unmet = it.prereqs.filter((p) => !statFor(progress, p).mastered);
           const locked = unmet.length > 0 && !mastered;
           return (
-            <Row
-              key={it.id}
-              active={current}
-              onClick={() => openProblem(it.id)}
-            >
+            <Row key={it.id} active={current} onClick={() => openProblem(it.id)}>
               <Pill>{i + 1}</Pill>
               <span
                 className={cn('min-w-0 flex-1', nodeTextWrap, locked && 'opacity-60')}
-                title={locked ? `Suggested first: ${unmet.map((p) => catalog.getItem(p)?.title ?? p).join(', ')}` : undefined}
+                title={
+                  locked
+                    ? `Suggested first: ${unmet.map((p) => catalog.getItem(p)?.title ?? p).join(', ')}`
+                    : undefined
+                }
               >
                 {it.title}
               </span>

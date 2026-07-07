@@ -53,7 +53,9 @@ describe('content/taxonomy', () => {
 
   it('interview-prep track aggregates categories from other tracks', () => {
     const prep = getTrackById('interview-prep');
-    expect(prep?.categoryIds.length).toBeGreaterThan(getCategoriesForTrack('data-structures').length);
+    expect(prep?.categoryIds.length).toBeGreaterThan(
+      getCategoriesForTrack('data-structures').length,
+    );
   });
 
   it('exposes category unlock edges and problem graph helpers', () => {

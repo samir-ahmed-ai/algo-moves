@@ -6,7 +6,14 @@ import { useGameChannel } from '../../net/useGameChannel';
 import { useMatchReporter } from '../../net/useMatchReporter';
 import { usePublishState } from '../../net/usePublishState';
 import { mergeNestedRoomState, useSharedStateRef } from '../../net/nestedRoomState';
-import { GameArena, GameBody, ResultBanner, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
+import {
+  GameArena,
+  GameBody,
+  ResultBanner,
+  TouchButton,
+  TurnBadge,
+  WaitingForPeer,
+} from '../../ui/gamesUi';
 import { Confetti, CountdownRing } from '../../ui/effects';
 import { Avatar } from '../../ui/Avatar';
 import { usePrefersReducedMotion } from '../../ui/hooks';
@@ -73,7 +80,9 @@ export function TicTacToe() {
   const publishBoard = useCallback(
     (nextBoard: Board, nextGen: number) => {
       if (role !== 'host') return;
-      publishState(mergeNestedRoomState(sharedStateRef.current, 'ttt', { board: nextBoard, gen: nextGen }));
+      publishState(
+        mergeNestedRoomState(sharedStateRef.current, 'ttt', { board: nextBoard, gen: nextGen }),
+      );
     },
     [role, publishState],
   );
@@ -287,24 +296,20 @@ export function TicTacToe() {
 
       <div className="relative">
         <GameArena accent="#0ea5e9" className="p-2">
-        <div
-          className="grid grid-cols-3 gap-1.5"
-          role="grid"
-          aria-label="tic-tac-toe board"
-        >
-          {board.map((cell, i) => (
-            <Cell
-              key={i}
-              mark={cell}
-              highlighted={line !== null && line.includes(i)}
-              justPlaced={lastPlaced === i}
-              disabled={!myTurn || cell !== null}
-              reduced={reduced}
-              onClick={() => play(i)}
-            />
-          ))}
-        </div>
-        {line && <WinningStroke line={line} reduced={reduced} />}
+          <div className="grid grid-cols-3 gap-1.5" role="grid" aria-label="tic-tac-toe board">
+            {board.map((cell, i) => (
+              <Cell
+                key={i}
+                mark={cell}
+                highlighted={line !== null && line.includes(i)}
+                justPlaced={lastPlaced === i}
+                disabled={!myTurn || cell !== null}
+                reduced={reduced}
+                onClick={() => play(i)}
+              />
+            ))}
+          </div>
+          {line && <WinningStroke line={line} reduced={reduced} />}
         </GameArena>
         <Confetti fire={confetti} />
       </div>
@@ -405,16 +410,14 @@ function Cell({
     >
       <span
         className="flex h-2/3 w-2/3 items-center justify-center"
-        style={
-          animate
-            ? { animation: 'ttt-pop 0.22s cubic-bezier(0.34,1.56,0.64,1)' }
-            : undefined
-        }
+        style={animate ? { animation: 'ttt-pop 0.22s cubic-bezier(0.34,1.56,0.64,1)' } : undefined}
       >
         {mark === 'X' && <X className="h-full w-full text-accent" strokeWidth={2.5} />}
         {mark === 'O' && <Circle className="h-[90%] w-[90%] text-ink" strokeWidth={2.5} />}
       </span>
-      <style>{'@keyframes ttt-pop{from{transform:scale(0.2);opacity:0}to{transform:scale(1);opacity:1}}'}</style>
+      <style>
+        {'@keyframes ttt-pop{from{transform:scale(0.2);opacity:0}to{transform:scale(1);opacity:1}}'}
+      </style>
     </button>
   );
 }
@@ -443,7 +446,9 @@ function Scoreboard({
     <div className="flex items-stretch justify-center gap-2 text-center">
       <Tally name={me} mark={myMark} score={myScore} accent={!isSpectator} />
       <div className="flex flex-col items-center justify-center px-1">
-        <div className="font-mono text-[length:var(--fs-2xs)] uppercase tracking-wide text-ink3">{drawsLabel}</div>
+        <div className="font-mono text-[length:var(--fs-2xs)] uppercase tracking-wide text-ink3">
+          {drawsLabel}
+        </div>
         <div className="font-mono text-lg font-bold tabular-nums text-ink2">{draws}</div>
       </div>
       <Tally name={peer} mark={peerMark} score={peerScore} />

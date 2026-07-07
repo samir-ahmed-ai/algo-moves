@@ -20,7 +20,11 @@ for (const mod of Object.values(modules)) {
   if (mod.title) simulatorsByTitle[mod.title] = mod.simulator;
 }
 
-export function resolveSimulator(manifestId: string, title: string, category: string): ProblemSimulator | undefined {
+export function resolveSimulator(
+  manifestId: string,
+  title: string,
+  category: string,
+): ProblemSimulator | undefined {
   const SIMULATED = new Set(['dynamic-programming', 'graph', 'backtracking', 'binary-search']);
   if (!SIMULATED.has(category)) return undefined;
   return simulatorsById[manifestId] ?? simulatorsByTitle[title];

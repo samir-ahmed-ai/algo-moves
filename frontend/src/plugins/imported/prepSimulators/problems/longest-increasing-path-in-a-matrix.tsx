@@ -1,8 +1,23 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface LipInput {
   matrix: number[][];
@@ -173,7 +188,11 @@ function View({ frame }: PluginViewProps<LipState>) {
         <RailStat k="memo" v={at && s.memo[at[0]][at[1]] > 0 ? s.memo[at[0]][at[1]] : '—'} />
         <RailStat k="nbr" v={nb ? `(${nb[0]},${nb[1]})` : '—'} />
       </RailGroup>
-      <RailResult label="best" value={s.result ?? s.best} tone={s.result !== null ? 'good' : 'accent'} />
+      <RailResult
+        label="best"
+        value={s.result ?? s.best}
+        tone={s.result !== null ? 'good' : 'accent'}
+      />
     </>
   );
   return (
@@ -197,7 +216,10 @@ function Inspector({ frame }: InspectorProps<LipState>) {
       <InspectorRow k="grid" v={`${s.matrix.length}×${s.matrix[0].length}`} />
       <InspectorRow k="active cell" v={at ? `(${at[0]},${at[1]})` : '—'} />
       <InspectorRow k="value" v={at ? s.matrix[at[0]][at[1]] : '—'} />
-      <InspectorRow k="memo[cell]" v={at && s.memo[at[0]][at[1]] > 0 ? s.memo[at[0]][at[1]] : '—'} />
+      <InspectorRow
+        k="memo[cell]"
+        v={at && s.memo[at[0]][at[1]] > 0 ? s.memo[at[0]][at[1]] : '—'}
+      />
       <InspectorRow k="neighbor" v={s.neighbor ? `(${s.neighbor[0]},${s.neighbor[1]})` : '—'} />
       <InspectorRow k="chain depth" v={s.stack.length} />
       <InspectorRow k="best" v={s.result ?? s.best} />
@@ -242,132 +264,132 @@ function computeLip(matrix: number[][]): number {
 export const manifestId = 'prep-matrices-longest-increasing-path-in-a-matrix';
 export const title = 'Longest Increasing Path in a Matrix';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Longest Increasing Path in a Matrix\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Longest Increasing Path in a Matrix"?',
     choices: [
       {
-        label: "DFS + Memoization — fits this problem",
-        correct: true
+        label: 'DFS + Memoization — fits this problem',
+        correct: true,
       },
       {
-        label: "Row Comparison (same or inverse of row 0) — different approach"
+        label: 'Row Comparison (same or inverse of row 0) — different approach',
       },
       {
-        label: "First row/col as markers — different approach"
+        label: 'First row/col as markers — different approach',
       },
       {
-        label: "Backtracking word search — different approach"
-      }
+        label: 'Backtracking word search — different approach',
+      },
     ],
-    explain: "See Longest Increasing Path In A Matrix pattern"
+    explain: 'See Longest Increasing Path In A Matrix pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Longest Increasing Path in a Matrix), what strategy is established?",
+    id: 'init',
+    prompt:
+      'At the start of a run (Longest Increasing Path in a Matrix), what strategy is established?',
     choices: [
       {
-        label: "See Longest Increasing Path — described in INIT caption",
-        correct: true
+        label: 'See Longest Increasing Path — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Longest Increasing Path: from any cell we may step to an orthogonal neighbor only if its value is strictly larger. We want the longest such chain. dfs(r,c) returns the longest increasing path that STARTS at (r,c); we memoize it so each cell is solved once — Time O(m·n), Space O(m·n)."
+    explain:
+      'Longest Increasing Path: from any cell we may step to an orthogonal neighbor only if its value is strictly larger. We want the longest such chain. dfs(r,c) returns the longest increasing path that STARTS at (r,c); we memoize it so each cell is solved once — Time O(m·n), Space O(m·n).',
   },
   {
-    id: "key-step",
-    prompt: "On the \"BLOCK\" step ((,) not >), what happens?",
+    id: 'key-step',
+    prompt: 'On the "BLOCK" step ((,) not >), what happens?',
     choices: [
       {
-        label: "Neighbor (,)= is not strictly greater — this move caption",
-        correct: true
+        label: 'Neighbor (,)= is not strictly greater — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Neighbor (,)= is not strictly greater than , so the path cannot increase in that direction. Skip it."
+    explain:
+      'Neighbor (,)= is not strictly greater than , so the path cannot increase in that direction. Skip it.',
   },
   {
-    id: "state",
-    prompt: "What does the `memo` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `memo` field track in the visualization state?',
     choices: [
       {
-        label: "memo[r][c] = longest increasing path — updated each frame",
-        correct: true
+        label: 'memo[r][c] = longest increasing path — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `memo` in sync: memo[r][c] = longest increasing path starting at (r,c); 0 = not filled"
+    explain:
+      'The recorder keeps `memo` in sync: memo[r][c] = longest increasing path starting at (r,c); 0 = not filled',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Longest Increasing Path in a Matrix\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Longest Increasing Path in a Matrix"?',
     choices: [
       {
-        label: "O(m·n) time, O(m·n) space — standard bounds here",
-        correct: true
+        label: 'O(m·n) time, O(m·n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n log n) per axis time, O(n) space — wrong order of growth"
+        label: 'O(n log n) per axis time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
+        label: 'O(n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(max(m,n)) space — wrong order of growth"
-      }
+        label: 'O(m·n) time, O(max(m,n)) space — wrong order of growth',
+      },
     ],
-    explain: "O(m·n). O(m·n). Longest Increasing Path In A Matrix"
+    explain: 'O(m·n). O(m·n). Longest Increasing Path In A Matrix',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Every cell has been solved — final DONE caption",
-        correct: true
+        label: 'Every cell has been solved — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Every cell has been solved and cached. The longest strictly increasing path anywhere in the matrix has length ."
-  }
+    explain:
+      'Every cell has been solved and cached. The longest strictly increasing path anywhere in the matrix has length .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

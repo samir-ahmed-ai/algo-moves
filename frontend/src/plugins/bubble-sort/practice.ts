@@ -12,7 +12,8 @@ export const quiz: QuizQuestion[] = [
       { label: 'Smallest moves front — opposite pass' },
       { label: 'No comparisons — still compares pairs' },
     ],
-    explain: 'Each pass compares adjacent pairs and swaps out-of-order neighbors, so the maximum "bubbles" to the rightmost unsorted slot.',
+    explain:
+      'Each pass compares adjacent pairs and swaps out-of-order neighbors, so the maximum "bubbles" to the rightmost unsorted slot.',
   },
 ];
 

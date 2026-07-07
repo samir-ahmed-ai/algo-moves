@@ -67,20 +67,14 @@ export interface SubDocCursorOp {
 }
 
 export type SubDocOp =
-  | SubDocSnapshotOp
-  | SubDocWhiteboardPatchOp
-  | SubDocEditorPatchOp
-  | SubDocCursorOp;
+  SubDocSnapshotOp | SubDocWhiteboardPatchOp | SubDocEditorPatchOp | SubDocCursorOp;
 
 export function isSubDocOp(value: unknown): value is SubDocOp {
   const op = value as Partial<SubDocOp> | null;
   if (!op || op[SUBDOC_TAG] == null) return false;
   const tag = op[SUBDOC_TAG];
   return (
-    tag === 'snapshot' ||
-    tag === 'patch-whiteboard' ||
-    tag === 'patch-editor' ||
-    tag === 'cursor'
+    tag === 'snapshot' || tag === 'patch-whiteboard' || tag === 'patch-editor' || tag === 'cursor'
   );
 }
 

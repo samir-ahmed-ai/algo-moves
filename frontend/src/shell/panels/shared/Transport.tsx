@@ -27,13 +27,14 @@ export function Transport() {
   const bookmarked = player.bookmarks.has(player.index);
   const frameType = frame.move?.type ?? 'frame';
   const frameToneClass = moveToneChipClass(frame.move?.tone);
-  const playBadge = player.isPlaying ? 'text-good border-good/60 bg-goodbg/30' : 'text-ink3 border-edge/65 bg-panel2/80';
+  const playBadge = player.isPlaying
+    ? 'text-good border-good/60 bg-goodbg/30'
+    : 'text-ink3 border-edge/65 bg-panel2/80';
   const toggleBookmark = () => {
     if (bookmarked) player.removeBookmark(player.index);
     else player.setBookmark(player.index, frame.move.note);
   };
-  const btn =
-    `nodrag grid ${CHROME_BTN} place-items-center p-1 text-ink2 transition-colors enabled:hover:bg-panel2 enabled:hover:text-ink disabled:opacity-30 ${RADIUS_CTRL}`;
+  const btn = `nodrag grid ${CHROME_BTN} place-items-center p-1 text-ink2 transition-colors enabled:hover:bg-panel2 enabled:hover:text-ink disabled:opacity-30 ${RADIUS_CTRL}`;
   const { loopStart, loopEnd } = player;
   const looping = loopStart !== null || loopEnd !== null;
 
@@ -50,7 +51,12 @@ export function Transport() {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-1">
-        <button onClick={player.prev} disabled={player.index === 0 || scrubMax === 0} className={btn} aria-label="previous move">
+        <button
+          onClick={player.prev}
+          disabled={player.index === 0 || scrubMax === 0}
+          className={btn}
+          aria-label="previous move"
+        >
           <SkipBack className={nodeIconGlyph} />
         </button>
         <button
@@ -72,7 +78,11 @@ export function Transport() {
           )}
           aria-label={player.isPlaying ? 'pause' : 'play'}
         >
-          {player.isPlaying ? <Pause className={nodeIconGlyph} /> : <Play className={nodeIconGlyph} />}
+          {player.isPlaying ? (
+            <Pause className={nodeIconGlyph} />
+          ) : (
+            <Play className={nodeIconGlyph} />
+          )}
         </button>
         <button
           onClick={player.next}
@@ -98,7 +108,11 @@ export function Transport() {
           title={bookmarked ? 'remove bookmark' : 'bookmark this frame'}
           aria-label="toggle bookmark"
         >
-          {bookmarked ? <Bookmark className={cn(nodeIconGlyph, 'fill-current')} /> : <BookmarkPlus className={nodeIconGlyph} />}
+          {bookmarked ? (
+            <Bookmark className={cn(nodeIconGlyph, 'fill-current')} />
+          ) : (
+            <BookmarkPlus className={nodeIconGlyph} />
+          )}
         </button>
         <button
           onClick={() => toggleTweak('narrate')}
@@ -109,7 +123,11 @@ export function Transport() {
           title={tweaks.narrate ? 'mute narration' : 'narrate captions'}
           aria-label="toggle narration"
         >
-          {tweaks.narrate ? <Volume2 className={nodeIconGlyph} /> : <VolumeX className={nodeIconGlyph} />}
+          {tweaks.narrate ? (
+            <Volume2 className={nodeIconGlyph} />
+          ) : (
+            <VolumeX className={nodeIconGlyph} />
+          )}
         </button>
         <button
           onClick={() => toggleTweak('moveLog')}
@@ -125,16 +143,29 @@ export function Transport() {
       </div>
 
       <div className="flex items-center gap-1.5 text-[length:var(--fs-tight)] text-ink3">
-        <span className={cn('shrink-0 rounded-full px-2 py-0.5', playBadge)}>{player.isPlaying ? 'Playing' : 'Paused'}</span>
-        <span className={cn('shrink-0 rounded-full border px-2 py-0.5', frameToneClass)}>{frameType}</span>
+        <span className={cn('shrink-0 rounded-full px-2 py-0.5', playBadge)}>
+          {player.isPlaying ? 'Playing' : 'Paused'}
+        </span>
+        <span className={cn('shrink-0 rounded-full border px-2 py-0.5', frameToneClass)}>
+          {frameType}
+        </span>
         {looping && (
           <span className="shrink-0 rounded-full border border-edge/70 bg-panel2 px-2 py-0.5 text-ink3">
-            Loop {loopStart !== null ? `A:${loopStart + 1}` : 'A:—'} to {loopEnd !== null ? `B:${loopEnd + 1}` : 'B:—'}
+            Loop {loopStart !== null ? `A:${loopStart + 1}` : 'A:—'} to{' '}
+            {loopEnd !== null ? `B:${loopEnd + 1}` : 'B:—'}
           </span>
         )}
         <div className="flex-1" />
-        {player.speed !== 1 && <span className="shrink-0 rounded-full border border-edge px-2 py-0.5 text-ink2">{player.speed}×</span>}
-        {bookmarked && <span className="shrink-0 rounded-full border border-accent bg-accentbg px-2 py-0.5 text-accent">Bookmarked</span>}
+        {player.speed !== 1 && (
+          <span className="shrink-0 rounded-full border border-edge px-2 py-0.5 text-ink2">
+            {player.speed}×
+          </span>
+        )}
+        {bookmarked && (
+          <span className="shrink-0 rounded-full border border-accent bg-accentbg px-2 py-0.5 text-accent">
+            Bookmarked
+          </span>
+        )}
       </div>
 
       <input

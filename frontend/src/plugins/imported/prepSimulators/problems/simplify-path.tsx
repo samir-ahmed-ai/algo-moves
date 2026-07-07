@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -25,20 +31,21 @@ function canonical(stack: string[]): string {
   return '/' + stack.join('/');
 }
 
-function record({ path }: SimplifyPathInput): Frame<SimplifyPathState>[] {  const parts = path.split('/');
+function record({ path }: SimplifyPathInput): Frame<SimplifyPathState>[] {
+  const parts = path.split('/');
   const stack: string[] = [];
 
   const { emit, frames } = createRecorder<SimplifyPathState>(() => ({
-        path,
-        parts,
-        pi: null,
-        part: null,
-        stack: stack.slice(),
-        popped: null,
-        action: null,
-        result: null,
-        done: false
-      }));
+    path,
+    parts,
+    pi: null,
+    part: null,
+    stack: stack.slice(),
+    popped: null,
+    action: null,
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -120,10 +127,7 @@ function View({ frame }: PluginViewProps<SimplifyPathState>) {
         {s.parts.map((p, i) => (
           <span
             key={i}
-            className={cn(
-              s.pi === i ? 'text-accent' : 'text-ink3',
-              s.pi === i && 'font-semibold',
-            )}
+            className={cn(s.pi === i ? 'text-accent' : 'text-ink3', s.pi === i && 'font-semibold')}
           >
             {i > 0 && <span className="text-ink3">/</span>}
             {p === '' ? '·' : p}
@@ -160,132 +164,129 @@ function Inspector({ frame }: InspectorProps<SimplifyPathState>) {
 export const manifestId = 'prep-stacks-queues-simplify-path';
 export const title = 'Simplify Path';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Simplify Path\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Simplify Path"?',
     choices: [
       {
-        label: "Stack — fits this problem",
-        correct: true
+        label: 'Stack — fits this problem',
+        correct: true,
       },
       {
-        label: "Dual-stack infix calculator — different approach"
+        label: 'Dual-stack infix calculator — different approach',
       },
       {
-        label: "Queue + decreasing max deque — different approach"
+        label: 'Queue + decreasing max deque — different approach',
       },
       {
-        label: "Stack bracket matching — different approach"
-      }
+        label: 'Stack bracket matching — different approach',
+      },
     ],
-    explain: "Split by `/`, iterate parts: skip empty and `.`, pop on `..`, push otherwise"
+    explain: 'Split by `/`, iterate parts: skip empty and `.`, pop on `..`, push otherwise',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Simplify Path), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Simplify Path), what strategy is established?',
     choices: [
       {
-        label: "Split by `/`, iterate parts: skip — described in INIT caption",
-        correct: true
+        label: 'Split by `/`, iterate parts: skip — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Simplify Path: turn \"\" into its canonical Unix form. Split on \"/\" into  parts, then process each with a stack — \"\" and \".\" are skipped, \"..\" pops the last directory, anything else is pushed."
+    explain:
+      'Simplify Path: turn "" into its canonical Unix form. Split on "/" into  parts, then process each with a stack — "" and "." are skipped, ".." pops the last directory, anything else is pushed.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"PUSH\" step (push \"\"), what happens?",
+    id: 'key-step',
+    prompt: 'On the "PUSH" step (push ""), what happens?',
     choices: [
       {
-        label: "Part is a real directory name — this move caption",
-        correct: true
+        label: 'Part is a real directory name — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Part  is a real directory name \"\", so descend into it by pushing it onto the stack."
+    explain: 'Part  is a real directory name "", so descend into it by pushing it onto the stack.',
   },
   {
-    id: "state",
-    prompt: "What does the `parts` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `parts` field track in the visualization state?',
     choices: [
       {
         label: "path split on '/' — updated each frame",
-        correct: true
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `parts` in sync: path split on '/'"
+    explain: "The recorder keeps `parts` in sync: path split on '/'",
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Simplify Path\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Simplify Path"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n·maxK) time, O(n) space — wrong order of growth"
+        label: 'O(n·maxK) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m+n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(m+n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). Split by `/`, iterate parts: skip empty and `.`, pop on `..`, push otherwise; Join stack with `/` and prepend `/`"
+    explain:
+      'O(n). O(n). Split by `/`, iterate parts: skip empty and `.`, pop on `..`, push otherwise; Join stack with `/` and prepend `/`',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Part is a real directory name — final DONE caption",
-        correct: true
+        label: 'Part is a real directory name — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Part  is a real directory name \"\", so descend into it by pushing it onto the stack."
-  }
+    explain: 'Part  is a real directory name "", so descend into it by pushing it onto the stack.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

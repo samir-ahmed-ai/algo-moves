@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -18,16 +24,17 @@ interface LcpState {
   done: boolean;
 }
 
-function record({ strs }: LcpInput): Frame<LcpState>[] {  const base = strs.length > 0 ? strs[0] : '';
+function record({ strs }: LcpInput): Frame<LcpState>[] {
+  const base = strs.length > 0 ? strs[0] : '';
 
   const { emit, frames } = createRecorder<LcpState>(() => ({
-        strs,
-        col: null,
-        row: null,
-        matched: 0,
-        result: null,
-        done: false
-      }));
+    strs,
+    col: null,
+    row: null,
+    matched: 0,
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -37,7 +44,13 @@ function record({ strs }: LcpInput): Frame<LcpState>[] {  const base = strs.leng
   );
 
   if (strs.length === 0) {
-    emit('DONE', 'empty set', `There are no words at all, so the longest common prefix is the empty string "".`, { result: '', done: true }, 'bad');
+    emit(
+      'DONE',
+      'empty set',
+      `There are no words at all, so the longest common prefix is the empty string "".`,
+      { result: '', done: true },
+      'bad',
+    );
     return frames;
   }
 
@@ -115,9 +128,15 @@ function View({ frame }: PluginViewProps<LcpState>) {
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
         word 0 = <span className="font-mono text-ink">"{base}"</span> · comparing{' '}
-        <span className="font-mono text-ink">{s.strs.length}</span> word{s.strs.length === 1 ? '' : 's'}
+        <span className="font-mono text-ink">{s.strs.length}</span> word
+        {s.strs.length === 1 ? '' : 's'}
       </div>
-      <ArrayRow values={baseChars} cellTone={tone} pointers={pointers} windowRange={s.matched > 0 ? [0, s.matched - 1] : null} />
+      <ArrayRow
+        values={baseChars}
+        cellTone={tone}
+        pointers={pointers}
+        windowRange={s.matched > 0 ? [0, s.matched - 1] : null}
+      />
       <div className={cn('mt-1 flex flex-col gap-[2px] font-mono', vizText.sm)}>
         {s.strs.map((w, j) => {
           const isActive = s.row === j;
@@ -143,7 +162,13 @@ function View({ frame }: PluginViewProps<LcpState>) {
         })}
       </div>
       {s.result !== null && (
-        <div className={cn('mt-1 font-mono', s.result === '' ? 'text-ink3' : 'text-good', vizText.base)}>
+        <div
+          className={cn(
+            'mt-1 font-mono',
+            s.result === '' ? 'text-ink3' : 'text-good',
+            vizText.base,
+          )}
+        >
           → prefix = "{s.result}"
         </div>
       )}
@@ -162,7 +187,10 @@ function Inspector({ frame }: InspectorProps<LcpState>) {
       <InspectorRow k="column (i)" v={s.col ?? '—'} />
       <InspectorRow k="checking word (j)" v={s.row ?? '—'} />
       <InspectorRow k="prefix length" v={s.matched} />
-      <InspectorRow k="prefix" v={s.result !== null ? `"${s.result}"` : `"${base.slice(0, s.matched)}"`} />
+      <InspectorRow
+        k="prefix"
+        v={s.result !== null ? `"${s.result}"` : `"${base.slice(0, s.matched)}"`}
+      />
     </VarGrid>
   );
 }
@@ -170,137 +198,139 @@ function Inspector({ frame }: InspectorProps<LcpState>) {
 export const manifestId = 'prep-strings-longest-common-prefix';
 export const title = 'Longest common prefix';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Longest common prefix\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Longest common prefix"?',
     choices: [
       {
-        label: "Vertical scan — fits this problem",
-        correct: true
+        label: 'Vertical scan — fits this problem',
+        correct: true,
       },
       {
-        label: "Double string trick — different approach"
+        label: 'Double string trick — different approach',
       },
       {
-        label: "Index Map — different approach"
+        label: 'Index Map — different approach',
       },
       {
-        label: "Stack of unmatched indices — different approach"
-      }
+        label: 'Stack of unmatched indices — different approach',
+      },
     ],
-    explain: "Compare column by column across all words"
+    explain: 'Compare column by column across all words',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Longest common prefix), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Longest common prefix), what strategy is established?',
     choices: [
       {
-        label: "Compare column by column across — described in INIT caption",
-        correct: true
+        label: 'Compare column by column across — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Longest Common Prefix by vertical scan: fix word 0 (\"\") as the yardstick and walk its characters column by column. At each column, every other word must have the same character; the first mismatch (or a word that runs out) ends the prefix."
+    explain:
+      'Longest Common Prefix by vertical scan: fix word 0 ("") as the yardstick and walk its characters column by column. At each column, every other word must have the same character; the first mismatch (or a word that runs out) ends the prefix.',
   },
   {
-    id: "key-step",
+    id: 'key-step',
     prompt: "On the \"MISMATCH\" step ('' ≠ ''), what happens?",
     choices: [
       {
-        label: "Word (\"\") has '' at index — this move caption",
-        correct: true
+        label: 'Word ("") has \'\' at index — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Word  (\"\") has '' at index , which differs from ''. That breaks the prefix here. Answer = word0[:] = \"\"."
+    explain:
+      'Word  ("") has \'\' at index , which differs from \'\'. That breaks the prefix here. Answer = word0[:] = "".',
   },
   {
-    id: "state",
-    prompt: "What does the `col` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `col` field track in the visualization state?',
     choices: [
       {
-        label: "char column currently being compared — updated each frame",
-        correct: true
+        label: 'char column currently being compared — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `col` in sync: char column currently being compared"
+    explain: 'The recorder keeps `col` in sync: char column currently being compared',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Longest common prefix\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Longest common prefix"?',
     choices: [
       {
-        label: "O(n*m) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n*m) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(m+n) time, O(n) space — wrong order of growth"
+        label: 'O(m+n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O( time, O(1) space — wrong order of growth"
+        label: 'O( time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n*m). O(1). for i in word0: any mismatch/short -> return word0[:i]"
+    explain: 'O(n*m). O(1). for i in word0: any mismatch/short -> return word0[:i]',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "We consumed all of word 0 — final DONE caption",
-        correct: true
+        label: 'We consumed all of word 0 — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "We consumed all of word 0 without any mismatch, so word 0 itself is a prefix of every word. The longest common prefix is \"\"."
-  }
+    explain:
+      'We consumed all of word 0 without any mismatch, so word 0 itself is a prefix of every word. The longest common prefix is "".',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
   inputs: [
-    { id: 'lcp1', label: '["flower","flow","flight"]', value: { strs: ['flower', 'flow', 'flight'] } },
+    {
+      id: 'lcp1',
+      label: '["flower","flow","flight"]',
+      value: { strs: ['flower', 'flow', 'flight'] },
+    },
     { id: 'lcp2', label: '["dog","racecar","car"]', value: { strs: ['dog', 'racecar', 'car'] } },
   ] satisfies SampleInput<LcpInput>[],
   record,

@@ -78,17 +78,65 @@ export const quiz: QuizQuestion[] = [
 
 /** Ordered decomposition of the Go solution for the Code Studio reassemble drill. */
 export const codePieces: CodePiece[] = [
-  { id: 'sig', code: 'func solveNQueens(n int) ([]int, bool) {', role: 'signature — return the column per row, plus whether a solution exists' },
-  { id: 'init', code: '\tqueens := make([]int, n)\n\tfor i := range queens {\n\t\tqueens[i] = -1\n\t}', role: 'board: queens[row] = column, -1 means empty' },
-  { id: 'safe-sig', code: '\tsafe := func(row, col int) bool {', role: 'helper: is (row, col) attacked by an earlier queen?' },
-  { id: 'safe-loop', code: '\t\tfor r := 0; r < row; r++ {\n\t\t\tc := queens[r]', role: 'scan every queen placed in a row above' },
-  { id: 'safe-check', code: '\t\t\tif c == col || abs(c-col) == abs(r-row) {\n\t\t\t\treturn false\n\t\t\t}', role: 'same column or same diagonal → unsafe' },
+  {
+    id: 'sig',
+    code: 'func solveNQueens(n int) ([]int, bool) {',
+    role: 'signature — return the column per row, plus whether a solution exists',
+  },
+  {
+    id: 'init',
+    code: '\tqueens := make([]int, n)\n\tfor i := range queens {\n\t\tqueens[i] = -1\n\t}',
+    role: 'board: queens[row] = column, -1 means empty',
+  },
+  {
+    id: 'safe-sig',
+    code: '\tsafe := func(row, col int) bool {',
+    role: 'helper: is (row, col) attacked by an earlier queen?',
+  },
+  {
+    id: 'safe-loop',
+    code: '\t\tfor r := 0; r < row; r++ {\n\t\t\tc := queens[r]',
+    role: 'scan every queen placed in a row above',
+  },
+  {
+    id: 'safe-check',
+    code: '\t\t\tif c == col || abs(c-col) == abs(r-row) {\n\t\t\t\treturn false\n\t\t\t}',
+    role: 'same column or same diagonal → unsafe',
+  },
   { id: 'safe-ok', code: '\t\t}\n\t\treturn true\n\t}', role: 'no conflict found → safe' },
-  { id: 'place-sig', code: '\tvar place func(row int) bool\n\tplace = func(row int) bool {', role: 'recursive placer for one row at a time' },
-  { id: 'base', code: '\t\tif row == n {\n\t\t\treturn true\n\t\t}', role: 'base case: all rows filled → complete solution' },
-  { id: 'col-loop', code: '\t\tfor col := 0; col < n; col++ {\n\t\t\tif safe(row, col) {', role: 'try each column; only proceed where it is safe' },
-  { id: 'choose', code: '\t\t\t\tqueens[row] = col\n\t\t\t\tif place(row + 1) {\n\t\t\t\t\treturn true\n\t\t\t\t}', role: 'place the queen and recurse; bubble up on success' },
-  { id: 'undo', code: '\t\t\t\tqueens[row] = -1 // backtrack\n\t\t\t}\n\t\t}', role: 'undo the placement and try the next column' },
-  { id: 'fail', code: '\t\treturn false\n\t}', role: 'no column worked in this row → fail back up' },
-  { id: 'run', code: '\tif place(0) {\n\t\treturn queens, true\n\t}\n\treturn nil, false\n}', role: 'kick off at row 0 and report the outcome' },
+  {
+    id: 'place-sig',
+    code: '\tvar place func(row int) bool\n\tplace = func(row int) bool {',
+    role: 'recursive placer for one row at a time',
+  },
+  {
+    id: 'base',
+    code: '\t\tif row == n {\n\t\t\treturn true\n\t\t}',
+    role: 'base case: all rows filled → complete solution',
+  },
+  {
+    id: 'col-loop',
+    code: '\t\tfor col := 0; col < n; col++ {\n\t\t\tif safe(row, col) {',
+    role: 'try each column; only proceed where it is safe',
+  },
+  {
+    id: 'choose',
+    code: '\t\t\t\tqueens[row] = col\n\t\t\t\tif place(row + 1) {\n\t\t\t\t\treturn true\n\t\t\t\t}',
+    role: 'place the queen and recurse; bubble up on success',
+  },
+  {
+    id: 'undo',
+    code: '\t\t\t\tqueens[row] = -1 // backtrack\n\t\t\t}\n\t\t}',
+    role: 'undo the placement and try the next column',
+  },
+  {
+    id: 'fail',
+    code: '\t\treturn false\n\t}',
+    role: 'no column worked in this row → fail back up',
+  },
+  {
+    id: 'run',
+    code: '\tif place(0) {\n\t\treturn queens, true\n\t}\n\treturn nil, false\n}',
+    role: 'kick off at row 0 and report the outcome',
+  },
 ];

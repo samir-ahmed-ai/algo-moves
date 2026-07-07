@@ -8,11 +8,12 @@ export const quiz: QuizQuestion[] = [
     prompt: 'During a merge of two sorted runs, which element moves to the output next?',
     choices: [
       { label: 'Smaller front — preserves sorted order', correct: true },
-      { label: 'Left front always — ignores right run', },
-      { label: 'Larger front — would reverse order', },
-      { label: 'Middle element — not how merge works', },
+      { label: 'Left front always — ignores right run' },
+      { label: 'Larger front — would reverse order' },
+      { label: 'Middle element — not how merge works' },
     ],
-    explain: 'Merge compares the smallest unconsumed elements from each run and appends the smaller — preserving sorted order.',
+    explain:
+      'Merge compares the smallest unconsumed elements from each run and appends the smaller — preserving sorted order.',
   },
 ];
 

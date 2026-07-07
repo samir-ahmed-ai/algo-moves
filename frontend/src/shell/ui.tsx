@@ -7,7 +7,12 @@ import { chromeText, ChromeHint } from './chromeUi';
 export function TagChip({ id }: { id: string }) {
   const t = getTag(id);
   return (
-    <span className={cn('inline-flex items-center gap-1 rounded bg-panel2 px-1.5 py-0.5 text-ink2', chromeText.sm)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded bg-panel2 px-1.5 py-0.5 text-ink2',
+        chromeText.sm,
+      )}
+    >
       <span className="h-1.5 w-1.5 rounded-full" style={{ background: TAG_KIND_COLOR[t.kind] }} />
       {t.label}
     </span>
@@ -35,7 +40,9 @@ export function Toggle({
       )}
     >
       <span className="min-w-0">
-        <span className={cn('block text-ink', dense ? chromeText.sm : chromeText.base)}>{label}</span>
+        <span className={cn('block text-ink', dense ? chromeText.sm : chromeText.base)}>
+          {label}
+        </span>
         {hint && <ChromeHint className="block truncate">{hint}</ChromeHint>}
       </span>
       <Switch.Root

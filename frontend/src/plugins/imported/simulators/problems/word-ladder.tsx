@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { GraphBoard } from '../../../../components/board/GraphBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { InspectorRow, RailGroup, RailResult, RailStack, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  RailGroup,
+  RailResult,
+  RailStack,
+  RailStat,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+} from '../../../_shared/vizKit';
 import { circleLayout } from '../../../_shared/graphLayout';
 
 interface WLInput {
@@ -74,17 +88,33 @@ function record({ beginWord, endWord, wordList }: WLInput): Frame<WLState>[] {
   color[0] = 2;
   dist[0] = 1;
   queue.push(0);
-  emit('SEED', `queue ["${beginWord}"]`, `Seed the queue with "${beginWord}" at ladder length 1 and mark it queued.`, { active: 0 });
+  emit(
+    'SEED',
+    `queue ["${beginWord}"]`,
+    `Seed the queue with "${beginWord}" at ladder length 1 and mark it queued.`,
+    { active: 0 },
+  );
 
   let resolved = false;
   while (queue.length > 0 && !resolved) {
     const v = queue.shift() as number;
     color[v] = 1;
-    emit('VISIT', `visit "${labels[v]}"`, `Dequeue "${labels[v]}" (ladder length ${dist[v]}) and mark it visited.`, { active: v });
+    emit(
+      'VISIT',
+      `visit "${labels[v]}"`,
+      `Dequeue "${labels[v]}" (ladder length ${dist[v]}) and mark it visited.`,
+      { active: v },
+    );
 
     if (v === target) {
       answer = dist[v];
-      emit('FOUND', `reached "${endWord}"`, `"${labels[v]}" is the end word — the shortest ladder reaches it in ${answer} words.`, { active: v, answer }, 'good');
+      emit(
+        'FOUND',
+        `reached "${endWord}"`,
+        `"${labels[v]}" is the end word — the shortest ladder reaches it in ${answer} words.`,
+        { active: v, answer },
+        'good',
+      );
       resolved = true;
       break;
     }
@@ -105,10 +135,22 @@ function record({ beginWord, endWord, wordList }: WLInput): Frame<WLState>[] {
   }
 
   if (resolved) {
-    emit('DONE', `ladder ${answer}`, `Shortest transformation ladder from "${beginWord}" to "${endWord}" has ${answer} words.`, { active: target, answer, done: true }, 'good');
+    emit(
+      'DONE',
+      `ladder ${answer}`,
+      `Shortest transformation ladder from "${beginWord}" to "${endWord}" has ${answer} words.`,
+      { active: target, answer, done: true },
+      'good',
+    );
   } else {
     answer = 0;
-    emit('DONE', 'no ladder', `Queue drained without reaching "${endWord}" — no transformation ladder exists, so the answer is 0.`, { active: null, answer, done: true }, 'good');
+    emit(
+      'DONE',
+      'no ladder',
+      `Queue drained without reaching "${endWord}" — no transformation ladder exists, so the answer is 0.`,
+      { active: null, answer, done: true },
+      'good',
+    );
   }
   return frames;
 }
@@ -128,7 +170,9 @@ function View({ frame }: PluginViewProps<WLState>) {
         topLabel="front"
         highlightEnd="bottom"
       />
-      {s.done && <RailResult label="answer" value={s.answer || 0} tone={s.answer > 0 ? 'good' : 'bad'} />}
+      {s.done && (
+        <RailResult label="answer" value={s.answer || 0} tone={s.answer > 0 ? 'good' : 'bad'} />
+      )}
     </>
   );
   return (
@@ -151,7 +195,10 @@ function Inspector({ frame }: InspectorProps<WLState>) {
   return (
     <VarGrid>
       <InspectorRow k="current" v={s.active !== null ? s.labels[s.active] : '—'} />
-      <InspectorRow k="queue" v={s.queue.length ? `[${s.queue.map((n) => s.labels[n]).join(', ')}]` : '∅'} />
+      <InspectorRow
+        k="queue"
+        v={s.queue.length ? `[${s.queue.map((n) => s.labels[n]).join(', ')}]` : '∅'}
+      />
       <InspectorRow k="ladder length" v={s.answer || (s.active !== null ? s.dist[s.active] : 0)} />
     </VarGrid>
   );

@@ -110,12 +110,18 @@ export function computeRecallProgress(reference: string, draft: string): RecallP
 
   const lastDraftNorm = normLine(draftLines[lastIdx]);
   const refLineForLast = lastIdx < total ? normLine(refLines[lastIdx]) : '';
-  const lastLineComplete = lastIdx < total && lastDraftNorm.length > 0 && lastDraftNorm === refLineForLast;
+  const lastLineComplete =
+    lastIdx < total && lastDraftNorm.length > 0 && lastDraftNorm === refLineForLast;
 
   if (lastLineComplete) {
     completedLines.push(lastIdx + 1);
     const nextLine = lastIdx + 2;
-    return { completedLines, currentLine: nextLine <= total ? nextLine : null, matchedPrefixLen: 0, total };
+    return {
+      completedLines,
+      currentLine: nextLine <= total ? nextLine : null,
+      matchedPrefixLen: 0,
+      total,
+    };
   }
 
   const currentLine = lastIdx + 1 <= total ? lastIdx + 1 : null;

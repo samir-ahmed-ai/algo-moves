@@ -20,8 +20,7 @@ export interface SortInspectorOptions<S extends SortInspectorState> {
   extra?: (state: S) => ReactNode;
 }
 
-type SortInspectorProps<S extends SortInspectorState> = InspectorProps<S> &
-  SortInspectorOptions<S>;
+type SortInspectorProps<S extends SortInspectorState> = InspectorProps<S> & SortInspectorOptions<S>;
 
 /** Standard comparisons / metric / array inspector for sort plugins. */
 export function SortInspector<S extends SortInspectorState>({

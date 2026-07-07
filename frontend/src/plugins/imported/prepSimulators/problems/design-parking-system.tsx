@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -21,15 +27,16 @@ interface ParkingState {
 
 const TYPE_LABELS = ['', 'big', 'medium', 'small'];
 
-function record({ big, medium, small, cars }: ParkingInput): Frame<ParkingState>[] {  const slots: [number, number, number, number] = [0, big, medium, small];
+function record({ big, medium, small, cars }: ParkingInput): Frame<ParkingState>[] {
+  const slots: [number, number, number, number] = [0, big, medium, small];
 
   const { emit, frames } = createRecorder<ParkingState>(() => ({
-        slots: [...slots] as [number, number, number, number],
-        op: '',
-        carType: null,
-        allowed: null,
-        done: false
-      }));
+    slots: [...slots] as [number, number, number, number],
+    op: '',
+    carType: null,
+    allowed: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -117,112 +124,109 @@ function Inspector({ frame }: InspectorProps<ParkingState>) {
 export const manifestId = 'prep-design-design-parking-system';
 export const title = 'Design Parking System';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Design Parking System\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Design Parking System"?',
     choices: [
       {
-        label: "Design — fits this problem",
-        correct: true
+        label: 'Design — fits this problem',
+        correct: true,
       },
       {
-        label: "Two Heaps — different approach"
+        label: 'Two Heaps — different approach',
       },
       {
-        label: "Round-robin load balancer — different approach"
+        label: 'Round-robin load balancer — different approach',
       },
       {
-        label: "Bijective tiny URL encode/decode — different approach"
-      }
+        label: 'Bijective tiny URL encode/decode — different approach',
+      },
     ],
-    explain: "See Design Parking System pattern"
+    explain: 'See Design Parking System pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Design Parking System), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Design Parking System), what strategy is established?',
     choices: [
       {
-        label: "See Design Parking System pattern — described in INIT caption",
-        correct: true
+        label: 'See Design Parking System pattern — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Parking System: slots[1..3] track remaining big/medium/small spots. AddCar(type) decrements if available."
+    explain:
+      'Parking System: slots[1..3] track remaining big/medium/small spots. AddCar(type) decrements if available.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"REJECT\" step ( full), what happens?",
+    id: 'key-step',
+    prompt: 'On the "REJECT" step ( full), what happens?',
     choices: [
       {
-        label: "AddCar(=): no spots left → return — this move caption",
-        correct: true
+        label: 'AddCar(=): no spots left → return — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "AddCar(=): no  spots left → return false."
+    explain: 'AddCar(=): no  spots left → return false.',
   },
   {
-    id: "state",
-    prompt: "What does the `slots` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `slots` field track in the visualization state?',
     choices: [
       {
-        label: "Field slots in state — updated each frame",
-        correct: true
+        label: 'Field slots in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `slots` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `slots` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Done. Remaining: big=, medium=, small=. — final DONE caption",
-        correct: true
+        label: 'Done. Remaining: big=, medium=, small=. — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Done. Remaining: big=, medium=, small=."
-  }
+    explain: 'Done. Remaining: big=, medium=, small=.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -238,6 +242,8 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as ParkingState | undefined;
-    return s?.done ? { ok: true, label: `${s.slots[1]}/${s.slots[2]}/${s.slots[3]} left` } : { ok: false, label: 'incomplete' };
+    return s?.done
+      ? { ok: true, label: `${s.slots[1]}/${s.slots[2]}/${s.slots[3]} left` }
+      : { ok: false, label: 'incomplete' };
   },
 };

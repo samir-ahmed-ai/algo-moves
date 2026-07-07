@@ -37,10 +37,20 @@ function buildLineDecorations(state: EditorState, lines: Map<number, string>) {
 
 /** Shared editor chrome (font, gutters, diff/vim styling) — also reused by SplitCodeEditor's MergeView. */
 export const baseTheme = EditorView.theme({
-  '&': { fontSize: 'var(--fs-xs, 12px)', borderRadius: 'var(--radius)', overflow: 'hidden', height: '100%' },
+  '&': {
+    fontSize: 'var(--fs-xs, 12px)',
+    borderRadius: 'var(--radius)',
+    overflow: 'hidden',
+    height: '100%',
+  },
   '.cm-scroller': { fontFamily: 'var(--mono)', lineHeight: '1.5' },
   '.cm-gutters': { borderRight: '0.5px solid var(--border)' },
-  '.cm-foldGutter span': { cursor: 'pointer', padding: '0 2px', fontSize: '10px', color: 'var(--text-3)' },
+  '.cm-foldGutter span': {
+    cursor: 'pointer',
+    padding: '0 2px',
+    fontSize: '10px',
+    color: 'var(--text-3)',
+  },
   '.cm-foldPlaceholder': {
     color: 'var(--text-3)',
     fontStyle: 'italic',
@@ -65,7 +75,12 @@ export const mergeEditorChrome = EditorView.theme({
   '&': { fontSize: 'var(--fs-xs, 12px)', borderRadius: 'var(--radius)' },
   '.cm-scroller': { fontFamily: 'var(--mono)', lineHeight: '1.5' },
   '.cm-gutters': { borderRight: '0.5px solid var(--border)' },
-  '.cm-foldGutter span': { cursor: 'pointer', padding: '0 2px', fontSize: '10px', color: 'var(--text-3)' },
+  '.cm-foldGutter span': {
+    cursor: 'pointer',
+    padding: '0 2px',
+    fontSize: '10px',
+    color: 'var(--text-3)',
+  },
   '.cm-foldPlaceholder': {
     color: 'var(--text-3)',
     fontStyle: 'italic',
@@ -132,9 +147,14 @@ export function CodeMirrorEditor({
           vimComp.current.of(vimExtensions(vimRef.current)),
           ...coreEditorExtensions(langExt, { lang }),
           wrapComp.current.of(wrapExtensions(wrapRef.current)),
-          editComp.current.of([EditorView.editable.of(!readOnly), EditorState.readOnly.of(readOnly)]),
+          editComp.current.of([
+            EditorView.editable.of(!readOnly),
+            EditorState.readOnly.of(readOnly),
+          ]),
           decoComp.current.of(
-            EditorView.decorations.compute([], (state) => buildLineDecorations(state, lineDecoRef.current ?? new Map())),
+            EditorView.decorations.compute([], (state) =>
+              buildLineDecorations(state, lineDecoRef.current ?? new Map()),
+            ),
           ),
           EditorView.updateListener.of((u) => {
             if (u.docChanged) onChangeRef.current?.(u.state.doc.toString());
@@ -178,7 +198,12 @@ export function CodeMirrorEditor({
   useEffect(() => {
     const v = viewRef.current;
     if (!v) return;
-    v.dispatch({ effects: editComp.current.reconfigure([EditorView.editable.of(!readOnly), EditorState.readOnly.of(readOnly)]) });
+    v.dispatch({
+      effects: editComp.current.reconfigure([
+        EditorView.editable.of(!readOnly),
+        EditorState.readOnly.of(readOnly),
+      ]),
+    });
   }, [readOnly]);
 
   useEffect(() => {
@@ -194,7 +219,9 @@ export function CodeMirrorEditor({
     if (!v) return;
     v.dispatch({
       effects: decoComp.current.reconfigure(
-        EditorView.decorations.compute([], (state) => buildLineDecorations(state, lineDecorations ?? new Map())),
+        EditorView.decorations.compute([], (state) =>
+          buildLineDecorations(state, lineDecorations ?? new Map()),
+        ),
       ),
     });
   }, [lineDecorations]);

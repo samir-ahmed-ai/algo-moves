@@ -1,8 +1,23 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, ExprToken } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  ExprToken,
+} from '../../../_shared/vizKit';
 
 interface ExprInput {
   num: string;
@@ -20,28 +35,45 @@ interface ExprState {
   done: boolean;
 }
 
-function record({ num, target }: ExprInput): Frame<ExprState>[] {  const results: string[] = [];
+function record({ num, target }: ExprInput): Frame<ExprState>[] {
+  const results: string[] = [];
 
   const { emit, frames } = createRecorder<ExprState>(() => ({
-        num: num,
-        target: target,
-        results: results.slice(),
-        idx: 0,
-        path: '',
-        evalv: 0,
-        prev: 0,
-        done: false
-      }));
+    num: num,
+    target: target,
+    results: results.slice(),
+    idx: 0,
+    path: '',
+    evalv: 0,
+    prev: 0,
+    done: false,
+  }));
 
-  emit('INIT', `${num} → ${target}`, `Insert '+', '-', '*', or nothing (to grow a multi-digit operand) between the digits of "${num}" so the expression equals ${target}. Track the running value and the previous operand so '*' can undo and reapply with correct precedence.`, { idx: 0, path: '', evalv: 0, prev: 0 });
+  emit(
+    'INIT',
+    `${num} → ${target}`,
+    `Insert '+', '-', '*', or nothing (to grow a multi-digit operand) between the digits of "${num}" so the expression equals ${target}. Track the running value and the previous operand so '*' can undo and reapply with correct precedence.`,
+    { idx: 0, path: '', evalv: 0, prev: 0 },
+  );
 
   const bt = (idx: number, path: string, evalv: number, prev: number) => {
     if (idx === num.length) {
       if (evalv === target) {
         results.push(path);
-        emit('RECORD', `+"${path}"`, `All digits used and "${path}" = ${evalv} = target ${target} — record it (${results.length} so far).`, { idx: idx, path: path, evalv: evalv, prev: prev }, 'good');
+        emit(
+          'RECORD',
+          `+"${path}"`,
+          `All digits used and "${path}" = ${evalv} = target ${target} — record it (${results.length} so far).`,
+          { idx: idx, path: path, evalv: evalv, prev: prev },
+          'good',
+        );
       } else {
-        emit('REJECT', `${evalv}≠${target}`, `All digits used but "${path}" = ${evalv} ≠ target ${target} — discard this expression.`, { idx: idx, path: path, evalv: evalv, prev: prev });
+        emit(
+          'REJECT',
+          `${evalv}≠${target}`,
+          `All digits used but "${path}" = ${evalv} ≠ target ${target} — discard this expression.`,
+          { idx: idx, path: path, evalv: evalv, prev: prev },
+        );
       }
       return;
     }
@@ -50,24 +82,50 @@ function record({ num, target }: ExprInput): Frame<ExprState>[] {  const results
       const sub = num.slice(idx, i + 1);
       const val = parseInt(sub, 10);
       if (idx === 0) {
-        emit('START', `${sub}`, `Start the expression with operand ${sub}. Running value = ${val}.`, { idx: i + 1, path: sub, evalv: val, prev: val });
+        emit(
+          'START',
+          `${sub}`,
+          `Start the expression with operand ${sub}. Running value = ${val}.`,
+          { idx: i + 1, path: sub, evalv: val, prev: val },
+        );
         bt(i + 1, sub, val, val);
       } else {
-        emit('PLUS', `+${sub}`, `Choose '+${sub}': running value ${evalv} + ${val} = ${evalv + val}.`, { idx: i + 1, path: path + '+' + sub, evalv: evalv + val, prev: val });
+        emit(
+          'PLUS',
+          `+${sub}`,
+          `Choose '+${sub}': running value ${evalv} + ${val} = ${evalv + val}.`,
+          { idx: i + 1, path: path + '+' + sub, evalv: evalv + val, prev: val },
+        );
         bt(i + 1, path + '+' + sub, evalv + val, val);
 
-        emit('MINUS', `-${sub}`, `Choose '-${sub}': running value ${evalv} - ${val} = ${evalv - val}.`, { idx: i + 1, path: path + '-' + sub, evalv: evalv - val, prev: -val });
+        emit(
+          'MINUS',
+          `-${sub}`,
+          `Choose '-${sub}': running value ${evalv} - ${val} = ${evalv - val}.`,
+          { idx: i + 1, path: path + '-' + sub, evalv: evalv - val, prev: -val },
+        );
         bt(i + 1, path + '-' + sub, evalv - val, -val);
 
         const muled = evalv - prev + prev * val;
-        emit('TIMES', `*${sub}`, `Choose '*${sub}': '*' binds to the previous operand ${prev}. Undo it (${evalv} - ${prev}) then add ${prev}*${val} = ${prev * val}, giving ${muled}.`, { idx: i + 1, path: path + '*' + sub, evalv: muled, prev: prev * val });
+        emit(
+          'TIMES',
+          `*${sub}`,
+          `Choose '*${sub}': '*' binds to the previous operand ${prev}. Undo it (${evalv} - ${prev}) then add ${prev}*${val} = ${prev * val}, giving ${muled}.`,
+          { idx: i + 1, path: path + '*' + sub, evalv: muled, prev: prev * val },
+        );
         bt(i + 1, path + '*' + sub, muled, prev * val);
       }
     }
   };
 
   bt(0, '', 0, 0);
-  emit('DONE', `${results.length} found`, `All operator placements explored — ${results.length} expression${results.length === 1 ? '' : 's'} of "${num}" equal ${target}: ${results.map((r) => `"${r}"`).join(', ')}.`, { idx: num.length, path: '', evalv: 0, prev: 0 , done: true }, 'good');
+  emit(
+    'DONE',
+    `${results.length} found`,
+    `All operator placements explored — ${results.length} expression${results.length === 1 ? '' : 's'} of "${num}" equal ${target}: ${results.map((r) => `"${r}"`).join(', ')}.`,
+    { idx: num.length, path: '', evalv: 0, prev: 0, done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -87,7 +145,13 @@ function View({ frame }: PluginViewProps<ExprState>) {
         {!s.done && <RailStat k="prev" v={s.prev} />}
       </RailGroup>
       <RailStack label="found" items={s.results} />
-      {s.done && <RailResult label="total" value={s.results.length} tone={s.results.length > 0 ? 'good' : 'bad'} />}
+      {s.done && (
+        <RailResult
+          label="total"
+          value={s.results.length}
+          tone={s.results.length > 0 ? 'good' : 'bad'}
+        />
+      )}
     </>
   );
   return (

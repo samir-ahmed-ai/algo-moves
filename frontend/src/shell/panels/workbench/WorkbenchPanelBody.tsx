@@ -22,7 +22,9 @@ function WorkbenchSectionHeader({
         <span className="text-ink3">{icon}</span>
         {label}
       </span>
-      {toolbar && <div className="nodrag flex min-w-0 flex-1 items-center justify-end gap-0.5">{toolbar}</div>}
+      {toolbar && (
+        <div className="nodrag flex min-w-0 flex-1 items-center justify-end gap-0.5">{toolbar}</div>
+      )}
     </div>
   );
 }
@@ -52,7 +54,11 @@ export function WorkbenchPanelBody({
         <section className="flex min-h-0 flex-[1.1] flex-col overflow-hidden border-b border-edge/50">
           <WorkbenchSectionHeader label="Visualizer" icon={<Network className={nodeIconGlyph} />} />
           <div className="nowheel flex min-h-0 flex-1 flex-col overflow-hidden">
-            <VizPanelBody showBigO={showBigO} onBigOOpenChange={onBigOOpenChange} showTransport={false} />
+            <VizPanelBody
+              showBigO={showBigO}
+              onBigOOpenChange={onBigOOpenChange}
+              showTransport={false}
+            />
           </div>
           <div className="nodrag flex shrink-0 justify-center border-t border-edge/40 bg-panel/80 px-3 py-1.5 backdrop-blur">
             <TransportBar />

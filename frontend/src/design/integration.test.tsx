@@ -32,7 +32,9 @@ describe('vizKit integration', () => {
 
 describe('design density integration', () => {
   it('EmptyState uses token-based typography', () => {
-    const html = renderToStaticMarkup(<EmptyState title="Nothing here" hint="Try another filter" />);
+    const html = renderToStaticMarkup(
+      <EmptyState title="Nothing here" hint="Try another filter" />,
+    );
     expect(html).toContain('--node-fs-sm');
     expect(html).not.toMatch(/text-\[(?:9|10|11)px\]/);
   });

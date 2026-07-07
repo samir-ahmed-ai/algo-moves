@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -34,19 +40,20 @@ function toBits(exp: number): string[] {
   return out.reverse();
 }
 
-function record({ base, exp }: PowerInput): Frame<PowerState>[] {  const bits = toBits(Math.max(exp, 0));
+function record({ base, exp }: PowerInput): Frame<PowerState>[] {
+  const bits = toBits(Math.max(exp, 0));
 
   const { emit, frames } = createRecorder<PowerState>(() => ({
-        origBase: base,
-        origExp: exp,
-        bits,
-        i: null,
-        base,
-        result: 1,
-        odd: null,
-        multiplied: false,
-        done: false
-      }));
+    origBase: base,
+    origExp: exp,
+    bits,
+    i: null,
+    base,
+    result: 1,
+    odd: null,
+    multiplied: false,
+    done: false,
+  }));
 
   if (exp < 0) {
     emit(
@@ -172,132 +179,128 @@ function Inspector({ frame }: InspectorProps<PowerState>) {
 export const manifestId = 'prep-math-power-x-of-y';
 export const title = 'Power X of Y';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Power X of Y\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Power X of Y"?',
     choices: [
       {
-        label: "Binary exponentiation — fits this problem",
-        correct: true
+        label: 'Binary exponentiation — fits this problem',
+        correct: true,
       },
       {
-        label: "Primality trial division — different approach"
+        label: 'Primality trial division — different approach',
       },
       {
-        label: "Fibonacci iterative — different approach"
+        label: 'Fibonacci iterative — different approach',
       },
       {
-        label: "Greedy — different approach"
-      }
+        label: 'Greedy — different approach',
+      },
     ],
-    explain: "Square the base each step; multiply in when the exponent bit is 1"
+    explain: 'Square the base each step; multiply in when the exponent bit is 1',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Power X of Y), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Power X of Y), what strategy is established?',
     choices: [
       {
-        label: "Square the base each step; multiply — described in INIT caption",
-        correct: true
+        label: 'Square the base each step; multiply — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Compute ^ by binary exponentiation. Read the exponent's bits from low to high: square the base every step, and multiply it into the result only when the current low bit is 1. Time O(log exp), space O(1)."
+    explain:
+      "Compute ^ by binary exponentiation. Read the exponent's bits from low to high: square the base every step, and multiply it into the result only when the current low bit is 1. Time O(log exp), space O(1).",
   },
   {
-    id: "key-step",
-    prompt: "On the \"SKIP\" step (bit 0), what happens?",
+    id: 'key-step',
+    prompt: 'On the "SKIP" step (bit 0), what happens?',
     choices: [
       {
-        label: "Bit at this position is 0 — this move caption",
-        correct: true
+        label: 'Bit at this position is 0 — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Bit  at this position is 0, so this power of the base is skipped — result stays ."
+    explain: 'Bit  at this position is 0, so this power of the base is skipped — result stays .',
   },
   {
-    id: "state",
-    prompt: "What does the `bits` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `bits` field track in the visualization state?',
     choices: [
       {
-        label: "exponent in binary, most-significant bit — updated each frame",
-        correct: true
+        label: 'exponent in binary, most-significant bit — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `bits` in sync: exponent in binary, most-significant bit first"
+    explain: 'The recorder keeps `bits` in sync: exponent in binary, most-significant bit first',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Power X of Y\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Power X of Y"?',
     choices: [
       {
-        label: "O(log exp) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(log exp) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(reservations) time, O(reserved rows) — wrong order of growth"
+        label: 'O(reservations) time, O(reserved rows) — wrong order of growth',
       },
       {
-        label: "O(log x) time, O(1) space — wrong order of growth"
+        label: 'O(log x) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n log n) time, O(1) space — wrong order of growth"
-      }
+        label: 'O(n log n) time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(log exp). O(1). exp odd -> res*=base; base*=base; exp>>=1"
+    explain: 'O(log exp). O(1). exp odd -> res*=base; base*=base; exp>>=1',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Every bit of the exponent — final DONE caption",
-        correct: true
+        label: 'Every bit of the exponent — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Every bit of the exponent has been consumed. The accumulated product is , so ^ = ."
-  }
+    explain: 'Every bit of the exponent has been consumed. The accumulated product is , so ^ = .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

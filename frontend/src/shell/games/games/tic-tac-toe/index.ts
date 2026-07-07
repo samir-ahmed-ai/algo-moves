@@ -1,9 +1,10 @@
 import type { GameDef } from '../../types';
+import { GAME_ID_TIC_TAC_TOE } from '../../_generated/gameIds';
 import { TicTacToe } from './TicTacToe';
 import { getTicTacToeStrings } from './strings';
 
 const ticTacToe: GameDef = {
-  id: 'tic-tac-toe',
+  id: GAME_ID_TIC_TAC_TOE,
   title: 'Tic-Tac-Toe',
   tagline: 'Three in a row — X moves first, O answers back.',
   minutes: '~1 min',

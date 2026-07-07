@@ -1,15 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { browseBreadcrumbForItem, catalog, getTrackById, type TrackId } from '@/content';
 import { normalizeCanvasMode, type CanvasMode } from '@/core';
-import { normalizeLegacyUrl, parsePageFromPathname, writeAppUrl } from '@/lib/navigation/appRoute';
-import {
-  isMobileHash,
-  writeMobileHash,
-  isVimHash,
-  writeVimHash,
-  isGamesHash,
-  writeGamesHash,
-} from '@/lib/navigation';
+import { parsePageFromPathname, writeAppUrl } from '@/lib/navigation/appRoute';
+import { writeMobileHash, writeVimHash, writeGamesHash } from '@/lib/navigation';
 import { initialBrowseFromHash } from '@/store/navigation/browseNavigation';
 import { resolveShareItemId, type ShareState } from '@/store/navigation/shareState';
 import { writeStorageText } from '@/store/persistence/storage';
@@ -17,10 +10,7 @@ import type { AppRoute } from './workspace';
 import { LAST_ITEM_KEY } from './workspaceConstants';
 
 function isCanvasFocus(shared: ShareState | null): boolean {
-  if (!shared) return false;
-  if (shared.focus === 'canvas') return true;
-  // Legacy share links: mode=visualize without an item meant canvas-only.
-  return shared.mode === 'visualize' && !shared.item;
+  return shared?.focus === 'canvas';
 }
 
 /** Where Back should land when leaving a focused problem view. */
@@ -61,8 +51,10 @@ export function useAppNavigation(shared: ShareState | null) {
       : initialBrowseFromHash(location.hash, sharedItemId, location.pathname),
   ).current;
   const [activeTopicId, setActiveTopicId] = useState<string | null>(initialBrowse.topicId);
-  const [activeTrackId, setActiveTrackId] = useState<TrackId | null>(
-    () => (shared?.trackId && getTrackById(shared.trackId as TrackId)) ? (shared.trackId as TrackId) : initialBrowse.trackId,
+  const [activeTrackId, setActiveTrackId] = useState<TrackId | null>(() =>
+    shared?.trackId && getTrackById(shared.trackId as TrackId)
+      ? (shared.trackId as TrackId)
+      : initialBrowse.trackId,
   );
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(initialBrowse.categoryId);
   const [problemFocused, setProblemFocused] = useState(() => {
@@ -74,20 +66,19 @@ export function useAppNavigation(shared: ShareState | null) {
     if (sharedItemId) return 'workspace';
     if (shared?.trackId && getTrackById(shared.trackId as TrackId)) return 'workspace';
     if (typeof location !== 'undefined') {
-      normalizeLegacyUrl();
       const page = parsePageFromPathname(location.pathname);
       if (page === 'mobile') return 'mobile';
       if (page === 'vim') return 'vim';
       if (page === 'games') return 'games';
       if (page === 'plans') return 'plans';
+      if (page === 'resumes') return 'resumes';
       if (page === 'home') return 'home';
       if (page === 'workspace') return 'workspace';
-      const { hash, pathname } = location;
-      if (isMobileHash(hash, pathname)) return 'mobile';
-      if (isVimHash(hash, pathname)) return 'vim';
-      if (isGamesHash(hash, pathname)) return 'games';
-      if (hash === '#home') return 'home';
-      if (typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 767px)').matches) return 'mobile';
+      if (
+        typeof window.matchMedia === 'function' &&
+        window.matchMedia('(max-width: 767px)').matches
+      )
+        return 'mobile';
     }
     return 'home';
   });
@@ -169,6 +160,11 @@ export function useAppNavigation(shared: ShareState | null) {
     writeAppUrl('plans');
   }, []);
 
+  const enterResumes = useCallback(() => {
+    setRoute('resumes');
+    writeAppUrl('resumes');
+  }, []);
+
   // Remember the last problem opened in the workspace for the home page's "Continue".
   useEffect(() => {
     if (route === 'workspace' && activeItemId) {
@@ -201,5 +197,6 @@ export function useAppNavigation(shared: ShareState | null) {
     enterVim,
     enterGames,
     enterPlans,
+    enterResumes,
   };
 }

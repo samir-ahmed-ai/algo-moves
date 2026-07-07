@@ -1,4 +1,10 @@
-import { definePlugin, type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../core/types';
+import {
+  definePlugin,
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../core/types';
 import { STRUDEL_NODE_W } from '../../design/tokens';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, badCases, intro } from './cases';
@@ -85,7 +91,12 @@ function record({ intervals }: SchedInput): Frame<SchedState>[] {
     }
   }
 
-  emit('DONE', `${acceptedCount} chosen`, `Sweep complete: ${acceptedCount} non-overlapping intervals selected — the maximum possible.`, 'good');
+  emit(
+    'DONE',
+    `${acceptedCount} chosen`,
+    `Sweep complete: ${acceptedCount} non-overlapping intervals selected — the maximum possible.`,
+    'good',
+  );
   return frames;
 }
 
@@ -114,11 +125,7 @@ function View({ frame }: PluginViewProps<SchedState>) {
         <RailStat k="lastEnd" v={s.lastEnd} tone="accent" />
         <RailStat k="current" v={curIv} />
       </RailGroup>
-      <RailResult
-        label="accepted"
-        value={s.acceptedCount}
-        tone={done ? 'good' : 'accent'}
-      />
+      <RailResult label="accepted" value={s.acceptedCount} tone={done ? 'good' : 'accent'} />
     </>
   );
 
@@ -233,20 +240,71 @@ func maxNonOverlapping(intervals [][2]int) [][2]int {
 }
 `;
 
-
 const inputs: SampleInput<SchedInput>[] = [
-    { id: 'classic', label: 'classic · 6 intervals', value: { intervals: [[1, 4], [3, 5], [0, 6], [5, 7], [3, 8], [8, 9]] as [number, number][] } },
-    { id: 'dense', label: 'dense overlaps · 5', value: { intervals: [[0, 3], [1, 2], [2, 5], [4, 6], [3, 9]] as [number, number][] } },
-    { id: 'staircase', label: 'staircase · 6', value: { intervals: [[0, 2], [1, 4], [2, 6], [5, 7], [6, 10], [9, 12]] as [number, number][] } },
-  ];
+  {
+    id: 'classic',
+    label: 'classic · 6 intervals',
+    value: {
+      intervals: [
+        [1, 4],
+        [3, 5],
+        [0, 6],
+        [5, 7],
+        [3, 8],
+        [8, 9],
+      ] as [number, number][],
+    },
+  },
+  {
+    id: 'dense',
+    label: 'dense overlaps · 5',
+    value: {
+      intervals: [
+        [0, 3],
+        [1, 2],
+        [2, 5],
+        [4, 6],
+        [3, 9],
+      ] as [number, number][],
+    },
+  },
+  {
+    id: 'staircase',
+    label: 'staircase · 6',
+    value: {
+      intervals: [
+        [0, 2],
+        [1, 4],
+        [2, 6],
+        [5, 7],
+        [6, 10],
+        [9, 12],
+      ] as [number, number][],
+    },
+  },
+];
 const verdict = (frames: Frame<SchedState>[]) => {
   const last = frames[frames.length - 1];
   const acceptedCount = last ? last.state.acceptedCount : 0;
   return { ok: true, label: `${acceptedCount} chosen` };
 };
 const teaching = wireTeachingStack({
-  record, View, inputs, verdict,
-  practice: { quiz, codePieces, cases: { good: goodCases, bad: badCases, intro, goodLabel: 'greedy picks', badLabel: 'greedy traps' }, simulateQuestion: 'Which interval is picked next?' },
+  record,
+  View,
+  inputs,
+  verdict,
+  practice: {
+    quiz,
+    codePieces,
+    cases: {
+      good: goodCases,
+      bad: badCases,
+      intro,
+      goodLabel: 'greedy picks',
+      badLabel: 'greedy traps',
+    },
+    simulateQuestion: 'Which interval is picked next?',
+  },
 });
 
 export const intervalSchedulingPlugin = definePlugin<SchedInput, SchedState>({
@@ -255,7 +313,8 @@ export const intervalSchedulingPlugin = definePlugin<SchedInput, SchedState>({
     title: 'Interval scheduling (activity selection)',
     difficulty: 'Medium',
     tags: ['greedy', 'sorting', 'intervals'],
-    summary: 'Sort intervals by end time, then greedily keep any interval that starts after the last one chosen to maximize the non-overlapping count.',
+    summary:
+      'Sort intervals by end time, then greedily keep any interval that starts after the last one chosen to maximize the non-overlapping count.',
     source: 'https://leetcode.com/problems/non-overlapping-intervals/',
   },
   inputs,

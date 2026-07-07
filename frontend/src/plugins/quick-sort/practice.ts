@@ -8,11 +8,12 @@ export const quiz: QuizQuestion[] = [
     prompt: 'After one partition step, what is true about the pivot?',
     choices: [
       { label: 'Left ≤ pivot, right ≥ pivot — pivot in final rank', correct: true },
-      { label: 'Fully sorted — only one pivot placed', },
-      { label: 'p is minimum — not guaranteed', },
-      { label: 'No swaps — partition swaps elements', },
+      { label: 'Fully sorted — only one pivot placed' },
+      { label: 'p is minimum — not guaranteed' },
+      { label: 'No swaps — partition swaps elements' },
     ],
-    explain: 'Partitioning places the pivot in its final sorted rank; recursion only needs to sort the strictly smaller and larger sides.',
+    explain:
+      'Partitioning places the pivot in its final sorted rank; recursion only needs to sort the strictly smaller and larger sides.',
   },
 ];
 

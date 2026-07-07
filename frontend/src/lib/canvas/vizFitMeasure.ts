@@ -79,7 +79,10 @@ function measureIntrinsic(el: HTMLElement): { w: number; h: number } {
 }
 
 /** Stage width + main animation height (rail must not inflate vertical footprint). */
-export function resolveVizStageMeasureSize(stageWidth: number, mainHeight: number): { w: number; h: number } {
+export function resolveVizStageMeasureSize(
+  stageWidth: number,
+  mainHeight: number,
+): { w: number; h: number } {
   return { w: stageWidth, h: mainHeight };
 }
 
@@ -112,15 +115,15 @@ export function resolveMeasureSize(
     boxH = intrinsic.h;
   }
 
-  const hasPrimitive = target.matches(VIZ_PRIMITIVE_SELECTOR)
-    || target.querySelector(VIZ_PRIMITIVE_SELECTOR) !== null;
+  const hasPrimitive =
+    target.matches(VIZ_PRIMITIVE_SELECTOR) || target.querySelector(VIZ_PRIMITIVE_SELECTOR) !== null;
   if (
-    !hasPrimitive
-    && nw >= containerWidth * 0.95
-    && intrinsic.w > 0
+    !hasPrimitive &&
+    nw >= containerWidth * 0.95 &&
+    intrinsic.w > 0 &&
     // Strict <: for stage/board targets nw is already intrinsic.w, and this
     // branch must not re-fire there or it clobbers the main-height override.
-    && intrinsic.w < nw
+    intrinsic.w < nw
   ) {
     nw = intrinsic.w;
     nh = intrinsic.h;

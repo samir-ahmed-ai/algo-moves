@@ -1,0 +1,14 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "src/main.tsx",
+    "scripts/**/*.{mjs,mts}",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "eslint.config.js"
+  ],
+  "project": ["src/**/*.{ts,tsx}", "scripts/**/*.{mjs,mts}"],
+  "ignore": ["src/plugins/_generated/**", "src/content/_generated/**"],
+  "ignoreDependencies": ["@codemirror/theme-one-dark", "codemirror", "@types/lz-string"],
+  "ignoreBinaries": ["eslint", "prettier", "husky", "lint-staged"]
+}

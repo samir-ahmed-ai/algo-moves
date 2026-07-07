@@ -80,14 +80,30 @@ describe('mind-meld group sync math', () => {
 
   it('averages plurality agreement across rounds into a whole percent', () => {
     // Round 1 unanimous (1.0), round 2 split (0.5) → mean 0.75 → 75%.
-    expect(groupSyncPercent([[0, 0, 0], [0, 1]])).toBe(75);
+    expect(
+      groupSyncPercent([
+        [0, 0, 0],
+        [0, 1],
+      ]),
+    ).toBe(75);
   });
 
   it('rounds the averaged percentage to the nearest integer', () => {
     // (1.0 + 0.5 + 0.75) / 3 = 0.75 → 75%.
-    expect(groupSyncPercent([[0, 0], [0, 1], [0, 0, 0, 1]])).toBe(75);
+    expect(
+      groupSyncPercent([
+        [0, 0],
+        [0, 1],
+        [0, 0, 0, 1],
+      ]),
+    ).toBe(75);
     // (1.0 + 0.6667) / 2 = 0.8333 → 83%.
-    expect(groupSyncPercent([[0, 0, 0], [0, 0, 1]])).toBe(83);
+    expect(
+      groupSyncPercent([
+        [0, 0, 0],
+        [0, 0, 1],
+      ]),
+    ).toBe(83);
   });
 
   it('skips unanswered rounds so partial games read fairly', () => {

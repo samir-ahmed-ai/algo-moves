@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -20,12 +26,12 @@ interface FindNodeState {
 
 function record({ list, val }: FindNodeInput): Frame<FindNodeState>[] {
   const { emit, frames } = createRecorder<FindNodeState>(() => ({
-        list,
-        val,
-        head: null,
-        found: null,
-        done: false
-      }));
+    list,
+    val,
+    head: null,
+    found: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -87,9 +93,7 @@ function View({ frame }: PluginViewProps<FindNodeState>) {
         target val = <span className="font-mono text-ink">{s.val}</span>
       </div>
       <ArrayRow values={s.list} cellTone={tone} pointers={pointers} windowRange={null} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        {chain || '∅'} → nil
-      </div>
+      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>{chain || '∅'} → nil</div>
       {s.done && (
         <div
           className={cn(
@@ -113,10 +117,7 @@ function Inspector({ frame }: InspectorProps<FindNodeState>) {
       <InspectorRow k="val (target)" v={s.val} />
       <InspectorRow k="head (index)" v={s.head ?? 'nil'} />
       <InspectorRow k="head.Val" v={s.head !== null ? s.list[s.head] : '—'} />
-      <InspectorRow
-        k="result"
-        v={s.found !== null ? `node[${s.found}]` : s.done ? 'nil' : '…'}
-      />
+      <InspectorRow k="result" v={s.found !== null ? `node[${s.found}]` : s.done ? 'nil' : '…'} />
     </VarGrid>
   );
 }
@@ -124,132 +125,130 @@ function Inspector({ frame }: InspectorProps<FindNodeState>) {
 export const manifestId = 'prep-linked-lists-find-node';
 export const title = 'Find node';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Find node\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Find node"?',
     choices: [
       {
-        label: "Linear scan — fits this problem",
-        correct: true
+        label: 'Linear scan — fits this problem',
+        correct: true,
       },
       {
-        label: "Floyd cycle — different approach"
+        label: 'Floyd cycle — different approach',
       },
       {
-        label: "Min-heap merge — different approach"
+        label: 'Min-heap merge — different approach',
       },
       {
-        label: "Hash map clone — different approach"
-      }
+        label: 'Hash map clone — different approach',
+      },
     ],
-    explain: "Walk the list until a node's value matches"
+    explain: "Walk the list until a node's value matches",
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Find node), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Find node), what strategy is established?',
     choices: [
       {
         label: "Walk the list until a node's — described in INIT caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Find node: walk the linked list from the head, one node at a time, and return the first node whose value equals . A single linear scan — O(n) time, O(1) space."
+    explain:
+      'Find node: walk the linked list from the head, one node at a time, and return the first node whose value equals . A single linear scan — O(n) time, O(1) space.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"FOUND\" step (match @), what happens?",
+    id: 'key-step',
+    prompt: 'On the "FOUND" step (match @), what happens?',
     choices: [
       {
-        label: "Match — the node at position — this move caption",
-        correct: true
+        label: 'Match — the node at position — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Match — the node at position  holds , which equals . Return this node."
+    explain: 'Match — the node at position  holds , which equals . Return this node.',
   },
   {
-    id: "state",
-    prompt: "What does the `head` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `head` field track in the visualization state?',
     choices: [
       {
-        label: "index of the node `head` — updated each frame",
-        correct: true
+        label: 'index of the node `head` — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `head` in sync: index of the node `head` currently points at; null = past the end"
+    explain:
+      'The recorder keeps `head` in sync: index of the node `head` currently points at; null = past the end',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Find node\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Find node"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n³) time, O(n) space — wrong order of growth"
+        label: 'O(n³) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(h) space — wrong order of growth"
+        label: 'O(n) time, O(h) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(log n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). while head: head.Val==val? else head=head.Next"
+    explain: 'O(n). O(1). while head: head.Val==val? else head=head.Next',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "!= , so this — final DONE caption",
-        correct: true
+        label: '!= , so this — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: " != , so this is not the node. Advance: head = head.Next, moving on to the next link in the chain."
-  }
+    explain:
+      ' != , so this is not the node. Advance: head = head.Next, moving on to the next link in the chain.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

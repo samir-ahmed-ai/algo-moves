@@ -1,5 +1,11 @@
 import type { ReactNode, ComponentType } from 'react';
-import { definePlugin, type Frame, type InspectorProps, type ProblemPlugin, type PluginViewProps } from '../../core/types';
+import {
+  definePlugin,
+  type Frame,
+  type InspectorProps,
+  type ProblemPlugin,
+  type PluginViewProps,
+} from '../../core/types';
 import { wireTeachingStack, codePiecesFromSource, type PracticeBundle } from '../_shared/pluginKit';
 import { resolveSimulator } from './simulators';
 import { resolvePracticeBundle } from './practice';
@@ -8,7 +14,12 @@ import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText, CollapsibleDetails } from '../_shared/vizKit';
 
 /** Imported categories that have hand-authored step-by-step simulators. */
-export const SIMULATED_CATEGORIES = new Set(['dynamic-programming', 'graph', 'backtracking', 'binary-search']);
+export const SIMULATED_CATEGORIES = new Set([
+  'dynamic-programming',
+  'graph',
+  'backtracking',
+  'binary-search',
+]);
 
 /** Shape of one record in the generated manifest (see scripts/import-problems.mjs). */
 export interface ImportedProblem {
@@ -44,24 +55,31 @@ const STEP_LABELS = ['Pattern', 'Walkthrough', 'Complexity'] as const;
 function recordConcept(p: ImportedProblem): Frame<ConceptState>[] {
   const frames: Frame<ConceptState>[] = [];
   const push = (type: string, note: string, caption: string, step: number) =>
-    frames.push({ move: { type, note, caption }, state: { p, step, label: STEP_LABELS[step] ?? '' } });
+    frames.push({
+      move: { type, note, caption },
+      state: { p, step, label: STEP_LABELS[step] ?? '' },
+    });
 
-  push('PATTERN', p.pattern || 'approach', p.pattern || `Solve “${p.title}” with the technique below.`, 0);
-  if (p.visual) push('WALKTHROUGH', 'visual', p.visual, 1);
   push(
-    'COMPLEXITY',
-    'cost',
-    `Runs in ${p.time || '—'} time and ${p.space || '—'} space.`,
-    2,
+    'PATTERN',
+    p.pattern || 'approach',
+    p.pattern || `Solve “${p.title}” with the technique below.`,
+    0,
   );
+  if (p.visual) push('WALKTHROUGH', 'visual', p.visual, 1);
+  push('COMPLEXITY', 'cost', `Runs in ${p.time || '—'} time and ${p.space || '—'} space.`, 2);
   return frames;
 }
 
 function Badge({ children, tone }: { children: ReactNode; tone?: 'time' | 'space' | 'diff' }) {
-  const bg = tone === 'time' ? 'var(--accent-bg)' : tone === 'space' ? 'var(--good-bg)' : 'var(--surface-2)';
+  const bg =
+    tone === 'time' ? 'var(--accent-bg)' : tone === 'space' ? 'var(--good-bg)' : 'var(--surface-2)';
   const fg = tone === 'time' ? 'var(--accent)' : tone === 'space' ? 'var(--good)' : 'var(--text-2)';
   return (
-    <span className={cn('rounded-md px-2 py-0.5 font-mono', vizText.sm)} style={{ background: bg, color: fg }}>
+    <span
+      className={cn('rounded-md px-2 py-0.5 font-mono', vizText.sm)}
+      style={{ background: bg, color: fg }}
+    >
       {children}
     </span>
   );
@@ -79,7 +97,15 @@ function ProblemDetails({ notes, approaches }: { notes?: string; approaches?: st
 
 function ConceptView({ frame }: PluginViewProps<ConceptState>) {
   const { p, step } = frame.state;
-  const Card = ({ active, label, children }: { active: boolean; label: string; children: ReactNode }) => (
+  const Card = ({
+    active,
+    label,
+    children,
+  }: {
+    active: boolean;
+    label: string;
+    children: ReactNode;
+  }) => (
     <div
       className="rounded-[var(--radius)] border p-4 transition-colors"
       style={{
@@ -87,7 +113,10 @@ function ConceptView({ frame }: PluginViewProps<ConceptState>) {
         background: active ? 'var(--accent-bg)' : 'transparent',
       }}
     >
-      <div className={cn('mb-1.5 font-medium uppercase tracking-wide', vizText.xs)} style={{ color: active ? 'var(--accent)' : 'var(--text-3)' }}>
+      <div
+        className={cn('mb-1.5 font-medium uppercase tracking-wide', vizText.xs)}
+        style={{ color: active ? 'var(--accent)' : 'var(--text-3)' }}
+      >
         {label}
       </div>
       <div className={cn('leading-relaxed text-ink2', vizText.base)}>{children}</div>
@@ -109,10 +138,19 @@ function ConceptView({ frame }: PluginViewProps<ConceptState>) {
         </Card>
       )}
       <Card active={step === 2} label="Complexity">
-        <span className="font-mono">{p.time || '—'}</span> time · <span className="font-mono">{p.space || '—'}</span> space
+        <span className="font-mono">{p.time || '—'}</span> time ·{' '}
+        <span className="font-mono">{p.space || '—'}</span> space
       </Card>
       {p.leetcode && (
-        <a href={p.leetcode} target="_blank" rel="noreferrer" className={cn('nodrag mt-auto inline-flex items-center gap-1 self-start text-accent hover:underline', vizText.base)}>
+        <a
+          href={p.leetcode}
+          target="_blank"
+          rel="noreferrer"
+          className={cn(
+            'nodrag mt-auto inline-flex items-center gap-1 self-start text-accent hover:underline',
+            vizText.base,
+          )}
+        >
           Open on LeetCode ↗
         </a>
       )}
@@ -135,7 +173,10 @@ function ConceptInspector({ frame }: InspectorProps<ConceptState>) {
   );
 }
 
-function mergePractice(simPractice: PracticeBundle | undefined, bundle: PracticeBundle | undefined): PracticeBundle | undefined {
+function mergePractice(
+  simPractice: PracticeBundle | undefined,
+  bundle: PracticeBundle | undefined,
+): PracticeBundle | undefined {
   if (!simPractice && !bundle) return undefined;
   return {
     quiz: bundle?.quiz ?? simPractice?.quiz,
@@ -178,14 +219,20 @@ export function makeImportedPlugin(p: ImportedProblem): ProblemPlugin<any, any> 
     summary: p.pattern || p.visual || `${p.categoryTitle} problem.`,
   };
   const code = { text: p.code, lang: 'go', file: 'solution.go' };
-  const extraCode = p.variants.map((v) => ({ text: v.text, lang: 'go', file: `variants/${v.file}` }));
+  const extraCode = p.variants.map((v) => ({
+    text: v.text,
+    lang: 'go',
+    file: `variants/${v.file}`,
+  }));
 
   // Story overlay: additional verified language ports surface as extra Code tabs.
   const ports = PROBLEM_PORTS[p.id];
   if (ports?.python) extraCode.push({ text: ports.python, lang: 'python', file: 'solution.py' });
   if (ports?.java) extraCode.push({ text: ports.java, lang: 'java', file: 'Solution.java' });
 
-  const sim = SIMULATED_CATEGORIES.has(p.category) ? resolveSimulator(p.id, p.title, p.category) : undefined;
+  const sim = SIMULATED_CATEGORIES.has(p.category)
+    ? resolveSimulator(p.id, p.title, p.category)
+    : undefined;
   const basePractice = resolvePracticeBundle(p.id, p.code);
   const practice = mergePractice(sim?.practice, basePractice);
 
@@ -221,15 +268,14 @@ export function makeImportedPlugin(p: ImportedProblem): ProblemPlugin<any, any> 
     });
   }
 
-  const conceptTeaching =
-    quiz?.length
-      ? wireTeachingStack({
-          record: recordConcept,
-          View: ConceptView,
-          inputs: [{ id: 'concept', label: 'Concept', value: p }],
-          practice: (practice ?? { quiz }) as PracticeBundle<ImportedProblem>,
-        })
-      : null;
+  const conceptTeaching = quiz?.length
+    ? wireTeachingStack({
+        record: recordConcept,
+        View: ConceptView,
+        inputs: [{ id: 'concept', label: 'Concept', value: p }],
+        practice: (practice ?? { quiz }) as PracticeBundle<ImportedProblem>,
+      })
+    : null;
 
   return definePlugin<ImportedProblem, ConceptState>({
     meta,

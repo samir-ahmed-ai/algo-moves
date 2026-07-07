@@ -102,18 +102,32 @@ cmd/gameserver      entrypoint (flags, http.Server)
 internal/ws         RFC 6455 handshake + framing (stdlib only)
 internal/hub        rooms, presence, relay, shared state
 internal/server     HTTP routes (testable handler)
-internal/arcade     Postgres store + `/api/*` REST handlers
-  api.go            service lifecycle + route registration
-  http.go           JSON helpers + session auth
-  api_auth.go       guest auth + profiles
-  api_matches.go    stats, matches, leaderboard, achievements
-  api_social.go     rooms, friends, daily challenge
-  api_canvas.go     saved canvas CRUD
-  api_interview.go  interview sessions
-  content.go        learning catalog reads
-  migrate.go        embedded migrations + seeds
-  store.go          Postgres queries
+internal/arcade     composition root: route table wiring /api/* to domain packages
+internal/platform   auth, profiles, sessions, migrations, shared Postgres store
+  arcadedb/         sqlc-generated queries
+  migrations/       embedded SQL schema (001–013)
+  seeds/            achievement + content seed SQL
+internal/games      games catalog, stats, matches, leaderboards, social
+internal/interview  interview sessions + guest tokens
+internal/content    learning catalog reads (/api/content/*)
+internal/canvas     saved canvas CRUD
+internal/prep       prep plan CRUD
 ```
+
+### Package map (Wave 5)
+
+| Package | Responsibility | Key routes |
+| ------- | -------------- | ---------- |
+| `platform` | Postgres pool, profiles, guest/email auth, SCS sessions, migrations | `/api/auth/*`, `/api/profiles/*` |
+| `games` | Arcade stats, match history, leaderboards, achievements, rooms, friends, daily challenge, games catalog | `/api/stats/*`, `/api/matches/*`, `/api/leaderboard/*`, `/api/achievements/*`, `/api/rooms/*`, `/api/friends`, `/api/daily-challenge/*`, `/api/games/*` |
+| `interview` | Durable interview whiteboard sessions | `/api/interviews/*` |
+| `content` | Read-only learning catalog mirror | `/api/content/catalog`, `/api/content/problems/*` |
+| `canvas` | Named saved canvas documents | `/api/canvases/*` |
+| `prep` | Owner-held ordered prep plans | `/api/prep-plans/*` |
+| `arcade` | Thin facade: `Open`, `Register`, route table delegating to packages above | (mounts all `/api/*`) |
+
+Domain packages depend on `platform` only — not on each other. `arcade` is the single composition root consumed by `cmd/gameserver` and `internal/server`.
+
 
 See [`../db/README.md`](../db/README.md) for Railway Postgres setup.
 

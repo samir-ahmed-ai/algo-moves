@@ -40,59 +40,114 @@ const C = 'graphs';
 /** The eleven regions of the archipelago, in voyage order. */
 export const ARCHIPELAGO_REGIONS: StoryRegion[] = [
   {
-    id: 'archipelago-ripple-shallows', courseId: C, order: 1,
-    codeName: 'Region 1', title: 'The Ripple Shallows', subtitle: 'BFS · unweighted paths & reachability',
-    blurb: 'Calm shallow water where a dropped stone sends rings outward, one ring per second. That expanding ring IS breadth-first search by levels — the nearest islets light up first.',
+    id: 'archipelago-ripple-shallows',
+    courseId: C,
+    order: 1,
+    codeName: 'Region 1',
+    title: 'The Ripple Shallows',
+    subtitle: 'BFS · unweighted paths & reachability',
+    blurb:
+      'Calm shallow water where a dropped stone sends rings outward, one ring per second. That expanding ring IS breadth-first search by levels — the nearest islets light up first.',
   },
   {
-    id: 'archipelago-fog-banks', courseId: C, order: 2,
-    codeName: 'Region 2', title: 'The Fog Banks', subtitle: 'BFS · grids & state-spaces',
-    blurb: 'A gridded sea of fog where you see only one tile ahead, so you must expand ring by ring, blind — even when the "tiles" are word-states or board positions rather than places.',
+    id: 'archipelago-fog-banks',
+    courseId: C,
+    order: 2,
+    codeName: 'Region 2',
+    title: 'The Fog Banks',
+    subtitle: 'BFS · grids & state-spaces',
+    blurb:
+      'A gridded sea of fog where you see only one tile ahead, so you must expand ring by ring, blind — even when the "tiles" are word-states or board positions rather than places.',
   },
   {
-    id: 'archipelago-deep-trenches', courseId: C, order: 3,
-    codeName: 'Region 3', title: 'The Deep Trenches', subtitle: 'DFS · dive, clone, enumerate, backtrack',
-    blurb: 'Vertical cave-tunnels where you plunge all the way down one branch before surfacing — memoising, snapshotting and backtracking as you go.',
+    id: 'archipelago-deep-trenches',
+    courseId: C,
+    order: 3,
+    codeName: 'Region 3',
+    title: 'The Deep Trenches',
+    subtitle: 'DFS · dive, clone, enumerate, backtrack',
+    blurb:
+      'Vertical cave-tunnels where you plunge all the way down one branch before surfacing — memoising, snapshotting and backtracking as you go.',
   },
   {
-    id: 'archipelago-tide-flats', courseId: C, order: 4,
-    codeName: 'Region 4', title: 'The Tide Flats', subtitle: 'Flood fill · grid connectivity',
-    blurb: 'At low tide, land and water blur into one muddy plain. Wade onto a patch of land and flood it with dye to claim the whole connected island at once.',
+    id: 'archipelago-tide-flats',
+    courseId: C,
+    order: 4,
+    codeName: 'Region 4',
+    title: 'The Tide Flats',
+    subtitle: 'Flood fill · grid connectivity',
+    blurb:
+      'At low tide, land and water blur into one muddy plain. Wade onto a patch of land and flood it with dye to claim the whole connected island at once.',
   },
   {
-    id: 'archipelago-mount-prerequisite', courseId: C, order: 5,
-    codeName: 'Region 5', title: 'Mount Prerequisite', subtitle: 'Topological sort',
-    blurb: 'A terraced volcano where you may lay a step only once every step beneath it is set — dependency order made physical.',
+    id: 'archipelago-mount-prerequisite',
+    courseId: C,
+    order: 5,
+    codeName: 'Region 5',
+    title: 'Mount Prerequisite',
+    subtitle: 'Topological sort',
+    blurb:
+      'A terraced volcano where you may lay a step only once every step beneath it is set — dependency order made physical.',
   },
   {
-    id: 'archipelago-whirlpool-watch', courseId: C, order: 6,
-    codeName: 'Region 6', title: 'The Whirlpool Watch', subtitle: 'Cycle detection',
-    blurb: 'A lookout tower that spots currents looping back on themselves — a rope crossing an already-marked buoy, or a channel still spinning on your stack.',
+    id: 'archipelago-whirlpool-watch',
+    courseId: C,
+    order: 6,
+    codeName: 'Region 6',
+    title: 'The Whirlpool Watch',
+    subtitle: 'Cycle detection',
+    blurb:
+      'A lookout tower that spots currents looping back on themselves — a rope crossing an already-marked buoy, or a channel still spinning on your stack.',
   },
   {
-    id: 'archipelago-coral-colonies', courseId: C, order: 7,
-    codeName: 'Region 7', title: 'The Coral Colonies', subtitle: 'Union-Find · disjoint sets',
-    blurb: 'Living reefs that fuse into ever-larger super-reefs; each reef knows only its elder polyp (the root). Merging is union; asking "same reef?" is find.',
+    id: 'archipelago-coral-colonies',
+    courseId: C,
+    order: 7,
+    codeName: 'Region 7',
+    title: 'The Coral Colonies',
+    subtitle: 'Union-Find · disjoint sets',
+    blurb:
+      'Living reefs that fuse into ever-larger super-reefs; each reef knows only its elder polyp (the root). Merging is union; asking "same reef?" is find.',
   },
   {
-    id: 'archipelago-lighthouse-straits', courseId: C, order: 8,
-    codeName: 'Region 8', title: 'The Lighthouse Straits', subtitle: 'Weighted shortest paths',
-    blurb: 'Channels with real distances and currents, where a greedy pilot always sails to the nearest unvisited lit buoy — Dijkstra at the helm, Floyd charting every hub.',
+    id: 'archipelago-lighthouse-straits',
+    courseId: C,
+    order: 8,
+    codeName: 'Region 8',
+    title: 'The Lighthouse Straits',
+    subtitle: 'Weighted shortest paths',
+    blurb:
+      'Channels with real distances and currents, where a greedy pilot always sails to the nearest unvisited lit buoy — Dijkstra at the helm, Floyd charting every hub.',
   },
   {
-    id: 'archipelago-two-tone-atoll', courseId: C, order: 9,
-    codeName: 'Region 9', title: 'The Two-Tone Atoll', subtitle: 'Bipartite coloring',
-    blurb: 'A ring reef you try to paint in exactly two alternating hues; two touching same-coloured isles break the two-tone spell.',
+    id: 'archipelago-two-tone-atoll',
+    courseId: C,
+    order: 9,
+    codeName: 'Region 9',
+    title: 'The Two-Tone Atoll',
+    subtitle: 'Bipartite coloring',
+    blurb:
+      'A ring reef you try to paint in exactly two alternating hues; two touching same-coloured isles break the two-tone spell.',
   },
   {
-    id: 'archipelago-fragile-bridges', courseId: C, order: 10,
-    codeName: 'Region 10', title: 'The Fragile Bridges', subtitle: 'Bridges · Tarjan',
-    blurb: 'Rope bridges where cutting the wrong one severs the archipelago; a surveyor times each island to find the links nothing can loop around.',
+    id: 'archipelago-fragile-bridges',
+    courseId: C,
+    order: 10,
+    codeName: 'Region 10',
+    title: 'The Fragile Bridges',
+    subtitle: 'Bridges · Tarjan',
+    blurb:
+      'Rope bridges where cutting the wrong one severs the archipelago; a surveyor times each island to find the links nothing can loop around.',
   },
   {
-    id: 'archipelago-harbormasters-ledger', courseId: C, order: 11,
-    codeName: 'Region 11', title: "The Harbormaster's Ledger", subtitle: 'Degree & greedy edge analysis',
-    blurb: 'A dockside office tallying how many ferries touch each port, and squeezing the highest-value routes out of the busiest berths.',
+    id: 'archipelago-harbormasters-ledger',
+    courseId: C,
+    order: 11,
+    codeName: 'Region 11',
+    title: "The Harbormaster's Ledger",
+    subtitle: 'Degree & greedy edge analysis',
+    blurb:
+      'A dockside office tallying how many ferries touch each port, and squeezing the highest-value routes out of the busiest berths.',
   },
 ];
 
@@ -386,7 +441,13 @@ const RIPPLE_SHALLOWS_PORTS: Record<string, ProblemPorts> = {
 };
 
 /** All per-problem story framing: Region 1 (hand-authored) + generated Regions 2–11. */
-export const PROBLEM_STORY: Record<string, ProblemStory> = { ...RIPPLE_SHALLOWS_STORY, ...GENERATED_STORY };
+export const PROBLEM_STORY: Record<string, ProblemStory> = {
+  ...RIPPLE_SHALLOWS_STORY,
+  ...GENERATED_STORY,
+};
 
 /** All verified language ports: Region 1 (hand-authored) + generated Regions 2–11. */
-export const PROBLEM_PORTS: Record<string, ProblemPorts> = { ...RIPPLE_SHALLOWS_PORTS, ...GENERATED_PORTS };
+export const PROBLEM_PORTS: Record<string, ProblemPorts> = {
+  ...RIPPLE_SHALLOWS_PORTS,
+  ...GENERATED_PORTS,
+};

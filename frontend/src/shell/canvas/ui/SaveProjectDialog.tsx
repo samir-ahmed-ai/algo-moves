@@ -39,10 +39,18 @@ export function SaveProjectDialog({ state }: { state: ProjectState | null }) {
               />
             </label>
             <div className="mt-4 flex justify-end gap-2">
-              <button type="button" onClick={() => setOpen(false)} className="rounded border border-edge px-3 py-1">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="rounded border border-edge px-3 py-1"
+              >
                 Cancel
               </button>
-              <button type="button" onClick={save} className="rounded bg-accent px-3 py-1 text-white">
+              <button
+                type="button"
+                onClick={save}
+                className="rounded bg-accent px-3 py-1 text-white"
+              >
                 Download JSON
               </button>
             </div>

@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -31,23 +37,24 @@ function busyLess(a: BusyMeet, b: BusyMeet): boolean {
   return a.end < b.end;
 }
 
-function record({ n, meetings }: MeetInput): Frame<MeetState>[] {  const sorted = [...meetings].sort((a, b) => a[0] - b[0]);
+function record({ n, meetings }: MeetInput): Frame<MeetState>[] {
+  const sorted = [...meetings].sort((a, b) => a[0] - b[0]);
   let avail: number[] = [];
   for (let i = 0; i < n; i++) avail.push(i);
   let busy: BusyMeet[] = [];
   const cnt = new Array(n).fill(0);
 
   const { emit, frames } = createRecorder<MeetState>(() => ({
-        n,
-        avail: avail.slice(),
-        busy: busy.map((b) => ({ ...b })),
-        cnt: cnt.slice(),
-        meeting: null,
-        assigned: null,
-        op: '',
-        winner: null,
-        done: false
-      }));
+    n,
+    avail: avail.slice(),
+    busy: busy.map((b) => ({ ...b })),
+    cnt: cnt.slice(),
+    meeting: null,
+    assigned: null,
+    op: '',
+    winner: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -72,26 +79,39 @@ function record({ n, meetings }: MeetInput): Frame<MeetState>[] {  const sorted 
       const r = avail.shift()!;
       cnt[r]++;
       busy.push({ end: e, room: r });
-      busy.sort((a, b) => busyLess(a, b) ? -1 : 1);
+      busy.sort((a, b) => (busyLess(a, b) ? -1 : 1));
       emit(
         'BOOK',
         `room ${r}`,
         `Meeting [${s},${e}]: free room ${r} available → assign, busy until ${e}. cnt[${r}]=${cnt[r]}.`,
-        { meeting: m, assigned: r, op: `[${s},${e})→R${r}`, cnt: cnt.slice(), avail: avail.slice(), busy: busy.slice() },
+        {
+          meeting: m,
+          assigned: r,
+          op: `[${s},${e})→R${r}`,
+          cnt: cnt.slice(),
+          avail: avail.slice(),
+          busy: busy.slice(),
+        },
         'good',
       );
     } else {
-      busy.sort((a, b) => busyLess(a, b) ? -1 : 1);
+      busy.sort((a, b) => (busyLess(a, b) ? -1 : 1));
       const b = busy.shift()!;
       cnt[b.room]++;
       const newEnd = b.end + (e - s);
       busy.push({ end: newEnd, room: b.room });
-      busy.sort((a, b) => busyLess(a, b) ? -1 : 1);
+      busy.sort((a, b) => (busyLess(a, b) ? -1 : 1));
       emit(
         'DELAY',
         `room ${b.room}`,
         `Meeting [${s},${e}]: all busy — reuse room ${b.room}, ends at ${newEnd}. cnt[${b.room}]=${cnt[b.room]}.`,
-        { meeting: m, assigned: b.room, op: `[${s},${e})→R${b.room}`, cnt: cnt.slice(), busy: busy.slice() },
+        {
+          meeting: m,
+          assigned: b.room,
+          op: `[${s},${e})→R${b.room}`,
+          cnt: cnt.slice(),
+          busy: busy.slice(),
+        },
       );
     }
   }
@@ -123,7 +143,11 @@ function View({ frame }: PluginViewProps<MeetState>) {
             className={cn(
               'rounded border px-2 py-0.5 font-mono',
               vizText.sm,
-              i === s.assigned ? 'border-accent bg-accentbg' : i === s.winner ? 'border-good' : 'border-edge',
+              i === s.assigned
+                ? 'border-accent bg-accentbg'
+                : i === s.winner
+                  ? 'border-good'
+                  : 'border-edge',
             )}
           >
             R{i}:{c}
@@ -131,7 +155,9 @@ function View({ frame }: PluginViewProps<MeetState>) {
         ))}
       </div>
       {s.winner !== null && (
-        <div className={cn('mt-2 font-mono', vizText.sm, 'text-good')}>most booked: room {s.winner}</div>
+        <div className={cn('mt-2 font-mono', vizText.sm, 'text-good')}>
+          most booked: room {s.winner}
+        </div>
       )}
     </div>
   );
@@ -153,132 +179,128 @@ function Inspector({ frame }: InspectorProps<MeetState>) {
 export const manifestId = 'prep-design-meeting-rooms-iii';
 export const title = 'Meeting Rooms III';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Meeting Rooms III\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Meeting Rooms III"?',
     choices: [
       {
-        label: "Two Heaps — fits this problem",
-        correct: true
+        label: 'Two Heaps — fits this problem',
+        correct: true,
       },
       {
-        label: "Round-robin load balancer — different approach"
+        label: 'Round-robin load balancer — different approach',
       },
       {
-        label: "Copy-on-write version snapshots — different approach"
+        label: 'Copy-on-write version snapshots — different approach',
       },
       {
-        label: "Trie dictionary + spell suggest — different approach"
-      }
+        label: 'Trie dictionary + spell suggest — different approach',
+      },
     ],
-    explain: "See Meeting Rooms Iii pattern"
+    explain: 'See Meeting Rooms Iii pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Meeting Rooms III), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Meeting Rooms III), what strategy is established?',
     choices: [
       {
-        label: "See Meeting Rooms Iii pattern — described in INIT caption",
-        correct: true
+        label: 'See Meeting Rooms Iii pattern — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Meeting Rooms III: min-heap avail rooms, busy heap by end time. Assign earliest free room; if none, delay meeting on earliest-ending room."
+    explain:
+      'Meeting Rooms III: min-heap avail rooms, busy heap by end time. Assign earliest free room; if none, delay meeting on earliest-ending room.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"DELAY\" step (room ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "DELAY" step (room ), what happens?',
     choices: [
       {
-        label: "Meeting [,]: all busy — reuse — this move caption",
-        correct: true
+        label: 'Meeting [,]: all busy — reuse — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Meeting [,]: all busy — reuse room , ends at . cnt[]=."
+    explain: 'Meeting [,]: all busy — reuse room , ends at . cnt[]=.',
   },
   {
-    id: "state",
-    prompt: "What does the `n` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `n` field track in the visualization state?',
     choices: [
       {
-        label: "Field n in state — updated each frame",
-        correct: true
+        label: 'Field n in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `n` on every emit so each frame shows the algorithm mid-step."
+    explain: 'The recorder snapshots `n` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Meeting Rooms III\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Meeting Rooms III"?',
     choices: [
       {
-        label: "O(m log n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(m log n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(m+n) time, O(n) space — wrong order of growth"
+        label: 'O(m+n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(versions) get time, O(changes) space — wrong order of growth"
+        label: 'O(versions) get time, O(changes) space — wrong order of growth',
       },
       {
-        label: "O(logs) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(logs) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(m log n). O(n). Meeting Rooms Iii"
+    explain: 'O(m log n). O(n). Meeting Rooms Iii',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Done. Room held the most meetings — final DONE caption",
-        correct: true
+        label: 'Done. Room held the most meetings — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Done. Room  held the most meetings (). Counts: []."
-  }
+    explain: 'Done. Room  held the most meetings (). Counts: [].',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

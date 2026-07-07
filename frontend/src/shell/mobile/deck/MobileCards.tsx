@@ -24,7 +24,13 @@ import { ASSEMBLE_GAMES, defaultGameFor } from '../../../components/puzzle/assem
 import { assembleGameStatsStore } from '../../assembleGameStats';
 import { quizQuestionSeed, shuffleQuizQuestion } from '@/lib/quiz';
 import { QUIZ_CORRECT_MS, QUIZ_WRONG_MS } from '@/lib/quiz';
-import { correctIndex, type GistCard as GistCardData, type ProblemBlock, type QuizCard as QuizCardData, type ReassembleCard as ReassembleCardData } from './deckModel';
+import {
+  correctIndex,
+  type GistCard as GistCardData,
+  type ProblemBlock,
+  type QuizCard as QuizCardData,
+  type ReassembleCard as ReassembleCardData,
+} from './deckModel';
 import { GistArcCaption } from '../../../components/shared/GistArcCaption';
 import { GistScene } from '../scenes/gistScenes';
 import { MobileVizShell } from '../MobileVizShell';
@@ -63,7 +69,12 @@ function Confetti() {
         <span
           key={i}
           className="mobile-confetti"
-          style={{ left: b.left, background: b.hue, animationDelay: b.delay, animationDuration: b.dur }}
+          style={{
+            left: b.left,
+            background: b.hue,
+            animationDelay: b.delay,
+            animationDuration: b.dur,
+          }}
         />
       ))}
     </div>
@@ -115,7 +126,9 @@ function TimerRing({
       {paused ? (
         <Play className="h-3.5 w-3.5" />
       ) : (
-        <span className="text-[length:var(--fs-xs)] font-semibold tabular-nums text-ink">{Math.ceil(remaining)}</span>
+        <span className="text-[length:var(--fs-xs)] font-semibold tabular-nums text-ink">
+          {Math.ceil(remaining)}
+        </span>
       )}
     </button>
   );
@@ -198,7 +211,12 @@ export function GistCardView({
           <span className="text-[length:var(--fs-tight)] font-semibold tabular-nums text-ink3">
             {problemIndex + 1}/{problemCount}
           </span>
-          <TimerRing remaining={remaining} total={GIST_SECONDS} paused={paused} onToggle={togglePause} />
+          <TimerRing
+            remaining={remaining}
+            total={GIST_SECONDS}
+            paused={paused}
+            onToggle={togglePause}
+          />
         </div>
       </div>
 
@@ -214,7 +232,9 @@ export function GistCardView({
 
       {summary && (
         <div className="mobile-problem-context mt-3 shrink-0 rounded-2xl border border-edge bg-panel/80 px-3.5 py-2.5">
-          <p className="text-[length:var(--fs-sm)] leading-relaxed text-ink2 line-clamp-3">{summary}</p>
+          <p className="text-[length:var(--fs-sm)] leading-relaxed text-ink2 line-clamp-3">
+            {summary}
+          </p>
         </div>
       )}
 
@@ -265,7 +285,9 @@ export function AnimateCardView({
     <div className="mobile-card-shell mobile-animate-card flex flex-1 flex-col px-4 pt-3">
       <div className="shrink-0">
         <div className="flex items-center gap-2">
-          <span className="text-[length:var(--fs-tight)] font-semibold tabular-nums text-ink3">{problemIndex + 1}/{problemCount}</span>
+          <span className="text-[length:var(--fs-tight)] font-semibold tabular-nums text-ink3">
+            {problemIndex + 1}/{problemCount}
+          </span>
           {block.pattern && (
             <span className="inline-flex items-center gap-1 rounded-full bg-accentbg px-2 py-0.5 text-[length:var(--fs-2xs)] font-medium text-accent">
               <Sparkles className="h-3 w-3" />
@@ -275,10 +297,14 @@ export function AnimateCardView({
           <DiffChip item={item} />
         </div>
         <div className="mt-1 flex flex-wrap items-center gap-2">
-          <h2 className="min-w-0 flex-1 text-[17px] font-semibold tracking-tight text-ink">{item.title}</h2>
+          <h2 className="min-w-0 flex-1 text-[17px] font-semibold tracking-tight text-ink">
+            {item.title}
+          </h2>
         </div>
         {summary && (
-          <p className="mt-0.5 text-[length:var(--fs-xs)] leading-snug text-ink3 line-clamp-2">{summary}</p>
+          <p className="mt-0.5 text-[length:var(--fs-xs)] leading-snug text-ink3 line-clamp-2">
+            {summary}
+          </p>
         )}
       </div>
 
@@ -396,12 +422,15 @@ export function QuizCardView({
     }
     onAnswered(correct);
     if (!correct) onNavLockChange?.(true);
-    timer.current = window.setTimeout(() => {
-      if (!aliveRef.current) return;
-      onNavLockChange?.(false);
-      if (correct) onAdvance();
-      else onRestartQuiz();
-    }, correct ? QUIZ_CORRECT_MS : QUIZ_WRONG_MS);
+    timer.current = window.setTimeout(
+      () => {
+        if (!aliveRef.current) return;
+        onNavLockChange?.(false);
+        if (correct) onAdvance();
+        else onRestartQuiz();
+      },
+      correct ? QUIZ_CORRECT_MS : QUIZ_WRONG_MS,
+    );
   };
 
   const skipWait = () => {
@@ -433,9 +462,13 @@ export function QuizCardView({
       {/* Header: title + summary + progress dots */}
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
-          <span className="text-[length:var(--fs-tight)] font-semibold uppercase tracking-[0.16em] text-ink3">{item.title}</span>
+          <span className="text-[length:var(--fs-tight)] font-semibold uppercase tracking-[0.16em] text-ink3">
+            {item.title}
+          </span>
           {summary && (
-            <p className="mt-0.5 text-[length:var(--fs-tight)] leading-snug text-ink3 line-clamp-2">{summary}</p>
+            <p className="mt-0.5 text-[length:var(--fs-tight)] leading-snug text-ink3 line-clamp-2">
+              {summary}
+            </p>
           )}
         </div>
         <span
@@ -461,7 +494,12 @@ export function QuizCardView({
                 style={{
                   width: active ? 16 : 6,
                   height: 6,
-                  background: i < card.qIndex - 1 ? 'var(--good)' : active ? 'var(--accent)' : 'var(--border-strong)',
+                  background:
+                    i < card.qIndex - 1
+                      ? 'var(--good)'
+                      : active
+                        ? 'var(--accent)'
+                        : 'var(--border-strong)',
                 }}
               />
             );
@@ -483,14 +521,22 @@ export function QuizCardView({
         <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-accentbg text-accent">
           <Brain className="h-4 w-4" />
         </span>
-        <h2 className="text-[19px] font-semibold leading-snug tracking-tight text-ink">{question.prompt}</h2>
+        <h2 className="text-[19px] font-semibold leading-snug tracking-tight text-ink">
+          {question.prompt}
+        </h2>
       </div>
 
       <div className="mt-4 flex flex-col gap-2.5">
         {q.choices.map((c, i) => {
           const showCorrect = answered && i === answer;
           const showWrong = answered && i === picked && i !== answer;
-          const choiceState = showCorrect ? 'correct' : showWrong ? 'wrong' : answered ? 'dim' : 'idle';
+          const choiceState = showCorrect
+            ? 'correct'
+            : showWrong
+              ? 'wrong'
+              : answered
+                ? 'dim'
+                : 'idle';
           return (
             <button
               key={i}
@@ -513,7 +559,13 @@ export function QuizCardView({
                   !showCorrect && !showWrong && 'bg-panel2 text-ink2',
                 )}
               >
-                {showCorrect ? <Check className="h-4 w-4" /> : showWrong ? <X className="h-4 w-4" /> : LETTERS[i]}
+                {showCorrect ? (
+                  <Check className="h-4 w-4" />
+                ) : showWrong ? (
+                  <X className="h-4 w-4" />
+                ) : (
+                  LETTERS[i]
+                )}
               </span>
               <span className="min-w-0 flex-1">
                 <QuizChoiceLabel label={c.label} size="mobile" state={choiceState} />
@@ -528,22 +580,34 @@ export function QuizCardView({
           key={`explain-${picked}`}
           className={cn(
             'mobile-explain mt-4 rounded-2xl border px-3.5 py-3',
-            isCorrect ? 'mobile-choice-correct border-good bg-goodbg/50' : 'mobile-choice-wrong border-bad bg-badbg/45',
+            isCorrect
+              ? 'mobile-choice-correct border-good bg-goodbg/50'
+              : 'mobile-choice-wrong border-bad bg-badbg/45',
           )}
           role="status"
           aria-live="polite"
         >
-          <div className={cn('flex items-center gap-1.5 text-[length:var(--fs-tight)] font-semibold uppercase tracking-wide', isCorrect ? 'text-good' : 'text-bad')}>
+          <div
+            className={cn(
+              'flex items-center gap-1.5 text-[length:var(--fs-tight)] font-semibold uppercase tracking-wide',
+              isCorrect ? 'text-good' : 'text-bad',
+            )}
+          >
             {isCorrect ? <Check className="h-3.5 w-3.5" /> : <Lightbulb className="h-3.5 w-3.5" />}
             {isCorrect ? 'Correct' : 'Start over — here’s why'}
           </div>
-          <p className="mt-1 text-[length:var(--fs)] leading-relaxed text-ink2">{question.explain}</p>
+          <p className="mt-1 text-[length:var(--fs)] leading-relaxed text-ink2">
+            {question.explain}
+          </p>
         </div>
       )}
 
       <div className="mt-auto" />
 
-      <div className="sticky bottom-0 -mx-5 flex shrink-0 items-center gap-2 border-t border-edge/60 bg-panel/95 px-5 py-3 backdrop-blur-sm" data-noswipe>
+      <div
+        className="sticky bottom-0 -mx-5 flex shrink-0 items-center gap-2 border-t border-edge/60 bg-panel/95 px-5 py-3 backdrop-blur-sm"
+        data-noswipe
+      >
         <button
           type="button"
           onClick={goBack}
@@ -683,13 +747,20 @@ export function ReassembleCardView({
             </button>
           </div>
         </div>
-        <div className="mt-0.5 truncate text-[length:var(--fs-title)] font-semibold text-ink">{item.title}</div>
+        <div className="mt-0.5 truncate text-[length:var(--fs-title)] font-semibold text-ink">
+          {item.title}
+        </div>
       </div>
 
       {/* Hint strip — shows the first code piece as a visual cue */}
       {showHint && hintPiece && (
-        <div className="mt-2 shrink-0 rounded-xl border border-accentbg bg-accentbg/30 px-3 py-2" data-noswipe>
-          <p className="mb-1 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-accent">Hint — first block:</p>
+        <div
+          className="mt-2 shrink-0 rounded-xl border border-accentbg bg-accentbg/30 px-3 py-2"
+          data-noswipe
+        >
+          <p className="mb-1 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-accent">
+            Hint — first block:
+          </p>
           <code className="block whitespace-pre-wrap font-mono text-[length:var(--fs-tight)] leading-relaxed text-ink2 opacity-80">
             {hintPiece.code.trim()}
           </code>
@@ -764,9 +835,7 @@ export function CompleteScreen({
               <span className="text-[length:var(--fs-tight)] text-ink3">problems</span>
             </div>
           )}
-          {problemCount != null && totalQuiz != null && (
-            <div className="h-8 w-px bg-edge" />
-          )}
+          {problemCount != null && totalQuiz != null && <div className="h-8 w-px bg-edge" />}
           {totalQuiz != null && totalQuiz > 0 && (
             <div className="flex flex-col items-center">
               <span className="text-[22px] font-bold tabular-nums text-ink">{totalQuiz}</span>
@@ -778,16 +847,28 @@ export function CompleteScreen({
 
       <div className="relative mt-8 flex w-full max-w-[280px] flex-col gap-2.5">
         {onNextCategory && (
-          <button type="button" onClick={onNextCategory} className="inline-flex items-center justify-center gap-2 rounded-full bg-accent px-5 py-3 text-[length:var(--fs-title)] font-semibold text-white">
+          <button
+            type="button"
+            onClick={onNextCategory}
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-accent px-5 py-3 text-[length:var(--fs-title)] font-semibold text-white"
+          >
             Next: {nextCategoryTitle}
             <ArrowRight className="h-4 w-4" />
           </button>
         )}
-        <button type="button" onClick={onRestart} className="inline-flex items-center justify-center gap-2 rounded-full border border-edge bg-panel px-5 py-2.5 text-[length:var(--fs)] font-medium text-ink2 hover:text-ink">
+        <button
+          type="button"
+          onClick={onRestart}
+          className="inline-flex items-center justify-center gap-2 rounded-full border border-edge bg-panel px-5 py-2.5 text-[length:var(--fs)] font-medium text-ink2 hover:text-ink"
+        >
           <RotateCcw className="h-4 w-4" />
           Practice again
         </button>
-        <button type="button" onClick={onExit} className="inline-flex items-center justify-center rounded-full px-5 py-2 text-[length:var(--fs-sm)] font-medium text-ink3 hover:text-ink">
+        <button
+          type="button"
+          onClick={onExit}
+          className="inline-flex items-center justify-center rounded-full px-5 py-2 text-[length:var(--fs-sm)] font-medium text-ink3 hover:text-ink"
+        >
           Back to categories
         </button>
       </div>

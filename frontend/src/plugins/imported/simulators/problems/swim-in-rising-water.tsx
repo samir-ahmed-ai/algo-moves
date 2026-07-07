@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+} from '../../../_shared/vizKit';
 
 interface SwimInput {
   grid: number[][]; // n×n elevations, distinct 0..n²-1
@@ -29,15 +42,20 @@ function record({ grid }: SwimInput): Frame<SwimState>[] {
   const reachTime = Array.from({ length: n }, () => new Array<number>(n).fill(-1));
   const vis = Array.from({ length: n }, () => new Array<boolean>(n).fill(false));
   const { emit, frames } = createRecorder<SwimState>(() => ({
-        grid: grid,
-        reachTime: reachTime.map((row) => row.slice()),
-        cur: null,
-        res: 0,
-        answer: null,
-        done: false
-      }));
+    grid: grid,
+    reachTime: reachTime.map((row) => row.slice()),
+    cur: null,
+    res: 0,
+    answer: null,
+    done: false,
+  }));
 
-  emit('INIT', `${n}×${n} grid`, `Water rises over time; at time t every cell with elevation ≤ t is flooded and swimmable. Cost to reach a cell = the maximum elevation along the best path. Dijkstra-style: always settle the unvisited frontier cell of lowest elevation. Answer = the least time to reach (${n - 1}, ${n - 1}) from (0, 0).`, { cur: null, res: 0, answer: null });
+  emit(
+    'INIT',
+    `${n}×${n} grid`,
+    `Water rises over time; at time t every cell with elevation ≤ t is flooded and swimmable. Cost to reach a cell = the maximum elevation along the best path. Dijkstra-style: always settle the unvisited frontier cell of lowest elevation. Answer = the least time to reach (${n - 1}, ${n - 1}) from (0, 0).`,
+    { cur: null, res: 0, answer: null },
+  );
 
   // min-heap over [elevation, r, c]
   const heap: [number, number, number][] = [[grid[0][0], 0, 0]];
@@ -58,9 +76,14 @@ function record({ grid }: SwimInput): Frame<SwimState>[] {
     if (elev > res) res = elev;
     reachTime[r][c] = res;
     const isTarget = r === n - 1 && c === n - 1;
-    emit(isTarget ? 'TARGET' : 'SETTLE', `(${r},${c}) elev ${elev} · time ${res}`, isTarget
+    emit(
+      isTarget ? 'TARGET' : 'SETTLE',
+      `(${r},${c}) elev ${elev} · time ${res}`,
+      isTarget
         ? `Reached the target (${r}, ${c}) with elevation ${elev}. The highest elevation crossed on the best path is ${res} — that is the least time needed.`
-        : `Settle the lowest frontier cell (${r}, ${c}), elevation ${elev}. Best time to reach it = max elevation so far = ${res}.`, { cur: [r, c], res: res, answer: null });
+        : `Settle the lowest frontier cell (${r}, ${c}), elevation ${elev}. Best time to reach it = max elevation so far = ${res}.`,
+      { cur: [r, c], res: res, answer: null },
+    );
     if (isTarget) {
       answer = res;
       break;
@@ -75,14 +98,22 @@ function record({ grid }: SwimInput): Frame<SwimState>[] {
     }
   }
 
-  emit('DONE', `answer = ${answer ?? res}`, `Least time to swim from (0, 0) to (${n - 1}, ${n - 1}) = ${answer ?? res}.`, { cur: [n - 1, n - 1], res: answer ?? res, answer: answer ?? res , done: true }, 'good');
+  emit(
+    'DONE',
+    `answer = ${answer ?? res}`,
+    `Least time to swim from (0, 0) to (${n - 1}, ${n - 1}) = ${answer ?? res}.`,
+    { cur: [n - 1, n - 1], res: answer ?? res, answer: answer ?? res, done: true },
+    'good',
+  );
   return frames;
 }
 
 function View({ frame }: PluginViewProps<SwimState>) {
   const s = frame.state;
   const n = s.grid.length;
-  const display = s.grid.map((row, r) => row.map((_, c) => (s.reachTime[r][c] >= 0 ? s.reachTime[r][c] : '·')));
+  const display = s.grid.map((row, r) =>
+    row.map((_, c) => (s.reachTime[r][c] >= 0 ? s.reachTime[r][c] : '·')),
+  );
   const cellTone = (r: number, c: number) => {
     if (s.done && r === n - 1 && c === n - 1) return 'path';
     if (s.cur && s.cur[0] === r && s.cur[1] === c) return 'active';
@@ -96,7 +127,11 @@ function View({ frame }: PluginViewProps<SwimState>) {
         <RailStat k="elev" v={s.cur ? s.grid[s.cur[0]][s.cur[1]] : '—'} />
         <RailStat k="time" v={s.res} tone="accent" />
       </RailGroup>
-      <RailResult label="answer" value={s.answer === null ? '—' : s.answer} tone={s.answer !== null ? 'good' : 'accent'} />
+      <RailResult
+        label="answer"
+        value={s.answer === null ? '—' : s.answer}
+        tone={s.answer !== null ? 'good' : 'accent'}
+      />
     </>
   );
   return (

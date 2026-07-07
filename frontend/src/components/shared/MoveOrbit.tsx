@@ -51,7 +51,7 @@ export function orbitTFromX(x: number): number {
 }
 
 function frameText(f: Frame | undefined): string {
-  return f ? (f.move.caption?.trim() || f.move.note?.trim() || '') : '';
+  return f ? f.move.caption?.trim() || f.move.note?.trim() || '' : '';
 }
 
 export function MoveOrbit({

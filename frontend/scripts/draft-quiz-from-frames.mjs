@@ -13,7 +13,9 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const id = process.argv.find((a) => !a.startsWith('-') && a !== process.argv[0] && a !== process.argv[1]);
+const id = process.argv.find(
+  (a) => !a.startsWith('-') && a !== process.argv[0] && a !== process.argv[1],
+);
 const promote = process.argv.includes('--promote');
 
 if (!id) {
@@ -43,11 +45,29 @@ function findManifestEntry(manifestSrc, pluginId) {
 function loadMeta(pluginId) {
   if (pluginId.startsWith('imp-')) {
     const src = readFileSync(join(root, 'src/plugins/imported/manifest.ts'), 'utf8');
-    return findManifestEntry(src, pluginId) ?? { title: pluginId, pattern: '', time: '', space: '', difficulty: 'Medium', visual: '' };
+    return (
+      findManifestEntry(src, pluginId) ?? {
+        title: pluginId,
+        pattern: '',
+        time: '',
+        space: '',
+        difficulty: 'Medium',
+        visual: '',
+      }
+    );
   }
   if (pluginId.startsWith('prep-')) {
     const src = readFileSync(join(root, 'src/plugins/imported/prepManifest.ts'), 'utf8');
-    return findManifestEntry(src, pluginId) ?? { title: pluginId, pattern: '', time: '', space: '', difficulty: 'Medium', visual: '' };
+    return (
+      findManifestEntry(src, pluginId) ?? {
+        title: pluginId,
+        pattern: '',
+        time: '',
+        space: '',
+        difficulty: 'Medium',
+        visual: '',
+      }
+    );
   }
   return { title: pluginId, pattern: '', time: '', space: '', difficulty: 'Medium', visual: '' };
 }
@@ -60,7 +80,10 @@ const draft = [
     id: 'pattern',
     prompt: `What is the core pattern for “${meta.title}”?`,
     choices: [
-      { label: `${meta.pattern || 'Fill from INIT/DONE captions'} — fits this problem`, correct: true },
+      {
+        label: `${meta.pattern || 'Fill from INIT/DONE captions'} — fits this problem`,
+        correct: true,
+      },
       { label: 'Brute-force enumerate all possibilities — different approach' },
       { label: 'Sort then scan linearly — different approach' },
       { label: 'Two pointers from both ends only — different approach' },
@@ -96,7 +119,9 @@ if (promote) {
     'const practiceQuiz = [',
     ...draft.map((q) => {
       const choices = q.choices
-        .map((c) => `      { label: ${JSON.stringify(c.label)}${c.correct ? ', correct: true' : ''} }`)
+        .map(
+          (c) => `      { label: ${JSON.stringify(c.label)}${c.correct ? ', correct: true' : ''} }`,
+        )
         .join(',\n');
       return `  {\n    id: ${JSON.stringify(q.id)},\n    prompt: ${JSON.stringify(q.prompt)},\n    choices: [\n${choices},\n    ],\n    explain: ${JSON.stringify(q.explain)},\n  }`;
     }),
@@ -105,10 +130,16 @@ if (promote) {
     'export const practice = {',
     '  quiz: practiceQuiz,',
     `  simulateQuestion: ${JSON.stringify(draft[1]?.prompt ?? draft[0].prompt)},`,
-    '} satisfies ProblemSimulator[\'practice\'];',
+    "} satisfies ProblemSimulator['practice'];",
   ];
   console.log(`// Paste into prepSimulators/problems/<slug>.tsx after human review\n`);
   console.log(lines.join('\n'));
 } else {
-  console.log(JSON.stringify({ pluginId: id, meta, quiz: draft, promoteHint: 'Re-run with --promote for TS snippet' }, null, 2));
+  console.log(
+    JSON.stringify(
+      { pluginId: id, meta, quiz: draft, promoteHint: 'Re-run with --promote for TS snippet' },
+      null,
+      2,
+    ),
+  );
 }

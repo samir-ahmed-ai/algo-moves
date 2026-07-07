@@ -8,7 +8,7 @@ describe('PuzzlePieceShell', () => {
       <PuzzlePieceShell piece={{ id: 'p1', code: 'return x', role: 'logic' }} lang="go" />,
     );
     expect(html).toContain('puzzle-piece--tray');
-    expect(html).toContain('hl-keyword');
+    expect(html).toContain('piece-code-text');
     expect(html).toContain('return');
   });
 });

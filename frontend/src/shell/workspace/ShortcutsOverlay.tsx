@@ -60,7 +60,13 @@ export function ShortcutsOverlay({ onClose }: { onClose: () => void }) {
               <span className={cn(chromeText.tight, 'text-ink2')}>{shortcut.label}</span>
               <span className="flex gap-0.5">
                 {shortcut.keys.map((key) => (
-                  <kbd key={key} className={cn('rounded border border-edge bg-panel2 px-1 py-px font-mono text-ink', chromeText.sm)}>
+                  <kbd
+                    key={key}
+                    className={cn(
+                      'rounded border border-edge bg-panel2 px-1 py-px font-mono text-ink',
+                      chromeText.sm,
+                    )}
+                  >
                     {key}
                   </kbd>
                 ))}
@@ -76,7 +82,13 @@ export function ShortcutsOverlay({ onClose }: { onClose: () => void }) {
               <span className={cn(chromeText.tight, 'text-ink2')}>{shortcut.label}</span>
               <span className="flex gap-0.5">
                 {shortcut.keys.map((key) => (
-                  <kbd key={key} className={cn('rounded border border-edge bg-panel2 px-1 py-px font-mono text-ink', chromeText.sm)}>
+                  <kbd
+                    key={key}
+                    className={cn(
+                      'rounded border border-edge bg-panel2 px-1 py-px font-mono text-ink',
+                      chromeText.sm,
+                    )}
+                  >
                     {key}
                   </kbd>
                 ))}

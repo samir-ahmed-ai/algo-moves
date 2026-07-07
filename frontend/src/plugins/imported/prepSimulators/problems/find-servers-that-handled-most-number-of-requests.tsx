@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -73,21 +79,22 @@ function insertSorted(avail: number[], id: number): number[] {
   return a;
 }
 
-function record({ k, arrival, load }: SrvInput): Frame<SrvState>[] {  let busy: BusyItem[] = [];
+function record({ k, arrival, load }: SrvInput): Frame<SrvState>[] {
+  let busy: BusyItem[] = [];
   let avail = Array.from({ length: k }, (_, i) => i);
   const cnt = new Array(k).fill(0);
 
   const { emit, frames } = createRecorder<SrvState>(() => ({
-        k,
-        avail: avail.slice(),
-        busy: busy.map((b) => ({ ...b })),
-        cnt: cnt.slice(),
-        req: 0,
-        assigned: null,
-        op: '',
-        result: [],
-        done: false
-      }));
+    k,
+    avail: avail.slice(),
+    busy: busy.map((b) => ({ ...b })),
+    cnt: cnt.slice(),
+    req: 0,
+    assigned: null,
+    op: '',
+    result: [],
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -104,7 +111,10 @@ function record({ k, arrival, load }: SrvInput): Frame<SrvState>[] {  let busy: 
       avail = insertSorted(avail, freed.id);
     }
     if (avail.length === 0) {
-      emit('SKIP', `req ${i} @${arr}`, `Request ${i} at t=${arr}: all servers busy → skip.`, { req: i, op: `skip @${arr}` });
+      emit('SKIP', `req ${i} @${arr}`, `Request ${i} at t=${arr}: all servers busy → skip.`, {
+        req: i,
+        op: `skip @${arr}`,
+      });
       continue;
     }
     const target = i % k;
@@ -118,7 +128,14 @@ function record({ k, arrival, load }: SrvInput): Frame<SrvState>[] {  let busy: 
       'ASSIGN',
       `srv ${srv}`,
       `Request ${i} at t=${arr}: target=${target} → server ${srv}, busy until ${arr + load[i]}. cnt[${srv}]=${cnt[srv]}.`,
-      { req: i, assigned: srv, op: `req${i}→srv${srv}`, cnt: cnt.slice(), avail: avail.slice(), busy: busy.slice() },
+      {
+        req: i,
+        assigned: srv,
+        op: `req${i}→srv${srv}`,
+        cnt: cnt.slice(),
+        avail: avail.slice(),
+        busy: busy.slice(),
+      },
       'good',
     );
   }
@@ -161,7 +178,9 @@ function View({ frame }: PluginViewProps<SrvState>) {
         ))}
       </div>
       {s.result.length > 0 && (
-        <div className={cn('mt-2 font-mono', vizText.sm, 'text-good')}>busiest: [{s.result.join(', ')}]</div>
+        <div className={cn('mt-2 font-mono', vizText.sm, 'text-good')}>
+          busiest: [{s.result.join(', ')}]
+        </div>
       )}
     </div>
   );
@@ -183,132 +202,130 @@ function Inspector({ frame }: InspectorProps<SrvState>) {
 export const manifestId = 'prep-design-find-servers-that-handled-most-number-of-requests';
 export const title = 'Find Servers That Handled Most Number of Requests';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Find Servers That Handled Most Number of Requests\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Find Servers That Handled Most Number of Requests"?',
     choices: [
       {
-        label: "Heap + Sorted Available Set — fits this problem",
-        correct: true
+        label: 'Heap + Sorted Available Set — fits this problem',
+        correct: true,
       },
       {
-        label: "Trie dictionary + spell suggest — different approach"
+        label: 'Trie dictionary + spell suggest — different approach',
       },
       {
-        label: "Two Heaps — different approach"
+        label: 'Two Heaps — different approach',
       },
       {
-        label: "Round-robin load balancer — different approach"
-      }
+        label: 'Round-robin load balancer — different approach',
+      },
     ],
-    explain: "See Find Servers That Handled Most Number Of Requests pattern"
+    explain: 'See Find Servers That Handled Most Number Of Requests pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Find Servers That Handled Most Number of Requests), what strategy is established?",
+    id: 'init',
+    prompt:
+      'At the start of a run (Find Servers That Handled Most Number of Requests), what strategy is established?',
     choices: [
       {
-        label: "See Find Servers That Handled Most — described in INIT caption",
-        correct: true
+        label: 'See Find Servers That Handled Most — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Busiest Servers: min-heap of busy servers by freeTime. avail sorted list; assign request i to server at/after i%k (wrap)."
+    explain:
+      'Busiest Servers: min-heap of busy servers by freeTime. avail sorted list; assign request i to server at/after i%k (wrap).',
   },
   {
-    id: "key-step",
-    prompt: "On the \"ASSIGN\" step (srv ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "ASSIGN" step (srv ), what happens?',
     choices: [
       {
-        label: "Request at t=: target= → server — this move caption",
-        correct: true
+        label: 'Request at t=: target= → server — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Request  at t=: target= → server , busy until . cnt[]=."
+    explain: 'Request  at t=: target= → server , busy until . cnt[]=.',
   },
   {
-    id: "state",
-    prompt: "What does the `k` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `k` field track in the visualization state?',
     choices: [
       {
-        label: "Field k in state — updated each frame",
-        correct: true
+        label: 'Field k in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `k` on every emit so each frame shows the algorithm mid-step."
+    explain: 'The recorder snapshots `k` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Find Servers That Handled Most Number of Requests\"?",
+    id: 'complexity',
+    prompt:
+      'What are the time and space complexities for "Find Servers That Handled Most Number of Requests"?',
     choices: [
       {
-        label: "O(n log k) time, O(k) space — standard bounds here",
-        correct: true
+        label: 'O(n log k) time, O(k) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n³) time, O(n) space — wrong order of growth"
+        label: 'O(n³) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m log n) time, O(n) space — wrong order of growth"
+        label: 'O(m log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(total painted) time, O(max coordinate) — wrong order of growth"
-      }
+        label: 'O(total painted) time, O(max coordinate) — wrong order of growth',
+      },
     ],
-    explain: "O(n log k). O(k). Find Servers That Handled Most Number Of Requests"
+    explain: 'O(n log k). O(k). Find Servers That Handled Most Number Of Requests',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Done. Max requests handled = . — final DONE caption",
-        correct: true
+        label: 'Done. Max requests handled = . — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Done. Max requests handled = . Busiest server(s): []."
-  }
+    explain: 'Done. Max requests handled = . Busiest server(s): [].',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -324,6 +341,8 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as SrvState | undefined;
-    return s?.done ? { ok: true, label: `[${s.result.join(',')}]` } : { ok: false, label: 'incomplete' };
+    return s?.done
+      ? { ok: true, label: `[${s.result.join(',')}]` }
+      : { ok: false, label: 'incomplete' };
   },
 };

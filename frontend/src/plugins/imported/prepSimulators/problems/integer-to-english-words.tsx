@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -26,9 +32,26 @@ interface WordsState {
 }
 
 const BELOW20 = [
-  '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
-  'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen',
-  'Seventeen', 'Eighteen', 'Nineteen',
+  '',
+  'One',
+  'Two',
+  'Three',
+  'Four',
+  'Five',
+  'Six',
+  'Seven',
+  'Eight',
+  'Nine',
+  'Ten',
+  'Eleven',
+  'Twelve',
+  'Thirteen',
+  'Fourteen',
+  'Fifteen',
+  'Sixteen',
+  'Seventeen',
+  'Eighteen',
+  'Nineteen',
 ];
 const TENS = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
 const THOUSANDS = ['', 'Thousand', 'Million', 'Billion'];
@@ -80,14 +103,14 @@ function record({ num }: WordsInput): Frame<WordsState>[] {
   }
 
   const { emit, frames } = createRecorder<WordsState>(() => ({
-        num,
-        chunks,
-        active: null,
-        remaining: num,
-        parts: [],
-        result: '',
-        done: false
-      }));
+    num,
+    chunks,
+    active: null,
+    remaining: num,
+    parts: [],
+    result: '',
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -191,7 +214,13 @@ function View({ frame }: PluginViewProps<WordsState>) {
       <div className={cn(vizText.sm, 'text-ink3')}>
         num = <span className="font-mono text-ink">{s.num.toLocaleString()}</span>
       </div>
-      <ArrayRow values={values} cellTone={tone} pointers={pointers} windowRange={null} label={scaleLabel} />
+      <ArrayRow
+        values={values}
+        cellTone={tone}
+        pointers={pointers}
+        windowRange={null}
+        label={scaleLabel}
+      />
       <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
         {s.active !== null && s.chunks[s.active] ? (
           <>
@@ -203,7 +232,13 @@ function View({ frame }: PluginViewProps<WordsState>) {
           'index = 3-digit group, label = scale'
         )}
       </div>
-      <div className={cn('mt-1 font-mono', s.done ? 'text-good' : 'text-ink', s.done ? vizText.base : vizText.sm)}>
+      <div
+        className={cn(
+          'mt-1 font-mono',
+          s.done ? 'text-good' : 'text-ink',
+          s.done ? vizText.base : vizText.sm,
+        )}
+      >
         {s.result ? `→ ${s.result}` : 'phrase: …'}
       </div>
     </div>
@@ -231,132 +266,131 @@ function Inspector({ frame }: InspectorProps<WordsState>) {
 export const manifestId = 'prep-math-integer-to-english-words';
 export const title = 'Integer to English Words';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Integer to English Words\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Integer to English Words"?',
     choices: [
       {
-        label: "Chunk by 1000 + Lookup — fits this problem",
-        correct: true
+        label: 'Chunk by 1000 + Lookup — fits this problem',
+        correct: true,
       },
       {
-        label: "Digit reversal — different approach"
+        label: 'Digit reversal — different approach',
       },
       {
-        label: "FizzBuzz conditional — different approach"
+        label: 'FizzBuzz conditional — different approach',
       },
       {
-        label: "Grade-school multiplication — different approach"
-      }
+        label: 'Grade-school multiplication — different approach',
+      },
     ],
-    explain: "See Integer To English Words pattern"
+    explain: 'See Integer To English Words pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Integer to English Words), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Integer to English Words), what strategy is established?',
     choices: [
       {
-        label: "See Integer To English Words pattern — described in INIT caption",
-        correct: true
+        label: 'See Integer To English Words pattern — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Integer to English Words: read  out loud. The trick is to chop the number into 3-digit groups from the right — ones, then Thousand, Million, Billion — name each group, then glue the scale words back on."
+    explain:
+      'Integer to English Words: read  out loud. The trick is to chop the number into 3-digit groups from the right — ones, then Thousand, Million, Billion — name each group, then glue the scale words back on.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"NAME\" step (\"\"), what happens?",
+    id: 'key-step',
+    prompt: 'On the "NAME" step (""), what happens?',
     choices: [
       {
-        label: "Name the 3-digit group — this move caption",
-        correct: true
+        label: 'Name the 3-digit group — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Name the 3-digit group  with the lookup helper:  → \"\". Hundreds use below-20 + \"Hundred\"; the last two digits use the tens/below-20 tables."
+    explain:
+      'Name the 3-digit group  with the lookup helper:  → "". Hundreds use below-20 + "Hundred"; the last two digits use the tens/below-20 tables.',
   },
   {
-    id: "state",
-    prompt: "What does the `chunks` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `chunks` field track in the visualization state?',
     choices: [
       {
-        label: "groups of 3 digits, index — updated each frame",
-        correct: true
+        label: 'groups of 3 digits, index — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `chunks` in sync: groups of 3 digits, index 0 = least significant (ones)"
+    explain:
+      'The recorder keeps `chunks` in sync: groups of 3 digits, index 0 = least significant (ones)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Integer to English Words\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Integer to English Words"?',
     choices: [
       {
-        label: "O(1) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(1) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(log n) time, O(1) space — wrong order of growth"
+        label: 'O(log n) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
+        label: 'O(n²) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(m+n) space — wrong order of growth"
-      }
+        label: 'O(m·n) time, O(m+n) space — wrong order of growth',
+      },
     ],
-    explain: "O(1). O(1). Integer To English Words"
+    explain: 'O(1). O(1). Integer To English Words',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "More-significant groups are spoken first — final DONE caption",
-        correct: true
+        label: 'More-significant groups are spoken first — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "More-significant groups are spoken first, so put \"\" at the front of the phrase. Running phrase: \"\"."
-  }
+    explain:
+      'More-significant groups are spoken first, so put "" at the front of the phrase. Running phrase: "".',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -370,7 +404,7 @@ export const simulator: ProblemSimulator = {
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as WordsState | undefined;
     const expected = s ? numberToWords(s.num) : '';
-    const got = s ? (s.result || (s.num === 0 ? 'Zero' : '')) : '';
+    const got = s ? s.result || (s.num === 0 ? 'Zero' : '') : '';
     return { ok: got === expected && got.length > 0, label: got || '—' };
   },
 };

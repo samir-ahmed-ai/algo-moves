@@ -13,11 +13,7 @@ import {
   useCanvasStatic,
   type CanvasActions,
 } from '@/shell/canvas';
-import {
-  CodeStudioProvider,
-  useCodeStudioContent,
-  useCodeStudioPhase,
-} from './CodeStudio';
+import { CodeStudioProvider, useCodeStudioContent, useCodeStudioPhase } from './CodeStudio';
 import { ProblemOverviewBody } from '@/shell/panels/problem/ProblemOverviewBody';
 import { QuizStageBody } from '@/shell/panels/problem/QuizStageBody';
 import { StudioAssembleStageBody } from '@/shell/panels/problem/StudioAssembleStageBody';
@@ -87,7 +83,16 @@ export function LearnStudio({
       selectedNode,
       setSelectedNode,
     }),
-    [plugin, item, inputId, setInputId, customInput, setCustomInput, inputFrameCounts, selectedNode],
+    [
+      plugin,
+      item,
+      inputId,
+      setInputId,
+      customInput,
+      setCustomInput,
+      inputFrameCounts,
+      selectedNode,
+    ],
   );
   const frameValue = useMemo(
     () => buildFrameContextValue(frames, player, frame),
@@ -98,11 +103,7 @@ export function LearnStudio({
     <CanvasStaticProvider value={staticValue}>
       <CanvasFrameProvider value={frameValue}>
         <CodeStudioProvider>
-          <StudioShell
-            key={item.id}
-            onOpenPalette={onOpenPalette}
-            onOpenHelp={onOpenHelp}
-          />
+          <StudioShell key={item.id} onOpenPalette={onOpenPalette} onOpenHelp={onOpenHelp} />
         </CodeStudioProvider>
       </CanvasFrameProvider>
     </CanvasStaticProvider>
@@ -141,7 +142,10 @@ function StudioShell({
     [hasQuiz, hasReassemble, reference],
   );
   const order = useMemo(() => flatOrder(avail), [avail]);
-  const stages = useMemo(() => STUDIO_GROUPS.filter((g) => avail.some((t) => t.group === g.id)), [avail]);
+  const stages = useMemo(
+    () => STUDIO_GROUPS.filter((g) => avail.some((t) => t.group === g.id)),
+    [avail],
+  );
 
   const [activeId, setActiveId] = useState(() => initialTab(item.id, avail));
 
@@ -320,4 +324,3 @@ function StageBody({
     </div>
   );
 }
-

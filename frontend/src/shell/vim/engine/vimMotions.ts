@@ -163,11 +163,13 @@ function findOnRow(
 ): number | null {
   if (forward) {
     for (let c = fromCol + 1; c < cols(grid); c++) {
-      if (isWalkable(grid, row, c) && cellChar(grid, row, c).toLowerCase() === char.toLowerCase()) return c;
+      if (isWalkable(grid, row, c) && cellChar(grid, row, c).toLowerCase() === char.toLowerCase())
+        return c;
     }
   } else {
     for (let c = fromCol - 1; c >= 0; c--) {
-      if (isWalkable(grid, row, c) && cellChar(grid, row, c).toLowerCase() === char.toLowerCase()) return c;
+      if (isWalkable(grid, row, c) && cellChar(grid, row, c).toLowerCase() === char.toLowerCase())
+        return c;
     }
   }
   return null;

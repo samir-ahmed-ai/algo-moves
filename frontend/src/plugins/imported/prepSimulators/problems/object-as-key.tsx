@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -43,18 +49,19 @@ function gradesToMap(entries: [Student, number][]): Map<string, number> {
   return m;
 }
 
-function record({ students, grades }: ObjectAsKeyInput): Frame<ObjectAsKeyState>[] {  const gmap = gradesToMap(grades);
+function record({ students, grades }: ObjectAsKeyInput): Frame<ObjectAsKeyState>[] {
+  const gmap = gradesToMap(grades);
   const result: ResultEntry[] = [];
 
   const { emit, frames } = createRecorder<ObjectAsKeyState>(() => ({
-        students,
-        grades,
-        i: null,
-        probeKey: null,
-        found: null,
-        result: result.map((e) => ({ student: e.student, grade: e.grade })),
-        done: false
-      }));
+    students,
+    grades,
+    i: null,
+    probeKey: null,
+    found: null,
+    result: result.map((e) => ({ student: e.student, grade: e.grade })),
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -80,7 +87,12 @@ function record({ students, grades }: ObjectAsKeyInput): Frame<ObjectAsKeyState>
         'COPY',
         `result[${s.Name}]=${g}`,
         `Hit — the struct key {${s.ID},"${s.Name}"} is present with grade ${g}. Copy it into the result: result[{${s.ID},"${s.Name}"}] = ${g}.`,
-        { i, probeKey: k, found: g, result: result.map((e) => ({ student: e.student, grade: e.grade })) },
+        {
+          i,
+          probeKey: k,
+          found: g,
+          result: result.map((e) => ({ student: e.student, grade: e.grade })),
+        },
         'good',
       );
     } else {
@@ -137,7 +149,9 @@ function View({ frame }: PluginViewProps<ObjectAsKeyState>) {
         {s.grades.map(([st, g]) => `${st.ID}·${st.Name}:${g}`).join(', ')}
         {'}'}
       </div>
-      <div className={cn('mt-1 font-mono', s.result.length ? 'text-good' : 'text-ink3', vizText.sm)}>
+      <div
+        className={cn('mt-1 font-mono', s.result.length ? 'text-good' : 'text-ink3', vizText.sm)}
+      >
         result {'{'}
         {s.result.map((e) => `${e.student.ID}·${e.student.Name}:${e.grade}`).join(', ')}
         {'}'}
@@ -156,7 +170,10 @@ function Inspector({ frame }: InspectorProps<ObjectAsKeyState>) {
       <InspectorRow k="grades size" v={s.grades.length} />
       <InspectorRow k="i" v={s.i ?? '—'} />
       <InspectorRow k="key {ID,Name}" v={cur ? `{${cur.ID}, ${cur.Name}}` : '—'} />
-      <InspectorRow k="lookup" v={s.found !== null ? `hit ${s.found}` : s.probeKey !== null ? 'miss' : '—'} />
+      <InspectorRow
+        k="lookup"
+        v={s.found !== null ? `hit ${s.found}` : s.probeKey !== null ? 'miss' : '—'}
+      />
       <InspectorRow k="result size" v={s.result.length} />
     </VarGrid>
   );
@@ -190,132 +207,130 @@ const sampleB: ObjectAsKeyInput = {
   ],
 };
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Object as key\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Object as key"?',
     choices: [
       {
-        label: "Custom hash key / struct map — fits this problem",
-        correct: true
+        label: 'Custom hash key / struct map — fits this problem',
+        correct: true,
       },
       {
-        label: "Frequency map — different approach"
+        label: 'Frequency map — different approach',
       },
       {
-        label: "Sliding window + frequency map — different approach"
+        label: 'Sliding window + frequency map — different approach',
       },
       {
-        label: "Hash map chain reconstruction — different approach"
-      }
+        label: 'Hash map chain reconstruction — different approach',
+      },
     ],
-    explain: "The whole struct value is the map key; Go compares its fields"
+    explain: 'The whole struct value is the map key; Go compares its fields',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Object as key), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Object as key), what strategy is established?',
     choices: [
       {
-        label: "The whole struct value — described in INIT caption",
-        correct: true
+        label: 'The whole struct value — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Object as key: the grades map is keyed by the whole Student struct, so a lookup matches only when BOTH ID and Name are equal. We scan the students list and copy each one that exists in the map into the result."
+    explain:
+      'Object as key: the grades map is keyed by the whole Student struct, so a lookup matches only when BOTH ID and Name are equal. We scan the students list and copy each one that exists in the map into the result.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"COPY\" step (result[]=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "COPY" step (result[]=), what happens?',
     choices: [
       {
-        label: "Hit — the struct key {,\"\"} — this move caption",
-        correct: true
+        label: 'Hit — the struct key {,""} — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Hit — the struct key {,\"\"} is present with grade . Copy it into the result: result[{,\"\"}] = ."
+    explain:
+      'Hit — the struct key {,""} is present with grade . Copy it into the result: result[{,""}] = .',
   },
   {
-    id: "state",
-    prompt: "What does the `i` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: "index of the student currently — updated each frame",
-        correct: true
+        label: 'index of the student currently — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `i` in sync: index of the student currently being looked up"
+    explain: 'The recorder keeps `i` in sync: index of the student currently being looked up',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Object as key\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Object as key"?',
     choices: [
       {
-        label: "O(1) per op time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(1) per op time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n·e·α(n)) time, O(n·e) space — wrong order of growth"
+        label: 'O(n·e·α(n)) time, O(n·e) space — wrong order of growth',
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(1) per op. O(n). map[Student]; copy grades[s] when present"
+    explain: 'O(1) per op. O(n). map[Student]; copy grades[s] when present',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Done. of students were found — final DONE caption",
-        correct: true
+        label: 'Done. of students were found — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Done.  of  students were found in the grades map and copied to the result. Each lookup was O(1); the result holds O(n) entries."
-  }
+    explain:
+      'Done.  of  students were found in the grades map and copied to the result. Each lookup was O(1); the result holds O(n) entries.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

@@ -22,20 +22,24 @@ export interface ReportedParticipant {
  */
 export function useMatchReporter(gameId: string): {
   isReporter: boolean;
-  report: (participants: ReportedParticipant[], opts?: { mode?: RoomMode; metadata?: Record<string, unknown> }) => Promise<SubmitMatchResult | null>;
+  report: (
+    participants: ReportedParticipant[],
+    opts?: { mode?: RoomMode; metadata?: Record<string, unknown> },
+  ) => Promise<SubmitMatchResult | null>;
 } {
   const { role, room, players, sharedState, self } = useGameRoom();
   const { identities, reportResult } = useRoomComms();
   const isReporter = role === 'host';
 
   const report = useCallback(
-    async (participants: ReportedParticipant[], opts?: { mode?: RoomMode; metadata?: Record<string, unknown> }) => {
+    async (
+      participants: ReportedParticipant[],
+      opts?: { mode?: RoomMode; metadata?: Record<string, unknown> },
+    ) => {
       if (!isReporter) return null;
       // Feed the running session standings (works even without Postgres).
       reportResult(participants.filter((p) => p.placement === 1).map((p) => p.peerId));
-      const mode =
-        opts?.mode ??
-        ((sharedState as { mode?: RoomMode } | null)?.mode ?? 'duel');
+      const mode = opts?.mode ?? (sharedState as { mode?: RoomMode } | null)?.mode ?? 'duel';
       const resolved = participants.map((p) => {
         const id = identities[p.peerId];
         const name = id?.name ?? players.find((pl) => pl.id === p.peerId)?.name ?? 'Player';

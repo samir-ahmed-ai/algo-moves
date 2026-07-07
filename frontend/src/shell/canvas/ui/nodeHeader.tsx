@@ -118,19 +118,41 @@ export function PanelHeaderMeta({
   const metaSize =
     density === 'ultra' ? nodeText.xs : density === 'spacious' ? nodeText.sm : nodeText.sm;
   return (
-    <span className={cn('shrink-0 font-mono tabular-nums text-ink3', metaSize, className)}>{children}</span>
+    <span className={cn('shrink-0 font-mono tabular-nums text-ink3', metaSize, className)}>
+      {children}
+    </span>
   );
 }
 
-export function PanelHeaderSub({ children, className }: { children: ReactNode; className?: string }) {
+export function PanelHeaderSub({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
-    <div className={cn('flex min-w-0 items-center gap-1 font-mono text-ink3', nodeText.sm, className)}>{children}</div>
+    <div
+      className={cn('flex min-w-0 items-center gap-1 font-mono text-ink3', nodeText.sm, className)}
+    >
+      {children}
+    </div>
   );
 }
 
-export function PanelHeaderActions({ children, className }: { children: ReactNode; className?: string }) {
+export function PanelHeaderActions({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
-    <div className={cn('nodrag ml-auto flex shrink-0 cursor-default items-center gap-1', className)}>{children}</div>
+    <div
+      className={cn('nodrag ml-auto flex shrink-0 cursor-default items-center gap-1', className)}
+    >
+      {children}
+    </div>
   );
 }
 
@@ -156,7 +178,9 @@ export function PanelBody({
     <div
       className={cn(
         'panel-node-body nowheel flex flex-col text-ink',
-        flush ? 'gap-0 rounded-none bg-transparent p-0' : cn('gap-[var(--node-gap,0.5rem)] rounded-[calc(var(--radius)-2px)] bg-panel'),
+        flush
+          ? 'gap-0 rounded-none bg-transparent p-0'
+          : cn('gap-[var(--node-gap,0.5rem)] rounded-[calc(var(--radius)-2px)] bg-panel'),
         fill ? 'min-h-0 flex-1 overflow-hidden' : 'shrink-0 overflow-x-auto',
         pad,
         className,

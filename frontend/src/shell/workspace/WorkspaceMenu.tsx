@@ -46,9 +46,21 @@ function MenuRow({
         accent ? 'text-accent' : 'text-ink2 hover:text-ink',
       )}
     >
-      <span className={cn('grid h-4 w-4 shrink-0 place-items-center', accent && 'text-accent')}>{icon}</span>
-      <span className={cn('min-w-0 flex-1 truncate', chromeText.sm, accent && 'font-medium text-accent')}>{label}</span>
-      {shortcut ? <span className={cn('shrink-0 tabular-nums text-ink3', chromeText.xs)}>{shortcut}</span> : null}
+      <span className={cn('grid h-4 w-4 shrink-0 place-items-center', accent && 'text-accent')}>
+        {icon}
+      </span>
+      <span
+        className={cn(
+          'min-w-0 flex-1 truncate',
+          chromeText.sm,
+          accent && 'font-medium text-accent',
+        )}
+      >
+        {label}
+      </span>
+      {shortcut ? (
+        <span className={cn('shrink-0 tabular-nums text-ink3', chromeText.xs)}>{shortcut}</span>
+      ) : null}
     </button>
   );
 }
@@ -63,8 +75,21 @@ export interface WorkspaceMenuDropdownProps extends WorkspaceMenuProps {
   compact?: boolean;
 }
 
-export function WorkspaceMenuDropdown({ onOpenPalette, onOpenHelp, compact }: WorkspaceMenuDropdownProps) {
-  const { menuOpen, setMenuOpen, goHome, enterPlans, canvasAdd, setSettingsOpen, activeItemId, focusCanvas } = useWorkspace();
+export function WorkspaceMenuDropdown({
+  onOpenPalette,
+  onOpenHelp,
+  compact,
+}: WorkspaceMenuDropdownProps) {
+  const {
+    menuOpen,
+    setMenuOpen,
+    goHome,
+    enterPlans,
+    canvasAdd,
+    setSettingsOpen,
+    activeItemId,
+    focusCanvas,
+  } = useWorkspace();
   const rootRef = useRef<HTMLDivElement>(null);
   const [explorerOpen, setExplorerOpen] = useState(false);
   const [explorerFocus, setExplorerFocus] = useState<ExplorerFocus>(null);
@@ -146,7 +171,12 @@ export function WorkspaceMenuDropdown({ onOpenPalette, onOpenHelp, compact }: Wo
             accent
             onClick={() => pick(onOpenPalette)}
           />
-          <MenuRow icon={<HelpCircle className="h-4 w-4" />} label="Help" shortcut="?" onClick={() => pick(onOpenHelp)} />
+          <MenuRow
+            icon={<HelpCircle className="h-4 w-4" />}
+            label="Help"
+            shortcut="?"
+            onClick={() => pick(onOpenHelp)}
+          />
 
           <MenuDivider />
 
@@ -195,7 +225,12 @@ export function WorkspaceMenu({ onOpenPalette, onOpenHelp }: WorkspaceMenuProps)
   return (
     <header className={cn('nodrag sticky top-0 z-20', chromeBar.shell)}>
       <WorkspaceMenuDropdown compact onOpenPalette={onOpenPalette} onOpenHelp={onOpenHelp} />
-      <span className={cn('min-w-0 flex-1 truncate font-semibold text-ink max-lg:sr-only', chromeText.sm)}>
+      <span
+        className={cn(
+          'min-w-0 flex-1 truncate font-semibold text-ink max-lg:sr-only',
+          chromeText.sm,
+        )}
+      >
         Algo Moves
       </span>
       <AuthButton compact />

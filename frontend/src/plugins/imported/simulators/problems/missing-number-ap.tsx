@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  RailGroup,
+  RailResult,
+  RailStat,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+} from '../../../_shared/vizKit';
 
 interface ApInput {
   values: number[];
@@ -20,23 +33,24 @@ interface ApState {
   done: boolean;
 }
 
-function record({ values }: ApInput): Frame<ApState>[] {  const n = values.length;
+function record({ values }: ApInput): Frame<ApState>[] {
+  const n = values.length;
   const dead = new Array<boolean>(n).fill(false);
   const diff = (values[n - 1] - values[0]) / n;
   let lo = 0;
   let hi = n - 1;
 
   const { emit, frames } = createRecorder<ApState>(() => ({
-        values: values,
-        diff: diff,
-        lo: lo,
-        hi: hi,
-        dead: dead.slice(),
-        mid: null,
-        expected: null,
-        result: null,
-        done: false
-      }));
+    values: values,
+    diff: diff,
+    lo: lo,
+    hi: hi,
+    dead: dead.slice(),
+    mid: null,
+    expected: null,
+    result: null,
+    done: false,
+  }));
   const emitDone = (
     type: string,
     note: string,
@@ -45,7 +59,12 @@ function record({ values }: ApInput): Frame<ApState>[] {  const n = values.lengt
     tone?: 'good' | 'bad',
   ) => emit(type, note, caption, { ...partial, done: true }, tone);
 
-  emit('INIT', `d=${diff}`, `The complete progression would step by d = (${values[n - 1]} − ${values[0]}) / ${n} = ${diff}. Cell i should hold ${values[0]} + i·${diff}. Binary-search the first index whose value has slipped off that expected line — the gap sits just before it.`, { mid: null, expected: null, result: null });
+  emit(
+    'INIT',
+    `d=${diff}`,
+    `The complete progression would step by d = (${values[n - 1]} − ${values[0]}) / ${n} = ${diff}. Cell i should hold ${values[0]} + i·${diff}. Binary-search the first index whose value has slipped off that expected line — the gap sits just before it.`,
+    { mid: null, expected: null, result: null },
+  );
 
   while (lo <= hi) {
     const mid = lo + ((hi - lo) >> 1);
@@ -54,17 +73,33 @@ function record({ values }: ApInput): Frame<ApState>[] {  const n = values.lengt
       // progression still intact up to mid → the break is to the right
       for (let i = lo; i <= mid; i++) dead[i] = true;
       lo = mid + 1;
-      emit('RIGHT', `lo=${lo}`, `arr[${mid}] = ${values[mid]} matches the expected ${expected}, so every term up to index ${mid} is on the line. The missing term is further right: set lo = ${lo}.`, { mid: mid, expected: expected, result: null });
+      emit(
+        'RIGHT',
+        `lo=${lo}`,
+        `arr[${mid}] = ${values[mid]} matches the expected ${expected}, so every term up to index ${mid} is on the line. The missing term is further right: set lo = ${lo}.`,
+        { mid: mid, expected: expected, result: null },
+      );
     } else {
       // arr[mid] is already shifted → the break is at or before mid
       for (let i = mid; i <= hi; i++) dead[i] = true;
       hi = mid - 1;
-      emit('LEFT', `hi=${hi}`, `arr[${mid}] = ${values[mid]} but the line expects ${expected}, so the gap is at or before index ${mid}. Set hi = ${hi}.`, { mid: mid, expected: expected, result: null });
+      emit(
+        'LEFT',
+        `hi=${hi}`,
+        `arr[${mid}] = ${values[mid]} but the line expects ${expected}, so the gap is at or before index ${mid}. Set hi = ${hi}.`,
+        { mid: mid, expected: expected, result: null },
+      );
     }
   }
 
   const result = values[0] + lo * diff;
-  emitDone('DONE', `missing=${result}`, `lo settled at index ${lo}: the first slot whose value drifted off the line. The missing term is ${values[0]} + ${lo}·${diff} = ${result}.`, { mid: null, expected: null, result: result }, 'good');
+  emitDone(
+    'DONE',
+    `missing=${result}`,
+    `lo settled at index ${lo}: the first slot whose value drifted off the line. The missing term is ${values[0]} + ${lo}·${diff} = ${result}.`,
+    { mid: null, expected: null, result: result },
+    'good',
+  );
   return frames;
 }
 
@@ -130,6 +165,8 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as ApState | undefined;
-    return s && s.result !== null ? { ok: true, label: `missing = ${s.result}` } : { ok: false, label: '—' };
+    return s && s.result !== null
+      ? { ok: true, label: `missing = ${s.result}` }
+      : { ok: false, label: '—' };
   },
 };

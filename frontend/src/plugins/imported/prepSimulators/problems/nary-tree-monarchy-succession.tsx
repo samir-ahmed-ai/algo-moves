@@ -1,8 +1,23 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface MonarchyInput {
   /**
@@ -81,7 +96,10 @@ function buildMonarchy(lines: string[]): { members: Map<string, Member>; king: s
  * draw the tree. Child k of node at index i goes to slot 2i+1+k. Inputs are kept
  * small with <=2 successors per member, so no member overflows its two slots.
  */
-function layout(king: string, members: Map<string, Member>): {
+function layout(
+  king: string,
+  members: Map<string, Member>,
+): {
   tree: (string | null)[];
   indexOf: Map<string, number>;
 } {
@@ -114,7 +132,13 @@ function record({ lines }: MonarchyInput): Frame<MonarchyState>[] {
   }));
 
   if (king === null) {
-    emit('DONE', 'no monarch', 'No monarch could be parsed from the input lines, so the succession order is empty.', { tree: [], active: null, visited: [], stack: [], order: [], done: true }, 'bad');
+    emit(
+      'DONE',
+      'no monarch',
+      'No monarch could be parsed from the input lines, so the succession order is empty.',
+      { tree: [], active: null, visited: [], stack: [], order: [], done: true },
+      'bad',
+    );
     return frames;
   }
 
@@ -122,7 +146,12 @@ function record({ lines }: MonarchyInput): Frame<MonarchyState>[] {
   tree = laid.tree;
   const { indexOf } = laid;
 
-  emit('INIT', `monarch ${king}`, `Monarchy succession: the parent→children lines are parsed into a family tree rooted at the monarch "${king}". An iterative pre-order walk lists each ruler before their descendants — a stack drives it, pushing successors in reverse so the eldest is popped first.`, { active: 0, stack: [king] });
+  emit(
+    'INIT',
+    `monarch ${king}`,
+    `Monarchy succession: the parent→children lines are parsed into a family tree rooted at the monarch "${king}". An iterative pre-order walk lists each ruler before their descendants — a stack drives it, pushing successors in reverse so the eldest is popped first.`,
+    { active: 0, stack: [king] },
+  );
 
   // Iterative pre-order, mirroring preorderSuccessors: pop, emit, push successors reversed.
   const stack: string[] = [king];
@@ -133,20 +162,37 @@ function record({ lines }: MonarchyInput): Frame<MonarchyState>[] {
     visited.push(idx);
 
     const succ = members.get(curr)?.successors ?? [];
-    emit('VISIT', curr, `Pop "${curr}" off the stack and add it to the succession order (position ${order.length}). ${
+    emit(
+      'VISIT',
+      curr,
+      `Pop "${curr}" off the stack and add it to the succession order (position ${order.length}). ${
         succ.length === 0
           ? `"${curr}" has no successors, so nothing new is pushed.`
           : `Its successors are [${succ.join(', ')}] — push them in reverse so "${succ[0]}" ends up on top and is crowned next.`
-      }`, { active: idx, stack: stack }, 'good');
+      }`,
+      { active: idx, stack: stack },
+      'good',
+    );
 
     for (let i = succ.length - 1; i >= 0; i--) stack.push(succ[i]);
 
     if (succ.length > 0) {
-      emit('PUSH', `+${succ.length}`, `After pushing the successors of "${curr}" reversed, the stack (top→bottom) is [${[...stack].reverse().join(', ')}]. The next pop takes the top, "${stack[stack.length - 1]}".`, { active: idx, stack: stack });
+      emit(
+        'PUSH',
+        `+${succ.length}`,
+        `After pushing the successors of "${curr}" reversed, the stack (top→bottom) is [${[...stack].reverse().join(', ')}]. The next pop takes the top, "${stack[stack.length - 1]}".`,
+        { active: idx, stack: stack },
+      );
     }
   }
 
-  emit('DONE', `${order.length} rulers`, `The stack is empty — every member has been listed. The full line of succession is: ${order.join(' → ')}.`, { active: null, stack: [] , done: true }, 'good');
+  emit(
+    'DONE',
+    `${order.length} rulers`,
+    `The stack is empty — every member has been listed. The full line of succession is: ${order.join(' → ')}.`,
+    { active: null, stack: [], done: true },
+    'good',
+  );
 
   return frames;
 }
@@ -163,11 +209,7 @@ function View({ frame }: PluginViewProps<MonarchyState>) {
   const activeName = s.active !== null ? s.tree[s.active] : null;
   const rail = (
     <>
-      <RailStack
-        label="stack"
-        items={[...s.stack].reverse()}
-        topLabel="top"
-      />
+      <RailStack label="stack" items={[...s.stack].reverse()} topLabel="top" />
       <RailGroup label="scan">
         <RailStat k="current" v={activeName ?? '—'} tone="accent" />
         <RailStat k="listed" v={`${s.order.length}/${total}`} />
@@ -204,132 +246,130 @@ function Inspector({ frame }: InspectorProps<MonarchyState>) {
 export const manifestId = 'prep-trees-nary-tree-monarchy-succession';
 export const title = 'Monarchy succession order';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Monarchy succession order\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Monarchy succession order"?',
     choices: [
       {
-        label: "Tree build + iterative pre-order — fits this problem",
-        correct: true
+        label: 'Tree build + iterative pre-order — fits this problem',
+        correct: true,
       },
       {
-        label: "DFS tracking top-2 child contributions — different approach"
+        label: 'DFS tracking top-2 child contributions — different approach',
       },
       {
-        label: "Mid divide BST — different approach"
+        label: 'Mid divide BST — different approach',
       },
       {
-        label: "Two Paths + LCA via Common Prefix — different approach"
-      }
+        label: 'Two Paths + LCA via Common Prefix — different approach',
+      },
     ],
-    explain: "Parse parent->children lines into a map, then iterative pre-order of names"
+    explain: 'Parse parent->children lines into a map, then iterative pre-order of names',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Monarchy succession order), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Monarchy succession order), what strategy is established?',
     choices: [
       {
-        label: "Parse parent->children lines into a map — described in INIT caption",
-        correct: true
+        label: 'Parse parent->children lines into a map — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Monarchy succession: the parent→children lines are parsed into a family tree rooted at the monarch \"\". An iterative pre-order walk lists each ruler before their descendants — a stack drives it, pushing successors in reverse so the eldest is popped first."
+    explain:
+      'Monarchy succession: the parent→children lines are parsed into a family tree rooted at the monarch "". An iterative pre-order walk lists each ruler before their descendants — a stack drives it, pushing successors in reverse so the eldest is popped first.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"PUSH\" step (+), what happens?",
+    id: 'key-step',
+    prompt: 'On the "PUSH" step (+), what happens?',
     choices: [
       {
-        label: "After pushing the successors of \"\" — this move caption",
-        correct: true
+        label: 'After pushing the successors of "" — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "After pushing the successors of \"\" reversed, the stack (top→bottom) is []. The next pop takes the top, \"\"."
+    explain:
+      'After pushing the successors of "" reversed, the stack (top→bottom) is []. The next pop takes the top, "".',
   },
   {
-    id: "state",
-    prompt: "What does the `active` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `active` field track in the visualization state?',
     choices: [
       {
-        label: "tree index of the member — updated each frame",
-        correct: true
+        label: 'tree index of the member — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `active` in sync: tree index of the member just popped / being emitted"
+    explain:
+      'The recorder keeps `active` in sync: tree index of the member just popped / being emitted',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Monarchy succession order\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Monarchy succession order"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n) time, O(h) space — wrong order of growth"
+        label: 'O(n) time, O(h) space — wrong order of growth',
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). buildMonarchyMap -> pre-order stack (push successors reversed)"
+    explain: 'O(n). O(n). buildMonarchyMap -> pre-order stack (push successors reversed)',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "The stack is empty — every — final DONE caption",
-        correct: true
+        label: 'The stack is empty — every — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "The stack is empty — every member has been listed. The full line of succession is: ."
-  }
+    explain: 'The stack is empty — every member has been listed. The full line of succession is: .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

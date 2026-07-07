@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -33,7 +39,8 @@ interface DetectLoopState {
  * The list is a value array; `next(i)` follows the chain, wrapping the tail
  * back to `loopAt` when a loop exists, else returning null past the end.
  */
-function record({ values, loopAt }: DetectLoopInput): Frame<DetectLoopState>[] {  const n = values.length;
+function record({ values, loopAt }: DetectLoopInput): Frame<DetectLoopState>[] {
+  const n = values.length;
 
   const next = (i: number | null): number | null => {
     if (i === null) return null;
@@ -43,22 +50,28 @@ function record({ values, loopAt }: DetectLoopInput): Frame<DetectLoopState>[] {
   };
 
   const { emit, frames } = createRecorder<DetectLoopState>(() => ({
-        values,
-        loopAt,
-        slow: null,
-        fast: null,
-        phase: 'init',
-        entry: null,
-        hasLoop: null,
-        done: false
-      }));
+    values,
+    loopAt,
+    slow: null,
+    fast: null,
+    phase: 'init',
+    entry: null,
+    hasLoop: null,
+    done: false,
+  }));
 
   if (n === 0) {
-    emit('INIT', 'empty', 'The list is empty, so there is nothing to traverse — no loop.', {
-      phase: 'done',
-      hasLoop: false,
-      done: true,
-    }, 'bad');
+    emit(
+      'INIT',
+      'empty',
+      'The list is empty, so there is nothing to traverse — no loop.',
+      {
+        phase: 'done',
+        hasLoop: false,
+        done: true,
+      },
+      'bad',
+    );
     return frames;
   }
 
@@ -145,13 +158,9 @@ function View({ frame }: PluginViewProps<DetectLoopState>) {
     return '';
   };
 
-  const chainHint = s.values
-    .map((v) => `${v}`)
-    .join(' → ');
+  const chainHint = s.values.map((v) => `${v}`).join(' → ');
   const loopTail =
-    s.loopAt >= 0
-      ? ` ↺ back to index ${s.loopAt} (value ${s.values[s.loopAt]})`
-      : ' → ∅';
+    s.loopAt >= 0 ? ` ↺ back to index ${s.loopAt} (value ${s.values[s.loopAt]})` : ' → ∅';
 
   return (
     <div className="board-area">
@@ -203,112 +212,109 @@ function Inspector({ frame }: InspectorProps<DetectLoopState>) {
 export const manifestId = 'prep-linked-lists-detect-loop';
 export const title = 'Detect loop';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Detect loop\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Detect loop"?',
     choices: [
       {
-        label: "Floyd cycle — fits this problem",
-        correct: true
+        label: 'Floyd cycle — fits this problem',
+        correct: true,
       },
       {
-        label: "Josephus simulation — different approach"
+        label: 'Josephus simulation — different approach',
       },
       {
-        label: "Interweave (3-pass, no map) — different approach"
+        label: 'Interweave (3-pass, no map) — different approach',
       },
       {
-        label: "Iterative Group Reversal — different approach"
-      }
+        label: 'Iterative Group Reversal — different approach',
+      },
     ],
-    explain: "Fast laps slow inside the loop; reset one to head, walk in lockstep to the entry"
+    explain: 'Fast laps slow inside the loop; reset one to head, walk in lockstep to the entry',
   },
   {
-    id: "key-step",
-    prompt: "On the \"WALK\" step (slow=, fast=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "WALK" step (slow=, fast=), what happens?',
     choices: [
       {
-        label: "Walk in lockstep: slow → index — this move caption",
-        correct: true
+        label: 'Walk in lockstep: slow → index — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Walk in lockstep: slow → index , fast → index . They are still apart, so keep advancing both by one."
+    explain:
+      'Walk in lockstep: slow → index , fast → index . They are still apart, so keep advancing both by one.',
   },
   {
-    id: "state",
-    prompt: "What does the `loopAt` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `loopAt` field track in the visualization state?',
     choices: [
       {
-        label: "where the chain reconnects (-1 — updated each frame",
-        correct: true
+        label: 'where the chain reconnects (-1 — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `loopAt` in sync: where the chain reconnects (-1 = none)"
+    explain: 'The recorder keeps `loopAt` in sync: where the chain reconnects (-1 = none)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Detect loop\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Detect loop"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
+        label: 'O(n²) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(1) space — wrong order of growth"
+        label: 'O(1) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(1) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). meet -> slow=head; advance both by 1 until equal"
+    explain: 'O(n). O(1). meet -> slow=head; advance both by 1 until equal',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "slow and fast meet again — final DONE caption",
-        correct: true
+        label: 'slow and fast meet again — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "slow and fast meet again at index  (value ) — that is the start of the loop. Return this node."
-  }
+    explain:
+      'slow and fast meet again at index  (value ) — that is the start of the loop. Return this node.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

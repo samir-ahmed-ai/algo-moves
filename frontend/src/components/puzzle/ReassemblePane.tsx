@@ -247,7 +247,12 @@ export function ReassemblePane({
         )}
       </div>
 
-      <div className={cn('reassemble-body flex min-h-0 flex-1 flex-col', mobileWrap && 'reassemble-body--scroll')}>
+      <div
+        className={cn(
+          'reassemble-body flex min-h-0 flex-1 flex-col',
+          mobileWrap && 'reassemble-body--scroll',
+        )}
+      >
         <AssembledDropZone
           innerRef={assembledRef}
           active={dragOver}
@@ -267,7 +272,10 @@ export function ReassemblePane({
             </div>
           )}
           {placed.map((p) => (
-            <div key={p.id} className={cn('blk-row piece placed', lastPlacedId === p.id && 'placed-enter')}>
+            <div
+              key={p.id}
+              className={cn('blk-row piece placed', lastPlacedId === p.id && 'placed-enter')}
+            >
               <PuzzlePieceShell piece={p} lang={lang} wrap={!mobileWrap} mode="placed" />
             </div>
           ))}
@@ -315,13 +323,23 @@ export function ReassemblePane({
             }}
             aria-hidden
           >
-            <PuzzlePieceShell piece={pointerGhost.piece} lang={lang} wrap={!mobileWrap} mode="ghost" />
+            <PuzzlePieceShell
+              piece={pointerGhost.piece}
+              lang={lang}
+              wrap={!mobileWrap}
+              mode="ghost"
+            />
           </div>,
           document.body,
         )}
 
       {showOverview && (
-        <CodeBlueprintOverlay pieces={pieces} lang={lang} wrap={false} onClose={() => setShowOverview(false)} />
+        <CodeBlueprintOverlay
+          pieces={pieces}
+          lang={lang}
+          wrap={false}
+          onClose={() => setShowOverview(false)}
+        />
       )}
     </>
   );

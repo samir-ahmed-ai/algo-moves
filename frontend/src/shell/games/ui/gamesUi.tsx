@@ -1,4 +1,10 @@
-import { useEffect, useRef, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from 'react';
+import {
+  useEffect,
+  useRef,
+  type ButtonHTMLAttributes,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useArcadeStrings } from '../locale';
@@ -109,7 +115,13 @@ export function ChoiceCard({
 }
 
 /** Whose turn / together banner. */
-export function TurnBadge({ tone = 'wait', children }: { tone?: 'you' | 'peer' | 'wait'; children: ReactNode }) {
+export function TurnBadge({
+  tone = 'wait',
+  children,
+}: {
+  tone?: 'you' | 'peer' | 'wait';
+  children: ReactNode;
+}) {
   return (
     <span
       className={cn(
@@ -162,7 +174,9 @@ export function WaitingForPeer({ message }: { message: string }) {
 
 /** A vertical stack of game content, centered and width-capped for readability. */
 export function GameBody({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('mx-auto flex w-full max-w-md flex-col gap-3', className)}>{children}</div>;
+  return (
+    <div className={cn('mx-auto flex w-full max-w-md flex-col gap-3', className)}>{children}</div>
+  );
 }
 
 /** Vibrant bordered play surface — shared arena chrome for in-game phases. */
@@ -257,10 +271,7 @@ export function SwipeHint({ message }: { message: string }) {
     return () => clearTimeout(t);
   }, []);
   return (
-    <div
-      ref={ref}
-      className="flex items-center justify-center gap-2 text-xs text-ink3 py-1"
-    >
+    <div ref={ref} className="flex items-center justify-center gap-2 text-xs text-ink3 py-1">
       <span className="animate-[swipeArrow_1s_ease-in-out_infinite]">👆</span>
       <span>{message}</span>
       <style>{`

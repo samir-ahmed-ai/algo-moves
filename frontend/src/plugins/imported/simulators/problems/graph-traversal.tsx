@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { GraphBoard } from '../../../../components/board/GraphBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 import { circleLayout } from '../../../_shared/graphLayout';
 
 interface GTInput {
@@ -45,39 +59,66 @@ function record({ adj, pos }: GTInput): Frame<GTState>[] {
 
   color[0] = 2;
   queue.push(0);
-  emit('SEED', `queue [0]`, `Seed the queue with the source node 0 and mark it queued.`, { active: 0 });
+  emit('SEED', `queue [0]`, `Seed the queue with the source node 0 and mark it queued.`, {
+    active: 0,
+  });
 
   while (queue.length > 0) {
     const v = queue.shift() as number;
     color[v] = 1;
     order.push(v);
-    emit('VISIT', `visit ${v}`, `Dequeue node ${v}, mark it visited, and append it to the traversal order (now [${order.join(', ')}]).`, { active: v });
+    emit(
+      'VISIT',
+      `visit ${v}`,
+      `Dequeue node ${v}, mark it visited, and append it to the traversal order (now [${order.join(', ')}]).`,
+      { active: v },
+    );
 
     for (const nb of adj[v]) {
       if (color[nb] === 0) {
         color[nb] = 2;
         queue.push(nb);
-        emit('ENQUEUE', `enqueue ${nb}`, `Neighbour ${nb} of ${v} is unvisited — mark it queued and push it. Queue is now [${queue.join(', ')}].`, { active: v });
+        emit(
+          'ENQUEUE',
+          `enqueue ${nb}`,
+          `Neighbour ${nb} of ${v} is unvisited — mark it queued and push it. Queue is now [${queue.join(', ')}].`,
+          { active: v },
+        );
       }
     }
   }
 
-  emit('DONE', `order ${order.length}`, `Queue empty — every reachable node visited. BFS order: [${order.join(', ')}].`, { active: null, done: true }, 'good');
+  emit(
+    'DONE',
+    `order ${order.length}`,
+    `Queue empty — every reachable node visited. BFS order: [${order.join(', ')}].`,
+    { active: null, done: true },
+    'good',
+  );
   return frames;
 }
 
 function View({ frame }: PluginViewProps<GTState>) {
   const s = frame.state;
   return (
-    <VizStage rail={<>
-      <RailStack label="queue" items={s.queue.map(String)} topLabel="front" highlightEnd="bottom" />
-      <RailStack label="order" items={s.order.map(String)} />
-      <RailGroup label="scan">
-        <RailStat k="current" v={s.active ?? '—'} tone="accent" />
-        <RailStat k="visited" v={`${s.order.length}/${s.adj.length}`} />
-      </RailGroup>
-      {s.done && <RailResult label="order" value={`[${s.order.join(', ')}]`} tone="good" />}
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailStack
+            label="queue"
+            items={s.queue.map(String)}
+            topLabel="front"
+            highlightEnd="bottom"
+          />
+          <RailStack label="order" items={s.order.map(String)} />
+          <RailGroup label="scan">
+            <RailStat k="current" v={s.active ?? '—'} tone="accent" />
+            <RailStat k="visited" v={`${s.order.length}/${s.adj.length}`} />
+          </RailGroup>
+          {s.done && <RailResult label="order" value={`[${s.order.join(', ')}]`} tone="good" />}
+        </>
+      }
+    >
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -103,7 +144,14 @@ function Inspector({ frame }: InspectorProps<GTState>) {
 }
 
 const G6: GTInput = {
-  adj: [[1, 2], [0, 3, 4], [0, 4], [1, 5], [1, 2, 5], [3, 4]],
+  adj: [
+    [1, 2],
+    [0, 3, 4],
+    [0, 4],
+    [1, 5],
+    [1, 2, 5],
+    [3, 4],
+  ],
   pos: circleLayout(6),
 };
 const G5: GTInput = {

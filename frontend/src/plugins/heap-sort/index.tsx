@@ -1,4 +1,9 @@
-import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
+import {
+  definePlugin,
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+} from '../../core/types';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, badCases, intro } from './cases';
@@ -152,7 +157,15 @@ function record({ values: initial }: SortInput): Frame<SortState>[] {
   phase = 'done';
   sortedFrom = 0;
   heapSize = 0;
-  emit('DONE', 'sorted ✓', `Every root has been extracted to the tail — the array is fully sorted.`, null, null, null, 'good');
+  emit(
+    'DONE',
+    'sorted ✓',
+    `Every root has been extracted to the tail — the array is fully sorted.`,
+    null,
+    null,
+    null,
+    'good',
+  );
   return frames;
 }
 
@@ -166,19 +179,21 @@ function View({ frame }: PluginViewProps<SortState>) {
     return 'idle';
   };
   return (
-    <VizStage rail={
-      <>
-        <RailGroup label="phase">
-          <RailStat k="phase" v={s.phase} tone={s.phase === 'done' ? 'good' : 'accent'} />
-          <RailStat k="heap" v={s.heapSize} />
-        </RailGroup>
-        <RailGroup label="ops">
-          <RailStat k="cmp" v={s.comparisons} />
-          <RailStat k="swap" v={s.swaps} />
-        </RailGroup>
-        {s.phase === 'done' && <RailResult label="result" value="sorted" tone="good" />}
-      </>
-    }>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="phase">
+            <RailStat k="phase" v={s.phase} tone={s.phase === 'done' ? 'good' : 'accent'} />
+            <RailStat k="heap" v={s.heapSize} />
+          </RailGroup>
+          <RailGroup label="ops">
+            <RailStat k="cmp" v={s.comparisons} />
+            <RailStat k="swap" v={s.swaps} />
+          </RailGroup>
+          {s.phase === 'done' && <RailResult label="result" value="sorted" tone="good" />}
+        </>
+      }
+    >
       <ArrayBars values={s.values} tone={tone} height={242} />
     </VizStage>
   );
@@ -250,14 +265,26 @@ function heapSort(nums: number[]): void {
 `;
 
 const inputs = [
-    { id: 'mix', label: '[5, 2, 8, 1, 9, 3]', value: { values: [5, 2, 8, 1, 9, 3] } },
-    { id: 'rev', label: '[8, 7, 6, 5, 4, 3, 2] · worst', value: { values: [8, 7, 6, 5, 4, 3, 2] } },
-    { id: 'dup', label: '[4, 2, 4, 1, 3, 2, 4, 1] · dups', value: { values: [4, 2, 4, 1, 3, 2, 4, 1] } },
-  ];
+  { id: 'mix', label: '[5, 2, 8, 1, 9, 3]', value: { values: [5, 2, 8, 1, 9, 3] } },
+  { id: 'rev', label: '[8, 7, 6, 5, 4, 3, 2] · worst', value: { values: [8, 7, 6, 5, 4, 3, 2] } },
+  {
+    id: 'dup',
+    label: '[4, 2, 4, 1, 3, 2, 4, 1] · dups',
+    value: { values: [4, 2, 4, 1, 3, 2, 4, 1] },
+  },
+];
 const verdict = verdictAlwaysOk('sorted');
 const teaching = wireTeachingStack({
-  record, View, inputs, verdict,
-  practice: { quiz, codePieces, cases: { good: goodCases, bad: badCases, intro, goodLabel: 'heapify steps' }, simulateQuestion: 'Which heap sift happens next?' },
+  record,
+  View,
+  inputs,
+  verdict,
+  practice: {
+    quiz,
+    codePieces,
+    cases: { good: goodCases, bad: badCases, intro, goodLabel: 'heapify steps' },
+    simulateQuestion: 'Which heap sift happens next?',
+  },
 });
 
 export const heapSortPlugin = definePlugin<SortInput, SortState>({
@@ -266,7 +293,8 @@ export const heapSortPlugin = definePlugin<SortInput, SortState>({
     title: 'Heap sort',
     difficulty: 'Medium',
     tags: ['array', 'sorting', 'heap'],
-    summary: 'Read the array as an in-place binary max-heap: build it by sifting down, then repeatedly swap the root to the tail and re-heapify the shrinking prefix.',
+    summary:
+      'Read the array as an in-place binary max-heap: build it by sifting down, then repeatedly swap the root to the tail and re-heapify the shrinking prefix.',
     source: 'https://en.wikipedia.org/wiki/Heapsort',
   },
   inputs,

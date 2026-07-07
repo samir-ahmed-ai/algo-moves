@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -20,20 +26,21 @@ interface MaxSwapState {
   done: boolean;
 }
 
-function record({ num }: MaxSwapInput): Frame<MaxSwapState>[] {  const s = String(num).split('');
+function record({ num }: MaxSwapInput): Frame<MaxSwapState>[] {
+  const s = String(num).split('');
   const last: number[] = new Array<number>(10).fill(-1);
   for (let i = 0; i < s.length; i++) last[s[i].charCodeAt(0) - 48] = i;
 
   const { emit, frames } = createRecorder<MaxSwapState>(() => ({
-        digits: s.slice(),
-        num,
-        last: last.slice(),
-        i: null,
-        d: null,
-        swapWith: null,
-        result: null,
-        done: false
-      }));
+    digits: s.slice(),
+    num,
+    last: last.slice(),
+    i: null,
+    d: null,
+    swapWith: null,
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -63,7 +70,9 @@ function record({ num }: MaxSwapInput): Frame<MaxSwapState>[] {  const s = Strin
         'TRY',
         `try ${d}`,
         `Is digit ${d} available at an index past ${i}? last[${d}] = ${last[d] === -1 ? 'none' : last[d]}${
-          hasLater ? ` > ${i}, yes — this is the biggest digit we can pull left here.` : `, not to the right, skip.`
+          hasLater
+            ? ` > ${i}, yes — this is the biggest digit we can pull left here.`
+            : `, not to the right, skip.`
         }`,
         { i, d },
         hasLater ? 'good' : undefined,
@@ -99,7 +108,8 @@ function View({ frame }: PluginViewProps<MaxSwapState>) {
   const s = frame.state;
   const pointers: ArrayPointer[] = [];
   if (s.i !== null) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
-  if (s.swapWith !== null) pointers.push({ i: s.swapWith, label: 'swap', tone: 'good', place: 'below' });
+  if (s.swapWith !== null)
+    pointers.push({ i: s.swapWith, label: 'swap', tone: 'good', place: 'below' });
   const tone = (idx: number) => {
     if (s.result !== null && (idx === s.i || idx === s.swapWith)) return 'found';
     if (idx === s.i) return 'match';
@@ -111,7 +121,8 @@ function View({ frame }: PluginViewProps<MaxSwapState>) {
         num = <span className="font-mono text-ink">{s.num}</span>
         {s.d !== null && !s.done && (
           <>
-            {' · '}looking for digit ≥ <span className="font-mono text-ink">{s.d}</span> to the right
+            {' · '}looking for digit ≥ <span className="font-mono text-ink">{s.d}</span> to the
+            right
           </>
         )}
       </div>
@@ -139,7 +150,10 @@ function Inspector({ frame }: InspectorProps<MaxSwapState>) {
       <InspectorRow k="i (pos)" v={s.i ?? '—'} />
       <InspectorRow k="digit at i" v={s.i !== null ? s.digits[s.i] : '—'} />
       <InspectorRow k="d (target)" v={s.d ?? '—'} />
-      <InspectorRow k="last[d]" v={s.d !== null ? (s.last[s.d] === -1 ? 'none' : s.last[s.d]) : '—'} />
+      <InspectorRow
+        k="last[d]"
+        v={s.d !== null ? (s.last[s.d] === -1 ? 'none' : s.last[s.d]) : '—'}
+      />
       <InspectorRow k="result" v={s.result ?? (s.done ? 'none' : '…')} />
     </VarGrid>
   );
@@ -148,132 +162,129 @@ function Inspector({ frame }: InspectorProps<MaxSwapState>) {
 export const manifestId = 'prep-math-maximum-swap';
 export const title = 'Maximum Swap';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Maximum Swap\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Maximum Swap"?',
     choices: [
       {
-        label: "Greedy (last occurrence) — fits this problem",
-        correct: true
+        label: 'Greedy (last occurrence) — fits this problem',
+        correct: true,
       },
       {
-        label: "Math (sum - n*min) — different approach"
+        label: 'Math (sum - n*min) — different approach',
       },
       {
-        label: "Bitmask per Row — different approach"
+        label: 'Bitmask per Row — different approach',
       },
       {
-        label: "Parity bit test — different approach"
-      }
+        label: 'Parity bit test — different approach',
+      },
     ],
-    explain: "See Maximum Swap pattern"
+    explain: 'See Maximum Swap pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Maximum Swap), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Maximum Swap), what strategy is established?',
     choices: [
       {
-        label: "See Maximum Swap pattern — described in INIT caption",
-        correct: true
+        label: 'See Maximum Swap pattern — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Maximum Swap: swap at most two digits of  to make the largest possible number. Greedy idea — for each position from the left, try to bring in a bigger digit that appears later. Time O(n), Space O(1)."
+    explain:
+      'Maximum Swap: swap at most two digits of  to make the largest possible number. Greedy idea — for each position from the left, try to bring in a bigger digit that appears later. Time O(n), Space O(1).',
   },
   {
-    id: "key-step",
-    prompt: "On the \"TRY\" step (try ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "TRY" step (try ), what happens?',
     choices: [
       {
-        label: "Is digit available at an index — this move caption",
-        correct: true
+        label: 'Is digit available at an index — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Is digit  available at an index past ? last[] = ${\n          hasLater ? "
+    explain: 'Is digit  available at an index past ? last[] = ${\n          hasLater ? ',
   },
   {
-    id: "state",
-    prompt: "What does the `digits` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `digits` field track in the visualization state?',
     choices: [
       {
-        label: "current digit chars (mutated — updated each frame",
-        correct: true
+        label: 'current digit chars (mutated — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `digits` in sync: current digit chars (mutated after the swap)"
+    explain: 'The recorder keeps `digits` in sync: current digit chars (mutated after the swap)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Maximum Swap\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Maximum Swap"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
+        label: 'O(log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m*n) time, O(m+n) space — wrong order of growth"
+        label: 'O(m*n) time, O(m+n) space — wrong order of growth',
       },
       {
-        label: "O(m+n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(m+n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). Maximum Swap"
+    explain: 'O(n). O(1). Maximum Swap',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Swap position () with position (). — final DONE caption",
-        correct: true
+        label: 'Swap position () with position (). — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Swap position  () with position  (). The number becomes  = . Because we scan left-to-right and pick the largest later digit, the very first swap we make is optimal — return immediately."
-  }
+    explain:
+      'Swap position  () with position  (). The number becomes  = . Because we scan left-to-right and pick the largest later digit, the very first swap we make is optimal — return immediately.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

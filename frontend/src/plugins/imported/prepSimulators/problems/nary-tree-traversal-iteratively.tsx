@@ -1,7 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 import { NaryTreeBoard, type NaryNode } from '../../../../components/board/NaryTreeBoard';
 
 /**
@@ -33,58 +48,100 @@ interface TraversalState {
   done: boolean;
 }
 
-function record({ nodes }: NaryTreeInput): Frame<TraversalState>[] {  const labels = nodes.map((n) => String(n.val));
+function record({ nodes }: NaryTreeInput): Frame<TraversalState>[] {
+  const labels = nodes.map((n) => String(n.val));
   const children = nodes.map((n) => n.children);
   const visited = new Array<boolean>(nodes.length).fill(false);
   const res: number[] = [];
 
   const { emit, frames } = createRecorder<TraversalState>(() => ({
-        labels: labels,
-        children: children,
-        res: res.slice(),
-        visited: visited.slice(),
-        stack: [],
-        curr: null,
-        done: false
-      }));
+    labels: labels,
+    children: children,
+    res: res.slice(),
+    visited: visited.slice(),
+    stack: [],
+    curr: null,
+    done: false,
+  }));
 
   if (nodes.length === 0) {
-    emit('DONE', 'empty', 'The tree is empty, so pre-order traversal returns nothing.', { stack: [], curr: null , done: true }, 'bad');
+    emit(
+      'DONE',
+      'empty',
+      'The tree is empty, so pre-order traversal returns nothing.',
+      { stack: [], curr: null, done: true },
+      'bad',
+    );
     return frames;
   }
 
   const stack: number[] = [0];
-  emit('INIT', 'push root', `Pre-order traversal with an explicit stack. Seed the stack with the root (node ${labels[0]}). We pop a node, emit its value, then push its children in reverse so the leftmost child is processed first.`, { stack: stack, curr: null });
+  emit(
+    'INIT',
+    'push root',
+    `Pre-order traversal with an explicit stack. Seed the stack with the root (node ${labels[0]}). We pop a node, emit its value, then push its children in reverse so the leftmost child is processed first.`,
+    { stack: stack, curr: null },
+  );
 
   while (stack.length > 0) {
     const curr = stack.pop()!;
-    emit('POP', `pop ${labels[curr]}`, `Pop the top of the stack: node ${labels[curr]}. In pre-order we emit a node the moment we pop it.`, { stack: stack, curr: curr });
+    emit(
+      'POP',
+      `pop ${labels[curr]}`,
+      `Pop the top of the stack: node ${labels[curr]}. In pre-order we emit a node the moment we pop it.`,
+      { stack: stack, curr: curr },
+    );
 
     res.push(nodes[curr].val);
     visited[curr] = true;
-    emit('EMIT', `emit ${labels[curr]}`, `Append ${labels[curr]} to the result. Output so far: [${res.join(', ')}].`, { stack: stack, curr: curr }, 'good');
+    emit(
+      'EMIT',
+      `emit ${labels[curr]}`,
+      `Append ${labels[curr]} to the result. Output so far: [${res.join(', ')}].`,
+      { stack: stack, curr: curr },
+      'good',
+    );
 
     const kids = children[curr];
     if (kids.length === 0) {
-      emit('LEAF', 'no children', `Node ${labels[curr]} is a leaf, so there is nothing to push. Continue with whatever is on top of the stack.`, { stack: stack, curr: curr });
+      emit(
+        'LEAF',
+        'no children',
+        `Node ${labels[curr]} is a leaf, so there is nothing to push. Continue with whatever is on top of the stack.`,
+        { stack: stack, curr: curr },
+      );
     } else {
       for (let i = kids.length - 1; i >= 0; i--) {
         stack.push(kids[i]);
       }
       const pushedLabels = kids.map((c) => labels[c]);
-      emit('PUSH', `push children`, `Push node ${labels[curr]}'s children in reverse order (${[...pushedLabels].reverse().join(', ')}) so the first child ${pushedLabels[0]} lands on top and gets visited next. Stack top → bottom: [${stack.slice().reverse().map((i) => labels[i]).join(', ')}].`, { stack: stack, curr: curr });
+      emit(
+        'PUSH',
+        `push children`,
+        `Push node ${labels[curr]}'s children in reverse order (${[...pushedLabels].reverse().join(', ')}) so the first child ${pushedLabels[0]} lands on top and gets visited next. Stack top → bottom: [${stack
+          .slice()
+          .reverse()
+          .map((i) => labels[i])
+          .join(', ')}].`,
+        { stack: stack, curr: curr },
+      );
     }
   }
 
-  emit('DONE', `${res.length} nodes`, `Stack is empty — traversal complete. Pre-order result: [${res.join(', ')}].`, { stack: [], curr: null , done: true }, 'good');
+  emit(
+    'DONE',
+    `${res.length} nodes`,
+    `Stack is empty — traversal complete. Pre-order result: [${res.join(', ')}].`,
+    { stack: [], curr: null, done: true },
+    'good',
+  );
   return frames;
 }
 
 function View({ frame }: PluginViewProps<TraversalState>) {
   const s = frame.state;
   const boardNodes: NaryNode[] = s.labels.map((label, i) => ({ label, children: s.children[i] }));
-  const nodeClass = (i: number) =>
-    s.curr === i ? 'team-1' : s.visited[i] ? 'team-2' : 'team-0';
+  const nodeClass = (i: number) => (s.curr === i ? 'team-1' : s.visited[i] ? 'team-2' : 'team-0');
 
   const stackTop = s.stack.length > 0 ? s.stack[s.stack.length - 1] : null;
 
@@ -93,20 +150,32 @@ function View({ frame }: PluginViewProps<TraversalState>) {
       <RailStack
         label="stack"
         topLabel="top"
-        items={s.stack.slice().reverse().map((i) => s.labels[i])}
+        items={s.stack
+          .slice()
+          .reverse()
+          .map((i) => s.labels[i])}
       />
       <RailGroup label="current">
         <RailStat k="pop" v={s.curr !== null ? s.labels[s.curr] : '—'} tone="accent" />
         <RailStat k="next" v={stackTop !== null ? s.labels[stackTop] : '—'} />
       </RailGroup>
-      <RailResult label="result" value={s.res.length ? `[${s.res.join(', ')}]` : '…'} tone={s.done ? 'good' : 'accent'} />
+      <RailResult
+        label="result"
+        value={s.res.length ? `[${s.res.join(', ')}]` : '…'}
+        tone={s.done ? 'good' : 'accent'}
+      />
     </>
   );
 
   return (
     <VizStage rail={rail} railWidth={150}>
       {boardNodes.length > 0 && (
-        <NaryTreeBoard nodes={boardNodes} nodeClass={nodeClass} activeNode={s.curr} highlightNode={s.curr} />
+        <NaryTreeBoard
+          nodes={boardNodes}
+          nodeClass={nodeClass}
+          activeNode={s.curr}
+          highlightNode={s.curr}
+        />
       )}
     </VizStage>
   );
@@ -168,112 +237,108 @@ const sample2: NaryTreeInput = {
   ],
 };
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Nary tree traversal iteratively\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Nary tree traversal iteratively"?',
     choices: [
       {
-        label: "N-ary iterative pre/post-order with stack — fits this problem",
-        correct: true
+        label: 'N-ary iterative pre/post-order with stack — fits this problem',
+        correct: true,
       },
       {
-        label: "N-ary tree DFS height — different approach"
+        label: 'N-ary tree DFS height — different approach',
       },
       {
-        label: "Prefix sum on tree — different approach"
+        label: 'Prefix sum on tree — different approach',
       },
       {
-        label: "LCA + level distance BFS — different approach"
-      }
+        label: 'LCA + level distance BFS — different approach',
+      },
     ],
-    explain: "Pre-order: pop, emit, push children reversed; post-order: prepend value"
+    explain: 'Pre-order: pop, emit, push children reversed; post-order: prepend value',
   },
   {
-    id: "key-step",
-    prompt: "On the \"EMIT\" step (emit ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "EMIT" step (emit ), what happens?',
     choices: [
       {
-        label: "Append to the result. Output — this move caption",
-        correct: true
+        label: 'Append to the result. Output — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Append  to the result. Output so far: []."
+    explain: 'Append  to the result. Output so far: [].',
   },
   {
-    id: "state",
-    prompt: "What does the `labels` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `labels` field track in the visualization state?',
     choices: [
       {
-        label: "node value labels, index-aligned — updated each frame",
-        correct: true
+        label: 'node value labels, index-aligned — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `labels` in sync: node value labels, index-aligned with input nodes"
+    explain:
+      'The recorder keeps `labels` in sync: node value labels, index-aligned with input nodes',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Nary tree traversal iteratively\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Nary tree traversal iteratively"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(m+n) time, O(n) space — wrong order of growth"
+        label: 'O(m+n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n^2) time, O(h) space — wrong order of growth"
+        label: 'O(n^2) time, O(h) space — wrong order of growth',
       },
       {
-        label: "O(n³) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n³) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). pre: pop->emit->push reversed kids; post: prepend value on pop"
+    explain: 'O(n). O(n). pre: pop->emit->push reversed kids; post: prepend value on pop',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Stack is empty — traversal complete. — final DONE caption",
-        correct: true
+        label: 'Stack is empty — traversal complete. — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Stack is empty — traversal complete. Pre-order result: []."
-  }
+    explain: 'Stack is empty — traversal complete. Pre-order result: [].',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

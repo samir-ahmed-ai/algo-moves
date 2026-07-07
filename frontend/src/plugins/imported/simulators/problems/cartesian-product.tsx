@@ -1,9 +1,24 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  vizText,
+} from '../../../_shared/vizKit';
 
 interface CartesianInput {
   lists: string[][];
@@ -18,41 +33,69 @@ interface CartesianState {
   done: boolean;
 }
 
-function record({ lists }: CartesianInput): Frame<CartesianState>[] {  const path: string[] = [];
+function record({ lists }: CartesianInput): Frame<CartesianState>[] {
+  const path: string[] = [];
   const results: string[][] = [];
 
   const { emit, frames } = createRecorder<CartesianState>(() => ({
-        lists: lists,
-        path: path.slice(),
-        results: results.map((r) => r.slice()),
-        depth: null,
-        pick: null,
-        done: false
-      }));
+    lists: lists,
+    path: path.slice(),
+    results: results.map((r) => r.slice()),
+    depth: null,
+    pick: null,
+    done: false,
+  }));
 
   const total = lists.reduce((acc, l) => acc * l.length, 1);
   const fmt = (xs: string[]) => `(${xs.join(', ')})`;
 
-  emit('INIT', `${lists.length} lists`, `Build the Cartesian product of ${lists.length} lists by depth-first search: pick one element from list 0, recurse into list 1, and so on. Choosing one element from each list yields ${lists.map((l) => l.length).join('×')} = ${total} tuples.`, { depth: 0, pick: null });
+  emit(
+    'INIT',
+    `${lists.length} lists`,
+    `Build the Cartesian product of ${lists.length} lists by depth-first search: pick one element from list 0, recurse into list 1, and so on. Choosing one element from each list yields ${lists.map((l) => l.length).join('×')} = ${total} tuples.`,
+    { depth: 0, pick: null },
+  );
 
   const backtrack = (i: number) => {
     if (i === lists.length) {
       results.push(path.slice());
-      emit('RECORD', `+${fmt(path)}`, `Picked from every list — record the tuple ${fmt(path)} (${results.length} of ${total} so far).`, { depth: null, pick: null }, 'good');
+      emit(
+        'RECORD',
+        `+${fmt(path)}`,
+        `Picked from every list — record the tuple ${fmt(path)} (${results.length} of ${total} so far).`,
+        { depth: null, pick: null },
+        'good',
+      );
       return;
     }
     for (let j = 0; j < lists[i].length; j++) {
       const v = lists[i][j];
       path.push(v);
-      emit('CHOOSE', `list ${i} → ${v}`, `From list ${i} = [${lists[i].join(', ')}] choose "${v}" and recurse into list ${i + 1}. Tuple so far is ${fmt(path)}.`, { depth: i, pick: j });
+      emit(
+        'CHOOSE',
+        `list ${i} → ${v}`,
+        `From list ${i} = [${lists[i].join(', ')}] choose "${v}" and recurse into list ${i + 1}. Tuple so far is ${fmt(path)}.`,
+        { depth: i, pick: j },
+      );
       backtrack(i + 1);
       path.pop();
-      emit('BACKTRACK', `undo ${v}`, `Backtrack out of list ${i}: drop "${v}" so the next branch tries another element. Tuple so far is ${fmt(path)}.`, { depth: i, pick: j });
+      emit(
+        'BACKTRACK',
+        `undo ${v}`,
+        `Backtrack out of list ${i}: drop "${v}" so the next branch tries another element. Tuple so far is ${fmt(path)}.`,
+        { depth: i, pick: j },
+      );
     }
   };
 
   backtrack(0);
-  emit('DONE', `${results.length} tuples`, `All branches explored — produced all ${results.length} tuples of the Cartesian product.`, { depth: null, pick: null , done: true }, 'good');
+  emit(
+    'DONE',
+    `${results.length} tuples`,
+    `All branches explored — produced all ${results.length} tuples of the Cartesian product.`,
+    { depth: null, pick: null, done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -69,9 +112,7 @@ function View({ frame }: PluginViewProps<CartesianState>) {
         items={s.results.map((r) => `(${r.join(', ')})`)}
         topLabel="last"
       />
-      {s.done && (
-        <RailResult label="answer" value={`${s.results.length} / ${total}`} tone="good" />
-      )}
+      {s.done && <RailResult label="answer" value={`${s.results.length} / ${total}`} tone="good" />}
     </>
   );
   return (
@@ -122,7 +163,16 @@ export const title = 'Cartesian Product of Multiple Arrays';
 export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'small', label: '[[1,2],[3,4],[5]]', value: { lists: [['1', '2'], ['3', '4'], ['5']] } },
-    { id: 'colors', label: '[[a,b],[x,y]]', value: { lists: [['a', 'b'], ['x', 'y']] } },
+    {
+      id: 'colors',
+      label: '[[a,b],[x,y]]',
+      value: {
+        lists: [
+          ['a', 'b'],
+          ['x', 'y'],
+        ],
+      },
+    },
   ] satisfies SampleInput<CartesianInput>[],
   record,
   View,

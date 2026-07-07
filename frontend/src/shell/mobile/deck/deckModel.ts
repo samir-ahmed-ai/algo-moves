@@ -145,7 +145,9 @@ export interface DeckSummary {
 
 export async function deckSummary(topic: Topic): Promise<DeckSummary> {
   const deck = await buildDeck(topic);
-  const withReassemble = deck.blocks.filter((b) => b.cards.some((c) => c.kind === 'reassemble')).length;
+  const withReassemble = deck.blocks.filter((b) =>
+    b.cards.some((c) => c.kind === 'reassemble'),
+  ).length;
   return { problems: deck.blocks.length, totalQuiz: deck.totalQuiz, withReassemble };
 }
 

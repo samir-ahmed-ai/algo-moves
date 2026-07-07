@@ -25,8 +25,21 @@ import { cn } from '@/lib/utils/cn';
 import { shuffle } from '@/lib/utils/shuffle';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { ASSEMBLE_GAMES } from '@/components/puzzle/assemble';
-import { assembleGameStatsStore, maybeWriteRushBest, readRushBestSeconds } from '@/shell/assembleGameStats';
-import { Btn, Chip, EmptyState, Label, Meter, MiniTabs, nodeText, useCanvasStatic } from '@/shell/canvas';
+import {
+  assembleGameStatsStore,
+  maybeWriteRushBest,
+  readRushBestSeconds,
+} from '@/store/practice/assembleBest';
+import {
+  Btn,
+  Chip,
+  EmptyState,
+  Label,
+  Meter,
+  MiniTabs,
+  nodeText,
+  useCanvasStatic,
+} from '@/shell/canvas';
 import { useCodeStudioContent, useCodeStudioPhase } from '@/shell/study/hooks/useCodeStudio';
 import type { CodePiece } from '@/lib/code';
 import { blockKind, BLOCK_META } from '@/lib/code';
@@ -61,7 +74,6 @@ function codeLines(ref: string): Line[] {
     .map((l) => ({ text: l.trim(), indent: indentUnits(l) }));
 }
 
-
 /** Shuffle that avoids returning the already-correct order for short lists. */
 function scramble(ids: string[]): string[] {
   if (ids.length < 2) return ids.slice();
@@ -74,7 +86,10 @@ function scramble(ids: string[]): string[] {
 function Mono({ children, indent = 0 }: { children: ReactNode; indent?: number }) {
   return (
     <pre
-      className={cn('overflow-x-auto whitespace-pre font-mono leading-relaxed text-ink', nodeText.tight)}
+      className={cn(
+        'overflow-x-auto whitespace-pre font-mono leading-relaxed text-ink',
+        nodeText.tight,
+      )}
       style={indent ? { paddingLeft: `${indent * 14}px` } : undefined}
     >
       {children}
@@ -84,7 +99,12 @@ function Mono({ children, indent = 0 }: { children: ReactNode; indent?: number }
 
 function SolvedBanner({ label }: { label: string }) {
   return (
-    <div className={cn('flex items-center gap-2 rounded-md border border-good/60 bg-goodbg/50 px-2.5 py-1.5 text-good', nodeText.tight)}>
+    <div
+      className={cn(
+        'flex items-center gap-2 rounded-md border border-good/60 bg-goodbg/50 px-2.5 py-1.5 text-good',
+        nodeText.tight,
+      )}
+    >
       <Check className="h-4 w-4" /> {label}
     </div>
   );
@@ -126,7 +146,12 @@ function OrderBoard({
   /** When this string changes, the board reshuffles (e.g. problem / language switch). */
   resetSig: string;
   onSolved?: () => void;
-  footer?: (info: { solved: boolean; correctCount: number; total: number; reshuffle: () => void }) => ReactNode;
+  footer?: (info: {
+    solved: boolean;
+    correctCount: number;
+    total: number;
+    reshuffle: () => void;
+  }) => ReactNode;
 }) {
   const [order, setOrder] = useState<string[]>(() => scramble(correctIds));
   const prev = useRef(resetSig);
@@ -173,17 +198,31 @@ function OrderBoard({
                   id={id}
                   className={cn(
                     'flex items-stretch gap-1.5 rounded-md border transition-colors',
-                    correct ? 'border-good/60 bg-goodbg/40' : 'border-edge bg-panel2/50 hover:border-accent/50',
+                    correct
+                      ? 'border-good/60 bg-goodbg/40'
+                      : 'border-edge bg-panel2/50 hover:border-accent/50',
                   )}
                 >
                   <div className="flex shrink-0 cursor-grab flex-col items-center justify-center gap-0.5 rounded-l-md border-r border-edge px-1 py-1">
                     <StepBtn dir="up" disabled={pos === 0} onClick={() => move(id, -1)} />
-                    <span className={cn('font-mono tabular-nums text-ink3', nodeText['2xs'])}>{pos + 1}</span>
-                    <StepBtn dir="down" disabled={pos === order.length - 1} onClick={() => move(id, 1)} />
+                    <span className={cn('font-mono tabular-nums text-ink3', nodeText['2xs'])}>
+                      {pos + 1}
+                    </span>
+                    <StepBtn
+                      dir="down"
+                      disabled={pos === order.length - 1}
+                      onClick={() => move(id, 1)}
+                    />
                   </div>
-                  <div className="min-w-0 flex-1 py-1.5 pr-2">{renderRow(id, { pos, correct })}</div>
+                  <div className="min-w-0 flex-1 py-1.5 pr-2">
+                    {renderRow(id, { pos, correct })}
+                  </div>
                   <span className="grid w-5 shrink-0 place-items-center text-ink3">
-                    {correct ? <Check className="h-3.5 w-3.5 text-good" /> : <GripVertical className="h-3.5 w-3.5 opacity-40" />}
+                    {correct ? (
+                      <Check className="h-3.5 w-3.5 text-good" />
+                    ) : (
+                      <GripVertical className="h-3.5 w-3.5 opacity-40" />
+                    )}
                   </span>
                 </SortableRow>
               );
@@ -191,7 +230,12 @@ function OrderBoard({
           </div>
         </SortableContext>
       </DndContext>
-      {footer?.({ solved, correctCount, total: correctIds.length, reshuffle: () => setOrder(scramble(correctIds)) })}
+      {footer?.({
+        solved,
+        correctCount,
+        total: correctIds.length,
+        reshuffle: () => setOrder(scramble(correctIds)),
+      })}
     </div>
   );
 }
@@ -223,11 +267,17 @@ function PuzzleBlock({
       <div className="blk-face">
         <div className="mb-1 flex items-center gap-1.5">
           <GripVertical className="h-3 w-3 shrink-0" style={{ color: meta.stroke }} />
-          <span className={cn('font-mono tabular-nums', nodeText['2xs'])} style={{ color: meta.text }}>
+          <span
+            className={cn('font-mono tabular-nums', nodeText['2xs'])}
+            style={{ color: meta.text }}
+          >
             {pos + 1}
           </span>
           <Icon className="h-3 w-3 shrink-0" style={{ color: meta.text }} />
-          <span className={cn('font-semibold uppercase tracking-[0.08em]', nodeText['2xs'])} style={{ color: meta.text }}>
+          <span
+            className={cn('font-semibold uppercase tracking-[0.08em]', nodeText['2xs'])}
+            style={{ color: meta.text }}
+          >
             {correct ? 'locked' : meta.label}
           </span>
           <span className="flex-1" />
@@ -235,10 +285,22 @@ function PuzzleBlock({
             <Lock className="h-3 w-3 shrink-0 text-good" />
           ) : (
             <span className="flex items-center gap-0.5">
-              <button type="button" disabled={!onUp} onClick={onUp} className="nodrag blk-step" aria-label="Move up">
+              <button
+                type="button"
+                disabled={!onUp}
+                onClick={onUp}
+                className="nodrag blk-step"
+                aria-label="Move up"
+              >
                 <ArrowUp className="h-3 w-3" />
               </button>
-              <button type="button" disabled={!onDown} onClick={onDown} className="nodrag blk-step" aria-label="Move down">
+              <button
+                type="button"
+                disabled={!onDown}
+                onClick={onDown}
+                className="nodrag blk-step"
+                aria-label="Move down"
+              >
                 <ArrowDown className="h-3 w-3" />
               </button>
             </span>
@@ -290,7 +352,11 @@ function BlocksMode() {
             {order.map((id, pos) => {
               const correct = correctIds[pos] === id;
               return (
-                <SortableRow key={id} id={id} className={cn('blk-row', correct && 'blk-row--correct')}>
+                <SortableRow
+                  key={id}
+                  id={id}
+                  className={cn('blk-row', correct && 'blk-row--correct')}
+                >
                   <PuzzleBlock
                     piece={byId.get(id)!}
                     pos={pos}
@@ -308,7 +374,12 @@ function BlocksMode() {
       {solved ? (
         <SolvedBanner label="Every block locked in source order — nicely done." />
       ) : (
-        <Btn size="xs" variant="ghost" icon={<RotateCcw className="h-3.5 w-3.5" />} onClick={() => setOrder(scramble(correctIds))}>
+        <Btn
+          size="xs"
+          variant="ghost"
+          icon={<RotateCcw className="h-3.5 w-3.5" />}
+          onClick={() => setOrder(scramble(correctIds))}
+        >
           Shuffle
         </Btn>
       )}
@@ -335,7 +406,12 @@ function ScrambleMode() {
           {solved ? (
             <SolvedBanner label="Every line back in order." />
           ) : (
-            <Btn size="xs" variant="ghost" icon={<RotateCcw className="h-3.5 w-3.5" />} onClick={reshuffle}>
+            <Btn
+              size="xs"
+              variant="ghost"
+              icon={<RotateCcw className="h-3.5 w-3.5" />}
+              onClick={reshuffle}
+            >
               Shuffle
             </Btn>
           )}
@@ -401,7 +477,12 @@ function RushMode() {
           ) : undefined
         }
         right={
-          <Btn size="xs" variant="ghost" icon={<RotateCcw className="h-3.5 w-3.5" />} onClick={() => setRunKey((k) => k + 1)}>
+          <Btn
+            size="xs"
+            variant="ghost"
+            icon={<RotateCcw className="h-3.5 w-3.5" />}
+            onClick={() => setRunKey((k) => k + 1)}
+          >
             Restart
           </Btn>
         }
@@ -467,8 +548,25 @@ function FirstLetterMode() {
 }
 
 const CLOZE_KEYWORDS = [
-  'func', 'for', 'if', 'else', 'return', 'range', 'len', 'append', 'var', 'make',
-  'break', 'continue', 'int', 'bool', 'string', 'true', 'false', 'nil', 'map',
+  'func',
+  'for',
+  'if',
+  'else',
+  'return',
+  'range',
+  'len',
+  'append',
+  'var',
+  'make',
+  'break',
+  'continue',
+  'int',
+  'bool',
+  'string',
+  'true',
+  'false',
+  'nil',
+  'map',
 ];
 
 type ClozeSeg = { t: 'text'; v: string } | { t: 'blank'; id: string; answer: string };
@@ -500,12 +598,20 @@ function ClozeMode() {
   const [vals, setVals] = useState<Record<string, string>>({});
   useEffect(() => setVals({}), [reference]);
 
-  const blanks = segments.flat().filter((s): s is Extract<ClozeSeg, { t: 'blank' }> => s.t === 'blank');
+  const blanks = segments
+    .flat()
+    .filter((s): s is Extract<ClozeSeg, { t: 'blank' }> => s.t === 'blank');
   const bank = Array.from(new Set(blanks.map((b) => b.answer))).sort();
   const done = blanks.filter((b) => vals[b.id] === b.answer).length;
 
   if (blanks.length === 0) {
-    return <EmptyState icon={<Puzzle className="h-4 w-4" />} title="No keywords to hide" hint="This source has no recognised keywords for a cloze drill." />;
+    return (
+      <EmptyState
+        icon={<Puzzle className="h-4 w-4" />}
+        title="No keywords to hide"
+        hint="This source has no recognised keywords for a cloze drill."
+      />
+    );
   }
 
   return (
@@ -518,7 +624,12 @@ function ClozeMode() {
           </Chip>
         ))}
       </div>
-      <div className={cn('ws-scroll overflow-x-auto rounded-md border border-edge bg-panel2/40 p-2 font-mono leading-relaxed', nodeText.tight)}>
+      <div
+        className={cn(
+          'ws-scroll overflow-x-auto rounded-md border border-edge bg-panel2/40 p-2 font-mono leading-relaxed',
+          nodeText.tight,
+        )}
+      >
         {segments.map((line, i) => (
           <div key={i} className="flex flex-wrap items-center whitespace-pre">
             {line.map((s, j) =>
@@ -604,11 +715,19 @@ function BlanksMode() {
                   {p.role}
                 </Chip>
               </div>
-              {got ? <Mono>{p.code}</Mono> : <span className={cn('text-ink3', nodeText.xs)}>empty</span>}
+              {got ? (
+                <Mono>{p.code}</Mono>
+              ) : (
+                <span className={cn('text-ink3', nodeText.xs)}>empty</span>
+              )}
             </button>
           );
         })}
-        <Meter value={done} max={resolved.length} tone={done === resolved.length ? 'good' : 'accent'} />
+        <Meter
+          value={done}
+          max={resolved.length}
+          tone={done === resolved.length ? 'good' : 'accent'}
+        />
       </div>
       <div className="flex w-full shrink-0 flex-col gap-1.5 lg:w-[44%]">
         <Label>Blocks</Label>
@@ -637,17 +756,23 @@ function ParsonsMode() {
 
   // Correct lines plus a couple of near-miss distractors.
   const { items, correctIds } = useMemo(() => {
-    const correct = base.map((l, i) => ({ id: `c${i}`, text: l.text, indent: l.indent, real: true }));
+    const correct = base.map((l, i) => ({
+      id: `c${i}`,
+      text: l.text,
+      indent: l.indent,
+      real: true,
+    }));
     const distractors: { id: string; text: string; indent: number; real: boolean }[] = [];
     const mutate = (s: string) =>
-      s
-        .replace(/<=/, '<')
-        .replace(/>=/, '>')
-        .replace(/\+\+/, '--')
-        .replace(/\b0\b/, '1');
-    for (let i = 0; i < base.length && distractors.length < 2; i += Math.ceil(base.length / 3) || 1) {
+      s.replace(/<=/, '<').replace(/>=/, '>').replace(/\+\+/, '--').replace(/\b0\b/, '1');
+    for (
+      let i = 0;
+      i < base.length && distractors.length < 2;
+      i += Math.ceil(base.length / 3) || 1
+    ) {
       const m = mutate(base[i].text);
-      if (m !== base[i].text) distractors.push({ id: `d${i}`, text: m, indent: base[i].indent, real: false });
+      if (m !== base[i].text)
+        distractors.push({ id: `d${i}`, text: m, indent: base[i].indent, real: false });
     }
     return {
       items: shuffle([...correct, ...distractors]),
@@ -709,7 +834,10 @@ function ParsonsMode() {
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <Label>Your solution</Label>
         {sol.map((x, i) => (
-          <div key={x.id} className="flex items-center gap-1 rounded-md border border-edge bg-panel2/50 py-1 pr-1">
+          <div
+            key={x.id}
+            className="flex items-center gap-1 rounded-md border border-edge bg-panel2/50 py-1 pr-1"
+          >
             <div className="flex flex-col">
               <StepBtn dir="up" disabled={i === 0} onClick={() => moveSol(i, -1)} />
               <StepBtn dir="down" disabled={i === sol.length - 1} onClick={() => moveSol(i, 1)} />
@@ -806,7 +934,11 @@ export function AssembleModes() {
   if (!pieces || !reference) {
     return (
       <div className="grid min-h-0 flex-1 place-items-center p-6">
-        <EmptyState icon={<Puzzle className="h-4 w-4" />} title="Nothing to assemble" hint="This problem has no source to break into pieces." />
+        <EmptyState
+          icon={<Puzzle className="h-4 w-4" />}
+          title="Nothing to assemble"
+          hint="This problem has no source to break into pieces."
+        />
       </div>
     );
   }

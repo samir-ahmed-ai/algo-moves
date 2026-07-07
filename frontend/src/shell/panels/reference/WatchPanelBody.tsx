@@ -8,7 +8,11 @@ export function WatchPanelBody() {
   const keys = Object.keys(s0).filter((k) => typeof s0[k] === 'number');
   if (keys.length === 0) {
     return (
-      <EmptyState icon={<LineChart className="h-5 w-5" />} title="No numeric variables" hint="This problem exposes no numeric state to watch." />
+      <EmptyState
+        icon={<LineChart className="h-5 w-5" />}
+        title="No numeric variables"
+        hint="This problem exposes no numeric state to watch."
+      />
     );
   }
   return (

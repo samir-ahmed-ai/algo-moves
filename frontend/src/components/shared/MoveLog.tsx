@@ -12,7 +12,14 @@ export interface MoveLogProps {
   onToggleBreakpoint?: (i: number) => void;
 }
 
-export function MoveLog({ moves, index, onSelect, columns = 1, breakpoints, onToggleBreakpoint }: MoveLogProps) {
+export function MoveLog({
+  moves,
+  index,
+  onSelect,
+  columns = 1,
+  breakpoints,
+  onToggleBreakpoint,
+}: MoveLogProps) {
   const cols = columns > 1;
   const curRef = useRef<HTMLButtonElement>(null);
 
@@ -24,7 +31,9 @@ export function MoveLog({ moves, index, onSelect, columns = 1, breakpoints, onTo
   const wrapStyle: CSSProperties | undefined = cols
     ? { display: 'block', columnCount: columns, columnGap: '14px' }
     : undefined;
-  const lineStyle: CSSProperties | undefined = cols ? { breakInside: 'avoid', display: 'flex' } : undefined;
+  const lineStyle: CSSProperties | undefined = cols
+    ? { breakInside: 'avoid', display: 'flex' }
+    : undefined;
 
   return (
     <div className="move-log" role="list" style={wrapStyle}>
@@ -58,7 +67,10 @@ export function MoveLog({ moves, index, onSelect, columns = 1, breakpoints, onTo
                   onToggleBreakpoint(i);
                 }}
                 className="bp-dot"
-                style={{ background: isBp ? 'var(--bad)' : 'transparent', borderColor: isBp ? 'var(--bad)' : 'var(--border-strong)' }}
+                style={{
+                  background: isBp ? 'var(--bad)' : 'transparent',
+                  borderColor: isBp ? 'var(--bad)' : 'var(--border-strong)',
+                }}
               />
             )}
             <span className="ln">{i + 1}</span>

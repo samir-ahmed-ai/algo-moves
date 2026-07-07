@@ -136,9 +136,10 @@ export function migrateLayouts(stored: Record<string, LayoutEntry>): Record<stri
     const practice = temp[`${pluginId}:practice`];
     const code = temp[`${pluginId}:code`];
     const existingLearn = temp[`${pluginId}:learn`];
-    let learn: LayoutEntry = practice && code
-      ? mergeLearnLayoutEntries(practice, code)
-      : practice ?? code ?? existingLearn!;
+    let learn: LayoutEntry =
+      practice && code
+        ? mergeLearnLayoutEntries(practice, code)
+        : (practice ?? code ?? existingLearn!);
     if (existingLearn) learn = mergeLearnLayoutEntries(learn, existingLearn);
     out[`${pluginId}:learn`] = learn;
   }

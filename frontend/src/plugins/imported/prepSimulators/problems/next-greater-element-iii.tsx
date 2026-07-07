@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -25,22 +31,23 @@ interface NgeState {
 
 const INT32_MAX = 2147483647;
 
-function record({ n }: NgeInput): Frame<NgeState>[] {  const s = String(n).split('');
+function record({ n }: NgeInput): Frame<NgeState>[] {
+  const s = String(n).split('');
   const k = s.length;
 
   const { emit, frames } = createRecorder<NgeState>(() => ({
-        n,
-        digits: s.slice(),
-        i: null,
-        j: null,
-        scanA: null,
-        scanB: null,
-        loR: null,
-        hiR: null,
-        result: null,
-        done: false,
-        overflow: false
-      }));
+    n,
+    digits: s.slice(),
+    i: null,
+    j: null,
+    scanA: null,
+    scanB: null,
+    loR: null,
+    hiR: null,
+    result: null,
+    done: false,
+    overflow: false,
+  }));
 
   emit(
     'INIT',
@@ -180,23 +187,17 @@ function View({ frame }: PluginViewProps<NgeState>) {
         n = <span className="font-mono text-ink">{s.n}</span>
         {s.i !== null && !s.done && (
           <>
-            {' · '}pivot i ={' '}
-            <span className="font-mono text-ink">{s.i}</span>
+            {' · '}pivot i = <span className="font-mono text-ink">{s.i}</span>
           </>
         )}
       </div>
       <ArrayRow values={s.digits} cellTone={tone} pointers={pointers} windowRange={null} />
       <div className={cn('mt-1', vizText.sm, 'text-ink3')}>
-        current ={' '}
-        <span className="font-mono text-ink">{s.digits.join('')}</span>
+        current = <span className="font-mono text-ink">{s.digits.join('')}</span>
       </div>
       {s.result !== null && (
         <div
-          className={cn(
-            'mt-1 font-mono',
-            vizText.base,
-            s.result === -1 ? 'text-bad' : 'text-good',
-          )}
+          className={cn('mt-1 font-mono', vizText.base, s.result === -1 ? 'text-bad' : 'text-good')}
         >
           → {s.result}
         </div>
@@ -208,7 +209,8 @@ function View({ frame }: PluginViewProps<NgeState>) {
 function Inspector({ frame }: InspectorProps<NgeState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const at = (idx: number | null) => (idx !== null && idx >= 0 && idx < s.digits.length ? s.digits[idx] : '—');
+  const at = (idx: number | null) =>
+    idx !== null && idx >= 0 && idx < s.digits.length ? s.digits[idx] : '—';
   return (
     <VarGrid>
       <InspectorRow k="n" v={s.n} />
@@ -225,132 +227,131 @@ function Inspector({ frame }: InspectorProps<NgeState>) {
 export const manifestId = 'prep-math-next-greater-element-iii';
 export const title = 'Next Greater Element III';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Next Greater Element III\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Next Greater Element III"?',
     choices: [
       {
-        label: "Next Permutation — fits this problem",
-        correct: true
+        label: 'Next Permutation — fits this problem',
+        correct: true,
       },
       {
-        label: "Base conversion repeated divmod — different approach"
+        label: 'Base conversion repeated divmod — different approach',
       },
       {
-        label: "Palindrome number — different approach"
+        label: 'Palindrome number — different approach',
       },
       {
-        label: "Primality trial division — different approach"
-      }
+        label: 'Primality trial division — different approach',
+      },
     ],
-    explain: "See Next Greater Element Iii pattern"
+    explain: 'See Next Greater Element Iii pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Next Greater Element III), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Next Greater Element III), what strategy is established?',
     choices: [
       {
-        label: "See Next Greater Element Iii pattern — described in INIT caption",
-        correct: true
+        label: 'See Next Greater Element Iii pattern — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Next Greater Element III: find the smallest number greater than  that uses exactly the same digits. This is the \"next permutation\" of the digit string — O(d) in the digit count d."
+    explain:
+      'Next Greater Element III: find the smallest number greater than  that uses exactly the same digits. This is the "next permutation" of the digit string — O(d) in the digit count d.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"SWAP\" step (swap ↔), what happens?",
+    id: 'key-step',
+    prompt: 'On the "SWAP" step (swap ↔), what happens?',
     choices: [
       {
-        label: "Swap the pivot with digits[]: now — this move caption",
-        correct: true
+        label: 'Swap the pivot with digits[]: now — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Swap the pivot with digits[]: now index  holds . The prefix is fixed at the smallest possible increase; the suffix is still descending (largest)."
+    explain:
+      'Swap the pivot with digits[]: now index  holds . The prefix is fixed at the smallest possible increase; the suffix is still descending (largest).',
   },
   {
-    id: "state",
-    prompt: "What does the `digits` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `digits` field track in the visualization state?',
     choices: [
       {
-        label: "current arrangement of digits (mutated — updated each frame",
-        correct: true
+        label: 'current arrangement of digits (mutated — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `digits` in sync: current arrangement of digits (mutated over time)"
+    explain:
+      'The recorder keeps `digits` in sync: current arrangement of digits (mutated over time)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Next Greater Element III\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Next Greater Element III"?',
     choices: [
       {
-        label: "O(d) time, O(d) space — standard bounds here",
-        correct: true
+        label: 'O(d) time, O(d) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(m*n) time, O(m+n) space — wrong order of growth"
+        label: 'O(m*n) time, O(m+n) space — wrong order of growth',
       },
       {
-        label: "O(reservations) time, O(reserved rows) — wrong order of growth"
+        label: 'O(reservations) time, O(reserved rows) — wrong order of growth',
       },
       {
-        label: "O(log x) time, O(1) space — wrong order of growth"
-      }
+        label: 'O(log x) time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(d). O(d). Next Greater Element Iii"
+    explain: 'O(d). O(d). Next Greater Element Iii',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "The suffix is now ascending. — final DONE caption",
-        correct: true
+        label: 'The suffix is now ascending. — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "The suffix is now ascending. The digits spell , the smallest number greater than  using the same digits."
-  }
+    explain:
+      'The suffix is now ascending. The digits spell , the smallest number greater than  using the same digits.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

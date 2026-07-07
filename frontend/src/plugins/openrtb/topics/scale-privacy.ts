@@ -123,7 +123,8 @@ func main() {
       quiz: [
         {
           id: 'ortb-pacing-smooth-vs-asap',
-          prompt: 'In "smooth pacing," a $1,000/day campaign at 9 AM should have spent approximately:',
+          prompt:
+            'In "smooth pacing," a $1,000/day campaign at 9 AM should have spent approximately:',
           choices: [
             { label: '$375 — 9/24 hours × $1,000 (proportional to time elapsed)', correct: true },
             { label: '$1,000 — smooth pacing spends all budget as fast as possible' },
@@ -135,34 +136,42 @@ func main() {
         },
         {
           id: 'ortb-pacing-atomic-cas',
-          prompt: 'The pacing implementation uses Compare-And-Swap (CAS) in a loop. Why is a loop necessary?',
+          prompt:
+            'The pacing implementation uses Compare-And-Swap (CAS) in a loop. Why is a loop necessary?',
           choices: [
-            { label: 'Contention retry — CAS fails under concurrent update; loop retries', correct: true },
+            {
+              label: 'Contention retry — CAS fails under concurrent update; loop retries',
+              correct: true,
+            },
             { label: 'Budget guard — the loop ensures the budget never goes negative' },
             { label: 'Cache propagation claim — CAS is for contention, not cache propagation' },
             { label: 'Go limitation claim — Go atomic has no per-function CAS call limit' },
           ],
           explain:
-            'CAS (CompareAndSwap) atomically checks that the current value equals the expected value and only updates it if so. Under contention (multiple goroutines simultaneously updating the counter), one goroutine\'s CAS will fail (the value changed before it could update). The loop retries with the freshly-loaded current value. This spin loop is correct and wait-free in the absence of starvation.',
+            "CAS (CompareAndSwap) atomically checks that the current value equals the expected value and only updates it if so. Under contention (multiple goroutines simultaneously updating the counter), one goroutine's CAS will fail (the value changed before it could update). The loop retries with the freshly-loaded current value. This spin loop is correct and wait-free in the absence of starvation.",
         },
         {
           id: 'ortb-pacing-per-dsp',
-          prompt: 'Should a DSP check budget pacing before or after the bid decision targeting logic?',
+          prompt:
+            'Should a DSP check budget pacing before or after the bid decision targeting logic?',
           choices: [
-            { label: 'After targeting — skip budget check for impressions that miss targeting', correct: true },
+            {
+              label: 'After targeting — skip budget check for impressions that miss targeting',
+              correct: true,
+            },
             { label: 'Before targeting — fail fast on empty budget before targeting compute' },
             { label: 'Simultaneously — in a separate goroutine alongside targeting logic' },
             { label: 'Never in bidder — budget managed by a separate billing service only' },
           ],
           explain:
-            'Targeting checks are O(1) in-process lookups (nanoseconds). Budget pacing involves an atomic read + potential CAS. While both are fast, the fail-fast order should be: cheap targeting checks first (geo, category, audience match). If the impression doesn\'t match any campaign, budget is irrelevant. Only perform the budget deduction when you\'re about to commit to a bid.',
+            "Targeting checks are O(1) in-process lookups (nanoseconds). Budget pacing involves an atomic read + potential CAS. While both are fast, the fail-fast order should be: cheap targeting checks first (geo, category, audience match). If the impression doesn't match any campaign, budget is irrelevant. Only perform the budget deduction when you're about to commit to a bid.",
         },
       ],
       design: {
         prompt:
           'Your DSP has 10,000 active campaigns, each with a daily budget. Budget pacing state is per-campaign. You run 100 bidder pods. How do you ensure budget pacing is consistent across all pods without a per-request Redis round-trip?',
         answer:
-          '1. Local token buckets: each pod maintains in-process token buckets for all campaigns. Updates are atomic int64 CAS — nanosecond latency.\n2. Budget sharding: divide total daily budget by pod count. Each pod\'s bucket = total_budget / N_pods. Allow small over-delivery (< 1%) from rounding.\n3. Reconciliation: background goroutine every second calls a Redis counter for each campaign\'s total spend (INCRBY with the pod\'s local spend increment). This is the global spend tracker.\n4. Budget reset: at midnight, all pods reset their local counters. Redis counters also reset.\n5. Budget exhaustion signal: when global spend in Redis approaches 95% of total budget, a coordination layer broadcasts a "paced out" signal to all pods via pub/sub (Redis or Kafka). Pods stop bidding for that campaign immediately.',
+          "1. Local token buckets: each pod maintains in-process token buckets for all campaigns. Updates are atomic int64 CAS — nanosecond latency.\n2. Budget sharding: divide total daily budget by pod count. Each pod's bucket = total_budget / N_pods. Allow small over-delivery (< 1%) from rounding.\n3. Reconciliation: background goroutine every second calls a Redis counter for each campaign's total spend (INCRBY with the pod's local spend increment). This is the global spend tracker.\n4. Budget reset: at midnight, all pods reset their local counters. Redis counters also reset.\n5. Budget exhaustion signal: when global spend in Redis approaches 95% of total budget, a coordination layer broadcasts a \"paced out\" signal to all pods via pub/sub (Redis or Kafka). Pods stop bidding for that campaign immediately.",
       },
       keyPoints: [
         'Token bucket: refills at budget/day_seconds rate; deducts CPM on each bid.',
@@ -184,7 +193,7 @@ func main() {
       memorize:
         'Fixed window: INCR + EXPIRE. Sliding window: ZADD ts + ZCOUNT range. Co-locate Redis with bidder (< 1ms). Consistent hash user to shard. Read-then-bid = 2 RTTs; Redis pipeline = 1 RTT.',
       scene:
-        'A concert wristband counter at the door: each time you enter (impression), the doorman taps your wristband counter. At 3 taps (cap), you\'re turned away. The band expires at midnight (window reset). Multiple doors (Redis shards) share the same log via consistent hashing.',
+        "A concert wristband counter at the door: each time you enter (impression), the doorman taps your wristband counter. At 3 taps (cap), you're turned away. The band expires at midnight (window reset). Multiple doors (Redis shards) share the same log via consistent hashing.",
       time: 'O(1) INCR / O(log N) ZADD per impression check',
       space: 'O(users × campaigns × windows)',
       code: `package main
@@ -288,9 +297,13 @@ func main() {
       quiz: [
         {
           id: 'ortb-freqcap-atomicity',
-          prompt: 'The read-then-increment pattern for frequency capping (GET + INCR) has a race condition. What is it and how is it fixed?',
+          prompt:
+            'The read-then-increment pattern for frequency capping (GET + INCR) has a race condition. What is it and how is it fixed?',
           choices: [
-            { label: 'Race condition — two goroutines both allow, both increment; Lua fix', correct: true },
+            {
+              label: 'Race condition — two goroutines both allow, both increment; Lua fix',
+              correct: true,
+            },
             { label: 'Shard mismatch — GET and INCR may route to different Redis shards' },
             { label: 'Thread safety — INCR is thread-safe in Redis; not the issue here' },
             { label: 'EXPIRE reset claim — EXPIRE sets TTL but does not reset counter value' },
@@ -300,9 +313,13 @@ func main() {
         },
         {
           id: 'ortb-freqcap-sliding',
-          prompt: 'A sliding window frequency cap (last 24 hours, not daily calendar boundary) is more complex than fixed-window. What Redis data structure enables it?',
+          prompt:
+            'A sliding window frequency cap (last 24 hours, not daily calendar boundary) is more complex than fixed-window. What Redis data structure enables it?',
           choices: [
-            { label: 'Sorted Set — ZADD timestamp as score, ZCOUNT in [now-86400s, now] range', correct: true },
+            {
+              label: 'Sorted Set — ZADD timestamp as score, ZCOUNT in [now-86400s, now] range',
+              correct: true,
+            },
             { label: 'String + INCR — works for fixed windows; not rolling 24-hour windows' },
             { label: 'Hash with buckets — needs manual hourly summing; not native to Redis' },
             { label: 'List with LPUSH — LLEN returns total length, not a time-ranged count' },
@@ -312,9 +329,13 @@ func main() {
         },
         {
           id: 'ortb-freqcap-consistent-hash',
-          prompt: 'Why should frequency cap Redis lookups use consistent hashing to route to shards?',
+          prompt:
+            'Why should frequency cap Redis lookups use consistent hashing to route to shards?',
           choices: [
-            { label: 'Same-shard routing — avoids split counts for the same user-campaign key', correct: true },
+            {
+              label: 'Same-shard routing — avoids split counts for the same user-campaign key',
+              correct: true,
+            },
             { label: 'Sort order claim — consistent hashing is not alphabetic sorting' },
             { label: 'Memory claim — consistent hashing controls routing, not memory per shard' },
             { label: 'Redis requirement claim — Redis does not mandate consistent hashing' },
@@ -342,14 +363,15 @@ func main() {
       title: 'Write-Behind Logging with Kafka',
       difficulty: 'Hard',
       tags: ['Kafka', 'write-behind', 'ring-buffer', 'logging', 'async', 'sampling'],
-      summary: 'Never block the hot path: ring buffer → background writer → Kafka → data warehouse.',
+      summary:
+        'Never block the hot path: ring buffer → background writer → Kafka → data warehouse.',
       pattern: 'Write-behind logging',
       visual:
         'Hot path: append bid event to ring buffer (O(1), non-blocking). Background goroutine: drain ring buffer → batch → Kafka producer → ack. Never call Kafka synchronously in the bid handler.',
       memorize:
         'Ring buffer cap=10k. Background goroutine flushes every 100ms or when full. Kafka batch = 1000 events. On overflow: sample (log 1% of losing bids) or drop oldest. Monitor lag.',
       scene:
-        'A restaurant kitchen order board: instead of running to the manager\'s office after every dish, cooks clip their completed order tickets on a rotating drum (ring buffer). A runner collects all tickets every 10 minutes (background flush) and files them in the archive (Kafka).',
+        "A restaurant kitchen order board: instead of running to the manager's office after every dish, cooks clip their completed order tickets on a rotating drum (ring buffer). A runner collects all tickets every 10 minutes (background flush) and files them in the archive (Kafka).",
       time: 'O(1) hot path append; O(batch) background flush',
       space: 'O(ring_buffer_cap)',
       code: `package main
@@ -473,9 +495,13 @@ func main() {
       quiz: [
         {
           id: 'ortb-log-why-async',
-          prompt: 'Why must Kafka/database writes happen asynchronously and not inline in the bid handler?',
+          prompt:
+            'Why must Kafka/database writes happen asynchronously and not inline in the bid handler?',
           choices: [
-            { label: 'Latency budget — 1-10ms Kafka write would triple p99 bid latency', correct: true },
+            {
+              label: 'Latency budget — 1-10ms Kafka write would triple p99 bid latency',
+              correct: true,
+            },
             { label: 'Sync support claim — Kafka does support synchronous writes' },
             { label: 'Handler limit claim — Go HTTP handlers can initiate network calls' },
             { label: 'Spec requirement claim — OpenRTB does not mandate async Kafka writes' },
@@ -485,21 +511,29 @@ func main() {
         },
         {
           id: 'ortb-log-overflow',
-          prompt: 'The ring buffer is full and a new bid event arrives. The best overflow policy for an ad exchange is:',
+          prompt:
+            'The ring buffer is full and a new bid event arrives. The best overflow policy for an ad exchange is:',
           choices: [
-            { label: 'Prioritize wins — sample losers at 1%; never drop revenue win events', correct: true },
+            {
+              label: 'Prioritize wins — sample losers at 1%; never drop revenue win events',
+              correct: true,
+            },
             { label: 'Block on drain — blocking the hot path defeats write-behind logging' },
             { label: 'Drop all events claim — win events cannot be dropped; revenue at risk' },
             { label: 'Dynamic resize claim — runtime buffer doubling risks out-of-memory' },
           ],
           explain:
-            'Win events (nurl fires, billing) are revenue-critical — losing one means a DSP doesn\'t know it won and can\'t reconcile spend. Losing bid events are high-volume and lower priority — a 1% sample is statistically representative for analytics. Best practice: maintain two ring buffers — one high-priority (wins, small, never drop) and one best-effort (all bids, sample on overflow).',
+            "Win events (nurl fires, billing) are revenue-critical — losing one means a DSP doesn't know it won and can't reconcile spend. Losing bid events are high-volume and lower priority — a 1% sample is statistically representative for analytics. Best practice: maintain two ring buffers — one high-priority (wins, small, never drop) and one best-effort (all bids, sample on overflow).",
         },
         {
           id: 'ortb-log-consumer-lag',
-          prompt: 'Your Kafka consumer group for the bid-events topic shows increasing consumer lag. What does this indicate?',
+          prompt:
+            'Your Kafka consumer group for the bid-events topic shows increasing consumer lag. What does this indicate?',
           choices: [
-            { label: 'Consumers behind — producer rate exceeds consumers; scale up', correct: true },
+            {
+              label: 'Consumers behind — producer rate exceeds consumers; scale up',
+              correct: true,
+            },
             { label: 'Disk space alert — consumer lag indicates rate mismatch, not disk' },
             { label: 'Ring buffer claim — consumer lag is Kafka offsets, not ring buffer' },
             { label: 'No production claim — increasing lag proves production is outpacing' },
@@ -534,7 +568,7 @@ func main() {
       memorize:
         'GDPR in BidRequest: regs.gdpr=1 + user.consent=TCF_string. TCF purposes: 1=store/access, 3=personalised ads, 4=personalised content. DSP vendor ID in TC string? Consent for purposes? → bid. GPP replaces individual privacy strings.',
       scene:
-        'A nightclub with a GDPR bouncer: regs.gdpr=1 means you\'re in Europe. user.consent is the patron\'s ID bracelet. The bouncer (bidder) checks: "Is this DSP on the approved vendor list? Did the patron consent to purpose 3 (personalised ads)?" Two \'yes\' answers = entry.',
+        "A nightclub with a GDPR bouncer: regs.gdpr=1 means you're in Europe. user.consent is the patron's ID bracelet. The bouncer (bidder) checks: \"Is this DSP on the approved vendor list? Did the patron consent to purpose 3 (personalised ads)?\" Two 'yes' answers = entry.",
       time: 'O(1) per consent check',
       space: '—',
       code: `package main
@@ -632,9 +666,13 @@ func main() {
       quiz: [
         {
           id: 'ortb-privacy-gdpr-nobid',
-          prompt: 'You receive a BidRequest with regs.gdpr=1 but user.consent is missing. What should your DSP do?',
+          prompt:
+            'You receive a BidRequest with regs.gdpr=1 but user.consent is missing. What should your DSP do?',
           choices: [
-            { label: 'No-bid — missing consent string means no verifiable legal basis for GDPR', correct: true },
+            {
+              label: 'No-bid — missing consent string means no verifiable legal basis for GDPR',
+              correct: true,
+            },
             { label: 'Bid normally claim — consent string is required in GDPR scope' },
             { label: 'Contextual bid claim — even contextual bidding needs legal review' },
             { label: 'Pop-up claim — pre-bid consent is required; not via creative pop-up' },
@@ -646,7 +684,10 @@ func main() {
           id: 'ortb-privacy-tcf-purposes',
           prompt: 'TCF 2.x Purpose 3 is required for which activity?',
           choices: [
-            { label: 'Personalised ads profile — building audience segments for ad targeting', correct: true },
+            {
+              label: 'Personalised ads profile — building audience segments for ad targeting',
+              correct: true,
+            },
             { label: 'Store/access info — that is TCF Purpose 1, not Purpose 3' },
             { label: 'Measure ad performance — that is TCF Purpose 7, not Purpose 3' },
             { label: 'Market research — that is TCF Purpose 9, not Purpose 3' },
@@ -658,7 +699,10 @@ func main() {
           id: 'ortb-privacy-ccpa',
           prompt: 'A CCPA us_privacy string of "1YYN" means:',
           choices: [
-            { label: 'Opted out of data sale — Y in position 3 means user opted out of sale', correct: true },
+            {
+              label: 'Opted out of data sale — Y in position 3 means user opted out of sale',
+              correct: true,
+            },
             { label: 'Opted in claim — Y in position 3 means opt-out, not opt-in' },
             { label: 'CCPA inapplicable claim — CCPA applies; notice=Y means given' },
             { label: 'No notice claim — position 2 Y means notice was provided to the user' },
@@ -801,9 +845,13 @@ func main() {
       quiz: [
         {
           id: 'ortb-id-att',
-          prompt: 'After Apple\'s App Tracking Transparency (ATT, iOS 14.5+), what happens to IDFA availability?',
+          prompt:
+            "After Apple's App Tracking Transparency (ATT, iOS 14.5+), what happens to IDFA availability?",
           choices: [
-            { label: 'Opt-in required — ~70% opted out; IDFA on ~30% of iOS traffic', correct: true },
+            {
+              label: 'Opt-in required — ~70% opted out; IDFA on ~30% of iOS traffic',
+              correct: true,
+            },
             { label: 'Completely removed — IDFA is opt-in gated but not fully removed from iOS' },
             { label: 'PPID auto-replace claim — PPID is optional; ATT makes IDFA opt-in gated' },
             { label: 'Encrypted IDFA claim — ATT makes IDFA unavailable, not encrypted' },
@@ -813,9 +861,13 @@ func main() {
         },
         {
           id: 'ortb-id-uid2',
-          prompt: 'UID2 (The Trade Desk\'s Unified ID 2.0) is designed to work in a cookieless world by:',
+          prompt:
+            "UID2 (The Trade Desk's Unified ID 2.0) is designed to work in a cookieless world by:",
           choices: [
-            { label: 'Hashed email token — SHA-256 of email to opaque token; no raw email', correct: true },
+            {
+              label: 'Hashed email token — SHA-256 of email to opaque token; no raw email',
+              correct: true,
+            },
             { label: 'Fingerprint claim — UID2 is email-based; fingerprinting is not used' },
             { label: 'localStorage claim — UID2 is server-side; not a browser localStorage ID' },
             { label: 'IP-based claim — UID2 uses hashed email, not IP or user-agent' },
@@ -825,9 +877,13 @@ func main() {
         },
         {
           id: 'ortb-id-eids',
-          prompt: 'User.eids (Extended IDs) supports multiple ID sources. Why does this matter for DSPs?',
+          prompt:
+            'User.eids (Extended IDs) supports multiple ID sources. Why does this matter for DSPs?',
           choices: [
-            { label: 'Multi-ID support — DSP picks whichever ID system it has keys for', correct: true },
+            {
+              label: 'Multi-ID support — DSP picks whichever ID system it has keys for',
+              correct: true,
+            },
             { label: 'DMP segments claim — eids has identity tokens, not DMP data segments' },
             { label: 'buyeruid backup claim — eids is a richer multi-source identity layer' },
             { label: 'Signatures claim — eids has identity tokens, not bid-signing material' },
@@ -840,7 +896,7 @@ func main() {
         prompt:
           'Your DSP needs to build a robust identity resolution strategy for a post-cookie world. Describe how you handle each identity environment and what targeting capabilities you maintain.',
         answer:
-          '1. IDFA/GAID (mobile): full deterministic targeting. Use device.ifa as user key. Audience lookup in DSP database. Full frequency cap per device.\n2. Cookie-synced (web, <30% and declining): use user.buyeruid for audience lookup. Run cookie-sync with major exchanges to maximise match rate. Store (exchange_uid → dsp_uid) in Redis.\n3. UID2 / LiveRamp (logged-in, CTV): decrypt eids token with API key. Map to internal user record. High-quality signal for premium inventory.\n4. First-party data (publishers with logins): publisher sends PPID in device.ifa. DSP matches PPID to own customer records via secure data clean room (non-deterministic but high quality).\n5. Contextual (no ID — growing to 40–60% of traffic): use site.page, site.cat, app.bundle, device.os, geo.country. Content classification model for contextual segments. IAB Topics API signal.\n6. Cohort / topics (Chrome Privacy Sandbox): when available, use Topics API to get topic interest buckets without user ID.\n7. Measurement: use conversion APIs (CAPI) for attribution in cookieless environments where pixels can\'t fire.',
+          "1. IDFA/GAID (mobile): full deterministic targeting. Use device.ifa as user key. Audience lookup in DSP database. Full frequency cap per device.\n2. Cookie-synced (web, <30% and declining): use user.buyeruid for audience lookup. Run cookie-sync with major exchanges to maximise match rate. Store (exchange_uid → dsp_uid) in Redis.\n3. UID2 / LiveRamp (logged-in, CTV): decrypt eids token with API key. Map to internal user record. High-quality signal for premium inventory.\n4. First-party data (publishers with logins): publisher sends PPID in device.ifa. DSP matches PPID to own customer records via secure data clean room (non-deterministic but high quality).\n5. Contextual (no ID — growing to 40–60% of traffic): use site.page, site.cat, app.bundle, device.os, geo.country. Content classification model for contextual segments. IAB Topics API signal.\n6. Cohort / topics (Chrome Privacy Sandbox): when available, use Topics API to get topic interest buckets without user ID.\n7. Measurement: use conversion APIs (CAPI) for attribution in cookieless environments where pixels can't fire.",
       },
       keyPoints: [
         'Web: User.buyeruid via cookie sync. Mobile: Device.ifa (IDFA/GAID). CTV: often no persistent ID.',
@@ -855,7 +911,8 @@ func main() {
       title: 'Capstone: Design an Ad Exchange',
       difficulty: 'Hard',
       tags: ['system-design', 'exchange', 'scalability', 'OpenRTB', 'architecture', 'capstone'],
-      summary: 'End-to-end design of an ad exchange: 1M RPS, sub-100 ms auctions, impression tracking, billing.',
+      summary:
+        'End-to-end design of an ad exchange: 1M RPS, sub-100 ms auctions, impression tracking, billing.',
       pattern: 'Exchange system design',
       visual:
         'SSP → Exchange[validate, enrich, select DSPs, fan-out, auction, win-notice, markup] → Publisher. Fraud sidecar (UDS), in-process caches, write-behind Kafka. Impression pixel server, burl handler, billing reconciliation.',
@@ -1012,7 +1069,8 @@ func main() {
       quiz: [
         {
           id: 'ortb-capstone-hot-path',
-          prompt: 'Which components should NEVER be in the synchronous hot path of an exchange auction?',
+          prompt:
+            'Which components should NEVER be in the synchronous hot path of an exchange auction?',
           choices: [
             {
               label: 'All writes async — DB, Kafka, and notice calls must be write-behind',
@@ -1027,9 +1085,13 @@ func main() {
         },
         {
           id: 'ortb-capstone-bottleneck',
-          prompt: 'At 1M RPS, which single change typically yields the biggest latency improvement in a Go exchange?',
+          prompt:
+            'At 1M RPS, which single change typically yields the biggest latency improvement in a Go exchange?',
           choices: [
-            { label: 'In-process cache — moves enrichment from Redis RTT to nanosecond lookups', correct: true },
+            {
+              label: 'In-process cache — moves enrichment from Redis RTT to nanosecond lookups',
+              correct: true,
+            },
             { label: 'Protobuf serialisation — helps latency less than eliminating Redis RTTs' },
             { label: 'GOMAXPROCS increase — exceeding CPU count adds context-switch overhead' },
             { label: 'Goroutine pools — per-DSP spawn cost is negligible compared to Redis RTT' },
@@ -1039,11 +1101,15 @@ func main() {
         },
         {
           id: 'ortb-capstone-reconciliation',
-          prompt: 'Your exchange bills advertisers based on burl (billing notice) counts. The DSP disputes the count saying their pixel count is 15% lower. Per IAB standards:',
+          prompt:
+            'Your exchange bills advertisers based on burl (billing notice) counts. The DSP disputes the count saying their pixel count is 15% lower. Per IAB standards:',
           choices: [
-            { label: 'Exchange count authoritative — 15% is within contract tolerance', correct: true },
+            {
+              label: 'Exchange count authoritative — 15% is within contract tolerance',
+              correct: true,
+            },
             { label: 'Lower count claim — exchange count is authoritative, not DSP pixels' },
-            { label: 'Always dispute claim — 15% is within many contracts\' tolerance' },
+            { label: "Always dispute claim — 15% is within many contracts' tolerance" },
             { label: 'Split difference claim — contracts use exchange count, not an average' },
           ],
           explain:

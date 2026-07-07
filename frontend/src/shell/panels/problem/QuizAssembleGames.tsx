@@ -20,7 +20,9 @@ export function QuizAssembleGames({ onWinContinue }: { onWinContinue?: () => voi
   const { pieces, reassembleKey } = useCodeStudioPhase();
   const lang = code?.lang;
   const scope = `${item.id}:${lang ?? active}`;
-  const [mode, setMode] = useState<QuizAssembleMode>(() => defaultGameFor(scope).id as QuizAssembleMode);
+  const [mode, setMode] = useState<QuizAssembleMode>(
+    () => defaultGameFor(scope).id as QuizAssembleMode,
+  );
   const stats = useMemo(() => assembleGameStatsStore(scope), [scope]);
   const game = ASSEMBLE_GAMES.find((g) => g.id === mode);
 

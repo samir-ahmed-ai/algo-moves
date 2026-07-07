@@ -2,7 +2,16 @@ import { useEffect, useState } from 'react';
 import { recordAttempt } from '@/store/persistence';
 import { PRACTICE_ADVANCE_MS } from '../shared/practiceConstants';
 
-import { useCanvasActions, useCanvasFrame, useCanvasStatic, Banner, Btn, Field, Hint, TextArea } from '@/shell/canvas';
+import {
+  useCanvasActions,
+  useCanvasFrame,
+  useCanvasStatic,
+  Banner,
+  Btn,
+  Field,
+  Hint,
+  TextArea,
+} from '@/shell/canvas';
 /** #52 Explain it back: write the invariant, reveal the reference, self-grade. */
 export function ExplainPanelBody() {
   const { item } = useCanvasStatic();
@@ -69,7 +78,9 @@ export function ExplainPanelBody() {
               </Btn>
             </div>
           ) : (
-            <Hint>{graded ? '✓ Logged — nicely done.' : 'Logged — revisit the replay and try again.'}</Hint>
+            <Hint>
+              {graded ? '✓ Logged — nicely done.' : 'Logged — revisit the replay and try again.'}
+            </Hint>
           )}
         </div>
       )}

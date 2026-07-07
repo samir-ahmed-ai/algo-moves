@@ -14,7 +14,8 @@ export function Roster({ compact = false }: { compact?: boolean }) {
   const { players, spectators, self } = useGameRoom();
   const { readyIds, reactions } = useRoomComms();
 
-  const latestReaction = (id: string) => reactions.filter((r) => r.fromId === id).slice(-1)[0]?.emoji;
+  const latestReaction = (id: string) =>
+    reactions.filter((r) => r.fromId === id).slice(-1)[0]?.emoji;
 
   return (
     <div className="flex flex-col gap-3">
@@ -96,7 +97,9 @@ function PlayerChip({
       <span className="flex items-center gap-1 text-sm font-medium text-ink">
         {isHost ? <Crown className="h-3.5 w-3.5 text-amber-500" aria-label={hostLabel} /> : null}
         <span className="max-w-[9rem] truncate">{peer.name}</span>
-        {isSelf ? <span className="text-[length:var(--fs-2xs)] font-semibold text-ink3">({youLabel})</span> : null}
+        {isSelf ? (
+          <span className="text-[length:var(--fs-2xs)] font-semibold text-ink3">({youLabel})</span>
+        ) : null}
         {isReady ? <Check className="h-3.5 w-3.5 text-good" /> : null}
       </span>
     </li>

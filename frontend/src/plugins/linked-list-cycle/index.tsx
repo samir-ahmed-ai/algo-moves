@@ -1,4 +1,9 @@
-import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
+import {
+  definePlugin,
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+} from '../../core/types';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, badCases, intro } from './cases';
@@ -42,7 +47,16 @@ function record({ values, cycleTo }: CycleInput): Frame<CycleState>[] {
   ) =>
     frames.push({
       move: { type, note, caption, tone },
-      state: { values, next: next.slice(), slow, fast, step, met, done: hasCycle !== null, hasCycle },
+      state: {
+        values,
+        next: next.slice(),
+        slow,
+        fast,
+        step,
+        met,
+        done: hasCycle !== null,
+        hasCycle,
+      },
     });
 
   emit(
@@ -168,15 +182,27 @@ function View({ frame }: PluginViewProps<CycleState>) {
   const result = s.hasCycle === null ? null : s.hasCycle ? 'cycle' : 'no cycle';
 
   return (
-    <VizStage rail={<>
-      <RailGroup label="pointers">
-        <RailStat k="step" v={s.step} />
-        <RailStat k="slow" v={show(s.slow)} tone={s.met ? 'accent' : undefined} />
-        <RailStat k="fast" v={show(s.fast)} tone={s.met ? 'accent' : undefined} />
-      </RailGroup>
-      {result !== null && <RailResult label="result" value={result} tone={s.hasCycle ? 'bad' : 'good'} />}
-    </>}>
-      <svg role="img" aria-label="linked list with cycle" viewBox={`0 0 ${width} ${height}`} width={width} height={height}>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="pointers">
+            <RailStat k="step" v={s.step} />
+            <RailStat k="slow" v={show(s.slow)} tone={s.met ? 'accent' : undefined} />
+            <RailStat k="fast" v={show(s.fast)} tone={s.met ? 'accent' : undefined} />
+          </RailGroup>
+          {result !== null && (
+            <RailResult label="result" value={result} tone={s.hasCycle ? 'bad' : 'good'} />
+          )}
+        </>
+      }
+    >
+      <svg
+        role="img"
+        aria-label="linked list with cycle"
+        viewBox={`0 0 ${width} ${height}`}
+        width={width}
+        height={height}
+      >
         <defs>
           <marker
             id="llc-arrow"
@@ -194,7 +220,13 @@ function View({ frame }: PluginViewProps<CycleState>) {
         {s.values.map((v, i) => (
           <g key={`n${i}`}>
             <circle className={tone(i)} cx={cx(i)} cy={cy} r={r} />
-            <text className="node-label" x={cx(i)} y={cy} textAnchor="middle" dominantBaseline="central">
+            <text
+              className="node-label"
+              x={cx(i)}
+              y={cy}
+              textAnchor="middle"
+              dominantBaseline="central"
+            >
               {v}
             </text>
           </g>
@@ -245,15 +277,22 @@ func hasCycle(head *ListNode) bool {
 }
 `;
 
-
 const inputs = [
-    { id: 'cycle', label: '3 2 0 4 ↺1', value: { values: [3, 2, 0, 4], cycleTo: 1 } },
-    { id: 'plain', label: '1 2 3 4 5', value: { values: [1, 2, 3, 4, 5], cycleTo: -1 } },
-  ];
+  { id: 'cycle', label: '3 2 0 4 ↺1', value: { values: [3, 2, 0, 4], cycleTo: 1 } },
+  { id: 'plain', label: '1 2 3 4 5', value: { values: [1, 2, 3, 4, 5], cycleTo: -1 } },
+];
 const verdict = verdictAlwaysOk('cycle');
 const teaching = wireTeachingStack({
-  record, View, inputs, verdict,
-  practice: { quiz, codePieces, cases: { good: goodCases, bad: badCases, intro, goodLabel: 'fast/slow steps' }, simulateQuestion: 'Which pointer advances next?' },
+  record,
+  View,
+  inputs,
+  verdict,
+  practice: {
+    quiz,
+    codePieces,
+    cases: { good: goodCases, bad: badCases, intro, goodLabel: 'fast/slow steps' },
+    simulateQuestion: 'Which pointer advances next?',
+  },
 });
 
 export const linkedListCyclePlugin = definePlugin<CycleInput, CycleState>({

@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { GraphBoard } from '../../../../components/board/GraphBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 import { circleLayout } from '../../../_shared/graphLayout';
 
 // adj is the prerequisite graph: an edge pre → course means "course depends on pre".
@@ -51,7 +65,12 @@ function record({ adj, pos }: CSInput): Frame<CSState>[] {
   const dfs = (v: number): boolean => {
     color[v] = 1;
     stack.push(v);
-    emit('ENTER', `start ${v} (grey)`, `Start course ${v} and colour it grey — it is now in progress on the recursion stack.`, { active: v, backEdge: null });
+    emit(
+      'ENTER',
+      `start ${v} (grey)`,
+      `Start course ${v} and colour it grey — it is now in progress on the recursion stack.`,
+      { active: v, backEdge: null },
+    );
 
     for (const nb of adj[v]) {
       if (color[nb] === 1) {
@@ -66,15 +85,30 @@ function record({ adj, pos }: CSInput): Frame<CSState>[] {
         return true;
       }
       if (color[nb] === 0) {
-        emit('WALK', `${v}→${nb}`, `Course ${v} unlocks white course ${nb}; recurse into ${nb} first.`, { active: v, backEdge: [v, nb] });
+        emit(
+          'WALK',
+          `${v}→${nb}`,
+          `Course ${v} unlocks white course ${nb}; recurse into ${nb} first.`,
+          { active: v, backEdge: [v, nb] },
+        );
         if (dfs(nb)) return true;
-        emit('RESUME', `resume ${v}`, `Back at course ${v} after clearing everything reachable from ${nb}; check its remaining unlocks.`, { active: v, backEdge: null });
+        emit(
+          'RESUME',
+          `resume ${v}`,
+          `Back at course ${v} after clearing everything reachable from ${nb}; check its remaining unlocks.`,
+          { active: v, backEdge: null },
+        );
       }
     }
 
     color[v] = 2;
     stack.pop();
-    emit('LEAVE', `clear ${v} (black)`, `Course ${v} has all its unlocks cleared — colour it black and remove it from the stack.`, { active: v, backEdge: null });
+    emit(
+      'LEAVE',
+      `clear ${v} (black)`,
+      `Course ${v} has all its unlocks cleared — colour it black and remove it from the stack.`,
+      { active: v, backEdge: null },
+    );
     return false;
   };
 
@@ -85,9 +119,21 @@ function record({ adj, pos }: CSInput): Frame<CSState>[] {
   }
 
   if (cycle) {
-    emit('DONE', 'canFinish: false', 'A circular dependency was found, so the courses cannot all be finished. Answer: false.', { active: null, backEdge: null, done: true }, 'bad');
+    emit(
+      'DONE',
+      'canFinish: false',
+      'A circular dependency was found, so the courses cannot all be finished. Answer: false.',
+      { active: null, backEdge: null, done: true },
+      'bad',
+    );
   } else {
-    emit('DONE', 'canFinish: true', 'Every course cleared with no circular dependency, so all courses can be finished. Answer: true.', { active: null, backEdge: null, done: true }, 'good');
+    emit(
+      'DONE',
+      'canFinish: true',
+      'Every course cleared with no circular dependency, so all courses can be finished. Answer: true.',
+      { active: null, backEdge: null, done: true },
+      'good',
+    );
   }
   return frames;
 }
@@ -99,10 +145,18 @@ function View({ frame }: PluginViewProps<CSState>) {
       <RailStack label="dfs stack" items={s.stack.map(String)} />
       <RailGroup label="scan">
         <RailStat k="node" v={s.active ?? '—'} tone="accent" />
-        <RailStat k="back edge" v={s.backEdge ? `${s.backEdge[0]}→${s.backEdge[1]}` : '—'} tone={s.backEdge ? 'bad' : undefined} />
+        <RailStat
+          k="back edge"
+          v={s.backEdge ? `${s.backEdge[0]}→${s.backEdge[1]}` : '—'}
+          tone={s.backEdge ? 'bad' : undefined}
+        />
       </RailGroup>
       {s.done && (
-        <RailResult label="canFinish" value={s.canFinish ? 'true' : 'false'} tone={s.canFinish ? 'good' : 'bad'} />
+        <RailResult
+          label="canFinish"
+          value={s.canFinish ? 'true' : 'false'}
+          tone={s.canFinish ? 'good' : 'bad'}
+        />
       )}
     </>
   );
@@ -114,7 +168,9 @@ function View({ frame }: PluginViewProps<CSState>) {
         nodeClass={(node) => `team-${s.color[node]}`}
         activeNode={s.active}
         highlightEdge={s.backEdge}
-        edgeTone={s.done && !s.canFinish ? 'clash' : s.backEdge && !s.canFinish ? 'clash' : 'active'}
+        edgeTone={
+          s.done && !s.canFinish ? 'clash' : s.backEdge && !s.canFinish ? 'clash' : 'active'
+        }
         directed
         height={260}
       />

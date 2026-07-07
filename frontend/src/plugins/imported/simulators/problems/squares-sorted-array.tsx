@@ -1,9 +1,24 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText, VizStage, RailGroup, RailStat, RailStack, RailResult } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  vizText,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailStack,
+  RailResult,
+} from '../../../_shared/vizKit';
 
 interface SqInput {
   values: number[];
@@ -115,7 +130,9 @@ function View({ frame }: PluginViewProps<SqState>) {
   );
   return (
     <VizStage rail={rail} railWidth={150}>
-      <div className={cn(vizText.sm, 'text-ink3')}>two pointers from the ends · square &amp; merge backward</div>
+      <div className={cn(vizText.sm, 'text-ink3')}>
+        two pointers from the ends · square &amp; merge backward
+      </div>
       <ArrayRow values={s.values} cellTone={tone} pointers={pointers} />
     </VizStage>
   );
@@ -152,6 +169,8 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as SqState | undefined;
-    return s && s.done ? { ok: true, label: `[${s.result.join(', ')}]` } : { ok: false, label: '—' };
+    return s && s.done
+      ? { ok: true, label: `[${s.result.join(', ')}]` }
+      : { ok: false, label: '—' };
   },
 };

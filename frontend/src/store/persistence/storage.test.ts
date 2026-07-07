@@ -1,5 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { readStorageJson, readStorageText, removeStorageValue, writeStorageJson, writeStorageText } from './storage';
+import {
+  readStorageJson,
+  readStorageText,
+  removeStorageValue,
+  writeStorageJson,
+  writeStorageText,
+} from './storage';
 
 function mockStorage() {
   const store = new Map<string, string>();
@@ -39,18 +45,31 @@ describe('storage', () => {
 
   it('reads and writes JSON values', () => {
     writeStorageJson('obj', { done: true });
-    const parsed = readStorageJson<{ done: boolean }>('obj', { done: false }, (value): value is { done: boolean } => {
-      return !!value && typeof value === 'object' && (value as { done?: unknown }).done === true;
-    });
+    const parsed = readStorageJson<{ done: boolean }>(
+      'obj',
+      { done: false },
+      (value): value is { done: boolean } => {
+        return !!value && typeof value === 'object' && (value as { done?: unknown }).done === true;
+      },
+    );
     expect(parsed).toEqual({ done: true });
   });
 
   it('falls back when JSON is malformed', () => {
-    const bad = { length: 0, key: () => null, getItem: () => '{bad', setItem: () => {}, removeItem: () => {}, clear: () => {} } as Storage;
+    const bad = {
+      length: 0,
+      key: () => null,
+      getItem: () => '{bad',
+      setItem: () => {},
+      removeItem: () => {},
+      clear: () => {},
+    } as Storage;
     vi.stubGlobal('localStorage', bad);
-    expect(readStorageJson('obj', { done: false }, (v): v is { done: boolean } => {
-      return !!v && typeof v === 'object' && (v as { done?: unknown }).done === true;
-    })).toEqual({ done: false });
+    expect(
+      readStorageJson('obj', { done: false }, (v): v is { done: boolean } => {
+        return !!v && typeof v === 'object' && (v as { done?: unknown }).done === true;
+      }),
+    ).toEqual({ done: false });
   });
 
   it('removes stored values', () => {

@@ -10,13 +10,7 @@ import {
   wrapOrbitLines,
   wrapOrbitTwoLines,
 } from './orbitArc';
-import {
-  orbitArcFraction,
-  orbitPoint,
-  orbitT,
-  orbitTFromX,
-  orbitTickIndices,
-} from './MoveOrbit';
+import { orbitArcFraction, orbitPoint, orbitT, orbitTFromX, orbitTickIndices } from './MoveOrbit';
 
 describe('orbitPoint', () => {
   it('hits the arc endpoints and a raised apex', () => {
@@ -113,7 +107,10 @@ describe('wrapOrbitLines', () => {
 describe('wrapOrbitTwoLines', () => {
   it('splits long text into two balanced lines', () => {
     const measure = (line: string) => line.length * 10;
-    expect(wrapOrbitTwoLines('one two three four', measure, 100)).toEqual(['one two', 'three four']);
+    expect(wrapOrbitTwoLines('one two three four', measure, 100)).toEqual([
+      'one two',
+      'three four',
+    ]);
   });
 
   it('keeps a short caption on one line', () => {

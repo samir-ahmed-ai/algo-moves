@@ -13,7 +13,9 @@ export function useChromeState({ requestFitCanvas, isMobile, initialDir }: Chrom
   const [menuOpen, setMenuOpen] = useState(false);
   const [rightOpen, setRightOpen] = useState(false);
   const [rightWide, setRightWide] = useState(false);
-  const [present, setPresent] = useState(() => typeof location !== 'undefined' && /[?&]embed\b/.test(location.search));
+  const [present, setPresent] = useState(
+    () => typeof location !== 'undefined' && /[?&]embed\b/.test(location.search),
+  );
   const [focusCanvas, setFocusCanvas] = useState(false);
   const [dir, setDir] = useState<LayoutDir>(initialDir);
   const [sidePanelTab, setSidePanelTab] = useState<string | null>(null);

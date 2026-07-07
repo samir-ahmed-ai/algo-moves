@@ -1,8 +1,21 @@
-import { ConnectionLineType, MarkerType, type Connection, type Edge, type Node } from '@xyflow/react';
+import {
+  ConnectionLineType,
+  MarkerType,
+  type Connection,
+  type Edge,
+  type Node,
+} from '@xyflow/react';
 import type { EdgeOpts, EdgePathType } from '@/lib/canvas/layoutPrefs';
 
 /** Accent swatches a node can be re-coloured to (NodeToolbar / context menu). */
-export const ACCENTS = ['var(--accent)', 'var(--good)', 'var(--bad)', 'var(--team1-stroke)', 'var(--team2-stroke)', 'var(--edge-active)'];
+export const ACCENTS = [
+  'var(--accent)',
+  'var(--good)',
+  'var(--bad)',
+  'var(--team1-stroke)',
+  'var(--team2-stroke)',
+  'var(--edge-active)',
+];
 
 /** Fit-view padding constants — single source for canvas chrome-aware framing. */
 export const FIT_PADDING = 0.08;
@@ -23,7 +36,10 @@ export function connectionLineType(pathType: EdgePathType): ConnectionLineType {
 }
 
 /** Short label shown on removable edges (Strudel Flow ButtonEdge analogue). */
-export function edgeConnectionLabel(connection: Pick<Connection, 'source' | 'target'>, nodes: Node[]): string {
+export function edgeConnectionLabel(
+  connection: Pick<Connection, 'source' | 'target'>,
+  nodes: Node[],
+): string {
   const src = nodes.find((n) => n.id === connection.source);
   const tgt = nodes.find((n) => n.id === connection.target);
   if (src?.type === 'effect' && tgt?.type === 'effect') return '→';

@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -18,17 +24,18 @@ interface FileLineState {
 }
 
 function record({ content }: FileLineInput): Frame<FileLineState>[] {
-  const lines = content.split('\n');  const output: string[] = [];
+  const lines = content.split('\n');
+  const output: string[] = [];
   let lineIdx = -1;
 
   const { emit, frames } = createRecorder<FileLineState>(() => ({
-        lines,
-        lineIdx: lineIdx >= 0 ? lineIdx : null,
-        current: null,
-        output: output.slice(),
-        hasNext: lineIdx + 1 < lines.length,
-        done: false
-      }));
+    lines,
+    lineIdx: lineIdx >= 0 ? lineIdx : null,
+    current: null,
+    output: output.slice(),
+    hasNext: lineIdx + 1 < lines.length,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -85,7 +92,11 @@ function View({ frame }: PluginViewProps<FileLineState>) {
             className={cn(
               'rounded border px-2 py-1 font-mono',
               vizText.sm,
-              s.lineIdx === i ? 'border-accent bg-accentbg text-accent' : i < (s.lineIdx ?? -1) ? 'border-line bg-surface2 text-ink3' : 'border-line text-ink',
+              s.lineIdx === i
+                ? 'border-accent bg-accentbg text-accent'
+                : i < (s.lineIdx ?? -1)
+                  ? 'border-line bg-surface2 text-ink3'
+                  : 'border-line text-ink',
             )}
           >
             {i + 1}: {line || '(empty line)'}
@@ -115,112 +126,108 @@ function Inspector({ frame }: InspectorProps<FileLineState>) {
 export const manifestId = 'prep-streams-io-file-line-iterator';
 export const title = 'File line iterator';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"File line iterator\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "File line iterator"?',
     choices: [
       {
-        label: "Buffered line iterator — fits this problem",
-        correct: true
+        label: 'Buffered line iterator — fits this problem',
+        correct: true,
       },
       {
-        label: "Min-heap size k — different approach"
+        label: 'Min-heap size k — different approach',
       },
       {
-        label: "Recursive directory walk — different approach"
+        label: 'Recursive directory walk — different approach',
       },
       {
-        label: "K-way merge with min-heap — different approach"
-      }
+        label: 'K-way merge with min-heap — different approach',
+      },
     ],
-    explain: "Buffered scanner yields one line per Next()"
+    explain: 'Buffered scanner yields one line per Next()',
   },
   {
-    id: "key-step",
-    prompt: "On the \"NEXT\" step (line ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "NEXT" step (line ), what happens?',
     choices: [
       {
-        label: "\\ — this move caption",
-        correct: true
+        label: '\\ — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "\\"
+    explain: '\\',
   },
   {
-    id: "state",
-    prompt: "What does the `lines` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `lines` field track in the visualization state?',
     choices: [
       {
-        label: "Field lines in state — updated each frame",
-        correct: true
+        label: 'Field lines in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `lines` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `lines` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"File line iterator\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "File line iterator"?',
     choices: [
       {
-        label: "O(file size) time, O(1) per line space — standard bounds here",
-        correct: true
+        label: 'O(file size) time, O(1) per line space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
+        label: 'O(log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(file size) time, O(1) space — wrong order of growth"
+        label: 'O(file size) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(file size). O(1) per line. hasNext=scanner.Scan(); next=scanner.Text()"
+    explain: 'O(file size). O(1) per line. hasNext=scanner.Scan(); next=scanner.Text()',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "\\ — final DONE caption",
-        correct: true
+        label: '\\ — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "\\"
-  }
+    explain: '\\',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -233,6 +240,8 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as FileLineState | undefined;
-    return s?.done ? { ok: true, label: `${s.output.length} lines` } : { ok: false, label: 'incomplete' };
+    return s?.done
+      ? { ok: true, label: `${s.output.length} lines` }
+      : { ok: false, label: 'incomplete' };
   },
 };

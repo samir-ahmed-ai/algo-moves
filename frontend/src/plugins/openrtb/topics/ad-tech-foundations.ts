@@ -11,7 +11,8 @@ export const adTechFoundations: GoTopic = {
       title: 'Programmatic Ad Tech Ecosystem',
       difficulty: 'Easy',
       tags: ['ad-tech', 'DSP', 'SSP', 'exchange', 'RTB', 'programmatic'],
-      summary: 'Publishers, SSPs, ad exchanges, DSPs, bidders, and advertisers — how they interconnect.',
+      summary:
+        'Publishers, SSPs, ad exchanges, DSPs, bidders, and advertisers — how they interconnect.',
       pattern: 'Ecosystem roles',
       visual:
         'Publisher → SSP → Exchange ← DSP ← Bidder ← Advertiser; exchange runs auction, winner serves ad.',
@@ -97,7 +98,10 @@ func main() {
           prompt:
             'Which entity in the programmatic stack is responsible for packaging publisher inventory and setting floor prices before forwarding bid requests to the exchange?',
           choices: [
-            { label: 'SSP — sell-side broker packaging publisher inventory and floors', correct: true },
+            {
+              label: 'SSP — sell-side broker packaging publisher inventory and floors',
+              correct: true,
+            },
             { label: 'DSP — demand-side buyer bidding for advertiser campaigns' },
             { label: 'Ad Exchange — neutral marketplace running auctions among DSPs' },
             { label: 'DMP — audience data warehouse; not an auction participant' },
@@ -107,8 +111,7 @@ func main() {
         },
         {
           id: 'ortb-ecosystem-header-bidding',
-          prompt:
-            'Header bidding differs from waterfall mediation primarily because:',
+          prompt: 'Header bidding differs from waterfall mediation primarily because:',
           choices: [
             {
               label: 'Parallel bidding — all demand sources compete in one unified auction',
@@ -125,7 +128,10 @@ func main() {
           id: 'ortb-ecosystem-bidder-vs-dsp',
           prompt: 'Which statement best describes the relationship between a bidder and a DSP?',
           choices: [
-            { label: 'Bidder = decision engine — evaluates imps, returns bid prices for DSP', correct: true },
+            {
+              label: 'Bidder = decision engine — evaluates imps, returns bid prices for DSP',
+              correct: true,
+            },
             { label: 'Synonyms claim — bidder and DSP are separate; bidder is one component' },
             { label: 'Exchange-side claim — the bidder lives inside the DSP, not the exchange' },
             { label: 'Third-party claim — bidders are built in-house by the DSP' },
@@ -228,8 +234,7 @@ func main() {
       quiz: [
         {
           id: 'ortb-flow-tmax',
-          prompt:
-            'The tmax field in a BidRequest specifies:',
+          prompt: 'The tmax field in a BidRequest specifies:',
           choices: [
             { label: 'tmax — max milliseconds the exchange waits for DSP bids', correct: true },
             { label: 'Ad duration claim — tmax is max video length in seconds per ad' },
@@ -241,10 +246,12 @@ func main() {
         },
         {
           id: 'ortb-flow-nurl-timing',
-          prompt:
-            'When should the exchange fire the nurl (win notice URL) to the winning DSP?',
+          prompt: 'When should the exchange fire the nurl (win notice URL) to the winning DSP?',
           choices: [
-            { label: 'At auction time — fires as soon as winner is selected, before markup', correct: true },
+            {
+              label: 'At auction time — fires as soon as winner is selected, before markup',
+              correct: true,
+            },
             { label: 'After render claim — nurl fires only when browser displays creative' },
             { label: 'On click claim — nurl fires when the user clicks the ad unit' },
             { label: 'Billing period claim — nurl fires at end of each billing cycle' },
@@ -254,16 +261,18 @@ func main() {
         },
         {
           id: 'ortb-flow-who-calls-pixel',
-          prompt:
-            'An impression-tracking pixel in the creative markup is called by:',
+          prompt: 'An impression-tracking pixel in the creative markup is called by:',
           choices: [
-            { label: "End-user browser — fires impression pixel on creative render", correct: true },
+            {
+              label: 'End-user browser — fires impression pixel on creative render',
+              correct: true,
+            },
             { label: 'Exchange server — fires pixel at end of the auction server-side' },
             { label: 'SSP server — fires pixel after returning markup to publisher' },
             { label: 'Bidder server — fires pixel after sending its BidResponse' },
           ],
           explain:
-            'Impression pixels are HTML image tags or beacons embedded in the ad markup. The browser fires them (via HTTP GET to the tracking URL) when it renders the creative. This is why impression counts logged by the DSP\'s tracking server and the exchange\'s nurl-based counts can differ — browser rendering is client-side and best-effort.',
+            "Impression pixels are HTML image tags or beacons embedded in the ad markup. The browser fires them (via HTTP GET to the tracking URL) when it renders the creative. This is why impression counts logged by the DSP's tracking server and the exchange's nurl-based counts can differ — browser rendering is client-side and best-effort.",
         },
       ],
       design: {
@@ -274,7 +283,7 @@ func main() {
       },
       keyPoints: [
         'The full RTB flow from ad tag to rendered creative must complete within ~100 ms; DSP decision window is typically 60–80 ms.',
-        'tmax in the BidRequest tells the DSP the exchange\'s deadline in milliseconds; late bids are silently ignored.',
+        "tmax in the BidRequest tells the DSP the exchange's deadline in milliseconds; late bids are silently ignored.",
         'nurl (win notice) fires server-to-server at auction time; impression pixels fire browser-side at render time — counts can diverge.',
         'Exchange fans out BidRequests to multiple DSPs concurrently; Go goroutines are the natural fit.',
         'Losing DSPs receive HTTP 204 (no markup) or a loss notification via lurl if enabled.',
@@ -367,10 +376,12 @@ func main() {
       quiz: [
         {
           id: 'ortb-auction-dominant-strategy',
-          prompt:
-            'In a second-price sealed-bid (Vickrey) auction, the dominant strategy is:',
+          prompt: 'In a second-price sealed-bid (Vickrey) auction, the dominant strategy is:',
           choices: [
-            { label: 'Bid true value — you pay at most the second-highest bid anyway', correct: true },
+            {
+              label: 'Bid true value — you pay at most the second-highest bid anyway',
+              correct: true,
+            },
             { label: 'Bid shading — shade below true value to cut the clearing price' },
             { label: 'Overbid strategy — bid above true value to beat rival buyers' },
             { label: 'Floor strategy — bid exactly floor price to minimise CPM spend' },
@@ -433,7 +444,7 @@ func main() {
       memorize:
         'ads.txt (publisher file) → who can sell my inventory. sellers.json (exchange/SSP file) → who are my sellers. schain (BidRequest field) → the ordered list of hops from publisher to current exchange.',
       scene:
-        'A certified organic food label: ads.txt is the farm\'s certificate of which retailers can stock the food; sellers.json is the retailer\'s directory of certified farms; schain is the trip ticket listing every hand the food passed through.',
+        "A certified organic food label: ads.txt is the farm's certificate of which retailers can stock the food; sellers.json is the retailer's directory of certified farms; schain is the trip ticket listing every hand the food passed through.",
       time: '—',
       space: '—',
       code: `package main
@@ -490,22 +501,28 @@ func main() {
       quiz: [
         {
           id: 'ortb-adstxt-purpose',
-          prompt: 'What does an ads.txt file published at a domain root (e.g. publisher.com/ads.txt) tell buyers?',
+          prompt:
+            'What does an ads.txt file published at a domain root (e.g. publisher.com/ads.txt) tell buyers?',
           choices: [
-            { label: 'Authorised sellers — ad systems approved to sell publisher inventory', correct: true },
+            {
+              label: 'Authorised sellers — ad systems approved to sell publisher inventory',
+              correct: true,
+            },
             { label: 'Advertiser blocklist — ads.txt does not list blocked advertisers' },
             { label: 'CPM floor claim — ads.txt does not encode price floors for formats' },
             { label: 'Privacy policy claim — ads.txt covers authorised sellers, not privacy' },
           ],
           explain:
-            'ads.txt (Authorised Digital Sellers) is a plain-text file on the publisher\'s domain. Each line declares a supply chain entity (ASI domain, publisher account ID, and relationship: DIRECT or RESELLER) authorised to sell inventory on that domain. DSPs and buyers check ads.txt to verify they aren\'t buying spoofed or unauthorised inventory.',
+            "ads.txt (Authorised Digital Sellers) is a plain-text file on the publisher's domain. Each line declares a supply chain entity (ASI domain, publisher account ID, and relationship: DIRECT or RESELLER) authorised to sell inventory on that domain. DSPs and buyers check ads.txt to verify they aren't buying spoofed or unauthorised inventory.",
         },
         {
           id: 'ortb-schain-complete',
-          prompt:
-            'A BidRequest arrives with schain.complete = 0. What should a cautious buyer do?',
+          prompt: 'A BidRequest arrives with schain.complete = 0. What should a cautious buyer do?',
           choices: [
-            { label: 'Incomplete path — some hops undeclared; apply stricter price scrutiny', correct: true },
+            {
+              label: 'Incomplete path — some hops undeclared; apply stricter price scrutiny',
+              correct: true,
+            },
             { label: 'Reject the bid request entirely — complete=0 is always fraud' },
             { label: 'Skip schain claim — flags supply quality and trust, not merely optional' },
             { label: 'Set bid price to floor — complete=0 implies a guaranteed deal' },

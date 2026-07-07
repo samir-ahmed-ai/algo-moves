@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -26,19 +32,20 @@ interface HeightState {
   answer: number | null;
 }
 
-function record({ nodes }: HeightInput): Frame<HeightState>[] {  const n = nodes.length;
+function record({ nodes }: HeightInput): Frame<HeightState>[] {
+  const n = nodes.length;
   const best = new Array<number | null>(n).fill(null);
   const height = new Array<number | null>(n).fill(null);
 
   const { emit, frames } = createRecorder<HeightState>(() => ({
-        nodes,
-        active: null,
-        childIdx: null,
-        best: best.slice(),
-        height: height.slice(),
-        done: false,
-        answer: null
-      }));
+    nodes,
+    active: null,
+    childIdx: null,
+    best: best.slice(),
+    height: height.slice(),
+    done: false,
+    answer: null,
+  }));
 
   // Post-order DFS, faithful to the Go getHeight: nil -> 0; else 1 + max(child heights).
   const getHeight = (i: number): number => {
@@ -93,7 +100,13 @@ function record({ nodes }: HeightInput): Frame<HeightState>[] {  const n = nodes
   };
 
   if (n === 0) {
-    emit('DONE', 'empty → 0', `The tree is empty (nil root), so by definition its height is 0.`, { done: true, answer: 0 }, 'good');
+    emit(
+      'DONE',
+      'empty → 0',
+      `The tree is empty (nil root), so by definition its height is 0.`,
+      { done: true, answer: 0 },
+      'good',
+    );
     return frames;
   }
 
@@ -131,8 +144,7 @@ function View({ frame }: PluginViewProps<HeightState>) {
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
         height = 1 + max(child heights){' · '}
-        answer ={' '}
-        <span className="font-mono text-ink">{s.answer !== null ? s.answer : '…'}</span>
+        answer = <span className="font-mono text-ink">{s.answer !== null ? s.answer : '…'}</span>
       </div>
       <NaryTreeBoard
         nodes={boardNodes}
@@ -146,8 +158,7 @@ function View({ frame }: PluginViewProps<HeightState>) {
           <span className="text-ink">{s.best[s.active] ?? 0}</span>
           {s.height[s.active] !== null && (
             <>
-              {' · '}h ={' '}
-              <span className="text-good">{s.height[s.active]}</span>
+              {' · '}h = <span className="text-good">{s.height[s.active]}</span>
             </>
           )}
         </div>
@@ -164,7 +175,7 @@ function Inspector({ frame }: InspectorProps<HeightState>) {
     <VarGrid>
       <InspectorRow k="nodes" v={s.nodes.length} />
       <InspectorRow k="active node" v={cur !== null ? s.nodes[cur].val : '—'} />
-      <InspectorRow k="children" v={cur !== null ? (s.nodes[cur].children.length || 'leaf') : '—'} />
+      <InspectorRow k="children" v={cur !== null ? s.nodes[cur].children.length || 'leaf' : '—'} />
       <InspectorRow k="best child h" v={cur !== null ? (s.best[cur] ?? 0) : '—'} />
       <InspectorRow k="h(node)" v={cur !== null && s.height[cur] !== null ? s.height[cur] : '…'} />
       <InspectorRow k="tree height" v={s.answer !== null ? s.answer : '…'} />
@@ -175,132 +186,130 @@ function Inspector({ frame }: InspectorProps<HeightState>) {
 export const manifestId = 'prep-trees-nary-tree-height';
 export const title = 'Get height';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Get height\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Get height"?',
     choices: [
       {
-        label: "N-ary tree DFS height — fits this problem",
-        correct: true
+        label: 'N-ary tree DFS height — fits this problem',
+        correct: true,
       },
       {
-        label: "N-ary BFS level order — different approach"
+        label: 'N-ary BFS level order — different approach',
       },
       {
-        label: "Inorder DFS (first/last tracking) — different approach"
+        label: 'Inorder DFS (first/last tracking) — different approach',
       },
       {
-        label: "BFS serialize — different approach"
-      }
+        label: 'BFS serialize — different approach',
+      },
     ],
-    explain: "Height = 1 + the tallest child subtree"
+    explain: 'Height = 1 + the tallest child subtree',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Get height), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Get height), what strategy is established?',
     choices: [
       {
-        label: "Height = 1 + the tallest — described in INIT caption",
-        correct: true
+        label: 'Height = 1 + the tallest — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Get the height of this -node N-ary tree. Rule: nil → 0, otherwise a node's height is 1 + the maximum height among its children. We compute it with a post-order DFS from the root."
+    explain:
+      "Get the height of this -node N-ary tree. Rule: nil → 0, otherwise a node's height is 1 + the maximum height among its children. We compute it with a post-order DFS from the root.",
   },
   {
-    id: "key-step",
-    prompt: "On the \"UPDATE\" step (best=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "UPDATE" step (best=), what happens?',
     choices: [
       {
-        label: "Child returned height , which beats — this move caption",
-        correct: true
+        label: 'Child returned height , which beats — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Child  returned height , which beats the previous best () for node . Update this node's tallest-child height to ."
+    explain:
+      "Child  returned height , which beats the previous best () for node . Update this node's tallest-child height to .",
   },
   {
-    id: "state",
-    prompt: "What does the `active` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `active` field track in the visualization state?',
     choices: [
       {
-        label: "node currently being processed — updated each frame",
-        correct: true
+        label: 'node currently being processed — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `active` in sync: node currently being processed"
+    explain: 'The recorder keeps `active` in sync: node currently being processed',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Get height\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Get height"?',
     choices: [
       {
-        label: "O(n) time, O(h) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(h) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(1) space — wrong order of growth"
+        label: 'O(n) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n²) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(h). nil -> 0; return 1 + max(getHeight(child))"
+    explain: 'O(n). O(h). nil -> 0; return 1 + max(getHeight(child))',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "The root returned  — final DONE caption",
-        correct: true
+        label: 'The root returned  — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "The root returned , so the whole tree's height is . Time O(n) — every node is visited once; Space O(h) for the recursion stack."
-  }
+    explain:
+      "The root returned , so the whole tree's height is . Time O(n) — every node is visited once; Space O(h) for the recursion stack.",
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

@@ -16,7 +16,8 @@ for (const file of walkFiles(shellDir, (p) => p.endsWith('.tsx') || p.endsWith('
   const content = readFileSync(file, 'utf8');
   const matches = content.match(BANNED);
   if (matches) {
-    for (const m of [...new Set(matches)]) hits.push({ file: file.replace(root + '/', ''), match: m });
+    for (const m of [...new Set(matches)])
+      hits.push({ file: file.replace(root + '/', ''), match: m });
   }
 }
 

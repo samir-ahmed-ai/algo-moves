@@ -1,9 +1,25 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  vizText,
+} from '../../../_shared/vizKit';
 
 interface MergeKInput {
   // Each inner array is one sorted linked list (its node values, head → tail).
@@ -42,11 +58,16 @@ function record({ lists }: MergeKInput): Frame<MergeKState>[] {
     done: false,
   }));
 
-  const show = (l: number[] | null): string =>
-    l && l.length ? l.join('→') : '∅';
+  const show = (l: number[] | null): string => (l && l.length ? l.join('→') : '∅');
 
   if (pool.length === 0) {
-    emit('DONE', 'empty', 'There are no lists at all, so the merged result is the empty list.', { result: [], done: true }, 'bad');
+    emit(
+      'DONE',
+      'empty',
+      'There are no lists at all, so the merged result is the empty list.',
+      { result: [], done: true },
+      'bad',
+    );
     return frames;
   }
 
@@ -228,12 +249,11 @@ function View({ frame }: PluginViewProps<MergeKState>) {
 
   const headA = s.a && s.ai !== null && s.ai < s.a.length ? s.a[s.ai] : null;
   const headB = s.b && s.bi !== null && s.bi < s.b.length ? s.b[s.bi] : null;
-  const pair =
-    s.pairIdx
-      ? s.pairIdx[1] >= 0
-        ? `${s.pairIdx[0]} & ${s.pairIdx[1]}`
-        : `${s.pairIdx[0]} (carry)`
-      : '—';
+  const pair = s.pairIdx
+    ? s.pairIdx[1] >= 0
+      ? `${s.pairIdx[0]} & ${s.pairIdx[1]}`
+      : `${s.pairIdx[0]} (carry)`
+    : '—';
 
   const rail = (
     <>
@@ -248,9 +268,7 @@ function View({ frame }: PluginViewProps<MergeKState>) {
           <RailStat k="b" v={headB ?? '—'} tone={headB !== null ? 'warn' : undefined} />
         </RailGroup>
       )}
-      {merging && (
-        <RailStack label="out" items={s.out.map(String)} />
-      )}
+      {merging && <RailStack label="out" items={s.out.map(String)} />}
       {s.done && (
         <RailResult
           label="result"
@@ -314,7 +332,11 @@ function View({ frame }: PluginViewProps<MergeKState>) {
 function Inspector({ frame }: InspectorProps<MergeKState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const pair = s.pairIdx ? (s.pairIdx[1] >= 0 ? `${s.pairIdx[0]} & ${s.pairIdx[1]}` : `${s.pairIdx[0]} (carry)`) : '—';
+  const pair = s.pairIdx
+    ? s.pairIdx[1] >= 0
+      ? `${s.pairIdx[0]} & ${s.pairIdx[1]}`
+      : `${s.pairIdx[0]} (carry)`
+    : '—';
   const headA = s.a && s.ai !== null && s.ai < s.a.length ? s.a[s.ai] : '—';
   const headB = s.b && s.bi !== null && s.bi < s.b.length ? s.b[s.bi] : '—';
   return (
@@ -325,7 +347,10 @@ function Inspector({ frame }: InspectorProps<MergeKState>) {
       <InspectorRow k="head a" v={headA} />
       <InspectorRow k="head b" v={headB} />
       <InspectorRow k="out len" v={s.out.length} />
-      <InspectorRow k="result" v={s.result ? (s.result.length ? s.result.join('→') : '∅') : s.done ? '∅' : '…'} />
+      <InspectorRow
+        k="result"
+        v={s.result ? (s.result.length ? s.result.join('→') : '∅') : s.done ? '∅' : '…'}
+      />
     </VarGrid>
   );
 }
@@ -333,132 +358,129 @@ function Inspector({ frame }: InspectorProps<MergeKState>) {
 export const manifestId = 'prep-linked-lists-merge-k-sorted-lists';
 export const title = 'Merge K sorted lists';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Merge K sorted lists\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Merge K sorted lists"?',
     choices: [
       {
-        label: "Min-heap merge — fits this problem",
-        correct: true
+        label: 'Min-heap merge — fits this problem',
+        correct: true,
       },
       {
-        label: "DFS flatten — different approach"
+        label: 'DFS flatten — different approach',
       },
       {
-        label: "Digit carry — different approach"
+        label: 'Digit carry — different approach',
       },
       {
-        label: "Iterative reverse — different approach"
-      }
+        label: 'Iterative reverse — different approach',
+      },
     ],
-    explain: "Pairwise-merge the lists until a single list remains"
+    explain: 'Pairwise-merge the lists until a single list remains',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Merge K sorted lists), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Merge K sorted lists), what strategy is established?',
     choices: [
       {
-        label: "Pairwise-merge the lists until a single — described in INIT caption",
-        correct: true
+        label: 'Pairwise-merge the lists until a single — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Merge K Sorted Lists: we have  already-sorted lists. Repeatedly pair them up and merge two at a time — pool size roughly halves each round — until a single sorted list remains. Time O(n log k), Space O(k)."
+    explain:
+      'Merge K Sorted Lists: we have  already-sorted lists. Repeatedly pair them up and merge two at a time — pool size roughly halves each round — until a single sorted list remains. Time O(n log k), Space O(k).',
   },
   {
-    id: "key-step",
-    prompt: "On the \"TAKE_B\" step (take ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "TAKE_B" step (take ), what happens?',
     choices: [
       {
-        label: "Compare heads: a= ≥ b= — this move caption",
-        correct: true
+        label: 'Compare heads: a= ≥ b= — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Compare heads: a= ≥ b=, so splice node  from list B onto the chain and advance B. (Ties take B, matching the Go else-branch.)"
+    explain:
+      'Compare heads: a= ≥ b=, so splice node  from list B onto the chain and advance B. (Ties take B, matching the Go else-branch.)',
   },
   {
-    id: "state",
-    prompt: "What does the `round` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `round` field track in the visualization state?',
     choices: [
       {
-        label: "pass number through the while(len>1) — updated each frame",
-        correct: true
+        label: 'pass number through the while(len>1) — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `round` in sync: pass number through the while(len>1) loop"
+    explain: 'The recorder keeps `round` in sync: pass number through the while(len>1) loop',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Merge K sorted lists\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Merge K sorted lists"?',
     choices: [
       {
-        label: "O(n log k) time, O(k) space — standard bounds here",
-        correct: true
+        label: 'O(n log k) time, O(k) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(1) space — wrong order of growth"
+        label: 'O(n) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(m+n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(m+n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n log k). O(k). while len>1: merge i with i+1 into a new slice"
+    explain: 'O(n log k). O(k). while len>1: merge i with i+1 into a new slice',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Pair done: lists and merged — final DONE caption",
-        correct: true
+        label: 'Pair done: lists and merged — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Pair done: lists  and  merged into . Add it to the next pool."
-  }
+    explain: 'Pair done: lists  and  merged into . Add it to the next pool.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -466,7 +488,13 @@ export const simulator: ProblemSimulator = {
     {
       id: 'mk1',
       label: '[1,4,5],[1,3,4],[2,6]',
-      value: { lists: [[1, 4, 5], [1, 3, 4], [2, 6]] },
+      value: {
+        lists: [
+          [1, 4, 5],
+          [1, 3, 4],
+          [2, 6],
+        ],
+      },
     },
     {
       id: 'mk2',

@@ -60,11 +60,19 @@ const SHAPE_GIST: Record<string, string> = {
   generic: 'Read the setup, then spot the pattern that cracks it.',
 };
 
-function gistForPlugin(id: string, meta: { title: string; summary: string; tags: string[] }): string {
+function gistForPlugin(
+  id: string,
+  meta: { title: string; summary: string; tags: string[] },
+): string {
   const curated = PROBLEM_GISTS[id];
   if (curated) return curated;
 
-  const sentence = meta.summary.trim().match(/^.*?[.!?](\s|$)/)?.[0]?.trim().replace(/[.!?]+$/, '') ?? '';
+  const sentence =
+    meta.summary
+      .trim()
+      .match(/^.*?[.!?](\s|$)/)?.[0]
+      ?.trim()
+      .replace(/[.!?]+$/, '') ?? '';
   if (sentence.split(/\s+/).length >= 5 && sentence.length <= 120) {
     return `${sentence}.`;
   }
@@ -95,7 +103,10 @@ function insightForPlugin(
   return 'Use the animation to watch how state evolves step by step.';
 }
 
-function askForPlugin(id: string, meta: { title: string; summary: string; tags: string[] }): string {
+function askForPlugin(
+  id: string,
+  meta: { title: string; summary: string; tags: string[] },
+): string {
   const gist = PROBLEM_GISTS[id];
   if (gist) return ensurePeriod(gist);
   const prep = prepById.get(id);

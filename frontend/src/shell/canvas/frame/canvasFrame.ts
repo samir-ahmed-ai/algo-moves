@@ -63,7 +63,12 @@ export function buildCanvasFrame(
   let nodes = buildNodes(plugin, mode);
   const hasSavedLayout = !!saved && Object.keys(saved).length > 0;
   const hasRemovedNodes = !!removed?.size;
-  const seededProblemCanvas = seedProblemCanvas && mode === 'visualize' && nodes.length === 0 && !hasSavedLayout && !hasRemovedNodes;
+  const seededProblemCanvas =
+    seedProblemCanvas &&
+    mode === 'visualize' &&
+    nodes.length === 0 &&
+    !hasSavedLayout &&
+    !hasRemovedNodes;
   if (seededProblemCanvas) {
     nodes = [nodeForKind(plugin, 'workbench', { x: 0, y: 0 })];
   }
@@ -98,7 +103,14 @@ export function buildCanvasFrame(
       const parentId = s.parentId ?? n.parentId;
       const base =
         mode === 'learn'
-          ? { ...n, position: n.position, width, height, parentId, extent: parentId ? ('parent' as const) : undefined }
+          ? {
+              ...n,
+              position: n.position,
+              width,
+              height,
+              parentId,
+              extent: parentId ? ('parent' as const) : undefined,
+            }
           : {
               ...n,
               position: s.position,
@@ -132,8 +144,14 @@ export function organizeCurrentCanvasFrame(
   input: Pick<CanvasFrameInput, 'layoutOpts' | 'dir' | 'edgeOpts'>,
 ): { nodes: PanelFlowNode[]; edges: Edge[] } {
   const present = new Set(nodes.map((n) => n.id));
-  const raw = buildEdges(plugin, mode).filter((e) => present.has(e.source) && present.has(e.target));
-  let kept: PanelFlowNode[] = nodes.map((n) => ({ ...n, position: { x: 0, y: 0 }, selected: false }));
+  const raw = buildEdges(plugin, mode).filter(
+    (e) => present.has(e.source) && present.has(e.target),
+  );
+  let kept: PanelFlowNode[] = nodes.map((n) => ({
+    ...n,
+    position: { x: 0, y: 0 },
+    selected: false,
+  }));
   kept =
     mode === 'visualize'
       ? layoutVisualizeCanvas(kept, input.layoutOpts)
@@ -151,8 +169,14 @@ export async function organizeCurrentCanvasFrameAsync(
   input: Pick<CanvasFrameInput, 'layoutOpts' | 'dir' | 'edgeOpts'>,
 ): Promise<{ nodes: PanelFlowNode[]; edges: Edge[] }> {
   const present = new Set(nodes.map((n) => n.id));
-  const raw = buildEdges(plugin, mode).filter((e) => present.has(e.source) && present.has(e.target));
-  let kept: PanelFlowNode[] = nodes.map((n) => ({ ...n, position: { x: 0, y: 0 }, selected: false }));
+  const raw = buildEdges(plugin, mode).filter(
+    (e) => present.has(e.source) && present.has(e.target),
+  );
+  let kept: PanelFlowNode[] = nodes.map((n) => ({
+    ...n,
+    position: { x: 0, y: 0 },
+    selected: false,
+  }));
   if (mode === 'visualize') {
     kept = layoutVisualizeCanvas(kept, input.layoutOpts);
   } else if (mode === 'learn') {

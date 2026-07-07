@@ -21,9 +21,7 @@ describe('resolveBackToBrowseTarget', () => {
   });
 
   it('falls back to home when the item has no browse path', () => {
-    expect(
-      resolveBackToBrowseTarget('not-in-catalog', null, null),
-    ).toEqual({
+    expect(resolveBackToBrowseTarget('not-in-catalog', null, null)).toEqual({
       trackId: null,
       categoryId: null,
       fallback: 'home',

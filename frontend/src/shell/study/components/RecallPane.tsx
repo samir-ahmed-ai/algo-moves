@@ -5,11 +5,7 @@ import { cn } from '@/lib/utils/cn';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { useWorkspace } from '@/store/workspace';
 import { EmptyState } from '@/shell/canvas';
-import {
-  useCodeStudioContent,
-  useCodeStudioDraft,
-  useCodeStudioEditor,
-} from '../CodeStudio';
+import { useCodeStudioContent, useCodeStudioDraft, useCodeStudioEditor } from '../CodeStudio';
 import { RecallEditorShell } from './RecallEditorShell';
 import { RecallToolbar } from './RecallToolbar';
 
@@ -35,7 +31,11 @@ export function RecallPane({ className, showTitle }: { className?: string; showT
   if (!reference) {
     return (
       <div className={cn('grid min-h-0 flex-1 place-items-center p-6', className)}>
-        <EmptyState icon={<ScanEye className="h-4 w-4" />} title="No source" hint="This problem has no solution to recall." />
+        <EmptyState
+          icon={<ScanEye className="h-4 w-4" />}
+          title="No source"
+          hint="This problem has no solution to recall."
+        />
       </div>
     );
   }

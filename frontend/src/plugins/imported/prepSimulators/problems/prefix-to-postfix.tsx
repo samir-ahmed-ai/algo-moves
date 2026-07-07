@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -24,19 +30,20 @@ function isOp(c: string): boolean {
   return c === '+' || c === '-' || c === '*' || c === '/';
 }
 
-function record({ exp }: PreToPostInput): Frame<PreToPostState>[] {  const stack: string[] = [];
+function record({ exp }: PreToPostInput): Frame<PreToPostState>[] {
+  const stack: string[] = [];
 
   const { emit, frames } = createRecorder<PreToPostState>(() => ({
-        exp,
-        i: null,
-        stack: stack.slice(),
-        a: null,
-        b: null,
-        op: null,
-        pushed: null,
-        result: null,
-        done: false
-      }));
+    exp,
+    i: null,
+    stack: stack.slice(),
+    a: null,
+    b: null,
+    op: null,
+    pushed: null,
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -66,12 +73,11 @@ function record({ exp }: PreToPostInput): Frame<PreToPostState>[] {  const stack
       );
     } else {
       stack.push(c);
-      emit(
-        'OPERAND',
-        `push '${c}'`,
-        `'${c}' is an operand. Push it onto the stack unchanged.`,
-        { i, pushed: c, stack: stack.slice() },
-      );
+      emit('OPERAND', `push '${c}'`, `'${c}' is an operand. Push it onto the stack unchanged.`, {
+        i,
+        pushed: c,
+        stack: stack.slice(),
+      });
     }
   }
 
@@ -181,132 +187,130 @@ function prefixToPostfix(exp: string): string {
 export const manifestId = 'prep-stacks-queues-prefix-to-postfix';
 export const title = 'Prefix to postfix';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Prefix to postfix\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Prefix to postfix"?',
     choices: [
       {
-        label: "Reverse scan prefix stack — fits this problem",
-        correct: true
+        label: 'Reverse scan prefix stack — fits this problem',
+        correct: true,
       },
       {
-        label: "Stack bracket matching — different approach"
+        label: 'Stack bracket matching — different approach',
       },
       {
-        label: "Dual Stack (counts + strings) — different approach"
+        label: 'Dual Stack (counts + strings) — different approach',
       },
       {
-        label: "Shunting-yard (no parens) — different approach"
-      }
+        label: 'Shunting-yard (no parens) — different approach',
+      },
     ],
-    explain: "Scan right-to-left; an operator pops two operand strings"
+    explain: 'Scan right-to-left; an operator pops two operand strings',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Prefix to postfix), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Prefix to postfix), what strategy is established?',
     choices: [
       {
-        label: "Scan right-to-left; an operator pops two — described in INIT caption",
-        correct: true
+        label: 'Scan right-to-left; an operator pops two — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Prefix to postfix: scan the prefix expression RIGHT to LEFT using a stack of postfix fragments. An operand is pushed as-is; an operator pops two fragments a and b (a is on top) and pushes a + b + op."
+    explain:
+      'Prefix to postfix: scan the prefix expression RIGHT to LEFT using a stack of postfix fragments. An operand is pushed as-is; an operator pops two fragments a and b (a is on top) and pushes a + b + op.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"OP\" step ('': ++), what happens?",
+    id: 'key-step',
+    prompt: 'On the "OP" step (\'\': ++), what happens?',
     choices: [
       {
         label: "'' is an operator. Pop — this move caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "'' is an operator. Pop the top fragment a=\"\" and the next fragment b=\"\", then push a + b + '' = \"\". In postfix the operands come before the operator."
+    explain:
+      '\'\' is an operator. Pop the top fragment a="" and the next fragment b="", then push a + b + \'\' = "". In postfix the operands come before the operator.',
   },
   {
-    id: "state",
-    prompt: "What does the `i` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: "current scan index (right-to-left) — updated each frame",
-        correct: true
+        label: 'current scan index (right-to-left) — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `i` in sync: current scan index (right-to-left)"
+    explain: 'The recorder keeps `i` in sync: current scan index (right-to-left)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Prefix to postfix\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Prefix to postfix"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n) time, O(1) space — wrong order of growth"
+        label: 'O(n) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n³) time, O(n) space — wrong order of growth"
+        label: 'O(n³) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(1) per next time, O(k) space — wrong order of growth"
-      }
+        label: 'O(1) per next time, O(k) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). operand push; operator -> push a+b+op"
+    explain: 'O(n). O(n). operand push; operator -> push a+b+op',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "The scan is finished and one — final DONE caption",
-        correct: true
+        label: 'The scan is finished and one — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "The scan is finished and one fragment remains on the stack: \"\". That is the postfix form of the input."
-  }
+    explain:
+      'The scan is finished and one fragment remains on the stack: "". That is the postfix form of the input.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

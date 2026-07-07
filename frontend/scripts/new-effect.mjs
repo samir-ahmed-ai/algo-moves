@@ -16,7 +16,9 @@ const catIdx = args.indexOf('--category');
 const category = catIdx >= 0 ? args[catIdx + 1] : 'time';
 
 if (!id || !/^[a-z][a-z0-9-]*$/.test(id)) {
-  console.error('Usage: npm run new-effect -- <kebab-id> "Title" [--category time|drill|emphasis] [--dry-run]');
+  console.error(
+    'Usage: npm run new-effect -- <kebab-id> "Title" [--category time|drill|emphasis] [--dry-run]',
+  );
   process.exit(1);
 }
 

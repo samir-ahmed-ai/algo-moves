@@ -72,7 +72,10 @@ export function titleToAsk(rawTitle, slug) {
     const capped = title.charAt(0).toUpperCase() + title.slice(1);
     if (capped.length >= 12) return ensurePeriod(capped);
     if (slug) {
-      const words = slug.replace(/-/g, ' ').replace(/^find\s+/i, '').trim();
+      const words = slug
+        .replace(/-/g, ' ')
+        .replace(/^find\s+/i, '')
+        .trim();
       if (words) return ensurePeriod(`${capped} in the ${words}.`);
     }
     return ensurePeriod(capped);
@@ -106,4 +109,3 @@ export function secondFromSummary(summary, first) {
 
   return undefined;
 }
-

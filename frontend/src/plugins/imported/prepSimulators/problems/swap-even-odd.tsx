@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -22,12 +28,12 @@ function record({ s }: SwapInput): Frame<SwapState>[] {
   const n = chars.length;
   const swapped = new Array<boolean>(n).fill(false);
   const { emit, frames } = createRecorder<SwapState>(() => ({
-        chars: chars.slice(),
-        i: null,
-        j: null,
-        swapped: swapped.slice(),
-        done: false
-      }));
+    chars: chars.slice(),
+    i: null,
+    j: null,
+    swapped: swapped.slice(),
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -77,8 +83,10 @@ function record({ s }: SwapInput): Frame<SwapState>[] {
 function View({ frame }: PluginViewProps<SwapState>) {
   const s = frame.state;
   const pointers: ArrayPointer[] = [];
-  if (s.i !== null && !s.done) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
-  if (s.j !== null && !s.done) pointers.push({ i: s.j, label: 'i+1', tone: 'warn', place: 'below' });
+  if (s.i !== null && !s.done)
+    pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
+  if (s.j !== null && !s.done)
+    pointers.push({ i: s.j, label: 'i+1', tone: 'warn', place: 'below' });
 
   const inActivePair = (idx: number) => !s.done && (idx === s.i || idx === s.j);
   const tone = (idx: number) => {
@@ -90,7 +98,8 @@ function View({ frame }: PluginViewProps<SwapState>) {
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
-        input = <span className="font-mono text-ink">"{s.chars.length === 0 ? '' : s.chars.join('')}"</span>
+        input ={' '}
+        <span className="font-mono text-ink">"{s.chars.length === 0 ? '' : s.chars.join('')}"</span>
       </div>
       <ArrayRow values={s.chars} cellTone={tone} pointers={pointers} windowRange={null} />
       <div className={cn('mt-1 font-mono', vizText.base, s.done ? 'text-good' : 'text-ink3')}>
@@ -121,132 +130,128 @@ function Inspector({ frame }: InspectorProps<SwapState>) {
 export const manifestId = 'prep-strings-swap-even-odd';
 export const title = 'Swap even odd';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Swap even odd\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Swap even odd"?',
     choices: [
       {
-        label: "Adjacent swap — fits this problem",
-        correct: true
+        label: 'Adjacent swap — fits this problem',
+        correct: true,
       },
       {
-        label: "Run-length — different approach"
+        label: 'Run-length — different approach',
       },
       {
-        label: "Hash set substrings — different approach"
+        label: 'Hash set substrings — different approach',
       },
       {
-        label: "Sort + Wrap-around — different approach"
-      }
+        label: 'Sort + Wrap-around — different approach',
+      },
     ],
-    explain: "Swap neighbors two at a time"
+    explain: 'Swap neighbors two at a time',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Swap even odd), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Swap even odd), what strategy is established?',
     choices: [
       {
-        label: "Swap neighbors two at a time — described in INIT caption",
-        correct: true
+        label: 'Swap neighbors two at a time — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Swap Even Odd: walk the string two characters at a time and swap each adjacent pair (index i with i+1). We step i += 2 so every neighbouring couple is swapped exactly once."
+    explain:
+      'Swap Even Odd: walk the string two characters at a time and swap each adjacent pair (index i with i+1). We step i += 2 so every neighbouring couple is swapped exactly once.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"SWAP\" step (), what happens?",
+    id: 'key-step',
+    prompt: 'On the "SWAP" step (), what happens?',
     choices: [
       {
         label: "Swap them: index and become '' — this move caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Swap them: index  and  become '' and ''. Now advance i += 2 to the next pair."
+    explain: "Swap them: index  and  become '' and ''. Now advance i += 2 to the next pair.",
   },
   {
-    id: "state",
-    prompt: "What does the `chars` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `chars` field track in the visualization state?',
     choices: [
       {
-        label: "working char array (mutated — updated each frame",
-        correct: true
+        label: 'working char array (mutated — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `chars` in sync: working char array (mutated as we swap)"
+    explain: 'The recorder keeps `chars` in sync: working char array (mutated as we swap)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Swap even odd\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Swap even odd"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
+        label: 'O(1) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n*m) time, O(1) space — wrong order of growth"
+        label: 'O(n*m) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). i+=2: swap b[i],b[i+1]"
+    explain: 'O(n). O(1). i+=2: swap b[i],b[i+1]',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
         label: "Swap them: index and become '' — final DONE caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Swap them: index  and  become '' and ''. Now advance i += 2 to the next pair."
-  }
+    explain: "Swap them: index  and  become '' and ''. Now advance i += 2 to the next pair.",
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -25,19 +31,20 @@ interface AddBinaryState {
 const digitAt = (s: string, idx: number): number =>
   idx >= 0 && idx < s.length ? s.charCodeAt(idx) - 48 : 0;
 
-function record({ a, b }: AddBinaryInput): Frame<AddBinaryState>[] {  const out: string[] = [];
+function record({ a, b }: AddBinaryInput): Frame<AddBinaryState>[] {
+  const out: string[] = [];
 
   const { emit, frames } = createRecorder<AddBinaryState>(() => ({
-        a,
-        b,
-        i: null,
-        j: null,
-        carry: 0,
-        sum: null,
-        bit: null,
-        result: out.slice().reverse().join(''),
-        done: false
-      }));
+    a,
+    b,
+    i: null,
+    j: null,
+    carry: 0,
+    sum: null,
+    bit: null,
+    result: out.slice().reverse().join(''),
+    done: false,
+  }));
 
   let i = a.length - 1;
   let j = b.length - 1;
@@ -92,9 +99,7 @@ function record({ a, b }: AddBinaryInput): Frame<AddBinaryState>[] {  const out:
 }
 
 function operandPointer(idx: number | null, label: string): ArrayPointer[] {
-  return idx !== null && idx >= 0
-    ? [{ i: idx, label, tone: 'accent', place: 'above' }]
-    : [];
+  return idx !== null && idx >= 0 ? [{ i: idx, label, tone: 'accent', place: 'above' }] : [];
 }
 
 function View({ frame }: PluginViewProps<AddBinaryState>) {
@@ -164,132 +169,129 @@ function Inspector({ frame }: InspectorProps<AddBinaryState>) {
 export const manifestId = 'prep-math-add-binary';
 export const title = 'Add binary';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Add binary\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Add binary"?',
     choices: [
       {
-        label: "Binary string addition — fits this problem",
-        correct: true
+        label: 'Binary string addition — fits this problem',
+        correct: true,
       },
       {
-        label: "Bit trick power of two — different approach"
+        label: 'Bit trick power of two — different approach',
       },
       {
-        label: "Iterative factorial — different approach"
+        label: 'Iterative factorial — different approach',
       },
       {
-        label: "Sort + Sliding Window (atan2) — different approach"
-      }
+        label: 'Sort + Sliding Window (atan2) — different approach',
+      },
     ],
-    explain: "Add right-to-left with a carry bit (base 2)"
+    explain: 'Add right-to-left with a carry bit (base 2)',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Add binary), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Add binary), what strategy is established?',
     choices: [
       {
-        label: "Add right-to-left with a carry bit — described in INIT caption",
-        correct: true
+        label: 'Add right-to-left with a carry bit — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Add binary: add the two binary strings \"\" and \"\" like grade-school addition, but in base 2. Walk both from the rightmost bit, keeping a carry."
+    explain:
+      'Add binary: add the two binary strings "" and "" like grade-school addition, but in base 2. Walk both from the rightmost bit, keeping a carry.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"EMIT\" step (bit , carry ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "EMIT" step (bit , carry ), what happens?',
     choices: [
       {
-        label: "Prepend bit to the answer, giving — this move caption",
-        correct: true
+        label: 'Prepend bit to the answer, giving — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Prepend bit  to the answer, giving \"\". Carry  moves into the next column to the left."
+    explain:
+      'Prepend bit  to the answer, giving "". Carry  moves into the next column to the left.',
   },
   {
-    id: "state",
-    prompt: "What does the `i` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: "current index into a (-1 — updated each frame",
-        correct: true
+        label: 'current index into a (-1 — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `i` in sync: current index into a (-1 = past the front)"
+    explain: 'The recorder keeps `i` in sync: current index into a (-1 = past the front)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Add binary\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Add binary"?',
     choices: [
       {
-        label: "O(max(len)) time, O(max(len)) space — standard bounds here",
-        correct: true
+        label: 'O(max(len)) time, O(max(len)) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
+        label: 'O(n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(sqrt(n)) time, O(1) space — wrong order of growth"
-      }
+        label: 'O(sqrt(n)) time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(max(len)). O(max(len)). sum=a+b+carry; bit=sum%2; carry=sum/2; reverse"
+    explain: 'O(max(len)). O(max(len)). sum=a+b+carry; bit=sum%2; carry=sum/2; reverse',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "No bits and no carry remain. — final DONE caption",
-        correct: true
+        label: 'No bits and no carry remain. — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "No bits and no carry remain. Reversing the LSB-first bits gives the sum \"\"."
-  }
+    explain: 'No bits and no carry remain. Reversing the LSB-first bits gives the sum "".',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

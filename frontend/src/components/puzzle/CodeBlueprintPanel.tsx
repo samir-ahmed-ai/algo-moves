@@ -24,7 +24,10 @@ export function CodeBlueprintPanel({
 }: CodeBlueprintPanelProps) {
   return (
     <div
-      className={cn('code-blueprint-panel code-studio-reassemble nodrag', inline && 'code-blueprint-panel--inline')}
+      className={cn(
+        'code-blueprint-panel code-studio-reassemble nodrag',
+        inline && 'code-blueprint-panel--inline',
+      )}
       onMouseDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
       role="region"
@@ -36,13 +39,17 @@ export function CodeBlueprintPanel({
           <div className="min-w-0">
             <h2 className="code-blueprint-title">Solution blueprint</h2>
             {!inline && (
-              <p className="code-blueprint-subtitle">
-                {pieces.length} blocks · source order
-              </p>
+              <p className="code-blueprint-subtitle">{pieces.length} blocks · source order</p>
             )}
           </div>
         </div>
-        <button ref={closeRef} type="button" className="code-blueprint-close" aria-label="Close blueprint" onClick={onClose}>
+        <button
+          ref={closeRef}
+          type="button"
+          className="code-blueprint-close"
+          aria-label="Close blueprint"
+          onClick={onClose}
+        >
           <X className="h-4 w-4" />
         </button>
       </header>

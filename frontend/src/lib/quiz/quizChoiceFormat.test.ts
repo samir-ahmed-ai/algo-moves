@@ -53,7 +53,11 @@ describe('quizLabelIssues', () => {
     expect(quizLabelIssues('Backtracking — plausible distractor')?.reason).toMatch(/generic/);
     expect(quizLabelIssues('n=0 and n=1 have — the same answer')?.reason).toMatch(/comma-split/);
     expect(quizLabelIssues('Greedy pick — wrong approach here')?.reason).toMatch(/generic/);
-    expect(quizLabelIssues('To visit nodes in, — lexicographic order')?.reason).toMatch(/comma-split/);
-    expect(quizLabelIssues('`adj[pre]` appends `course`… — edge to prerequisite')?.reason).toMatch(/truncated/);
+    expect(quizLabelIssues('To visit nodes in, — lexicographic order')?.reason).toMatch(
+      /comma-split/,
+    );
+    expect(quizLabelIssues('`adj[pre]` appends `course`… — edge to prerequisite')?.reason).toMatch(
+      /truncated/,
+    );
   });
 });

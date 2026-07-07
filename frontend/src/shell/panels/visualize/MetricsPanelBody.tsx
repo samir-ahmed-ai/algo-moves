@@ -1,5 +1,13 @@
-
-import { useCanvasFrame, useCanvasStatic, Chip, ControlsAccordion, Label, Meter, Stat, StatGrid } from '@/shell/canvas';
+import {
+  useCanvasFrame,
+  useCanvasStatic,
+  Chip,
+  ControlsAccordion,
+  Label,
+  Meter,
+  Stat,
+  StatGrid,
+} from '@/shell/canvas';
 export function MetricsBody() {
   const { plugin } = useCanvasStatic();
   const { frames, frame, player } = useCanvasFrame();

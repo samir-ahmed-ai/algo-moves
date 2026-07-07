@@ -7,7 +7,13 @@ import {
   type ThemePreset,
 } from '@/styles/themes/registry';
 import type { ProjectState } from '@/store/project-state/projectState';
-import type { AlignKind, BgVariant, CanvasSnapRegion, EdgeOpts, LayoutPreset } from '@/lib/canvas/layoutPrefs';
+import type {
+  AlignKind,
+  BgVariant,
+  CanvasSnapRegion,
+  EdgeOpts,
+  LayoutPreset,
+} from '@/lib/canvas/layoutPrefs';
 import { DEFAULTS_KEY, LAST_ITEM_KEY } from './workspaceConstants';
 import { readStorageText, writeStorageJson } from '@/store/persistence/storage';
 
@@ -27,7 +33,7 @@ export type Theme = 'dark' | 'light';
 export type Density = 'compact' | 'ultra' | 'spacious';
 export type Palette = 'default' | 'cb';
 /** Which top-level surface is showing: home launchpad, canvas workspace, the mobile swipe deck, the Vim dojo, the two-player games arcade, or the interview prep plans hub. */
-export type AppRoute = 'home' | 'workspace' | 'mobile' | 'vim' | 'games' | 'plans';
+export type AppRoute = 'home' | 'workspace' | 'mobile' | 'vim' | 'games' | 'plans' | 'resumes';
 export type { ThemePreset, LayoutPreset, CanvasSnapRegion };
 export { DEFAULT_THEME_PRESET, THEME_META, THEME_PRESETS, normalizeThemePreset };
 
@@ -58,7 +64,11 @@ export type RightSidebarTab = 'analysis' | 'canvas' | 'selection' | 'collab' | '
 export interface CanvasProjectApi {
   getProjectState: () => ProjectState;
   applyProjectState: (state: ProjectState) => void;
-  applyWorkflowPreset: (preset: { mode: CanvasMode; layoutPreset: LayoutPreset; ensurePanels?: string[] }) => void;
+  applyWorkflowPreset: (preset: {
+    mode: CanvasMode;
+    layoutPreset: LayoutPreset;
+    ensurePanels?: string[];
+  }) => void;
 }
 
 /** Optional add-panel API registered by CanvasStage while visualize mode is active. */

@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface LcoInput {
   grid: number[][]; // each row sorted: 0s then 1s
@@ -20,39 +33,61 @@ interface LcoState {
 
 function record({ grid }: LcoInput): Frame<LcoState>[] {
   const m = grid.length;
-  const n = grid[0].length;  const path = Array.from({ length: m }, () => new Array<boolean>(n).fill(false));
+  const n = grid[0].length;
+  const path = Array.from({ length: m }, () => new Array<boolean>(n).fill(false));
 
   let r = 0;
   let c = n - 1;
   let res = -1;
 
   const { emit, frames } = createRecorder<LcoState>(() => ({
-        grid: grid,
-        r: r,
-        c: c,
-        path: path.map((row) => row.slice()),
-        res: res,
-        inBounds: r < m && c >= 0,
-        done: false
-      }));
+    grid: grid,
+    r: r,
+    c: c,
+    path: path.map((row) => row.slice()),
+    res: res,
+    inBounds: r < m && c >= 0,
+    done: false,
+  }));
 
-  emit('INIT', `${m}×${n}, start (0, ${n - 1})`, `Each row is sorted (0s then 1s). Start at the top-right corner and walk a staircase: on a 1 record its column and step left (a 1 might also sit further left in a lower row); on a 0 step down. The smallest column ever recorded is the answer.`, {});
+  emit(
+    'INIT',
+    `${m}×${n}, start (0, ${n - 1})`,
+    `Each row is sorted (0s then 1s). Start at the top-right corner and walk a staircase: on a 1 record its column and step left (a 1 might also sit further left in a lower row); on a 0 step down. The smallest column ever recorded is the answer.`,
+    {},
+  );
 
   while (r < m && c >= 0) {
     path[r][c] = true;
     if (grid[r][c] === 1) {
       res = c;
-      emit('ONE', `(${r},${c}) = 1 → res=${c}`, `Cell (${r}, ${c}) is 1: this row has a 1 at column ${c}, so record res = ${c} and step left to hunt for an even earlier 1.`, {});
+      emit(
+        'ONE',
+        `(${r},${c}) = 1 → res=${c}`,
+        `Cell (${r}, ${c}) is 1: this row has a 1 at column ${c}, so record res = ${c} and step left to hunt for an even earlier 1.`,
+        {},
+      );
       c--;
     } else {
-      emit('ZERO', `(${r},${c}) = 0 → down`, `Cell (${r}, ${c}) is 0: the whole row up to here is 0, so no 1 can be at column ≤ ${c} in this row — step down to the next row.`, {});
+      emit(
+        'ZERO',
+        `(${r},${c}) = 0 → down`,
+        `Cell (${r}, ${c}) is 0: the whole row up to here is 0, so no 1 can be at column ≤ ${c} in this row — step down to the next row.`,
+        {},
+      );
       r++;
     }
   }
 
-  emit('DONE', res === -1 ? 'no 1 found' : `leftmost column ${res}`, res === -1
+  emit(
+    'DONE',
+    res === -1 ? 'no 1 found' : `leftmost column ${res}`,
+    res === -1
       ? `The walk left the grid without ever seeing a 1 — the matrix is all zeros. Return -1.`
-      : `The walk left the grid. The smallest column that held a 1 was ${res}. Leftmost column with a one = ${res}.`, { done: true }, 'good');
+      : `The walk left the grid. The smallest column that held a 1 was ${res}. Leftmost column with a one = ${res}.`,
+    { done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -71,7 +106,11 @@ function View({ frame }: PluginViewProps<LcoState>) {
         <RailStat k="r" v={s.inBounds && !s.done ? s.r : '—'} tone="accent" />
         <RailStat k="c" v={s.inBounds && !s.done ? s.c : '—'} tone="accent" />
       </RailGroup>
-      <RailResult label="leftmost col" value={s.res === -1 ? '—' : s.res} tone={s.done ? (s.res === -1 ? 'bad' : 'good') : 'accent'} />
+      <RailResult
+        label="leftmost col"
+        value={s.res === -1 ? '—' : s.res}
+        tone={s.done ? (s.res === -1 ? 'bad' : 'good') : 'accent'}
+      />
     </>
   );
   return (

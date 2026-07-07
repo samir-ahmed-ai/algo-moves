@@ -1,9 +1,23 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  RailGroup,
+  RailResult,
+  RailStat,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  vizText,
+} from '../../../_shared/vizKit';
 
 interface RotInput {
   values: number[];
@@ -21,21 +35,22 @@ interface RotState {
   done: boolean;
 }
 
-function record({ values, target }: RotInput): Frame<RotState>[] {  const dead = new Array<boolean>(values.length).fill(false);
+function record({ values, target }: RotInput): Frame<RotState>[] {
+  const dead = new Array<boolean>(values.length).fill(false);
   let lo = 0;
   let hi = values.length - 1;
   let found: number | null = null;
 
   const { emit, frames } = createRecorder<RotState>(() => ({
-        values: values,
-        target: target,
-        lo: lo,
-        hi: hi,
-        found: found,
-        dead: dead.slice(),
-        mid: null,
-        done: false
-      }));
+    values: values,
+    target: target,
+    lo: lo,
+    hi: hi,
+    found: found,
+    dead: dead.slice(),
+    mid: null,
+    done: false,
+  }));
   const emitDone = (
     type: string,
     note: string,
@@ -44,14 +59,27 @@ function record({ values, target }: RotInput): Frame<RotState>[] {  const dead =
     tone?: 'good' | 'bad',
   ) => emit(type, note, caption, { ...partial, done: true }, tone);
 
-  emit('INIT', `lo=0 hi=${hi}`, `Search for ${target} in a sorted array that was rotated at an unknown pivot. At each step one half [lo..mid] or [mid..hi] is still in sorted order — decide which, and whether the target lies inside it.`, { mid: null });
+  emit(
+    'INIT',
+    `lo=0 hi=${hi}`,
+    `Search for ${target} in a sorted array that was rotated at an unknown pivot. At each step one half [lo..mid] or [mid..hi] is still in sorted order — decide which, and whether the target lies inside it.`,
+    { mid: null },
+  );
 
   while (lo <= hi) {
     const mid = (lo + hi) >> 1;
-    emit('MID', `mid=${mid}`, `Middle of the live window: mid=${mid}, value ${values[mid]}.`, { mid: mid });
+    emit('MID', `mid=${mid}`, `Middle of the live window: mid=${mid}, value ${values[mid]}.`, {
+      mid: mid,
+    });
     if (values[mid] === target) {
       found = mid;
-      emitDone('FOUND', `found @${mid}`, `values[${mid}] = ${target}. Found at index ${mid}.`, { mid: mid }, 'good');
+      emitDone(
+        'FOUND',
+        `found @${mid}`,
+        `values[${mid}] = ${target}. Found at index ${mid}.`,
+        { mid: mid },
+        'good',
+      );
       return frames;
     }
     if (values[lo] <= values[mid]) {
@@ -59,27 +87,53 @@ function record({ values, target }: RotInput): Frame<RotState>[] {  const dead =
       if (values[lo] <= target && target < values[mid]) {
         for (let i = mid; i <= hi; i++) dead[i] = true;
         hi = mid - 1;
-        emit('LEFT', `hi=${hi}`, `[${lo}..${mid}] is sorted and ${values[lo]} ≤ ${target} < ${values[mid]}, so the target is in the left half. Set hi = ${hi}.`, { mid: mid });
+        emit(
+          'LEFT',
+          `hi=${hi}`,
+          `[${lo}..${mid}] is sorted and ${values[lo]} ≤ ${target} < ${values[mid]}, so the target is in the left half. Set hi = ${hi}.`,
+          { mid: mid },
+        );
       } else {
         for (let i = lo; i <= mid; i++) dead[i] = true;
         lo = mid + 1;
-        emit('RIGHT', `lo=${lo}`, `The sorted left half ends at ${values[mid]} and doesn't contain ${target}, so search the right half. Set lo = ${lo}.`, { mid: mid });
+        emit(
+          'RIGHT',
+          `lo=${lo}`,
+          `The sorted left half ends at ${values[mid]} and doesn't contain ${target}, so search the right half. Set lo = ${lo}.`,
+          { mid: mid },
+        );
       }
     } else {
       // right half [mid..hi] is sorted
       if (values[mid] < target && target <= values[hi]) {
         for (let i = lo; i <= mid; i++) dead[i] = true;
         lo = mid + 1;
-        emit('RIGHT', `lo=${lo}`, `[${mid}..${hi}] is sorted and ${values[mid]} < ${target} ≤ ${values[hi]}, so the target is in the right half. Set lo = ${lo}.`, { mid: mid });
+        emit(
+          'RIGHT',
+          `lo=${lo}`,
+          `[${mid}..${hi}] is sorted and ${values[mid]} < ${target} ≤ ${values[hi]}, so the target is in the right half. Set lo = ${lo}.`,
+          { mid: mid },
+        );
       } else {
         for (let i = mid; i <= hi; i++) dead[i] = true;
         hi = mid - 1;
-        emit('LEFT', `hi=${hi}`, `[${mid}..${hi}] is sorted but ${target} is outside it, so search the left half. Set hi = ${hi}.`, { mid: mid });
+        emit(
+          'LEFT',
+          `hi=${hi}`,
+          `[${mid}..${hi}] is sorted but ${target} is outside it, so search the left half. Set hi = ${hi}.`,
+          { mid: mid },
+        );
       }
     }
   }
 
-  emitDone('MISS', 'absent', `lo passed hi with no match — ${target} is not in the array. Return -1.`, { mid: null }, 'bad');
+  emitDone(
+    'MISS',
+    'absent',
+    `lo passed hi with no match — ${target} is not in the array. Return -1.`,
+    { mid: null },
+    'bad',
+  );
   return frames;
 }
 
@@ -129,7 +183,10 @@ function Inspector({ frame }: InspectorProps<RotState>) {
       <InspectorRow k="lo" v={s.lo} />
       <InspectorRow k="hi" v={s.hi} />
       <InspectorRow k="mid" v={s.mid ?? '—'} />
-      <InspectorRow k="result" v={s.found !== null ? `index ${s.found}` : s.done ? '-1 (absent)' : '…searching'} />
+      <InspectorRow
+        k="result"
+        v={s.found !== null ? `index ${s.found}` : s.done ? '-1 (absent)' : '…searching'}
+      />
     </VarGrid>
   );
 }
@@ -139,14 +196,24 @@ export const title = 'Search in Rotated Sorted Array';
 
 export const simulator: ProblemSimulator = {
   inputs: [
-    { id: 'r1', label: '[4,5,6,7,0,1,2], t=0', value: { values: [4, 5, 6, 7, 0, 1, 2], target: 0 } },
-    { id: 'r2', label: '[4,5,6,7,0,1,2], t=3', value: { values: [4, 5, 6, 7, 0, 1, 2], target: 3 } },
+    {
+      id: 'r1',
+      label: '[4,5,6,7,0,1,2], t=0',
+      value: { values: [4, 5, 6, 7, 0, 1, 2], target: 0 },
+    },
+    {
+      id: 'r2',
+      label: '[4,5,6,7,0,1,2], t=3',
+      value: { values: [4, 5, 6, 7, 0, 1, 2], target: 3 },
+    },
   ] satisfies SampleInput<RotInput>[],
   record,
   View,
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as RotState | undefined;
-    return s && s.found !== null ? { ok: true, label: `index ${s.found}` } : { ok: false, label: '-1 (absent)' };
+    return s && s.found !== null
+      ? { ok: true, label: `index ${s.found}` }
+      : { ok: false, label: '-1 (absent)' };
   },
 };

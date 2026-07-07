@@ -2,11 +2,7 @@ import { createContext, type MutableRefObject } from 'react';
 import type { EditorView } from '@codemirror/view';
 import type { QuizQuestion } from '@/core/types';
 import type { CodePiece } from '@/lib/code';
-import type {
-  CodeStudioPhase,
-  QuizProgress,
-  loadReassembleProgress,
-} from '@/store/user-prefs';
+import type { CodeStudioPhase, QuizProgress, loadReassembleProgress } from '@/store/user-prefs';
 import type { EditorPrefs } from '@/store/user-prefs';
 import type { statFor } from '@/store/persistence';
 

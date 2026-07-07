@@ -1,9 +1,25 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { minHeapPopGeneric, minHeapPushGeneric } from '../../../_shared/dualHeapBoard';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  vizText,
+} from '../../../_shared/vizKit';
 
 interface StreamItem {
   val: number;
@@ -52,12 +68,10 @@ function record({ streams }: MergeStreamsInput): Frame<MergeStreamsState>[] {
     if (streams[si].length > 0) {
       const it: StreamItem = { val: streams[si][0], stream: si, idx: 0 };
       heap = minHeapPushGeneric(heap, it, cmpStreamItem);
-      emit(
-        'SEED',
-        `s${si}→${it.val}`,
-        `Seed heap with stream ${si}'s head: ${it.val}.`,
-        { heap: heap.slice(), cursors: cursors.slice() },
-      );
+      emit('SEED', `s${si}→${it.val}`, `Seed heap with stream ${si}'s head: ${it.val}.`, {
+        heap: heap.slice(),
+        cursors: cursors.slice(),
+      });
     }
   }
 
@@ -75,7 +89,11 @@ function record({ streams }: MergeStreamsInput): Frame<MergeStreamsState>[] {
     cursors[popped.stream] = popped.idx + 1;
     const next = popped.idx + 1;
     if (next < streams[popped.stream].length) {
-      const nxt: StreamItem = { val: streams[popped.stream][next], stream: popped.stream, idx: next };
+      const nxt: StreamItem = {
+        val: streams[popped.stream][next],
+        stream: popped.stream,
+        idx: next,
+      };
       heap = minHeapPushGeneric(heap, nxt, cmpStreamItem);
       emit(
         'PUSH',
@@ -102,14 +120,22 @@ function View({ frame }: PluginViewProps<MergeStreamsState>) {
     <>
       <RailStack
         label="min-heap"
-        items={s.heap.length ? [...s.heap].sort((a, b) => a.val - b.val).map((it) => `s${it.stream}:${it.val}`) : []}
+        items={
+          s.heap.length
+            ? [...s.heap].sort((a, b) => a.val - b.val).map((it) => `s${it.stream}:${it.val}`)
+            : []
+        }
         topLabel="min"
       />
       <RailGroup label="last pop">
         <RailStat k="stream" v={s.popped ? `s${s.popped.stream}` : '—'} />
         <RailStat k="val" v={s.popped ? s.popped.val : '—'} tone="accent" />
       </RailGroup>
-      <RailResult label="merged" value={s.out.length ? `[${s.out.join(', ')}]` : '—'} tone={s.done ? 'good' : 'accent'} />
+      <RailResult
+        label="merged"
+        value={s.out.length ? `[${s.out.join(', ')}]` : '—'}
+        tone={s.done ? 'good' : 'accent'}
+      />
     </>
   );
   return (
@@ -123,7 +149,11 @@ function View({ frame }: PluginViewProps<MergeStreamsState>) {
               key={i}
               className={cn(
                 'mr-1',
-                i < s.cursors[si] ? 'text-ink3 line-through' : i === s.cursors[si] ? 'rounded bg-accentbg text-accent' : 'text-ink',
+                i < s.cursors[si]
+                  ? 'text-ink3 line-through'
+                  : i === s.cursors[si]
+                    ? 'rounded bg-accentbg text-accent'
+                    : 'text-ink',
               )}
             >
               {v}
@@ -151,132 +181,130 @@ function Inspector({ frame }: InspectorProps<MergeStreamsState>) {
 export const manifestId = 'prep-streams-io-merge-k-sorted-streams-in-one';
 export const title = 'Merge K sorted streams in one';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Merge K sorted streams in one\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Merge K sorted streams in one"?',
     choices: [
       {
-        label: "K-way merge with min-heap — fits this problem",
-        correct: true
+        label: 'K-way merge with min-heap — fits this problem',
+        correct: true,
       },
       {
-        label: "In-place byte reversal — different approach"
+        label: 'In-place byte reversal — different approach',
       },
       {
-        label: "Streaming palindrome stack — different approach"
+        label: 'Streaming palindrome stack — different approach',
       },
       {
-        label: "Min-heap size k — different approach"
-      }
+        label: 'Min-heap size k — different approach',
+      },
     ],
-    explain: "Min-heap holds each stream's head; pop min, push that stream's next"
+    explain: "Min-heap holds each stream's head; pop min, push that stream's next",
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Merge K sorted streams in one), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Merge K sorted streams in one), what strategy is established?',
     choices: [
       {
         label: "Min-heap holds each stream's head; pop — described in INIT caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Merge K sorted streams: seed a min-heap with the first element of each non-empty stream. Repeatedly popMin, append to output, push that stream's next."
+    explain:
+      "Merge K sorted streams: seed a min-heap with the first element of each non-empty stream. Repeatedly popMin, append to output, push that stream's next.",
   },
   {
-    id: "key-step",
-    prompt: "On the \"POP\" step (take ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "POP" step (take ), what happens?',
     choices: [
       {
-        label: "PopMin: value from stream (index ). — this move caption",
-        correct: true
+        label: 'PopMin: value from stream (index ). — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "PopMin: value  from stream  (index ). Append to merged output."
+    explain: 'PopMin: value  from stream  (index ). Append to merged output.',
   },
   {
-    id: "state",
-    prompt: "What does the `streams` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `streams` field track in the visualization state?',
     choices: [
       {
-        label: "Field streams in state — updated each frame",
-        correct: true
+        label: 'Field streams in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `streams` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `streams` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Merge K sorted streams in one\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Merge K sorted streams in one"?',
     choices: [
       {
-        label: "O(total * log k) time, O(k) space — standard bounds here",
-        correct: true
+        label: 'O(total * log k) time, O(k) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(entries) time, O(depth) space — wrong order of growth"
+        label: 'O(entries) time, O(depth) space — wrong order of growth',
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(log n) per add time, O(n) space — wrong order of growth"
-      }
+        label: 'O(log n) per add time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(total * log k). O(k). seed heap with first of each; pop -> append -> push next from same stream"
+    explain:
+      'O(total * log k). O(k). seed heap with first of each; pop -> append -> push next from same stream',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Heap empty — all streams exhausted. — final DONE caption",
-        correct: true
+        label: 'Heap empty — all streams exhausted. — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Heap empty — all streams exhausted. Merged sorted output: []."
-  }
+    explain: 'Heap empty — all streams exhausted. Merged sorted output: [].',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -284,12 +312,23 @@ export const simulator: ProblemSimulator = {
     {
       id: 'mks1',
       label: '[[1,4,7],[2,5,8],[3,6,9]]',
-      value: { streams: [[1, 4, 7], [2, 5, 8], [3, 6, 9]] },
+      value: {
+        streams: [
+          [1, 4, 7],
+          [2, 5, 8],
+          [3, 6, 9],
+        ],
+      },
     },
     {
       id: 'mks2',
       label: '[[1,10],[2,3,4]]',
-      value: { streams: [[1, 10], [2, 3, 4]] },
+      value: {
+        streams: [
+          [1, 10],
+          [2, 3, 4],
+        ],
+      },
     },
   ] satisfies SampleInput<MergeStreamsInput>[],
   record,

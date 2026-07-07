@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -24,14 +30,14 @@ interface InsertState {
 
 function record({ list, insertVal }: InsertInput): Frame<InsertState>[] {
   const { emit, frames } = createRecorder<InsertState>(() => ({
-        chain: list,
-        insertVal,
-        prev: null,
-        cur: null,
-        reason: '',
-        inserted: null,
-        done: false
-      }));
+    chain: list,
+    insertVal,
+    prev: null,
+    cur: null,
+    reason: '',
+    inserted: null,
+    done: false,
+  }));
 
   // Empty-list case: the new node points to itself.
   if (list.length === 0) {
@@ -153,9 +159,12 @@ function record({ list, insertVal }: InsertInput): Frame<InsertState>[] {
 function View({ frame }: PluginViewProps<InsertState>) {
   const s = frame.state;
   const pointers: ArrayPointer[] = [];
-  if (s.prev !== null && !s.done) pointers.push({ i: s.prev, label: 'prev', tone: 'warn', place: 'above' });
-  if (s.cur !== null && !s.done) pointers.push({ i: s.cur, label: 'cur', tone: 'accent', place: 'above' });
-  if (s.inserted !== null) pointers.push({ i: s.inserted, label: 'new', tone: 'good', place: 'below' });
+  if (s.prev !== null && !s.done)
+    pointers.push({ i: s.prev, label: 'prev', tone: 'warn', place: 'above' });
+  if (s.cur !== null && !s.done)
+    pointers.push({ i: s.cur, label: 'cur', tone: 'accent', place: 'above' });
+  if (s.inserted !== null)
+    pointers.push({ i: s.inserted, label: 'new', tone: 'good', place: 'below' });
 
   const tone = (i: number) => {
     if (s.inserted === i) return 'found';
@@ -169,14 +178,14 @@ function View({ frame }: PluginViewProps<InsertState>) {
         insertVal = <span className="font-mono text-ink">{s.insertVal}</span>
         {s.reason && (
           <>
-            {' · '}case ={' '}
-            <span className="font-mono text-ink">{s.reason}</span>
+            {' · '}case = <span className="font-mono text-ink">{s.reason}</span>
           </>
         )}
       </div>
       <ArrayRow values={s.chain} cellTone={tone} pointers={pointers} windowRange={null} />
       <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        {s.chain.join(' → ')}{s.chain.length > 0 ? ' →↺' : '∅'}
+        {s.chain.join(' → ')}
+        {s.chain.length > 0 ? ' →↺' : '∅'}
       </div>
       {s.done && (
         <div className={cn('mt-1 font-mono text-good', vizText.base)}>→ [{s.chain.join(', ')}]</div>
@@ -191,8 +200,14 @@ function Inspector({ frame }: InspectorProps<InsertState>) {
   return (
     <VarGrid>
       <InspectorRow k="insertVal" v={s.insertVal} />
-      <InspectorRow k="prev" v={s.prev !== null && !s.done ? `${s.chain[s.prev]} (i=${s.prev})` : '—'} />
-      <InspectorRow k="cur" v={s.cur !== null && !s.done ? `${s.chain[s.cur]} (i=${s.cur})` : '—'} />
+      <InspectorRow
+        k="prev"
+        v={s.prev !== null && !s.done ? `${s.chain[s.prev]} (i=${s.prev})` : '—'}
+      />
+      <InspectorRow
+        k="cur"
+        v={s.cur !== null && !s.done ? `${s.chain[s.cur]} (i=${s.cur})` : '—'}
+      />
       <InspectorRow k="case" v={s.reason || '…'} />
       <InspectorRow k="len" v={s.chain.length} />
       <InspectorRow k="result" v={s.done ? `[${s.chain.join(', ')}]` : '…'} />
@@ -203,132 +218,131 @@ function Inspector({ frame }: InspectorProps<InsertState>) {
 export const manifestId = 'prep-linked-lists-insert-into-a-sorted-circular-linked-list';
 export const title = 'Insert into a Sorted Circular Linked List';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Insert into a Sorted Circular Linked List\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Insert into a Sorted Circular Linked List"?',
     choices: [
       {
-        label: "Circular Scan (3 cases) — fits this problem",
-        correct: true
+        label: 'Circular Scan (3 cases) — fits this problem',
+        correct: true,
       },
       {
-        label: "Josephus simulation — different approach"
+        label: 'Josephus simulation — different approach',
       },
       {
-        label: "Interweave (3-pass, no map) — different approach"
+        label: 'Interweave (3-pass, no map) — different approach',
       },
       {
-        label: "Iterative Group Reversal — different approach"
-      }
+        label: 'Iterative Group Reversal — different approach',
+      },
     ],
-    explain: "Three cases for insertion between `prev` and `curr`:"
+    explain: 'Three cases for insertion between `prev` and `curr`:',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Insert into a Sorted Circular Linked List), what strategy is established?",
+    id: 'init',
+    prompt:
+      'At the start of a run (Insert into a Sorted Circular Linked List), what strategy is established?',
     choices: [
       {
-        label: "Three cases for insertion between `prev` — described in INIT caption",
-        correct: true
+        label: 'Three cases for insertion between `prev` — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Insert  into the sorted circular list. Walk pairs (prev, cur) starting at head until we find the gap where  fits. prev = head (index 0), cur = the next node."
+    explain:
+      'Insert  into the sorted circular list. Walk pairs (prev, cur) starting at head until we find the gap where  fits. prev = head (index 0), cur = the next node.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"CASE2\" step ( is new ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "CASE2" step ( is new ), what happens?',
     choices: [
       {
-        label: "Case 2: ${insertVal >= pv ? — this move caption",
-        correct: true
+        label: 'Case 2: ${insertVal >= pv ? — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Case 2:  ${insertVal >= pv ? "
+    explain: 'Case 2:  ${insertVal >= pv ? ',
   },
   {
-    id: "state",
-    prompt: "What does the `chain` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `chain` field track in the visualization state?',
     choices: [
       {
-        label: "the (possibly grown) list values — updated each frame",
-        correct: true
+        label: 'the (possibly grown) list values — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `chain` in sync: the (possibly grown) list values in order"
+    explain: 'The recorder keeps `chain` in sync: the (possibly grown) list values in order',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Insert into a Sorted Circular Linked List\"?",
+    id: 'complexity',
+    prompt:
+      'What are the time and space complexities for "Insert into a Sorted Circular Linked List"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
+        label: 'O(n²) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(1) space — wrong order of growth"
+        label: 'O(1) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(1) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). Three cases for insertion between `prev` and `curr`:"
+    explain: 'O(n). O(1). Three cases for insertion between `prev` and `curr`:',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Splice the new node between — final DONE caption",
-        correct: true
+        label: 'Splice the new node between — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Splice the new node between  and : prev.Next = node, node.Next = cur. With all values equal the order is unchanged."
-  }
+    explain:
+      'Splice the new node between  and : prev.Next = node, node.Next = cur. With all values equal the order is unchanged.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

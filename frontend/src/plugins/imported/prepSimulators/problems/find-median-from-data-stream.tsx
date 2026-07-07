@@ -1,6 +1,20 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+} from '../../../_shared/vizKit';
 import type { DualHeapMedianState } from '../../../_shared/dualHeapMedianRecord';
 import { recordDualHeapMedian } from '../../../_shared/dualHeapMedianRecord';
 import { DualHeapBoard } from '../../../_shared/dualHeapBoard';
@@ -28,8 +42,16 @@ function View({ frame }: PluginViewProps<MedianState>) {
           <RailGroup label="heaps">
             <RailStat k="low sz" v={s.low.length} />
             <RailStat k="high sz" v={s.high.length} />
-            <RailStat k="low top" v={s.low[0] ?? '—'} tone={s.highlightLow ? 'accent' : undefined} />
-            <RailStat k="high top" v={s.high[0] ?? '—'} tone={s.highlightHigh ? 'accent' : undefined} />
+            <RailStat
+              k="low top"
+              v={s.low[0] ?? '—'}
+              tone={s.highlightLow ? 'accent' : undefined}
+            />
+            <RailStat
+              k="high top"
+              v={s.high[0] ?? '—'}
+              tone={s.highlightHigh ? 'accent' : undefined}
+            />
           </RailGroup>
           {s.added !== null && (
             <RailGroup label="step">
@@ -71,32 +93,27 @@ function Inspector({ frame }: InspectorProps<MedianState>) {
 export const manifestId = 'prep-design-find-median-from-data-stream';
 export const title = 'Find Median From Data Stream';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Find Median from Data Stream\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Find Median from Data Stream"?',
     choices: [
       {
-        label: "Design — fits this problem",
-        correct: true
+        label: 'Design — fits this problem',
+        correct: true,
       },
       {
-        label: "Log parsing aggregation — different approach"
+        label: 'Log parsing aggregation — different approach',
       },
       {
-        label: "Copy-on-write version snapshots — different approach"
+        label: 'Copy-on-write version snapshots — different approach',
       },
       {
-        label: "Stack — different approach"
-      }
+        label: 'Stack — different approach',
+      },
     ],
-    explain: "See Find Median From Data Stream pattern"
-  }
+    explain: 'See Find Median From Data Stream pattern',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

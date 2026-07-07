@@ -1,3 +1,4 @@
+export { Avatar, avatarHue } from './Avatar';
 export { Chip } from './Chip';
 export { ChromeLabel } from './ChromeLabel';
 export { EmptyState } from './EmptyState';

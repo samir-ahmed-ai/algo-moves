@@ -39,14 +39,64 @@ export function seededShuffle<T>(arr: T[], rand: () => number): T[] {
 
 const KEYWORDS = new Set([
   // go
-  'func', 'for', 'if', 'else', 'return', 'range', 'len', 'append', 'var', 'make',
-  'break', 'continue', 'int', 'bool', 'string', 'true', 'false', 'nil', 'map',
-  'package', 'import', 'switch', 'case', 'default', 'struct', 'type', 'go', 'defer',
+  'func',
+  'for',
+  'if',
+  'else',
+  'return',
+  'range',
+  'len',
+  'append',
+  'var',
+  'make',
+  'break',
+  'continue',
+  'int',
+  'bool',
+  'string',
+  'true',
+  'false',
+  'nil',
+  'map',
+  'package',
+  'import',
+  'switch',
+  'case',
+  'default',
+  'struct',
+  'type',
+  'go',
+  'defer',
   // python
-  'def', 'elif', 'while', 'in', 'not', 'and', 'or', 'None', 'True', 'False',
-  'lambda', 'yield', 'pass', 'del', 'class', 'from', 'as', 'with', 'print',
+  'def',
+  'elif',
+  'while',
+  'in',
+  'not',
+  'and',
+  'or',
+  'None',
+  'True',
+  'False',
+  'lambda',
+  'yield',
+  'pass',
+  'del',
+  'class',
+  'from',
+  'as',
+  'with',
+  'print',
   // java
-  'public', 'private', 'static', 'void', 'new', 'null', 'this', 'boolean', 'final',
+  'public',
+  'private',
+  'static',
+  'void',
+  'new',
+  'null',
+  'this',
+  'boolean',
+  'final',
 ]);
 
 /** Character index ranges of quoted spans, so mutators never edit string literals. */
@@ -82,7 +132,12 @@ function splice(code: string, start: number, len: number, insert: string): strin
 type Mutator = (code: string, rand: () => number, siblings: string[]) => string | null;
 
 const COMPARISON_FLIP: Record<string, string> = {
-  '<=': '<', '<': '<=', '>=': '>', '>': '>=', '==': '!=', '!=': '==',
+  '<=': '<',
+  '<': '<=',
+  '>=': '>',
+  '>': '>=',
+  '==': '!=',
+  '!=': '==',
 };
 
 const mutators: Mutator[] = [
@@ -94,7 +149,11 @@ const mutators: Mutator[] = [
   },
   // increment/decrement + arithmetic swap
   (code, rand) => {
-    const m = pickMatch(code, /\+\+|--|(?<![+\-=<>!*/])\+(?![+=])|(?<![+\-=<>!*/])-(?![-=>])/g, rand);
+    const m = pickMatch(
+      code,
+      /\+\+|--|(?<![+\-=<>!*/])\+(?![+=])|(?<![+\-=<>!*/])-(?![-=>])/g,
+      rand,
+    );
     if (!m) return null;
     const swap: Record<string, string> = { '++': '--', '--': '++', '+': '-', '-': '+' };
     return splice(code, m.index, m[0].length, swap[m[0]]);
@@ -141,7 +200,12 @@ const mutators: Mutator[] = [
   (code, rand) => {
     const m = pickMatch(code, /\btrue\b|\bfalse\b|\bTrue\b|\bFalse\b/g, rand);
     if (!m) return null;
-    const swap: Record<string, string> = { true: 'false', false: 'true', True: 'False', False: 'True' };
+    const swap: Record<string, string> = {
+      true: 'false',
+      false: 'true',
+      True: 'False',
+      False: 'True',
+    };
     return splice(code, m.index, m[0].length, swap[m[0]]);
   },
   // adjacent interior-line swap (multi-line pieces only)
@@ -162,7 +226,12 @@ const mutators: Mutator[] = [
  * `exclude` are outputs to avoid (previous mutants AND every real piece's code,
  * so a lie can never be indistinguishable from a truth).
  */
-export function mutateCode(code: string, seed: number, exclude: Set<string>, siblings: string[] = []): string | null {
+export function mutateCode(
+  code: string,
+  seed: number,
+  exclude: Set<string>,
+  siblings: string[] = [],
+): string | null {
   const rand = mulberry32(seed);
   for (const mutate of seededShuffle(mutators, rand)) {
     for (let attempt = 0; attempt < 3; attempt++) {

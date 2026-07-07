@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface MDInput {
   s: string;
@@ -18,39 +31,61 @@ interface MDState {
 
 function record({ s }: MDInput): Frame<MDState>[] {
   const n = s.length;
-  const dp = new Array<number>(n).fill(-1);  let bCount = 0;
+  const dp = new Array<number>(n).fill(-1);
+  let bCount = 0;
   let cur = 0;
 
   const { emit, frames } = createRecorder<MDState>(() => ({
-        s: s,
-        dp: dp.slice(),
-        bCount: bCount,
-        i: null,
-        done: false
-      }));
+    s: s,
+    dp: dp.slice(),
+    bCount: bCount,
+    i: null,
+    done: false,
+  }));
 
-  emit('INIT', `s="${s}"`, `Minimum Deletions to Make String Balanced: delete the fewest characters from "${s}" so no 'b' ever comes before an 'a'. Scan left to right tracking bCount (how many 'b' seen) and dp (min deletions for the prefix so far).`, { i: null });
+  emit(
+    'INIT',
+    `s="${s}"`,
+    `Minimum Deletions to Make String Balanced: delete the fewest characters from "${s}" so no 'b' ever comes before an 'a'. Scan left to right tracking bCount (how many 'b' seen) and dp (min deletions for the prefix so far).`,
+    { i: null },
+  );
 
   for (let i = 0; i < n; i++) {
     if (s[i] === 'b') {
       bCount++;
       dp[i] = cur;
-      emit('SEE_B', `dp[${i}]=${cur}`, `s[${i}]='b': a 'b' never violates balance on its own, so deletions stay at ${cur}. We just remember it by bumping bCount to ${bCount}.`, { i: i });
+      emit(
+        'SEE_B',
+        `dp[${i}]=${cur}`,
+        `s[${i}]='b': a 'b' never violates balance on its own, so deletions stay at ${cur}. We just remember it by bumping bCount to ${bCount}.`,
+        { i: i },
+      );
     } else {
       // s[i] === 'a': either delete this 'a' (cur+1) or delete all prior 'b's (bCount)
       const next = cur + 1 < bCount ? cur + 1 : bCount;
       const deleteA = cur + 1 < bCount;
       cur = next;
       dp[i] = cur;
-      emit('SEE_A', `dp[${i}]=${cur}`, deleteA
+      emit(
+        'SEE_A',
+        `dp[${i}]=${cur}`,
+        deleteA
           ? `s[${i}]='a' sits after ${bCount} 'b'(s). Cheaper to delete this single 'a' (${cur - 1} + 1 = ${cur}) than to delete all ${bCount} prior 'b's, so dp[${i}] = ${cur}.`
-          : `s[${i}]='a' sits after ${bCount} 'b'(s). Deleting all ${bCount} prior 'b's (${bCount}) is at least as cheap as deleting this 'a' (${cur} + 1), so dp[${i}] = ${bCount}.`, { i: i });
+          : `s[${i}]='a' sits after ${bCount} 'b'(s). Deleting all ${bCount} prior 'b's (${bCount}) is at least as cheap as deleting this 'a' (${cur} + 1), so dp[${i}] = ${bCount}.`,
+        { i: i },
+      );
     }
   }
 
-  emit('DONE', `${cur} deletions`, n === 0
+  emit(
+    'DONE',
+    `${cur} deletions`,
+    n === 0
       ? `The string is empty — it is already balanced, so 0 deletions are needed.`
-      : `Scan complete. The minimum deletions to balance "${s}" is dp[${n - 1}] = ${cur}.`, { i: n > 0 ? n - 1 : null , done: true }, 'good');
+      : `Scan complete. The minimum deletions to balance "${s}" is dp[${n - 1}] = ${cur}.`,
+    { i: n > 0 ? n - 1 : null, done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -58,11 +93,15 @@ function View({ frame }: PluginViewProps<MDState>) {
   const s = frame.state;
   const cells = s.dp.map((v, i) => (v < 0 ? s.s[i] : v));
   const pointers: ArrayPointer[] = [];
-  if (s.i !== null) pointers.push({ i: s.i, label: `'${s.s[s.i]}'`, tone: 'accent', place: 'above' });
+  if (s.i !== null)
+    pointers.push({ i: s.i, label: `'${s.s[s.i]}'`, tone: 'accent', place: 'above' });
   const tone = (i: number) => (s.i === i ? 'found' : s.dp[i] >= 0 ? 'match' : '');
   let ans: string | number = '…';
   for (let i = s.dp.length - 1; i >= 0; i--) {
-    if (s.dp[i] >= 0) { ans = s.dp[i]; break; }
+    if (s.dp[i] >= 0) {
+      ans = s.dp[i];
+      break;
+    }
   }
   const rail = (
     <>
@@ -75,7 +114,13 @@ function View({ frame }: PluginViewProps<MDState>) {
   );
   return (
     <VizStage rail={rail}>
-      <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} label={(i) => s.s[i]} />
+      <ArrayRow
+        values={cells}
+        cellTone={tone}
+        pointers={pointers}
+        windowRange={null}
+        label={(i) => s.s[i]}
+      />
     </VizStage>
   );
 }

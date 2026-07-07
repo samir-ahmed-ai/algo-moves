@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface FllInput {
   values: number[];
@@ -54,7 +67,12 @@ function record({ values, target }: FllInput): Frame<FllState>[] {
   );
 
   // ---- Phase 1: lower bound — leftmost index whose value == target ----
-  emit('FIRST', `search lower bound`, `Phase 1 — searching for the FIRST position of ${target}. Whenever values[mid] ≥ ${target} we keep mid as a candidate and shrink right; otherwise we move past it.`, { mid: null });
+  emit(
+    'FIRST',
+    `search lower bound`,
+    `Phase 1 — searching for the FIRST position of ${target}. Whenever values[mid] ≥ ${target} we keep mid as a candidate and shrink right; otherwise we move past it.`,
+    { mid: null },
+  );
   lo = 0;
   hi = n - 1;
   while (lo < hi) {
@@ -63,18 +81,39 @@ function record({ values, target }: FllInput): Frame<FllState>[] {
     if (values[mid] < target) {
       for (let i = lo; i <= mid; i++) dead[i] = true;
       lo = mid + 1;
-      emit('RIGHT', `lo=${lo}`, `values[${mid}] = ${values[mid]} < ${target}, so the first ${target} (if any) is strictly to the right. Set lo = ${lo}.`, { mid });
+      emit(
+        'RIGHT',
+        `lo=${lo}`,
+        `values[${mid}] = ${values[mid]} < ${target}, so the first ${target} (if any) is strictly to the right. Set lo = ${lo}.`,
+        { mid },
+      );
     } else {
       for (let i = mid + 1; i <= hi; i++) dead[i] = true;
       hi = mid;
-      emit('LEFT', `hi=${hi}`, `values[${mid}] = ${values[mid]} ≥ ${target}, so index ${mid} could be the first one — keep it and discard everything to the right. Set hi = ${hi}.`, { mid });
+      emit(
+        'LEFT',
+        `hi=${hi}`,
+        `values[${mid}] = ${values[mid]} ≥ ${target}, so index ${mid} could be the first one — keep it and discard everything to the right. Set hi = ${hi}.`,
+        { mid },
+      );
     }
   }
   if (values[lo] === target) {
     first = lo;
-    emit('FOUND', `first=${first}`, `Converged at index ${lo} with value ${values[lo]} = ${target}. The FIRST position is ${first}.`, { mid: lo });
+    emit(
+      'FOUND',
+      `first=${first}`,
+      `Converged at index ${lo} with value ${values[lo]} = ${target}. The FIRST position is ${first}.`,
+      { mid: lo },
+    );
   } else {
-    emit('MISS', `absent`, `Converged at index ${lo} with value ${values[lo]} ≠ ${target}. The target ${target} is not in the array, so the answer is [-1, -1].`, { mid: lo, done: true }, 'bad');
+    emit(
+      'MISS',
+      `absent`,
+      `Converged at index ${lo} with value ${values[lo]} ≠ ${target}. The target ${target} is not in the array, so the answer is [-1, -1].`,
+      { mid: lo, done: true },
+      'bad',
+    );
     return frames;
   }
 
@@ -83,22 +122,43 @@ function record({ values, target }: FllInput): Frame<FllState>[] {
   dead.fill(false);
   lo = 0;
   hi = n - 1;
-  emit('LAST', `search upper bound`, `Phase 2 — searching for the LAST position of ${target}. Reset the window. Whenever values[mid] ≤ ${target} we keep mid as a candidate and shrink left.`, { phase: 'last', mid: null });
+  emit(
+    'LAST',
+    `search upper bound`,
+    `Phase 2 — searching for the LAST position of ${target}. Reset the window. Whenever values[mid] ≤ ${target} we keep mid as a candidate and shrink left.`,
+    { phase: 'last', mid: null },
+  );
   while (lo < hi) {
     const mid = (lo + hi + 1) >> 1; // bias right to avoid an infinite loop on lo = mid
     emit('MID', `mid=${mid}`, `Upper-bound search: mid=${mid}, value ${values[mid]}.`, { mid });
     if (values[mid] > target) {
       for (let i = mid; i <= hi; i++) dead[i] = true;
       hi = mid - 1;
-      emit('LEFT', `hi=${hi}`, `values[${mid}] = ${values[mid]} > ${target}, so the last ${target} is strictly to the left. Set hi = ${hi}.`, { mid });
+      emit(
+        'LEFT',
+        `hi=${hi}`,
+        `values[${mid}] = ${values[mid]} > ${target}, so the last ${target} is strictly to the left. Set hi = ${hi}.`,
+        { mid },
+      );
     } else {
       for (let i = lo; i < mid; i++) dead[i] = true;
       lo = mid;
-      emit('RIGHT', `lo=${lo}`, `values[${mid}] = ${values[mid]} ≤ ${target}, so index ${mid} could be the last one — keep it and discard everything to the left. Set lo = ${lo}.`, { mid });
+      emit(
+        'RIGHT',
+        `lo=${lo}`,
+        `values[${mid}] = ${values[mid]} ≤ ${target}, so index ${mid} could be the last one — keep it and discard everything to the left. Set lo = ${lo}.`,
+        { mid },
+      );
     }
   }
   last = lo;
-  emit('DONE', `[${first}, ${last}]`, `Converged at index ${lo} with value ${values[lo]} = ${target}. The LAST position is ${last}. Final answer: [${first}, ${last}].`, { mid: lo, done: true }, 'good');
+  emit(
+    'DONE',
+    `[${first}, ${last}]`,
+    `Converged at index ${lo} with value ${values[lo]} = ${target}. The LAST position is ${last}. Final answer: [${first}, ${last}].`,
+    { mid: lo, done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -112,31 +172,44 @@ function View({ frame }: PluginViewProps<FllState>) {
     pointers.push({ i: s.hi, label: 'hi', tone: 'bad', place: 'below' });
   }
   const tone = (i: number) => {
-    if (s.done && s.phase === 'last' && s.first !== null && s.last !== null && i >= s.first && i <= s.last) return 'found';
+    if (
+      s.done &&
+      s.phase === 'last' &&
+      s.first !== null &&
+      s.last !== null &&
+      i >= s.first &&
+      i <= s.last
+    )
+      return 'found';
     if (s.phase === 'last' && s.first === i) return 'found';
     if (s.mid === i) return 'mid';
     if (s.dead[i]) return 'dead';
     return '';
   };
-  const result = s.first === null ? '[-1, -1]' : s.last === null ? `[${s.first}, …]` : `[${s.first}, ${s.last}]`;
+  const result =
+    s.first === null ? '[-1, -1]' : s.last === null ? `[${s.first}, …]` : `[${s.first}, ${s.last}]`;
   const resultTone = s.done ? (s.last !== null ? 'good' : 'bad') : 'accent';
   return (
-    <VizStage rail={<>
-      <RailGroup label="window">
-        <RailStat k="lo" v={s.lo} tone="accent" />
-        <RailStat k="hi" v={s.hi} tone="bad" />
-        <RailStat k="mid" v={s.mid ?? '—'} tone="warn" />
-      </RailGroup>
-      <RailGroup label="phase">
-        <RailStat k="phase" v={s.phase === 'first' ? 'lower' : 'upper'} />
-        <RailStat k="target" v={s.target} />
-      </RailGroup>
-      <RailGroup label="bounds">
-        <RailStat k="first" v={s.first ?? '—'} tone={s.first !== null ? 'good' : undefined} />
-        <RailStat k="last" v={s.last ?? '—'} tone={s.last !== null ? 'good' : undefined} />
-      </RailGroup>
-      <RailResult label="answer" value={result} tone={resultTone} />
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="window">
+            <RailStat k="lo" v={s.lo} tone="accent" />
+            <RailStat k="hi" v={s.hi} tone="bad" />
+            <RailStat k="mid" v={s.mid ?? '—'} tone="warn" />
+          </RailGroup>
+          <RailGroup label="phase">
+            <RailStat k="phase" v={s.phase === 'first' ? 'lower' : 'upper'} />
+            <RailStat k="target" v={s.target} />
+          </RailGroup>
+          <RailGroup label="bounds">
+            <RailStat k="first" v={s.first ?? '—'} tone={s.first !== null ? 'good' : undefined} />
+            <RailStat k="last" v={s.last ?? '—'} tone={s.last !== null ? 'good' : undefined} />
+          </RailGroup>
+          <RailResult label="answer" value={result} tone={resultTone} />
+        </>
+      }
+    >
       <ArrayRow values={s.values} cellTone={tone} pointers={pointers} />
     </VizStage>
   );
@@ -145,7 +218,12 @@ function View({ frame }: PluginViewProps<FllState>) {
 function Inspector({ frame }: InspectorProps<FllState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const result = s.first === null ? '[-1, -1]' : s.last === null ? `first ${s.first}, last …` : `[${s.first}, ${s.last}]`;
+  const result =
+    s.first === null
+      ? '[-1, -1]'
+      : s.last === null
+        ? `first ${s.first}, last …`
+        : `[${s.first}, ${s.last}]`;
   return (
     <VarGrid>
       <InspectorRow k="target" v={s.target} />
@@ -173,7 +251,8 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as FllState | undefined;
-    if (s && s.first !== null && s.last !== null) return { ok: true, label: `[${s.first}, ${s.last}]` };
+    if (s && s.first !== null && s.last !== null)
+      return { ok: true, label: `[${s.first}, ${s.last}]` };
     return { ok: false, label: '[-1, -1]' };
   },
 };

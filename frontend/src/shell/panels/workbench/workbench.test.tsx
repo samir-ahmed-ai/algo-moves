@@ -55,37 +55,40 @@ const stubPlayer = {
   toggleReverse: () => {},
 };
 
-const stubFrame: Frame<any> = { move: { type: 'INIT', note: 'start', caption: 'Start' }, state: {} };
+const stubFrame: Frame<any> = {
+  move: { type: 'INIT', note: 'start', caption: 'Start' },
+  state: {},
+};
 
 function Harness() {
   return (
     <WorkspaceProvider>
       <CanvasStaticProvider
-      value={{
-        plugin: stubPlugin,
-        item: stubItem,
-        inputId: 'a',
-        setInputId: () => {},
-        customInput: null,
-        setCustomInput: () => {},
-        inputFrameCounts: new Map(),
-        selectedNode: null,
-        setSelectedNode: () => {},
-      }}
-    >
-      <CanvasFrameProvider
         value={{
-          frames: [stubFrame],
-          player: stubPlayer,
-          frame: stubFrame,
-          changedKeys: [],
+          plugin: stubPlugin,
+          item: stubItem,
+          inputId: 'a',
+          setInputId: () => {},
+          customInput: null,
+          setCustomInput: () => {},
+          inputFrameCounts: new Map(),
+          selectedNode: null,
+          setSelectedNode: () => {},
         }}
       >
-        <CodeStudioProvider>
-          <WorkbenchPanelBody />
-        </CodeStudioProvider>
-      </CanvasFrameProvider>
-    </CanvasStaticProvider>
+        <CanvasFrameProvider
+          value={{
+            frames: [stubFrame],
+            player: stubPlayer,
+            frame: stubFrame,
+            changedKeys: [],
+          }}
+        >
+          <CodeStudioProvider>
+            <WorkbenchPanelBody />
+          </CodeStudioProvider>
+        </CanvasFrameProvider>
+      </CanvasStaticProvider>
     </WorkspaceProvider>
   );
 }

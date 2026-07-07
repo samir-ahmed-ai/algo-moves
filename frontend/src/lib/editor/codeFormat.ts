@@ -4,10 +4,7 @@ import type { MergeView } from '@codemirror/merge';
 import { Compartment, EditorSelection, EditorState, type Extension } from '@codemirror/state';
 import { EditorView, keymap, type Command } from '@codemirror/view';
 import { languageExtension } from './languageExtension';
-import {
-  applySpacingOnly,
-  formatCompleteSource,
-} from './styleFormat';
+import { applySpacingOnly, formatCompleteSource } from './styleFormat';
 
 /** Tab for Go; two spaces for other studio languages. */
 export function indentExtensionsForLang(lang?: string): Extension[] {
@@ -192,7 +189,10 @@ export function mergeFormatKeymap(formatBoth: () => void): Extension {
 export type AlignDelimiter = '=' | ':';
 
 /** Split a line into [prefix, delimiter, suffix] for column alignment. */
-export function splitForAlign(line: string, delimiter: AlignDelimiter): [string, string, string] | null {
+export function splitForAlign(
+  line: string,
+  delimiter: AlignDelimiter,
+): [string, string, string] | null {
   if (delimiter === ':') {
     const m = line.match(/^(.*?)(:)(.*)$/);
     return m ? [m[1], m[2], m[3]] : null;

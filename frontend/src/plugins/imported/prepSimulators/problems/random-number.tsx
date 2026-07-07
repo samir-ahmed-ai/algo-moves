@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -38,14 +44,14 @@ function record({ minVal, maxVal, seed }: RandomNumberInput): Frame<RandomNumber
   let hi = maxVal;
 
   const { emit, frames } = createRecorder<RandomNumberState>(() => ({
-        lo,
-        hi,
-        span: null,
-        offset: null,
-        pick: null,
-        swapped: false,
-        done: false
-      }));
+    lo,
+    hi,
+    span: null,
+    offset: null,
+    pick: null,
+    swapped: false,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -129,25 +135,22 @@ function View({ frame }: PluginViewProps<RandomNumberState>) {
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
-        range = <span className="font-mono text-ink">[{s.lo}, {s.hi}]</span>
+        range ={' '}
+        <span className="font-mono text-ink">
+          [{s.lo}, {s.hi}]
+        </span>
         {s.span !== null && (
           <>
-            {' · '}span ={' '}
-            <span className="font-mono text-ink">{s.span}</span>
+            {' · '}span = <span className="font-mono text-ink">{s.span}</span>
           </>
         )}
       </div>
       <ArrayRow values={values} cellTone={tone} pointers={pointers} windowRange={null} />
       <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        pick = lo + Intn(span) = {s.lo} +{' '}
-        {s.offset !== null ? s.offset : '·'} ={' '}
-        <span className={s.done ? 'text-good' : 'text-ink'}>
-          {s.pick !== null ? s.pick : '·'}
-        </span>
+        pick = lo + Intn(span) = {s.lo} + {s.offset !== null ? s.offset : '·'} ={' '}
+        <span className={s.done ? 'text-good' : 'text-ink'}>{s.pick !== null ? s.pick : '·'}</span>
       </div>
-      {span === 0 && (
-        <div className={cn('mt-1', vizText.sm, 'text-ink3')}>empty range</div>
-      )}
+      {span === 0 && <div className={cn('mt-1', vizText.sm, 'text-ink3')}>empty range</div>}
     </div>
   );
 }
@@ -170,132 +173,130 @@ function Inspector({ frame }: InspectorProps<RandomNumberState>) {
 export const manifestId = 'prep-math-random-number';
 export const title = 'Random number';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Random number\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Random number"?',
     choices: [
       {
-        label: "Uniform random in range — fits this problem",
-        correct: true
+        label: 'Uniform random in range — fits this problem',
+        correct: true,
       },
       {
-        label: "Binary Exponentiation — different approach"
+        label: 'Binary Exponentiation — different approach',
       },
       {
-        label: "Greedy roman numeral — different approach"
+        label: 'Greedy roman numeral — different approach',
       },
       {
-        label: "Integer log base 2 — different approach"
-      }
+        label: 'Integer log base 2 — different approach',
+      },
     ],
-    explain: "Uniform pick within [min,max] inclusive"
+    explain: 'Uniform pick within [min,max] inclusive',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Random number), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Random number), what strategy is established?',
     choices: [
       {
-        label: "Uniform pick within [min,max] inclusive — described in INIT caption",
-        correct: true
+        label: 'Uniform pick within [min,max] inclusive — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Random Number: draw one value uniformly from the inclusive range [, ] using a seeded generator. The whole trick is min + rng.Intn(max − min + 1)."
+    explain:
+      'Random Number: draw one value uniformly from the inclusive range [, ] using a seeded generator. The whole trick is min + rng.Intn(max − min + 1).',
   },
   {
-    id: "key-step",
-    prompt: "On the \"SPAN\" step (span=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "SPAN" step (span=), what happens?',
     choices: [
       {
-        label: "Count the candidates: span = hi — this move caption",
-        correct: true
+        label: 'Count the candidates: span = hi — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Count the candidates: span = hi − lo + 1 =  −  + 1 = . There are  equally likely values to choose from."
+    explain:
+      'Count the candidates: span = hi − lo + 1 =  −  + 1 = . There are  equally likely values to choose from.',
   },
   {
-    id: "state",
-    prompt: "What does the `lo` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `lo` field track in the visualization state?',
     choices: [
       {
-        label: "normalized min (after swap) — updated each frame",
-        correct: true
+        label: 'normalized min (after swap) — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `lo` in sync: normalized min (after swap)"
+    explain: 'The recorder keeps `lo` in sync: normalized min (after swap)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Random number\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Random number"?',
     choices: [
       {
-        label: "O(1) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(1) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(log n) space — wrong order of growth"
+        label: 'O(log n) time, O(log n) space — wrong order of growth',
       },
       {
-        label: "O(sqrt(n)) time, O(1) space — wrong order of growth"
-      }
+        label: 'O(sqrt(n)) time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(1). O(1). min + rng.Intn(max-min+1)"
+    explain: 'O(1). O(1). min + rng.Intn(max-min+1)',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Shift the offset back into range: — final DONE caption",
-        correct: true
+        label: 'Shift the offset back into range: — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Shift the offset back into range: pick = lo + offset =  +  = . That is our uniform random number in [, ]."
-  }
+    explain:
+      'Shift the offset back into range: pick = lo + offset =  +  = . That is our uniform random number in [, ].',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

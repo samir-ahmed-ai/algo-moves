@@ -10,7 +10,8 @@ export function funcLineTone(trimmed: string, lang: string): FuncLineTone | null
   }
   if (l === 'js' || l === 'javascript' || l === 'ts' || l === 'typescript') {
     if (/^function\s+\w+\s*\(/.test(trimmed)) return 'hl-line-entry';
-    if (/\bfunction\s*\(/.test(trimmed) || /^const\s+\w+\s*=\s*\(/.test(trimmed)) return 'hl-line-func';
+    if (/\bfunction\s*\(/.test(trimmed) || /^const\s+\w+\s*=\s*\(/.test(trimmed))
+      return 'hl-line-func';
     return null;
   }
   if (l === 'py' || l === 'python') {
@@ -18,8 +19,13 @@ export function funcLineTone(trimmed: string, lang: string): FuncLineTone | null
     return null;
   }
   if (l === 'java') {
-    if (/^(public|private|protected|static|final)[\w\s<>\[\],]*\s+\w+\s*\(/.test(trimmed)) return 'hl-line-entry';
-    if (/^[\w<>\[\],]+\s+\w+\s*\(/.test(trimmed) && !/^(return|new|if|for|while|switch)\b/.test(trimmed)) return 'hl-line-func';
+    if (/^(public|private|protected|static|final)[\w\s<>\[\],]*\s+\w+\s*\(/.test(trimmed))
+      return 'hl-line-entry';
+    if (
+      /^[\w<>\[\],]+\s+\w+\s*\(/.test(trimmed) &&
+      !/^(return|new|if|for|while|switch)\b/.test(trimmed)
+    )
+      return 'hl-line-func';
     return null;
   }
   return null;
@@ -30,5 +36,4 @@ export function pieceHasEntrySignature(code: string, lang: string): boolean {
   return code.split('\n').some((line) => funcLineTone(line.trim(), lang) === 'hl-line-entry');
 }
 
-export const ENTRY_SIG =
-  /^(?:func\s+(\w+)|function\s+(\w+)|def\s+(\w+))([\s\S]*)$/;
+export const ENTRY_SIG = /^(?:func\s+(\w+)|function\s+(\w+)|def\s+(\w+))([\s\S]*)$/;

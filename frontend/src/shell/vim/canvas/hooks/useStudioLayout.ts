@@ -14,10 +14,7 @@ import {
 } from '../layout/studioLayout';
 import { HUD_NODE_ID, HUD_SLOT, MAZE_NODE_ID } from '../layout/orbitSlots';
 import { STUDIO_REFERENCE_VIEWPORT_W, resolveStudioChrome } from '../layout/studioFit';
-import {
-  computeMazeFillCellSize,
-  MAZE_NODE_CHROME,
-} from '../layout/mazeMetrics';
+import { computeMazeFillCellSize, MAZE_NODE_CHROME } from '../layout/mazeMetrics';
 import type { MazeGrid } from '../../engine';
 
 const RESIZE_DEBOUNCE_MS = 100;
@@ -74,7 +71,10 @@ export function useStudioLayout(grid: MazeGrid, containerRef: React.RefObject<HT
   const cellSize = useMemo(() => {
     const mazeInnerW = layoutMetrics.mazeW - MAZE_NODE_CHROME.padX;
     const mazeInnerH =
-      layoutMetrics.mazeH - MAZE_NODE_CHROME.padTop - MAZE_NODE_CHROME.title - MAZE_NODE_CHROME.padBottom;
+      layoutMetrics.mazeH -
+      MAZE_NODE_CHROME.padTop -
+      MAZE_NODE_CHROME.title -
+      MAZE_NODE_CHROME.padBottom;
     return computeMazeFillCellSize(grid, mazeInnerW, mazeInnerH);
   }, [grid, layoutMetrics]);
 

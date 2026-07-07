@@ -1,11 +1,33 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+} from 'react';
 import { ListOrdered, Lock, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { hapticError } from '@/lib/utils/haptic';
 import { blockKind, BLOCK_META, type CodePiece } from '@/lib/code';
 import { isBetterAssembleTime, type AssembleGameProps, type AssembleGameStatsStore } from './types';
-import { formatSecs, hashString, memoryStatsStore, mulberry32, pieceFirstLine, seededShuffle } from './gameShared';
-import { ConfettiBurst, GameBlock, GameHud, HudChip, WinCard, usePrefersReducedMotion } from './gameUi';
+import {
+  formatSecs,
+  hashString,
+  memoryStatsStore,
+  mulberry32,
+  pieceFirstLine,
+  seededShuffle,
+} from './gameShared';
+import {
+  ConfettiBurst,
+  GameBlock,
+  GameHud,
+  HudChip,
+  WinCard,
+  usePrefersReducedMotion,
+} from './gameUi';
 
 const GAME_ID = 'one-stroke';
 
@@ -62,11 +84,18 @@ function writeStrokeStats(stats: AssembleGameStatsStore, value: StrokeSaved): vo
   stats.write(GAME_ID, value);
 }
 
-const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) && v > 0 ? v : null);
+const num = (v: unknown): number | null =>
+  typeof v === 'number' && Number.isFinite(v) && v > 0 ? v : null;
 
 const fmtClock = (ms: number) => `${(ms / 1000).toFixed(2)}s`;
 
-export function OneStrokeGame({ pieces, storageKey, stats, onComplete, onContinue }: AssembleGameProps) {
+export function OneStrokeGame({
+  pieces,
+  storageKey,
+  stats,
+  onComplete,
+  onContinue,
+}: AssembleGameProps) {
   const statsStore = useMemo(() => stats ?? memoryStatsStore(), [stats]);
   const n = pieces.length;
   const cols = n <= 8 ? 2 : 3;
@@ -126,7 +155,12 @@ export function OneStrokeGame({ pieces, storageKey, stats, onComplete, onContinu
   const tileEls = useRef(new Map<string, HTMLDivElement>());
   const rects = useRef(new Map<string, TileRect>());
   const gridRect = useRef<DOMRect | null>(null);
-  const runRef = useRef<{ captured: string[]; capturedTiles: string[]; start: number; end: number | null } | null>(null);
+  const runRef = useRef<{
+    captured: string[];
+    capturedTiles: string[];
+    start: number;
+    end: number | null;
+  } | null>(null);
   const capturedSet = useRef(new Set<string>());
   const activePtr = useRef<number | null>(null);
   const livePt = useRef<{ x: number; y: number } | null>(null);
@@ -250,7 +284,10 @@ export function OneStrokeGame({ pieces, storageKey, stats, onComplete, onContinu
           line.setAttribute('visibility', 'hidden');
         }
       }
-      haloEl.current?.setAttribute('points', trailPoints(run.capturedTiles, run.end === null ? lp : null));
+      haloEl.current?.setAttribute(
+        'points',
+        trailPoints(run.capturedTiles, run.end === null ? lp : null),
+      );
     }
     rafId.current = requestAnimationFrame(tick);
   };
@@ -288,7 +325,11 @@ export function OneStrokeGame({ pieces, storageKey, stats, onComplete, onContinu
     if (!run) return;
     hapticError();
     brokenRef.current += 1;
-    setFx({ kind: 'shatter', points: trailPoints(run.capturedTiles, livePt.current), tiles: [...run.capturedTiles] });
+    setFx({
+      kind: 'shatter',
+      points: trailPoints(run.capturedTiles, livePt.current),
+      tiles: [...run.capturedTiles],
+    });
     flashTile(offender.id, 'stroke-bad-pulse');
     const reached = run.captured.length;
     endStroke();
@@ -353,7 +394,14 @@ export function OneStrokeGame({ pieces, storageKey, stats, onComplete, onContinu
     }
     setBests(b);
     setUnlocked(u);
-    writeStrokeStats(statsStore, { bestT1: b[1], bestT2: b[2], bestT3: b[3], bestSteps: b.steps, t2: u[2], t3: u[3] });
+    writeStrokeStats(statsStore, {
+      bestT1: b[1],
+      bestT2: b[2],
+      bestT3: b[3],
+      bestSteps: b.steps,
+      t2: u[2],
+      t3: u[3],
+    });
     onComplete?.({ mistakes: broken, ms, perfect });
 
     setWinInfo({ ms, broken, perfect, newBest, unlockedTier, points, step });
@@ -450,7 +498,12 @@ export function OneStrokeGame({ pieces, storageKey, stats, onComplete, onContinu
       }
       activePtr.current = e.pointerId;
       setFx(null);
-      runRef.current = { captured: [pieces[0].id], capturedTiles: [hit.id], start: performance.now(), end: null };
+      runRef.current = {
+        captured: [pieces[0].id],
+        capturedTiles: [hit.id],
+        start: performance.now(),
+        end: null,
+      };
       capturedSet.current = new Set([hit.id]);
       setCapturedTiles([hit.id]);
       setPhase('stroking');
@@ -498,7 +551,7 @@ export function OneStrokeGame({ pieces, storageKey, stats, onComplete, onContinu
   const onPointerCancel = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (activePtr.current !== e.pointerId) return;
     const run = runRef.current;
-    if (run) (run.captured.length === n ? win() : lift());
+    if (run) run.captured.length === n ? win() : lift();
     rebuildRects();
   };
 
@@ -549,13 +602,21 @@ export function OneStrokeGame({ pieces, storageKey, stats, onComplete, onContinu
   /* --------------------------------- render --------------------------------- */
 
   if (n === 0) {
-    return <div className="rounded-md border border-edge bg-panel2 p-3 text-[13px] text-ink2">No puzzle pieces available.</div>;
+    return (
+      <div className="rounded-md border border-edge bg-panel2 p-3 text-[13px] text-ink2">
+        No puzzle pieces available.
+      </div>
+    );
   }
 
   const capturedCount = capturedTiles.length;
   const activeBest = stepMode ? bests.steps : bests[tier];
-  const centers = capturedTiles.map(centerOf).filter((c): c is { x: number; y: number } => c !== null);
-  const segments = centers.slice(1).map((c, i) => ({ a: centers[i], b: c, key: capturedTiles[i + 1] }));
+  const centers = capturedTiles
+    .map(centerOf)
+    .filter((c): c is { x: number; y: number } => c !== null);
+  const segments = centers
+    .slice(1)
+    .map((c, i) => ({ a: centers[i], b: c, key: capturedTiles[i + 1] }));
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-2">
@@ -600,7 +661,11 @@ export function OneStrokeGame({ pieces, storageKey, stats, onComplete, onContinu
         }
       />
 
-      <div className="flex min-h-[44px] shrink-0 items-stretch gap-1 rounded-full bg-panel2 p-1" role="tablist" aria-label="Cue tier">
+      <div
+        className="flex min-h-[44px] shrink-0 items-stretch gap-1 rounded-full bg-panel2 p-1"
+        role="tablist"
+        aria-label="Cue tier"
+      >
         {TIERS.map((t) => {
           const locked = (t.id === 2 && !unlocked[2]) || (t.id === 3 && !unlocked[3]);
           return (
@@ -630,7 +695,10 @@ export function OneStrokeGame({ pieces, storageKey, stats, onComplete, onContinu
         <div
           ref={gridRef}
           data-noswipe
-          className={cn('stroke-grid grid h-full w-full', winStage === 'stack' && 'stroke-grid-out')}
+          className={cn(
+            'stroke-grid grid h-full w-full',
+            winStage === 'stack' && 'stroke-grid-out',
+          )}
           style={{
             gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
             gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
@@ -671,11 +739,18 @@ export function OneStrokeGame({ pieces, storageKey, stats, onComplete, onContinu
                       }
                     : undefined
                 }
-                className={cn('blk stroke-tile', meta.shape, isCap && 'stroke-tile--captured', unlightIdx !== -1 && 'stroke-unlight')}
+                className={cn(
+                  'blk stroke-tile',
+                  meta.shape,
+                  isCap && 'stroke-tile--captured',
+                  unlightIdx !== -1 && 'stroke-unlight',
+                )}
                 style={
                   {
                     '--blk-stroke': isCap ? 'var(--accent)' : meta.stroke,
-                    ...(unlightIdx !== -1 && fx ? { '--unlight-delay': `${(fx.tiles.length - 1 - unlightIdx) * 30}ms` } : null),
+                    ...(unlightIdx !== -1 && fx
+                      ? { '--unlight-delay': `${(fx.tiles.length - 1 - unlightIdx) * 30}ms` }
+                      : null),
                   } as CSSProperties
                 }
               >
@@ -686,21 +761,34 @@ export function OneStrokeGame({ pieces, storageKey, stats, onComplete, onContinu
                     </span>
                   )}
                   {tier === 3 && !isCap ? (
-                    <span className="font-mono text-[26px] leading-none" style={{ color: meta.text, opacity: 0.3 }} aria-hidden>
+                    <span
+                      className="font-mono text-[26px] leading-none"
+                      style={{ color: meta.text, opacity: 0.3 }}
+                      aria-hidden
+                    >
                       {meta.glyph}
                     </span>
                   ) : (
                     <>
                       <span
-                        className={cn('font-mono leading-none', isCap ? 'text-[15px]' : 'text-[25px]')}
+                        className={cn(
+                          'font-mono leading-none',
+                          isCap ? 'text-[15px]' : 'text-[25px]',
+                        )}
                         style={{ color: meta.text }}
                         aria-hidden
                       >
                         {meta.glyph}
                       </span>
-                      {isCap && <span className="stroke-clamp2 w-full font-mono text-[11px] leading-tight text-ink">{p.code}</span>}
+                      {isCap && (
+                        <span className="stroke-clamp2 w-full font-mono text-[11px] leading-tight text-ink">
+                          {p.code}
+                        </span>
+                      )}
                       {!isCap && tier === 1 && (
-                        <span className="stroke-clamp1 w-full font-mono text-[11px] text-ink">{pieceFirstLine(p.code)}</span>
+                        <span className="stroke-clamp1 w-full font-mono text-[11px] text-ink">
+                          {pieceFirstLine(p.code)}
+                        </span>
                       )}
                       {!isCap && (
                         <span className="flex items-center gap-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-ink3">
@@ -748,7 +836,14 @@ export function OneStrokeGame({ pieces, storageKey, stats, onComplete, onContinu
               className={reducedMotion ? undefined : 'stroke-seg'}
             />
           ))}
-          <line ref={liveLineEl} visibility="hidden" stroke="var(--accent)" strokeWidth={6} strokeLinecap="round" opacity={0.85} />
+          <line
+            ref={liveLineEl}
+            visibility="hidden"
+            stroke="var(--accent)"
+            strokeWidth={6}
+            strokeLinecap="round"
+            opacity={0.85}
+          />
           {fx && fx.points && (
             <polyline
               points={fx.points}
@@ -778,7 +873,12 @@ export function OneStrokeGame({ pieces, storageKey, stats, onComplete, onContinu
 
         {winStage === 'stack' && winInfo && (
           <div className="absolute inset-0 z-20 flex flex-col">
-            <div className={cn('blk-board stroke-stack min-h-0 flex-1 overflow-y-auto px-1 pb-2', reducedMotion && 'stroke-fade-in')}>
+            <div
+              className={cn(
+                'blk-board stroke-stack min-h-0 flex-1 overflow-y-auto px-1 pb-2',
+                reducedMotion && 'stroke-fade-in',
+              )}
+            >
               {pieces.map((p, i) => (
                 <div key={p.id} className="blk-row" style={{ '--seam-i': i } as CSSProperties}>
                   <GameBlock piece={p} compact />
@@ -790,18 +890,33 @@ export function OneStrokeGame({ pieces, storageKey, stats, onComplete, onContinu
                 <WinCard
                   title={winInfo.step ? 'Stepped through!' : 'One stroke!'}
                   stats={[
-                    { label: winInfo.step ? 'Step time' : 'Stroke time', value: fmtClock(winInfo.ms) },
+                    {
+                      label: winInfo.step ? 'Step time' : 'Stroke time',
+                      value: fmtClock(winInfo.ms),
+                    },
                     { label: 'Broken strokes', value: String(winInfo.broken) },
                     { label: 'Tier', value: TIERS[tier - 1].name },
                   ]}
                   badges={[{ icon: Sparkles, label: 'Flawless', earned: winInfo.perfect }]}
                   newBest={winInfo.newBest}
-                  primaryLabel={activeBest !== null ? `Run it back — beat ${formatSecs(activeBest * 1000)}` : 'Run it back'}
+                  primaryLabel={
+                    activeBest !== null
+                      ? `Run it back — beat ${formatSecs(activeBest * 1000)}`
+                      : 'Run it back'
+                  }
                   onPrimary={() => resetRun()}
                   secondaryLabel={
-                    winInfo.unlockedTier !== null ? `Try ${TIERS[winInfo.unlockedTier - 1].name}` : onContinue ? 'Continue' : undefined
+                    winInfo.unlockedTier !== null
+                      ? `Try ${TIERS[winInfo.unlockedTier - 1].name}`
+                      : onContinue
+                        ? 'Continue'
+                        : undefined
                   }
-                  onSecondary={winInfo.unlockedTier !== null ? () => resetRun(winInfo.unlockedTier as Tier) : onContinue}
+                  onSecondary={
+                    winInfo.unlockedTier !== null
+                      ? () => resetRun(winInfo.unlockedTier as Tier)
+                      : onContinue
+                  }
                 />
               </div>
             </div>

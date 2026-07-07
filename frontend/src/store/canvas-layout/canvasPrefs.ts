@@ -21,10 +21,17 @@ interface StoredCanvasPrefs {
 }
 
 function load(): CanvasPrefs {
-  const raw = readStorageJson<StoredCanvasPrefs | CanvasPrefs | null>(KEY, null, (value): value is StoredCanvasPrefs | CanvasPrefs => {
-    if (!value || typeof value !== 'object') return false;
-    return typeof (value as StoredCanvasPrefs).bg === 'string' || !!(value as StoredCanvasPrefs).edgeOpts;
-  });
+  const raw = readStorageJson<StoredCanvasPrefs | CanvasPrefs | null>(
+    KEY,
+    null,
+    (value): value is StoredCanvasPrefs | CanvasPrefs => {
+      if (!value || typeof value !== 'object') return false;
+      return (
+        typeof (value as StoredCanvasPrefs).bg === 'string' ||
+        !!(value as StoredCanvasPrefs).edgeOpts
+      );
+    },
+  );
   if (!raw) return DEFAULTS;
   return {
     edgeOpts: { ...DEFAULTS.edgeOpts, ...(raw.edgeOpts ?? {}) },

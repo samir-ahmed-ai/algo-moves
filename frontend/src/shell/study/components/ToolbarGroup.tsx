@@ -14,7 +14,10 @@ export function ToolbarGroup({
 }) {
   return (
     <div
-      className={cn('inline-flex shrink-0 overflow-hidden rounded-md border border-edge bg-panel2/40 shadow-sm', className)}
+      className={cn(
+        'inline-flex shrink-0 overflow-hidden rounded-md border border-edge bg-panel2/40 shadow-sm',
+        className,
+      )}
       title={title}
       aria-label={title}
     >

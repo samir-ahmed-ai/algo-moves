@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GraphBoard } from '../../../../components/board/GraphBoard';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 import { circleLayout } from '../../../_shared/graphLayout';
 
 interface ADInput {
@@ -60,23 +74,29 @@ function record({ words }: ADInput): Frame<ADState>[] {
 
   const color = new Array<number>(n).fill(0);
   const queue: number[] = [];
-  const order: number[] = [];  let answer = '';
+  const order: number[] = [];
+  let answer = '';
 
   const { emit, frames } = createRecorder<ADState>(() => ({
-        adj: adj,
-        pos: pos,
-        labels: labels,
-        color: color.slice(),
-        queue: queue.slice(),
-        indeg: indeg.slice(),
-        order: order.slice(),
-        answer: answer,
-        active: null,
-        done: false
-      }));
+    adj: adj,
+    pos: pos,
+    labels: labels,
+    color: color.slice(),
+    queue: queue.slice(),
+    indeg: indeg.slice(),
+    order: order.slice(),
+    answer: answer,
+    active: null,
+    done: false,
+  }));
 
   const edgeText = edges.map(([u, v]) => `${u}→${v}`).join(', ');
-  emit('INIT', 'build graph', `Compare each pair of adjacent words in the sorted dictionary; the first position where they differ gives a precedence edge (earlier letter → later letter). Here that yields ${edgeText}. Then topologically sort the letters with Kahn's algorithm.`, { active: null });
+  emit(
+    'INIT',
+    'build graph',
+    `Compare each pair of adjacent words in the sorted dictionary; the first position where they differ gives a precedence edge (earlier letter → later letter). Here that yields ${edgeText}. Then topologically sort the letters with Kahn's algorithm.`,
+    { active: null },
+  );
 
   for (let i = 0; i < n; i++) {
     if (indeg[i] === 0) {
@@ -84,30 +104,57 @@ function record({ words }: ADInput): Frame<ADState>[] {
       queue.push(i);
     }
   }
-  emit('SEED', `queue [${queue.map((i) => labels[i]).join(', ')}]`, `Queue every letter with in-degree 0 (no letter must come before it): [${queue.map((i) => labels[i]).join(', ')}].`, { active: null });
+  emit(
+    'SEED',
+    `queue [${queue.map((i) => labels[i]).join(', ')}]`,
+    `Queue every letter with in-degree 0 (no letter must come before it): [${queue.map((i) => labels[i]).join(', ')}].`,
+    { active: null },
+  );
 
   while (queue.length > 0) {
     const v = queue.shift() as number;
     color[v] = 1;
     order.push(v);
     answer = order.map((i) => labels[i]).join('');
-    emit('PLACE', `place ${labels[v]}`, `Dequeue "${labels[v]}" and append it to the order — alien order so far is "${answer}".`, { active: v });
+    emit(
+      'PLACE',
+      `place ${labels[v]}`,
+      `Dequeue "${labels[v]}" and append it to the order — alien order so far is "${answer}".`,
+      { active: v },
+    );
 
     for (const nb of adj[v]) {
       indeg[nb]--;
       if (indeg[nb] === 0) {
         color[nb] = 2;
         queue.push(nb);
-        emit('RELAX', `${labels[nb]} ready`, `Removing "${labels[v]}" drops "${labels[nb]}" to in-degree 0, so all its predecessors are placed — enqueue it.`, { active: v });
+        emit(
+          'RELAX',
+          `${labels[nb]} ready`,
+          `Removing "${labels[v]}" drops "${labels[nb]}" to in-degree 0, so all its predecessors are placed — enqueue it.`,
+          { active: v },
+        );
       }
     }
   }
 
   if (order.length === n) {
-    emit('DONE', `order "${answer}"`, `Every letter placed — the alien alphabet order is "${answer}".`, { active: null , done: true }, 'good');
+    emit(
+      'DONE',
+      `order "${answer}"`,
+      `Every letter placed — the alien alphabet order is "${answer}".`,
+      { active: null, done: true },
+      'good',
+    );
   } else {
     answer = '';
-    emit('DONE', 'cycle', `Only ${order.length} of ${n} letters could be placed — a cycle makes the order invalid, so the answer is "".`, { active: null , done: true }, 'good');
+    emit(
+      'DONE',
+      'cycle',
+      `Only ${order.length} of ${n} letters could be placed — a cycle makes the order invalid, so the answer is "".`,
+      { active: null, done: true },
+      'good',
+    );
   }
   return frames;
 }
@@ -127,7 +174,11 @@ function View({ frame }: PluginViewProps<ADState>) {
         <RailStat k="cur" v={s.active !== null ? s.labels[s.active] : '—'} tone="accent" />
       </RailGroup>
       {s.done && (
-        <RailResult label="answer" value={s.answer ? `"${s.answer}"` : '""'} tone={s.answer ? 'good' : 'bad'} />
+        <RailResult
+          label="answer"
+          value={s.answer ? `"${s.answer}"` : '""'}
+          tone={s.answer ? 'good' : 'bad'}
+        />
       )}
     </>
   );
@@ -152,7 +203,10 @@ function Inspector({ frame }: InspectorProps<ADState>) {
   return (
     <VarGrid>
       <InspectorRow k="current" v={s.active !== null ? s.labels[s.active] : '—'} />
-      <InspectorRow k="queue" v={s.queue.length ? `[${s.queue.map((n) => s.labels[n]).join(', ')}]` : '∅'} />
+      <InspectorRow
+        k="queue"
+        v={s.queue.length ? `[${s.queue.map((n) => s.labels[n]).join(', ')}]` : '∅'}
+      />
       <InspectorRow k="order" v={s.answer ? `"${s.answer}"` : '—'} />
       <InspectorRow k="placed" v={`${s.order.length} / ${s.labels.length}`} />
     </VarGrid>
@@ -165,7 +219,9 @@ export const manifestId = 'imp-2-alien-dictionary';
 export const title = 'Alien Dictionary';
 
 export const simulator: ProblemSimulator = {
-  inputs: [{ id: 'wertf', label: 'wrt, wrf, er, ett, rftt', value: WERTF }] satisfies SampleInput<ADInput>[],
+  inputs: [
+    { id: 'wertf', label: 'wrt, wrf, er, ett, rftt', value: WERTF },
+  ] satisfies SampleInput<ADInput>[],
   record,
   View,
   Inspector,

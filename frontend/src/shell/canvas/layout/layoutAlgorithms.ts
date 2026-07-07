@@ -177,9 +177,14 @@ export function layoutLearnCanvas(nodes: PanelFlowNode[], edges: Edge[] = []): P
     return [stackHandles({ ...anchor, position: { x: CANVAS_MARGIN, y: CANVAS_MARGIN } })];
   }
 
-  const rowEdges = edges.filter((e) => rowNodes.some((n) => n.id === e.source) && rowNodes.some((n) => n.id === e.target));
+  const rowEdges = edges.filter(
+    (e) => rowNodes.some((n) => n.id === e.source) && rowNodes.some((n) => n.id === e.target),
+  );
   const orderedRow = wireOrderRow(rowNodes, rowEdges);
-  const rowWidth = orderedRow.reduce((sum, n, i) => sum + nodeW(n) + (i > 0 ? LEARN_NODE_SEP : 0), 0);
+  const rowWidth = orderedRow.reduce(
+    (sum, n, i) => sum + nodeW(n) + (i > 0 ? LEARN_NODE_SEP : 0),
+    0,
+  );
   const spanW = Math.max(nodeW(anchor), rowWidth);
 
   const rowY = CANVAS_MARGIN;
@@ -194,11 +199,18 @@ export function layoutLearnCanvas(nodes: PanelFlowNode[], edges: Edge[] = []): P
   const anchorY = rowY + rowH + LEARN_RANK_SEP;
   const anchorX = CANVAS_MARGIN + Math.max(0, (spanW - nodeW(anchor)) / 2);
 
-  return [...positionedRow.map(stackHandles), stackHandles({ ...anchor, position: { x: anchorX, y: anchorY } })];
+  return [
+    ...positionedRow.map(stackHandles),
+    stackHandles({ ...anchor, position: { x: anchorX, y: anchorY } }),
+  ];
 }
 
 /** Auto-organize the graph with dagre (top-to-bottom by default, left-to-right optional). */
-export function layoutGraph(nodes: PanelFlowNode[], edges: Edge[], rankdir: LayoutDir = 'TB'): PanelFlowNode[] {
+export function layoutGraph(
+  nodes: PanelFlowNode[],
+  edges: Edge[],
+  rankdir: LayoutDir = 'TB',
+): PanelFlowNode[] {
   if (nodes.length === 0) return nodes;
   const g = new dagre.graphlib.Graph();
   g.setGraph({ rankdir, nodesep: 40, ranksep: 52, marginx: 24, marginy: 24 });

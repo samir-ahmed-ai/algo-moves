@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { definePlugin, type ProblemPlugin } from '@/core/types';
-import {
-  computeInputFrameCounts,
-  inputFrameCount,
-  inputFrameCountsKey,
-} from './inputFrameCounts';
+import { computeInputFrameCounts, inputFrameCount, inputFrameCountsKey } from './inputFrameCounts';
 
 const plugin = definePlugin({
   meta: {

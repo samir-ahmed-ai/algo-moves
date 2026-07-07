@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -20,7 +26,8 @@ interface ReverseState {
   done: boolean;
 }
 
-function record({ values }: ReverseInput): Frame<ReverseState>[] {  const n = values.length;
+function record({ values }: ReverseInput): Frame<ReverseState>[] {
+  const n = values.length;
   // Original forward links: node i → node i+1, last → nil.
   const next: (number | null)[] = values.map((_, i) => (i + 1 < n ? i + 1 : null));
 
@@ -28,14 +35,14 @@ function record({ values }: ReverseInput): Frame<ReverseState>[] {  const n = va
   let head: number | null = n > 0 ? 0 : null;
 
   const { emit, frames } = createRecorder<ReverseState>(() => ({
-        values,
-        next: next.slice(),
-        prev,
-        head,
-        nextSaved: null,
-        resultHead: null,
-        done: false
-      }));
+    values,
+    next: next.slice(),
+    prev,
+    head,
+    nextSaved: null,
+    resultHead: null,
+    done: false,
+  }));
 
   const name = (i: number | null) => (i === null ? 'nil' : `${values[i]}`);
 
@@ -109,7 +116,8 @@ function View({ frame }: PluginViewProps<ReverseState>) {
   const pointers: ArrayPointer[] = [];
   if (s.prev !== null) pointers.push({ i: s.prev, label: 'prev', tone: 'good', place: 'below' });
   if (s.head !== null) pointers.push({ i: s.head, label: 'head', tone: 'accent', place: 'above' });
-  if (s.nextSaved !== null) pointers.push({ i: s.nextSaved, label: 'next', tone: 'warn', place: 'above' });
+  if (s.nextSaved !== null)
+    pointers.push({ i: s.nextSaved, label: 'next', tone: 'warn', place: 'above' });
 
   const tone = (i: number) => {
     if (s.done && s.resultHead !== null) return 'found';
@@ -126,8 +134,10 @@ function View({ frame }: PluginViewProps<ReverseState>) {
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
-        prev = <span className="font-mono text-ink">{s.prev === null ? 'nil' : s.values[s.prev]}</span>
-        {' · '}head = <span className="font-mono text-ink">{s.head === null ? 'nil' : s.values[s.head]}</span>
+        prev ={' '}
+        <span className="font-mono text-ink">{s.prev === null ? 'nil' : s.values[s.prev]}</span>
+        {' · '}head ={' '}
+        <span className="font-mono text-ink">{s.head === null ? 'nil' : s.values[s.head]}</span>
         {s.nextSaved !== null && (
           <>
             {' · '}next = <span className="font-mono text-ink">{s.values[s.nextSaved]}</span>
@@ -168,132 +178,131 @@ function Inspector({ frame }: InspectorProps<ReverseState>) {
 export const manifestId = 'prep-linked-lists-reverse-linked-list';
 export const title = 'Reverse linked list';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Reverse linked list\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Reverse linked list"?',
     choices: [
       {
-        label: "Iterative reverse — fits this problem",
-        correct: true
+        label: 'Iterative reverse — fits this problem',
+        correct: true,
       },
       {
-        label: "DFS flatten — different approach"
+        label: 'DFS flatten — different approach',
       },
       {
-        label: "Digit carry — different approach"
+        label: 'Digit carry — different approach',
       },
       {
-        label: "Recursion / stack — different approach"
-      }
+        label: 'Recursion / stack — different approach',
+      },
     ],
-    explain: "Flip each Next to point back at prev as you walk"
+    explain: 'Flip each Next to point back at prev as you walk',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Reverse linked list), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Reverse linked list), what strategy is established?',
     choices: [
       {
-        label: "Flip each Next to point back — described in INIT caption",
-        correct: true
+        label: 'Flip each Next to point back — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Reverse a singly linked list in place. We walk it once with three pointers: prev starts at nil, head (cur) starts at the first node, and next is a scratch pointer. Each step flips one node's link to point backward."
+    explain:
+      "Reverse a singly linked list in place. We walk it once with three pointers: prev starts at nil, head (cur) starts at the first node, and next is a scratch pointer. Each step flips one node's link to point backward.",
   },
   {
-    id: "key-step",
-    prompt: "On the \"FLIP\" step (→), what happens?",
+    id: 'key-step',
+    prompt: 'On the "FLIP" step (→), what happens?',
     choices: [
       {
-        label: "Flip the link: head.Next = prev — this move caption",
-        correct: true
+        label: 'Flip the link: head.Next = prev — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Flip the link: head.Next = prev, so node  now points back at  instead of forward. This is the actual reversal."
+    explain:
+      'Flip the link: head.Next = prev, so node  now points back at  instead of forward. This is the actual reversal.',
   },
   {
-    id: "state",
-    prompt: "What does the `values` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `values` field track in the visualization state?',
     choices: [
       {
-        label: "node values, fixed positions left→right — updated each frame",
-        correct: true
+        label: 'node values, fixed positions left→right — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `values` in sync: node values, fixed positions left→right (original order)"
+    explain:
+      'The recorder keeps `values` in sync: node values, fixed positions left→right (original order)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Reverse linked list\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Reverse linked list"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
+        label: 'O(n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m+n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(m+n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). next=head.Next; head.Next=prev; prev=head; head=next"
+    explain: 'O(n). O(1). next=head.Next; head.Next=prev; prev=head; head=next',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "head reached nil, so the walk — final DONE caption",
-        correct: true
+        label: 'head reached nil, so the walk — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "head reached nil, so the walk is complete. prev now points at the old tail, which is the new head of the reversed list. Return prev. Time O(n), Space O(1)."
-  }
+    explain:
+      'head reached nil, so the walk is complete. prev now points at the old tail, which is the new head of the reversed list. Return prev. Time O(n), Space O(1).',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

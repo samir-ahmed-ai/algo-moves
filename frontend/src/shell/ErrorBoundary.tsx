@@ -34,7 +34,11 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error(`[ErrorBoundary${this.props.label ? ` ${this.props.label}` : ''}]`, error, info.componentStack);
+    console.error(
+      `[ErrorBoundary${this.props.label ? ` ${this.props.label}` : ''}]`,
+      error,
+      info.componentStack,
+    );
   }
 
   render() {
@@ -43,8 +47,12 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="grid h-full min-h-[120px] w-full place-items-center p-6 text-center">
           <div className="max-w-[40ch]">
-            <div className="text-sm font-medium text-ink2">Something went wrong rendering this view.</div>
-            <div className="mt-1 break-words font-mono text-xs text-ink3">{this.state.error.message}</div>
+            <div className="text-sm font-medium text-ink2">
+              Something went wrong rendering this view.
+            </div>
+            <div className="mt-1 break-words font-mono text-xs text-ink3">
+              {this.state.error.message}
+            </div>
           </div>
         </div>
       );

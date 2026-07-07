@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -37,25 +43,26 @@ const maskToLetters = (mask: number): string => {
   return out || '∅';
 };
 
-function record({ startWords, targetWords }: WordCountInput): Frame<WordCountState>[] {  const startMasks = startWords.map(toBitmask);
+function record({ startWords, targetWords }: WordCountInput): Frame<WordCountState>[] {
+  const startMasks = startWords.map(toBitmask);
   const set = new Set<number>(startMasks);
   const matched = new Array<boolean>(targetWords.length).fill(false);
   let count = 0;
 
   const { emit, frames } = createRecorder<WordCountState>(() => ({
-        startWords,
-        targetWords,
-        startMasks,
-        ti: null,
-        chars: [],
-        mask: null,
-        ci: null,
-        probe: null,
-        hit: false,
-        matched: matched.slice(),
-        count,
-        done: false
-      }));
+    startWords,
+    targetWords,
+    startMasks,
+    ti: null,
+    chars: [],
+    mask: null,
+    ci: null,
+    probe: null,
+    hit: false,
+    matched: matched.slice(),
+    count,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -137,7 +144,8 @@ function View({ frame }: PluginViewProps<WordCountState>) {
         ? '∅'
         : (() => {
             let out = '';
-            for (let b = 0; b < 26; b++) if (s.probe! & (1 << b)) out += String.fromCharCode(97 + b);
+            for (let b = 0; b < 26; b++)
+              if (s.probe! & (1 << b)) out += String.fromCharCode(97 + b);
             return out;
           })()
       : null;
@@ -145,9 +153,7 @@ function View({ frame }: PluginViewProps<WordCountState>) {
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
         start set:{' '}
-        <span className="font-mono text-ink">
-          {s.startWords.map((w) => `"${w}"`).join(', ')}
-        </span>
+        <span className="font-mono text-ink">{s.startWords.map((w) => `"${w}"`).join(', ')}</span>
       </div>
       <div className={cn('mt-1', vizText.sm, 'text-ink3')}>
         target{s.ti !== null ? ` ${s.ti + 1}/${s.targetWords.length}` : ''}:{' '}
@@ -187,132 +193,132 @@ function Inspector({ frame }: InspectorProps<WordCountState>) {
 export const manifestId = 'prep-strings-count-words-obtained-after-adding-a-letter';
 export const title = 'Count Words Obtained After Adding a Letter';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Count Words Obtained After Adding a Letter\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Count Words Obtained After Adding a Letter"?',
     choices: [
       {
-        label: "Bitmask Hash Set — fits this problem",
-        correct: true
+        label: 'Bitmask Hash Set — fits this problem',
+        correct: true,
       },
       {
-        label: "Vertical scan — different approach"
+        label: 'Vertical scan — different approach',
       },
       {
-        label: "Split + Reverse — different approach"
+        label: 'Split + Reverse — different approach',
       },
       {
-        label: "Index Map — different approach"
-      }
+        label: 'Index Map — different approach',
+      },
     ],
-    explain: "See Count Words Obtained After Adding A Letter pattern"
+    explain: 'See Count Words Obtained After Adding A Letter pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Count Words Obtained After Adding a Letter), what strategy is established?",
+    id: 'init',
+    prompt:
+      'At the start of a run (Count Words Obtained After Adding a Letter), what strategy is established?',
     choices: [
       {
-        label: "See Count Words Obtained After Adding — described in INIT caption",
-        correct: true
+        label: 'See Count Words Obtained After Adding — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Each word is reduced to a 26-bit mask (bit k set if letter 'a'+k appears). A target is obtainable when removing exactly one of its letters yields a mask that exists in the start-word set. Build that set first."
+    explain:
+      "Each word is reduced to a 26-bit mask (bit k set if letter 'a'+k appears). A target is obtainable when removing exactly one of its letters yields a mask that exists in the start-word set. Build that set first.",
   },
   {
-    id: "key-step",
-    prompt: "On the \"NONE\" step (\"\" no), what happens?",
+    id: 'key-step',
+    prompt: 'On the "NONE" step ("" no), what happens?',
     choices: [
       {
-        label: "No single-letter removal of \"\" matched — this move caption",
-        correct: true
+        label: 'No single-letter removal of "" matched — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "No single-letter removal of \"\" matched a start word, so it is not obtainable. Move to the next target."
+    explain:
+      'No single-letter removal of "" matched a start word, so it is not obtainable. Move to the next target.',
   },
   {
-    id: "state",
-    prompt: "What does the `startMasks` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `startMasks` field track in the visualization state?',
     choices: [
       {
-        label: "bitmask set built from startWords — updated each frame",
-        correct: true
+        label: 'bitmask set built from startWords — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `startMasks` in sync: bitmask set built from startWords"
+    explain: 'The recorder keeps `startMasks` in sync: bitmask set built from startWords',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Count Words Obtained After Adding a Letter\"?",
+    id: 'complexity',
+    prompt:
+      'What are the time and space complexities for "Count Words Obtained After Adding a Letter"?',
     choices: [
       {
-        label: "O(n·26) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n·26) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n*m) time, O(1) space — wrong order of growth"
+        label: 'O(n*m) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O( time, O(words) space — wrong order of growth"
-      }
+        label: 'O( time, O(words) space — wrong order of growth',
+      },
     ],
-    explain: "O(n·26). O(n). Count Words Obtained After Adding A Letter"
+    explain: 'O(n·26). O(n). Count Words Obtained After Adding A Letter',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Every target word checked. of target — final DONE caption",
-        correct: true
+        label: 'Every target word checked. of target — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Every target word checked.  of  target words can be formed by adding one letter to some start word."
-  }
+    explain:
+      'Every target word checked.  of  target words can be formed by adding one letter to some start word.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

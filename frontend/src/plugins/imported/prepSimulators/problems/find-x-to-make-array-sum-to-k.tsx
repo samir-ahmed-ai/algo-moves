@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -28,18 +34,19 @@ function cappedSum(a: number[], x: number): number {
   return s;
 }
 
-function record({ a, target }: FindXInput): Frame<FindXState>[] {  const sorted = [...a].sort((p, q) => p - q);
+function record({ a, target }: FindXInput): Frame<FindXState>[] {
+  const sorted = [...a].sort((p, q) => p - q);
 
   const { emit, frames } = createRecorder<FindXState>(() => ({
-        a: sorted,
-        target,
-        lo: null,
-        hi: null,
-        mid: null,
-        capped: null,
-        result: null,
-        done: false
-      }));
+    a: sorted,
+    target,
+    lo: null,
+    hi: null,
+    mid: null,
+    capped: null,
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -100,7 +107,14 @@ function record({ a, target }: FindXInput): Frame<FindXState>[] {  const sorted 
     'DONE',
     `x=${answer}`,
     `lo and hi have met at x = ${answer}. cappedSum(a, ${answer}) = ${cappedSum(sorted, answer)} ≥ ${target}, and no smaller cap reaches ${target}. The answer is ${answer}.`,
-    { lo: answer, hi: answer, mid: answer, capped: cappedSum(sorted, answer), result: answer, done: true },
+    {
+      lo: answer,
+      hi: answer,
+      mid: answer,
+      capped: cappedSum(sorted, answer),
+      result: answer,
+      done: true,
+    },
     'good',
   );
 
@@ -122,8 +136,10 @@ function View({ frame }: PluginViewProps<FindXState>) {
     return best;
   };
 
-  if (s.lo !== null) pointers.push({ i: nearest(s.lo), label: `lo=${s.lo}`, tone: 'good', place: 'below' });
-  if (s.hi !== null) pointers.push({ i: nearest(s.hi), label: `hi=${s.hi}`, tone: 'bad', place: 'below' });
+  if (s.lo !== null)
+    pointers.push({ i: nearest(s.lo), label: `lo=${s.lo}`, tone: 'good', place: 'below' });
+  if (s.hi !== null)
+    pointers.push({ i: nearest(s.hi), label: `hi=${s.hi}`, tone: 'bad', place: 'below' });
   if (s.mid !== null && !s.done)
     pointers.push({ i: nearest(s.mid), label: `x=${s.mid}`, tone: 'accent', place: 'above' });
 
@@ -140,8 +156,7 @@ function View({ frame }: PluginViewProps<FindXState>) {
         target = <span className="font-mono text-ink">{s.target}</span>
         {s.mid !== null && (
           <>
-            {' · '}testing x ={' '}
-            <span className="font-mono text-ink">{s.mid}</span>
+            {' · '}testing x = <span className="font-mono text-ink">{s.mid}</span>
           </>
         )}
       </div>
@@ -149,8 +164,7 @@ function View({ frame }: PluginViewProps<FindXState>) {
       <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
         {s.mid !== null && s.capped !== null ? (
           <>
-            cappedSum(a, {s.mid}) = <span className="text-ink">{s.capped}</span>
-            {' '}
+            cappedSum(a, {s.mid}) = <span className="text-ink">{s.capped}</span>{' '}
             {s.capped >= s.target ? '≥' : '<'} {s.target}
           </>
         ) : (
@@ -182,132 +196,130 @@ function Inspector({ frame }: InspectorProps<FindXState>) {
 export const manifestId = 'prep-hash-maps-find-x-to-make-array-sum-to-k';
 export const title = 'Find X to make array sum to K';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Find X to make array sum to K\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Find X to make array sum to K"?',
     choices: [
       {
-        label: "Binary search on answer — fits this problem",
-        correct: true
+        label: 'Binary search on answer — fits this problem',
+        correct: true,
       },
       {
-        label: "Custom hash key / struct map — different approach"
+        label: 'Custom hash key / struct map — different approach',
       },
       {
-        label: "Sliding window + frequency map — different approach"
+        label: 'Sliding window + frequency map — different approach',
       },
       {
-        label: "Hash map chain reconstruction — different approach"
-      }
+        label: 'Hash map chain reconstruction — different approach',
+      },
     ],
-    explain: "Cap each value at x; cappedSum rises monotonically with x"
+    explain: 'Cap each value at x; cappedSum rises monotonically with x',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Find X to make array sum to K), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Find X to make array sum to K), what strategy is established?',
     choices: [
       {
-        label: "Cap each value at x; cappedSum — described in INIT caption",
-        correct: true
+        label: 'Cap each value at x; cappedSum — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Find the smallest cap x so that capping every value at x makes the array sum reach . cappedSum(a, x) only ever grows as x grows, so we can binary-search x. First sort the array: []."
+    explain:
+      'Find the smallest cap x so that capping every value at x makes the array sum reach . cappedSum(a, x) only ever grows as x grows, so we can binary-search x. First sort the array: [].',
   },
   {
-    id: "key-step",
-    prompt: "On the \"TEST\" step (cap()=>=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "TEST" step (cap()=>=), what happens?',
     choices: [
       {
-        label: "Test mid = : cappedSum = — this move caption",
-        correct: true
+        label: 'Test mid = : cappedSum = — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Test mid = : cappedSum =  which is at least . This x works, but a smaller one might too — keep it as a candidate by setting hi = mid."
+    explain:
+      'Test mid = : cappedSum =  which is at least . This x works, but a smaller one might too — keep it as a candidate by setting hi = mid.',
   },
   {
-    id: "state",
-    prompt: "What does the `a` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `a` field track in the visualization state?',
     choices: [
       {
-        label: "sorted array — updated each frame",
-        correct: true
+        label: 'sorted array — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `a` in sync: sorted array"
+    explain: 'The recorder keeps `a` in sync: sorted array',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Find X to make array sum to K\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Find X to make array sum to K"?',
     choices: [
       {
-        label: "O(n log n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n log n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n) average time, O(1) space — wrong order of growth"
+        label: 'O(n) average time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n·e·α(n)) time, O(n·e) space — wrong order of growth"
+        label: 'O(n·e·α(n)) time, O(n·e) space — wrong order of growth',
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n log n). O(n). binary-search x on cappedSum(a,x) >= target"
+    explain: 'O(n log n). O(n). binary-search x on cappedSum(a,x) >= target',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "lo and hi have met — final DONE caption",
-        correct: true
+        label: 'lo and hi have met — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "lo and hi have met at x = . cappedSum(a, ) =  ≥ , and no smaller cap reaches . The answer is ."
-  }
+    explain:
+      'lo and hi have met at x = . cappedSum(a, ) =  ≥ , and no smaller cap reaches . The answer is .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

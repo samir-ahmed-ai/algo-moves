@@ -25,7 +25,9 @@ export function InsSection({
     <section className={cn('flex flex-col gap-1', className)}>
       {title && (
         <div className="flex min-h-[16px] items-center justify-between">
-          <span className={cn('font-semibold uppercase tracking-wide text-ink3', chromeText.xs)}>{title}</span>
+          <span className={cn('font-semibold uppercase tracking-wide text-ink3', chromeText.xs)}>
+            {title}
+          </span>
           {right}
         </div>
       )}
@@ -37,7 +39,10 @@ export function InsSection({
 /** Equal-width column grid for paired fields (W/H, opacity/radius…). */
 export function InsGrid({ children, cols = 2 }: { children: ReactNode; cols?: number }) {
   return (
-    <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+    <div
+      className="grid gap-1.5"
+      style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+    >
       {children}
     </div>
   );
@@ -75,11 +80,18 @@ export function InsField({
       className={cn(
         'flex h-[26px] items-center gap-1 border bg-panel2 px-1.5 transition-colors',
         RADIUS_CTRL,
-        readOnly ? 'border-transparent opacity-70' : 'border-transparent hover:border-edge2 focus-within:border-accent',
+        readOnly
+          ? 'border-transparent opacity-70'
+          : 'border-transparent hover:border-edge2 focus-within:border-accent',
       )}
     >
       {icon != null && (
-        <span className={cn('grid h-3.5 w-3.5 shrink-0 place-items-center text-ink3 [&>svg]:h-3 [&>svg]:w-3', chromeText.xs)}>
+        <span
+          className={cn(
+            'grid h-3.5 w-3.5 shrink-0 place-items-center text-ink3 [&>svg]:h-3 [&>svg]:w-3',
+            chromeText.xs,
+          )}
+        >
           {icon}
         </span>
       )}
@@ -92,14 +104,20 @@ export function InsField({
         step={step}
         onChange={onChange ? (e) => onChange(e.target.value) : undefined}
         onBlur={onCommit}
-        onKeyDown={onCommit ? (e) => e.key === 'Enter' && (e.currentTarget as HTMLInputElement).blur() : undefined}
+        onKeyDown={
+          onCommit
+            ? (e) => e.key === 'Enter' && (e.currentTarget as HTMLInputElement).blur()
+            : undefined
+        }
         className={cn(
           'nodrag w-full min-w-0 bg-transparent text-ink outline-none tabular-nums',
           chromeText.sm,
           readOnly && 'cursor-default',
         )}
       />
-      {unit != null && <span className={cn('shrink-0 select-none text-ink3', chromeText.xs)}>{unit}</span>}
+      {unit != null && (
+        <span className={cn('shrink-0 select-none text-ink3', chromeText.xs)}>{unit}</span>
+      )}
     </label>
   );
 }
@@ -129,7 +147,10 @@ export function InsSelect<T extends string>({
         value={value}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value as T)}
-        className={cn('nodrag w-full cursor-pointer bg-transparent px-1.5 text-ink outline-none', chromeText.sm)}
+        className={cn(
+          'nodrag w-full cursor-pointer bg-transparent px-1.5 text-ink outline-none',
+          chromeText.sm,
+        )}
       >
         {options.map((o) => (
           <option key={o.v} value={o.v}>

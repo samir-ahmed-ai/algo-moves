@@ -41,18 +41,22 @@ function isProblemStat(value: unknown): value is ProblemStat {
 function isProgressData(value: unknown): value is ProgressData {
   const candidate = value as Partial<ProgressData>;
   if (!candidate || typeof candidate !== 'object') return false;
-  if (!candidate.stats || typeof candidate.stats !== 'object' || !Array.isArray(candidate.mistakes)) return false;
-  if (!candidate.mistakes.every((m: unknown) => {
-    const item = m as Partial<Mistake>;
-    return (
-      typeof item.id === 'string' &&
-      typeof item.problemId === 'string' &&
-      typeof item.problemTitle === 'string' &&
-      typeof item.prompt === 'string' &&
-      typeof item.picked === 'string' &&
-      typeof item.answer === 'string'
-    );
-  })) return false;
+  if (!candidate.stats || typeof candidate.stats !== 'object' || !Array.isArray(candidate.mistakes))
+    return false;
+  if (
+    !candidate.mistakes.every((m: unknown) => {
+      const item = m as Partial<Mistake>;
+      return (
+        typeof item.id === 'string' &&
+        typeof item.problemId === 'string' &&
+        typeof item.problemTitle === 'string' &&
+        typeof item.prompt === 'string' &&
+        typeof item.picked === 'string' &&
+        typeof item.answer === 'string'
+      );
+    })
+  )
+    return false;
   return Object.values(candidate.stats).every((s) => isProblemStat(s));
 }
 

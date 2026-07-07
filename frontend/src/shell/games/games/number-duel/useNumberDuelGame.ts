@@ -27,7 +27,14 @@ export type Attempt = { value: number; result: GuessResult; heat: HeatLevel; fra
 export type NdMsg =
   | { kind: 'ready' }
   | { kind: 'guess'; value: number }
-  | { kind: 'feedback'; value: number; result: GuessResult; heat: HeatLevel; frac: number; count: number }
+  | {
+      kind: 'feedback';
+      value: number;
+      result: GuessResult;
+      heat: HeatLevel;
+      frac: number;
+      count: number;
+    }
   | { kind: 'rematch' };
 
 export type NdPhase = 'setup' | 'waitingKeeper' | 'watching' | 'guessing' | 'roundResult' | 'over';
@@ -51,13 +58,13 @@ export function isNdSharedState(v: unknown): v is NdSharedState {
   if (!v || typeof v !== 'object') return false;
   const o = v as Record<string, unknown>;
   return (
-    typeof o.round === 'number'
-    && typeof o.phase === 'string'
-    && Array.isArray(o.attempts)
-    && typeof o.counts === 'object'
-    && o.counts !== null
-    && typeof o.keeperName === 'string'
-    && typeof o.guesserName === 'string'
+    typeof o.round === 'number' &&
+    typeof o.phase === 'string' &&
+    Array.isArray(o.attempts) &&
+    typeof o.counts === 'object' &&
+    o.counts !== null &&
+    typeof o.keeperName === 'string' &&
+    typeof o.guesserName === 'string'
   );
 }
 
@@ -77,7 +84,8 @@ export function useNumberDuelGame() {
   const { locale } = useGamesLocale();
   const strings = useMemo(() => getNumberDuelStrings(locale), [locale]);
   const arcade = useMemo(() => getArcadeStrings(locale), [locale]);
-  const { self, peer, players, connected, isSpectator, role, sharedState, publishState } = useGameRoom();
+  const { self, peer, players, connected, isSpectator, role, sharedState, publishState } =
+    useGameRoom();
   const sharedStateRef = useSharedStateRef(sharedState);
   const { report } = useMatchReporter('number-duel');
 
@@ -151,59 +159,65 @@ export function useNumberDuelGame() {
 
   const sendRef = useRef<(msg: NdMsg) => void>(() => {});
 
-  const send = useGameChannel<NdMsg>((msg) => {
-    switch (msg.kind) {
-      case 'ready':
-        if (!isSpectator && !amKeeper) {
-          setPhase('guessing');
-          playCue('go');
+  const send = useGameChannel<NdMsg>(
+    (msg) => {
+      switch (msg.kind) {
+        case 'ready':
+          if (!isSpectator && !amKeeper) {
+            setPhase('guessing');
+            playCue('go');
+          }
+          break;
+        case 'guess': {
+          if (isSpectator || !amKeeper || secret == null) return;
+          const result = evaluateGuess(secret, msg.value);
+          const heat = proximityBand(secret, msg.value);
+          const frac = proximityFraction(secret, msg.value);
+          const count = attempts.length + 1;
+          const attempt: Attempt = { value: msg.value, result, heat, frac };
+          const nextAttempts = [...attempts, attempt];
+          setAttempts(nextAttempts);
+          sendRef.current({ kind: 'feedback', value: msg.value, result, heat, frac, count });
+          const nextPhase: NdPhase = result === 'correct' ? 'roundResult' : phase;
+          const nextCounts = result === 'correct' ? { ...counts, [round]: count } : counts;
+          if (result === 'correct') {
+            setCounts(nextCounts);
+            setPhase('roundResult');
+          }
+          if (role === 'host') {
+            publishSnapshot({
+              round,
+              phase: nextPhase,
+              attempts: nextAttempts,
+              counts: nextCounts,
+              keeperName,
+              guesserName,
+            });
+          }
+          break;
         }
-        break;
-      case 'guess': {
-        if (isSpectator || !amKeeper || secret == null) return;
-        const result = evaluateGuess(secret, msg.value);
-        const heat = proximityBand(secret, msg.value);
-        const frac = proximityFraction(secret, msg.value);
-        const count = attempts.length + 1;
-        const attempt: Attempt = { value: msg.value, result, heat, frac };
-        const nextAttempts = [...attempts, attempt];
-        setAttempts(nextAttempts);
-        sendRef.current({ kind: 'feedback', value: msg.value, result, heat, frac, count });
-        const nextPhase: NdPhase = result === 'correct' ? 'roundResult' : phase;
-        const nextCounts = result === 'correct' ? { ...counts, [round]: count } : counts;
-        if (result === 'correct') {
-          setCounts(nextCounts);
-          setPhase('roundResult');
+        case 'feedback': {
+          if (isSpectator || amKeeper) return;
+          setAttempts((a) => [
+            ...a,
+            { value: msg.value, result: msg.result, heat: msg.heat, frac: msg.frac },
+          ]);
+          setPending(false);
+          if (msg.result === 'correct') {
+            setCounts((c) => ({ ...c, [round]: msg.count }));
+            setPhase('roundResult');
+          } else {
+            playCue(msg.heat === 'burning' || msg.heat === 'hot' ? 'select' : 'tick');
+          }
+          break;
         }
-        if (role === 'host') {
-          publishSnapshot({
-            round,
-            phase: nextPhase,
-            attempts: nextAttempts,
-            counts: nextCounts,
-            keeperName,
-            guesserName,
-          });
-        }
-        break;
+        case 'rematch':
+          resetMatch();
+          break;
       }
-      case 'feedback': {
-        if (isSpectator || amKeeper) return;
-        setAttempts((a) => [...a, { value: msg.value, result: msg.result, heat: msg.heat, frac: msg.frac }]);
-        setPending(false);
-        if (msg.result === 'correct') {
-          setCounts((c) => ({ ...c, [round]: msg.count }));
-          setPhase('roundResult');
-        } else {
-          playCue(msg.heat === 'burning' || msg.heat === 'hot' ? 'select' : 'tick');
-        }
-        break;
-      }
-      case 'rematch':
-        resetMatch();
-        break;
-    }
-  }, { validate: isNdMsg });
+    },
+    { validate: isNdMsg },
+  );
   sendRef.current = send;
 
   useEffect(() => {

@@ -8,6 +8,9 @@ import { shuffleSeeded } from './shuffleSeeded';
  * Shared by the predict-the-move and complexity practice panels.
  */
 export function buildShuffledChoices<T>(answer: T, pool: T[], round: number, distractors = 3): T[] {
-  const distract = shuffleSeeded(pool.filter((p) => p !== answer), round).slice(0, distractors);
+  const distract = shuffleSeeded(
+    pool.filter((p) => p !== answer),
+    round,
+  ).slice(0, distractors);
   return shuffleSeeded([answer, ...distract], round + 1);
 }

@@ -49,7 +49,9 @@ describe('PlanContext', () => {
       items: (patch.itemIds ?? samplePlan.items.map((i) => i.itemId)).map((itemId, position) => ({
         itemId,
         position,
-        completed: patch.completedItems?.includes(itemId) ?? samplePlan.items.some((i) => i.itemId === itemId && i.completed),
+        completed:
+          patch.completedItems?.includes(itemId) ??
+          samplePlan.items.some((i) => i.itemId === itemId && i.completed),
       })),
     }));
     localStorage.clear();

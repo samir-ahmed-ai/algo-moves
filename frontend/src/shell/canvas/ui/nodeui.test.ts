@@ -161,7 +161,12 @@ describe('resolveMeasureSize', () => {
   });
 
   it('feeds oversized viz-stage width into downscale fit math', () => {
-    const stage = createStageMock({ clampedScrollW: 400, intrinsicW: 524, intrinsicH: 80, mainH: 80 });
+    const stage = createStageMock({
+      clampedScrollW: 400,
+      intrinsicW: 524,
+      intrinsicH: 80,
+      mainH: 80,
+    });
     const { w, h } = resolveMeasureSize(stage, 400);
     const fit = computeVizFitLayout(w, h, 400, 400, 4);
     expect(fit.scale).toBeLessThan(1);

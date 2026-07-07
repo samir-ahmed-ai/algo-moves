@@ -4,7 +4,14 @@ import { useGameRoom } from '../../net/useGameRoom';
 import { useGameChannel } from '../../net/useGameChannel';
 import { useMatchReporter } from '../../net/useMatchReporter';
 import type { Peer } from '../../net/protocol';
-import { GameArena, GameBody, ResultBanner, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
+import {
+  GameArena,
+  GameBody,
+  ResultBanner,
+  TouchButton,
+  TurnBadge,
+  WaitingForPeer,
+} from '../../ui/gamesUi';
 import { Avatar } from '../../ui/Avatar';
 import { Confetti, CountdownRing } from '../../ui/effects';
 import { usePrefersReducedMotion } from '../../ui/hooks';
@@ -143,7 +150,13 @@ export function ReactionDuel() {
       if (winnerId) nextScores[winnerId] = (nextScores[winnerId] ?? 0) + 1;
       const over = matchOver(...Object.values(nextScores));
 
-      const result: RoundResult = { round: r, taps: { ...taps }, winnerId, scores: nextScores, over };
+      const result: RoundResult = {
+        round: r,
+        taps: { ...taps },
+        winnerId,
+        scores: nextScores,
+        over,
+      };
       setResults((prev) => [...prev.filter((x) => x.round !== r), result]);
       setScores(nextScores);
       setPhase('result');
@@ -186,7 +199,9 @@ export function ReactionDuel() {
     if (isSpectator) return;
     if (phase !== 'armed' && phase !== 'go') return;
     const ms =
-      phase === 'go' && goTimeRef.current != null ? performance.now() - goTimeRef.current : FALSE_START;
+      phase === 'go' && goTimeRef.current != null
+        ? performance.now() - goTimeRef.current
+        : FALSE_START;
     setMyMs(ms);
     setPhase('tapped');
 
@@ -280,7 +295,11 @@ export function ReactionDuel() {
       for (const p of players) filled[p.id] = scores[p.id] ?? 0;
       const places = placementsByScore(filled);
       void report(
-        players.map((p) => ({ peerId: p.id, placement: places[p.id] ?? players.length, score: filled[p.id] })),
+        players.map((p) => ({
+          peerId: p.id,
+          placement: places[p.id] ?? players.length,
+          score: filled[p.id],
+        })),
       );
     }
   }, [phase, isSpectator, iAmMatchWinner, reduced, amHost, players, scores, report]);
@@ -325,8 +344,14 @@ export function ReactionDuel() {
           <Confetti fire={iAmMatchWinner} />
           <Ladder ordered={ordered} scores={scores} myId={myId} nPlayer={nPlayer} strings={t} />
         </div>
-        <ResultBanner tone={tone} title={title} detail={<ScoreLine ordered={ordered} scores={scores} />} />
-        {results.length > 0 ? <History results={results} players={players} myId={myId} strings={t} /> : null}
+        <ResultBanner
+          tone={tone}
+          title={title}
+          detail={<ScoreLine ordered={ordered} scores={scores} />}
+        />
+        {results.length > 0 ? (
+          <History results={results} players={players} myId={myId} strings={t} />
+        ) : null}
         {!isSpectator ? (
           <TouchButton variant="primary" size="md" className="w-full" onClick={rematch}>
             {t.playAgain}
@@ -341,7 +366,7 @@ export function ReactionDuel() {
   // ---- In-progress view -----------------------------------------------------
   const ordered = orderByScore(players, scores, myId);
   const winnerName = currentResult?.winnerId
-    ? players.find((p) => p.id === currentResult.winnerId)?.name ?? t.partner
+    ? (players.find((p) => p.id === currentResult.winnerId)?.name ?? t.partner)
     : null;
   const iWonRound = currentResult?.winnerId === myId;
   const showResult = phase === 'result' && !!currentResult;
@@ -369,7 +394,9 @@ export function ReactionDuel() {
 
       {showResult ? (
         <ResultBanner
-          tone={isSpectator ? 'draw' : iWonRound ? 'win' : currentResult!.winnerId ? 'lose' : 'draw'}
+          tone={
+            isSpectator ? 'draw' : iWonRound ? 'win' : currentResult!.winnerId ? 'lose' : 'draw'
+          }
           title={
             isSpectator
               ? winnerName
@@ -402,7 +429,10 @@ export function ReactionDuel() {
   );
 }
 
-function fmt(ms: number | null, strings: { falseStart: string; ms: (n: number) => string; noTime: string }): string {
+function fmt(
+  ms: number | null,
+  strings: { falseStart: string; ms: (n: number) => string; noTime: string },
+): string {
   if (ms === null) return strings.noTime;
   if (isFalseStart(ms)) return strings.falseStart;
   return strings.ms(Math.round(ms));
@@ -443,7 +473,10 @@ function TapZone({
   let tone = 'border-edge bg-panel text-ink2';
   if (armed) tone = 'border-amber-400/50 bg-amber-500/10 text-amber-500';
   else if (go) tone = 'border-good/60 bg-good/15 text-good';
-  else if (tapped) tone = falseStart ? 'border-bad/50 bg-badbg text-bad' : 'border-accent/40 bg-accentbg text-accent';
+  else if (tapped)
+    tone = falseStart
+      ? 'border-bad/50 bg-badbg text-bad'
+      : 'border-accent/40 bg-accentbg text-accent';
 
   let heading = strings.getReady;
   let sub = strings.tapWhenGreen;
@@ -536,11 +569,18 @@ function Ladder({
             )}
           >
             <Avatar seed={p.id} name={p.name} size={26} />
-            <span className={cn('min-w-0 flex-1 truncate text-sm font-semibold', mine ? 'text-accent' : 'text-ink')}>
+            <span
+              className={cn(
+                'min-w-0 flex-1 truncate text-sm font-semibold',
+                mine ? 'text-accent' : 'text-ink',
+              )}
+            >
               {mine ? strings.you : p.name}
             </span>
             <Pips score={s} />
-            <span className="w-5 text-right font-mono text-sm font-bold tabular-nums text-ink2">{s}</span>
+            <span className="w-5 text-right font-mono text-sm font-bold tabular-nums text-ink2">
+              {s}
+            </span>
           </div>
         );
       })}
@@ -548,12 +588,29 @@ function Ladder({
   );
 }
 
-function PlayerCell({ peer, name, score, mine }: { peer?: Peer; name?: string; score: number; mine?: boolean }) {
+function PlayerCell({
+  peer,
+  name,
+  score,
+  mine,
+}: {
+  peer?: Peer;
+  name?: string;
+  score: number;
+  mine?: boolean;
+}) {
   return (
     <div className="flex min-w-0 flex-1 flex-col items-center gap-1">
       {peer ? <Avatar seed={peer.id} name={peer.name} size={26} /> : null}
       <div className="truncate text-xs font-semibold text-ink">{name ?? '—'}</div>
-      <div className={cn('font-mono text-xl font-bold tabular-nums', mine ? 'text-accent' : 'text-ink2')}>{score}</div>
+      <div
+        className={cn(
+          'font-mono text-xl font-bold tabular-nums',
+          mine ? 'text-accent' : 'text-ink2',
+        )}
+      >
+        {score}
+      </div>
       <Pips score={score} />
     </div>
   );
@@ -611,7 +668,9 @@ function History({
   const ordered = [...results].sort((a, b) => a.round - b.round);
   return (
     <div className="rounded-xl border border-edge bg-panel2 p-2.5">
-      <p className="mb-1.5 text-center text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">{strings.history}</p>
+      <p className="mb-1.5 text-center text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">
+        {strings.history}
+      </p>
       <div className="flex flex-col gap-1.5">
         {ordered.map((res) => {
           const rows = Object.entries(res.taps)
@@ -625,7 +684,11 @@ function History({
                   <span
                     key={r.id}
                     className={cn(
-                      r.id === res.winnerId ? 'font-bold text-good' : r.id === myId ? 'text-ink2' : 'text-ink3',
+                      r.id === res.winnerId
+                        ? 'font-bold text-good'
+                        : r.id === myId
+                          ? 'text-ink2'
+                          : 'text-ink3',
                     )}
                   >
                     {r.id === myId ? strings.you : r.name}: {fmt(r.ms, strings)}
@@ -641,7 +704,11 @@ function History({
 }
 
 function ScoreLine({ ordered, scores }: { ordered: Peer[]; scores: Record<string, number> }) {
-  return <span className="font-mono tabular-nums">{ordered.map((p) => scores[p.id] ?? 0).join(' – ')}</span>;
+  return (
+    <span className="font-mono tabular-nums">
+      {ordered.map((p) => scores[p.id] ?? 0).join(' – ')}
+    </span>
+  );
 }
 
 export default ReactionDuel;

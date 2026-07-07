@@ -1,96 +1,94 @@
-# Postgres — Games Arcade persistence
+# Postgres — persistence layer
+
+PostgreSQL stores durable data for the arcade, learning catalog, interview sessions,
+canvas snapshots, prep plans, HTTP sessions (SCS), and Yjs CRDT documents (Hocuspocus).
 
 The realtime relay (moves, presence, spectators) runs in the Go server under
-`backend/`. **PostgreSQL** stores durable data: player profiles, match history,
-per-game MMR/stats, leaderboards, achievements, persistent rooms, friends and
-daily challenges.
+`backend/`. Without `DATABASE_URL`, the backend still runs for zero-config LAN play —
+profiles, leaderboards, interview tokens, and content API are unavailable.
 
-The arcade **degrades gracefully**: without `DATABASE_URL` on the backend it
-still runs for zero-config LAN play — you just don't get profiles/leaderboards/history.
+## Migrations (001–013)
+
+Canonical copies for review and manual runs live in [`db/migrations/`](migrations/).
+The backend embeds identical files in `backend/internal/arcade/migrations/`.
+Sync with `./scripts/migrate-db.sh` or `make db-migrate`.
+
+| # | File | Purpose |
+|---|------|---------|
+| 001 | `001_arcade_schema.sql` | Profiles, matches, stats, achievements, rooms, friends, daily challenges |
+| 002 | `002_arcade_functions.sql` | Security-definer RPCs (submit_match_result, leaderboards, daily challenge) |
+| 003 | `003_canvas_schema.sql` | Saved canvas JSON snapshots (`canvases`) |
+| 004 | `004_content_schema.sql` | Learning catalog (courses, topics, problems, solutions, quizzes) |
+| 005 | `005_interview_schema.sql` | Interview sessions |
+| 006 | `006_openrtb_group.sql` | OpenRTB course group constraint |
+| 007 | `007_personal_room.sql` | Personal room codes on profiles |
+| 008 | `008_user_auth.sql` | Email/password auth on profiles |
+| 009 | `009_prep_plans_schema.sql` | Prep plans |
+| 010 | `010_games_catalog.sql` | Games catalog (mirrors frontend registry) |
+| 011 | `011_scs_sessions.sql` | HTTP session store for alexedwards/scs |
+| 012 | `012_yjs_documents.sql` | Yjs binary state for Hocuspocus collab |
+| 013 | `013_schema_migrations.sql` | Migration audit table (`schema_migrations`) |
+
+Applied versions are recorded in `public.schema_migrations`. DDL remains idempotent;
+re-deploy skips already-recorded files.
 
 ## Railway setup
 
 1. In your Railway project, click **+ New** → **Database** → **PostgreSQL**.
 2. Open the **backend** service → **Variables** → add a reference to the Postgres
-   service's `DATABASE_URL` (Railway offers `${{Postgres.DATABASE_URL}}` or similar
-   when you use **Add Reference**).
-3. Set on the backend (both accept `true`/`1`; set `false` to skip on a given deploy):
+   service's `DATABASE_URL`.
+3. Set on the backend:
    - `RUN_MIGRATIONS=true` — schema migrations + achievement seed
    - `RUN_CONTENT_SEED=true` — reload learning catalog (`/api/content/*`)
-4. Redeploy the backend. `GET /healthz` should return `"arcade": true`.
-
-No frontend env vars are needed for persistence — the browser calls the backend
-at `/api/*` on the same host as `VITE_GAMES_SERVER_URL`.
+4. Set `DATABASE_URL` on the **hocuspocus** service (same Postgres) for Yjs persistence.
+5. Redeploy. `GET /healthz` should return `"arcade": true`.
 
 ## Local development
 
 ```bash
-# Start Postgres (Docker example)
 docker run -d --name algo-moves-pg -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:16
 
-# Backend with persistence
 export DATABASE_URL="postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
-export RUN_MIGRATIONS=true
+make db-migrate          # applies all migrations + achievement seed
 make backend-dev
 ```
 
 ## Manual migrations
 
-Migrations are embedded in the backend image (`backend/internal/arcade/migrations/`).
-Canonical copies for review and manual runs live in `db/migrations/` — keep them in
-sync when editing schema.
-
 ```bash
+./scripts/migrate-db.sh   # preferred — applies all migrations in order
+# or individually:
 psql "$DATABASE_URL" -f db/migrations/001_arcade_schema.sql
-psql "$DATABASE_URL" -f db/migrations/002_arcade_functions.sql
-psql "$DATABASE_URL" -f db/migrations/003_canvas_schema.sql
-psql "$DATABASE_URL" -f db/migrations/004_content_schema.sql
-psql "$DATABASE_URL" -f db/migrations/005_interview_schema.sql
+# ... through 013_schema_migrations.sql
 psql "$DATABASE_URL" -f db/seed.sql
 ```
 
+## Canvas persistence (dual path)
+
+| Store | Owner | Format | Use |
+|-------|-------|--------|-----|
+| `canvases` | Go `/api/canvases` | JSON snapshot | Saved named canvases, REST load/save |
+| `yjs_documents` | Hocuspocus service | Yjs CRDT binary | Live collab sync by room code |
+
+Both can reference the same logical room; they are not automatically unified.
+
 ## Learning content
 
-Migration `004_content_schema.sql` adds the **learning catalog** tables —
-`courses`, `topics`, `items`, `problems`, `solutions` (one row per
-problem × language), `tags` + `problem_tags`, `quiz_questions` + `quiz_choices`,
-and `story_regions` (narrative worlds layered over a course, e.g. Graphs →
-*The Archipelago of Reach*). The schema runs on deploy like the others.
-
-The catalog is still authored in the frontend TypeScript (`src/plugins/**`,
-`src/content/**`). `frontend/scripts/export-content-sql.mts` mirrors it into a
-deterministic seed and `check:all` fails if the seed drifts:
+Migration `004_content_schema.sql` adds catalog tables. Content is authored in
+TypeScript and exported via `frontend/scripts/export-content-sql.mts`:
 
 ```bash
-npm --prefix frontend run export-content-sql   # writes db/content_seed.sql
-npm --prefix frontend run check-content-sql     # CI drift guard (in check:all)
+npm --prefix frontend run export-content-sql
+npm --prefix frontend run check-content-sql
+make content-seed
 ```
 
-The seed is a single transaction that **truncates and reloads** the content
-tables, so re-running always converges to the current catalog. On Railway, set
-`RUN_CONTENT_SEED=true` on the backend to apply it on every deploy (embedded in
-the Docker image). Locally:
-
-```bash
-make content-seed                       # regenerate + apply to $DATABASE_URL
-# or: SEED_CONTENT=1 ./scripts/migrate-db.sh
-# or: RUN_CONTENT_SEED=true make backend-dev   (after export-content-sql syncs the embed copy)
-# or: psql "$DATABASE_URL" -f db/content_seed.sql
-```
-
-Reads are public (no auth), mirroring the leaderboard endpoints:
-`GET /api/content/catalog` (course/topic/item tree) and
-`GET /api/content/problems/{id}` (a problem with its tags, per-language
-solutions and quiz).
+Reads: `GET /api/content/catalog`, `GET /api/content/problems/{id}`.
+Games catalog: `GET /api/games`, `GET /api/games/{id}`.
 
 ## Design notes
 
-- **No forged scores.** Clients never write directly to `matches`, `match_participants`
-  or `game_stats`. All rating/XP changes go through the `submit_match_result(...)`
-  function, which computes placement-based Elo, updates streaks, awards XP and
-  unlocks achievements atomically.
-- **Guest profiles.** `POST /api/auth/guest` creates a profile and session token;
-  the browser stores the token and sends it as `Authorization: Bearer …` on
-  mutating calls.
-- **Leaderboards** come from `leaderboard_game` / `leaderboard_global` /
-  `leaderboard_recent` (day/week windows).
+- **No forged scores.** Match results go through `submit_match_result(...)` only.
+- **Guest profiles.** `POST /api/auth/guest` creates a profile; mutating calls use
+  SCS session cookies (or legacy bearer during transition).
+- **Leaderboards** from `leaderboard_game` / `leaderboard_global` / `leaderboard_recent`.

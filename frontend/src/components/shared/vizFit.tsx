@@ -1,4 +1,11 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 import { cn } from '@/lib/utils/cn';
 import { nodeText, RADIUS_CTRL } from '@/design/typography';
 import {
@@ -87,8 +94,11 @@ export function VizFitBox({
       // Bail on identical values: the eased box resize re-fires the observer
       // for ~13 frames per step, and each converged tick must not re-render.
       setLayout((prev) =>
-        prev.scale === next.scale && prev.w === next.w && prev.h === next.h
-          && prev.nw === next.nw && prev.nh === next.nh
+        prev.scale === next.scale &&
+        prev.w === next.w &&
+        prev.h === next.h &&
+        prev.nw === next.nw &&
+        prev.nh === next.nh
           ? prev
           : next,
       );
@@ -111,8 +121,8 @@ export function VizFitBox({
       // In hug mode the measure parent's *height* follows our own eased box —
       // only width changes demand a re-fit, so ignore pure-height echoes.
       if (
-        hug
-        && entries.every(
+        hug &&
+        entries.every(
           (e) => e.target === measureEl && Math.round(e.contentRect.width) === lastMeasureW.current,
         )
       ) {
@@ -187,7 +197,9 @@ export function MiniTabs<T extends string>({
           onClick={() => onChange(o.v)}
           className={cn(
             cn(RADIUS_CTRL, 'px-2 py-1 font-medium transition-colors', nodeText.sm),
-            value === o.v ? 'bg-panel text-ink shadow-[var(--shadow-sm)]' : 'text-ink3 hover:text-ink',
+            value === o.v
+              ? 'bg-panel text-ink shadow-[var(--shadow-sm)]'
+              : 'text-ink3 hover:text-ink',
           )}
         >
           {o.label}

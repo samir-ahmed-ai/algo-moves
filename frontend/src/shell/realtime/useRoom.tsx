@@ -152,7 +152,13 @@ export function GameRoomProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const openSocket = useCallback(
-    (target: { room: string; name: string; pid: string; asSpectator: boolean; capacity?: number }) => {
+    (target: {
+      room: string;
+      name: string;
+      pid: string;
+      asSpectator: boolean;
+      capacity?: number;
+    }) => {
       // Tear down any previous socket without triggering its reconnect path.
       if (wsRef.current) {
         wsRef.current.onclose = null;
@@ -207,7 +213,9 @@ export function GameRoomProvider({ children }: { children: ReactNode }) {
           case 'role-change':
             setPlayers((p) => bucketPeer(p, spectatorsRef.current, msg.peer)[0]);
             setSpectators((s) => bucketPeer(playersRef.current, s, msg.peer)[1]);
-            setSelf((cur) => (cur && cur.id === msg.peer.id ? { ...cur, role: msg.peer.role } : cur));
+            setSelf((cur) =>
+              cur && cur.id === msg.peer.id ? { ...cur, role: msg.peer.role } : cur,
+            );
             break;
           case 'relay':
             relayListeners.current.forEach((fn) => fn(msg.d, msg.from));
@@ -348,10 +356,7 @@ export function GameRoomProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const role = self?.role ?? null;
-  const otherPlayers = useMemo(
-    () => players.filter((p) => p.id !== self?.id),
-    [players, self],
-  );
+  const otherPlayers = useMemo(() => players.filter((p) => p.id !== self?.id), [players, self]);
   const peer = otherPlayers[0] ?? null;
 
   const value = useMemo<GameRoomApi>(

@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  RailGroup,
+  RailResult,
+  RailStat,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  vizText,
+} from '../../../_shared/vizKit';
 
 // A nested integer is either a plain number or a (possibly nested) list.
 type Nested = number | Nested[];
@@ -41,36 +55,63 @@ function flatten(list: Nested[], depth: number, lines: TreeLine[], next: { id: n
   }
 }
 
-function record({ list }: NestedInput): Frame<NestedState>[] {  const lines: TreeLine[] = [];
+function record({ list }: NestedInput): Frame<NestedState>[] {
+  const lines: TreeLine[] = [];
   flatten(list, 1, lines, { id: 0 });
 
   let sum = 0;
 
   const { emit, frames } = createRecorder<NestedState>(() => ({
-        lines: lines,
-        sum: sum,
-        activeId: null,
-        contribution: null,
-        done: false
-      }));
+    lines: lines,
+    sum: sum,
+    activeId: null,
+    contribution: null,
+    done: false,
+  }));
 
   const intCount = lines.filter((l) => l.kind === 'int').length;
-  emit('INIT', `${intCount} integers`, `Depth-first walk of the nested list. Each integer contributes value × depth (the outermost list is depth 1); descending into a sublist increases depth by 1. Sum the contributions of all ${intCount} integers.`, { activeId: null, contribution: null });
+  emit(
+    'INIT',
+    `${intCount} integers`,
+    `Depth-first walk of the nested list. Each integer contributes value × depth (the outermost list is depth 1); descending into a sublist increases depth by 1. Sum the contributions of all ${intCount} integers.`,
+    { activeId: null, contribution: null },
+  );
 
   // Walk the flattened lines in order; only integers add to the sum.
   for (const line of lines) {
     if (line.kind === 'open') {
-      emit('DESCEND', `→ depth ${line.depth + 1}`, `Enter a sublist — its elements live at depth ${line.depth + 1}.`, { activeId: line.id, contribution: null });
+      emit(
+        'DESCEND',
+        `→ depth ${line.depth + 1}`,
+        `Enter a sublist — its elements live at depth ${line.depth + 1}.`,
+        { activeId: line.id, contribution: null },
+      );
     } else if (line.kind === 'close') {
-      emit('ASCEND', `← depth ${line.depth}`, `Leave the sublist and return to depth ${line.depth}.`, { activeId: line.id, contribution: null });
+      emit(
+        'ASCEND',
+        `← depth ${line.depth}`,
+        `Leave the sublist and return to depth ${line.depth}.`,
+        { activeId: line.id, contribution: null },
+      );
     } else {
       const contribution = (line.value ?? 0) * line.depth;
       sum += contribution;
-      emit('ADD', `+${line.value}×${line.depth}`, `Integer ${line.value} sits at depth ${line.depth}, so it contributes ${line.value} × ${line.depth} = ${contribution}. Running weighted sum is now ${sum}.`, { activeId: line.id, contribution: contribution });
+      emit(
+        'ADD',
+        `+${line.value}×${line.depth}`,
+        `Integer ${line.value} sits at depth ${line.depth}, so it contributes ${line.value} × ${line.depth} = ${contribution}. Running weighted sum is now ${sum}.`,
+        { activeId: line.id, contribution: contribution },
+      );
     }
   }
 
-  emit('DONE', `sum = ${sum}`, `Every integer visited — the weighted depth sum is ${sum}.`, { activeId: null, contribution: null , done: true }, 'good');
+  emit(
+    'DONE',
+    `sum = ${sum}`,
+    `Every integer visited — the weighted depth sum is ${sum}.`,
+    { activeId: null, contribution: null, done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -82,7 +123,11 @@ function View({ frame }: PluginViewProps<NestedState>) {
       <RailGroup label="scan">
         <RailStat k="depth" v={active ? active.depth : '—'} />
         <RailStat k="value" v={active && active.kind === 'int' ? (active.value ?? '—') : '—'} />
-        <RailStat k="+contrib" v={s.contribution !== null ? s.contribution : '—'} tone={s.contribution !== null ? 'accent' : undefined} />
+        <RailStat
+          k="+contrib"
+          v={s.contribution !== null ? s.contribution : '—'}
+          tone={s.contribution !== null ? 'accent' : undefined}
+        />
       </RailGroup>
       <RailResult label="sum" value={s.sum} tone={s.done ? 'good' : 'accent'} />
     </>
@@ -123,7 +168,10 @@ function Inspector({ frame }: InspectorProps<NestedState>) {
   return (
     <VarGrid>
       <InspectorRow k="current depth" v={active ? active.depth : '—'} />
-      <InspectorRow k="current value" v={active && active.kind === 'int' ? (active.value ?? '—') : '—'} />
+      <InspectorRow
+        k="current value"
+        v={active && active.kind === 'int' ? (active.value ?? '—') : '—'}
+      />
       <InspectorRow k="last contribution" v={s.contribution ?? '—'} />
       <InspectorRow k="weighted sum" v={s.sum} />
     </VarGrid>

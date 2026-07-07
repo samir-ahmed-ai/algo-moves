@@ -53,7 +53,11 @@ export function recordGraphBfs(
   start: number,
   options: {
     initCaption: string;
-    onDequeue?: (u: number, emit: GraphEmit, ctx: { visited: boolean[]; dist: number[]; queue: number[] }) => boolean;
+    onDequeue?: (
+      u: number,
+      emit: GraphEmit,
+      ctx: { visited: boolean[]; dist: number[]; queue: number[] },
+    ) => boolean;
     onFinish?: (emit: GraphEmit, ctx: { visited: boolean[]; dist: number[] }) => void;
   },
 ): Frame<GraphRecordState>[] {
@@ -64,16 +68,35 @@ export function recordGraphBfs(
   visited[start] = true;
   dist[start] = 0;
 
-  const { emit, frames } = createGraphRecorder(adj, pos, start, { queue: [...queue], visited: [...visited], dist: [...dist] });
-  emit('INIT', `start=${start}`, options.initCaption, { queue: [...queue], visited: [...visited], dist: [...dist] });
+  const { emit, frames } = createGraphRecorder(adj, pos, start, {
+    queue: [...queue],
+    visited: [...visited],
+    dist: [...dist],
+  });
+  emit('INIT', `start=${start}`, options.initCaption, {
+    queue: [...queue],
+    visited: [...visited],
+    dist: [...dist],
+  });
 
   while (queue.length > 0) {
     const u = queue.shift()!;
-    emit('DEQUEUE', `u=${u}`, `Dequeue node ${u} (distance ${dist[u]}).`, { active: u, queue: [...queue], visited: [...visited], dist: [...dist] });
+    emit('DEQUEUE', `u=${u}`, `Dequeue node ${u} (distance ${dist[u]}).`, {
+      active: u,
+      queue: [...queue],
+      visited: [...visited],
+      dist: [...dist],
+    });
     if (options.onDequeue?.(u, emit, { visited, dist, queue })) break;
     for (const v of adj[u] ?? []) {
       if (visited[v]) {
-        emit('SKIP', `${u}→${v}`, `Neighbor ${v} already visited — skip.`, { active: u, edge: [u, v], queue: [...queue], visited: [...visited], dist: [...dist] });
+        emit('SKIP', `${u}→${v}`, `Neighbor ${v} already visited — skip.`, {
+          active: u,
+          edge: [u, v],
+          queue: [...queue],
+          visited: [...visited],
+          dist: [...dist],
+        });
         continue;
       }
       visited[v] = true;

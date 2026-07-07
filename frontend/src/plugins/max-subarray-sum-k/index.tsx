@@ -1,10 +1,23 @@
-import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
+import {
+  definePlugin,
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+} from '../../core/types';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { ArrayRow, type ArrayPointer } from '../../components/board/ArrayRow';
-import { InspectorRow, VizEmpty, VizInspector, VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
+import {
+  InspectorRow,
+  VizEmpty,
+  VizInspector,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+} from '../_shared/vizKit';
 
 export interface WindowInput {
   values: number[];
@@ -48,7 +61,11 @@ function record({ values, k }: WindowInput): Frame<WindowState>[] {
   for (let i = 0; i < k; i++) sum += values[i];
   best = sum;
   bestStart = 0;
-  emit('BUILD', `sum ${sum}`, `Initial window [0,${right}] has sum ${sum}. That's our first candidate for the best.`);
+  emit(
+    'BUILD',
+    `sum ${sum}`,
+    `Initial window [0,${right}] has sum ${sum}. That's our first candidate for the best.`,
+  );
 
   for (right = k; right < n; right++) {
     left = right - k + 1;
@@ -75,7 +92,12 @@ function record({ values, k }: WindowInput): Frame<WindowState>[] {
   done = true;
   left = bestStart;
   right = bestStart + k - 1;
-  emit('DONE', `best ${best}`, `Done. The maximum sum is ${best}, from window [${bestStart},${right}].`, 'good');
+  emit(
+    'DONE',
+    `best ${best}`,
+    `Done. The maximum sum is ${best}, from window [${bestStart},${right}].`,
+    'good',
+  );
   return frames;
 }
 
@@ -91,14 +113,23 @@ function View({ frame }: PluginViewProps<WindowState>) {
     return '';
   };
   return (
-    <VizStage rail={<>
-      <RailGroup label="window">
-        <RailStat k="sum" v={s.sum} tone="accent" />
-        <RailStat k="best" v={s.best} tone={s.done ? 'good' : undefined} />
-      </RailGroup>
-      {s.done && <RailResult label="answer" value={s.best} tone="good" />}
-    </>}>
-      <ArrayRow values={s.values} windowRange={[s.left, s.right]} cellTone={tone} pointers={pointers} />
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="window">
+            <RailStat k="sum" v={s.sum} tone="accent" />
+            <RailStat k="best" v={s.best} tone={s.done ? 'good' : undefined} />
+          </RailGroup>
+          {s.done && <RailResult label="answer" value={s.best} tone="good" />}
+        </>
+      }
+    >
+      <ArrayRow
+        values={s.values}
+        windowRange={[s.left, s.right]}
+        cellTone={tone}
+        pointers={pointers}
+      />
     </VizStage>
   );
 }
@@ -134,16 +165,27 @@ func maxSubarraySumK(values []int, k int) int {
 }
 `;
 
-
 const inputs = [
-    { id: 'a', label: '[2,1,5,1,3,2,7,1] · k=3', value: { values: [2, 1, 5, 1, 3, 2, 7, 1], k: 3 } },
-    { id: 'b', label: '[1,4,2,10,2,3,1,0,20] · k=4', value: { values: [1, 4, 2, 10, 2, 3, 1, 0, 20], k: 4 } },
-    { id: 'c', label: '[5,2,1,1,1,1,1,8] · k=2', value: { values: [5, 2, 1, 1, 1, 1, 1, 8], k: 2 } },
-  ];
+  { id: 'a', label: '[2,1,5,1,3,2,7,1] · k=3', value: { values: [2, 1, 5, 1, 3, 2, 7, 1], k: 3 } },
+  {
+    id: 'b',
+    label: '[1,4,2,10,2,3,1,0,20] · k=4',
+    value: { values: [1, 4, 2, 10, 2, 3, 1, 0, 20], k: 4 },
+  },
+  { id: 'c', label: '[5,2,1,1,1,1,1,8] · k=2', value: { values: [5, 2, 1, 1, 1, 1, 1, 8], k: 2 } },
+];
 const verdict = verdictAlwaysOk('max');
 const teaching = wireTeachingStack({
-  record, View, inputs, verdict,
-  practice: { quiz, codePieces, cases: { good: goodCases, bad: badCases, intro, goodLabel: 'window steps' }, simulateQuestion: 'How does the window shift next?' },
+  record,
+  View,
+  inputs,
+  verdict,
+  practice: {
+    quiz,
+    codePieces,
+    cases: { good: goodCases, bad: badCases, intro, goodLabel: 'window steps' },
+    simulateQuestion: 'How does the window shift next?',
+  },
 });
 
 export const maxSubarraySumKPlugin = definePlugin<WindowInput, WindowState>({
@@ -169,5 +211,8 @@ export const maxSubarraySumKPlugin = definePlugin<WindowInput, WindowState>({
   quiz,
   tabs: teaching.tabs,
   wires: teaching.wires,
-  editable: [{ key: 'values', label: 'Array', type: 'numberArray', min: -9, max: 99 }, { key: 'k', label: 'Window size (k)', type: 'number', min: 1, max: 12 }],
+  editable: [
+    { key: 'values', label: 'Array', type: 'numberArray', min: -9, max: 99 },
+    { key: 'k', label: 'Window size (k)', type: 'number', min: 1, max: 12 },
+  ],
 });

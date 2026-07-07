@@ -53,7 +53,8 @@ export function orbitArcFraction(t: number): number {
   const total = lens[ARC_SAMPLES];
   const ft = Math.min(1, Math.max(0, t)) * ARC_SAMPLES;
   const i = Math.floor(ft);
-  const partial = i >= ARC_SAMPLES ? lens[ARC_SAMPLES] : lens[i] + (lens[i + 1] - lens[i]) * (ft - i);
+  const partial =
+    i >= ARC_SAMPLES ? lens[ARC_SAMPLES] : lens[i] + (lens[i + 1] - lens[i]) * (ft - i);
   return partial / total;
 }
 
@@ -221,7 +222,10 @@ export function fitOrbitMultilineLayout(
 
   const size = min;
   const measure = (line: string) => measureLine(line, size);
-  let lines = maxLines >= 2 ? wrapOrbitTwoLines(trimmed, measure, budget) : wrapOrbitLines(trimmed, measure, budget);
+  let lines =
+    maxLines >= 2
+      ? wrapOrbitTwoLines(trimmed, measure, budget)
+      : wrapOrbitLines(trimmed, measure, budget);
   if (lines.length > maxLines) {
     const tail = lines.slice(maxLines - 1).join(' ');
     lines = [...lines.slice(0, maxLines - 1), truncateOrbitText(tail, 48)];

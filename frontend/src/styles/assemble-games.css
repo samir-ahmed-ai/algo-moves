@@ -5,43 +5,78 @@
 /* ------------------------------- motion ---------------------------------- */
 
 @keyframes asmSpring {
-  0% { transform: scale(1); }
-  40% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 .asm-spring {
   animation: asmSpring 320ms cubic-bezier(0.2, 1.4, 0.4, 1);
 }
 
 @keyframes asmShake {
-  0%, 100% { transform: translateX(0); }
-  15%, 45%, 75% { transform: translateX(-6px); }
-  30%, 60%, 90% { transform: translateX(6px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  15%,
+  45%,
+  75% {
+    transform: translateX(-6px);
+  }
+  30%,
+  60%,
+  90% {
+    transform: translateX(6px);
+  }
 }
 .asm-shake {
   animation: asmShake 250ms ease-in-out;
 }
 
 @keyframes asmPop {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 .asm-pop {
   animation: asmPop 120ms ease-out;
 }
 
 @keyframes asmSheetIn {
-  from { transform: translateY(24px); opacity: 0; }
-  to { transform: none; opacity: 1; }
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
 }
 .asm-sheet-in {
   animation: asmSheetIn 280ms cubic-bezier(0.2, 1.4, 0.4, 1);
 }
 
 @keyframes asmStamp {
-  from { transform: rotate(-8deg) scale(1.3); opacity: 0; }
-  to { transform: none; opacity: 1; }
+  from {
+    transform: rotate(-8deg) scale(1.3);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
 }
 .asm-stamp {
   animation: asmStamp 300ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
@@ -49,13 +84,17 @@
 
 /* good/bad flash grammar — flares then settles back to identity colors */
 @keyframes asmFlashGood {
-  from { background: var(--good-bg); }
+  from {
+    background: var(--good-bg);
+  }
 }
 .asm-flash-good {
   animation: asmFlashGood 300ms ease-out;
 }
 @keyframes asmFlashBad {
-  from { background: var(--bad-bg); }
+  from {
+    background: var(--bad-bg);
+  }
 }
 .asm-flash-bad {
   animation: asmFlashBad 400ms ease-out;
@@ -64,8 +103,12 @@
 /* win ritual: top-to-bottom seam cascade over the finished program.
  * Apply per block with inline animation-delay = index * 40-60ms. */
 @keyframes asmSeam {
-  0% { box-shadow: inset 0 0 0 999px color-mix(in srgb, var(--good) 22%, transparent); }
-  100% { box-shadow: inset 0 0 0 999px transparent; }
+  0% {
+    box-shadow: inset 0 0 0 999px color-mix(in srgb, var(--good) 22%, transparent);
+  }
+  100% {
+    box-shadow: inset 0 0 0 999px transparent;
+  }
 }
 .asm-seam {
   animation: asmSeam 500ms ease-out both;
@@ -74,8 +117,14 @@
 /* ------------------------------ confetti --------------------------------- */
 
 @keyframes asmConfettiFall {
-  0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
-  100% { transform: translateY(140px) rotate(280deg); opacity: 0; }
+  0% {
+    transform: translateY(-10px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(140px) rotate(280deg);
+    opacity: 0;
+  }
 }
 .asm-confetti {
   position: absolute;
@@ -110,6 +159,10 @@
   }
 }
 @keyframes asmReducedFade {
-  from { opacity: 0.4; }
-  to { opacity: 1; }
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
+  }
 }

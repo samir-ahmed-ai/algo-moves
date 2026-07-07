@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -32,22 +38,23 @@ function fmtPt(p: Point): string {
   return `(${p[0]},${p[1]})`;
 }
 
-function record({ pairs, k }: KClosestInput): Frame<KClosestState>[] {  const order: Point[] = pairs.map((p) => [p[0], p[1]] as Point);
+function record({ pairs, k }: KClosestInput): Frame<KClosestState>[] {
+  const order: Point[] = pairs.map((p) => [p[0], p[1]] as Point);
   const dist = order.map(distSq);
   const n = order.length;
   const kClamped = Math.min(k, n);
 
   const { emit, frames } = createRecorder<KClosestState>(() => ({
-        k: kClamped,
-        order: order.map((p) => [p[0], p[1]] as Point),
-        dist: dist.slice(),
-        sortedUpto: 0,
-        i: null,
-        j: null,
-        best: null,
-        resultUpto: 0,
-        done: false
-      }));
+    k: kClamped,
+    order: order.map((p) => [p[0], p[1]] as Point),
+    dist: dist.slice(),
+    sortedUpto: 0,
+    i: null,
+    j: null,
+    best: null,
+    resultUpto: 0,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -72,7 +79,9 @@ function record({ pairs, k }: KClosestInput): Frame<KClosestState>[] {  const or
         'COMPARE',
         `${dist[j]} vs ${dist[best]}`,
         `Compare ${fmtPt(order[j])} (dist² = ${dist[j]}) against the current closest ${fmtPt(order[best])} (dist² = ${dist[best]}). ${
-          dist[j] < dist[best] ? `${dist[j]} < ${dist[best]}, so this one is nearer.` : `${dist[j]} ≥ ${dist[best]}, so keep the current closest.`
+          dist[j] < dist[best]
+            ? `${dist[j]} < ${dist[best]}, so this one is nearer.`
+            : `${dist[j]} ≥ ${dist[best]}, so keep the current closest.`
         }`,
         { sortedUpto: i, i, j, best },
       );
@@ -124,9 +133,12 @@ function View({ frame }: PluginViewProps<KClosestState>) {
   const s = frame.state;
   const labels = s.order.map((p) => `(${p[0]},${p[1]})`);
   const pointers: ArrayPointer[] = [];
-  if (s.i !== null && s.i < s.order.length) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
-  if (s.j !== null && s.j < s.order.length) pointers.push({ i: s.j, label: 'j', tone: 'warn', place: 'above' });
-  if (s.best !== null && s.best < s.order.length) pointers.push({ i: s.best, label: 'min', tone: 'good', place: 'below' });
+  if (s.i !== null && s.i < s.order.length)
+    pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
+  if (s.j !== null && s.j < s.order.length)
+    pointers.push({ i: s.j, label: 'j', tone: 'warn', place: 'above' });
+  if (s.best !== null && s.best < s.order.length)
+    pointers.push({ i: s.best, label: 'min', tone: 'good', place: 'below' });
 
   const tone = (i: number) => {
     if (s.done) return i < s.resultUpto ? 'found' : 'dead';
@@ -158,7 +170,9 @@ function Inspector({ frame }: InspectorProps<KClosestState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const at = (idx: number | null) =>
-    idx !== null && idx >= 0 && idx < s.order.length ? `(${s.order[idx][0]},${s.order[idx][1]})` : '—';
+    idx !== null && idx >= 0 && idx < s.order.length
+      ? `(${s.order[idx][0]},${s.order[idx][1]})`
+      : '—';
   const distAt = (idx: number | null) =>
     idx !== null && idx >= 0 && idx < s.dist.length ? s.dist[idx] : '—';
   return (
@@ -173,7 +187,14 @@ function Inspector({ frame }: InspectorProps<KClosestState>) {
       <InspectorRow k="sorted prefix" v={s.sortedUpto} />
       <InspectorRow
         k="result"
-        v={s.done ? `[${s.order.slice(0, s.resultUpto).map((p) => `(${p[0]},${p[1]})`).join(', ')}]` : '…'}
+        v={
+          s.done
+            ? `[${s.order
+                .slice(0, s.resultUpto)
+                .map((p) => `(${p[0]},${p[1]})`)
+                .join(', ')}]`
+            : '…'
+        }
       />
     </VarGrid>
   );
@@ -182,132 +203,131 @@ function Inspector({ frame }: InspectorProps<KClosestState>) {
 export const manifestId = 'prep-hash-maps-find-k-closest-to-center';
 export const title = 'find K closest to center';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"find K closest to center\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "find K closest to center"?',
     choices: [
       {
-        label: "Sort by distance to origin — fits this problem",
-        correct: true
+        label: 'Sort by distance to origin — fits this problem',
+        correct: true,
       },
       {
-        label: "Hash map chain reconstruction — different approach"
+        label: 'Hash map chain reconstruction — different approach',
       },
       {
-        label: "Two-pass frequency map — different approach"
+        label: 'Two-pass frequency map — different approach',
       },
       {
-        label: "Frequency map — different approach"
-      }
+        label: 'Frequency map — different approach',
+      },
     ],
-    explain: "Sort points by squared distance, take the first k"
+    explain: 'Sort points by squared distance, take the first k',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (find K closest to center), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (find K closest to center), what strategy is established?',
     choices: [
       {
-        label: "Sort points by squared distance, take — described in INIT caption",
-        correct: true
+        label: 'Sort points by squared distance, take — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Find the  points closest to the origin. Distance to (0,0) is sqrt(x²+y²), but ordering only needs the squared distance x²+y² — so we skip the sqrt and sort by that, then take the first ."
+    explain:
+      'Find the  points closest to the origin. Distance to (0,0) is sqrt(x²+y²), but ordering only needs the squared distance x²+y² — so we skip the sqrt and sort by that, then take the first .',
   },
   {
-    id: "key-step",
-    prompt: "On the \"SWAP\" step (place ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "SWAP" step (place ), what happens?',
     choices: [
       {
-        label: "Move the closest remaining point (dist² — this move caption",
-        correct: true
+        label: 'Move the closest remaining point (dist² — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Move the closest remaining point  (dist² = ) into position . Positions 0… are now in sorted order."
+    explain:
+      'Move the closest remaining point  (dist² = ) into position . Positions 0… are now in sorted order.',
   },
   {
-    id: "state",
-    prompt: "What does the `order` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `order` field track in the visualization state?',
     choices: [
       {
-        label: "current arrangement of points (sorted — updated each frame",
-        correct: true
+        label: 'current arrangement of points (sorted — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `order` in sync: current arrangement of points (sorted view as it forms)"
+    explain:
+      'The recorder keeps `order` in sync: current arrangement of points (sorted view as it forms)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"find K closest to center\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "find K closest to center"?',
     choices: [
       {
-        label: "O(n log n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n log n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(t log t) time, O(t) space — wrong order of growth"
+        label: 'O(t log t) time, O(t) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
+        label: 'O(log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m+n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(m+n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n log n). O(n). compare x*x+y*y (no sqrt); slice [:k]"
+    explain: 'O(n log n). O(n). compare x*x+y*y (no sqrt); slice [:k]',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "The points are fully sorted — final DONE caption",
-        correct: true
+        label: 'The points are fully sorted — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "The points are fully sorted by squared distance. Take the first  — these are the  points closest to the origin."
-  }
+    explain:
+      'The points are fully sorted by squared distance. Take the first  — these are the  points closest to the origin.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -315,12 +335,27 @@ export const simulator: ProblemSimulator = {
     {
       id: 'kc1',
       label: '[(1,3),(-2,2),(5,8),(0,1)] k=2',
-      value: { pairs: [[1, 3], [-2, 2], [5, 8], [0, 1]], k: 2 },
+      value: {
+        pairs: [
+          [1, 3],
+          [-2, 2],
+          [5, 8],
+          [0, 1],
+        ],
+        k: 2,
+      },
     },
     {
       id: 'kc2',
       label: '[(3,3),(5,-1),(-2,4)] k=2',
-      value: { pairs: [[3, 3], [5, -1], [-2, 4]], k: 2 },
+      value: {
+        pairs: [
+          [3, 3],
+          [5, -1],
+          [-2, 4],
+        ],
+        k: 2,
+      },
     },
   ] satisfies SampleInput<KClosestInput>[],
   record,

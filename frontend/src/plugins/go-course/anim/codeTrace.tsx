@@ -2,7 +2,14 @@ import { type ComponentType } from 'react';
 import { Flag, Sparkles } from 'lucide-react';
 import type { Frame, InspectorProps, PluginViewProps } from '../../../core/types';
 import { cn } from '@/lib/utils/cn';
-import { VizStage, RailSection, InspectorRow, VarGrid, VizEmpty, vizText } from '../../_shared/vizKit';
+import {
+  VizStage,
+  RailSection,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  vizText,
+} from '../../_shared/vizKit';
 import type { GoConcept, GoStateChip } from '../types';
 
 /** Resolved per-step state the View renders. */
@@ -26,7 +33,11 @@ export function recordTrace(concept: GoConcept): Frame<TraceState>[] {
   const recapCaption = concept.memorize || concept.summary || concept.title;
 
   frames.push({
-    move: { type: 'START', note: `${concept.title} — press play to walk through`, caption: introCaption },
+    move: {
+      type: 'START',
+      note: `${concept.title} — press play to walk through`,
+      caption: introCaption,
+    },
     state: { ...base, step: -1, title: 'Start', caption: introCaption, chips: [] },
   });
 
@@ -48,13 +59,21 @@ export function recordTrace(concept: GoConcept): Frame<TraceState>[] {
 }
 
 function StepBadge({ s }: { s: TraceState }) {
-  const label = s.step < 0 ? 'Intro' : s.step >= s.total ? 'Recall' : `Step ${s.step + 1} / ${s.total}`;
+  const label =
+    s.step < 0 ? 'Intro' : s.step >= s.total ? 'Recall' : `Step ${s.step + 1} / ${s.total}`;
   return (
     <span
-      className={cn('inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 font-medium', vizText.sm)}
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 font-medium',
+        vizText.sm,
+      )}
       style={{ background: 'var(--accent-bg)', color: 'var(--accent)' }}
     >
-      {s.step < 0 ? <Flag className="h-3.5 w-3.5" /> : s.step >= s.total ? <Sparkles className="h-3.5 w-3.5" /> : null}
+      {s.step < 0 ? (
+        <Flag className="h-3.5 w-3.5" />
+      ) : s.step >= s.total ? (
+        <Sparkles className="h-3.5 w-3.5" />
+      ) : null}
       {label}
     </span>
   );
@@ -79,7 +98,10 @@ export function TraceView({ frame }: PluginViewProps<TraceState>) {
                 {s.chips.map((c, i) => (
                   <div
                     key={`${c.k}-${i}`}
-                    className={cn('flex items-center justify-between gap-2 rounded-md border border-edge bg-panel2/50 px-1.5 py-1', vizText.sm)}
+                    className={cn(
+                      'flex items-center justify-between gap-2 rounded-md border border-edge bg-panel2/50 px-1.5 py-1',
+                      vizText.sm,
+                    )}
                   >
                     <span className="truncate text-ink3">{c.k}</span>
                     <span className={cn('shrink-0 font-mono text-ink', vizText.mono)}>{c.v}</span>
@@ -128,13 +150,22 @@ export function makeGoInspector(concept: GoConcept): ComponentType<InspectorProp
         {concept.memorize && (
           <details className="mt-2 rounded-md border border-edge bg-panel2/40 px-2 py-1.5">
             <summary className={cn('cursor-pointer text-ink3', vizText.xs)}>Memorize</summary>
-            <p className={cn('nodrag mt-1.5 font-mono leading-relaxed text-ink2', vizText.xs)}>{concept.memorize}</p>
+            <p className={cn('nodrag mt-1.5 font-mono leading-relaxed text-ink2', vizText.xs)}>
+              {concept.memorize}
+            </p>
           </details>
         )}
         {concept.keyPoints.length > 0 && (
           <details className="mt-1.5 rounded-md border border-edge bg-panel2/40 px-2 py-1.5">
-            <summary className={cn('cursor-pointer text-ink3', vizText.xs)}>Senior takeaways</summary>
-            <ul className={cn('nodrag mt-1.5 list-disc space-y-1 pl-4 leading-relaxed text-ink2', vizText.xs)}>
+            <summary className={cn('cursor-pointer text-ink3', vizText.xs)}>
+              Senior takeaways
+            </summary>
+            <ul
+              className={cn(
+                'nodrag mt-1.5 list-disc space-y-1 pl-4 leading-relaxed text-ink2',
+                vizText.xs,
+              )}
+            >
               {concept.keyPoints.map((p, i) => (
                 <li key={i}>{p}</li>
               ))}
@@ -143,9 +174,15 @@ export function makeGoInspector(concept: GoConcept): ComponentType<InspectorProp
         )}
         {concept.design && (
           <details className="mt-1.5 rounded-md border border-edge bg-panel2/40 px-2 py-1.5">
-            <summary className={cn('cursor-pointer text-ink3', vizText.xs)}>Design question &amp; model answer</summary>
-            <p className={cn('nodrag mt-1.5 font-medium leading-relaxed text-ink', vizText.xs)}>{concept.design.prompt}</p>
-            <p className={cn('nodrag mt-1 leading-relaxed text-ink2', vizText.xs)}>{concept.design.answer}</p>
+            <summary className={cn('cursor-pointer text-ink3', vizText.xs)}>
+              Design question &amp; model answer
+            </summary>
+            <p className={cn('nodrag mt-1.5 font-medium leading-relaxed text-ink', vizText.xs)}>
+              {concept.design.prompt}
+            </p>
+            <p className={cn('nodrag mt-1 leading-relaxed text-ink2', vizText.xs)}>
+              {concept.design.answer}
+            </p>
           </details>
         )}
       </VarGrid>

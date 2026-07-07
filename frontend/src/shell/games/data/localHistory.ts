@@ -40,7 +40,11 @@ function isLocalMatchRecordArray(value: unknown): value is LocalMatchRecord[] {
 }
 
 function readAll(): LocalMatchRecord[] {
-  return readStorageJson<LocalMatchRecord[]>(STORAGE_KEYS.GAMES_LOCAL_HISTORY, [], isLocalMatchRecordArray);
+  return readStorageJson<LocalMatchRecord[]>(
+    STORAGE_KEYS.GAMES_LOCAL_HISTORY,
+    [],
+    isLocalMatchRecordArray,
+  );
 }
 
 export function saveLocalMatch(record: LocalMatchRecord): void {

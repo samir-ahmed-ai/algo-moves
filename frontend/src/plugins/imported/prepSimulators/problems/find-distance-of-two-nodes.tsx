@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -34,20 +40,21 @@ const right = (i: number) => 2 * i + 2;
 const exists = (tree: (number | null)[], i: number) => i >= 0 && i < tree.length && tree[i] != null;
 const val = (tree: (number | null)[], i: number) => (exists(tree, i) ? tree[i] : '·');
 
-function record({ tree, p, q }: DistInput): Frame<DistState>[] {  const visited: number[] = [];
+function record({ tree, p, q }: DistInput): Frame<DistState>[] {
+  const visited: number[] = [];
 
   const { emit, frames } = createRecorder<DistState>(() => ({
-        tree,
-        p,
-        q,
-        phase: 'INIT',
-        active: null,
-        visited: visited.slice(),
-        lca: null,
-        depthP: null,
-        depthQ: null,
-        answer: null
-      }));
+    tree,
+    p,
+    q,
+    phase: 'INIT',
+    active: null,
+    visited: visited.slice(),
+    lca: null,
+    depthP: null,
+    depthQ: null,
+    answer: null,
+  }));
 
   emit(
     'INIT',
@@ -187,8 +194,7 @@ function View({ frame }: PluginViewProps<DistState>) {
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
-        targets ={' '}
-        <span className="font-mono text-ink">{val(s.tree, s.p)}</span>
+        targets = <span className="font-mono text-ink">{val(s.tree, s.p)}</span>
         {' & '}
         <span className="font-mono text-ink">{val(s.tree, s.q)}</span>
         {s.lca !== null && (
@@ -201,9 +207,7 @@ function View({ frame }: PluginViewProps<DistState>) {
       <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.active} />
       <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
         depthP = {s.depthP ?? '·'} {' · '} depthQ = {s.depthQ ?? '·'}
-        {s.answer !== null && (
-          <span className="ml-2 text-good">→ distance = {s.answer}</span>
-        )}
+        {s.answer !== null && <span className="ml-2 text-good">→ distance = {s.answer}</span>}
       </div>
     </div>
   );
@@ -229,112 +233,108 @@ function Inspector({ frame }: InspectorProps<DistState>) {
 export const manifestId = 'prep-trees-find-distance-of-two-nodes';
 export const title = 'Find distance of two nodes';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Find distance of two nodes\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Find distance of two nodes"?',
     choices: [
       {
-        label: "LCA + heights — fits this problem",
-        correct: true
+        label: 'LCA + heights — fits this problem',
+        correct: true,
       },
       {
-        label: "BFS + Direction Toggle — different approach"
+        label: 'BFS + Direction Toggle — different approach',
       },
       {
-        label: "Inorder DFS (find two inversions) — different approach"
+        label: 'Inorder DFS (find two inversions) — different approach',
       },
       {
-        label: "Post-order height — different approach"
-      }
+        label: 'Post-order height — different approach',
+      },
     ],
-    explain: "Distance = depth(p)+depth(q) measured down from their LCA"
+    explain: 'Distance = depth(p)+depth(q) measured down from their LCA',
   },
   {
-    id: "key-step",
-    prompt: "On the \"LCA\" step (pass up ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "LCA" step (pass up ), what happens?',
     choices: [
       {
-        label: "Only one side found a target — this move caption",
-        correct: true
+        label: 'Only one side found a target — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Only one side found a target under node , so we pass that candidate () up unchanged."
+    explain: 'Only one side found a target under node , so we pass that candidate () up unchanged.',
   },
   {
-    id: "state",
-    prompt: "What does the `active` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `active` field track in the visualization state?',
     choices: [
       {
-        label: "node currently under inspection (ring) — updated each frame",
-        correct: true
+        label: 'node currently under inspection (ring) — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `active` in sync: node currently under inspection (ring)"
+    explain: 'The recorder keeps `active` in sync: node currently under inspection (ring)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Find distance of two nodes\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Find distance of two nodes"?',
     choices: [
       {
-        label: "O(n) time, O(h) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(h) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(h) time, O(1) space — wrong order of growth"
+        label: 'O(h) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(log n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(h). find LCA; sum depth from lca to each node"
+    explain: 'O(n). O(h). find LCA; sum depth from lca to each node',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Distance = depth(LCA→) + depth(LCA→) = — final DONE caption",
-        correct: true
+        label: 'Distance = depth(LCA→) + depth(LCA→) = — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Distance = depth(LCA→) + depth(LCA→) =  +  = . That is the number of edges on the path between the two nodes."
-  }
+    explain:
+      'Distance = depth(LCA→) + depth(LCA→) =  +  = . That is the number of edges on the path between the two nodes.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

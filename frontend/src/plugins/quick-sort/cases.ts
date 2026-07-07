@@ -10,7 +10,8 @@ export const goodCases: WorkedCase<SortInput>[] = [
     returns: 'sorted',
     tone: 'ok',
     question: 'After partitioning on pivot 4, where does the pivot end up?',
-    answer: 'Elements ≤ pivot move left, greater move right; the pivot index is its sorted position — smaller subarrays recurse independently.',
+    answer:
+      'Elements ≤ pivot move left, greater move right; the pivot index is its sorted position — smaller subarrays recurse independently.',
   },
 ];
 
@@ -23,7 +24,8 @@ export const badCases: WorkedCase<SortInput>[] = [
     returns: 'sorted but Θ(n²) if pivot is always max',
     tone: 'bad',
     question: 'Why can quicksort degrade on sorted input?',
-    answer: 'Choosing the last element as pivot on sorted data yields empty left partitions — recursion depth becomes n instead of log n.',
+    answer:
+      'Choosing the last element as pivot on sorted data yields empty left partitions — recursion depth becomes n instead of log n.',
   },
 ];
 

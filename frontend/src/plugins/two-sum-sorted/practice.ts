@@ -11,7 +11,8 @@ export const quiz: QuizQuestion[] = [
       { label: 'Both inward — breaks discard logic' },
       { label: 'Restart middle — not two pointers' },
     ],
-    explain: 'The sum is too small. Every pair using the current low value was too small, so advance the low pointer to a larger element.',
+    explain:
+      'The sum is too small. Every pair using the current low value was too small, so advance the low pointer to a larger element.',
   },
   {
     id: 'precondition',
@@ -22,16 +23,33 @@ export const quiz: QuizQuestion[] = [
       { label: 'Deduplicate only not the reason — sorted order enables two pointers' },
       { label: 'Unsorted OK — discard logic fails' },
     ],
-    explain: 'The discard logic assumes every element left of the low pointer is ≤ its value and every element right of the high pointer is ≥ its value. Without sorted order those inferences fail.',
+    explain:
+      'The discard logic assumes every element left of the low pointer is ≤ its value and every element right of the high pointer is ≥ its value. Without sorted order those inferences fail.',
   },
 ];
 
 export const codePieces: CodePiece[] = [
-  { id: 'sig', code: 'func twoSum(nums []int, target int) []int {', role: 'return indices of the two numbers that sum to target' },
-  { id: 'init', code: '\tleft, right := 0, len(nums)-1', role: 'two pointers at the ends of the sorted array' },
+  {
+    id: 'sig',
+    code: 'func twoSum(nums []int, target int) []int {',
+    role: 'return indices of the two numbers that sum to target',
+  },
+  {
+    id: 'init',
+    code: '\tleft, right := 0, len(nums)-1',
+    role: 'two pointers at the ends of the sorted array',
+  },
   { id: 'loop', code: '\tfor left < right {', role: 'stop when pointers cross — no pair left' },
   { id: 'sum', code: '\t\tsum := nums[left] + nums[right]', role: 'current candidate sum' },
-  { id: 'hit', code: '\t\tif sum == target {\n\t\t\treturn []int{left, right}\n\t\t}', role: 'found the pair' },
-  { id: 'low', code: '\t\tif sum < target {\n\t\t\tleft++\n\t\t} else {\n\t\t\tright--\n\t\t}', role: 'too small → move left; too big → move right' },
+  {
+    id: 'hit',
+    code: '\t\tif sum == target {\n\t\t\treturn []int{left, right}\n\t\t}',
+    role: 'found the pair',
+  },
+  {
+    id: 'low',
+    code: '\t\tif sum < target {\n\t\t\tleft++\n\t\t} else {\n\t\t\tright--\n\t\t}',
+    role: 'too small → move left; too big → move right',
+  },
   { id: 'end', code: '\t}\n\treturn nil\n}', role: 'no valid pair' },
 ];

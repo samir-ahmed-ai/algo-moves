@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { resolveWorkspaceKeyboardAction, type WorkspaceKeyboardSnapshot } from './useWorkspaceKeyboard';
+import {
+  resolveWorkspaceKeyboardAction,
+  type WorkspaceKeyboardSnapshot,
+} from './useWorkspaceKeyboard';
 
 describe('resolveWorkspaceKeyboardAction', () => {
   function action(overrides: Partial<WorkspaceKeyboardSnapshot> = {}) {
@@ -18,7 +21,9 @@ describe('resolveWorkspaceKeyboardAction', () => {
   });
 
   it('closes the topmost overlay before presentation mode', () => {
-    expect(action({ key: 'Escape', paletteOpen: true, helpOpen: true, present: true })).toBe('close-palette');
+    expect(action({ key: 'Escape', paletteOpen: true, helpOpen: true, present: true })).toBe(
+      'close-palette',
+    );
     expect(action({ key: 'Escape', helpOpen: true, present: true })).toBe('close-help');
     expect(action({ key: 'Escape', present: true })).toBe('exit-presentation');
   });

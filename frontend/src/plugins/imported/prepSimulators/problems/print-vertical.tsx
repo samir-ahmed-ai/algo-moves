@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -28,7 +34,8 @@ interface VerticalState {
   done: boolean;
 }
 
-function record({ tree }: VerticalInput): Frame<VerticalState>[] {  const cols = new Map<number, number[]>();
+function record({ tree }: VerticalInput): Frame<VerticalState>[] {
+  const cols = new Map<number, number[]>();
   const visited: number[] = [];
   let minC = 0;
   let maxC = 0;
@@ -38,20 +45,26 @@ function record({ tree }: VerticalInput): Frame<VerticalState>[] {  const cols =
     [...cols.entries()].sort((a, b) => a[0] - b[0]).map(([c, v]) => [c, v.slice()]);
 
   const { emit, frames } = createRecorder<VerticalState>(() => ({
-        tree,
-        queue: queue.map((q) => ({ ...q })),
-        visited: visited.slice(),
-        current: null,
-        currentCol: null,
-        cols: colsSorted(),
-        minC,
-        maxC,
-        out: null,
-        done: false
-      }));
+    tree,
+    queue: queue.map((q) => ({ ...q })),
+    visited: visited.slice(),
+    current: null,
+    currentCol: null,
+    cols: colsSorted(),
+    minC,
+    maxC,
+    out: null,
+    done: false,
+  }));
 
   if (tree.length === 0 || tree[0] == null) {
-    emit('DONE', 'empty', 'The tree is empty, so there are no vertical columns to print.', { out: [], done: true }, 'bad');
+    emit(
+      'DONE',
+      'empty',
+      'The tree is empty, so there are no vertical columns to print.',
+      { out: [], done: true },
+      'bad',
+    );
     return frames;
   }
 
@@ -145,8 +158,7 @@ function View({ frame }: PluginViewProps<VerticalState>) {
         <span className="font-mono text-ink">{s.maxC}</span>
         {s.currentCol !== null && !s.done && (
           <>
-            {' · '}current col ={' '}
-            <span className="font-mono text-ink">{s.currentCol}</span>
+            {' · '}current col = <span className="font-mono text-ink">{s.currentCol}</span>
           </>
         )}
       </div>
@@ -186,112 +198,107 @@ function Inspector({ frame }: InspectorProps<VerticalState>) {
 export const manifestId = 'prep-trees-print-vertical';
 export const title = 'Print vertical';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Print vertical\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Print vertical"?',
     choices: [
       {
-        label: "Column map BFS — fits this problem",
-        correct: true
+        label: 'Column map BFS — fits this problem',
+        correct: true,
       },
       {
-        label: "N-ary iterative pre/post-order with stack — different approach"
+        label: 'N-ary iterative pre/post-order with stack — different approach',
       },
       {
-        label: "LCA + level distance BFS — different approach"
+        label: 'LCA + level distance BFS — different approach',
       },
       {
-        label: "Same tree check — different approach"
-      }
+        label: 'Same tree check — different approach',
+      },
     ],
-    explain: "Track a column offset: root=0, left is -1, right is +1"
+    explain: 'Track a column offset: root=0, left is -1, right is +1',
   },
   {
-    id: "key-step",
-    prompt: "On the \"PUSH_LEFT\" step (enqueue  @ col ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "PUSH_LEFT" step (enqueue  @ col ), what happens?',
     choices: [
       {
-        label: "Node has a left child ; — this move caption",
-        correct: true
+        label: 'Node has a left child ; — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Node  has a left child ; going left means column  − 1 = . Enqueue it."
+    explain: 'Node  has a left child ; going left means column  − 1 = . Enqueue it.',
   },
   {
-    id: "state",
-    prompt: "What does the `queue` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `queue` field track in the visualization state?',
     choices: [
       {
-        label: "BFS frontier still to process — updated each frame",
-        correct: true
+        label: 'BFS frontier still to process — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `queue` in sync: BFS frontier still to process"
+    explain: 'The recorder keeps `queue` in sync: BFS frontier still to process',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Print vertical\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Print vertical"?',
     choices: [
       {
-        label: "O(n log n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n log n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n) time, O(1) space — wrong order of growth"
+        label: 'O(n) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n³) time, O(n) space — wrong order of growth"
+        label: 'O(n³) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n log n). O(n). BFS carrying col; map col->vals; emit min..max columns"
+    explain: 'O(n log n). O(n). BFS carrying col; map col->vals; emit min..max columns',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "BFS is complete. Reading columns — final DONE caption",
-        correct: true
+        label: 'BFS is complete. Reading columns — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "BFS is complete. Reading columns from  to  gives  vertical groups: ${out.map((g) => "
-  }
+    explain: 'BFS is complete. Reading columns from  to  gives  vertical groups: ${out.map((g) => ',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

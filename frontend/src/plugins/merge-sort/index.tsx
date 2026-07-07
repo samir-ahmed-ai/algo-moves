@@ -1,4 +1,9 @@
-import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
+import {
+  definePlugin,
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+} from '../../core/types';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, badCases, intro } from './cases';
@@ -181,9 +186,7 @@ function View({ frame }: PluginViewProps<SortState>) {
   const inSpan = (i: number): boolean => {
     const l = s.leftRun;
     const r = s.rightRun;
-    return (
-      (l !== null && i >= l[0] && i <= l[1]) || (r !== null && i >= r[0] && i <= r[1])
-    );
+    return (l !== null && i >= l[0] && i <= l[1]) || (r !== null && i >= r[0] && i <= r[1]);
   };
   const tone = (i: number): BarTone => {
     if (done) return 'sorted';
@@ -197,16 +200,21 @@ function View({ frame }: PluginViewProps<SortState>) {
       ? `[${s.leftRun[0]}..${s.leftRun[1]}]+[${s.rightRun[0]}..${s.rightRun[1]}]`
       : '—';
   return (
-    <VizStage rail={<>
-      <RailGroup label="ops">
-        <RailStat k="cmps" v={s.comparisons} />
-        <RailStat k="writes" v={s.writes} tone="accent" />
-      </RailGroup>
-      <RailGroup label="merge">
-        <RailStat k="span" v={span} />
-      </RailGroup>
-      {done && <RailResult label="result" value="sorted" tone="good" />}
-    </>} railWidth={150}>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="ops">
+            <RailStat k="cmps" v={s.comparisons} />
+            <RailStat k="writes" v={s.writes} tone="accent" />
+          </RailGroup>
+          <RailGroup label="merge">
+            <RailStat k="span" v={span} />
+          </RailGroup>
+          {done && <RailResult label="result" value="sorted" tone="good" />}
+        </>
+      }
+      railWidth={150}
+    >
       <ArrayBars values={s.values} tone={tone} height={242} />
     </VizStage>
   );
@@ -295,14 +303,26 @@ function mergeSort(nums: number[]): void {
 `;
 
 const inputs = [
-    { id: 'mix', label: '[5, 2, 8, 1, 9, 3]', value: { values: [5, 2, 8, 1, 9, 3] } },
-    { id: 'rev', label: '[8, 7, 6, 5, 4, 3, 2] · worst', value: { values: [8, 7, 6, 5, 4, 3, 2] } },
-    { id: 'dup', label: '[4, 2, 4, 1, 3, 2, 4, 1] · dups', value: { values: [4, 2, 4, 1, 3, 2, 4, 1] } },
-  ];
+  { id: 'mix', label: '[5, 2, 8, 1, 9, 3]', value: { values: [5, 2, 8, 1, 9, 3] } },
+  { id: 'rev', label: '[8, 7, 6, 5, 4, 3, 2] · worst', value: { values: [8, 7, 6, 5, 4, 3, 2] } },
+  {
+    id: 'dup',
+    label: '[4, 2, 4, 1, 3, 2, 4, 1] · dups',
+    value: { values: [4, 2, 4, 1, 3, 2, 4, 1] },
+  },
+];
 const verdict = verdictAlwaysOk('sorted');
 const teaching = wireTeachingStack({
-  record, View, inputs, verdict,
-  practice: { quiz, codePieces, cases: { good: goodCases, bad: badCases, intro, goodLabel: 'merge steps' }, simulateQuestion: 'Which merge or split happens next?' },
+  record,
+  View,
+  inputs,
+  verdict,
+  practice: {
+    quiz,
+    codePieces,
+    cases: { good: goodCases, bad: badCases, intro, goodLabel: 'merge steps' },
+    simulateQuestion: 'Which merge or split happens next?',
+  },
 });
 
 export const mergeSortPlugin = definePlugin<SortInput, SortState>({
@@ -311,7 +331,8 @@ export const mergeSortPlugin = definePlugin<SortInput, SortState>({
     title: 'Merge sort',
     difficulty: 'Medium',
     tags: ['array', 'sorting'],
-    summary: 'Treat each element as a sorted run, then repeatedly merge adjacent runs by comparing their fronts and writing the smaller value back, doubling run width each pass.',
+    summary:
+      'Treat each element as a sorted run, then repeatedly merge adjacent runs by comparing their fronts and writing the smaller value back, doubling run width each pass.',
     source: 'https://en.wikipedia.org/wiki/Merge_sort',
   },
   inputs,

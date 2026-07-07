@@ -1,4 +1,7 @@
-import { NAMED_LAYOUT_PRESET_META, type NamedLayoutPreset } from '@/shell/canvas/layout/layoutPresets';
+import {
+  NAMED_LAYOUT_PRESET_META,
+  type NamedLayoutPreset,
+} from '@/shell/canvas/layout/layoutPresets';
 import type { LayoutPreset } from '@/shell/canvas';
 import type { CanvasMode } from '../core';
 import { readStorageText, writeStorageText } from '@/store/persistence';
@@ -15,7 +18,11 @@ export interface WorkflowPresetAction {
   ensurePanels?: string[];
 }
 
-function named(id: NamedLayoutPreset, mode: CanvasMode, ensurePanels?: string[]): WorkflowPresetAction {
+function named(
+  id: NamedLayoutPreset,
+  mode: CanvasMode,
+  ensurePanels?: string[],
+): WorkflowPresetAction {
   const meta = NAMED_LAYOUT_PRESET_META[id];
   return {
     id,

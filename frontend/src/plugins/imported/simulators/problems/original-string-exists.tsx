@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  RailGroup,
+  RailResult,
+  RailStat,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+} from '../../../_shared/vizKit';
 
 interface OSEInput {
   s1: string;
@@ -30,30 +43,45 @@ function record({ s1, s2 }: OSEInput): Frame<OSEState>[] {
   const grid: number[][] = Array.from({ length: m + 1 }, () => new Array<number>(n + 1).fill(-1));
   const memo = new Map<string, boolean>();
   const { emit, frames } = createRecorder<OSEState>(() => ({
-        s1: s1,
-        s2: s2,
-        grid: grid.map((r) => r.slice()),
-        cur: null,
-        diff: null,
-        answer: null,
-        done: false
-      }));
+    s1: s1,
+    s2: s2,
+    grid: grid.map((r) => r.slice()),
+    cur: null,
+    diff: null,
+    answer: null,
+    done: false,
+  }));
 
-  emit('INIT', `"${s1}" ?= "${s2}"`, `Check if An Original String Exists: could "${s1}" and "${s2}" both be run-length encodings of one original string? A memoized search tracks state (i, j, diff): position i in "${s1}", position j in "${s2}", and diff = how many more raw letters "${s1}" has consumed than "${s2}". Each cell below marks whether some state at (i, j) is reachable to a solution.`, { cur: null, diff: null, answer: null });
+  emit(
+    'INIT',
+    `"${s1}" ?= "${s2}"`,
+    `Check if An Original String Exists: could "${s1}" and "${s2}" both be run-length encodings of one original string? A memoized search tracks state (i, j, diff): position i in "${s1}", position j in "${s2}", and diff = how many more raw letters "${s1}" has consumed than "${s2}". Each cell below marks whether some state at (i, j) is reachable to a solution.`,
+    { cur: null, diff: null, answer: null },
+  );
 
   const bt = (i: number, j: number, diff: number): boolean => {
     if (i === m && j === n) {
       const ok = diff === 0;
       if (grid[i][j] !== 1) grid[i][j] = ok ? 1 : 0;
-      emit(ok ? 'GOAL' : 'STATE', `(${i},${j},${diff})`, ok
+      emit(
+        ok ? 'GOAL' : 'STATE',
+        `(${i},${j},${diff})`,
+        ok
           ? `Reached the end of both strings with diff = 0 — the lengths reconcile, so this branch succeeds.`
-          : `Reached the end of both strings but diff = ${diff} != 0, so this branch fails.`, { cur: [i, j], diff: diff, answer: null });
+          : `Reached the end of both strings but diff = ${diff} != 0, so this branch fails.`,
+        { cur: [i, j], diff: diff, answer: null },
+      );
       return ok;
     }
     const key = `${i},${j},${diff}`;
     const cached = memo.get(key);
     if (cached !== undefined) {
-      emit('MEMO', `(${i},${j},${diff})`, `State (${i}, ${j}, diff=${diff}) was already resolved to ${cached} — reuse the memo, no recompute.`, { cur: [i, j], diff: diff, answer: null });
+      emit(
+        'MEMO',
+        `(${i},${j},${diff})`,
+        `State (${i}, ${j}, diff=${diff}) was already resolved to ${cached} — reuse the memo, no recompute.`,
+        { cur: [i, j], diff: diff, answer: null },
+      );
       return cached;
     }
 
@@ -98,21 +126,33 @@ function record({ s1, s2 }: OSEInput): Frame<OSEState>[] {
             : diff < 0
               ? `diff = ${diff} < 0: "${s2}" is ahead, so consume a letter of "${s1}" at index ${i} to grow diff.`
               : `diff = 0: both sides must consume a matching literal letter here.`;
-    emit('STATE', `(${i},${j},${diff})=${res}`, `State (${i}, ${j}, diff=${diff}) resolves to ${res}. ${reason}`, { cur: [i, j], diff: diff, answer: null });
+    emit(
+      'STATE',
+      `(${i},${j},${diff})=${res}`,
+      `State (${i}, ${j}, diff=${diff}) resolves to ${res}. ${reason}`,
+      { cur: [i, j], diff: diff, answer: null },
+    );
     return res;
   };
 
   const answer = bt(0, 0, 0);
-  emit('DONE', answer ? 'true' : 'false', answer
+  emit(
+    'DONE',
+    answer ? 'true' : 'false',
+    answer
       ? `The root state (0, 0, 0) is reachable: "${s1}" and "${s2}" can encode the same original string. Answer: true.`
-      : `The root state (0, 0, 0) has no reachable solution: "${s1}" and "${s2}" cannot encode the same original string. Answer: false.`, { cur: [0, 0], diff: 0, answer: answer , done: true });
+      : `The root state (0, 0, 0) has no reachable solution: "${s1}" and "${s2}" cannot encode the same original string. Answer: false.`,
+    { cur: [0, 0], diff: 0, answer: answer, done: true },
+  );
   return frames;
 }
 
 function buildDisplay(s: OSEState): (number | string)[][] {
   const m = s.s1.length;
   const n = s.s2.length;
-  const display: (number | string)[][] = Array.from({ length: m + 2 }, () => new Array<number | string>(n + 2).fill(''));
+  const display: (number | string)[][] = Array.from({ length: m + 2 }, () =>
+    new Array<number | string>(n + 2).fill(''),
+  );
   display[0][1] = 'ε';
   for (let j = 0; j < n; j++) display[0][j + 2] = s.s2[j];
   display[1][0] = 'ε';
@@ -141,14 +181,18 @@ function View({ frame }: PluginViewProps<OSEState>) {
   const ansDone = s.answer !== null;
   const ans = ansDone ? (s.answer ? 'true' : 'false') : '—';
   return (
-    <VizStage rail={<>
-      <RailGroup label="state">
-        <RailStat k="i" v={s.cur ? s.cur[0] : '—'} />
-        <RailStat k="j" v={s.cur ? s.cur[1] : '—'} />
-        <RailStat k="diff" v={s.diff ?? '—'} tone="accent" />
-      </RailGroup>
-      {ansDone && <RailResult label="answer" value={ans} tone={s.answer ? 'good' : 'bad'} />}
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="state">
+            <RailStat k="i" v={s.cur ? s.cur[0] : '—'} />
+            <RailStat k="j" v={s.cur ? s.cur[1] : '—'} />
+            <RailStat k="diff" v={s.diff ?? '—'} tone="accent" />
+          </RailGroup>
+          {ansDone && <RailResult label="answer" value={ans} tone={s.answer ? 'good' : 'bad'} />}
+        </>
+      }
+    >
       <GridBoard grid={display} cellTone={cellTone} active={displayActive} cellSize={34} />
     </VizStage>
   );

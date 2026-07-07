@@ -1,0 +1,8 @@
+dist/
+node_modules/
+coverage/
+src/plugins/_generated/
+src/content/_generated/
+src/plugins/imported/prepManifest.ts
+src/plugins/imported/manifest.ts
+../db/content_seed.sql

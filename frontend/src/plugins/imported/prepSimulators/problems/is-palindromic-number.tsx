@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -19,21 +25,22 @@ interface PalinState {
   done: boolean;
 }
 
-function record({ n: input }: PalinInput): Frame<PalinState>[] {  const digits = Math.abs(input).toString().split('');
+function record({ n: input }: PalinInput): Frame<PalinState>[] {
+  const digits = Math.abs(input).toString().split('');
   if (input < 0) digits.unshift('-');
 
   let n = input;
   let rev = 0;
 
   const { emit, frames } = createRecorder<PalinState>(() => ({
-        original: input,
-        n,
-        rev,
-        digits,
-        frontCount: n < 0 ? digits.length : n.toString().length,
-        result: null,
-        done: false
-      }));
+    original: input,
+    n,
+    rev,
+    digits,
+    frontCount: n < 0 ? digits.length : n.toString().length,
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -148,132 +155,130 @@ function Inspector({ frame }: InspectorProps<PalinState>) {
 export const manifestId = 'prep-math-is-palindromic-number';
 export const title = 'Is palindromic number';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Is palindromic number\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Is palindromic number"?',
     choices: [
       {
-        label: "Palindrome number — fits this problem",
-        correct: true
+        label: 'Palindrome number — fits this problem',
+        correct: true,
       },
       {
-        label: "Greedy (last occurrence) — different approach"
+        label: 'Greedy (last occurrence) — different approach',
       },
       {
-        label: "Bijective base-26 encoding — different approach"
+        label: 'Bijective base-26 encoding — different approach',
       },
       {
-        label: "Digit sum — different approach"
-      }
+        label: 'Digit sum — different approach',
+      },
     ],
-    explain: "Reverse only the back half; meet in the middle"
+    explain: 'Reverse only the back half; meet in the middle',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Is palindromic number), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Is palindromic number), what strategy is established?',
     choices: [
       {
-        label: "Reverse only the back half; meet — described in INIT caption",
-        correct: true
+        label: 'Reverse only the back half; meet — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Is  a palindrome? We reverse only the back half of the number: build rev by peeling the last digit of n each step, and stop once rev catches up to n. That is O(log n) time and O(1) space — no string conversion."
+    explain:
+      'Is  a palindrome? We reverse only the back half of the number: build rev by peeling the last digit of n each step, and stop once rev catches up to n. That is O(log n) time and O(1) space — no string conversion.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"PEEL\" step (rev=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "PEEL" step (rev=), what happens?',
     choices: [
       {
-        label: "Peel the last digit off n — this move caption",
-        correct: true
+        label: 'Peel the last digit off n — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Peel the last digit  off n and push it onto rev: rev = rev·10 +  = , then drop it from n so n = . Loop continues while n () > rev ()."
+    explain:
+      'Peel the last digit  off n and push it onto rev: rev = rev·10 +  = , then drop it from n so n = . Loop continues while n () > rev ().',
   },
   {
-    id: "state",
-    prompt: "What does the `original` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `original` field track in the visualization state?',
     choices: [
       {
-        label: "the untouched input — updated each frame",
-        correct: true
+        label: 'the untouched input — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `original` in sync: the untouched input, for the digit strip"
+    explain: 'The recorder keeps `original` in sync: the untouched input, for the digit strip',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Is palindromic number\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Is palindromic number"?',
     choices: [
       {
-        label: "O(log n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(log n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(log x) time, O(1) space — wrong order of growth"
+        label: 'O(log x) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(log n). O(1). build rev while n>rev; n==rev || n==rev/10"
+    explain: 'O(log n). O(1). build rev while n>rev; n==rev || n==rev/10',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Peel the last digit off n — final DONE caption",
-        correct: true
+        label: 'Peel the last digit off n — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Peel the last digit  off n and push it onto rev: rev = rev·10 +  = , then drop it from n so n = . Loop continues while n () > rev ()."
-  }
+    explain:
+      'Peel the last digit  off n and push it onto rev: rev = rev·10 +  = , then drop it from n so n = . Loop continues while n () > rev ().',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

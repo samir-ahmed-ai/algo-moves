@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -28,23 +34,24 @@ function digitProduct(num1: string, i: number, num2: string, j: number): number 
   return (num1.charCodeAt(i) - 48) * (num2.charCodeAt(j) - 48);
 }
 
-function record({ num1, num2 }: MultiplyInput): Frame<MultiplyState>[] {  const m = num1.length;
+function record({ num1, num2 }: MultiplyInput): Frame<MultiplyState>[] {
+  const m = num1.length;
   const n = num2.length;
   const result = new Array<number>(m + n).fill(0);
 
   const { emit, frames } = createRecorder<MultiplyState>(() => ({
-        num1,
-        num2,
-        result: result.slice(),
-        i: null,
-        j: null,
-        lo: null,
-        hi: null,
-        mul: null,
-        sum: null,
-        answer: null,
-        done: false
-      }));
+    num1,
+    num2,
+    result: result.slice(),
+    i: null,
+    j: null,
+    lo: null,
+    hi: null,
+    mul: null,
+    sum: null,
+    answer: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -124,7 +131,8 @@ function View({ frame }: PluginViewProps<MultiplyState>) {
   const cells = s.result.map((d) => String(d));
   const pr: ArrayPointer[] = [];
   if (s.lo !== null) pr.push({ i: s.lo, label: 'i+j+1', tone: 'accent', place: 'below' });
-  if (s.hi !== null && s.hi !== s.lo) pr.push({ i: s.hi, label: 'i+j', tone: 'good', place: 'below' });
+  if (s.hi !== null && s.hi !== s.lo)
+    pr.push({ i: s.hi, label: 'i+j', tone: 'good', place: 'below' });
   const toneR = (i: number) => {
     if (s.done && s.answer !== null) {
       const first = s.result.length - s.answer.length;
@@ -190,132 +198,130 @@ function Inspector({ frame }: InspectorProps<MultiplyState>) {
 export const manifestId = 'prep-math-multiply-string-numbers';
 export const title = 'Multiply string numbers';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Multiply string numbers\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Multiply string numbers"?',
     choices: [
       {
-        label: "Grade-school multiplication — fits this problem",
-        correct: true
+        label: 'Grade-school multiplication — fits this problem',
+        correct: true,
       },
       {
-        label: "Base conversion repeated divmod — different approach"
+        label: 'Base conversion repeated divmod — different approach',
       },
       {
-        label: "Palindrome number — different approach"
+        label: 'Palindrome number — different approach',
       },
       {
-        label: "Primality trial division — different approach"
-      }
+        label: 'Primality trial division — different approach',
+      },
     ],
-    explain: "Each digit product a[i]*b[j] lands at result[i+j+1]"
+    explain: 'Each digit product a[i]*b[j] lands at result[i+j+1]',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Multiply string numbers), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Multiply string numbers), what strategy is established?',
     choices: [
       {
-        label: "Each digit product a[i]*b[j] lands — described in INIT caption",
-        correct: true
+        label: 'Each digit product a[i]*b[j] lands — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Grade-school multiplication of \"\" × \"\". We keep a result array of  digit slots. The product of num1[i] and num2[j] always lands at slot i+j+1, with any carry spilling into slot i+j."
+    explain:
+      'Grade-school multiplication of "" × "". We keep a result array of  digit slots. The product of num1[i] and num2[j] always lands at slot i+j+1, with any carry spilling into slot i+j.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"CARRY\" step ([]= +[]), what happens?",
+    id: 'key-step',
+    prompt: 'On the "CARRY" step ([]= +[]), what happens?',
     choices: [
       {
-        label: "Write the units digit sum%10 = — this move caption",
-        correct: true
+        label: 'Write the units digit sum%10 = — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Write the units digit sum%10 =  into slot , and carry sum/10 =  up into slot i+j= (now )."
+    explain:
+      'Write the units digit sum%10 =  into slot , and carry sum/10 =  up into slot i+j= (now ).',
   },
   {
-    id: "state",
-    prompt: "What does the `result` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `result` field track in the visualization state?',
     choices: [
       {
-        label: "digits of the running product — updated each frame",
-        correct: true
+        label: 'digits of the running product — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `result` in sync: digits of the running product, most-significant first"
+    explain:
+      'The recorder keeps `result` in sync: digits of the running product, most-significant first',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Multiply string numbers\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Multiply string numbers"?',
     choices: [
       {
-        label: "O(m*n) time, O(m+n) space — standard bounds here",
-        correct: true
+        label: 'O(m*n) time, O(m+n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(m·n) time, O(m+n) space — wrong order of growth"
+        label: 'O(m·n) time, O(m+n) space — wrong order of growth',
       },
       {
-        label: "O(reservations) time, O(reserved rows) — wrong order of growth"
+        label: 'O(reservations) time, O(reserved rows) — wrong order of growth',
       },
       {
-        label: "O(log x) time, O(1) space — wrong order of growth"
-      }
+        label: 'O(log x) time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(m*n). O(m+n). result[i+j+1]+=mul; carry to [i+j]; strip leading zeros"
+    explain: 'O(m*n). O(m+n). result[i+j+1]+=mul; carry to [i+j]; strip leading zeros',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "The grid is complete. Reading result — final DONE caption",
-        correct: true
+        label: 'The grid is complete. Reading result — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "The grid is complete. Reading result from slot  onward gives \"\". So  ×  = ."
-  }
+    explain: 'The grid is complete. Reading result from slot  onward gives "". So  ×  = .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

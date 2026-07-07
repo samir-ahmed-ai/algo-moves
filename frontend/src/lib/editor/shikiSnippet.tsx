@@ -36,7 +36,11 @@ const LANG_MAP: Record<string, BundledLanguage> = {
 function scopeToClass(scope: string): string | undefined {
   if (scope.includes('comment')) return 'hl-comment';
   if (scope.includes('string')) return 'hl-string';
-  if (scope.includes('keyword') || scope.includes('storage.type') || scope.includes('storage.modifier')) {
+  if (
+    scope.includes('keyword') ||
+    scope.includes('storage.type') ||
+    scope.includes('storage.modifier')
+  ) {
     return 'hl-keyword';
   }
   if (scope.includes('constant.language') || scope.includes('constant.numeric')) return 'hl-number';
@@ -106,11 +110,7 @@ function plainLine(line: string): ReactNode {
 }
 
 /** Domain-specific signature styling layered on top of Shiki token spans. */
-function renderSignatureLine(
-  line: string,
-  tone: FuncLineTone,
-  bodySpans: ReactNode,
-): ReactNode {
+function renderSignatureLine(line: string, tone: FuncLineTone, bodySpans: ReactNode): ReactNode {
   const trimmed = line.trimStart();
   const lead = line.slice(0, line.length - trimmed.length);
   const nameClass = tone === 'hl-line-entry' ? 'hl-sig-name' : 'hl-sig-name-func';
@@ -124,8 +124,7 @@ function renderSignatureLine(
       return (
         <>
           {lead}
-          <span className="hl-sig-kw">{kw}</span>{' '}
-          <span className={nameClass}>{funcName}</span>
+          <span className="hl-sig-kw">{kw}</span> <span className={nameClass}>{funcName}</span>
           {rest ? <span>{rest}</span> : null}
         </>
       );

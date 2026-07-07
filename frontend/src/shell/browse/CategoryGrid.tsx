@@ -1,4 +1,10 @@
-import { catalog, getCategoriesForTrack, getItemsForCategory, type BrowseCategory, type TrackId } from '../../content';
+import {
+  catalog,
+  getCategoriesForTrack,
+  getItemsForCategory,
+  type BrowseCategory,
+  type TrackId,
+} from '../../content';
 import { useProgress, statFor } from '@/store/persistence';
 import { cn } from '@/lib/utils/cn';
 import { courseIcon } from '../courseIcon';
@@ -39,7 +45,11 @@ export function CategoryGrid({
             onClick={() => onPick(cat.id)}
             className="group relative flex min-h-[120px] flex-col gap-2 overflow-hidden rounded-lg border border-edge bg-panel p-4 text-left transition-all hover:border-accent/60 hover:bg-panel2 hover:shadow-md"
           >
-            <span aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.12]" style={gridStyle} />
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 opacity-[0.12]"
+              style={gridStyle}
+            />
             <div className="relative flex items-start gap-3">
               <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-edge bg-panel2 text-accent transition-colors group-hover:border-accent/40">
                 <Icon className="h-5 w-5" strokeWidth={1.5} />
@@ -47,7 +57,9 @@ export function CategoryGrid({
               <div className="min-w-0 flex-1">
                 <h3 className={cn('font-semibold text-ink', chromeText.base)}>{cat.title}</h3>
                 {cat.summary && (
-                  <p className={cn('mt-0.5 line-clamp-2 text-ink3', chromeText.sm)}>{cat.summary}</p>
+                  <p className={cn('mt-0.5 line-clamp-2 text-ink3', chromeText.sm)}>
+                    {cat.summary}
+                  </p>
                 )}
               </div>
             </div>

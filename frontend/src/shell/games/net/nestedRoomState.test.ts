@@ -20,8 +20,10 @@ describe('nestedRoomState', () => {
 
   it('reads nested game state when present', () => {
     const shared = { game: 'would-you-rather', wyr: { phase: 'picking', round: 1 } };
-    const state = readNestedRoomState(shared, 'wyr', (v): v is { phase: string; round: number } =>
-      !!v && typeof v === 'object' && 'phase' in v,
+    const state = readNestedRoomState(
+      shared,
+      'wyr',
+      (v): v is { phase: string; round: number } => !!v && typeof v === 'object' && 'phase' in v,
     );
     expect(state).toEqual({ phase: 'picking', round: 1 });
   });

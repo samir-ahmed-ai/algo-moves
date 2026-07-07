@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -23,7 +29,8 @@ interface BstState {
   done: boolean;
 }
 
-function record({ tree }: BstInput): Frame<BstState>[] {  const status: Status[] = tree.map(() => 'idle');
+function record({ tree }: BstInput): Frame<BstState>[] {
+  const status: Status[] = tree.map(() => 'idle');
   const order: number[] = [];
   let first: number | null = null;
   let last: number | null = null;
@@ -31,15 +38,15 @@ function record({ tree }: BstInput): Frame<BstState>[] {  const status: Status[]
   const val = (i: number) => tree[i] as number;
 
   const { emit, frames } = createRecorder<BstState>(() => ({
-        tree,
-        status: status.slice(),
-        active: null,
-        order: order.slice(),
-        first,
-        last,
-        closed: false,
-        done: false
-      }));
+    tree,
+    status: status.slice(),
+    active: null,
+    order: order.slice(),
+    first,
+    last,
+    closed: false,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -116,7 +123,13 @@ function record({ tree }: BstInput): Frame<BstState>[] {  const status: Status[]
       'good',
     );
   } else {
-    emit('DONE', 'empty tree', 'The tree is empty, so there is nothing to link — return null.', { done: true }, 'bad');
+    emit(
+      'DONE',
+      'empty tree',
+      'The tree is empty, so there is nothing to link — return null.',
+      { done: true },
+      'bad',
+    );
   }
 
   return frames;
@@ -154,7 +167,9 @@ function View({ frame }: PluginViewProps<BstState>) {
       <div className={cn('mt-1 font-mono', vizText.base, s.closed ? 'text-good' : 'text-ink')}>
         {s.closed ? `⤺ ${chainStr} ⤸ (circular)` : chainStr}
       </div>
-      <div className={cn('mt-1', vizText.sm, 'text-ink3')}>sorted doubly linked list, head → tail</div>
+      <div className={cn('mt-1', vizText.sm, 'text-ink3')}>
+        sorted doubly linked list, head → tail
+      </div>
     </div>
   );
 }
@@ -178,112 +193,110 @@ function Inspector({ frame }: InspectorProps<BstState>) {
 export const manifestId = 'prep-trees-convert-binary-search-tree-to-sorted-doubly-linked-list';
 export const title = 'Convert Binary Search Tree to Sorted Doubly Linked List';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Convert Binary Search Tree to Sorted Doubly Linked List\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Convert Binary Search Tree to Sorted Doubly Linked List"?',
     choices: [
       {
-        label: "Inorder DFS (first/last tracking) — fits this problem",
-        correct: true
+        label: 'Inorder DFS (first/last tracking) — fits this problem',
+        correct: true,
       },
       {
-        label: "Post-order diameter — different approach"
+        label: 'Post-order diameter — different approach',
       },
       {
-        label: "Recursive DFS — different approach"
+        label: 'Recursive DFS — different approach',
       },
       {
-        label: "Inorder simulation — different approach"
-      }
+        label: 'Inorder simulation — different approach',
+      },
     ],
-    explain: "In-order traversal: at each node, link `last.Right = node` and `node.Left = last`"
+    explain: 'In-order traversal: at each node, link `last.Right = node` and `node.Left = last`',
   },
   {
-    id: "key-step",
-    prompt: "On the \"ADVANCE\" step (last = ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "ADVANCE" step (last = ), what happens?',
     choices: [
       {
-        label: "Mark as the most recent node — this move caption",
-        correct: true
+        label: 'Mark as the most recent node — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Mark  as the most recent node (last = ). Its right subtree will be linked next."
+    explain: 'Mark  as the most recent node (last = ). Its right subtree will be linked next.',
   },
   {
-    id: "state",
-    prompt: "What does the `status` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `status` field track in the visualization state?',
     choices: [
       {
-        label: "per-node visit status by tree — updated each frame",
-        correct: true
+        label: 'per-node visit status by tree — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `status` in sync: per-node visit status by tree index"
+    explain: 'The recorder keeps `status` in sync: per-node visit status by tree index',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Convert Binary Search Tree to Sorted Doubly Linked List\"?",
+    id: 'complexity',
+    prompt:
+      'What are the time and space complexities for "Convert Binary Search Tree to Sorted Doubly Linked List"?',
     choices: [
       {
-        label: "O(n) time, O(h) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(h) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
+        label: 'O(n²) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
+        label: 'O(n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(h). In-order traversal: at each node, link `last.Right = node` and `node.Left = last`; Track `first` (smallest) and `last` (most recent). After traversal, connect `"
+    explain:
+      'O(n). O(h). In-order traversal: at each node, link `last.Right = node` and `node.Left = last`; Track `first` (smallest) and `last` (most recent). After traversal, connect `',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Traversal done. Close the circle: — final DONE caption",
-        correct: true
+        label: 'Traversal done. Close the circle: — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Traversal done. Close the circle: first.Left = last (.Left = ) and last.Right = first (.Right = ). Return first () as the head."
-  }
+    explain:
+      'Traversal done. Close the circle: first.Left = last (.Left = ) and last.Right = first (.Right = ). Return first () as the head.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -291,7 +304,11 @@ export const simulator: ProblemSimulator = {
     // Level-order BST: 4 / (2,5) / (1,3) -> in-order 1 2 3 4 5
     { id: 'bst1', label: 'BST [4,2,5,1,3]', value: { tree: [4, 2, 5, 1, 3] } },
     // Level-order BST: 3 / (1,4) / (null,2,null,5) -> in-order 1 2 3 4 5
-    { id: 'bst2', label: 'BST [3,1,4,null,2,null,5]', value: { tree: [3, 1, 4, null, 2, null, 5] } },
+    {
+      id: 'bst2',
+      label: 'BST [3,1,4,null,2,null,5]',
+      value: { tree: [3, 1, 4, null, 2, null, 5] },
+    },
   ] satisfies SampleInput<BstInput>[],
   record,
   View,

@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { catalog, getCategoryById, getItemsForCategory, getAllCategories, briefFor, statementsFor } from './index';
+import {
+  catalog,
+  getCategoryById,
+  getItemsForCategory,
+  getAllCategories,
+  briefFor,
+  statementsFor,
+} from './index';
 
 const CATEGORY_DESCRIPTIONS = new Set(
   getAllCategories()

@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -21,7 +27,8 @@ interface BstState {
   finished: boolean;
 }
 
-function record({ nums }: BstInput): Frame<BstState>[] {  const tree: (number | null)[] = [];
+function record({ nums }: BstInput): Frame<BstState>[] {
+  const tree: (number | null)[] = [];
   const done: number[] = [];
 
   const setAt = (pos: number, val: number) => {
@@ -30,15 +37,15 @@ function record({ nums }: BstInput): Frame<BstState>[] {  const tree: (number | 
   };
 
   const { emit, frames } = createRecorder<BstState>(() => ({
-        nums,
-        tree: tree.slice(),
-        l: null,
-        r: null,
-        m: null,
-        pos: null,
-        done: done.slice(),
-        finished: false
-      }));
+    nums,
+    tree: tree.slice(),
+    l: null,
+    r: null,
+    m: null,
+    pos: null,
+    done: done.slice(),
+    finished: false,
+  }));
 
   emit(
     'INIT',
@@ -108,7 +115,9 @@ function View({ frame }: PluginViewProps<BstState>) {
         {s.m !== null && (
           <>
             {' · '}mid ={' '}
-            <span className="font-mono text-ink">nums[{s.m}] = {s.nums[s.m]}</span>
+            <span className="font-mono text-ink">
+              nums[{s.m}] = {s.nums[s.m]}
+            </span>
           </>
         )}
       </div>
@@ -117,9 +126,7 @@ function View({ frame }: PluginViewProps<BstState>) {
       ) : (
         <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={activePos} />
       )}
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        build(l, r) on {range}
-      </div>
+      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>build(l, r) on {range}</div>
     </div>
   );
 }
@@ -143,132 +150,129 @@ function Inspector({ frame }: InspectorProps<BstState>) {
 export const manifestId = 'prep-trees-convert-sorted-array-to-bst';
 export const title = 'Convert sorted array to BST';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Convert sorted array to BST\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Convert sorted array to BST"?',
     choices: [
       {
-        label: "Mid divide BST — fits this problem",
-        correct: true
+        label: 'Mid divide BST — fits this problem',
+        correct: true,
       },
       {
-        label: "BFS + Column Map — different approach"
+        label: 'BFS + Column Map — different approach',
       },
       {
-        label: "Column map BFS — different approach"
+        label: 'Column map BFS — different approach',
       },
       {
-        label: "N-ary tree diameter via top-2 heights — different approach"
-      }
+        label: 'N-ary tree diameter via top-2 heights — different approach',
+      },
     ],
-    explain: "Middle element becomes the root; recurse on the two halves"
+    explain: 'Middle element becomes the root; recurse on the two halves',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Convert sorted array to BST), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Convert sorted array to BST), what strategy is established?',
     choices: [
       {
-        label: "Middle element becomes the root; recurse — described in INIT caption",
-        correct: true
+        label: 'Middle element becomes the root; recurse — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Convert Sorted Array to BST: the array is already sorted, so the middle element is the root of a balanced BST. build(l, r) takes the mid of [l, r] as a subtree root, then recurses on the left half and the right half."
+    explain:
+      'Convert Sorted Array to BST: the array is already sorted, so the middle element is the root of a balanced BST. build(l, r) takes the mid of [l, r] as a subtree root, then recurses on the left half and the right half.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"MID\" step (m=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "MID" step (m=), what happens?',
     choices: [
       {
-        label: "In range [, ] the middle — this move caption",
-        correct: true
+        label: 'In range [, ] the middle — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "In range [, ] the middle index is m = ⌊( + ) / 2⌋ = , so nums[] =  becomes the root of this subtree. Values left of  are smaller, values right are larger."
+    explain:
+      'In range [, ] the middle index is m = ⌊( + ) / 2⌋ = , so nums[] =  becomes the root of this subtree. Values left of  are smaller, values right are larger.',
   },
   {
-    id: "state",
-    prompt: "What does the `l` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `l` field track in the visualization state?',
     choices: [
       {
-        label: "current sub-array left bound — updated each frame",
-        correct: true
+        label: 'current sub-array left bound — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `l` in sync: current sub-array left bound"
+    explain: 'The recorder keeps `l` in sync: current sub-array left bound',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Convert sorted array to BST\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Convert sorted array to BST"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n³) time, O(n) space — wrong order of growth"
+        label: 'O(n³) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(h+k) time, O(h) space — wrong order of growth"
+        label: 'O(h+k) time, O(h) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(1) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). build(l,r): m=(l+r)/2 root, build(l,m-1), build(m+1,r)"
+    explain: 'O(n). O(n). build(l,r): m=(l+r)/2 root, build(l,m-1), build(m+1,r)',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
         label: "Place as this subtree's root. Now — final DONE caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Place  as this subtree's root. Now recurse left on [, ] then right on [, ]."
-  }
+    explain: "Place  as this subtree's root. Now recurse left on [, ] then right on [, ].",
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

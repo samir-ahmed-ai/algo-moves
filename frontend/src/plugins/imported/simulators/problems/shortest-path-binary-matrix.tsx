@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  RailGroup,
+  RailResult,
+  RailStat,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+} from '../../../_shared/vizKit';
 
 interface SpbmInput {
   grid: number[][]; // 0 = open, 1 = blocked
@@ -34,7 +47,9 @@ function record({ grid }: SpbmInput): Frame<SpbmState>[] {
   const n = grid.length;
   const visited = Array.from({ length: n }, () => new Array<boolean>(n).fill(false));
   // parent[r][c] = the cell we arrived from, to reconstruct the path.
-  const parent: ([number, number] | null)[][] = Array.from({ length: n }, () => new Array<[number, number] | null>(n).fill(null));
+  const parent: ([number, number] | null)[][] = Array.from({ length: n }, () =>
+    new Array<[number, number] | null>(n).fill(null),
+  );
   const dist = Array.from({ length: n }, () => new Array<number>(n).fill(0));
 
   const { emit, frames } = createRecorder<SpbmState>(() => ({
@@ -57,13 +72,19 @@ function record({ grid }: SpbmInput): Frame<SpbmState>[] {
     answer: number | null,
     tone?: 'good' | 'bad',
   ) =>
-    emit(type, note, caption, {
-      cur,
-      dist: d,
-      path: path.map((p) => [p[0], p[1]] as [number, number]),
-      answer,
-      done: type === 'DONE',
-    }, tone);
+    emit(
+      type,
+      note,
+      caption,
+      {
+        cur,
+        dist: d,
+        path: path.map((p) => [p[0], p[1]] as [number, number]),
+        answer,
+        done: type === 'DONE',
+      },
+      tone,
+    );
 
   snap(
     'INIT',
@@ -127,7 +148,16 @@ function record({ grid }: SpbmInput): Frame<SpbmState>[] {
         path,
         d,
       );
-      snap('DONE', `${d} cells`, `Shortest clear path uses ${d} cells. The answer is ${d}.`, null, d, path, d, 'good');
+      snap(
+        'DONE',
+        `${d} cells`,
+        `Shortest clear path uses ${d} cells. The answer is ${d}.`,
+        null,
+        d,
+        path,
+        d,
+        'good',
+      );
       return frames;
     }
 
@@ -159,7 +189,16 @@ function record({ grid }: SpbmInput): Frame<SpbmState>[] {
     );
   }
 
-  snap('DONE', 'no path', `The queue is empty and the goal was never reached: the answer is -1.`, null, 0, [], -1, 'bad');
+  snap(
+    'DONE',
+    'no path',
+    `The queue is empty and the goal was never reached: the answer is -1.`,
+    null,
+    0,
+    [],
+    -1,
+    'bad',
+  );
   return frames;
 }
 
@@ -181,7 +220,11 @@ function View({ frame }: PluginViewProps<SpbmState>) {
         <RailStat k="cell" v={s.cur ? `(${s.cur[0]},${s.cur[1]})` : '—'} />
         <RailStat k="dist" v={s.dist > 0 ? s.dist : '—'} tone="accent" />
       </RailGroup>
-      <RailResult label="path len" value={answerValue} tone={answerDone ? (s.answer === -1 ? 'bad' : 'good') : 'accent'} />
+      <RailResult
+        label="path len"
+        value={answerValue}
+        tone={answerDone ? (s.answer === -1 ? 'bad' : 'good') : 'accent'}
+      />
     </>
   );
   return (

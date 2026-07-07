@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { GraphBoard } from '../../../../components/board/GraphBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 import { circleLayout } from '../../../_shared/graphLayout';
 
 interface BipInput {
@@ -86,7 +100,13 @@ function record({ adj, pos }: BipInput): Frame<BipState>[] {
             { active: v, inspect: nb, clashEdge: [v, nb] },
             'bad',
           );
-          emit('DONE', 'not bipartite', 'Result: the graph is NOT bipartite (false).', { active: null, inspect: null, clashEdge: [v, nb], bipartite, done: true }, 'bad');
+          emit(
+            'DONE',
+            'not bipartite',
+            'Result: the graph is NOT bipartite (false).',
+            { active: null, inspect: null, clashEdge: [v, nb], bipartite, done: true },
+            'bad',
+          );
           return frames;
         } else {
           emit(
@@ -101,7 +121,13 @@ function record({ adj, pos }: BipInput): Frame<BipState>[] {
   }
 
   bipartite = true;
-  emit('DONE', 'bipartite', 'Every edge joins opposite colours. The graph IS bipartite (true).', { active: null, inspect: null, clashEdge: null, bipartite, done: true }, 'good');
+  emit(
+    'DONE',
+    'bipartite',
+    'Every edge joins opposite colours. The graph IS bipartite (true).',
+    { active: null, inspect: null, clashEdge: null, bipartite, done: true },
+    'good',
+  );
   return frames;
 }
 

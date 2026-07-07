@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -22,22 +28,23 @@ interface HistogramState {
   done: boolean;
 }
 
-function record({ heights }: HistogramInput): Frame<HistogramState>[] {  const stack: number[] = [];
+function record({ heights }: HistogramInput): Frame<HistogramState>[] {
+  const stack: number[] = [];
   let best = 0;
   let bestIdx: number | null = null;
 
   const { emit, frames } = createRecorder<HistogramState>(() => ({
-        heights,
-        i: null,
-        h: null,
-        stack: stack.slice(),
-        top: null,
-        width: null,
-        area: null,
-        best,
-        bestIdx,
-        done: false
-      }));
+    heights,
+    i: null,
+    h: null,
+    stack: stack.slice(),
+    top: null,
+    width: null,
+    area: null,
+    best,
+    bestIdx,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -136,15 +143,12 @@ function View({ frame }: PluginViewProps<HistogramState>) {
   };
 
   const window: [number, number] | null =
-    s.top !== null && s.width !== null && s.width > 0
-      ? [s.i! - s.width, s.i! - 1]
-      : null;
+    s.top !== null && s.width !== null && s.width > 0 ? [s.i! - s.width, s.i! - 1] : null;
 
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
-        best ={' '}
-        <span className="font-mono text-ink">{s.best}</span>
+        best = <span className="font-mono text-ink">{s.best}</span>
         {s.area !== null && (
           <>
             {' · '}rect = <span className="font-mono text-ink">{s.area}</span>
@@ -156,9 +160,7 @@ function View({ frame }: PluginViewProps<HistogramState>) {
         stack [{s.stack.join(', ')}]
       </div>
       {s.done && (
-        <div className={cn('mt-1 font-mono text-good', vizText.base)}>
-          → max area = {s.best}
-        </div>
+        <div className={cn('mt-1 font-mono text-good', vizText.base)}>→ max area = {s.best}</div>
       )}
     </div>
   );
@@ -183,132 +185,129 @@ function Inspector({ frame }: InspectorProps<HistogramState>) {
 export const manifestId = 'prep-arrays-max-rectangle-in-histogram';
 export const title = 'Max rectangle in histogram';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Max rectangle in histogram\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Max rectangle in histogram"?',
     choices: [
       {
-        label: "Monotonic stack — fits this problem",
-        correct: true
+        label: 'Monotonic stack — fits this problem',
+        correct: true,
       },
       {
-        label: "Reverse segments — different approach"
+        label: 'Reverse segments — different approach',
       },
       {
-        label: "Boyer-Moore voting — different approach"
+        label: 'Boyer-Moore voting — different approach',
       },
       {
-        label: "Merge from end — different approach"
-      }
+        label: 'Merge from end — different approach',
+      },
     ],
-    explain: "Increasing stack of bars; a shorter bar pops and settles rectangles"
+    explain: 'Increasing stack of bars; a shorter bar pops and settles rectangles',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Max rectangle in histogram), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Max rectangle in histogram), what strategy is established?',
     choices: [
       {
-        label: "Increasing stack of bars; a shorter — described in INIT caption",
-        correct: true
+        label: 'Increasing stack of bars; a shorter — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Max Rectangle in Histogram: find the largest axis-aligned rectangle that fits under the bar heights. We keep a stack of indices whose heights are strictly increasing; a shorter bar makes the taller ones \"settle\" their widest possible rectangle."
+    explain:
+      'Max Rectangle in Histogram: find the largest axis-aligned rectangle that fits under the bar heights. We keep a stack of indices whose heights are strictly increasing; a shorter bar makes the taller ones "settle" their widest possible rectangle.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"POP\" step (area=×=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "POP" step (area=×=), what happens?',
     choices: [
       {
-        label: "Pop bar (height ). It spans — this move caption",
-        correct: true
+        label: 'Pop bar (height ). It spans — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Pop bar  (height ). It spans from just right of index  up to , a width of . Its rectangle area is  ×  = ."
+    explain:
+      'Pop bar  (height ). It spans from just right of index  up to , a width of . Its rectangle area is  ×  = .',
   },
   {
-    id: "state",
-    prompt: "What does the `i` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: "current bar (or sentinel = — updated each frame",
-        correct: true
+        label: 'current bar (or sentinel = — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `i` in sync: current bar (or sentinel = heights.length)"
+    explain: 'The recorder keeps `i` in sync: current bar (or sentinel = heights.length)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Max rectangle in histogram\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Max rectangle in histogram"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m+n) time, O(n) space — wrong order of growth"
+        label: 'O(m+n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n+m) time, O(1) space — wrong order of growth"
-      }
+        label: 'O(n+m) time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). push indices; on drop pop top, width=i-stack.top-1"
+    explain: 'O(n). O(n). push indices; on drop pop top, width=i-stack.top-1',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Every bar has settled. The largest — final DONE caption",
-        correct: true
+        label: 'Every bar has settled. The largest — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Every bar has settled. The largest rectangle has area ."
-  }
+    explain: 'Every bar has settled. The largest rectangle has area .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

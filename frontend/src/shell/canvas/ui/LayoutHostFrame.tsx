@@ -1,10 +1,7 @@
 import { useSyncExternalStore } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { cn } from '@/lib/utils/cn';
-import {
-  assignNodeToSlot,
-  LAYOUT_SLOT_COUNT,
-} from '@/shell/canvas/layout/layoutSlots';
+import { assignNodeToSlot, LAYOUT_SLOT_COUNT } from '@/shell/canvas/layout/layoutSlots';
 import {
   getLayoutDropTarget,
   subscribeLayoutDropTarget,
@@ -14,13 +11,7 @@ import { nodeIcon } from '@/shell/panels';
 import { nodeText } from './nodeui';
 
 /** In-body 3×3 slot grid — primary drop target for nesting panels inside a host. */
-export function LayoutHostFrame({
-  hostId,
-  slots,
-}: {
-  hostId: string;
-  slots?: (string | null)[];
-}) {
+export function LayoutHostFrame({ hostId, slots }: { hostId: string; slots?: (string | null)[] }) {
   const { getNode, getNodes, setNodes } = useReactFlow();
   const dropTarget = useSyncExternalStore(subscribeLayoutDropTarget, getLayoutDropTarget);
   const occupied = slots ?? Array(LAYOUT_SLOT_COUNT).fill(null);
@@ -46,20 +37,20 @@ export function LayoutHostFrame({
           const kind = (child?.data as { kind?: string } | undefined)?.kind ?? childId ?? '';
           const title = (child?.data as { title?: string } | undefined)?.title;
           const filled = !!childId;
-          const isDrop =
-            dropTarget?.hostId === hostId && dropTarget.slotIndex === slotIndex;
+          const isDrop = dropTarget?.hostId === hostId && dropTarget.slotIndex === slotIndex;
           return (
             <button
               key={slotIndex}
               type="button"
               data-layout-slot={slotIndex}
               data-layout-host={hostId}
-              title={filled ? title ?? childId : `Slot ${slotIndex + 1}`}
+              title={filled ? (title ?? childId) : `Slot ${slotIndex + 1}`}
               disabled={!filled && !selectedPeerId}
               onClick={() => {
                 if (filled && childId) {
-                  setNodes((nds) =>
-                    nds.map((n) => ({ ...n, selected: n.id === childId })) as PanelFlowNode[],
+                  setNodes(
+                    (nds) =>
+                      nds.map((n) => ({ ...n, selected: n.id === childId })) as PanelFlowNode[],
                   );
                   return;
                 }
@@ -79,7 +70,9 @@ export function LayoutHostFrame({
                   <span className="grid h-4 w-4 place-items-center [&>*]:h-3.5 [&>*]:w-3.5">
                     {nodeIcon(kind)}
                   </span>
-                  <span className={cn('max-w-full truncate px-1', nodeText.xs)}>{title ?? kind}</span>
+                  <span className={cn('max-w-full truncate px-1', nodeText.xs)}>
+                    {title ?? kind}
+                  </span>
                 </>
               ) : (
                 <span className={cn('text-ink3/70', nodeText.xs)}>{slotIndex + 1}</span>

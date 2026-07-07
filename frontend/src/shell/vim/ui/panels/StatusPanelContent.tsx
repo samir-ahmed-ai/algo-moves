@@ -20,8 +20,7 @@ export function StatusPanelContent() {
     resetLevel,
   } = useVimGame();
 
-  const moveLabel =
-    level.parMoves != null ? `${moves}/${level.parMoves} moves` : `${moves} moves`;
+  const moveLabel = level.parMoves != null ? `${moves}/${level.parMoves} moves` : `${moves} moves`;
 
   return (
     <div className="min-w-0">
@@ -40,7 +39,9 @@ export function StatusPanelContent() {
         {isMobile ? (
           <p className="mt-3 text-base text-bad">Connect a keyboard to play</p>
         ) : message ? (
-          <p className={cn('mt-3 text-base', nodeTextWrap, error ? 'text-bad' : 'text-good')}>{message}</p>
+          <p className={cn('mt-3 text-base', nodeTextWrap, error ? 'text-bad' : 'text-good')}>
+            {message}
+          </p>
         ) : (
           <p className="mt-3 text-base text-ink3">Reach ★ with Vim motions</p>
         )}

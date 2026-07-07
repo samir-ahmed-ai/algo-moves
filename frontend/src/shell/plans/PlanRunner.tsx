@@ -1,12 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import {
-  BookMarked,
-  CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
-  Circle,
-  X,
-} from 'lucide-react';
+import { BookMarked, CheckCircle2, ChevronLeft, ChevronRight, Circle, X } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { catalog } from '@/content';
 import { chromeText } from '@/shell/chromeUi';

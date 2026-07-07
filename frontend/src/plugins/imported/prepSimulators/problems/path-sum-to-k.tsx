@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -24,22 +30,23 @@ interface PathSumState {
   done: boolean;
 }
 
-function record({ tree, k }: PathSumInput): Frame<PathSumState>[] {  const cnt = new Map<number, number>([[0, 1]]);
+function record({ tree, k }: PathSumInput): Frame<PathSumState>[] {
+  const cnt = new Map<number, number>([[0, 1]]);
   const visited: number[] = [];
   let ans = 0;
 
   const { emit, frames } = createRecorder<PathSumState>(() => ({
-        tree,
-        k,
-        node: null,
-        visited: [...visited],
-        sum: null,
-        need: null,
-        hits: 0,
-        cnt: [...cnt.entries()],
-        ans,
-        done: false
-      }));
+    tree,
+    k,
+    node: null,
+    visited: [...visited],
+    sum: null,
+    need: null,
+    hits: 0,
+    cnt: [...cnt.entries()],
+    ans,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -159,132 +166,130 @@ function Inspector({ frame }: InspectorProps<PathSumState>) {
 export const manifestId = 'prep-trees-path-sum-to-k';
 export const title = 'Path sum to K';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Path sum to K\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Path sum to K"?',
     choices: [
       {
-        label: "Prefix sum on tree — fits this problem",
-        correct: true
+        label: 'Prefix sum on tree — fits this problem',
+        correct: true,
       },
       {
-        label: "Post-order height — different approach"
+        label: 'Post-order height — different approach',
       },
       {
-        label: "Tree build + iterative pre-order — different approach"
+        label: 'Tree build + iterative pre-order — different approach',
       },
       {
-        label: "LCA + heights — different approach"
-      }
+        label: 'LCA + heights — different approach',
+      },
     ],
-    explain: "Running root-to-node sum; need an ancestor prefix equal to sum-k"
+    explain: 'Running root-to-node sum; need an ancestor prefix equal to sum-k',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Path sum to K), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Path sum to K), what strategy is established?',
     choices: [
       {
-        label: "Running root-to-node sum; need an ancestor — described in INIT caption",
-        correct: true
+        label: 'Running root-to-node sum; need an ancestor — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Path sum to K: count downward root-to-descendant paths whose values sum to . We DFS once, tracking the running root-to-node prefix sum. cnt holds how many ancestor prefixes we have seen, seeded with cnt[0] = 1 for the empty prefix."
+    explain:
+      'Path sum to K: count downward root-to-descendant paths whose values sum to . We DFS once, tracking the running root-to-node prefix sum. cnt holds how many ancestor prefixes we have seen, seeded with cnt[0] = 1 for the empty prefix.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"RECORD\" step (cnt[]++), what happens?",
+    id: 'key-step',
+    prompt: 'On the "RECORD" step (cnt[]++), what happens?',
     choices: [
       {
         label: "Record this node's prefix sum: cnt[] — this move caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Record this node's prefix sum: cnt[] is now . Then recurse into its children so deeper nodes can look back at this prefix."
+    explain:
+      "Record this node's prefix sum: cnt[] is now . Then recurse into its children so deeper nodes can look back at this prefix.",
   },
   {
-    id: "state",
-    prompt: "What does the `node` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `node` field track in the visualization state?',
     choices: [
       {
-        label: "index of the node — updated each frame",
-        correct: true
+        label: 'index of the node — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `node` in sync: index of the node being processed (null = between/after DFS)"
+    explain:
+      'The recorder keeps `node` in sync: index of the node being processed (null = between/after DFS)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Path sum to K\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Path sum to K"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(1) space — wrong order of growth"
+        label: 'O(n) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n²) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). cnt[0]=1; ans+=cnt[sum-k]; cnt[sum]++; undo on return"
+    explain: 'O(n). O(n). cnt[0]=1; ans+=cnt[sum-k]; cnt[sum]++; undo on return',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "DFS complete. downward path sum — final DONE caption",
-        correct: true
+        label: 'DFS complete. downward path sum — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "DFS complete.  downward path sum to ."
-  }
+    explain: 'DFS complete.  downward path sum to .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

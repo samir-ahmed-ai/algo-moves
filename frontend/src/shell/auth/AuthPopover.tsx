@@ -279,7 +279,10 @@ export function AuthPopover({
       )}
       onClick={(e) => e.stopPropagation()}
     >
-      <div aria-hidden className="auth-modal-glow pointer-events-none absolute inset-x-0 top-0 h-24" />
+      <div
+        aria-hidden
+        className="auth-modal-glow pointer-events-none absolute inset-x-0 top-0 h-24"
+      />
 
       <div className="relative px-4 pb-4 pt-4 sm:px-5 sm:pb-5 sm:pt-5">
         <button
@@ -344,7 +347,9 @@ export function AuthPopover({
             type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={setPassword}
-            placeholder={tab === 'signup' ? s.passwordSignupPlaceholder : s.passwordLoginPlaceholder}
+            placeholder={
+              tab === 'signup' ? s.passwordSignupPlaceholder : s.passwordLoginPlaceholder
+            }
             autoComplete={tab === 'signup' ? 'new-password' : 'current-password'}
             required
             leading={<Lock className="h-4 w-4" />}
@@ -496,7 +501,10 @@ function PasswordStrengthMeter({ strength }: { strength: 'weak' | 'fair' | 'stro
         {[0, 1, 2, 3].map((i) => (
           <span
             key={i}
-            className={cn('h-1 flex-1 rounded-full transition-colors', i < bars ? tone : 'bg-edge/60')}
+            className={cn(
+              'h-1 flex-1 rounded-full transition-colors',
+              i < bars ? tone : 'bg-edge/60',
+            )}
           />
         ))}
       </div>
@@ -538,7 +546,10 @@ function AuthField({
 }) {
   return (
     <div className="flex flex-col gap-1 text-start">
-      <label className="text-[length:var(--fs-tight)] font-semibold uppercase tracking-wide text-ink3" htmlFor={id}>
+      <label
+        className="text-[length:var(--fs-tight)] font-semibold uppercase tracking-wide text-ink3"
+        htmlFor={id}
+      >
         {label}
       </label>
       <div className="relative">
@@ -566,7 +577,9 @@ function AuthField({
             invalid ? 'border-bad/50 focus:border-bad focus:ring-bad/15' : 'border-edge',
           )}
         />
-        {trailing ? <div className="absolute inset-y-0 end-1 flex items-center">{trailing}</div> : null}
+        {trailing ? (
+          <div className="absolute inset-y-0 end-1 flex items-center">{trailing}</div>
+        ) : null}
       </div>
       {error ? (
         <p id={id ? `${id}-error` : undefined} className="text-xs text-bad">
@@ -632,7 +645,14 @@ export function AuthUserMenu({
         ) : null}
       </div>
       {onOpenProfile ? (
-        <MenuRow onClick={() => { onOpenProfile(); onClose(); }}>{s.profileStats}</MenuRow>
+        <MenuRow
+          onClick={() => {
+            onOpenProfile();
+            onClose();
+          }}
+        >
+          {s.profileStats}
+        </MenuRow>
       ) : null}
       <MenuRow
         danger

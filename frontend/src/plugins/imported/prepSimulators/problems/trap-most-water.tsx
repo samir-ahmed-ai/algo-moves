@@ -1,7 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 
 interface TrapInput {
@@ -99,8 +113,10 @@ function record({ height }: TrapInput): Frame<TrapState>[] {
 function View({ frame }: PluginViewProps<TrapState>) {
   const s = frame.state;
   const pointers: ArrayPointer[] = [];
-  if (s.l >= 0 && s.l < s.height.length) pointers.push({ i: s.l, label: 'l', tone: 'accent', place: 'above' });
-  if (s.r >= 0 && s.r < s.height.length) pointers.push({ i: s.r, label: 'r', tone: 'accent', place: 'above' });
+  if (s.l >= 0 && s.l < s.height.length)
+    pointers.push({ i: s.l, label: 'l', tone: 'accent', place: 'above' });
+  if (s.r >= 0 && s.r < s.height.length)
+    pointers.push({ i: s.r, label: 'r', tone: 'accent', place: 'above' });
   const inWindow = !s.done && s.l < s.r;
   const tone = (i: number) => {
     if (s.bestPair && (i === s.bestPair[0] || i === s.bestPair[1])) return 'found';
@@ -120,7 +136,11 @@ function View({ frame }: PluginViewProps<TrapState>) {
       </RailGroup>
       <RailResult
         label="best"
-        value={s.best === 0 ? '—' : `${s.best}${s.bestPair ? ` @ [${s.bestPair[0]},${s.bestPair[1]}]` : ''}`}
+        value={
+          s.best === 0
+            ? '—'
+            : `${s.best}${s.bestPair ? ` @ [${s.bestPair[0]},${s.bestPair[1]}]` : ''}`
+        }
         tone={s.done ? 'good' : 'accent'}
       />
     </>
@@ -159,132 +179,130 @@ function Inspector({ frame }: InspectorProps<TrapState>) {
 export const manifestId = 'prep-arrays-trap-most-water';
 export const title = 'Trap most water';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Trap most water\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Trap most water"?',
     choices: [
       {
-        label: "Two pointers — fits this problem",
-        correct: true
+        label: 'Two pointers — fits this problem',
+        correct: true,
       },
       {
-        label: "Prefix + suffix pass — different approach"
+        label: 'Prefix + suffix pass — different approach',
       },
       {
-        label: "Track min/max product — different approach"
+        label: 'Track min/max product — different approach',
       },
       {
-        label: "Scan from right — different approach"
-      }
+        label: 'Scan from right — different approach',
+      },
     ],
-    explain: "Widest pair of lines; always move the shorter one inward"
+    explain: 'Widest pair of lines; always move the shorter one inward',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Trap most water), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Trap most water), what strategy is established?',
     choices: [
       {
-        label: "Widest pair of lines; always move — described in INIT caption",
-        correct: true
+        label: 'Widest pair of lines; always move — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Container With Most Water: treat each value as a vertical line. The water a pair (l, r) holds is width (r − l) times the shorter line min(height[l], height[r]). Start with the widest pair and walk the two pointers inward."
+    explain:
+      'Container With Most Water: treat each value as a vertical line. The water a pair (l, r) holds is width (r − l) times the shorter line min(height[l], height[r]). Start with the widest pair and walk the two pointers inward.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"MOVE\" step (l→), what happens?",
+    id: 'key-step',
+    prompt: 'On the "MOVE" step (l→), what happens?',
     choices: [
       {
-        label: "The left line () is shorter — this move caption",
-        correct: true
+        label: 'The left line () is shorter — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "The left line () is shorter than the right (). The shorter line caps the area, so moving it is the only way to possibly gain — advance l to ."
+    explain:
+      'The left line () is shorter than the right (). The shorter line caps the area, so moving it is the only way to possibly gain — advance l to .',
   },
   {
-    id: "state",
-    prompt: "What does the `l` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `l` field track in the visualization state?',
     choices: [
       {
-        label: "left pointer — updated each frame",
-        correct: true
+        label: 'left pointer — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `l` in sync: left pointer"
+    explain: 'The recorder keeps `l` in sync: left pointer',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Trap most water\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Trap most water"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
+        label: 'O(n²) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
+        label: 'O(1) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). area=(r-l)*min(h[l],h[r]); move shorter side"
+    explain: 'O(n). O(1). area=(r-l)*min(h[l],h[r]); move shorter side',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "The pointers met, so every — final DONE caption",
-        correct: true
+        label: 'The pointers met, so every — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "The pointers met, so every meaningfully-wide pair has been considered. The most water any container holds is ${bestPair ? "
-  }
+    explain:
+      'The pointers met, so every meaningfully-wide pair has been considered. The most water any container holds is ${bestPair ? ',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

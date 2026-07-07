@@ -68,7 +68,11 @@ export function RecallEditorShell({
         formatBothRef={formatRef}
         foldBothRef={foldRef}
       />
-      <RecallEditorFooter editorPrefs={editorPrefs} setEditorPrefs={setEditorPrefs} compact={compact} />
+      <RecallEditorFooter
+        editorPrefs={editorPrefs}
+        setEditorPrefs={setEditorPrefs}
+        compact={compact}
+      />
     </div>
   );
 }

@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  RailGroup,
+  RailResult,
+  RailStat,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+} from '../../../_shared/vizKit';
 
 interface MissInput {
   nums: number[];
@@ -19,7 +32,8 @@ interface MissState {
   done: boolean;
 }
 
-function record({ nums }: MissInput): Frame<MissState>[] {  const raw = nums.slice();
+function record({ nums }: MissInput): Frame<MissState>[] {
+  const raw = nums.slice();
   const values = nums.slice().sort((a, b) => a - b);
   const base = values[0];
   let lo = 0;
@@ -27,15 +41,15 @@ function record({ nums }: MissInput): Frame<MissState>[] {  const raw = nums.sli
   let result: number | null = null;
 
   const { emit, frames } = createRecorder<MissState>(() => ({
-        raw: raw,
-        values: values,
-        base: base,
-        lo: lo,
-        hi: hi,
-        result: result,
-        mid: null,
-        done: false
-      }));
+    raw: raw,
+    values: values,
+    base: base,
+    lo: lo,
+    hi: hi,
+    result: result,
+    mid: null,
+    done: false,
+  }));
   const emitDone = (
     type: string,
     note: string,
@@ -44,28 +58,60 @@ function record({ nums }: MissInput): Frame<MissState>[] {  const raw = nums.sli
     tone?: 'good' | 'bad',
   ) => emit(type, note, caption, { ...partial, done: true }, tone);
 
-  emit('SORT', `sorted [${values.join(',')}]`, `Sort the input [${raw.join(',')}] to [${values.join(',')}]. In a complete run each values[i] would equal base+i (here base=${base}), so binary-search for the first index where that breaks.`, { mid: null });
+  emit(
+    'SORT',
+    `sorted [${values.join(',')}]`,
+    `Sort the input [${raw.join(',')}] to [${values.join(',')}]. In a complete run each values[i] would equal base+i (here base=${base}), so binary-search for the first index where that breaks.`,
+    { mid: null },
+  );
 
   while (lo <= hi) {
     const mid = lo + ((hi - lo) >> 1);
     const expected = base + mid;
-    emit('MID', `mid=${mid} exp=${expected}`, `Middle of the live window: mid=${mid}. Expected base+mid = ${base}+${mid} = ${expected}; actual values[${mid}] = ${values[mid]}.`, { mid: mid });
+    emit(
+      'MID',
+      `mid=${mid} exp=${expected}`,
+      `Middle of the live window: mid=${mid}. Expected base+mid = ${base}+${mid} = ${expected}; actual values[${mid}] = ${values[mid]}.`,
+      { mid: mid },
+    );
     if (mid > 0 && values[mid - 1] === base + mid - 1 && values[mid] !== expected) {
       result = expected;
-      emitDone('GAP', `missing ${expected}`, `values[${mid - 1}] = ${values[mid - 1]} is correct but values[${mid}] = ${values[mid]} skips past ${expected}, so the gap is exactly here — the missing number is ${expected}.`, { mid: mid }, 'good');
+      emitDone(
+        'GAP',
+        `missing ${expected}`,
+        `values[${mid - 1}] = ${values[mid - 1]} is correct but values[${mid}] = ${values[mid]} skips past ${expected}, so the gap is exactly here — the missing number is ${expected}.`,
+        { mid: mid },
+        'good',
+      );
       return frames;
     }
     if (values[mid] === expected) {
       lo = mid + 1;
-      emit('RIGHT', `lo=${lo}`, `values[${mid}] = ${expected} matches, so everything up to mid is intact — the gap must be to the right. Set lo = ${lo}.`, { mid: mid });
+      emit(
+        'RIGHT',
+        `lo=${lo}`,
+        `values[${mid}] = ${expected} matches, so everything up to mid is intact — the gap must be to the right. Set lo = ${lo}.`,
+        { mid: mid },
+      );
     } else {
       hi = mid - 1;
-      emit('LEFT', `hi=${hi}`, `values[${mid}] = ${values[mid]} ≠ ${expected}, so the gap is at or before mid — search the left half. Set hi = ${hi}.`, { mid: mid });
+      emit(
+        'LEFT',
+        `hi=${hi}`,
+        `values[${mid}] = ${values[mid]} ≠ ${expected}, so the gap is at or before mid — search the left half. Set hi = ${hi}.`,
+        { mid: mid },
+      );
     }
   }
 
   result = base + lo;
-  emitDone('DONE', `missing ${result}`, `The search settled at lo=${lo}, so the first missing value is base+lo = ${base}+${lo} = ${result}.`, { mid: null }, 'good');
+  emitDone(
+    'DONE',
+    `missing ${result}`,
+    `The search settled at lo=${lo}, so the first missing value is base+lo = ${base}+${lo} = ${result}.`,
+    { mid: null },
+    'good',
+  );
   return frames;
 }
 
@@ -84,14 +130,18 @@ function View({ frame }: PluginViewProps<MissState>) {
     return 'dead';
   };
   return (
-    <VizStage rail={<>
-      <RailGroup label="search">
-        <RailStat k="lo" v={s.lo} tone="accent" />
-        <RailStat k="hi" v={s.hi} tone="bad" />
-        <RailStat k="mid" v={s.mid ?? '—'} tone="warn" />
-      </RailGroup>
-      <RailResult label="missing" value={s.result ?? '…'} tone={s.done ? 'good' : 'accent'} />
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="search">
+            <RailStat k="lo" v={s.lo} tone="accent" />
+            <RailStat k="hi" v={s.hi} tone="bad" />
+            <RailStat k="mid" v={s.mid ?? '—'} tone="warn" />
+          </RailGroup>
+          <RailResult label="missing" value={s.result ?? '…'} tone={s.done ? 'good' : 'accent'} />
+        </>
+      }
+    >
       <ArrayRow values={s.values} cellTone={tone} pointers={pointers} label={(i) => s.base + i} />
     </VizStage>
   );

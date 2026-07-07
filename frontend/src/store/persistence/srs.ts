@@ -19,7 +19,6 @@ export interface SrsData {
 }
 
 const KEY = STORAGE_KEYS.SRS_DECK;
-const DAY_MS = 86_400_000;
 const scheduler = fsrs();
 
 function isSrsData(value: unknown): value is SrsData {
@@ -27,23 +26,17 @@ function isSrsData(value: unknown): value is SrsData {
   return !!c && typeof c === 'object' && !!c.cards && typeof c.cards === 'object';
 }
 
-/** Rehydrate Date fields after JSON parse and migrate legacy SM-2-lite cards. */
+/** Rehydrate Date fields after JSON parse. */
 function hydrateCard(card: SrsCard): SrsCard {
-  if (card.fsrs) {
-    return {
-      ...card,
-      fsrs: {
-        ...card.fsrs,
-        due: new Date(card.fsrs.due),
-        last_review: card.fsrs.last_review ? new Date(card.fsrs.last_review) : undefined,
-      },
-    };
-  }
-  const fsrsCard = createEmptyCard(new Date(card.due - card.intervalDays * DAY_MS));
-  fsrsCard.reps = card.reps;
-  fsrsCard.scheduled_days = card.intervalDays;
-  fsrsCard.due = new Date(card.due);
-  return { ...card, fsrs: fsrsCard };
+  if (!card.fsrs) return card;
+  return {
+    ...card,
+    fsrs: {
+      ...card.fsrs,
+      due: new Date(card.fsrs.due),
+      last_review: card.fsrs.last_review ? new Date(card.fsrs.last_review) : undefined,
+    },
+  };
 }
 
 function load(): SrsData {
@@ -78,7 +71,9 @@ export function scheduleReview(problemId: string, correct: boolean): SrsCard {
     const prev = data.cards[problemId];
     const fsrsCard: Card = prev?.fsrs ?? createEmptyCard();
     const grade = correct ? Rating.Good : Rating.Again;
-    const preview = scheduler.repeat(fsrsCard, new Date()) as Partial<Record<Rating, { card: Card }>>;
+    const preview = scheduler.repeat(fsrsCard, new Date()) as Partial<
+      Record<Rating, { card: Card }>
+    >;
     const item = preview[grade];
     if (!item?.card) {
       next = toSrsCard(problemId, fsrsCard);

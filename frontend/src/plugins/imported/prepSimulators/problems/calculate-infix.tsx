@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
@@ -41,22 +47,23 @@ function opPrec(op: string): number {
   return op === '+' || op === '-' ? 1 : 2;
 }
 
-function record({ exp }: InfixInput): Frame<InfixState>[] {  const nums: number[] = [];
+function record({ exp }: InfixInput): Frame<InfixState>[] {
+  const nums: number[] = [];
   const ops: string[] = [];
   let lastApply: { a: number; b: number; op: string; result: number } | null = null;
 
   const { emit, frames } = createRecorder<InfixState>(() => ({
-        exp,
-        i: null,
-        nums: nums.slice(),
-        ops: ops.slice(),
-        applyA: lastApply?.a ?? null,
-        applyB: lastApply?.b ?? null,
-        applyOp: lastApply?.op ?? null,
-        applyResult: lastApply?.result ?? null,
-        answer: null,
-        done: false
-      }));
+    exp,
+    i: null,
+    nums: nums.slice(),
+    ops: ops.slice(),
+    applyA: lastApply?.a ?? null,
+    applyB: lastApply?.b ?? null,
+    applyOp: lastApply?.op ?? null,
+    applyResult: lastApply?.result ?? null,
+    answer: null,
+    done: false,
+  }));
 
   const applyTop = () => {
     const op = ops.pop() as string;
@@ -177,9 +184,7 @@ function View({ frame }: PluginViewProps<InfixState>) {
 
   return (
     <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        expression
-      </div>
+      <div className={cn(vizText.sm, 'text-ink3')}>expression</div>
       <ArrayRow values={chars} cellTone={charTone} pointers={pointers} windowRange={null} />
 
       <div className={cn('mt-2', vizText.sm, 'text-ink3')}>
@@ -221,7 +226,10 @@ function Inspector({ frame }: InspectorProps<InfixState>) {
       <InspectorRow k="nums top" v={s.nums.length > 0 ? s.nums[s.nums.length - 1] : '—'} />
       <InspectorRow k="nums size" v={s.nums.length} />
       <InspectorRow k="ops top" v={s.ops.length > 0 ? s.ops[s.ops.length - 1] : '—'} />
-      <InspectorRow k="last apply" v={s.applyOp !== null ? `${s.applyA} ${s.applyOp} ${s.applyB} = ${s.applyResult}` : '—'} />
+      <InspectorRow
+        k="last apply"
+        v={s.applyOp !== null ? `${s.applyA} ${s.applyOp} ${s.applyB} = ${s.applyResult}` : '—'}
+      />
       <InspectorRow k="answer" v={s.done && s.answer !== null ? s.answer : '…'} />
     </VarGrid>
   );
@@ -230,132 +238,129 @@ function Inspector({ frame }: InspectorProps<InfixState>) {
 export const manifestId = 'prep-stacks-queues-calculate-infix';
 export const title = 'Calculate infix';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Calculate infix\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Calculate infix"?',
     choices: [
       {
-        label: "Dual-stack infix calculator — fits this problem",
-        correct: true
+        label: 'Dual-stack infix calculator — fits this problem',
+        correct: true,
       },
       {
-        label: "Two Pointers — different approach"
+        label: 'Two Pointers — different approach',
       },
       {
-        label: "Dual Stack (counts + strings) — different approach"
+        label: 'Dual Stack (counts + strings) — different approach',
       },
       {
-        label: "Shunting-yard (no parens) — different approach"
-      }
+        label: 'Shunting-yard (no parens) — different approach',
+      },
     ],
-    explain: "Two stacks (numbers and ops); flush pending ops by precedence"
+    explain: 'Two stacks (numbers and ops); flush pending ops by precedence',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Calculate infix), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Calculate infix), what strategy is established?',
     choices: [
       {
-        label: "Two stacks (numbers and ops); flush — described in INIT caption",
-        correct: true
+        label: 'Two stacks (numbers and ops); flush — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Calculate Infix: evaluate \"\" with operator precedence using two stacks — one for numbers, one for operators. Time O(n), Space O(n)."
+    explain:
+      'Calculate Infix: evaluate "" with operator precedence using two stacks — one for numbers, one for operators. Time O(n), Space O(n).',
   },
   {
-    id: "key-step",
-    prompt: "On the \"PUSH_OP\" step (push ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "PUSH_OP" step (push ), what happens?',
     choices: [
       {
-        label: "No higher- or equal-precedence operator — this move caption",
-        correct: true
+        label: 'No higher- or equal-precedence operator — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "No higher- or equal-precedence operator pending, so push '' onto the operator stack to wait for its right operand."
+    explain:
+      "No higher- or equal-precedence operator pending, so push '' onto the operator stack to wait for its right operand.",
   },
   {
-    id: "state",
-    prompt: "What does the `i` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: "index of the char we — updated each frame",
-        correct: true
+        label: 'index of the char we — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `i` in sync: index of the char we are looking at"
+    explain: 'The recorder keeps `i` in sync: index of the char we are looking at',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Calculate infix\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Calculate infix"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(1) per op time, O(n) space — wrong order of growth"
+        label: 'O(1) per op time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
+        label: 'O(n²) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(k) space — wrong order of growth"
-      }
+        label: 'O(n) time, O(k) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). parse multi-digit; apply pending ops with prec>=cur; flush"
+    explain: 'O(n). O(n). parse multi-digit; apply pending ops with prec>=cur; flush',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Both stacks are drained. The single — final DONE caption",
-        correct: true
+        label: 'Both stacks are drained. The single — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Both stacks are drained. The single remaining number  is the value of \"\"."
-  }
+    explain: 'Both stacks are drained. The single remaining number  is the value of "".',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

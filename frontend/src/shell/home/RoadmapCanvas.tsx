@@ -8,15 +8,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from 'react';
-import {
-  Code2,
-  Gamepad2,
-  GraduationCap,
-  Keyboard,
-  Megaphone,
-  Target,
-  Trophy,
-} from 'lucide-react';
+import { Code2, Gamepad2, GraduationCap, Keyboard, Megaphone, Target, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { EagleMark } from '@/shell/EagleMark';
 
@@ -62,16 +54,52 @@ function StopArt({ kind, c1, c2 }: { kind: ArtKind; c1: string; c2: string }) {
 
       {kind === 'problems' && (
         <g>
-          <rect x="18" y="22" width="92" height="56" rx="10" fill={`url(#${soft})`} stroke={`url(#${g})`} strokeWidth="3" />
-          <path d="M40 46 L30 56 L40 66" stroke={`url(#${g})`} strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-          <path d="M88 46 L98 56 L88 66" stroke={`url(#${g})`} strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <rect
+            x="18"
+            y="22"
+            width="92"
+            height="56"
+            rx="10"
+            fill={`url(#${soft})`}
+            stroke={`url(#${g})`}
+            strokeWidth="3"
+          />
+          <path
+            d="M40 46 L30 56 L40 66"
+            stroke={`url(#${g})`}
+            strokeWidth="4.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+          />
+          <path
+            d="M88 46 L98 56 L88 66"
+            stroke={`url(#${g})`}
+            strokeWidth="4.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+          />
         </g>
       )}
 
       {kind === 'tracks' && (
         <g>
-          <path d="M64 82 C64 62 34 58 34 34" stroke={`url(#${g})`} strokeWidth="5" strokeLinecap="round" fill="none" />
-          <path d="M64 82 C64 62 96 58 96 34" stroke={c2} strokeWidth="5" strokeLinecap="round" fill="none" opacity="0.75" />
+          <path
+            d="M64 82 C64 62 34 58 34 34"
+            stroke={`url(#${g})`}
+            strokeWidth="5"
+            strokeLinecap="round"
+            fill="none"
+          />
+          <path
+            d="M64 82 C64 62 96 58 96 34"
+            stroke={c2}
+            strokeWidth="5"
+            strokeLinecap="round"
+            fill="none"
+            opacity="0.75"
+          />
           <circle cx="64" cy="82" r="6" fill={`url(#${g})`} />
         </g>
       )}
@@ -88,15 +116,39 @@ function StopArt({ kind, c1, c2 }: { kind: ArtKind; c1: string; c2: string }) {
       {kind === 'vim' && (
         <g>
           {[0, 1, 2, 3].map((i) => (
-            <rect key={`t${i}`} x={26 + i * 20} y="30" width="16" height="16" rx="4" fill={`url(#${soft})`} stroke={`url(#${g})`} strokeWidth="2.5" />
+            <rect
+              key={`t${i}`}
+              x={26 + i * 20}
+              y="30"
+              width="16"
+              height="16"
+              rx="4"
+              fill={`url(#${soft})`}
+              stroke={`url(#${g})`}
+              strokeWidth="2.5"
+            />
           ))}
         </g>
       )}
 
       {kind === 'games' && (
         <g>
-          <rect x="24" y="38" width="80" height="34" rx="17" fill={`url(#${soft})`} stroke={`url(#${g})`} strokeWidth="3" />
-          <path d="M42 49 v10 M37 54 h10" stroke={`url(#${g})`} strokeWidth="4" strokeLinecap="round" />
+          <rect
+            x="24"
+            y="38"
+            width="80"
+            height="34"
+            rx="17"
+            fill={`url(#${soft})`}
+            stroke={`url(#${g})`}
+            strokeWidth="3"
+          />
+          <path
+            d="M42 49 v10 M37 54 h10"
+            stroke={`url(#${g})`}
+            strokeWidth="4"
+            strokeLinecap="round"
+          />
         </g>
       )}
     </svg>
@@ -241,7 +293,13 @@ const StopCard = forwardRef<
         'roadmap-stop group relative w-full max-w-[136px] overflow-hidden rounded-xl border border-edge bg-panel/70 p-1.5 text-left shadow-[var(--shadow-sm)] backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)] sm:max-w-[152px]',
         side === 'left' ? 'ml-auto' : 'mr-auto',
       )}
-      style={{ '--stop-c1': stop.c1, '--stop-c2': stop.c2, animationDelay: `${index * 90}ms` } as CSSProperties}
+      style={
+        {
+          '--stop-c1': stop.c1,
+          '--stop-c2': stop.c2,
+          animationDelay: `${index * 90}ms`,
+        } as CSSProperties
+      }
     >
       <span
         aria-hidden
@@ -291,17 +349,21 @@ function StopRow({
         <span
           ref={dotRef}
           className="roadmap-dot relative grid h-7 w-7 place-items-center rounded-full border-2 border-bg font-mono text-[length:var(--fs-2xs)] font-semibold text-white shadow-[var(--shadow-sm)] sm:h-8 sm:w-8 sm:text-[length:var(--fs-tight)]"
-          style={{
-            background: `linear-gradient(135deg, ${stop.c1}, ${stop.c2})`,
-            '--stop-c1': stop.c1,
-          } as CSSProperties}
+          style={
+            {
+              background: `linear-gradient(135deg, ${stop.c1}, ${stop.c2})`,
+              '--stop-c1': stop.c1,
+            } as CSSProperties
+          }
         >
           {index + 1}
         </span>
       </div>
 
       <div className="min-w-0">
-        {side === 'right' ? <StopCard ref={cardRef} stop={stop} index={index} side="right" /> : null}
+        {side === 'right' ? (
+          <StopCard ref={cardRef} stop={stop} index={index} side="right" />
+        ) : null}
       </div>
     </div>
   );
@@ -338,7 +400,9 @@ export function RoadmapCanvas(props: RoadmapCanvasProps) {
     const h = cr.height;
     const cx = w / 2;
 
-    const spineNodes = [startRef.current, ...dotRefs.current, finishRef.current].filter(Boolean) as HTMLElement[];
+    const spineNodes = [startRef.current, ...dotRefs.current, finishRef.current].filter(
+      Boolean,
+    ) as HTMLElement[];
     const spineYs = spineNodes.map((el) => centerY(el, cr));
 
     const spinePath =
@@ -369,14 +433,16 @@ export function RoadmapCanvas(props: RoadmapCanvasProps) {
     const next = { w, h, cx, spinePath, connectors };
     setLayout((prev) => {
       const sameConnectors =
-        prev.connectors.length === next.connectors.length
-        && prev.connectors.every((c, i) => c.d === next.connectors[i].d && c.c1 === next.connectors[i].c1);
+        prev.connectors.length === next.connectors.length &&
+        prev.connectors.every(
+          (c, i) => c.d === next.connectors[i].d && c.c1 === next.connectors[i].c1,
+        );
       if (
-        prev.w === next.w
-        && prev.h === next.h
-        && prev.cx === next.cx
-        && prev.spinePath === next.spinePath
-        && sameConnectors
+        prev.w === next.w &&
+        prev.h === next.h &&
+        prev.cx === next.cx &&
+        prev.spinePath === next.spinePath &&
+        sameConnectors
       ) {
         return prev;
       }
@@ -410,7 +476,10 @@ export function RoadmapCanvas(props: RoadmapCanvasProps) {
   };
 
   return (
-    <div ref={containerRef} className="relative mx-auto w-full px-2 pb-8 pt-2 sm:px-3 sm:pb-10 sm:pt-3">
+    <div
+      ref={containerRef}
+      className="relative mx-auto w-full px-2 pb-8 pt-2 sm:px-3 sm:pb-10 sm:pt-3"
+    >
       {layout.w > 0 && layout.spinePath ? (
         <svg
           className="pointer-events-none absolute inset-0"
@@ -421,7 +490,14 @@ export function RoadmapCanvas(props: RoadmapCanvasProps) {
           aria-hidden
         >
           <defs>
-            <linearGradient id={`road-${gradId}`} x1="0" y1="0" x2="0" y2={layout.h} gradientUnits="userSpaceOnUse">
+            <linearGradient
+              id={`road-${gradId}`}
+              x1="0"
+              y1="0"
+              x2="0"
+              y2={layout.h}
+              gradientUnits="userSpaceOnUse"
+            >
               {stops.map((s, i) => (
                 <stop key={s.key} offset={`${(i / (stops.length - 1)) * 100}%`} stopColor={s.c1} />
               ))}
@@ -439,7 +515,13 @@ export function RoadmapCanvas(props: RoadmapCanvasProps) {
             />
           ))}
 
-          <path d={layout.spinePath} stroke={`url(#road-${gradId})`} strokeWidth={12} strokeLinecap="round" opacity={0.16} />
+          <path
+            d={layout.spinePath}
+            stroke={`url(#road-${gradId})`}
+            strokeWidth={12}
+            strokeLinecap="round"
+            opacity={0.16}
+          />
           <path d={layout.spinePath} stroke="var(--edge)" strokeWidth={3} strokeLinecap="round" />
           <path
             className="roadmap-road-path"

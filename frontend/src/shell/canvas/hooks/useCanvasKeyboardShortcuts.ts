@@ -41,7 +41,12 @@ export function useCanvasKeyboardShortcuts({
       }
       if (!mod && (e.key === 'z' || e.key === 'Z') && !inField) {
         const selected = nodesRef.current.filter((n) => n.selected);
-        fitView({ padding: FIT_PADDING, duration: FIT_VIEW_DURATION_MS, maxZoom: 1.0, nodes: selected.length ? selected : undefined });
+        fitView({
+          padding: FIT_PADDING,
+          duration: FIT_VIEW_DURATION_MS,
+          maxZoom: 1.0,
+          nodes: selected.length ? selected : undefined,
+        });
         return;
       }
       if (!mod && (e.key === 'c' || e.key === 'C') && !inField) {

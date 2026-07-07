@@ -8,11 +8,12 @@ export const quiz: QuizQuestion[] = [
     prompt: 'What is true after processing index i in insertion sort?',
     choices: [
       { label: 'Prefix sorted — values[0..i] ordered', correct: true },
-      { label: 'Whole array sorted — not yet', },
-      { label: 'Max at i — selection sort shape', },
-      { label: 'No swaps — shifts still happen', },
+      { label: 'Whole array sorted — not yet' },
+      { label: 'Max at i — selection sort shape' },
+      { label: 'No swaps — shifts still happen' },
     ],
-    explain: 'The outer loop extends the sorted prefix one element at a time by inserting the key at its correct position.',
+    explain:
+      'The outer loop extends the sorted prefix one element at a time by inserting the key at its correct position.',
   },
 ];
 

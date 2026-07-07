@@ -1,22 +1,12 @@
 import { useRef, useState } from 'react';
-import {
-  Home,
-  Lock,
-  Magnet,
-  Undo2,
-  Redo2,
-  Users,
-  LayoutGrid,
-  Plus,
-  Sparkles,
-} from 'lucide-react';
+import { Home, Lock, Magnet, Undo2, Redo2, Users, LayoutGrid, Plus, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useWorkspace } from '@/store/workspace';
 import { nodeIcon } from '@/shell/panels';
 import { usePopoverDismiss } from '../../ui/usePopoverDismiss';
 import { chromeText } from '../../chromeUi';
 import { RADIUS_SHELL } from './nodeui';
-import { SessionBody } from '../collab/collabWidgets';
+import { SessionBody } from '@/shell/collab';
 import { AlignDropdown } from './CanvasTools';
 import { InterviewInvitePopover } from './InterviewInvitePopover';
 
@@ -86,7 +76,9 @@ export function CanvasToolbar({ lock, onToggleLock, onTidy }: CanvasToolbarProps
                     chromeText.sm,
                   )}
                 >
-                  <span className="grid h-3.5 w-3.5 shrink-0 place-items-center">{nodeIcon(k.id)}</span>
+                  <span className="grid h-3.5 w-3.5 shrink-0 place-items-center">
+                    {nodeIcon(k.id)}
+                  </span>
                   {k.title}
                 </button>
               ))}
@@ -112,7 +104,13 @@ export function CanvasToolbar({ lock, onToggleLock, onTidy }: CanvasToolbarProps
         </div>
       )}
 
-      <button type="button" title="Home" aria-label="Home" onClick={() => goHome()} className={btnClass}>
+      <button
+        type="button"
+        title="Home"
+        aria-label="Home"
+        onClick={() => goHome()}
+        className={btnClass}
+      >
         <Home className="h-4 w-4" />
       </button>
 

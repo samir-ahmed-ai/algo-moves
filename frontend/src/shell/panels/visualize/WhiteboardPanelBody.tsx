@@ -12,7 +12,10 @@ export function WhiteboardPanelBody() {
     !!collab && !collab.isHost && collab.session.interviewRuntime?.hostFollow === true;
 
   const collaborators = useMemo(() => {
-    const map = new Map<string, { username?: string; pointer?: { x: number; y: number; tool: 'pointer' } }>();
+    const map = new Map<
+      string,
+      { username?: string; pointer?: { x: number; y: number; tool: 'pointer' } }
+    >();
     for (const c of sync.remoteCursors) {
       map.set(c.peerId, {
         username: c.name,

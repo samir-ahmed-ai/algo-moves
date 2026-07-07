@@ -1,7 +1,50 @@
+/**
+ * Nested room shared-state contract
+ * =================================
+ *
+ * The arcade game server stores one JSON blob per room (`sharedState`). Room
+ * metadata lives at the top level; each host-authoritative game nests its
+ * snapshot under a short key so multiple games never clobber each other.
+ *
+ * Top-level keys (owned by the room shell, not games):
+ *   - `game`    — active {@link GameId} from the catalog
+ *   - `started` — whether a match is in progress
+ *   - `locale`  — host-selected UI locale (`ar` | `en`)
+ *
+ * Nested game keys ({@link NESTED_GAME_STATE_KEYS}):
+ *   - `ttt`   — tic-tac-toe board + generation counter
+ *   - `meld`  — mind-meld round/phase snapshot
+ *   - `wyr`   — would-you-rather {@link WyrState}
+ *   - `nduel` — number-duel shared phase snapshot
+ *
+ * Games that relay moves over {@link useGameChannel} (rock-paper-scissors,
+ * reaction-duel) do not use nested keys — only P2P channel frames.
+ *
+ * Host contract:
+ *   1. Publish with {@link mergeNestedRoomState} so room metadata survives.
+ *   2. On game switch or rematch, call {@link stripNestedGameState} first.
+ *   3. Keep {@link useSharedStateRef} current so publish closures see live state.
+ *
+ * Guest/spectator contract:
+ *   - Adopt inbound snapshots via {@link useAdoptNestedState}; hosts skip adoption.
+ *   - Guard renders with a type predicate passed to {@link readNestedRoomState}.
+ *
+ * Equality:
+ *   {@link nestedSnapshotEqual} uses JSON stringify — fine for small snapshots;
+ *   do not use for large or order-sensitive structures.
+ */
 import { useEffect, useRef, type Dispatch, type SetStateAction } from 'react';
 
 /** Keys used by host-authoritative games under room shared state. */
 export const NESTED_GAME_STATE_KEYS = ['ttt', 'meld', 'wyr', 'nduel'] as const;
+
+/** Map nested snapshot keys to canonical {@link GameId} values. */
+export const NESTED_KEY_TO_GAME_ID = {
+  ttt: 'tic-tac-toe',
+  meld: 'mind-meld',
+  wyr: 'would-you-rather',
+  nduel: 'number-duel',
+} as const satisfies Record<(typeof NESTED_GAME_STATE_KEYS)[number], string>;
 
 /** Read game state nested under a key in room shared state. */
 export function readNestedRoomState<T extends object>(

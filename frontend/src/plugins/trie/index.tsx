@@ -1,4 +1,10 @@
-import { definePlugin, type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../core/types';
+import {
+  definePlugin,
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../core/types';
 import { NaryTreeBoard } from '../../components/board/NaryTreeBoard';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, badCases } from './cases';
@@ -33,7 +39,8 @@ function record({ insert, search }: TrieInput): Frame<TrieState>[] {
   // Parallel char->child index map per node; not part of state.
   const childMap: Record<string, number>[] = [{}];
 
-  const snapshot = (): TrieNode[] => nodes.map((nd) => ({ label: nd.label, children: nd.children.slice(), isEnd: nd.isEnd }));
+  const snapshot = (): TrieNode[] =>
+    nodes.map((nd) => ({ label: nd.label, children: nd.children.slice(), isEnd: nd.isEnd }));
 
   const emit = (
     type: string,
@@ -52,7 +59,17 @@ function record({ insert, search }: TrieInput): Frame<TrieState>[] {
       state: { nodes: snapshot(), active, highlight, phase, word, pathOk, result },
     });
 
-  emit('INIT', 'root', 'Start with an empty trie holding only the root node.', 0, null, 'insert', '', true, '');
+  emit(
+    'INIT',
+    'root',
+    'Start with an empty trie holding only the root node.',
+    0,
+    null,
+    'insert',
+    '',
+    true,
+    '',
+  );
 
   for (const word of insert) {
     let cur = 0;
@@ -60,7 +77,17 @@ function record({ insert, search }: TrieInput): Frame<TrieState>[] {
       const existing = childMap[cur][ch];
       if (existing !== undefined) {
         cur = existing;
-        emit('DOWN', ch, `Inserting "${word}": child '${ch}' already exists, so descend into it.`, cur, cur, 'insert', word, true, '');
+        emit(
+          'DOWN',
+          ch,
+          `Inserting "${word}": child '${ch}' already exists, so descend into it.`,
+          cur,
+          cur,
+          'insert',
+          word,
+          true,
+          '',
+        );
       } else {
         const next = nodes.length;
         nodes.push({ label: ch, children: [], isEnd: false });
@@ -68,11 +95,31 @@ function record({ insert, search }: TrieInput): Frame<TrieState>[] {
         nodes[cur].children.push(next);
         childMap[cur][ch] = next;
         cur = next;
-        emit('ADD', ch, `Inserting "${word}": no child '${ch}', so create a new node for it.`, cur, cur, 'insert', word, true, '');
+        emit(
+          'ADD',
+          ch,
+          `Inserting "${word}": no child '${ch}', so create a new node for it.`,
+          cur,
+          cur,
+          'insert',
+          word,
+          true,
+          '',
+        );
       }
     }
     nodes[cur].isEnd = true;
-    emit('MARK', word, `Mark the node for "${word}" as end-of-word.`, cur, null, 'insert', word, true, '');
+    emit(
+      'MARK',
+      word,
+      `Mark the node for "${word}" as end-of-word.`,
+      cur,
+      null,
+      'insert',
+      word,
+      true,
+      '',
+    );
   }
 
   let cur = 0;
@@ -81,18 +128,60 @@ function record({ insert, search }: TrieInput): Frame<TrieState>[] {
     const next = childMap[cur][ch];
     if (next === undefined) {
       ok = false;
-      emit('MISS', ch, `Searching "${search}": no child '${ch}' from here, so the word is absent.`, cur, null, 'search', search, false, '');
+      emit(
+        'MISS',
+        ch,
+        `Searching "${search}": no child '${ch}' from here, so the word is absent.`,
+        cur,
+        null,
+        'search',
+        search,
+        false,
+        '',
+      );
       break;
     }
     cur = next;
-    emit('MATCH', ch, `Searching "${search}": child '${ch}' found, so descend into it.`, cur, cur, 'search', search, true, '');
+    emit(
+      'MATCH',
+      ch,
+      `Searching "${search}": child '${ch}' found, so descend into it.`,
+      cur,
+      cur,
+      'search',
+      search,
+      true,
+      '',
+    );
   }
 
   if (ok && nodes[cur].isEnd) {
-    emit('FOUND', search, `Reached an end-of-word node — "${search}" is in the trie.`, cur, null, 'search', search, true, 'found', 'good');
+    emit(
+      'FOUND',
+      search,
+      `Reached an end-of-word node — "${search}" is in the trie.`,
+      cur,
+      null,
+      'search',
+      search,
+      true,
+      'found',
+      'good',
+    );
   } else {
     const why = ok ? 'the path exists but is not marked end-of-word' : 'the path is missing';
-    emit('ABSENT', search, `"${search}" is not in the trie (${why}).`, ok ? cur : null, null, 'search', search, false, 'absent', 'good');
+    emit(
+      'ABSENT',
+      search,
+      `"${search}" is not in the trie (${why}).`,
+      ok ? cur : null,
+      null,
+      'search',
+      search,
+      false,
+      'absent',
+      'good',
+    );
   }
 
   return frames;
@@ -102,16 +191,18 @@ function View({ frame }: PluginViewProps<TrieState>) {
   const s = frame.state;
   const done = s.result !== '';
   return (
-    <VizStage rail={<>
-      <RailGroup label="scan">
-        <RailStat k="phase" v={s.phase} />
-        <RailStat k="word" v={s.word ? `"${s.word}"` : '∅'} tone="accent" />
-        <RailStat k="nodes" v={s.nodes.length} />
-      </RailGroup>
-      {done && (
-        <RailResult label="result" value={s.result} tone={s.pathOk ? 'good' : 'bad'} />
-      )}
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="scan">
+            <RailStat k="phase" v={s.phase} />
+            <RailStat k="word" v={s.word ? `"${s.word}"` : '∅'} tone="accent" />
+            <RailStat k="nodes" v={s.nodes.length} />
+          </RailGroup>
+          {done && <RailResult label="result" value={s.result} tone={s.pathOk ? 'good' : 'bad'} />}
+        </>
+      }
+    >
       <NaryTreeBoard
         nodes={s.nodes}
         nodeClass={(i) => (i === s.active ? 'team-1' : s.nodes[i].isEnd ? 'team-2' : 'team-0')}
@@ -180,8 +271,16 @@ func (t *Trie) Search(word string) bool {
 `;
 
 const inputs: SampleInput<TrieInput>[] = [
-  { id: 'cat-car', label: 'Insert cat/car/can/dog · search car', value: { insert: ['cat', 'car', 'can', 'dog'], search: 'car' } },
-  { id: 'to-ten', label: 'Insert to/tea/ten/i/in · search ten', value: { insert: ['to', 'tea', 'ten', 'i', 'in'], search: 'ten' } },
+  {
+    id: 'cat-car',
+    label: 'Insert cat/car/can/dog · search car',
+    value: { insert: ['cat', 'car', 'can', 'dog'], search: 'car' },
+  },
+  {
+    id: 'to-ten',
+    label: 'Insert to/tea/ten/i/in · search ten',
+    value: { insert: ['to', 'tea', 'ten', 'i', 'in'], search: 'ten' },
+  },
 ];
 
 const verdict = (frames: Frame<TrieState>[]) => {
@@ -212,7 +311,8 @@ export const triePlugin = definePlugin<TrieInput, TrieState>({
     title: 'Trie (prefix tree)',
     difficulty: 'Medium',
     tags: ['tree', 'trie', 'string'],
-    summary: 'Insert several words into a prefix tree, then search one — walking and creating child nodes per character.',
+    summary:
+      'Insert several words into a prefix tree, then search one — walking and creating child nodes per character.',
     source: 'https://leetcode.com/problems/implement-trie-prefix-tree/',
   },
   inputs,

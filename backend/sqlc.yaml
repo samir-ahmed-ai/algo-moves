@@ -2,11 +2,11 @@ version: "2"
 sql:
   - engine: "postgresql"
     queries: "db/queries"
-    schema: "internal/arcade/migrations"
+    schema: "internal/platform/migrations"
     gen:
       go:
         package: "arcadedb"
-        out: "internal/arcade/arcadedb"
+        out: "internal/platform/arcadedb"
         sql_package: "pgx/v5"
         emit_json_tags: true
         emit_interface: true

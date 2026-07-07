@@ -28,7 +28,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'impossible (−1)',
           tone: 'bad',
           question: 'Why does dp[3] stay at infinity?',
-          answer: 'Only even partial sums are reachable with coin 2. Amount 3 is odd, so no combination works and the table never improves dp[3].',
+          answer:
+            'Only even partial sums are reachable with coin 2. Amount 3 is odd, so no combination works and the table never improves dp[3].',
         },
       ],
     },
@@ -45,7 +46,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'LCS length 3 ("ace")',
           tone: 'ok',
           question: 'Which letters align without reordering?',
-          answer: 'a, c, e appear in order in both strings. dp walks both pointers; matches extend the diagonal, mismatches take max of left/top.',
+          answer:
+            'a, c, e appear in order in both strings. dp walks both pointers; matches extend the diagonal, mismatches take max of left/top.',
         },
       ],
       bad: [
@@ -57,7 +59,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'LCS length 0',
           tone: 'bad',
           question: 'Every comparison mismatches — what does dp[3][3] hold?',
-          answer: 'With no equal letters, only empty-prefix cells are non-zero. The full-table corner stays 0.',
+          answer:
+            'With no equal letters, only empty-prefix cells are non-zero. The full-table corner stays 0.',
         },
       ],
     },
@@ -80,7 +83,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'minimum sum 7',
           tone: 'ok',
           question: 'Why not go through the 5 in the center?',
-          answer: 'The optimal route slides along the bottom edge where costs are 1: 1→3→1→1→1 sums to 7. The middle 5 is on a longer expensive branch.',
+          answer:
+            'The optimal route slides along the bottom edge where costs are 1: 1→3→1→1→1 sums to 7. The middle 5 is on a longer expensive branch.',
         },
       ],
     },
@@ -97,7 +101,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: '6 paths',
           tone: 'ok',
           question: 'How many right/down choices in a 3×3?',
-          answer: 'Need 2 rights and 2 downs in any order: C(4,2) = 6. dp[r][c] = dp[r-1][c] + dp[r][c-1] accumulates the same count.',
+          answer:
+            'Need 2 rights and 2 downs in any order: C(4,2) = 6. dp[r][c] = dp[r-1][c] + dp[r][c-1] accumulates the same count.',
         },
       ],
     },
@@ -109,24 +114,34 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
         {
           id: 'hit-cog',
           title: 'Classic "hit" → "cog"',
-          input: { beginWord: 'hit', endWord: 'cog', wordList: ['hot', 'dot', 'dog', 'lot', 'log', 'cog'] },
+          input: {
+            beginWord: 'hit',
+            endWord: 'cog',
+            wordList: ['hot', 'dot', 'dog', 'lot', 'log', 'cog'],
+          },
           inputLabel: 'hit → cog with 6 intermediates',
           returns: '5 words in ladder',
           tone: 'ok',
           question: 'Why is BFS the right tool here?',
-          answer: 'Each transformation is an unweighted edge. BFS from "hit" finds the fewest hops to "cog" before exploring longer ladders.',
+          answer:
+            'Each transformation is an unweighted edge. BFS from "hit" finds the fewest hops to "cog" before exploring longer ladders.',
         },
       ],
       bad: [
         {
           id: 'no-ladder',
           title: 'End word missing from dictionary',
-          input: { beginWord: 'hit', endWord: 'cog', wordList: ['hot', 'dot', 'dog', 'lot', 'log'] },
+          input: {
+            beginWord: 'hit',
+            endWord: 'cog',
+            wordList: ['hot', 'dot', 'dog', 'lot', 'log'],
+          },
           inputLabel: 'hit → cog but "cog" not in list',
           returns: '0 (no ladder)',
           tone: 'bad',
           question: 'BFS drains the queue — why is 0 correct?',
-          answer: '"cog" is never enqueued because it is not in wordList. No path can end on a word outside the dictionary.',
+          answer:
+            '"cog" is never enqueued because it is not in wordList. No path can end on a word outside the dictionary.',
         },
       ],
     },
@@ -143,7 +158,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'max value 9',
           tone: 'ok',
           question: 'Why not take the heaviest item (value 7)?',
-          answer: 'Item 4 alone gives 7, but items 2+3 (weights 3+4, values 4+5) fit in 7 and sum to 9. 0/1 means each item at most once.',
+          answer:
+            'Item 4 alone gives 7, but items 2+3 (weights 3+4, values 4+5) fit in 7 and sum to 9. 0/1 means each item at most once.',
         },
       ],
     },
@@ -160,7 +176,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'matches',
           tone: 'ok',
           question: 'How does c* consume zero characters?',
-          answer: 'c* matches the empty string, so the pattern reduces to a*b matching "aab". a* eats "aa", then b matches "b".',
+          answer:
+            'c* matches the empty string, so the pattern reduces to a*b matching "aab". a* eats "aa", then b matches "b".',
         },
       ],
     },
@@ -177,7 +194,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: '[3, 4]',
           tone: 'ok',
           question: 'Why two binary searches instead of one?',
-          answer: 'Standard binary search finds any 8. A left-biased search lands on index 3; a right-biased search lands on index 4 — the full range of 8s.',
+          answer:
+            'Standard binary search finds any 8. A left-biased search lands on index 3; a right-biased search lands on index 4 — the full range of 8s.',
         },
       ],
     },
@@ -194,7 +212,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'found at index 4',
           tone: 'ok',
           question: 'At lo=0, hi=6, mid=3 (value 7) — which half is sorted?',
-          answer: 'Left half [4,5,6,7] is sorted. Target 0 is not in [4,7], so discard left and search lo=4..6 where 0 lives.',
+          answer:
+            'Left half [4,5,6,7] is sorted. Target 0 is not in [4,7], so discard left and search lo=4..6 where 0 lives.',
         },
       ],
       bad: [
@@ -206,7 +225,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'not found (−1)',
           tone: 'bad',
           question: 'Window collapses with no hit — why is −1 safe?',
-          answer: '3 never appears in the rotated sorted sequence. Binary search exhausts the half-discard logic until lo > hi.',
+          answer:
+            '3 never appears in the rotated sorted sequence. Binary search exhausts the half-discard logic until lo > hi.',
         },
       ],
     },
@@ -219,17 +239,15 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           id: 'adj-list',
           title: 'Two-node graph',
           input: {
-            adj: [
-              [1],
-              [0],
-            ],
+            adj: [[1], [0]],
             pos: circleLayout(2),
           },
           inputLabel: 'nodes 0 ↔ 1',
           returns: 'deep copy with same structure',
           tone: 'ok',
           question: 'Why map old node → new node?',
-          answer: 'When you revisit a node through a cycle, the copy must wire to the already-created clone, not allocate again — the map breaks infinite recursion.',
+          answer:
+            'When you revisit a node through a cycle, the copy must wire to the already-created clone, not allocate again — the map breaks infinite recursion.',
         },
       ],
     },
@@ -250,7 +268,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'distances to all reachable nodes',
           tone: 'ok',
           question: 'Why does BFS give shortest hop count?',
-          answer: 'Nodes are dequeued in non-decreasing distance from the start. The first time you reach a node is along a shortest path in an unweighted graph.',
+          answer:
+            'Nodes are dequeued in non-decreasing distance from the start. The first time you reach a node is along a shortest path in an unweighted graph.',
         },
       ],
       bad: [
@@ -266,7 +285,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'node 5 unreachable (−1)',
           tone: 'bad',
           question: 'Which node never gets dequeued?',
-          answer: 'Node 5 has an empty adjacency list and no path from 0. BFS never paints it, so its distance stays −1.',
+          answer:
+            'Node 5 has an empty adjacency list and no path from 0. BFS never paints it, so its distance stays −1.',
         },
       ],
     },
@@ -283,20 +303,30 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: '2 valid strings: (()) and ()()',
           tone: 'ok',
           question: 'Why can close never exceed open mid-build?',
-          answer: 'A closing paren without a matching open prefix is invalid. The prune keeps every partial string a prefix of some valid completion.',
+          answer:
+            'A closing paren without a matching open prefix is invalid. The prune keeps every partial string a prefix of some valid completion.',
         },
       ],
     },
   },
   'imp-0-03-find-shortest-path-with-bfs': {
     cases: {
-      intro: 'BFS expands layer by layer from src — first time dst is dequeued gives shortest hop count.',
+      intro:
+        'BFS expands layer by layer from src — first time dst is dequeued gives shortest hop count.',
       good: [
         {
           id: 'g7',
           title: '7 nodes · 0→5',
           input: {
-            adj: [[1, 2], [0, 3], [0, 3, 6], [1, 2, 4], [3, 5], [4, 6], [2, 5]],
+            adj: [
+              [1, 2],
+              [0, 3],
+              [0, 3, 6],
+              [1, 2, 4],
+              [3, 5],
+              [4, 6],
+              [2, 5],
+            ],
             pos: circleLayout(7),
             src: 0,
             dst: 5,
@@ -305,7 +335,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'shortest path length 3',
           tone: 'ok',
           question: 'Why does BFS find the shortest route here?',
-          answer: 'BFS visits nodes in non-decreasing distance from src; the first path reconstruction to dst uses the minimum number of edges.',
+          answer:
+            'BFS visits nodes in non-decreasing distance from src; the first path reconstruction to dst uses the minimum number of edges.',
         },
       ],
     },
@@ -329,7 +360,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'found',
           tone: 'ok',
           question: 'Why reuse the same cell letter twice along the path?',
-          answer: 'The path may revisit cells only if the match sequence requires it — here C appears twice in ABCCED along valid adjacent steps.',
+          answer:
+            'The path may revisit cells only if the match sequence requires it — here C appears twice in ABCCED along valid adjacent steps.',
         },
       ],
       bad: [
@@ -348,14 +380,16 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'not found',
           tone: 'bad',
           question: 'Why does ABCB fail on this board?',
-          answer: 'After matching ABC, returning to B would reuse a cell already on the path — DFS backtracks and exhausts without a full match.',
+          answer:
+            'After matching ABC, returning to B would reuse a cell already on the path — DFS backtracks and exhausts without a full match.',
         },
       ],
     },
   },
   'imp-70-maximal-rectangle': {
     cases: {
-      intro: 'For each cell, track histogram height of consecutive 1s upward; largest rectangle in histogram gives best area.',
+      intro:
+        'For each cell, track histogram height of consecutive 1s upward; largest rectangle in histogram gives best area.',
       good: [
         {
           id: 'classic',
@@ -372,14 +406,16 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'max area 6',
           tone: 'ok',
           question: 'What does heights[i][j] represent?',
-          answer: 'The number of consecutive 1s directly above (i,j) inclusive — a histogram bar height for row i.',
+          answer:
+            'The number of consecutive 1s directly above (i,j) inclusive — a histogram bar height for row i.',
         },
       ],
     },
   },
   'imp-54-find-peak-element': {
     cases: {
-      intro: 'Binary search on slope: if nums[mid] < nums[mid+1], peak lies to the right; else to the left.',
+      intro:
+        'Binary search on slope: if nums[mid] < nums[mid+1], peak lies to the right; else to the left.',
       good: [
         {
           id: 'p1',
@@ -389,7 +425,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'peak at index 5 (value 6) or 1 (value 2)',
           tone: 'ok',
           question: 'Why compare mid with mid+1 instead of mid-1?',
-          answer: 'If the right neighbor is larger, the array rises to the right so some peak exists in (mid, hi]; otherwise peak is in [lo, mid].',
+          answer:
+            'If the right neighbor is larger, the array rises to the right so some peak exists in (mid, hi]; otherwise peak is in [lo, mid].',
         },
       ],
     },
@@ -406,14 +443,16 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'missing 2',
           tone: 'ok',
           question: 'Why does nums[mid] ≠ mid shrink the search?',
-          answer: 'If nums[mid] > mid, the hole is at or before mid; if nums[mid] === mid, every index < mid matches so the hole is after mid.',
+          answer:
+            'If nums[mid] > mid, the hole is at or before mid; if nums[mid] === mid, every index < mid matches so the hole is after mid.',
         },
       ],
     },
   },
   'imp-27-combinations': {
     cases: {
-      intro: 'Choose k numbers from 1..n in increasing order — backtrack by trying the next start value.',
+      intro:
+        'Choose k numbers from 1..n in increasing order — backtrack by trying the next start value.',
       good: [
         {
           id: '4c2',
@@ -430,7 +469,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
   },
   'imp-60-coin-change-ii': {
     cases: {
-      intro: 'Count ways to make amount using each coin unlimited times — 1-D DP over coins then amounts.',
+      intro:
+        'Count ways to make amount using each coin unlimited times — 1-D DP over coins then amounts.',
       good: [
         {
           id: 'c125',
@@ -440,7 +480,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: '4 combinations',
           tone: 'ok',
           question: 'Why iterate coins outermost?',
-          answer: 'Processing each coin once per amount layer counts unordered combinations — inner amount loop accumulates ways using that coin repeatedly.',
+          answer:
+            'Processing each coin once per amount layer counts unordered combinations — inner amount loop accumulates ways using that coin repeatedly.',
         },
       ],
     },
@@ -457,14 +498,16 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'LIS length 4',
           tone: 'ok',
           question: 'Can greedy always pick the global minimum next?',
-          answer: 'No — the optimal subsequence may skip a larger value that enables a longer chain later (e.g. 2→5→7→101).',
+          answer:
+            'No — the optimal subsequence may skip a larger value that enables a longer chain later (e.g. 2→5→7→101).',
         },
       ],
     },
   },
   'imp-67-longest-palindromic-subsequence': {
     cases: {
-      intro: 'Interval DP: lps[i][j] best inside s[i..j]; match ends or take max of skipping one end.',
+      intro:
+        'Interval DP: lps[i][j] best inside s[i..j]; match ends or take max of skipping one end.',
       good: [
         {
           id: 'bbbab',
@@ -474,7 +517,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'LPS length 4 (bbbb)',
           tone: 'ok',
           question: 'When s[i] === s[j], what recurrence applies?',
-          answer: 'Matching outer chars add 2 to lps[i+1][j-1]; mismatches take max(lps[i+1][j], lps[i][j-1]).',
+          answer:
+            'Matching outer chars add 2 to lps[i+1][j-1]; mismatches take max(lps[i+1][j], lps[i][j-1]).',
         },
       ],
     },
@@ -491,7 +535,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'longest valid length 4',
           tone: 'ok',
           question: 'Why reset start after an unmatched ")"?',
-          answer: 'A closing paren without a partner breaks the current valid segment — the next candidate starts after it.',
+          answer:
+            'A closing paren without a partner breaks the current valid segment — the next candidate starts after it.',
         },
       ],
     },
@@ -508,14 +553,16 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: '3 distinct subsequences',
           tone: 'ok',
           question: 'Why does matching a char add dp[i-1][j-1]?',
-          answer: 'Using s[i] for t[j] extends every subsequence that already formed t[0..j-1] from s[0..i-1].',
+          answer:
+            'Using s[i] for t[j] extends every subsequence that already formed t[0..j-1] from s[0..i-1].',
         },
       ],
     },
   },
   'imp-78-decode-ways': {
     cases: {
-      intro: 'dp[i] = ways to decode s[0..i); add dp[i-1] if one digit valid, dp[i-2] if two-digit 10–26.',
+      intro:
+        'dp[i] = ways to decode s[0..i); add dp[i-1] if one digit valid, dp[i-2] if two-digit 10–26.',
       good: [
         {
           id: 'd226',
@@ -525,14 +572,16 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: '3 decodings',
           tone: 'ok',
           question: 'What makes "26" a valid two-digit chunk?',
-          answer: 'Leading zero and values > 26 are invalid — 26 maps to "Z" so s="226" splits as 2|2|6, 22|6, or 2|26.',
+          answer:
+            'Leading zero and values > 26 are invalid — 26 maps to "Z" so s="226" splits as 2|2|6, 22|6, or 2|26.',
         },
       ],
     },
   },
   'imp-80-race-car': {
     cases: {
-      intro: 'BFS/DP on (position, speed) — each step accelerates (speed doubles) or reverses direction.',
+      intro:
+        'BFS/DP on (position, speed) — each step accelerates (speed doubles) or reverses direction.',
       good: [
         {
           id: 't3',
@@ -542,24 +591,32 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: '2 instructions (A,A)',
           tone: 'ok',
           question: 'Why is BFS natural here?',
-          answer: 'Each instruction sequence is a state transition; the first time position hits target gives minimum instructions.',
+          answer:
+            'Each instruction sequence is a state transition; the first time position hits target gives minimum instructions.',
         },
       ],
     },
   },
   'imp-5-swim-in-rising-water': {
     cases: {
-      intro: 'Minimize the maximum elevation encountered along a path from top-left to bottom-right.',
+      intro:
+        'Minimize the maximum elevation encountered along a path from top-left to bottom-right.',
       good: [
         {
           id: 'g1',
           title: '2×2 grid',
-          input: { grid: [[0, 2], [1, 3]] },
+          input: {
+            grid: [
+              [0, 2],
+              [1, 3],
+            ],
+          },
           inputLabel: '2×2 elevation grid',
           returns: 'answer 3',
           tone: 'ok',
           question: 'Why is the answer not simply max(grid)?',
-          answer: 'You must follow a path — the minimax route may avoid the global max cell if a detour lowers the required water level.',
+          answer:
+            'You must follow a path — the minimax route may avoid the global max cell if a detour lowers the required water level.',
         },
       ],
     },
@@ -590,7 +647,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'final Q reports merged size',
           tone: 'ok',
           question: 'Why does union by rank help?',
-          answer: 'Shallow trees keep find/union near O(α(n)); path compression flattens during find.',
+          answer:
+            'Shallow trees keep find/union near O(α(n)); path compression flattens during find.',
         },
       ],
     },
@@ -607,7 +665,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'cycle = true',
           tone: 'ok',
           question: 'What edge triggers cycle detection?',
-          answer: 'When exploring from node 2, neighbor 0 is still grey (on the recursion stack) — that back edge closes a cycle.',
+          answer:
+            'When exploring from node 2, neighbor 0 is still grey (on the recursion stack) — that back edge closes a cycle.',
         },
       ],
     },
@@ -632,14 +691,16 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'finds oath and eat',
           tone: 'ok',
           question: 'Why build a trie instead of running Word Search per word?',
-          answer: 'Shared prefixes are explored once; the trie guides DFS and early-prunes dead branches.',
+          answer:
+            'Shared prefixes are explored once; the trie guides DFS and early-prunes dead branches.',
         },
       ],
     },
   },
   'imp-71-maximal-square': {
     cases: {
-      intro: 'dp[i][j] = side of largest square with bottom-right at (i,j); 1 + min of three neighbors if matrix[i][j]=1.',
+      intro:
+        'dp[i][j] = side of largest square with bottom-right at (i,j); 1 + min of three neighbors if matrix[i][j]=1.',
       good: [
         {
           id: 'm4x5',
@@ -656,7 +717,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'max square side 2',
           tone: 'ok',
           question: 'Why take min of three diagonal/up/left neighbors?',
-          answer: 'A 1-cell extends the square only if all three supporting cells already form a square of that size.',
+          answer:
+            'A 1-cell extends the square only if all three supporting cells already form a square of that size.',
         },
       ],
     },
@@ -679,7 +741,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: 'shortest path length 4',
           tone: 'ok',
           question: 'Why 8 directions instead of 4?',
-          answer: 'Problem allows diagonal moves through 0-cells; BFS still yields shortest hop count in that move set.',
+          answer:
+            'Problem allows diagonal moves through 0-cells; BFS still yields shortest hop count in that move set.',
         },
       ],
     },
@@ -705,7 +768,8 @@ export const EXTRA_CASE_BUNDLES: Record<string, PracticeBundle> = {
           returns: '6 moves',
           tone: 'ok',
           question: 'Why carry k in the BFS state?',
-          answer: 'Reaching the same cell with more eliminations left may unlock paths impossible with fewer — state is (r,c,k).',
+          answer:
+            'Reaching the same cell with more eliminations left may unlock paths impossible with fewer — state is (r,c,k).',
         },
       ],
     },

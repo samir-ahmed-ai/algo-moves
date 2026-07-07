@@ -106,7 +106,15 @@ export function Spark({ series, index }: { series: number[]; index: number }) {
   return (
     <svg viewBox={`0 0 ${w} ${h}`} width="100%" height={h} preserveAspectRatio="none">
       <polyline points={pts.join(' ')} fill="none" stroke="var(--team2-stroke)" strokeWidth={1.5} />
-      <line x1={cx} y1={0} x2={cx} y2={h} stroke="var(--accent)" strokeWidth={1} strokeDasharray="2 2" />
+      <line
+        x1={cx}
+        y1={0}
+        x2={cx}
+        y2={h}
+        stroke="var(--accent)"
+        strokeWidth={1}
+        strokeDasharray="2 2"
+      />
     </svg>
   );
 }

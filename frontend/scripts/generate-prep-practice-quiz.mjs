@@ -21,12 +21,23 @@ const topicFilter = (() => {
 })();
 
 const COMPLEXITY_POOL = [
-  'O(1)', 'O(log n)', 'O(n)', 'O(n log n)', 'O(n²)', 'O(n³)', 'O(2ⁿ)', 'O(m·n)', 'O(m+n)',
+  'O(1)',
+  'O(log n)',
+  'O(n)',
+  'O(n log n)',
+  'O(n²)',
+  'O(n³)',
+  'O(2ⁿ)',
+  'O(m·n)',
+  'O(m+n)',
 ];
 
 const GENERIC_DETAILS = new Set([
-  'plausible distractor', 'typical bound here', 'typical for this pattern',
-  'short rationale', 'wrong approach here',
+  'plausible distractor',
+  'typical bound here',
+  'typical for this pattern',
+  'short rationale',
+  'wrong approach here',
 ]);
 const BAD_HEADLINE_END =
   /\b(have|has|had|are|is|was|were|been|a|an|the|no|at|on|in|to|for|with|by|from|that|when|where|if|so|as|may|would|could|should|can|will|be|of|and|or|not|its|it|dequeued|being|each|all|before|after|into|only|just|also|still|un)\s*$/i;
@@ -73,7 +84,11 @@ function quizLabelIssues(label) {
 }
 
 function sanitizeHeadline(s) {
-  let h = s.replace(/\$\{[^}]+\}/g, '').replace(/…/g, '').replace(/\s+/g, ' ').trim();
+  let h = s
+    .replace(/\$\{[^}]+\}/g, '')
+    .replace(/…/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
   h = truncateChars(h, 42);
   for (let i = 0; i < 4 && BAD_HEADLINE_END.test(h); i++) {
     const words = h.split(' ');
@@ -166,7 +181,12 @@ function buildPatternChoices(pattern, pool, seed) {
 
 function buildComplexityChoices(entry, peers, seed) {
   const correct = `${entry.time} time, ${entry.space || 'O(1)'} space`;
-  const pool = [...new Set([...peers.map((p) => `${p.time} time, ${p.space || 'O(1)'} space`), ...COMPLEXITY_POOL.map((t) => `${t} time, O(n) space`)])];
+  const pool = [
+    ...new Set([
+      ...peers.map((p) => `${p.time} time, ${p.space || 'O(1)'} space`),
+      ...COMPLEXITY_POOL.map((t) => `${t} time, O(n) space`),
+    ]),
+  ];
   const distractors = pickDistractors(correct, pool, 3, seed + 7);
   return [
     mkChoice(correct, 'standard bounds here', true),
@@ -199,7 +219,10 @@ function generateQuiz(entry, simSrc) {
   }
 
   if (init) {
-    const strategyHeadline = truncateWords((entry.visual || init.caption).replace(/\$\{[^}]+\}/g, ''), 6);
+    const strategyHeadline = truncateWords(
+      (entry.visual || init.caption).replace(/\$\{[^}]+\}/g, ''),
+      6,
+    );
     questions.push({
       id: 'init',
       prompt: `At the start of a run (${entry.title}), what strategy is established?`,
@@ -228,9 +251,10 @@ function generateQuiz(entry, simSrc) {
     });
   }
 
-  const field = stateFields.find((f) => !['done', 'op', 'cap'].includes(f) && stateComments[f])
-    ?? stateFields.find((f) => !['done', 'op'].includes(f))
-    ?? stateFields[0];
+  const field =
+    stateFields.find((f) => !['done', 'op', 'cap'].includes(f) && stateComments[f]) ??
+    stateFields.find((f) => !['done', 'op'].includes(f)) ??
+    stateFields[0];
 
   if (field) {
     const comment = stateComments[field]?.replace(/\$\{[^}]+\}/g, '');
@@ -297,16 +321,16 @@ function serializeQuiz(quiz) {
 function ensureQuizImport(src) {
   if (/type QuizQuestion/.test(src)) {
     return src
-      .replace(/\nimport type \{ QuizQuestion \} from '\.\.\/\.\.\/\.\.\/\.\.\/core\/types';\n/, '\n')
       .replace(
-        /import \{ ([^}]+) \} from '\.\.\/\.\.\/\.\.\/\.\.\/core\/types';/,
-        (m, types) => {
-          if (types.includes('QuizQuestion')) {
-            return `import { ${types.replace(/\s+,/g, ',').replace(/,\s+/g, ', ').trim()} } from '../../../../core/types';`;
-          }
-          return `import { ${types.trim()}, type QuizQuestion } from '../../../../core/types';`;
-        },
-      );
+        /\nimport type \{ QuizQuestion \} from '\.\.\/\.\.\/\.\.\/\.\.\/core\/types';\n/,
+        '\n',
+      )
+      .replace(/import \{ ([^}]+) \} from '\.\.\/\.\.\/\.\.\/\.\.\/core\/types';/, (m, types) => {
+        if (types.includes('QuizQuestion')) {
+          return `import { ${types.replace(/\s+,/g, ',').replace(/,\s+/g, ', ').trim()} } from '../../../../core/types';`;
+        }
+        return `import { ${types.trim()}, type QuizQuestion } from '../../../../core/types';`;
+      });
   }
   return src.replace(
     /import \{ ([^}]+) \} from '\.\.\/\.\.\/\.\.\/\.\.\/core\/types';/,
@@ -347,7 +371,9 @@ let updated = 0;
 let skipped = 0;
 const allIssues = [];
 
-for (const name of readdirSync(simDir).filter((n) => n.endsWith('.tsx')).sort()) {
+for (const name of readdirSync(simDir)
+  .filter((n) => n.endsWith('.tsx'))
+  .sort()) {
   const path = join(simDir, name);
   const src = readFileSync(path, 'utf8');
   const idMatch = src.match(/manifestId\s*=\s*['"]([^'"]+)['"]/);
@@ -377,7 +403,9 @@ for (const name of readdirSync(simDir).filter((n) => n.endsWith('.tsx')).sort())
   updated++;
 }
 
-console.log(`generate-prep-practice-quiz: ${updated} file(s)${dryRun ? ' (dry-run)' : ''}${skipped ? `, ${skipped} skipped` : ''}`);
+console.log(
+  `generate-prep-practice-quiz: ${updated} file(s)${dryRun ? ' (dry-run)' : ''}${skipped ? `, ${skipped} skipped` : ''}`,
+);
 if (allIssues.length) {
   console.warn(`total label issues: ${allIssues.length} (first 8):`);
   for (const i of allIssues.slice(0, 8)) console.warn(`  ${i}`);

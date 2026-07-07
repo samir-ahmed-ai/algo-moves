@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -30,8 +36,7 @@ function insertSorted(locs: Loc[], name: string, score: number): Loc[] {
   while (lo < hi) {
     const mid = (lo + hi) >> 1;
     const cur = locs[mid];
-    const before =
-      cur.score < score || (cur.score === score && cur.name > name);
+    const before = cur.score < score || (cur.score === score && cur.name > name);
     if (before) lo = mid + 1;
     else hi = mid;
   }
@@ -40,16 +45,17 @@ function insertSorted(locs: Loc[], name: string, score: number): Loc[] {
   return out;
 }
 
-function record({ ops }: SorInput): Frame<SorState>[] {  let locs: Loc[] = [];
+function record({ ops }: SorInput): Frame<SorState>[] {
+  let locs: Loc[] = [];
   let idx = 0;
 
   const { emit, frames } = createRecorder<SorState>(() => ({
-        locs: locs.map((x) => ({ ...x })),
-        idx,
-        op: '',
-        result: '',
-        done: false
-      }));
+    locs: locs.map((x) => ({ ...x })),
+    idx,
+    op: '',
+    result: '',
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -128,92 +134,88 @@ function Inspector({ frame }: InspectorProps<SorState>) {
 export const manifestId = 'prep-design-sequentially-ordinal-rank-tracker';
 export const title = 'Sequentially Ordinal Rank Tracker';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Sequentially Ordinal Rank Tracker\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Sequentially Ordinal Rank Tracker"?',
     choices: [
       {
-        label: "Design — fits this problem",
-        correct: true
+        label: 'Design — fits this problem',
+        correct: true,
       },
       {
-        label: "Trie dictionary + spell suggest — different approach"
+        label: 'Trie dictionary + spell suggest — different approach',
       },
       {
-        label: "Hash map + doubly linked list LRU — different approach"
+        label: 'Hash map + doubly linked list LRU — different approach',
       },
       {
-        label: "Heap + Sorted Available Set — different approach"
-      }
+        label: 'Heap + Sorted Available Set — different approach',
+      },
     ],
-    explain: "See Sequentially Ordinal Rank Tracker pattern"
+    explain: 'See Sequentially Ordinal Rank Tracker pattern',
   },
   {
-    id: "key-step",
-    prompt: "On the \"ADD\" step (@), what happens?",
+    id: 'key-step',
+    prompt: 'On the "ADD" step (@), what happens?',
     choices: [
       {
-        label: "Add(\"\", ): binary-search insert. Rank — this move caption",
-        correct: true
+        label: 'Add("", ): binary-search insert. Rank — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Add(\"\", ): binary-search insert. Rank list: [${locs.map((x) => "
+    explain: 'Add("", ): binary-search insert. Rank list: [${locs.map((x) => ',
   },
   {
-    id: "state",
-    prompt: "What does the `locs` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `locs` field track in the visualization state?',
     choices: [
       {
-        label: "Field locs in state — updated each frame",
-        correct: true
+        label: 'Field locs in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `locs` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `locs` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Add(\"\", ): binary-search insert. Rank — final DONE caption",
-        correct: true
+        label: 'Add("", ): binary-search insert. Rank — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Add(\"\", ): binary-search insert. Rank list: [${locs.map((x) => "
-  }
+    explain: 'Add("", ): binary-search insert. Rank list: [${locs.map((x) => ',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

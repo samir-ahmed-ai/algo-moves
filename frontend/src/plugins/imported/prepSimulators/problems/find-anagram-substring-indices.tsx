@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+} from '../../../_shared/vizKit';
 
 interface AnagramInput {
   s: string;
@@ -127,7 +141,8 @@ function View({ frame }: PluginViewProps<AnagramState>) {
   const pointers: ArrayPointer[] = [];
   if (s.r !== null) pointers.push({ i: s.r, label: 'r', tone: 'accent', place: 'above' });
   if (s.winLo !== null) pointers.push({ i: s.winLo, label: 'lo', tone: 'good', place: 'below' });
-  if (s.dropped !== null) pointers.push({ i: s.dropped, label: 'drop', tone: 'bad', place: 'below' });
+  if (s.dropped !== null)
+    pointers.push({ i: s.dropped, label: 'drop', tone: 'bad', place: 'below' });
 
   const foundSet = new Set(s.found);
   const tone = (i: number) => {
@@ -146,7 +161,11 @@ function View({ frame }: PluginViewProps<AnagramState>) {
         <RailStat k="len" v={s.pLen} />
       </RailGroup>
       <RailGroup label="window">
-        <RailStat k="off" v={s.nonZero} tone={s.nonZero === 0 && s.r !== null ? 'good' : 'accent'} />
+        <RailStat
+          k="off"
+          v={s.nonZero}
+          tone={s.nonZero === 0 && s.r !== null ? 'good' : 'accent'}
+        />
       </RailGroup>
       <RailResult
         label="starts"
@@ -177,7 +196,10 @@ function Inspector({ frame }: InspectorProps<AnagramState>) {
       <InspectorRow k="r (right)" v={s.r ?? '—'} />
       <InspectorRow k="window" v={win} />
       <InspectorRow k="letters off" v={s.nonZero} />
-      <InspectorRow k="matches" v={s.found.length ? `[${s.found.join(', ')}]` : s.done ? 'none' : '…'} />
+      <InspectorRow
+        k="matches"
+        v={s.found.length ? `[${s.found.join(', ')}]` : s.done ? 'none' : '…'}
+      />
     </VarGrid>
   );
 }
@@ -198,112 +220,109 @@ function compute(s: string, p: string): number[] {
   return out;
 }
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Find anagram substring indices\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Find anagram substring indices"?',
     choices: [
       {
-        label: "Sliding window freq — fits this problem",
-        correct: true
+        label: 'Sliding window freq — fits this problem',
+        correct: true,
       },
       {
-        label: "Greedy Line Packing — different approach"
+        label: 'Greedy Line Packing — different approach',
       },
       {
-        label: "Vertical scan — different approach"
+        label: 'Vertical scan — different approach',
       },
       {
-        label: "Split + Reverse — different approach"
-      }
+        label: 'Split + Reverse — different approach',
+      },
     ],
-    explain: "26-count window slides; all-zero counts means anagram here"
+    explain: '26-count window slides; all-zero counts means anagram here',
   },
   {
-    id: "key-step",
-    prompt: "On the \"DROP\" step (- ''), what happens?",
+    id: 'key-step',
+    prompt: 'On the "DROP" step (- \'\'), what happens?',
     choices: [
       {
-        label: "Window now exceeds length  — this move caption",
-        correct: true
+        label: 'Window now exceeds length  — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Window now exceeds length , so bite off the left letter '' at index : undo its effect by adding 1 back. The window stays exactly  wide."
+    explain:
+      "Window now exceeds length , so bite off the left letter '' at index : undo its effect by adding 1 back. The window stays exactly  wide.",
   },
   {
-    id: "state",
-    prompt: "What does the `chars` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `chars` field track in the visualization state?',
     choices: [
       {
-        label: "s split into characters — updated each frame",
-        correct: true
+        label: 's split into characters — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `chars` in sync: s split into characters"
+    explain: 'The recorder keeps `chars` in sync: s split into characters',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Find anagram substring indices\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Find anagram substring indices"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n*m) time, O(1) space — wrong order of growth"
+        label: 'O(n*m) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O( time, O(words) space — wrong order of growth"
-      }
+        label: 'O( time, O(words) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). add s[r], drop s[r-len(p)]; all-zero -> record start"
+    explain: 'O(n). O(1). add s[r], drop s[r-len(p)]; all-zero -> record start',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Check window s[..] = \"\": letter — final DONE caption",
-        correct: true
+        label: 'Check window s[..] = "": letter — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Check window s[..] = \"\":  letter still off-balance, so it is not an anagram. Slide on."
-  }
+    explain:
+      'Check window s[..] = "":  letter still off-balance, so it is not an anagram. Slide on.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

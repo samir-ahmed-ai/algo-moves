@@ -1,9 +1,28 @@
-import { useCallback, useEffect, useRef, type Dispatch, type MutableRefObject, type RefObject, type SetStateAction } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  type Dispatch,
+  type MutableRefObject,
+  type RefObject,
+  type SetStateAction,
+} from 'react';
 import type { Edge } from '@xyflow/react';
 import type { CanvasMode, Frame, Player, ProblemPlugin } from '@/core';
 import type { PanelFlowNode } from '@/core/panelFlowTypes';
 import { saveCanvasPrefs } from '@/store/canvas-layout';
-import { buildEdges, edgeConnectionLabel, modeNodeIds, REQUIRED_VISUALIZE_EDGES, standaloneNodeIds, styleEdges, type BgVariant, type EdgeOpts, type LayoutDir, type LayoutVisualizeOptions } from '../layout';
+import {
+  buildEdges,
+  edgeConnectionLabel,
+  modeNodeIds,
+  REQUIRED_VISUALIZE_EDGES,
+  standaloneNodeIds,
+  styleEdges,
+  type BgVariant,
+  type EdgeOpts,
+  type LayoutDir,
+  type LayoutVisualizeOptions,
+} from '../layout/layout';
 import { buildCanvasFrame, organizeCurrentCanvasFrameAsync } from '../frame';
 import { sanitizeVisualizeEdges } from '../edges';
 import { snapNodeLayout } from '../nodes/nodeSnapshot';
@@ -27,7 +46,10 @@ export type UseCanvasLifecycleOptions = {
   removedRef: MutableRefObject<Record<string, Set<string>>>;
   removedEdgesRef: MutableRefObject<Record<string, Set<string>>>;
   viewportRef: MutableRefObject<Record<string, { x: number; y: number; zoom: number }>>;
-  setViewport: (viewport: { x: number; y: number; zoom: number }, options?: { duration?: number }) => void;
+  setViewport: (
+    viewport: { x: number; y: number; zoom: number },
+    options?: { duration?: number },
+  ) => void;
   persist: () => void;
   buildFor: (m: CanvasMode, k: string) => { nodes: PanelFlowNode[]; edges: Edge[] };
   layoutOpts: () => LayoutVisualizeOptions;
@@ -162,7 +184,9 @@ export function useCanvasLifecycle({
     });
     layoutRef.current[prevKeyRef.current] = snap;
     const prevNodeIds = standalone ? standaloneNodeIds() : modeNodeIds(plugin, prevModeRef.current);
-    removedRef.current[prevKeyRef.current] = new Set(prevNodeIds.filter((id) => !presentIds.has(id)));
+    removedRef.current[prevKeyRef.current] = new Set(
+      prevNodeIds.filter((id) => !presentIds.has(id)),
+    );
     prevKeyRef.current = key;
     prevModeRef.current = mode;
 
@@ -201,7 +225,17 @@ export function useCanvasLifecycle({
     const nodeIds = standalone ? standaloneNodeIds() : modeNodeIds(plugin, mode);
     removedRef.current[key] = new Set(nodeIds.filter((id) => !presentIds.has(id)));
     persist();
-  }, [nodes, key, plugin, mode, persist, collab.isCollaborating, standalone, layoutRef, removedRef]);
+  }, [
+    nodes,
+    key,
+    plugin,
+    mode,
+    persist,
+    collab.isCollaborating,
+    standalone,
+    layoutRef,
+    removedRef,
+  ]);
 
   const persistViewport = useCallback(
     (vp: { x: number; y: number; zoom: number }) => {
@@ -256,7 +290,12 @@ export function useCanvasLifecycle({
     if (standalone || mode !== 'visualize' || nodes.length > 0) return;
     if (autoRestoredProblemCanvasRef.current.has(key)) return;
     const id = window.setTimeout(() => {
-      if (collab.isCollaborating || nodesRef.current.length > 0 || autoRestoredProblemCanvasRef.current.has(key)) return;
+      if (
+        collab.isCollaborating ||
+        nodesRef.current.length > 0 ||
+        autoRestoredProblemCanvasRef.current.has(key)
+      )
+        return;
       autoRestoredProblemCanvasRef.current.add(key);
       restoreProblemStarterPanels();
     }, 60);
@@ -276,7 +315,21 @@ export function useCanvasLifecycle({
       setEdges(tidy.edges);
       requestAnimationFrame(() => fitCanvas());
     });
-  }, [plugin, mode, key, edgeOpts, dir, setNodes, setEdges, fitCanvas, layoutOpts, standalone, layoutRef, removedRef, removedEdgesRef]);
+  }, [
+    plugin,
+    mode,
+    key,
+    edgeOpts,
+    dir,
+    setNodes,
+    setEdges,
+    fitCanvas,
+    layoutOpts,
+    standalone,
+    layoutRef,
+    removedRef,
+    removedEdgesRef,
+  ]);
 
   useEffect(() => {
     const id = requestAnimationFrame(() => fitCanvas(200));

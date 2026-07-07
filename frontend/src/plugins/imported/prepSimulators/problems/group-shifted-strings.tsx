@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -30,23 +36,23 @@ function shift(a: string, b: string): number {
   return (b.charCodeAt(0) - a.charCodeAt(0) + 26) % 26;
 }
 
-function record({ words }: GroupShiftedInput): Frame<GroupShiftedState>[] {  const groups = new Map<string, string[]>();
+function record({ words }: GroupShiftedInput): Frame<GroupShiftedState>[] {
+  const groups = new Map<string, string[]>();
 
-  const snapshotGroups = (): GroupEntry[] =>
-    [...groups.entries()].map(([k, v]) => [k, [...v]]);
+  const snapshotGroups = (): GroupEntry[] => [...groups.entries()].map(([k, v]) => [k, [...v]]);
 
   const { emit, frames } = createRecorder<GroupShiftedState>(() => ({
-        words,
-        wi: null,
-        chars: [],
-        ci: null,
-        diffs: [],
-        key: null,
-        groups: snapshotGroups(),
-        assignedKey: null,
-        done: false,
-        result: groups.size
-      }));
+    words,
+    wi: null,
+    chars: [],
+    ci: null,
+    diffs: [],
+    key: null,
+    groups: snapshotGroups(),
+    assignedKey: null,
+    done: false,
+    result: groups.size,
+  }));
 
   emit(
     'INIT',
@@ -131,8 +137,7 @@ function View({ frame }: PluginViewProps<GroupShiftedState>) {
       <div className={cn(vizText.sm, 'text-ink3')}>
         {s.wi !== null ? (
           <>
-            word #{s.wi} ={' '}
-            <span className="font-mono text-ink">"{s.words[s.wi]}"</span>
+            word #{s.wi} = <span className="font-mono text-ink">"{s.words[s.wi]}"</span>
           </>
         ) : (
           <>{s.words.length} words to group</>
@@ -159,9 +164,7 @@ function View({ frame }: PluginViewProps<GroupShiftedState>) {
         groups {'{'}
         {s.groups.length === 0
           ? ''
-          : s.groups
-              .map(([k, members]) => `${k || '∅'}: [${members.join(', ')}]`)
-              .join('  |  ')}
+          : s.groups.map(([k, members]) => `${k || '∅'}: [${members.join(', ')}]`).join('  |  ')}
         {'}'}
       </div>
 
@@ -192,132 +195,129 @@ function Inspector({ frame }: InspectorProps<GroupShiftedState>) {
 export const manifestId = 'prep-strings-group-shifted-strings';
 export const title = 'Group Shifted Strings';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Group Shifted Strings\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Group Shifted Strings"?',
     choices: [
       {
-        label: "Hash Map (diff key) — fits this problem",
-        correct: true
+        label: 'Hash Map (diff key) — fits this problem',
+        correct: true,
       },
       {
-        label: "DP palindrome — different approach"
+        label: 'DP palindrome — different approach',
       },
       {
-        label: "Wildcard Hash Set — different approach"
+        label: 'Wildcard Hash Set — different approach',
       },
       {
-        label: "Hash by signature — different approach"
-      }
+        label: 'Hash by signature — different approach',
+      },
     ],
-    explain: "See Group Shifted Strings pattern"
+    explain: 'See Group Shifted Strings pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Group Shifted Strings), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Group Shifted Strings), what strategy is established?',
     choices: [
       {
-        label: "See Group Shifted Strings pattern — described in INIT caption",
-        correct: true
+        label: 'See Group Shifted Strings pattern — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Group Shifted Strings: two words belong together if one is a repeated single-shift of the other. We fingerprint each word by the gaps between neighbouring letters (mod 26) and group words that share the same fingerprint."
+    explain:
+      'Group Shifted Strings: two words belong together if one is a repeated single-shift of the other. We fingerprint each word by the gaps between neighbouring letters (mod 26) and group words that share the same fingerprint.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"MATCH\" step (key \"\"), what happens?",
+    id: 'key-step',
+    prompt: 'On the "MATCH" step (key ""), what happens?',
     choices: [
       {
-        label: "Key for \"\" is \"\", which — this move caption",
-        correct: true
+        label: 'Key for "" is "", which — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Key for \"\" is \"\", which already exists — add \"\" to that existing group. No new group created."
+    explain:
+      'Key for "" is "", which already exists — add "" to that existing group. No new group created.',
   },
   {
-    id: "state",
-    prompt: "What does the `wi` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `wi` field track in the visualization state?',
     choices: [
       {
-        label: "index of the word — updated each frame",
-        correct: true
+        label: 'index of the word — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `wi` in sync: index of the word being processed"
+    explain: 'The recorder keeps `wi` in sync: index of the word being processed',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Group Shifted Strings\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Group Shifted Strings"?',
     choices: [
       {
-        label: "O(n·L) time, O(n·L) space — standard bounds here",
-        correct: true
+        label: 'O(n·L) time, O(n·L) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n·26) time, O(n) space — wrong order of growth"
+        label: 'O(n·26) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(log n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n·L). O(n·L). Group Shifted Strings"
+    explain: 'O(n·L). O(n·L). Group Shifted Strings',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Every word placed. There are distinct — final DONE caption",
-        correct: true
+        label: 'Every word placed. There are distinct — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Every word placed. There are  distinct shift groups — that is the answer."
-  }
+    explain: 'Every word placed. There are  distinct shift groups — that is the answer.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

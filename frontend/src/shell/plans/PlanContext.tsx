@@ -9,11 +9,7 @@ import {
 } from 'react';
 import { useAuth } from '@/shell/auth/AuthProvider';
 import { STORAGE_KEYS } from '@/store/storageKeys';
-import {
-  readStorageJson,
-  removeStorageValue,
-  writeStorageJson,
-} from '@/store/persistence/storage';
+import { readStorageJson, removeStorageValue, writeStorageJson } from '@/store/persistence/storage';
 import { getPrepPlan, updatePrepPlan, type PrepPlan } from './data/prepPlansApi';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -114,24 +110,21 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     writeStorageJson(STORAGE_KEYS.PREP_PLAN_ACTIVE, { planId, running } satisfies PersistedActive);
   }, []);
 
-  const doSave = useCallback(
-    async (plan: PrepPlan, ids: string[], comp: Set<string>) => {
-      setSaving(true);
-      try {
-        const updated = await updatePrepPlan(plan.id, {
-          title: plan.title,
-          notes: plan.notes,
-          itemIds: ids,
-          completedItems: [...comp],
-        });
-        if (updated) setActivePlan(updated);
-      } finally {
-        setSaving(false);
-        pendingSave.current = null;
-      }
-    },
-    [],
-  );
+  const doSave = useCallback(async (plan: PrepPlan, ids: string[], comp: Set<string>) => {
+    setSaving(true);
+    try {
+      const updated = await updatePrepPlan(plan.id, {
+        title: plan.title,
+        notes: plan.notes,
+        itemIds: ids,
+        completedItems: [...comp],
+      });
+      if (updated) setActivePlan(updated);
+    } finally {
+      setSaving(false);
+      pendingSave.current = null;
+    }
+  }, []);
 
   const scheduleSave = useCallback(
     (plan: PrepPlan, ids: string[], comp: Set<string>) => {
@@ -249,7 +242,8 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     (fromIndex: number, toIndex: number) => {
       if (!activePlan) return;
       setItemIds((prev) => {
-        if (fromIndex < 0 || fromIndex >= prev.length || toIndex < 0 || toIndex >= prev.length) return prev;
+        if (fromIndex < 0 || fromIndex >= prev.length || toIndex < 0 || toIndex >= prev.length)
+          return prev;
         const next = [...prev];
         const [moved] = next.splice(fromIndex, 1);
         next.splice(toIndex, 0, moved);

@@ -25,7 +25,8 @@ export function ConnectedComponentsProvider({
     return {
       components,
       indexOf: (id: string) => indexMap.get(id) ?? -1,
-      sameComponent: (a: string, b: string) => indexMap.get(a) === indexMap.get(b) && indexMap.has(a),
+      sameComponent: (a: string, b: string) =>
+        indexMap.get(a) === indexMap.get(b) && indexMap.has(a),
     };
   }, [nodeIds, edges]);
 
@@ -34,7 +35,8 @@ export function ConnectedComponentsProvider({
 
 export function useConnectedComponents() {
   const ctx = useContext(Ctx);
-  if (!ctx) throw new Error('useConnectedComponents must be used inside ConnectedComponentsProvider');
+  if (!ctx)
+    throw new Error('useConnectedComponents must be used inside ConnectedComponentsProvider');
   return ctx;
 }
 

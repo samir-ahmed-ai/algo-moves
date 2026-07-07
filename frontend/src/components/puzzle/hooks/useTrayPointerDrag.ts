@@ -3,7 +3,11 @@ import type { CodePiece } from '@/lib/code';
 
 const DRAG_THRESHOLD = 8;
 
-function isOverAssembled(clientX: number, clientY: number, assembledEl: HTMLElement | null): boolean {
+function isOverAssembled(
+  clientX: number,
+  clientY: number,
+  assembledEl: HTMLElement | null,
+): boolean {
   if (!assembledEl) return false;
   const r = assembledEl.getBoundingClientRect();
   return clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom;
@@ -21,9 +25,12 @@ export function useTrayPointerDrag({
   onPlace: (piece: CodePiece, index: number) => void;
   setDragOver: (over: boolean) => void;
 }) {
-  const [pointerGhost, setPointerGhost] = useState<{ piece: CodePiece; x: number; y: number; width: number } | null>(
-    null,
-  );
+  const [pointerGhost, setPointerGhost] = useState<{
+    piece: CodePiece;
+    x: number;
+    y: number;
+    width: number;
+  } | null>(null);
   const pointerDragRef = useRef<{
     piece: CodePiece;
     startX: number;

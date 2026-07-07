@@ -1,8 +1,9 @@
 import type { GameDef } from '../../types';
+import { GAME_ID_REACTION_DUEL } from '../../_generated/gameIds';
 import { ReactionDuel } from './ReactionDuel';
 
 const reactionDuel: GameDef = {
-  id: 'reaction-duel',
+  id: GAME_ID_REACTION_DUEL,
   title: 'Reaction Duel',
   tagline: 'Tap the moment it turns green — fastest wins.',
   minutes: '~2 min',

@@ -69,7 +69,9 @@ describe('buildCanvasFrame', () => {
     const { nodes, edges } = buildCanvasFrame(stubPlugin, 'learn', { ...baseInput, removed });
     expect(nodes.some((n) => n.id === full.nodes[0].id)).toBe(false);
     expect(nodes.length).toBe(full.nodes.length - 1);
-    expect(edges.every((e) => e.source !== full.nodes[0].id && e.target !== full.nodes[0].id)).toBe(true);
+    expect(edges.every((e) => e.source !== full.nodes[0].id && e.target !== full.nodes[0].id)).toBe(
+      true,
+    );
   });
 
   it('drops removed edges', () => {

@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -22,26 +28,26 @@ interface PopulationState {
   phase: 'build' | 'sweep' | 'done';
 }
 
-function record({ years }: PopulationInput): Frame<PopulationState>[] {  const delta = new Map<number, number>();
+function record({ years }: PopulationInput): Frame<PopulationState>[] {
+  const delta = new Map<number, number>();
 
   // We keep yearKeys / prefix stable across frames so the axis does not jump.
   // They are computed once the delta map is fully built; before that the
   // sweep-only fields stay null/empty.
-  const deltaEntries = (): [number, number][] =>
-    [...delta.entries()].sort((a, b) => a[0] - b[0]);
+  const deltaEntries = (): [number, number][] => [...delta.entries()].sort((a, b) => a[0] - b[0]);
 
   const { emit, frames } = createRecorder<PopulationState>(() => ({
-        intervals: years,
-        delta: deltaEntries(),
-        yearKeys: [],
-        prefix: [],
-        i: null,
-        buildPair: null,
-        pop: 0,
-        bestPop: 0,
-        bestYear: null,
-        phase: 'build'
-      }));
+    intervals: years,
+    delta: deltaEntries(),
+    yearKeys: [],
+    prefix: [],
+    i: null,
+    buildPair: null,
+    pop: 0,
+    bestPop: 0,
+    bestYear: null,
+    phase: 'build',
+  }));
 
   emit(
     'INIT',
@@ -149,10 +155,7 @@ function View({ frame }: PluginViewProps<PopulationState>) {
         </div>
         <div className={cn('mt-2 flex flex-col gap-1 font-mono', vizText.sm)}>
           {s.intervals.map(([b, d], p) => (
-            <div
-              key={p}
-              className={cn(s.buildPair === p ? 'text-accent' : 'text-ink2')}
-            >
+            <div key={p} className={cn(s.buildPair === p ? 'text-accent' : 'text-ink2')}>
               person {p}: [{b}, {d}]
             </div>
           ))}
@@ -185,10 +188,8 @@ function View({ frame }: PluginViewProps<PopulationState>) {
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
-        sweep — running population ={' '}
-        <span className="font-mono text-ink">{s.pop}</span>
-        {' · '}best ={' '}
-        <span className="font-mono text-ink">{s.bestPop}</span>
+        sweep — running population = <span className="font-mono text-ink">{s.pop}</span>
+        {' · '}best = <span className="font-mono text-ink">{s.bestPop}</span>
         {s.bestYear !== null && (
           <>
             {' @ year '}
@@ -197,17 +198,11 @@ function View({ frame }: PluginViewProps<PopulationState>) {
         )}
       </div>
       <div className={cn('mt-1', vizText.sm, 'text-ink3')}>year axis (sorted change points):</div>
-      <ArrayRow
-        values={s.yearKeys}
-        cellTone={cellTone}
-        pointers={pointers}
-        windowRange={null}
-      />
+      <ArrayRow values={s.yearKeys} cellTone={cellTone} pointers={pointers} windowRange={null} />
       <div className={cn('mt-2', vizText.sm, 'text-ink3')}>delta at each year:</div>
       <ArrayRow values={deltaRow} cellTone={cellTone} windowRange={null} />
       <div className={cn('mt-2 font-mono', vizText.sm, 'text-ink3')}>
-        prefix population: [
-        {s.prefix.map((v) => (v === null ? '·' : v)).join(', ')}]
+        prefix population: [{s.prefix.map((v) => (v === null ? '·' : v)).join(', ')}]
       </div>
       {s.phase === 'done' && s.bestYear !== null && (
         <div className={cn('mt-1 font-mono text-good', vizText.base)}>→ year {s.bestYear}</div>
@@ -240,132 +235,130 @@ function Inspector({ frame }: InspectorProps<PopulationState>) {
 export const manifestId = 'prep-hash-maps-find-year-with-most-population';
 export const title = 'Find year with most population';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Find year with most population\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Find year with most population"?',
     choices: [
       {
-        label: "Sweep line / delta map — fits this problem",
-        correct: true
+        label: 'Sweep line / delta map — fits this problem',
+        correct: true,
       },
       {
-        label: "Binary search on answer — different approach"
+        label: 'Binary search on answer — different approach',
       },
       {
-        label: "Two-pass frequency map — different approach"
+        label: 'Two-pass frequency map — different approach',
       },
       {
-        label: "Custom hash key / struct map — different approach"
-      }
+        label: 'Custom hash key / struct map — different approach',
+      },
     ],
-    explain: "+1 at birth, -1 at death+1; sweep years tracking running population"
+    explain: '+1 at birth, -1 at death+1; sweep years tracking running population',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Find year with most population), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Find year with most population), what strategy is established?',
     choices: [
       {
-        label: "+1 at birth, -1 at death+1; — described in INIT caption",
-        correct: true
+        label: '+1 at birth, -1 at death+1; — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Find the year with the most people alive. Each person spans [birth, death]. Instead of touching every year of every life, we record only the changes: +1 the year someone is born, −1 the year after they die. Then a single sweep of the change points gives the running population."
+    explain:
+      'Find the year with the most people alive. Each person spans [birth, death]. Instead of touching every year of every life, we record only the changes: +1 the year someone is born, −1 the year after they die. Then a single sweep of the change points gives the running population.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"SORT\" step ( change years), what happens?",
+    id: 'key-step',
+    prompt: 'On the "SORT" step ( change years), what happens?',
     choices: [
       {
-        label: "The delta map is complete. Collect — this move caption",
-        correct: true
+        label: 'The delta map is complete. Collect — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "The delta map is complete. Collect its keys and sort them: []. These are the only years where the population can change, so we sweep them left to right with a prefix sum."
+    explain:
+      'The delta map is complete. Collect its keys and sort them: []. These are the only years where the population can change, so we sweep them left to right with a prefix sum.',
   },
   {
-    id: "state",
-    prompt: "What does the `intervals` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `intervals` field track in the visualization state?',
     choices: [
       {
-        label: "the raw input intervals — updated each frame",
-        correct: true
+        label: 'the raw input intervals — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `intervals` in sync: the raw input intervals"
+    explain: 'The recorder keeps `intervals` in sync: the raw input intervals',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Find year with most population\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Find year with most population"?',
     choices: [
       {
-        label: "O(p log p) time, O(y) space — standard bounds here",
-        correct: true
+        label: 'O(p log p) time, O(y) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(t log t) time, O(t) space — wrong order of growth"
+        label: 'O(t log t) time, O(t) space — wrong order of growth',
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n²) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(p log p). O(y). delta[birth]++, delta[death+1]--; prefix-sum, track peak year"
+    explain: 'O(p log p). O(y). delta[birth]++, delta[death+1]--; prefix-sum, track peak year',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "The sweep is finished. The maximum — final DONE caption",
-        correct: true
+        label: 'The sweep is finished. The maximum — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "The sweep is finished. The maximum running population was , first reached in year . Return ."
-  }
+    explain:
+      'The sweep is finished. The maximum running population was , first reached in year . Return .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -373,12 +366,23 @@ export const simulator: ProblemSimulator = {
     {
       id: 'pop1',
       label: '[[1993,1999],[2000,2010]]',
-      value: { years: [[1993, 1999], [2000, 2010]] },
+      value: {
+        years: [
+          [1993, 1999],
+          [2000, 2010],
+        ],
+      },
     },
     {
       id: 'pop2',
       label: '[[1950,1961],[1960,1971],[1960,1971]]',
-      value: { years: [[1950, 1961], [1960, 1971], [1960, 1971]] },
+      value: {
+        years: [
+          [1950, 1961],
+          [1960, 1971],
+          [1960, 1971],
+        ],
+      },
     },
   ] satisfies SampleInput<PopulationInput>[],
   record,

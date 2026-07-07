@@ -11,7 +11,10 @@ import { loadProjectFromUrl } from '@/store/project-state';
  * hydration from a `?state=` link, and writing the share hash back on every change.
  * Pulls the workspace setters from context itself so the call site stays tiny.
  */
-export function useWorkspaceUrlState(plugin: ProblemPlugin<any, any> | undefined, activeItemId: string) {
+export function useWorkspaceUrlState(
+  plugin: ProblemPlugin<any, any> | undefined,
+  activeItemId: string,
+) {
   const {
     openProblem,
     enterCanvas,
@@ -51,7 +54,9 @@ export function useWorkspaceUrlState(plugin: ProblemPlugin<any, any> | undefined
     const shared = readShareFromUrl();
     const sharedItemId = resolveShareItemId(shared);
     const fromUrl =
-      sharedItemId === activeItemId && shared?.input && plugin.inputs.some((i) => i.id === shared.input)
+      sharedItemId === activeItemId &&
+      shared?.input &&
+      plugin.inputs.some((i) => i.id === shared.input)
         ? shared.input
         : null;
     setInputId(fromUrl ?? plugin.inputs[0]?.id ?? '');
@@ -86,7 +91,9 @@ export function useWorkspaceUrlState(plugin: ProblemPlugin<any, any> | undefined
       if (s.input) {
         // Best-effort: validate against the plugin only if its chunk is already
         // loaded. Otherwise the input effect re-validates once the plugin resolves.
-        const targetPlugin = s.item ? getLoadedPlugin(catalog.getItem(s.item)?.pluginId ?? '') : plugin;
+        const targetPlugin = s.item
+          ? getLoadedPlugin(catalog.getItem(s.item)?.pluginId ?? '')
+          : plugin;
         const validInput =
           targetPlugin && targetPlugin.inputs.some((i) => i.id === s.input) ? s.input : null;
         if (validInput) setInputId(validInput);
@@ -137,7 +144,17 @@ export function useWorkspaceUrlState(plugin: ProblemPlugin<any, any> | undefined
       dir,
       ...roomFields,
     });
-  }, [activeItemId, inputId, mode, theme, palette, themePreset, dir, problemFocused, plugin?.meta.number]);
+  }, [
+    activeItemId,
+    inputId,
+    mode,
+    theme,
+    palette,
+    themePreset,
+    dir,
+    problemFocused,
+    plugin?.meta.number,
+  ]);
 
   // Picking a different sample clears any custom edits.
   const selectInput = (id: string) => {

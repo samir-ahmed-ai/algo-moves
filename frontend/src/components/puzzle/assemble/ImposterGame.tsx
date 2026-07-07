@@ -12,7 +12,15 @@ import { cn } from '@/lib/utils/cn';
 import { hapticError, hapticSuccess } from '@/lib/utils/haptic';
 import { blockKind, BLOCK_META, type CodePiece } from '@/lib/code';
 import type { AssembleGameProps, AssembleGameStatsStore } from './types';
-import { diffTokens, hashString, memoryStatsStore, mulberry32, mutateCode, seededShuffle, type DiffToken } from './gameShared';
+import {
+  diffTokens,
+  hashString,
+  memoryStatsStore,
+  mulberry32,
+  mutateCode,
+  seededShuffle,
+  type DiffToken,
+} from './gameShared';
 import {
   ConfettiBurst,
   GameBlock,
@@ -126,7 +134,13 @@ interface TapProbe {
   moved: number;
 }
 
-export function ImposterGame({ pieces, storageKey, stats, onComplete, onContinue }: AssembleGameProps) {
+export function ImposterGame({
+  pieces,
+  storageKey,
+  stats,
+  onComplete,
+  onContinue,
+}: AssembleGameProps) {
   const statsStore = useMemo(() => stats ?? memoryStatsStore(), [stats]);
   const statsRef = useRef(statsStore);
   statsRef.current = statsStore;
@@ -211,7 +225,8 @@ export function ImposterGame({ pieces, storageKey, stats, onComplete, onContinue
   }, [roundTotal]);
 
   /* 45s soft ring — feeds the speed bonus only, never blocks play */
-  const timerPaused = phase !== 'scan' || revealing || magnifierIdx !== null || hidden || end !== null;
+  const timerPaused =
+    phase !== 'scan' || revealing || magnifierIdx !== null || hidden || end !== null;
   useEffect(() => {
     if (timerPaused || roundTotal === 0) return;
     const id = window.setInterval(() => {
@@ -252,7 +267,10 @@ export function ImposterGame({ pieces, storageKey, stats, onComplete, onContinue
       const prev = readImposterStats(statsRef.current);
       const prevBest = prev?.bestScore ?? 0;
       const best = Math.max(prevBest, total);
-      writeImposterStats(statsRef.current, { bestScore: best, sharpEyes: (prev?.sharpEyes ?? false) || sharp });
+      writeImposterStats(statsRef.current, {
+        bestScore: best,
+        sharpEyes: (prev?.sharpEyes ?? false) || sharp,
+      });
       setSummary({ total, firstTryCount, best, newBest: total > 0 && total > prevBest, sharp });
       if (!completedRef.current) {
         completedRef.current = true;
@@ -324,7 +342,18 @@ export function ImposterGame({ pieces, storageKey, stats, onComplete, onContinue
         }
       }
     },
-    [phase, end, healed, revealing, current, mutantIdx, timeLeft, later, loseHeart, beginDeathReveal],
+    [
+      phase,
+      end,
+      healed,
+      revealing,
+      current,
+      mutantIdx,
+      timeLeft,
+      later,
+      loseHeart,
+      beginDeathReveal,
+    ],
   );
 
   const pickFix = useCallback(
@@ -338,7 +367,10 @@ export function ImposterGame({ pieces, storageKey, stats, onComplete, onContinue
           hapticSuccess();
           outcomesRef.current = [
             ...outcomesRef.current,
-            { score: roundScore(wrongRef.current, false, bonusRef.current), firstTry: wrongRef.current === 0 },
+            {
+              score: roundScore(wrongRef.current, false, bonusRef.current),
+              firstTry: wrongRef.current === 0,
+            },
           ];
           setAnnounce('Fixed — the block is telling the truth again');
           later(520, advanceOrWin);
@@ -358,7 +390,10 @@ export function ImposterGame({ pieces, storageKey, stats, onComplete, onContinue
           healBlock();
           outcomesRef.current = [
             ...outcomesRef.current,
-            { score: roundScore(wrongRef.current, true, bonusRef.current), firstTry: wrongRef.current === 0 },
+            {
+              score: roundScore(wrongRef.current, true, bonusRef.current),
+              firstTry: wrongRef.current === 0,
+            },
           ];
           if (left <= 0) later(600, () => finishRun('dead'));
           else later(520, advanceOrWin);
@@ -404,7 +439,14 @@ export function ImposterGame({ pieces, storageKey, stats, onComplete, onContinue
     // Only a genuinely-concurrent second finger is ignored; a stale probe (the
     // pointerup landed outside the board) or the same pointer restarting is replaced.
     if (tp && tp.pid !== e.pointerId && performance.now() - tp.t <= TAP_MAX_MS) return;
-    tapRef.current = { pid: e.pointerId, idx, x: e.clientX, y: e.clientY, t: performance.now(), moved: 0 };
+    tapRef.current = {
+      pid: e.pointerId,
+      idx,
+      x: e.clientX,
+      y: e.clientY,
+      t: performance.now(),
+      moved: 0,
+    };
   }, []);
 
   const onBlockPointerMove = useCallback((e: ReactPointerEvent<HTMLButtonElement>) => {
@@ -418,7 +460,8 @@ export function ImposterGame({ pieces, storageKey, stats, onComplete, onContinue
       const tp = tapRef.current;
       if (!tp || tp.pid !== e.pointerId) return;
       tapRef.current = null;
-      if (tp.idx === idx && tp.moved < TAP_MAX_MOVE && performance.now() - tp.t < TAP_MAX_MS) accuse(idx);
+      if (tp.idx === idx && tp.moved < TAP_MAX_MOVE && performance.now() - tp.t < TAP_MAX_MS)
+        accuse(idx);
     },
     [accuse],
   );
@@ -504,7 +547,11 @@ export function ImposterGame({ pieces, storageKey, stats, onComplete, onContinue
           </div>
         }
         center={
-          <div className="flex items-center gap-1" role="img" aria-label={`${hearts} of ${HEARTS} hearts left`}>
+          <div
+            className="flex items-center gap-1"
+            role="img"
+            aria-label={`${hearts} of ${HEARTS} hearts left`}
+          >
             {Array.from({ length: HEARTS }, (_, i) => {
               const filled = i < hearts;
               const popping = i === hearts && heartPop > 0;
@@ -555,7 +602,10 @@ export function ImposterGame({ pieces, storageKey, stats, onComplete, onContinue
                     type="button"
                     aria-label={`block ${i + 1} of ${pieces.length} — ${BLOCK_META[kind].label}`}
                     aria-disabled={phase !== 'scan' || !!end || revealing}
-                    className={cn('block min-h-[44px] w-full text-left', isMutantRow && healed && 'imp-heal')}
+                    className={cn(
+                      'block min-h-[44px] w-full text-left',
+                      isMutantRow && healed && 'imp-heal',
+                    )}
                     onPointerDown={(e) => onBlockPointerDown(e, i)}
                     onPointerMove={onBlockPointerMove}
                     onPointerUp={(e) => onBlockPointerUp(e, i)}
@@ -602,7 +652,9 @@ export function ImposterGame({ pieces, storageKey, stats, onComplete, onContinue
           data-noswipe
         >
           <div className="imp-handle mx-auto mb-2" aria-hidden />
-          <div className="mb-2 text-center text-[12px] font-medium text-ink2">Which version is the truth?</div>
+          <div className="mb-2 text-center text-[12px] font-medium text-ink2">
+            Which version is the truth?
+          </div>
           <div className="flex flex-col gap-2">
             {fixCards.map((card) => {
               const revealedGood = fixState !== 'open' && card.isOriginal;
@@ -624,7 +676,10 @@ export function ImposterGame({ pieces, storageKey, stats, onComplete, onContinue
                     <pre className="whitespace-pre font-mono text-[12px] leading-relaxed text-ink">
                       {card.tokens.map((t: DiffToken, ti: number) =>
                         t.changed ? (
-                          <strong key={ti} className="font-bold text-ink underline decoration-2 underline-offset-2">
+                          <strong
+                            key={ti}
+                            className="font-bold text-ink underline decoration-2 underline-offset-2"
+                          >
                             {t.text}
                           </strong>
                         ) : (
@@ -647,7 +702,10 @@ export function ImposterGame({ pieces, storageKey, stats, onComplete, onContinue
       )}
 
       {magnifierIdx !== null && (
-        <MagnifierSheet piece={displayPieceAt(magnifierIdx)} onClose={() => setMagnifierIdx(null)} />
+        <MagnifierSheet
+          piece={displayPieceAt(magnifierIdx)}
+          onClose={() => setMagnifierIdx(null)}
+        />
       )}
 
       {showEndCard && summary && (

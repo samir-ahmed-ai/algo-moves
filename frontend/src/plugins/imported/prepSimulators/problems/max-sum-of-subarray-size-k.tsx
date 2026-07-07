@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -25,17 +31,17 @@ interface MaxSumKState {
 
 function record({ nums, k }: MaxSumKInput): Frame<MaxSumKState>[] {
   const { emit, frames } = createRecorder<MaxSumKState>(() => ({
-        nums,
-        k,
-        lo: null,
-        hi: null,
-        enter: null,
-        leave: null,
-        sum: 0,
-        best: 0,
-        bestRange: null,
-        done: false
-      }));
+    nums,
+    k,
+    lo: null,
+    hi: null,
+    enter: null,
+    leave: null,
+    sum: 0,
+    best: 0,
+    bestRange: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -136,8 +142,7 @@ function View({ frame }: PluginViewProps<MaxSumKState>) {
     return '';
   };
 
-  const win: [number, number] | null =
-    s.lo !== null && s.hi !== null ? [s.lo, s.hi] : null;
+  const win: [number, number] | null = s.lo !== null && s.hi !== null ? [s.lo, s.hi] : null;
 
   return (
     <div className="board-area">
@@ -165,11 +170,20 @@ function Inspector({ frame }: InspectorProps<MaxSumKState>) {
       <InspectorRow k="k (window)" v={s.k} />
       <InspectorRow k="lo" v={s.lo ?? '—'} />
       <InspectorRow k="hi" v={s.hi ?? '—'} />
-      <InspectorRow k="entering" v={s.enter !== null ? `nums[${s.enter}]=${s.nums[s.enter]}` : '—'} />
-      <InspectorRow k="leaving" v={s.leave !== null ? `nums[${s.leave}]=${s.nums[s.leave]}` : '—'} />
+      <InspectorRow
+        k="entering"
+        v={s.enter !== null ? `nums[${s.enter}]=${s.nums[s.enter]}` : '—'}
+      />
+      <InspectorRow
+        k="leaving"
+        v={s.leave !== null ? `nums[${s.leave}]=${s.nums[s.leave]}` : '—'}
+      />
       <InspectorRow k="window sum" v={s.sum} />
       <InspectorRow k="best" v={s.best} />
-      <InspectorRow k="best window" v={s.bestRange ? `[${s.bestRange[0]}..${s.bestRange[1]}]` : '—'} />
+      <InspectorRow
+        k="best window"
+        v={s.bestRange ? `[${s.bestRange[0]}..${s.bestRange[1]}]` : '—'}
+      />
     </VarGrid>
   );
 }
@@ -177,138 +191,140 @@ function Inspector({ frame }: InspectorProps<MaxSumKState>) {
 export const manifestId = 'prep-arrays-max-sum-of-subarray-size-k';
 export const title = 'Max sum of subarray size K';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Max sum of subarray size K\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Max sum of subarray size K"?',
     choices: [
       {
-        label: "Sliding window — fits this problem",
-        correct: true
+        label: 'Sliding window — fits this problem',
+        correct: true,
       },
       {
-        label: "Prefix + suffix pass — different approach"
+        label: 'Prefix + suffix pass — different approach',
       },
       {
-        label: "Greedy reach — different approach"
+        label: 'Greedy reach — different approach',
       },
       {
-        label: "Scan from right — different approach"
-      }
+        label: 'Scan from right — different approach',
+      },
     ],
-    explain: "Fixed width-K window slides one slot at a time"
+    explain: 'Fixed width-K window slides one slot at a time',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Max sum of subarray size K), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Max sum of subarray size K), what strategy is established?',
     choices: [
       {
-        label: "Fixed width-K window slides one slot — described in INIT caption",
-        correct: true
+        label: 'Fixed width-K window slides one slot — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Max Sum of Subarray Size K: slide a fixed window of width  across the array and track the largest window sum. We seed the first  elements, then move the window one slot at a time."
+    explain:
+      'Max Sum of Subarray Size K: slide a fixed window of width  across the array and track the largest window sum. We seed the first  elements, then move the window one slot at a time.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"SLIDE\" step (sum=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "SLIDE" step (sum=), what happens?',
     choices: [
       {
-        label: "Slide right: nums[] = enters — this move caption",
-        correct: true
+        label: 'Slide right: nums[] = enters — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Slide right: nums[] =  enters and nums[] =  leaves, so sum +=  −  = . Window is now [..]."
+    explain:
+      'Slide right: nums[] =  enters and nums[] =  leaves, so sum +=  −  = . Window is now [..].',
   },
   {
-    id: "state",
-    prompt: "What does the `lo` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `lo` field track in the visualization state?',
     choices: [
       {
-        label: "left edge of the current — updated each frame",
-        correct: true
+        label: 'left edge of the current — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `lo` in sync: left edge of the current window (inclusive)"
+    explain: 'The recorder keeps `lo` in sync: left edge of the current window (inclusive)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Max sum of subarray size K\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Max sum of subarray size K"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
+        label: 'O(n²) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
+        label: 'O(1) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). seed first k; sum+=in-out; track best"
+    explain: 'O(n). O(1). seed first k; sum+=in-out; track best',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Every window of size — final DONE caption",
-        correct: true
+        label: 'Every window of size — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Every window of size  has been checked. The maximum sum is , from the highlighted window."
-  }
+    explain:
+      'Every window of size  has been checked. The maximum sum is , from the highlighted window.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'msk1', label: '[2,1,5,1,3,2], k=3', value: { nums: [2, 1, 5, 1, 3, 2], k: 3 } },
-    { id: 'msk2', label: '[1,9,-1,-2,7,3,-1,2], k=4', value: { nums: [1, 9, -1, -2, 7, 3, -1, 2], k: 4 } },
+    {
+      id: 'msk2',
+      label: '[1,9,-1,-2,7,3,-1,2], k=4',
+      value: { nums: [1, 9, -1, -2, 7, 3, -1, 2], k: 4 },
+    },
   ] satisfies SampleInput<MaxSumKInput>[],
   record,
   View,

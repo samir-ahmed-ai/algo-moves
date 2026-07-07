@@ -12,7 +12,9 @@ export function SortableRow({
   className?: string;
   children: ReactNode;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+  });
   const style: CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -20,7 +22,13 @@ export function SortableRow({
   };
 
   return (
-    <div ref={setNodeRef} style={style} className={cn(className, isDragging && 'z-10')} {...attributes} {...listeners}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(className, isDragging && 'z-10')}
+      {...attributes}
+      {...listeners}
+    >
       {children}
     </div>
   );

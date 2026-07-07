@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GraphBoard } from '../../../../components/board/GraphBoard';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 import { circleLayout } from '../../../_shared/graphLayout';
 
 /** A friendship log: [timestamp, personX, personY], people are 0-indexed. */
@@ -49,19 +62,24 @@ function record({ n, logs, pos }: EMInput): Frame<EMState>[] {
     return x;
   };
   const { emit, frames } = createRecorder<EMState>(() => ({
-        parent: parent.slice(),
-        size: size.slice(),
-        adj: adj.map((row) => row.slice()),
-        pos: pos,
-        components: components,
-        earliest: earliest,
-        pair: null,
-        ts: null,
-        done: false
-      }));
+    parent: parent.slice(),
+    size: size.slice(),
+    adj: adj.map((row) => row.slice()),
+    pos: pos,
+    components: components,
+    earliest: earliest,
+    pair: null,
+    ts: null,
+    done: false,
+  }));
   // renamed from snapshot
 
-  emit('INIT', `${n} people · ${sorted.length} logs`, `Earliest Moment Everyone Becomes Friends: ${n} people start as ${n} separate components. We sort the ${sorted.length} friendship logs by timestamp ascending and union each pair; the answer is the first timestamp at which the component count reaches 1.`, { pair: null, ts: null });
+  emit(
+    'INIT',
+    `${n} people · ${sorted.length} logs`,
+    `Earliest Moment Everyone Becomes Friends: ${n} people start as ${n} separate components. We sort the ${sorted.length} friendship logs by timestamp ascending and union each pair; the answer is the first timestamp at which the component count reaches 1.`,
+    { pair: null, ts: null },
+  );
 
   for (const [ts, x, y] of sorted) {
     adj[x].push(y);
@@ -69,7 +87,12 @@ function record({ n, logs, pos }: EMInput): Frame<EMState>[] {
     const rx = find(x);
     const ry = find(y);
     if (rx === ry) {
-      emit('UNION', `t=${ts}: ${x}~${y}`, `At t=${ts}, ${x} and ${y} become friends, but they are already in the same component (root ${rx}). The component count stays ${components}.`, { pair: [x, y], ts: ts });
+      emit(
+        'UNION',
+        `t=${ts}: ${x}~${y}`,
+        `At t=${ts}, ${x} and ${y} become friends, but they are already in the same component (root ${rx}). The component count stays ${components}.`,
+        { pair: [x, y], ts: ts },
+      );
       continue;
     }
     // Union by size.
@@ -84,16 +107,39 @@ function record({ n, logs, pos }: EMInput): Frame<EMState>[] {
     components -= 1;
     if (components === 1 && earliest === null) {
       earliest = ts;
-      emit('CONNECTED', `t=${ts}: all joined`, `At t=${ts}, ${x} and ${y} merge their groups and the component count drops to 1 — everyone is now connected. This is the earliest such moment, so the answer is ${ts}.`, { pair: [x, y], ts: ts }, 'good');
+      emit(
+        'CONNECTED',
+        `t=${ts}: all joined`,
+        `At t=${ts}, ${x} and ${y} merge their groups and the component count drops to 1 — everyone is now connected. This is the earliest such moment, so the answer is ${ts}.`,
+        { pair: [x, y], ts: ts },
+        'good',
+      );
     } else {
-      emit('UNION', `t=${ts}: ${x}~${y}`, `At t=${ts}, ${x} and ${y} merge their groups under root ${big}; the component count drops to ${components}.`, { pair: [x, y], ts: ts });
+      emit(
+        'UNION',
+        `t=${ts}: ${x}~${y}`,
+        `At t=${ts}, ${x} and ${y} merge their groups under root ${big}; the component count drops to ${components}.`,
+        { pair: [x, y], ts: ts },
+      );
     }
   }
 
   if (earliest !== null) {
-    emit('DONE', `earliest = ${earliest}`, `Everyone became connected at timestamp ${earliest} — the earliest moment when all ${n} people are friends.`, { pair: null, ts: earliest , done: true }, 'good');
+    emit(
+      'DONE',
+      `earliest = ${earliest}`,
+      `Everyone became connected at timestamp ${earliest} — the earliest moment when all ${n} people are friends.`,
+      { pair: null, ts: earliest, done: true },
+      'good',
+    );
   } else {
-    emit('DONE', `earliest = -1`, `All logs processed but ${components} components remain — the group never fully connects, so the answer is -1.`, { pair: null, ts: null , done: true }, 'bad');
+    emit(
+      'DONE',
+      `earliest = -1`,
+      `All logs processed but ${components} components remain — the group never fully connects, so the answer is -1.`,
+      { pair: null, ts: null, done: true },
+      'bad',
+    );
   }
 
   return frames;
@@ -109,15 +155,23 @@ function View({ frame }: PluginViewProps<EMState>) {
   const s = frame.state;
   const ans = s.earliest ?? (s.done ? -1 : null);
   return (
-    <VizStage rail={<>
-      <RailGroup label="scan">
-        <RailStat k="components" v={s.components} tone={s.components === 1 ? 'good' : undefined} />
-        <RailStat k="t" v={s.ts ?? '—'} tone="accent" />
-      </RailGroup>
-      {ans !== null && (
-        <RailResult label="earliest" value={ans} tone={ans === -1 ? 'bad' : 'good'} />
-      )}
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="scan">
+            <RailStat
+              k="components"
+              v={s.components}
+              tone={s.components === 1 ? 'good' : undefined}
+            />
+            <RailStat k="t" v={s.ts ?? '—'} tone="accent" />
+          </RailGroup>
+          {ans !== null && (
+            <RailResult label="earliest" value={ans} tone={ans === -1 ? 'bad' : 'good'} />
+          )}
+        </>
+      }
+    >
       <GraphBoard
         adj={s.adj}
         pos={s.pos}

@@ -31,12 +31,24 @@ const SRC = resolve(dirname(fileURLToPath(import.meta.url)), '../src');
 
 /** Forbidden target layers per source layer. Absence = unconstrained. */
 const FORBIDDEN = {
-  design: ['lib', 'core', 'content', 'components', 'effects', 'store', 'plugins', 'hooks', 'shell'],
-  lib: ['store', 'plugins', 'shell'],
-  core: ['store', 'plugins', 'shell'],
-  content: ['store', 'plugins', 'shell'],
-  components: ['store', 'plugins', 'shell'],
-  effects: ['store', 'plugins', 'shell'],
+  design: [
+    'lib',
+    'core',
+    'content',
+    'components',
+    'effects',
+    'platform',
+    'store',
+    'plugins',
+    'hooks',
+    'shell',
+  ],
+  lib: ['platform', 'store', 'plugins', 'shell'],
+  platform: ['store', 'plugins', 'shell'],
+  core: ['platform', 'store', 'plugins', 'shell'],
+  content: ['platform', 'store', 'plugins', 'shell'],
+  components: ['platform', 'store', 'plugins', 'shell'],
+  effects: ['platform', 'store', 'plugins', 'shell'],
   store: ['plugins', 'shell'],
   plugins: ['shell'],
 };
@@ -63,7 +75,8 @@ const ACCEPTED = new Set([
 // new violations must be fixed, not allowlisted.
 const KNOWN_VIOLATIONS = new Set([]);
 
-const IMPORT_RE = /(?:import|export)\b[^;'"]*?\bfrom\s*['"]([^'"]+)['"]|\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)|\bimport\s*['"]([^'"]+)['"]/g;
+const IMPORT_RE =
+  /(?:import|export)\b[^;'"]*?\bfrom\s*['"]([^'"]+)['"]|\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)|\bimport\s*['"]([^'"]+)['"]/g;
 const IS_TEST = /(?:\.test\.|\.spec\.|(?:^|\/)__tests__\/)/;
 
 function walk(dir, out = []) {
@@ -114,7 +127,10 @@ for (const file of walk(SRC)) {
 
     const key = `${srcRel} :: ${spec}`;
     if (ACCEPTED.has(key)) continue;
-    if (KNOWN_VIOLATIONS.has(key)) { used.add(key); continue; }
+    if (KNOWN_VIOLATIONS.has(key)) {
+      used.add(key);
+      continue;
+    }
     violations.push({ srcRel, spec, srcLayer, targetLayer });
   }
 }
@@ -124,7 +140,9 @@ const stale = [...KNOWN_VIOLATIONS].filter((k) => !used.has(k));
 let bad = false;
 if (violations.length) {
   bad = true;
-  console.error(`\n✗ ${violations.length} module-boundary violation(s) — imports must flow downward (see docs/architecture.md):\n`);
+  console.error(
+    `\n✗ ${violations.length} module-boundary violation(s) — imports must flow downward (see docs/architecture.md):\n`,
+  );
   for (const v of violations.sort((a, b) => a.srcRel.localeCompare(b.srcRel))) {
     console.error(`  ${v.srcLayer} ⇏ ${v.targetLayer}   ${v.srcRel}`);
     console.error(`      imports '${v.spec}'`);
@@ -133,7 +151,9 @@ if (violations.length) {
 }
 if (stale.length) {
   bad = true;
-  console.error(`\n✗ ${stale.length} stale KNOWN_VIOLATIONS entry(ies) — import was fixed; delete these from check-boundaries.mjs:\n`);
+  console.error(
+    `\n✗ ${stale.length} stale KNOWN_VIOLATIONS entry(ies) — import was fixed; delete these from check-boundaries.mjs:\n`,
+  );
   for (const k of stale) console.error(`  ${k}`);
   console.error('');
 }

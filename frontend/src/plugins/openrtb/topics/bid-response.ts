@@ -97,7 +97,8 @@ func main() {
       quiz: [
         {
           id: 'ortb-resp-empty',
-          prompt: 'How should a DSP signal "no bid" for an entire BidRequest in the most network-efficient way?',
+          prompt:
+            'How should a DSP signal "no bid" for an entire BidRequest in the most network-efficient way?',
           choices: [
             { label: 'HTTP 204 — no body; most efficient no-bid signal', correct: true },
             { label: 'HTTP 200 + empty seatbid — valid but wastes JSON parsing overhead' },
@@ -123,7 +124,10 @@ func main() {
           id: 'ortb-resp-mtype',
           prompt: 'Why is Bid.mtype important for a multi-format Imp?',
           choices: [
-            { label: 'Format discriminator — tells exchange which adm type to render', correct: true },
+            {
+              label: 'Format discriminator — tells exchange which adm type to render',
+              correct: true,
+            },
             { label: 'Max CPM claim — mtype sets the maximum CPM the bidder will pay' },
             { label: 'Deal type claim — mtype identifies PMP vs open-auction deal' },
             { label: 'MIME type claim — mtype specifies the MIME type of the creative file' },
@@ -134,7 +138,7 @@ func main() {
       ],
       design: {
         prompt:
-          'Your DSP\'s bidder sometimes returns a bid for an imp.id that doesn\'t match any impression in the BidRequest. How would you design validation on the exchange side and on the DSP side to catch this?',
+          "Your DSP's bidder sometimes returns a bid for an imp.id that doesn't match any impression in the BidRequest. How would you design validation on the exchange side and on the DSP side to catch this?",
         answer:
           'Exchange side: index BidRequest.imp[] by ID into a map before fanning out. On BidResponse receipt, for each Bid.impid, check map.Get(impid) — reject the bid if not found. Log DSP + impid for diagnostics. Apply a per-DSP anomaly counter: if >1% of bids have invalid impids, throttle that DSP.\n\nDSP side: keep the original BidRequest in scope while building the response (use a closure or struct). Assert bid.ImpID == req.Imp[i].ID before returning. Add a unit test: construct a mock BidRequest with known imp IDs, call the bidder, assert all BidResponse.seatbid[].bid[].impid match.',
       },
@@ -173,7 +177,7 @@ import (
 // The spec mandates URL-encoding for macro values that appear in query params.
 func MacroSubstitute(s string, macros map[string]string) string {
 	for k, v := range macros {
-		s = strings.ReplaceAll(s, "${"+k+"}", v)
+		s = strings.ReplaceAll(s, "${'+k+'}", v)
 	}
 	return s
 }
@@ -182,7 +186,7 @@ func MacroSubstitute(s string, macros map[string]string) string {
 // don't break query string parsing in tracking URLs.
 func MacroSubstituteURL(rawURL string, macros map[string]string) (string, error) {
 	for k, v := range macros {
-		rawURL = strings.ReplaceAll(rawURL, "${"+k+"}", url.QueryEscape(v))
+		rawURL = strings.ReplaceAll(rawURL, "${'+k+'}", url.QueryEscape(v))
 	}
 	_, err := url.Parse(rawURL)
 	return rawURL, err
@@ -245,19 +249,25 @@ func main() {
           id: 'ortb-bid-adm-vs-nurl',
           prompt: 'What is the key difference between serving markup via Bid.adm vs via Bid.nurl?',
           choices: [
-            { label: 'adm = inline markup — nurl = win notice URL; exchange fetches markup', correct: true },
+            {
+              label: 'adm = inline markup — nurl = win notice URL; exchange fetches markup',
+              correct: true,
+            },
             { label: 'Format split — adm is for banner; nurl is for video ads' },
             { label: 'Caller swap — nurl is called by browser; adm is called by exchange' },
             { label: 'Simultaneous claim — both deliver markup at the same time' },
           ],
           explain:
-            'adm (ad markup) carries the creative inline in the JSON response — lower latency but larger payload. nurl (notice URL) is a callback the exchange fires after the auction to both notify the DSP of the win AND retrieve the markup from the DSP\'s server. nurl-based serving decouples win notification from markup delivery, enabling dynamic creative generation.',
+            "adm (ad markup) carries the creative inline in the JSON response — lower latency but larger payload. nurl (notice URL) is a callback the exchange fires after the auction to both notify the DSP of the win AND retrieve the markup from the DSP's server. nurl-based serving decouples win notification from markup delivery, enabling dynamic creative generation.",
         },
         {
           id: 'ortb-bid-burl-vs-nurl',
           prompt: 'nurl is called at auction time; when is burl called?',
           choices: [
-            { label: 'On billable event — render or viewability threshold, not at auction', correct: true },
+            {
+              label: 'On billable event — render or viewability threshold, not at auction',
+              correct: true,
+            },
             { label: 'Right after nurl — burl and nurl fire in the same HTTP request' },
             { label: 'On click — burl fires when the user clicks the ad unit' },
             { label: 'Billing period — burl fires at end of daily or weekly cycle' },
@@ -269,13 +279,16 @@ func main() {
           id: 'ortb-bid-crid-purpose',
           prompt: 'Why do exchanges store and check Bid.crid (creative ID)?',
           choices: [
-            { label: 'Creative auditing — exchange scans and blocks per crid for brand safety', correct: true },
+            {
+              label: 'Creative auditing — exchange scans and blocks per crid for brand safety',
+              correct: true,
+            },
             { label: 'Bid dedup claim — crid is not used to deduplicate bids per impression' },
             { label: 'Campaign billing — crid maps to campaign for billing purposes' },
             { label: 'Competitive sep — crid enforces competitive separation on page' },
           ],
           explain:
-            'Exchanges maintain a creative library keyed by crid. New crid values trigger an audit pipeline (image classification, malware scan, brand-safety scoring). Publishers can then block specific creative IDs. Without a stable crid, an exchange can\'t track which creatives have been audited or blocked.',
+            "Exchanges maintain a creative library keyed by crid. New crid values trigger an audit pipeline (image classification, malware scan, brand-safety scoring). Publishers can then block specific creative IDs. Without a stable crid, an exchange can't track which creatives have been audited or blocked.",
         },
       ],
       design: {
@@ -303,7 +316,7 @@ func main() {
       visual:
         'Exchange calls nurl at auction win; \${AUCTION_PRICE} substituted with clearing price (URL-encoded). Exchange calls burl at billable event. DSP records spend at burl receipt, not nurl.',
       memorize:
-        'nurl = win signal (possibly deliver markup). burl = spend signal (record cost here). \${AUCTION_PRICE} in URLs → clearing price in winner\'s currency. Always URL-encode before substituting into query params.',
+        "nurl = win signal (possibly deliver markup). burl = spend signal (record cost here). \${AUCTION_PRICE} in URLs → clearing price in winner's currency. Always URL-encode before substituting into query params.",
       scene:
         'Buying a car at auction: nurl is the auctioneer yelling "Sold!" to you. burl is the finance office charging your card when you actually drive off the lot. \${AUCTION_PRICE} is the final hammer price written on the contract.',
       time: '—',
@@ -383,7 +396,10 @@ func main() {
           id: 'ortb-settlement-who-calls',
           prompt: 'Who is responsible for calling the nurl after the auction?',
           choices: [
-            { label: 'Exchange calls nurl — server-to-server win notification to DSP', correct: true },
+            {
+              label: 'Exchange calls nurl — server-to-server win notification to DSP',
+              correct: true,
+            },
             { label: 'Browser fires nurl — nurl is a server-side call, not a browser pixel' },
             { label: 'DSP polls exchange — nurl is push, not poll' },
             { label: 'SSP calls nurl — the SSP triggers nurl before returning markup' },
@@ -393,9 +409,13 @@ func main() {
         },
         {
           id: 'ortb-settlement-encode',
-          prompt: 'Why must \${AUCTION_PRICE} be URL-encoded when substituted into a query-string parameter?',
+          prompt:
+            'Why must \${AUCTION_PRICE} be URL-encoded when substituted into a query-string parameter?',
           choices: [
-            { label: 'URL safety — special chars in other macros can break URL parsing', correct: true },
+            {
+              label: 'URL safety — special chars in other macros can break URL parsing',
+              correct: true,
+            },
             { label: 'Base64 claim — spec requires base64, not URL-encoding, for macros' },
             { label: 'HTTPS-only claim — URL encoding is not restricted to HTTPS URLs' },
             { label: 'Log-hiding claim — URL encoding does not prevent price appearing in logs' },
@@ -405,28 +425,32 @@ func main() {
         },
         {
           id: 'ortb-settlement-second-price-clearing',
-          prompt: 'In a second-price auction, what does \${AUCTION_PRICE} contain in the nurl call?',
+          prompt:
+            'In a second-price auction, what does \${AUCTION_PRICE} contain in the nurl call?',
           choices: [
-            { label: 'Clearing price — max(floor, 2nd-highest bid), not the winner\'s bid', correct: true },
+            {
+              label: "Clearing price — max(floor, 2nd-highest bid), not the winner's bid",
+              correct: true,
+            },
             { label: "Winner's bid — AUCTION_PRICE equals the submitted bid in second-price" },
             { label: 'Floor price — AUCTION_PRICE equals the publisher-set floor value' },
             { label: 'Average bid — AUCTION_PRICE is the mean of all submitted bids' },
           ],
           explain:
-            'In a second-price auction, \${AUCTION_PRICE} in the nurl is the clearing price (what the winner pays), which equals max(second-highest-bid, floor). In a first-price auction, clearing price equals the winner\'s bid. The DSP should record \${AUCTION_PRICE} (not their submitted bid) as their spend for accurate cost tracking.',
+            "In a second-price auction, \${AUCTION_PRICE} in the nurl is the clearing price (what the winner pays), which equals max(second-highest-bid, floor). In a first-price auction, clearing price equals the winner's bid. The DSP should record \${AUCTION_PRICE} (not their submitted bid) as their spend for accurate cost tracking.",
         },
       ],
       design: {
         prompt:
           'Your DSP receives nurl calls but burl calls are missing for ~30% of won impressions. What are the likely causes and how would you investigate?',
         answer:
-          '1. Ad failed to render — browser blocked (ad blocker, mixed-content), creative error, or timeout. Check DSP-side impression pixel fire rate vs nurl rate for the same time window.\n2. Exchange burl policy — some exchanges only call burl after viewability threshold (50% in-view for 1 second); slow-loading ads may not meet it. Check exchange integration spec.\n3. Network failure — burl endpoint unreliable. Add retry + exponential backoff; check server error rate.\n4. Configuration error — burl field missing from some bids. Audit bidder code: ensure burl is populated for all bids, not just certain campaign types.\n5. Reporting reconciliation: expected discrepancy is 5–10% between nurl (auction win) and burl (billable impression). > 20% suggests a product issue. Compare with publisher\'s own impression count as a third data point.',
+          "1. Ad failed to render — browser blocked (ad blocker, mixed-content), creative error, or timeout. Check DSP-side impression pixel fire rate vs nurl rate for the same time window.\n2. Exchange burl policy — some exchanges only call burl after viewability threshold (50% in-view for 1 second); slow-loading ads may not meet it. Check exchange integration spec.\n3. Network failure — burl endpoint unreliable. Add retry + exponential backoff; check server error rate.\n4. Configuration error — burl field missing from some bids. Audit bidder code: ensure burl is populated for all bids, not just certain campaign types.\n5. Reporting reconciliation: expected discrepancy is 5–10% between nurl (auction win) and burl (billable impression). > 20% suggests a product issue. Compare with publisher's own impression count as a third data point.",
       },
       keyPoints: [
         'nurl: exchange calls at auction win (server-to-server); may serve markup from DSP.',
         'burl: exchange calls at billable event (typically impression render); DSP records spend here.',
         'lurl: optional loss notification with \${AUCTION_LOSS} macro (loss reason code).',
-        '\${AUCTION_PRICE} = clearing price (second-price) or winner\'s bid (first-price).',
+        "\${AUCTION_PRICE} = clearing price (second-price) or winner's bid (first-price).",
         'Always URL-encode macro values before substituting into query-string parameters.',
         '5–10% discrepancy between nurl wins and burl billings is normal; > 20% warrants investigation.',
       ],
@@ -516,9 +540,13 @@ func main() {
       quiz: [
         {
           id: 'ortb-nobid-http204',
-          prompt: 'A bidder has no matching campaign for an impression. The most efficient response is:',
+          prompt:
+            'A bidder has no matching campaign for an impression. The most efficient response is:',
           choices: [
-            { label: 'HTTP 204 — preferred; no JSON parsing overhead for the exchange', correct: true },
+            {
+              label: 'HTTP 204 — preferred; no JSON parsing overhead for the exchange',
+              correct: true,
+            },
             { label: 'HTTP 200 + empty seatbid — valid but parses unnecessary JSON' },
             { label: 'HTTP 200 + nbr code — useful for communicating a specific reason' },
             { label: 'HTTP 400 claim — 400 signals request error, not a no-bid decision' },
@@ -528,9 +556,13 @@ func main() {
         },
         {
           id: 'ortb-nobid-timeout-consequence',
-          prompt: 'What typically happens to a DSP that consistently responds after the exchange tmax deadline?',
+          prompt:
+            'What typically happens to a DSP that consistently responds after the exchange tmax deadline?',
           choices: [
-            { label: 'Timeout logged — persistent high rates risk DSP exclusion from auctions', correct: true },
+            {
+              label: 'Timeout logged — persistent high rates risk DSP exclusion from auctions',
+              correct: true,
+            },
             { label: 'Advisory tmax — tmax is informational; exchange waits indefinitely' },
             { label: 'Floor raised — exchange bumps DSP bid floor to offset latency cost' },
             { label: 'Late-bid queue — late bids are queued for the next matching auction' },
@@ -542,13 +574,16 @@ func main() {
           id: 'ortb-nobid-reason-unmatched',
           prompt: 'A bidder returns nbr=8 (unmatched user). What does this indicate?',
           choices: [
-            { label: 'nbr=8 — no cookie/device ID match; DSP cannot apply audience targeting', correct: true },
+            {
+              label: 'nbr=8 — no cookie/device ID match; DSP cannot apply audience targeting',
+              correct: true,
+            },
             { label: 'Fraud IP claim — nbr=8 is for fraud block, not unmatched user' },
             { label: 'Opt-out claim — opt-out is nbr=0 or separate consent handling' },
             { label: 'Format claim — format incompatibility is nbr=6, not nbr=8' },
           ],
           explain:
-            'nbr=8 means the DSP received the BidRequest but User.buyeruid was absent or unknown in its own user database — the DSP can\'t resolve the user to any audience segment. This is common in cookieless traffic or when cookie sync coverage is low. The exchange can use this signal to measure cookie sync health per DSP.',
+            "nbr=8 means the DSP received the BidRequest but User.buyeruid was absent or unknown in its own user database — the DSP can't resolve the user to any audience segment. This is common in cookieless traffic or when cookie sync coverage is low. The exchange can use this signal to measure cookie sync health per DSP.",
         },
       ],
       design: {

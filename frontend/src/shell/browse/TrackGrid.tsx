@@ -1,4 +1,10 @@
-import { catalog, getCategoriesForTrack, getItemsForCategory, getTracks, type TrackId } from '../../content';
+import {
+  catalog,
+  getCategoriesForTrack,
+  getItemsForCategory,
+  getTracks,
+  type TrackId,
+} from '../../content';
 import { useProgress, statFor } from '@/store/persistence';
 import { cn } from '@/lib/utils/cn';
 import { courseIcon } from '../courseIcon';

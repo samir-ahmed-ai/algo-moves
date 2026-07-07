@@ -1,9 +1,10 @@
 import type { GameDef } from '../../types';
+import { GAME_ID_NUMBER_DUEL } from '../../_generated/gameIds';
 import { NumberDuel } from './NumberDuel';
 import { getNumberDuelStrings } from './strings';
 
 const numberDuel: GameDef = {
-  id: 'number-duel',
+  id: GAME_ID_NUMBER_DUEL,
   title: 'Number Duel',
   tagline: 'Hide a number 1–100, then race to crack each other’s in the fewest guesses.',
   minutes: '~3 min',

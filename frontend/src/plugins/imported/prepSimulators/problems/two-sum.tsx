@@ -1,8 +1,25 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { ArrayPatternInspector, ArrayPatternView, type ArrayPointer } from '../../../_shared/arrayPatterns';
-import { RailGroup, RailStat, RailResult, RailStack, VizEmpty, type TreeNode } from '../../../_shared/vizKit';
+import {
+  ArrayPatternInspector,
+  ArrayPatternView,
+  type ArrayPointer,
+} from '../../../_shared/arrayPatterns';
+import {
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  VizEmpty,
+  type TreeNode,
+} from '../../../_shared/vizKit';
 
 interface TwoSumInput {
   nums: number[];
@@ -33,22 +50,49 @@ function record({ nums, target }: TwoSumInput): Frame<TwoSumState>[] {
     done: false,
   }));
 
-  emit('INIT', `target=${target}`, `Two Sum: find two indices whose values add up to ${target}. Walk the array once, remembering each value in a hash map so we can look back for the complement target − v.`, {});
+  emit(
+    'INIT',
+    `target=${target}`,
+    `Two Sum: find two indices whose values add up to ${target}. Walk the array once, remembering each value in a hash map so we can look back for the complement target − v.`,
+    {},
+  );
 
   for (let i = 0; i < nums.length; i++) {
     const v = nums[i];
     const need = target - v;
-    emit('SCAN', `need ${need}`, `At index ${i} the value is ${v}, so we need its complement ${target} − ${v} = ${need}. Is ${need} already in the map?`, { i, need });
+    emit(
+      'SCAN',
+      `need ${need}`,
+      `At index ${i} the value is ${v}, so we need its complement ${target} − ${v} = ${need}. Is ${need} already in the map?`,
+      { i, need },
+    );
     if (seen.has(need)) {
       const j = seen.get(need)!;
-      emit('FOUND', `${j},${i}`, `Yes — ${need} was stored at index ${j}. nums[${j}] + nums[${i}] = ${nums[j]} + ${v} = ${target}. Return [${j}, ${i}].`, { i, need, hit: j, result: [j, i], done: true }, 'good');
+      emit(
+        'FOUND',
+        `${j},${i}`,
+        `Yes — ${need} was stored at index ${j}. nums[${j}] + nums[${i}] = ${nums[j]} + ${v} = ${target}. Return [${j}, ${i}].`,
+        { i, need, hit: j, result: [j, i], done: true },
+        'good',
+      );
       return frames;
     }
     seen.set(v, i);
-    emit('STORE', `seen[${v}]=${i}`, `${need} is not in the map yet, so remember the current value: seen[${v}] = ${i}. Move on.`, { i, need });
+    emit(
+      'STORE',
+      `seen[${v}]=${i}`,
+      `${need} is not in the map yet, so remember the current value: seen[${v}] = ${i}. Move on.`,
+      { i, need },
+    );
   }
 
-  emit('DONE', 'no pair', `Scanned the whole array with no complement match — there is no pair that sums to ${target}.`, { done: true }, 'bad');
+  emit(
+    'DONE',
+    'no pair',
+    `Scanned the whole array with no complement match — there is no pair that sums to ${target}.`,
+    { done: true },
+    'bad',
+  );
   return frames;
 }
 
@@ -109,132 +153,128 @@ function Inspector({ frame }: InspectorProps<TwoSumState>) {
 export const manifestId = 'prep-arrays-two-sum';
 export const title = 'Two sum';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Two sum\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Two sum"?',
     choices: [
       {
-        label: "Hash map — fits this problem",
-        correct: true
+        label: 'Hash map — fits this problem',
+        correct: true,
       },
       {
-        label: "XOR + math — different approach"
+        label: 'XOR + math — different approach',
       },
       {
-        label: "Prefix + suffix pass — different approach"
+        label: 'Prefix + suffix pass — different approach',
       },
       {
-        label: "Track min/max product — different approach"
-      }
+        label: 'Track min/max product — different approach',
+      },
     ],
-    explain: "Map remembers value->index; look back for the complement"
+    explain: 'Map remembers value->index; look back for the complement',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Two sum), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Two sum), what strategy is established?',
     choices: [
       {
-        label: "Map remembers value->index; look back — described in INIT caption",
-        correct: true
+        label: 'Map remembers value->index; look back — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Two Sum: find two indices whose values add up to . Walk the array once, remembering each value in a hash map so we can look back for the complement target − v."
+    explain:
+      'Two Sum: find two indices whose values add up to . Walk the array once, remembering each value in a hash map so we can look back for the complement target − v.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"FOUND\" step (,), what happens?",
+    id: 'key-step',
+    prompt: 'On the "FOUND" step (,), what happens?',
     choices: [
       {
-        label: "Yes — was stored at index — this move caption",
-        correct: true
+        label: 'Yes — was stored at index — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Yes —  was stored at index . nums[] + nums[] =  +  = . Return [, ]."
+    explain: 'Yes —  was stored at index . nums[] + nums[] =  +  = . Return [, ].',
   },
   {
-    id: "state",
-    prompt: "What does the `i` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: "current index — updated each frame",
-        correct: true
+        label: 'current index — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `i` in sync: current index"
+    explain: 'The recorder keeps `i` in sync: current index',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Two sum\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Two sum"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n³) time, O(n) space — wrong order of growth"
+        label: 'O(n³) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
+        label: 'O(log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). want target-v in seen? return; else seen[v]=i"
+    explain: 'O(n). O(n). want target-v in seen? return; else seen[v]=i',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "is not in the map yet — final DONE caption",
-        correct: true
+        label: 'is not in the map yet — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: " is not in the map yet, so remember the current value: seen[] = . Move on."
-  }
+    explain: ' is not in the map yet, so remember the current value: seen[] = . Move on.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -247,6 +287,8 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as TwoSumState | undefined;
-    return s?.result ? { ok: true, label: `[${s.result.join(',')}]` } : { ok: false, label: 'no pair' };
+    return s?.result
+      ? { ok: true, label: `[${s.result.join(',')}]` }
+      : { ok: false, label: 'no pair' };
   },
 };

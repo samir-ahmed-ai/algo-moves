@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -52,25 +58,32 @@ function lastNotOverlap(
   return res;
 }
 
-function record({ jobs: rawJobs }: SchedulerInput): Frame<SchedulerState>[] {  const jobs = [...rawJobs].sort((a, b) => a.end - b.end);
+function record({ jobs: rawJobs }: SchedulerInput): Frame<SchedulerState>[] {
+  const jobs = [...rawJobs].sort((a, b) => a.end - b.end);
   const n = jobs.length;
   const dp: (number | null)[] = new Array<number | null>(n).fill(null);
 
   const { emit, frames } = createRecorder<SchedulerState>(() => ({
-        jobs,
-        dp: dp.slice(),
-        i: null,
-        prev: null,
-        lo: null,
-        hi: null,
-        mid: null,
-        take: null,
-        skip: null,
-        done: false
-      }));
+    jobs,
+    dp: dp.slice(),
+    i: null,
+    prev: null,
+    lo: null,
+    hi: null,
+    mid: null,
+    take: null,
+    skip: null,
+    done: false,
+  }));
 
   if (n === 0) {
-    emit('DONE', 'no jobs', 'There are no jobs to schedule, so the maximum profit is 0.', { done: true }, 'good');
+    emit(
+      'DONE',
+      'no jobs',
+      'There are no jobs to schedule, so the maximum profit is 0.',
+      { done: true },
+      'good',
+    );
     return frames;
   }
 
@@ -172,9 +185,12 @@ function View({ frame }: PluginViewProps<SchedulerState>) {
 
   const jobPointers: ArrayPointer[] = [];
   if (s.i !== null) jobPointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
-  if (s.prev !== null && s.prev !== NONE) jobPointers.push({ i: s.prev, label: 'prev', tone: 'good', place: 'below' });
-  if (s.lo !== null && s.lo >= 0) jobPointers.push({ i: s.lo, label: 'lo', tone: 'warn', place: 'below' });
-  if (s.hi !== null && s.hi >= 0) jobPointers.push({ i: s.hi, label: 'hi', tone: 'warn', place: 'below' });
+  if (s.prev !== null && s.prev !== NONE)
+    jobPointers.push({ i: s.prev, label: 'prev', tone: 'good', place: 'below' });
+  if (s.lo !== null && s.lo >= 0)
+    jobPointers.push({ i: s.lo, label: 'lo', tone: 'warn', place: 'below' });
+  if (s.hi !== null && s.hi >= 0)
+    jobPointers.push({ i: s.hi, label: 'hi', tone: 'warn', place: 'below' });
 
   const jobTone = (i: number) => {
     if (s.done && i === s.i) return 'found';
@@ -229,8 +245,14 @@ function Inspector({ frame }: InspectorProps<SchedulerState>) {
     <VarGrid>
       <InspectorRow k="i (job)" v={s.i ?? '—'} />
       <InspectorRow k="job i" v={job ? `[${job.start},${job.end}] p=${job.profit}` : '—'} />
-      <InspectorRow k="prev (non-overlap)" v={s.prev === null || s.prev === NONE ? 'none' : s.prev} />
-      <InspectorRow k="search lo..hi" v={s.lo !== null && s.hi !== null ? `${s.lo}..${s.hi}` : '—'} />
+      <InspectorRow
+        k="prev (non-overlap)"
+        v={s.prev === null || s.prev === NONE ? 'none' : s.prev}
+      />
+      <InspectorRow
+        k="search lo..hi"
+        v={s.lo !== null && s.hi !== null ? `${s.lo}..${s.hi}` : '—'}
+      />
       <InspectorRow k="mid" v={s.mid ?? '—'} />
       <InspectorRow k="skip = dp[i−1]" v={s.skip ?? '—'} />
       <InspectorRow k="take = p + dp[prev]" v={s.take ?? '—'} />
@@ -243,112 +265,109 @@ function Inspector({ frame }: InspectorProps<SchedulerState>) {
 export const manifestId = 'prep-intervals-weighted-job-scheduler';
 export const title = 'Weighted job scheduler';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Weighted job scheduler\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Weighted job scheduler"?',
     choices: [
       {
-        label: "Sort by end + DP + binary search — fits this problem",
-        correct: true
+        label: 'Sort by end + DP + binary search — fits this problem',
+        correct: true,
       },
       {
-        label: "Sort + merge coverage — different approach"
+        label: 'Sort + merge coverage — different approach',
       },
       {
-        label: "Compare six pairwise distances — different approach"
+        label: 'Compare six pairwise distances — different approach',
       },
       {
-        label: "Sweep line with height events — different approach"
-      }
+        label: 'Sweep line with height events — different approach',
+      },
     ],
-    explain: "Sort by end; dp = max(skip, take + best earlier non-overlapping job)"
+    explain: 'Sort by end; dp = max(skip, take + best earlier non-overlapping job)',
   },
   {
-    id: "key-step",
-    prompt: "On the \"TAKE\" step (take=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "TAKE" step (take=), what happens?',
     choices: [
       {
-        label: "Latest non-overlapping job is (ends ≤ — this move caption",
-        correct: true
+        label: 'Latest non-overlapping job is (ends ≤ — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Latest non-overlapping job is  (ends  ≤ ). Taking job  yields its profit  + dp[] (=) = ."
+    explain:
+      'Latest non-overlapping job is  (ends  ≤ ). Taking job  yields its profit  + dp[] (=) = .',
   },
   {
-    id: "state",
-    prompt: "What does the `jobs` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `jobs` field track in the visualization state?',
     choices: [
       {
-        label: "sorted by end time — updated each frame",
-        correct: true
+        label: 'sorted by end time — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `jobs` in sync: sorted by end time"
+    explain: 'The recorder keeps `jobs` in sync: sorted by end time',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Weighted job scheduler\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Weighted job scheduler"?',
     choices: [
       {
-        label: "O(n log n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n log n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
+        label: 'O(log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m+n) time, O(n) space — wrong order of growth"
+        label: 'O(m+n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n log n). O(n). sort by end; dp[i]=max(dp[i-1], profit+dp[lastNonOverlap])"
+    explain: 'O(n log n). O(n). sort by end; dp[i]=max(dp[i-1], profit+dp[lastNonOverlap])',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "The table is complete. dp[] = — final DONE caption",
-        correct: true
+        label: 'The table is complete. dp[] = — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "The table is complete. dp[] =  is the maximum total profit from any set of non-overlapping jobs."
-  }
+    explain:
+      'The table is complete. dp[] =  is the maximum total profit from any set of non-overlapping jobs.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

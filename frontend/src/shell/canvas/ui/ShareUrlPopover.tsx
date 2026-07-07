@@ -6,13 +6,7 @@ import { useCopyFeedback } from '@/hooks/useCopyFeedback';
 import { getProjectShareUrl, type ProjectState } from '@/store/project-state';
 import { usePopoverDismiss } from '../../ui/usePopoverDismiss';
 
-export function ShareUrlPopover({
-  state,
-  dense,
-}: {
-  state: ProjectState | null;
-  dense?: boolean;
-}) {
+export function ShareUrlPopover({ state, dense }: { state: ProjectState | null; dense?: boolean }) {
   const [open, setOpen] = useState(false);
   const { copied, copy } = useCopyFeedback();
   const ref = useRef<HTMLDivElement>(null);

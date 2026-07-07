@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface CookingTimeInput {
   startAt: number;
@@ -44,7 +58,12 @@ function digitsFor(m: number, s: number): number[] {
   return digits;
 }
 
-function record({ startAt, moveCost, pushCost, targetSeconds }: CookingTimeInput): Frame<CookingTimeState>[] {
+function record({
+  startAt,
+  moveCost,
+  pushCost,
+  targetSeconds,
+}: CookingTimeInput): Frame<CookingTimeState>[] {
   const base: CookingTimeState = {
     startAt,
     moveCost,
@@ -72,17 +91,33 @@ function record({ startAt, moveCost, pushCost, targetSeconds }: CookingTimeInput
   const m = Math.floor(targetSeconds / 60);
   const s = targetSeconds % 60;
 
-  emit('INIT', `${targetSeconds}s`, `Minimum Cost to Set Cooking Time: a microwave shows mm:ss. We type ${targetSeconds} seconds as digits. Each keypress costs pushCost=${pushCost}; moving the finger to a different key costs moveCost=${moveCost}. The finger starts on digit ${startAt}. We try two ways to split the time and keep the cheaper one.`, { cand: null });
+  emit(
+    'INIT',
+    `${targetSeconds}s`,
+    `Minimum Cost to Set Cooking Time: a microwave shows mm:ss. We type ${targetSeconds} seconds as digits. Each keypress costs pushCost=${pushCost}; moving the finger to a different key costs moveCost=${moveCost}. The finger starts on digit ${startAt}. We try two ways to split the time and keep the cheaper one.`,
+    { cand: null },
+  );
 
   // Simulate one candidate, emitting a frame per digit. Returns its cost.
   const simulate = (candM: number, candS: number, tag: 'A' | 'B'): number => {
     if (candM < 0 || candM > 99 || candS < 0 || candS > 99) {
-      emit(tag === 'A' ? 'CAND_A' : 'CAND_B', `${tag}: invalid`, `Candidate ${tag} = ${candM} min ${candS} s is out of range (each of minutes and seconds must be 0..99), so it cannot be typed. Its cost is treated as ∞.`, { cand: tag, candM, candS, digits: [], i: null, pos: startAt, cost: INVALID }, 'bad');
+      emit(
+        tag === 'A' ? 'CAND_A' : 'CAND_B',
+        `${tag}: invalid`,
+        `Candidate ${tag} = ${candM} min ${candS} s is out of range (each of minutes and seconds must be 0..99), so it cannot be typed. Its cost is treated as ∞.`,
+        { cand: tag, candM, candS, digits: [], i: null, pos: startAt, cost: INVALID },
+        'bad',
+      );
       return INVALID;
     }
 
     const digits = digitsFor(candM, candS);
-    emit(tag === 'A' ? 'CAND_A' : 'CAND_B', `${tag}: ${candM}m ${candS}s`, `Candidate ${tag}: represent the time as ${candM} minute(s) and ${candS} second(s). Typed as digits [${digits.join(', ')}]. Start with the finger on ${startAt} and cost 0.`, { cand: tag, candM, candS, digits, i: null, pos: startAt, cost: 0 });
+    emit(
+      tag === 'A' ? 'CAND_A' : 'CAND_B',
+      `${tag}: ${candM}m ${candS}s`,
+      `Candidate ${tag}: represent the time as ${candM} minute(s) and ${candS} second(s). Typed as digits [${digits.join(', ')}]. Start with the finger on ${startAt} and cost 0.`,
+      { cand: tag, candM, candS, digits, i: null, pos: startAt, cost: 0 },
+    );
 
     let cost = 0;
     let pos = startAt;
@@ -92,13 +127,28 @@ function record({ startAt, moveCost, pushCost, targetSeconds }: CookingTimeInput
         const from = pos;
         cost += moveCost;
         pos = d;
-        emit('MOVE', `move ${from}→${d} (+${moveCost})`, `Digit ${k + 1} is ${d}, but the finger is on ${from}. Move it to key ${d}: cost += moveCost (${moveCost}). Running cost = ${cost}.`, { cand: tag, candM, candS, digits, i: k, pos, cost });
+        emit(
+          'MOVE',
+          `move ${from}→${d} (+${moveCost})`,
+          `Digit ${k + 1} is ${d}, but the finger is on ${from}. Move it to key ${d}: cost += moveCost (${moveCost}). Running cost = ${cost}.`,
+          { cand: tag, candM, candS, digits, i: k, pos, cost },
+        );
       }
       cost += pushCost;
-      emit('PUSH', `push ${d} (+${pushCost})`, `Press key ${d}: cost += pushCost (${pushCost}). Running cost = ${cost}. The finger stays on ${pos}.`, { cand: tag, candM, candS, digits, i: k, pos, cost });
+      emit(
+        'PUSH',
+        `push ${d} (+${pushCost})`,
+        `Press key ${d}: cost += pushCost (${pushCost}). Running cost = ${cost}. The finger stays on ${pos}.`,
+        { cand: tag, candM, candS, digits, i: k, pos, cost },
+      );
     }
 
-    emit(tag === 'A' ? 'DONE_A' : 'DONE_B', `${tag} cost=${cost}`, `Candidate ${tag} fully typed: total cost = ${cost}.`, { cand: tag, candM, candS, digits, i: null, pos, cost });
+    emit(
+      tag === 'A' ? 'DONE_A' : 'DONE_B',
+      `${tag} cost=${cost}`,
+      `Candidate ${tag} fully typed: total cost = ${cost}.`,
+      { cand: tag, candM, candS, digits, i: null, pos, cost },
+    );
     return cost;
   };
 
@@ -110,7 +160,13 @@ function record({ startAt, moveCost, pushCost, targetSeconds }: CookingTimeInput
 
   const best = Math.min(costA, costB);
   const winner = costA <= costB ? 'A' : 'B';
-  emit('RESULT', `min=${best}`, `Compare the two candidates: A = ${costA === INVALID ? '∞' : costA}, B = ${costB === INVALID ? '∞' : costB}. The cheaper one is candidate ${winner} with cost ${best}. That is the minimum cost.`, { cand: null, best, done: true }, 'good');
+  emit(
+    'RESULT',
+    `min=${best}`,
+    `Compare the two candidates: A = ${costA === INVALID ? '∞' : costA}, B = ${costB === INVALID ? '∞' : costB}. The cheaper one is candidate ${winner} with cost ${best}. That is the minimum cost.`,
+    { cand: null, best, done: true },
+    'good',
+  );
 
   return frames;
 }
@@ -141,9 +197,7 @@ function View({ frame }: PluginViewProps<CookingTimeState>) {
         <RailStat k="A" v={fmt(s.costA)} />
         <RailStat k="B" v={fmt(s.costB)} />
       </RailGroup>
-      {s.done && s.best !== null && (
-        <RailResult label="min cost" value={s.best} tone="good" />
-      )}
+      {s.done && s.best !== null && <RailResult label="min cost" value={s.best} tone="good" />}
     </>
   );
   return (
@@ -174,132 +228,130 @@ function Inspector({ frame }: InspectorProps<CookingTimeState>) {
 export const manifestId = 'prep-math-minimum-cost-to-set-cooking-time';
 export const title = 'Minimum Cost to Set Cooking Time';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Minimum Cost to Set Cooking Time\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Minimum Cost to Set Cooking Time"?',
     choices: [
       {
-        label: "Enumerate 2 candidates — fits this problem",
-        correct: true
+        label: 'Enumerate 2 candidates — fits this problem',
+        correct: true,
       },
       {
-        label: "Bit trick power of two — different approach"
+        label: 'Bit trick power of two — different approach',
       },
       {
-        label: "Greedy roman numeral — different approach"
+        label: 'Greedy roman numeral — different approach',
       },
       {
-        label: "Integer log base 2 — different approach"
-      }
+        label: 'Integer log base 2 — different approach',
+      },
     ],
-    explain: "See Minimum Cost To Set Cooking Time pattern"
+    explain: 'See Minimum Cost To Set Cooking Time pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Minimum Cost to Set Cooking Time), what strategy is established?",
+    id: 'init',
+    prompt:
+      'At the start of a run (Minimum Cost to Set Cooking Time), what strategy is established?',
     choices: [
       {
-        label: "See Minimum Cost To Set Cooking — described in INIT caption",
-        correct: true
+        label: 'See Minimum Cost To Set Cooking — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Minimum Cost to Set Cooking Time: a microwave shows mm:ss. We type  seconds as digits. Each keypress costs pushCost=; moving the finger to a different key costs moveCost=. The finger starts on digit . We try two ways to split the time and keep the cheaper one."
+    explain:
+      'Minimum Cost to Set Cooking Time: a microwave shows mm:ss. We type  seconds as digits. Each keypress costs pushCost=; moving the finger to a different key costs moveCost=. The finger starts on digit . We try two ways to split the time and keep the cheaper one.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"PUSH\" step (push  (+)), what happens?",
+    id: 'key-step',
+    prompt: 'On the "PUSH" step (push  (+)), what happens?',
     choices: [
       {
-        label: "Press key : cost += pushCost — this move caption",
-        correct: true
+        label: 'Press key : cost += pushCost — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Press key : cost += pushCost (). Running cost = . The finger stays on ."
+    explain: 'Press key : cost += pushCost (). Running cost = . The finger stays on .',
   },
   {
-    id: "state",
-    prompt: "What does the `digits` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `digits` field track in the visualization state?',
     choices: [
       {
-        label: "the 1-4 digits the current — updated each frame",
-        correct: true
+        label: 'the 1-4 digits the current — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `digits` in sync: the 1-4 digits the current candidate types"
+    explain: 'The recorder keeps `digits` in sync: the 1-4 digits the current candidate types',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Minimum Cost to Set Cooking Time\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Minimum Cost to Set Cooking Time"?',
     choices: [
       {
-        label: "O(1) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(1) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(log n) space — wrong order of growth"
+        label: 'O(log n) time, O(log n) space — wrong order of growth',
       },
       {
-        label: "O(sqrt(n)) time, O(1) space — wrong order of growth"
-      }
+        label: 'O(sqrt(n)) time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(1). O(1). Minimum Cost To Set Cooking Time"
+    explain: 'O(1). O(1). Minimum Cost To Set Cooking Time',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Compare the two candidates: A = — final DONE caption",
-        correct: true
+        label: 'Compare the two candidates: A = — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Compare the two candidates: A = , B = . The cheaper one is candidate  with cost . That is the minimum cost."
-  }
+    explain:
+      'Compare the two candidates: A = , B = . The cheaper one is candidate  with cost . That is the minimum cost.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

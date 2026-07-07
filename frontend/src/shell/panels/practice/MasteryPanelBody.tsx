@@ -4,7 +4,17 @@ import { cn } from '@/lib/utils/cn';
 import { useProgress, statFor, setMastered } from '@/store/persistence';
 import { PRACTICE_ADVANCE_MS } from '../shared/practiceConstants';
 
-import { useCanvasActions, useCanvasStatic, Btn, Label, Meter, Stat, StatGrid, StreakPips, nodeText } from '@/shell/canvas';
+import {
+  useCanvasActions,
+  useCanvasStatic,
+  Btn,
+  Label,
+  Meter,
+  Stat,
+  StatGrid,
+  StreakPips,
+  nodeText,
+} from '@/shell/canvas';
 /** #51 Mastery meter + streaks (localStorage-backed, per problem). */
 export function MasteryPanelBody() {
   const { item } = useCanvasStatic();
@@ -27,8 +37,13 @@ export function MasteryPanelBody() {
   return (
     <div className="nodrag flex flex-col gap-2">
       <div className="flex items-center gap-2">
-        <Trophy className="h-5 w-5" style={{ color: s.mastered ? 'var(--good)' : 'var(--text-3)' }} />
-        <span className={cn('font-medium text-ink', nodeText.sm)}>{s.mastered ? 'Mastered' : 'In progress'}</span>
+        <Trophy
+          className="h-5 w-5"
+          style={{ color: s.mastered ? 'var(--good)' : 'var(--text-3)' }}
+        />
+        <span className={cn('font-medium text-ink', nodeText.sm)}>
+          {s.mastered ? 'Mastered' : 'In progress'}
+        </span>
         <span className="flex-1" />
         <span className={cn('font-mono tabular-nums text-good', nodeText.base)}>{acc}%</span>
       </div>

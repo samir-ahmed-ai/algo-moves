@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -33,16 +39,16 @@ function record({ intervals }: MeetingsInput): Frame<MeetingsState>[] {
   const original = intervals.map((c) => ({ ...c }));
 
   const { emit, frames } = createRecorder<MeetingsState>(() => ({
-        cells: original.map((c) => ({ ...c })),
-        sorted: false,
-        i: null,
-        prev: null,
-        prevEnd: null,
-        curStart: null,
-        conflict: false,
-        result: null,
-        done: false
-      }));
+    cells: original.map((c) => ({ ...c })),
+    sorted: false,
+    i: null,
+    prev: null,
+    prevEnd: null,
+    curStart: null,
+    conflict: false,
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -88,7 +94,17 @@ function record({ intervals }: MeetingsInput): Frame<MeetingsState>[] {
         'CONFLICT',
         `${curStart} < ${prevEnd}`,
         `Overlap found: ${fmt(sorted[i])} starts at ${curStart}, which is before ${fmt(sorted[i - 1])} ends at ${prevEnd}. The two meetings collide, so not all meetings can be attended — return false.`,
-        { cells: sorted.map((c) => ({ ...c })), sorted: true, i, prev: i - 1, prevEnd, curStart, conflict: true, result: false, done: true },
+        {
+          cells: sorted.map((c) => ({ ...c })),
+          sorted: true,
+          i,
+          prev: i - 1,
+          prevEnd,
+          curStart,
+          conflict: true,
+          result: false,
+          done: true,
+        },
         'bad',
       );
       return frames;
@@ -179,132 +195,130 @@ function Inspector({ frame }: InspectorProps<MeetingsState>) {
 export const manifestId = 'prep-intervals-schedule-meetings';
 export const title = 'Schedule meetings';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Schedule meetings\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Schedule meetings"?',
     choices: [
       {
-        label: "Sort by start + adjacency check — fits this problem",
-        correct: true
+        label: 'Sort by start + adjacency check — fits this problem',
+        correct: true,
       },
       {
-        label: "Three-segment interval insert — different approach"
+        label: 'Three-segment interval insert — different approach',
       },
       {
-        label: "Sort by end + DP + binary search — different approach"
+        label: 'Sort by end + DP + binary search — different approach',
       },
       {
-        label: "Sort + merge coverage — different approach"
-      }
+        label: 'Sort + merge coverage — different approach',
+      },
     ],
-    explain: "Sort by start; any meeting starting before the previous end conflicts"
+    explain: 'Sort by start; any meeting starting before the previous end conflicts',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Schedule meetings), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Schedule meetings), what strategy is established?',
     choices: [
       {
-        label: "Sort by start; any meeting starting — described in INIT caption",
-        correct: true
+        label: 'Sort by start; any meeting starting — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Schedule meetings: can one person attend every meeting? They can if and only if no two intervals overlap. Strategy — sort by start time, then check each meeting against the one before it."
+    explain:
+      'Schedule meetings: can one person attend every meeting? They can if and only if no two intervals overlap. Strategy — sort by start time, then check each meeting against the one before it.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"CONFLICT\" step ( < ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "CONFLICT" step ( < ), what happens?',
     choices: [
       {
-        label: "Overlap found: starts at , which — this move caption",
-        correct: true
+        label: 'Overlap found: starts at , which — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Overlap found:  starts at , which is before  ends at . The two meetings collide, so not all meetings can be attended — return false."
+    explain:
+      'Overlap found:  starts at , which is before  ends at . The two meetings collide, so not all meetings can be attended — return false.',
   },
   {
-    id: "state",
-    prompt: "What does the `sorted` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `sorted` field track in the visualization state?',
     choices: [
       {
-        label: "have we committed — updated each frame",
-        correct: true
+        label: 'have we committed — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `sorted` in sync: have we committed to the sorted order yet"
+    explain: 'The recorder keeps `sorted` in sync: have we committed to the sorted order yet',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Schedule meetings\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Schedule meetings"?',
     choices: [
       {
-        label: "O(n log n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n log n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(1) time, O(1) space — wrong order of growth"
+        label: 'O(1) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(s * c) time, O(1) space — wrong order of growth"
-      }
+        label: 'O(s * c) time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(n log n). O(n). sort by start; sorted[i].Start < sorted[i-1].End -> false"
+    explain: 'O(n log n). O(n). sort by start; sorted[i].Start < sorted[i-1].End -> false',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "No overlap: starts at step — final DONE caption",
-        correct: true
+        label: 'No overlap: starts at step — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "No overlap:  starts at , at or after  ends at . These two are compatible — keep sweeping."
-  }
+    explain:
+      'No overlap:  starts at , at or after  ends at . These two are compatible — keep sweeping.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -336,8 +350,6 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as MeetingsState | undefined;
-    return s?.result
-      ? { ok: true, label: 'can attend all' }
-      : { ok: false, label: 'conflict' };
+    return s?.result ? { ok: true, label: 'can attend all' } : { ok: false, label: 'conflict' };
   },
 };

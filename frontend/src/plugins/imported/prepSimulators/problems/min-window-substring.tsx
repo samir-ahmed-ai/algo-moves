@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -38,17 +44,17 @@ function record({ s, t }: MinWindowInput): Frame<MinWindowState>[] {
   let bestLen = Number.MAX_SAFE_INTEGER;
 
   const { emit, frames } = createRecorder<MinWindowState>(() => ({
-        s,
-        t,
-        l: null,
-        r: null,
-        required,
-        formed,
-        window: null,
-        best: bestLen === Number.MAX_SAFE_INTEGER ? null : [bestL, bestL + bestLen - 1],
-        result: null,
-        done: false
-      }));
+    s,
+    t,
+    l: null,
+    r: null,
+    required,
+    formed,
+    window: null,
+    best: bestLen === Number.MAX_SAFE_INTEGER ? null : [bestL, bestL + bestLen - 1],
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -58,7 +64,13 @@ function record({ s, t }: MinWindowInput): Frame<MinWindowState>[] {
   );
 
   if (t.length === 0) {
-    emit('EMPTY', 'empty t', `t is empty, so the answer is the empty string "".`, { result: '', done: true }, 'bad');
+    emit(
+      'EMPTY',
+      'empty t',
+      `t is empty, so the answer is the empty string "".`,
+      { result: '', done: true },
+      'bad',
+    );
     return frames;
   }
 
@@ -128,7 +140,8 @@ function View({ frame }: PluginViewProps<MinWindowState>) {
   const s = frame.state;
   const chars = s.s.split('');
   const pointers: ArrayPointer[] = [];
-  if (s.l !== null && s.l < chars.length) pointers.push({ i: s.l, label: 'l', tone: 'good', place: 'below' });
+  if (s.l !== null && s.l < chars.length)
+    pointers.push({ i: s.l, label: 'l', tone: 'good', place: 'below' });
   if (s.r !== null) pointers.push({ i: s.r, label: 'r', tone: 'accent', place: 'above' });
 
   const tone = (i: number) => {
@@ -172,7 +185,10 @@ function Inspector({ frame }: InspectorProps<MinWindowState>) {
       <InspectorRow k="window" v={winStr} />
       <InspectorRow k="formed / required" v={`${s.formed} / ${s.required}`} />
       <InspectorRow k="best" v={bestStr} />
-      <InspectorRow k="result" v={s.result !== null ? (s.result === '' ? '""' : `"${s.result}"`) : '…'} />
+      <InspectorRow
+        k="result"
+        v={s.result !== null ? (s.result === '' ? '""' : `"${s.result}"`) : '…'}
+      />
     </VarGrid>
   );
 }
@@ -180,132 +196,130 @@ function Inspector({ frame }: InspectorProps<MinWindowState>) {
 export const manifestId = 'prep-strings-min-window-substring';
 export const title = 'Min window substring';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Min window substring\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Min window substring"?',
     choices: [
       {
-        label: "Sliding window — fits this problem",
-        correct: true
+        label: 'Sliding window — fits this problem',
+        correct: true,
       },
       {
-        label: "Greedy (keep max in group) — different approach"
+        label: 'Greedy (keep max in group) — different approach',
       },
       {
-        label: "Greedy Line Packing — different approach"
+        label: 'Greedy Line Packing — different approach',
       },
       {
-        label: "Two pointers — different approach"
-      }
+        label: 'Two pointers — different approach',
+      },
     ],
-    explain: "Grow right until t is covered, then shrink left to smallest"
+    explain: 'Grow right until t is covered, then shrink left to smallest',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Min window substring), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Min window substring), what strategy is established?',
     choices: [
       {
-        label: "Grow right until t is covered — described in INIT caption",
-        correct: true
+        label: 'Grow right until t is covered — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Min Window Substring: find the shortest slice of s that contains every character of t (with multiplicity). We slide a window over s, growing the right edge to cover t, then shrinking the left edge to make it as small as possible. required =  distinct char(s)."
+    explain:
+      'Min Window Substring: find the shortest slice of s that contains every character of t (with multiplicity). We slide a window over s, growing the right edge to cover t, then shrinking the left edge to make it as small as possible. required =  distinct char(s).',
   },
   {
-    id: "key-step",
-    prompt: "On the \"RECORD\" step (best=\"\"), what happens?",
+    id: 'key-step',
+    prompt: 'On the "RECORD" step (best=""), what happens?',
     choices: [
       {
-        label: "The window s[..] = \"\" covers — this move caption",
-        correct: true
+        label: 'The window s[..] = "" covers — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "The window s[..] = \"\" covers all of t and is shorter than any before (length ). Record it as the new best."
+    explain:
+      'The window s[..] = "" covers all of t and is shorter than any before (length ). Record it as the new best.',
   },
   {
-    id: "state",
-    prompt: "What does the `s` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `s` field track in the visualization state?',
     choices: [
       {
-        label: "the search string, one char — updated each frame",
-        correct: true
+        label: 'the search string, one char — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `s` in sync: the search string, one char per cell"
+    explain: 'The recorder keeps `s` in sync: the search string, one char per cell',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Min window substring\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Min window substring"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
+        label: 'O(1) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n*m) time, O(1) space — wrong order of growth"
+        label: 'O(n*m) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). need map; formed==required -> shrink l, record best"
+    explain: 'O(n). O(1). need map; formed==required -> shrink l, record best',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "The window s[..] = \"\" covers — final DONE caption",
-        correct: true
+        label: 'The window s[..] = "" covers — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "The window s[..] = \"\" covers all of t and is shorter than any before (length ). Record it as the new best."
-  }
+    explain:
+      'The window s[..] = "" covers all of t and is shorter than any before (length ). Record it as the new best.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -319,6 +333,8 @@ export const simulator: ProblemSimulator = {
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as MinWindowState | undefined;
     if (!s || s.result === null) return { ok: false, label: 'no window' };
-    return s.result === '' ? { ok: false, label: '"" (no window)' } : { ok: true, label: `"${s.result}"` };
+    return s.result === ''
+      ? { ok: false, label: '"" (no window)' }
+      : { ok: true, label: `"${s.result}"` };
   },
 };

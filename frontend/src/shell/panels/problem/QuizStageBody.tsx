@@ -76,7 +76,9 @@ export function QuizStageBody({
         />
       }
       problem={
-        <ProblemStatementColumn className={cn(isMobile && 'max-h-[40vh] shrink-0 border-b border-edge')}>
+        <ProblemStatementColumn
+          className={cn(isMobile && 'max-h-[40vh] shrink-0 border-b border-edge')}
+        >
           <ProblemPanelBody />
         </ProblemStatementColumn>
       }
@@ -109,7 +111,8 @@ function QuizContent({
   onAdvance: () => void;
 }) {
   const { active } = useCodeStudioContent();
-  const { quiz, savedQuizProgress, nextLabel, onQuizProgress, onQuizContinue } = useCodeStudioPhase();
+  const { quiz, savedQuizProgress, nextLabel, onQuizProgress, onQuizContinue } =
+    useCodeStudioPhase();
   const { item } = useCanvasStatic();
   const { onAnswer: relayQuizAnswer } = useQuizHostRelay(item.id);
   const { advancePractice } = useCanvasActions();
@@ -127,7 +130,11 @@ function QuizContent({
   if (!quiz) {
     return (
       <div className="grid min-h-0 flex-1 place-items-center p-6">
-        <EmptyState icon={<GraduationCap className="h-4 w-4" />} title="No quiz" hint="This problem has no quiz." />
+        <EmptyState
+          icon={<GraduationCap className="h-4 w-4" />}
+          title="No quiz"
+          hint="This problem has no quiz."
+        />
       </div>
     );
   }

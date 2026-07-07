@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -27,16 +33,17 @@ function valAt(tree: (number | null)[], i: number): number | null {
   return tree[i];
 }
 
-function record({ tree }: SymmetricInput): Frame<SymmetricState>[] {  const visited: number[] = [];
+function record({ tree }: SymmetricInput): Frame<SymmetricState>[] {
+  const visited: number[] = [];
 
   const { emit, frames } = createRecorder<SymmetricState>(() => ({
-        tree,
-        a: null,
-        b: null,
-        visited: visited.slice(),
-        result: null,
-        done: false
-      }));
+    tree,
+    a: null,
+    b: null,
+    visited: visited.slice(),
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -120,8 +127,7 @@ function View({ frame }: PluginViewProps<SymmetricState>) {
     return 'team-0';
   };
   const active = s.a !== null ? s.a : s.b !== null ? s.b : null;
-  const label =
-    s.result === null ? 'comparing…' : s.result ? 'symmetric' : 'not symmetric';
+  const label = s.result === null ? 'comparing…' : s.result ? 'symmetric' : 'not symmetric';
   const labelTone = s.result === null ? 'text-ink' : s.result ? 'text-good' : 'text-bad';
   return (
     <div className="board-area">
@@ -159,112 +165,110 @@ function Inspector({ frame }: InspectorProps<SymmetricState>) {
 export const manifestId = 'prep-trees-is-symmetric';
 export const title = 'Is symmetric';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Is symmetric\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Is symmetric"?',
     choices: [
       {
-        label: "Mirror compare — fits this problem",
-        correct: true
+        label: 'Mirror compare — fits this problem',
+        correct: true,
       },
       {
-        label: "Recursive DFS — different approach"
+        label: 'Recursive DFS — different approach',
       },
       {
-        label: "Mid divide BST — different approach"
+        label: 'Mid divide BST — different approach',
       },
       {
-        label: "Two Paths + LCA via Common Prefix — different approach"
-      }
+        label: 'Two Paths + LCA via Common Prefix — different approach',
+      },
     ],
-    explain: "Fold the tree; left subtree must mirror the right"
+    explain: 'Fold the tree; left subtree must mirror the right',
   },
   {
-    id: "key-step",
-    prompt: "On the \"MATCH\" step ( == ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "MATCH" step ( == ), what happens?',
     choices: [
       {
-        label: "Values match ( == ). Now — this move caption",
-        correct: true
+        label: 'Values match ( == ). Now — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Values match ( == ). Now recurse the mirrored way: compare a.left with b.right, and a.right with b.left."
+    explain:
+      'Values match ( == ). Now recurse the mirrored way: compare a.left with b.right, and a.right with b.left.',
   },
   {
-    id: "state",
-    prompt: "What does the `a` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `a` field track in the visualization state?',
     choices: [
       {
-        label: "level-order index of the left-side — updated each frame",
-        correct: true
+        label: 'level-order index of the left-side — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `a` in sync: level-order index of the left-side node under compare"
+    explain:
+      'The recorder keeps `a` in sync: level-order index of the left-side node under compare',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Is symmetric\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Is symmetric"?',
     choices: [
       {
-        label: "O(n) time, O(h) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(h) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
+        label: 'O(n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(h). mirror(a.Left,b.Right) && mirror(a.Right,b.Left)"
+    explain: 'O(n). O(h). mirror(a.Left,b.Right) && mirror(a.Right,b.Left)',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Values match ( == ). Now — final DONE caption",
-        correct: true
+        label: 'Values match ( == ). Now — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Values match ( == ). Now recurse the mirrored way: compare a.left with b.right, and a.right with b.left."
-  }
+    explain:
+      'Values match ( == ). Now recurse the mirrored way: compare a.left with b.right, and a.right with b.left.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

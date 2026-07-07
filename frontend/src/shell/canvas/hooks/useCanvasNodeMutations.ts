@@ -38,7 +38,10 @@ export function useCanvasNodeMutations({
     [setNodes],
   );
   const minimizeNode = useCallback(
-    (id: string) => setNodes((nds) => nds.map((n) => (n.id === id ? togglePanelCollapse(n as PanelFlowNode) : n))),
+    (id: string) =>
+      setNodes((nds) =>
+        nds.map((n) => (n.id === id ? togglePanelCollapse(n as PanelFlowNode) : n)),
+      ),
     [setNodes],
   );
   const removeNode = useCallback(

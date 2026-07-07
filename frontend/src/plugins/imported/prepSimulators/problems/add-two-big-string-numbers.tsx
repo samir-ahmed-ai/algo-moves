@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -24,24 +30,25 @@ interface AddState {
   done: boolean;
 }
 
-function record({ a, b }: AddInput): Frame<AddState>[] {  let i = a.length - 1;
+function record({ a, b }: AddInput): Frame<AddState>[] {
+  let i = a.length - 1;
   let j = b.length - 1;
   let carry = 0;
   let out = '';
 
   const { emit, frames } = createRecorder<AddState>(() => ({
-        a,
-        b,
-        i: null,
-        j: null,
-        aDigit: null,
-        bDigit: null,
-        carry,
-        sum: null,
-        out,
-        result: null,
-        done: false
-      }));
+    a,
+    b,
+    i: null,
+    j: null,
+    aDigit: null,
+    bDigit: null,
+    carry,
+    sum: null,
+    out,
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -120,10 +127,8 @@ function View({ frame }: PluginViewProps<AddState>) {
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
-        a ={' '}
-        <span className="font-mono text-ink">{s.a}</span>
-        {' + '}b ={' '}
-        <span className="font-mono text-ink">{s.b}</span>
+        a = <span className="font-mono text-ink">{s.a}</span>
+        {' + '}b = <span className="font-mono text-ink">{s.b}</span>
       </div>
 
       <div className={cn(vizText.xs, 'mt-1 text-ink3')}>a</div>
@@ -132,25 +137,17 @@ function View({ frame }: PluginViewProps<AddState>) {
       <ArrayRow values={bChars} cellTone={bTone} pointers={bPointers} windowRange={null} />
 
       <div className={cn('mt-2 font-mono', vizText.sm, 'text-ink3')}>
-        carry ={' '}
-        <span className="text-ink">{s.carry}</span>
+        carry = <span className="text-ink">{s.carry}</span>
         {s.sum !== null && !s.done && (
           <>
-            {' · '}sum ={' '}
-            <span className="text-ink">{s.sum}</span>
+            {' · '}sum = <span className="text-ink">{s.sum}</span>
           </>
         )}
       </div>
       <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
         digits (rev) = <span className="text-ink">{outLeastFirst}</span>
       </div>
-      <div
-        className={cn(
-          'mt-1 font-mono',
-          vizText.base,
-          s.result ? 'text-good' : 'text-ink2',
-        )}
-      >
+      <div className={cn('mt-1 font-mono', vizText.base, s.result ? 'text-good' : 'text-ink2')}>
         {s.result ? '→ ' : '= '}
         {built}
       </div>
@@ -180,132 +177,130 @@ function Inspector({ frame }: InspectorProps<AddState>) {
 export const manifestId = 'prep-math-add-two-big-string-numbers';
 export const title = 'Add two big string numbers';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Add two big string numbers\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Add two big string numbers"?',
     choices: [
       {
-        label: "Big integer string addition — fits this problem",
-        correct: true
+        label: 'Big integer string addition — fits this problem',
+        correct: true,
       },
       {
-        label: "Sort — different approach"
+        label: 'Sort — different approach',
       },
       {
-        label: "Uniform random in range — different approach"
+        label: 'Uniform random in range — different approach',
       },
       {
-        label: "Singleton XOR — different approach"
-      }
+        label: 'Singleton XOR — different approach',
+      },
     ],
-    explain: "Same as binary add, but base 10"
+    explain: 'Same as binary add, but base 10',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Add two big string numbers), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Add two big string numbers), what strategy is established?',
     choices: [
       {
-        label: "Same as binary add, but base — described in INIT caption",
-        correct: true
+        label: 'Same as binary add, but base — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Big-integer addition: the numbers are too long for a machine int, so we add them digit by digit as strings. Walk both numbers from the least-significant digit (the right end), keeping a running carry."
+    explain:
+      'Big-integer addition: the numbers are too long for a machine int, so we add them digit by digit as strings. Walk both numbers from the least-significant digit (the right end), keeping a running carry.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"WRITE\" step (digit=, carry=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "WRITE" step (digit=, carry=), what happens?',
     choices: [
       {
-        label: "Keep sum % 10 = — this move caption",
-        correct: true
+        label: 'Keep sum % 10 = — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Keep sum % 10 =  as this column's output digit, and carry sum / 10 =  into the next column. Digits collected so far (least-significant first): ."
+    explain:
+      "Keep sum % 10 =  as this column's output digit, and carry sum / 10 =  into the next column. Digits collected so far (least-significant first): .",
   },
   {
-    id: "state",
-    prompt: "What does the `i` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: "current digit index — updated each frame",
-        correct: true
+        label: 'current digit index — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `i` in sync: current digit index into a (from the right)"
+    explain: 'The recorder keeps `i` in sync: current digit index into a (from the right)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Add two big string numbers\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Add two big string numbers"?',
     choices: [
       {
-        label: "O(max(len)) time, O(max(len)) space — standard bounds here",
-        correct: true
+        label: 'O(max(len)) time, O(max(len)) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(d) time, O(d) space — wrong order of growth"
+        label: 'O(d) time, O(d) space — wrong order of growth',
       },
       {
-        label: "O(bits set) time, O(1) space — wrong order of growth"
+        label: 'O(bits set) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(1) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(max(len)). O(max(len)). sum=a+b+carry; digit=sum%10; carry=sum/10; reverse"
+    explain: 'O(max(len)). O(max(len)). sum=a+b+carry; digit=sum%10; carry=sum/10; reverse',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Every column is processed — final DONE caption",
-        correct: true
+        label: 'Every column is processed — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Every column is processed and the carry is gone. The digits were appended least-significant first, so reverse them to get the answer: ."
-  }
+    explain:
+      'Every column is processed and the carry is gone. The digits were appended least-significant first, so reverse them to get the answer: .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -318,8 +313,6 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as AddState | undefined;
-    return s?.result
-      ? { ok: true, label: s.result }
-      : { ok: false, label: 'no result' };
+    return s?.result ? { ok: true, label: s.result } : { ok: false, label: 'no result' };
   },
 };

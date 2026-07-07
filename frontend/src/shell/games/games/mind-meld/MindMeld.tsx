@@ -4,12 +4,25 @@ import { useGameRoom } from '../../net/useGameRoom';
 import { useGameChannel } from '../../net/useGameChannel';
 import { useMatchReporter } from '../../net/useMatchReporter';
 import { usePublishState } from '../../net/usePublishState';
-import { mergeNestedRoomState, useAdoptNestedState, useSharedStateRef } from '../../net/nestedRoomState';
+import {
+  mergeNestedRoomState,
+  useAdoptNestedState,
+  useSharedStateRef,
+} from '../../net/nestedRoomState';
 import type { Peer } from '../../net/protocol';
 import { Avatar } from '../../ui/Avatar';
 import { Confetti, CountdownRing } from '../../ui/effects';
 import { usePrefersReducedMotion } from '../../ui/hooks';
-import { ChoiceCard, GameArena, GameBody, ResultBanner, RoundProgress, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
+import {
+  ChoiceCard,
+  GameArena,
+  GameBody,
+  ResultBanner,
+  RoundProgress,
+  TouchButton,
+  TurnBadge,
+  WaitingForPeer,
+} from '../../ui/gamesUi';
 import { playCue } from '@/lib/utils/audio';
 import { hapticError, hapticSuccess } from '@/lib/utils/haptic';
 import { cn } from '@/lib/utils/cn';
@@ -48,12 +61,12 @@ function isMeldState(v: unknown): v is MeldState {
   if (!v || typeof v !== 'object') return false;
   const o = v as Record<string, unknown>;
   return (
-    typeof o.round === 'number'
-    && typeof o.phase === 'string'
-    && (o.phase === 'answer' || o.phase === 'reveal' || o.phase === 'over')
-    && (o.deadline === null || typeof o.deadline === 'number')
-    && typeof o.answers === 'object'
-    && o.answers !== null
+    typeof o.round === 'number' &&
+    typeof o.phase === 'string' &&
+    (o.phase === 'answer' || o.phase === 'reveal' || o.phase === 'over') &&
+    (o.deadline === null || typeof o.deadline === 'number') &&
+    typeof o.answers === 'object' &&
+    o.answers !== null
   );
 }
 
@@ -77,7 +90,8 @@ export function MindMeld() {
   const prompts = useMemo(() => getMeldPrompts(locale), [locale]);
   const total = prompts.length;
 
-  const { self, peer, players, connected, role, isSpectator, publishState, sharedState } = useGameRoom();
+  const { self, peer, players, connected, role, isSpectator, publishState, sharedState } =
+    useGameRoom();
   const { report } = useMatchReporter('mind-meld');
 
   const isHost = role === 'host';
@@ -101,21 +115,18 @@ export function MindMeld() {
 
   // Record a pick. Host applies it straight to authoritative state; guests relay
   // it up and optimistically show their own selection.
-  const recordAnswer = useCallback(
-    (round: number, peerId: string, choice: MeldChoice) => {
-      setState((prev) => {
-        if (prev.phase !== 'answer' || round !== prev.round) return prev;
-        const row = prev.answers[round] ?? {};
-        if (peerId in row) return prev; // one pick per player per round
-        const next: MeldState = {
-          ...prev,
-          answers: { ...prev.answers, [round]: { ...row, [peerId]: choice } },
-        };
-        return next;
-      });
-    },
-    [],
-  );
+  const recordAnswer = useCallback((round: number, peerId: string, choice: MeldChoice) => {
+    setState((prev) => {
+      if (prev.phase !== 'answer' || round !== prev.round) return prev;
+      const row = prev.answers[round] ?? {};
+      if (peerId in row) return prev; // one pick per player per round
+      const next: MeldState = {
+        ...prev,
+        answers: { ...prev.answers, [round]: { ...row, [peerId]: choice } },
+      };
+      return next;
+    });
+  }, []);
 
   const send = useGameChannel<MeldMsg>((msg, fromId) => {
     if (msg.kind === 'answer') {
@@ -132,7 +143,8 @@ export function MindMeld() {
   useEffect(() => {
     if (prevLocaleRef.current === locale) return;
     prevLocaleRef.current = locale;
-    const untouched = state.round === 0 && state.phase === 'answer' && Object.keys(state.answers).length === 0;
+    const untouched =
+      state.round === 0 && state.phase === 'answer' && Object.keys(state.answers).length === 0;
     if (untouched) return;
     if (isHost) {
       resetMatch();
@@ -224,14 +236,21 @@ export function MindMeld() {
     for (let r = 0; r <= Math.min(state.round, total - 1); r++) {
       if (state.phase === 'answer' && r === state.round) continue; // not revealed yet
       const picks = roundPicks(state, r, players);
-      if (picks.length >= 2 && picks[0] !== null && picks[1] !== null && isMatch(picks[0], picks[1])) n++;
+      if (
+        picks.length >= 2 &&
+        picks[0] !== null &&
+        picks[1] !== null &&
+        isMatch(picks[0], picks[1])
+      )
+        n++;
     }
     return n;
   }, [state, players, total]);
 
   const revealedRounds = useMemo(() => {
     const rows: (MeldChoice | null)[][] = [];
-    const last = state.phase === 'over' ? total - 1 : state.phase === 'reveal' ? state.round : state.round - 1;
+    const last =
+      state.phase === 'over' ? total - 1 : state.phase === 'reveal' ? state.round : state.round - 1;
     for (let r = 0; r <= last; r++) rows.push(roundPicks(state, r, players));
     return rows;
   }, [state, players, total]);
@@ -282,7 +301,11 @@ export function MindMeld() {
     }
     if (reportedRef.current) return;
     reportedRef.current = true;
-    const finalSync = isGroup ? syncPercent : total > 0 ? Math.round((matchedCount / total) * 100) : 0;
+    const finalSync = isGroup
+      ? syncPercent
+      : total > 0
+        ? Math.round((matchedCount / total) * 100)
+        : 0;
     // Cooperative: everyone shares placement 1, scored by the group's sync %.
     void report(
       players.map((p) => ({ peerId: p.id, placement: 1, score: finalSync })),
@@ -302,7 +325,9 @@ export function MindMeld() {
   if (state.phase === 'over') {
     const ratio = isGroup ? syncPercent / 100 : total > 0 ? matchedCount / total : 0;
     const finalSync = Math.round(ratio * 100);
-    const labelKey = isGroup ? compatibilityKeyFromRatio(ratio) : compatibilityKey(matchedCount, total);
+    const labelKey = isGroup
+      ? compatibilityKeyFromRatio(ratio)
+      : compatibilityKey(matchedCount, total);
     return (
       <GameBody>
         <Confetti fire={ratio >= 0.8} />
@@ -317,7 +342,9 @@ export function MindMeld() {
         />
         <ResultBanner
           tone={ratio >= 0.8 ? 'win' : ratio >= 0.5 ? 'draw' : 'lose'}
-          title={isGroup ? strings.groupSyncTitle(finalSync) : strings.inSyncTitle(matchedCount, total)}
+          title={
+            isGroup ? strings.groupSyncTitle(finalSync) : strings.inSyncTitle(matchedCount, total)
+          }
           detail={strings.compatibility[labelKey]}
         />
         <HistoryList history={history} strings={strings} />
@@ -357,7 +384,9 @@ export function MindMeld() {
 
       <GameArena accent="#8b5cf6">
         <div className="text-center">
-          <p className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-[0.14em] text-ink3">{prompt.q}</p>
+          <p className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-[0.14em] text-ink3">
+            {prompt.q}
+          </p>
           <p className="mt-0.5 text-sm font-bold tracking-tight text-ink">{strings.thisOrThat}</p>
         </div>
 
@@ -510,7 +539,12 @@ function RevealGrid({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className={cn('grid gap-2', players.length <= 2 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3')}>
+      <div
+        className={cn(
+          'grid gap-2',
+          players.length <= 2 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3',
+        )}
+      >
         {players.map((p, i) => {
           const pick = picks[i] ?? null;
           const onPlurality = isGroup ? pick !== null && pick === pluralityChoice : twoPlayerMatch;
@@ -528,7 +562,11 @@ function RevealGrid({
         })}
       </div>
       <p className={cn('text-center text-sm font-bold', synced ? 'text-good' : 'text-ink2')}>
-        {isGroup ? strings.groupInSync(Math.round(agreement * 100)) : synced ? strings.inSync : strings.offThisTime}
+        {isGroup
+          ? strings.groupInSync(Math.round(agreement * 100))
+          : synced
+            ? strings.inSync
+            : strings.offThisTime}
       </p>
     </div>
   );
@@ -552,7 +590,9 @@ function RevealCard({
   const text = pick === null ? '—' : pick === 0 ? prompt.a : prompt.b;
   return (
     <div
-      style={reduced ? undefined : { animation: `meldReveal 360ms both`, animationDelay: `${delayMs}ms` }}
+      style={
+        reduced ? undefined : { animation: `meldReveal 360ms both`, animationDelay: `${delayMs}ms` }
+      }
       className={cn(
         'flex flex-col items-center gap-1 rounded-xl border p-2 text-center transition-colors',
         highlight ? 'border-good/50 bg-goodbg text-good' : 'border-edge bg-panel2 text-ink2',
@@ -579,7 +619,9 @@ function HistoryList({
 }) {
   return (
     <div className="rounded-xl border border-edge bg-panel2 p-2.5">
-      <p className="mb-1.5 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">{strings.historyTitle}</p>
+      <p className="mb-1.5 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">
+        {strings.historyTitle}
+      </p>
       {history.length === 0 ? (
         <p className="text-xs text-ink3">{strings.historyEmpty}</p>
       ) : (

@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -24,17 +30,17 @@ interface MinMovesState {
 
 function record({ nums }: MinMovesInput): Frame<MinMovesState>[] {
   const { emit, frames } = createRecorder<MinMovesState>(() => ({
-        nums,
-        i: null,
-        sum: 0,
-        min: null,
-        minIdx: null,
-        reducedIdx: null,
-        contribution: null,
-        moves: 0,
-        scanning: true,
-        done: false
-      }));
+    nums,
+    i: null,
+    sum: 0,
+    min: null,
+    minIdx: null,
+    reducedIdx: null,
+    contribution: null,
+    moves: 0,
+    scanning: true,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -122,7 +128,8 @@ function View({ frame }: PluginViewProps<MinMovesState>) {
   const s = frame.state;
   const pointers: ArrayPointer[] = [];
   if (s.i !== null) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
-  if (s.reducedIdx !== null) pointers.push({ i: s.reducedIdx, label: 'gap', tone: 'warn', place: 'above' });
+  if (s.reducedIdx !== null)
+    pointers.push({ i: s.reducedIdx, label: 'gap', tone: 'warn', place: 'above' });
   if (s.minIdx !== null) pointers.push({ i: s.minIdx, label: 'min', tone: 'good', place: 'below' });
 
   const tone = (i: number) => {
@@ -179,132 +186,131 @@ function Inspector({ frame }: InspectorProps<MinMovesState>) {
 export const manifestId = 'prep-math-minimum-moves-to-equal-array-elements';
 export const title = 'Minimum Moves to Equal Array Elements';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Minimum Moves to Equal Array Elements\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Minimum Moves to Equal Array Elements"?',
     choices: [
       {
-        label: "Math (sum - n*min) — fits this problem",
-        correct: true
+        label: 'Math (sum - n*min) — fits this problem',
+        correct: true,
       },
       {
-        label: "Single-bit check — different approach"
+        label: 'Single-bit check — different approach',
       },
       {
-        label: "Bit trick power of two — different approach"
+        label: 'Bit trick power of two — different approach',
       },
       {
-        label: "Greedy roman numeral — different approach"
-      }
+        label: 'Greedy roman numeral — different approach',
+      },
     ],
-    explain: "See Minimum Moves To Equal Array Elements pattern"
+    explain: 'See Minimum Moves To Equal Array Elements pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Minimum Moves to Equal Array Elements), what strategy is established?",
+    id: 'init',
+    prompt:
+      'At the start of a run (Minimum Moves to Equal Array Elements), what strategy is established?',
     choices: [
       {
-        label: "See Minimum Moves To Equal Array — described in INIT caption",
-        correct: true
+        label: 'See Minimum Moves To Equal Array — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Minimum Moves to Equal Array Elements: one move adds 1 to n−1 elements. Adding to everyone-but-one is the same as subtracting 1 from that one element, so the answer is the total number of single decrements needed to pull every element down to the minimum: sum − n·min."
+    explain:
+      'Minimum Moves to Equal Array Elements: one move adds 1 to n−1 elements. Adding to everyone-but-one is the same as subtracting 1 from that one element, so the answer is the total number of single decrements needed to pull every element down to the minimum: sum − n·min.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"SCAN\" step (sum=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "SCAN" step (sum=), what happens?',
     choices: [
       {
-        label: "Add nums[] = to the running — this move caption",
-        correct: true
+        label: 'Add nums[] = to the running — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Add nums[] =  to the running sum → . It is not below the current minimum (), so min stays."
+    explain:
+      'Add nums[] =  to the running sum → . It is not below the current minimum (), so min stays.',
   },
   {
-    id: "state",
-    prompt: "What does the `i` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: "current index being scanned — updated each frame",
-        correct: true
+        label: 'current index being scanned — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `i` in sync: current index being scanned"
+    explain: 'The recorder keeps `i` in sync: current index being scanned',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Minimum Moves to Equal Array Elements\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Minimum Moves to Equal Array Elements"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(√n) time, O(√n) space — wrong order of growth"
+        label: 'O(√n) time, O(√n) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(log n) space — wrong order of growth"
-      }
+        label: 'O(log n) time, O(log n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). Minimum Moves To Equal Array Elements"
+    explain: 'O(n). O(1). Minimum Moves To Equal Array Elements',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Every element is now level — final DONE caption",
-        correct: true
+        label: 'Every element is now level — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Every element is now level with the minimum. Total = sum − n·min =  − · = . That is the minimum number of moves."
-  }
+    explain:
+      'Every element is now level with the minimum. Total = sum − n·min =  − · = . That is the minimum number of moves.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

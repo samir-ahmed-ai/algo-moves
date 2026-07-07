@@ -25,13 +25,16 @@ function mergeBundles(a?: PracticeBundle, b?: PracticeBundle): PracticeBundle | 
 }
 
 /** Resolve teaching bundle: migrated native content > split item bundles > extra cases. */
-export function resolvePracticeBundle(manifestId: string, goSource: string): PracticeBundle | undefined {
+export function resolvePracticeBundle(
+  manifestId: string,
+  goSource: string,
+): PracticeBundle | undefined {
   const fromSplit = IMPORTED_PRACTICE[manifestId];
   const fromMigrated = MIGRATED_BUNDLES[manifestId];
 
   let bundle = mergeBundles(fromSplit, fromMigrated);
   const extra = EXTRA_CASE_BUNDLES[manifestId];
-  if (extra?.cases?.good.length && (!bundle?.cases?.good.length)) {
+  if (extra?.cases?.good.length && !bundle?.cases?.good.length) {
     bundle = mergeBundles(bundle, extra);
   }
 

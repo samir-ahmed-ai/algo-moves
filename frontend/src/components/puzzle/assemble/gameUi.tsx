@@ -6,7 +6,15 @@ import { blockKind, BLOCK_META, type CodePiece } from '@/lib/code';
 /* --------------------------------- HUD ------------------------------------ */
 /* Family frame band 1: LEFT progress · CENTER chase stat · RIGHT lives/best. */
 
-export function GameHud({ left, center, right }: { left: ReactNode; center?: ReactNode; right?: ReactNode }) {
+export function GameHud({
+  left,
+  center,
+  right,
+}: {
+  left: ReactNode;
+  center?: ReactNode;
+  right?: ReactNode;
+}) {
   return (
     <div className="flex min-h-[44px] shrink-0 items-center gap-2 px-1">
       <div className="flex min-w-0 flex-1 items-center gap-1.5">{left}</div>
@@ -16,7 +24,13 @@ export function GameHud({ left, center, right }: { left: ReactNode; center?: Rea
   );
 }
 
-export function HudChip({ children, tone = 'muted' }: { children: ReactNode; tone?: 'muted' | 'accent' | 'good' | 'bad' }) {
+export function HudChip({
+  children,
+  tone = 'muted',
+}: {
+  children: ReactNode;
+  tone?: 'muted' | 'accent' | 'good' | 'bad';
+}) {
   return (
     <span
       className={cn(
@@ -51,7 +65,11 @@ export function GameTimerRing({
   const frac = Math.max(0, Math.min(1, remaining / total));
   const low = frac < 0.25;
   return (
-    <span className="relative grid shrink-0 place-items-center" style={{ width: size, height: size }} aria-hidden>
+    <span
+      className="relative grid shrink-0 place-items-center"
+      style={{ width: size, height: size }}
+      aria-hidden
+    >
       <svg viewBox="0 0 40 40" className="absolute inset-0 h-full w-full -rotate-90">
         <circle cx="20" cy="20" r={r} fill="none" stroke="var(--border-strong)" strokeWidth="4" />
         <circle
@@ -101,9 +119,20 @@ export function GameBlock({
   return (
     <div
       className={cn('blk', meta.shape, muted && 'asm-block-muted', className)}
-      style={{ '--blk-stroke': flash === 'bad' ? 'var(--bad)' : flash === 'good' ? 'var(--good)' : meta.stroke } as CSSProperties}
+      style={
+        {
+          '--blk-stroke':
+            flash === 'bad' ? 'var(--bad)' : flash === 'good' ? 'var(--good)' : meta.stroke,
+        } as CSSProperties
+      }
     >
-      <div className={cn('blk-face', flash === 'good' && 'asm-flash-good', flash === 'bad' && 'asm-flash-bad')}>
+      <div
+        className={cn(
+          'blk-face',
+          flash === 'good' && 'asm-flash-good',
+          flash === 'bad' && 'asm-flash-bad',
+        )}
+      >
         <div className={cn('flex items-center gap-1.5', compact ? 'mb-0.5' : 'mb-1')}>
           <Icon className="h-3 w-3 shrink-0" style={{ color: meta.text }} />
           <span
@@ -116,7 +145,12 @@ export function GameBlock({
           {trailing}
         </div>
         <div className="ws-scroll overflow-x-auto" data-noswipe>
-          <pre className={cn('whitespace-pre font-mono leading-relaxed text-ink', compact ? 'text-[11px]' : 'text-[12px]')}>
+          <pre
+            className={cn(
+              'whitespace-pre font-mono leading-relaxed text-ink',
+              compact ? 'text-[11px]' : 'text-[12px]',
+            )}
+          >
             {piece.code}
           </pre>
         </div>
@@ -134,7 +168,11 @@ export function GhostSlot({ piece, lines }: { piece: CodePiece; lines: number })
       style={{ minHeight: Math.max(44, 20 + lines * 18) }}
       aria-label={`Next: ${piece.role}`}
     >
-      <span className="font-mono text-[26px] leading-none opacity-20" style={{ color: meta.text }} aria-hidden>
+      <span
+        className="font-mono text-[26px] leading-none opacity-20"
+        style={{ color: meta.text }}
+        aria-hidden
+      >
         {meta.glyph}
       </span>
     </div>
@@ -160,7 +198,12 @@ export function ConfettiBurst({ count = 14 }: { count?: number }) {
         <span
           key={i}
           className="asm-confetti"
-          style={{ left: b.left, background: b.hue, animationDelay: b.delay, animationDuration: b.dur }}
+          style={{
+            left: b.left,
+            background: b.hue,
+            animationDelay: b.delay,
+            animationDuration: b.dur,
+          }}
         />
       ))}
     </div>
@@ -204,7 +247,10 @@ export function WinCard({
     navigator.vibrate?.([30, 40, 30]);
   }, []);
   return (
-    <div className="asm-sheet-in relative mx-auto w-full max-w-[360px] rounded-[var(--radius)] border border-edge bg-panel2 p-4 shadow-[var(--shadow-lg)]" data-noswipe>
+    <div
+      className="asm-sheet-in relative mx-auto w-full max-w-[360px] rounded-[var(--radius)] border border-edge bg-panel2 p-4 shadow-[var(--shadow-lg)]"
+      data-noswipe
+    >
       <ConfettiBurst count={newBest ? 26 : 14} />
       <div className="text-center text-[15px] font-semibold tracking-tight text-ink">{title}</div>
       {newBest && (
@@ -214,7 +260,10 @@ export function WinCard({
       )}
       <div className="mt-3 flex flex-col gap-1.5">
         {stats.map((s) => (
-          <div key={s.label} className="flex items-baseline justify-between rounded-lg bg-panel px-3 py-1.5">
+          <div
+            key={s.label}
+            className="flex items-baseline justify-between rounded-lg bg-panel px-3 py-1.5"
+          >
             <span className="text-[12px] text-ink3">{s.label}</span>
             <span className="text-[15px] font-semibold tabular-nums text-ink">{s.value}</span>
           </div>
@@ -222,19 +271,21 @@ export function WinCard({
       </div>
       {badges && badges.some((b) => b.earned) && (
         <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-          {badges.filter((b) => b.earned).map((b, i) => {
-            const Icon = b.icon;
-            return (
-              <span
-                key={b.label}
-                className="asm-stamp inline-flex items-center gap-1 rounded-full bg-goodbg px-2.5 py-1 text-[11px] font-semibold text-good"
-                style={{ animationDelay: `${200 + i * 120}ms` }}
-              >
-                <Icon className="h-3.5 w-3.5" />
-                {b.label}
-              </span>
-            );
-          })}
+          {badges
+            .filter((b) => b.earned)
+            .map((b, i) => {
+              const Icon = b.icon;
+              return (
+                <span
+                  key={b.label}
+                  className="asm-stamp inline-flex items-center gap-1 rounded-full bg-goodbg px-2.5 py-1 text-[11px] font-semibold text-good"
+                  style={{ animationDelay: `${200 + i * 120}ms` }}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {b.label}
+                </span>
+              );
+            })}
         </div>
       )}
       <div className="mt-4 flex flex-col gap-2">
@@ -270,7 +321,11 @@ export function MagnifierSheet({ piece, onClose }: { piece: CodePiece; onClose: 
     return () => prev?.focus?.();
   }, []);
   return (
-    <div className="absolute inset-0 z-30 flex items-center justify-center p-4" onPointerDown={onClose} data-noswipe>
+    <div
+      className="absolute inset-0 z-30 flex items-center justify-center p-4"
+      onPointerDown={onClose}
+      data-noswipe
+    >
       <div className="absolute inset-0 bg-bg/70" aria-hidden />
       <div
         ref={sheetRef}
@@ -291,7 +346,9 @@ export function MagnifierSheet({ piece, onClose }: { piece: CodePiece; onClose: 
           <span className="font-mono text-[15px]" style={{ color: meta.text }} aria-hidden>
             {meta.glyph}
           </span>
-          <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-ink3">{piece.role}</span>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-ink3">
+            {piece.role}
+          </span>
           <button
             type="button"
             onClick={onClose}
@@ -301,7 +358,10 @@ export function MagnifierSheet({ piece, onClose }: { piece: CodePiece; onClose: 
           </button>
         </div>
         <div className="ws-scroll max-h-[52vh] overflow-auto p-3" data-noswipe>
-          <pre className="whitespace-pre font-mono text-[13px] leading-relaxed text-ink" style={{ fontSize: '1.05em' }}>
+          <pre
+            className="whitespace-pre font-mono text-[13px] leading-relaxed text-ink"
+            style={{ fontSize: '1.05em' }}
+          >
             {piece.code}
           </pre>
         </div>
@@ -314,7 +374,9 @@ export function MagnifierSheet({ piece, onClose }: { piece: CodePiece; onClose: 
 
 export function usePrefersReducedMotion(): boolean {
   const [reduced, setReduced] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
+    () =>
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
   );
   useEffect(() => {
     const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)');

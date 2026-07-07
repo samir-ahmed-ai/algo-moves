@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GraphBoard } from '../../../../components/board/GraphBoard';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+} from '../../../_shared/vizKit';
 import { circleLayout } from '../../../_shared/graphLayout';
 
 interface SSGInput {
@@ -55,20 +68,25 @@ function record({ strs, pos }: SSGInput): Frame<SSGState>[] {
     return x;
   };
   const { emit, frames } = createRecorder<SSGState>(() => ({
-        parent: parent.slice(),
-        size: size.slice(),
-        strs: strs,
-        adj: adj.map((row) => row.slice()),
-        pos: pos,
-        groups: groups,
-        pair: null,
-        diffs: null,
-        united: false,
-        done: false
-      }));
+    parent: parent.slice(),
+    size: size.slice(),
+    strs: strs,
+    adj: adj.map((row) => row.slice()),
+    pos: pos,
+    groups: groups,
+    pair: null,
+    diffs: null,
+    united: false,
+    done: false,
+  }));
   // renamed from snapshot
 
-  emit('INIT', `${n} strings`, `Similar String Groups: each of the ${n} strings starts in its own group. Two strings are "similar" when they differ in exactly 0 or 2 positions; we compare every pair and union the similar ones. The answer is the final number of groups.`, { pair: null, diffs: null, united: false });
+  emit(
+    'INIT',
+    `${n} strings`,
+    `Similar String Groups: each of the ${n} strings starts in its own group. Two strings are "similar" when they differ in exactly 0 or 2 positions; we compare every pair and union the similar ones. The answer is the final number of groups.`,
+    { pair: null, diffs: null, united: false },
+  );
 
   for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
@@ -81,7 +99,12 @@ function record({ strs, pos }: SSGInput): Frame<SSGState>[] {
       const ri = find(i);
       const rj = find(j);
       if (ri === rj) {
-        emit('COMPARE', `"${strs[i]}"~"${strs[j]}"`, `Compare "${strs[i]}" and "${strs[j]}": they differ in ${diffs} positions, so they are similar — but already in the same group, so the group count stays ${groups}.`, { pair: [i, j], diffs: diffs, united: false });
+        emit(
+          'COMPARE',
+          `"${strs[i]}"~"${strs[j]}"`,
+          `Compare "${strs[i]}" and "${strs[j]}": they differ in ${diffs} positions, so they are similar — but already in the same group, so the group count stays ${groups}.`,
+          { pair: [i, j], diffs: diffs, united: false },
+        );
         adj[i].push(j);
         adj[j].push(i);
         continue;
@@ -98,11 +121,22 @@ function record({ strs, pos }: SSGInput): Frame<SSGState>[] {
       parent[small] = big;
       size[big] += size[small];
       groups -= 1;
-      emit('UNION', `"${strs[i]}"~"${strs[j]}"`, `Compare "${strs[i]}" and "${strs[j]}": they differ in exactly ${diffs} positions, so they are similar — union their groups. The group count drops to ${groups}.`, { pair: [i, j], diffs: diffs, united: true });
+      emit(
+        'UNION',
+        `"${strs[i]}"~"${strs[j]}"`,
+        `Compare "${strs[i]}" and "${strs[j]}": they differ in exactly ${diffs} positions, so they are similar — union their groups. The group count drops to ${groups}.`,
+        { pair: [i, j], diffs: diffs, united: true },
+      );
     }
   }
 
-  emit('DONE', `${groups} groups`, `Every pair has been compared. The strings collapse into ${groups} similar ${groups === 1 ? 'group' : 'groups'}.`, { pair: null, diffs: null, united: false , done: true }, 'good');
+  emit(
+    'DONE',
+    `${groups} groups`,
+    `Every pair has been compared. The strings collapse into ${groups} similar ${groups === 1 ? 'group' : 'groups'}.`,
+    { pair: null, diffs: null, united: false, done: true },
+    'good',
+  );
 
   return frames;
 }
@@ -116,13 +150,17 @@ function colorOf(parent: number[], node: number): number {
 function View({ frame }: PluginViewProps<SSGState>) {
   const s = frame.state;
   return (
-    <VizStage rail={<>
-      <RailGroup label="scan">
-        <RailStat k="groups" v={s.groups} tone="accent" />
-        {s.pair && s.diffs !== null && <RailStat k="diffs" v={s.diffs} />}
-      </RailGroup>
-      {s.done && <RailResult label="answer" value={s.groups} tone="good" />}
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="scan">
+            <RailStat k="groups" v={s.groups} tone="accent" />
+            {s.pair && s.diffs !== null && <RailStat k="diffs" v={s.diffs} />}
+          </RailGroup>
+          {s.done && <RailResult label="answer" value={s.groups} tone="good" />}
+        </>
+      }
+    >
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -145,7 +183,10 @@ function Inspector({ frame }: InspectorProps<SSGState>) {
     <VarGrid>
       <InspectorRow k="strings" v={s.strs.length} />
       <InspectorRow k="groups" v={s.groups} />
-      <InspectorRow k="comparing" v={s.pair ? `"${s.strs[s.pair[0]]}" ~ "${s.strs[s.pair[1]]}"` : '—'} />
+      <InspectorRow
+        k="comparing"
+        v={s.pair ? `"${s.strs[s.pair[0]]}" ~ "${s.strs[s.pair[1]]}"` : '—'}
+      />
       <InspectorRow k="differing positions" v={s.diffs ?? '—'} />
     </VarGrid>
   );

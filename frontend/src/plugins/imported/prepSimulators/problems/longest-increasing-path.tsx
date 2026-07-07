@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { GridBoard } from '../../../../components/board/GridBoard';
@@ -36,14 +42,14 @@ function record({ mat }: LipInput): Frame<LipState>[] {
   const snapshot = (): number[][] => memo.map((row) => row.slice());
 
   const { emit, frames } = createRecorder<LipState>(() => ({
-        mat,
-        memo: snapshot(),
-        cur: null,
-        neighbor: null,
-        bestCell,
-        bestLen,
-        done: false
-      }));
+    mat,
+    memo: snapshot(),
+    cur: null,
+    neighbor: null,
+    bestCell,
+    bestLen,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -164,11 +170,8 @@ function View({ frame }: PluginViewProps<LipState>) {
       </div>
       <GridBoard grid={s.mat} cellTone={cellTone} active={s.cur} />
       <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        memo:{' '}
-        {s.memo
-          .flat()
-          .filter((v) => v !== 0).length}
-        /{s.mat.length * (s.mat[0]?.length ?? 0)} cells cached
+        memo: {s.memo.flat().filter((v) => v !== 0).length}/{s.mat.length * (s.mat[0]?.length ?? 0)}{' '}
+        cells cached
       </div>
     </div>
   );
@@ -195,132 +198,131 @@ function Inspector({ frame }: InspectorProps<LipState>) {
 export const manifestId = 'prep-matrices-longest-increasing-path';
 export const title = 'Longest increasing path';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Longest increasing path\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Longest increasing path"?',
     choices: [
       {
-        label: "DFS + memo longest increasing path — fits this problem",
-        correct: true
+        label: 'DFS + memo longest increasing path — fits this problem',
+        correct: true,
       },
       {
-        label: "Spiral four-boundary shrink — different approach"
+        label: 'Spiral four-boundary shrink — different approach',
       },
       {
-        label: "Simulation — different approach"
+        label: 'Simulation — different approach',
       },
       {
-        label: "Boundary Simulation — different approach"
-      }
+        label: 'Boundary Simulation — different approach',
+      },
     ],
-    explain: "DFS only to strictly larger neighbors, caching each cell's best"
+    explain: "DFS only to strictly larger neighbors, caching each cell's best",
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Longest increasing path), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Longest increasing path), what strategy is established?',
     choices: [
       {
-        label: "DFS only to strictly larger neighbors — described in INIT caption",
-        correct: true
+        label: 'DFS only to strictly larger neighbors — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Longest Increasing Path: find the longest run of strictly increasing values, moving up/down/left/right. We DFS from each cell, only stepping to larger neighbors, and cache each cell's best length in memo so we never recompute it (Time O(m·n), Space O(m·n))."
+    explain:
+      "Longest Increasing Path: find the longest run of strictly increasing values, moving up/down/left/right. We DFS from each cell, only stepping to larger neighbors, and cache each cell's best length in memo so we never recompute it (Time O(m·n), Space O(m·n)).",
   },
   {
-    id: "key-step",
-    prompt: "On the \"EXTEND\" step (best=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "EXTEND" step (best=), what happens?',
     choices: [
       {
-        label: "The path through (,) gives length — this move caption",
-        correct: true
+        label: 'The path through (,) gives length — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "The path through (,) gives length , which beats the current best for (,). Update best = ."
+    explain:
+      'The path through (,) gives length , which beats the current best for (,). Update best = .',
   },
   {
-    id: "state",
-    prompt: "What does the `memo` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `memo` field track in the visualization state?',
     choices: [
       {
-        label: "memo[i][j] = best path length — updated each frame",
-        correct: true
+        label: 'memo[i][j] = best path length — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `memo` in sync: memo[i][j] = best path length from cell (i,j); 0 = unfilled"
+    explain:
+      'The recorder keeps `memo` in sync: memo[i][j] = best path length from cell (i,j); 0 = unfilled',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Longest increasing path\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Longest increasing path"?',
     choices: [
       {
-        label: "O(m·n) time, O(m·n) space — standard bounds here",
-        correct: true
+        label: 'O(m·n) time, O(m·n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
+        label: 'O(n²) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(log n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(m·n). O(m·n). memo[i][j]=1+max(dfs over greater neighbors)"
+    explain: 'O(m·n). O(m·n). memo[i][j]=1+max(dfs over greater neighbors)',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Every cell has been solved — final DONE caption",
-        correct: true
+        label: 'Every cell has been solved — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Every cell has been solved and cached. The longest strictly increasing path in the matrix has length ."
-  }
+    explain:
+      'Every cell has been solved and cached. The longest strictly increasing path in the matrix has length .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface LineInput {
   mat: number[][];
@@ -26,7 +40,8 @@ interface LineState {
   done: boolean;
 }
 
-function record({ mat }: LineInput): Frame<LineState>[] {  const m = mat.length;
+function record({ mat }: LineInput): Frame<LineState>[] {
+  const m = mat.length;
   const n = m > 0 ? mat[0].length : 0;
 
   // best[r][c] for the View — longest line ending at each visited cell.
@@ -37,19 +52,29 @@ function record({ mat }: LineInput): Frame<LineState>[] {  const m = mat.length;
   let res = 0;
 
   const { emit, frames } = createRecorder<LineState>(() => ({
-        mat: mat,
-        best: best.map((row) => row.slice()),
-        res: res,
-        cur: null,
-        dirs: null,
-        bestDir: '',
-        done: false
-      }));
+    mat: mat,
+    best: best.map((row) => row.slice()),
+    res: res,
+    cur: null,
+    dirs: null,
+    bestDir: '',
+    done: false,
+  }));
 
-  emit('INIT', `${m}×${n} grid`, `Longest Line of Consecutive One: find the longest run of 1s in any of 4 directions — horizontal →, vertical ↓, diagonal ↘, or anti-diagonal ↙. We sweep the matrix once, and for each 1 we extend the run from its neighbours, keeping only the previous row in memory.`, { cur: null, dirs: null, bestDir: '' });
+  emit(
+    'INIT',
+    `${m}×${n} grid`,
+    `Longest Line of Consecutive One: find the longest run of 1s in any of 4 directions — horizontal →, vertical ↓, diagonal ↘, or anti-diagonal ↙. We sweep the matrix once, and for each 1 we extend the run from its neighbours, keeping only the previous row in memory.`,
+    { cur: null, dirs: null, bestDir: '' },
+  );
 
   for (let i = 0; i < m; i++) {
-    const nd: DirLengths[] = Array.from({ length: n }, () => ({ hor: 0, ver: 0, diag: 0, anti: 0 }));
+    const nd: DirLengths[] = Array.from({ length: n }, () => ({
+      hor: 0,
+      ver: 0,
+      diag: 0,
+      anti: 0,
+    }));
     for (let j = 0; j < n; j++) {
       if (mat[i][j] === 1) {
         // horizontal: extend the cell to the left in this row
@@ -75,15 +100,31 @@ function record({ mat }: LineInput): Frame<LineState>[] {  const m = mat.length;
         const improved = local > res;
         if (improved) res = local;
 
-        emit(improved ? 'GROW' : 'CELL', `(${i},${j}) max=${local}`, `Cell (${i},${j}) is a 1. Extend each direction from its neighbours: horizontal=${nd[j].hor}, vertical=${nd[j].ver}, diagonal=${nd[j].diag}, anti-diagonal=${nd[j].anti}. The longest line ending here is ${local} (${bestDir}).${improved ? ` That beats the old best, so res = ${res}.` : ` The best so far stays ${res}.`}`, { cur: [i, j], dirs: { ...nd[j] }, bestDir: bestDir });
+        emit(
+          improved ? 'GROW' : 'CELL',
+          `(${i},${j}) max=${local}`,
+          `Cell (${i},${j}) is a 1. Extend each direction from its neighbours: horizontal=${nd[j].hor}, vertical=${nd[j].ver}, diagonal=${nd[j].diag}, anti-diagonal=${nd[j].anti}. The longest line ending here is ${local} (${bestDir}).${improved ? ` That beats the old best, so res = ${res}.` : ` The best so far stays ${res}.`}`,
+          { cur: [i, j], dirs: { ...nd[j] }, bestDir: bestDir },
+        );
       } else {
-        emit('ZERO', `(${i},${j})=0`, `Cell (${i},${j}) is a 0, so no line can pass through it. All four direction lengths reset to 0 here.`, { cur: [i, j], dirs: { hor: 0, ver: 0, diag: 0, anti: 0 }, bestDir: '' });
+        emit(
+          'ZERO',
+          `(${i},${j})=0`,
+          `Cell (${i},${j}) is a 0, so no line can pass through it. All four direction lengths reset to 0 here.`,
+          { cur: [i, j], dirs: { hor: 0, ver: 0, diag: 0, anti: 0 }, bestDir: '' },
+        );
       }
     }
     dp = nd; // slide the window: this row becomes "previous" for the next one
   }
 
-  emit('DONE', `${res}`, `Sweep complete. The longest line of consecutive 1s in any direction is ${res}.`, { cur: null, dirs: null, bestDir: '' , done: true }, 'good');
+  emit(
+    'DONE',
+    `${res}`,
+    `Sweep complete. The longest line of consecutive 1s in any direction is ${res}.`,
+    { cur: null, dirs: null, bestDir: '', done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -140,132 +181,131 @@ function Inspector({ frame }: InspectorProps<LineState>) {
 export const manifestId = 'prep-matrices-longest-line-of-consecutive-one-in-matrix';
 export const title = 'Longest Line of Consecutive One in Matrix';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Longest Line of Consecutive One in Matrix\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Longest Line of Consecutive One in Matrix"?',
     choices: [
       {
-        label: "4-direction DP — fits this problem",
-        correct: true
+        label: '4-direction DP — fits this problem',
+        correct: true,
       },
       {
-        label: "Staircase search from top-right — different approach"
+        label: 'Staircase search from top-right — different approach',
       },
       {
-        label: "DFS + Memoization — different approach"
+        label: 'DFS + Memoization — different approach',
       },
       {
-        label: "Row Comparison (same or inverse of row 0) — different approach"
-      }
+        label: 'Row Comparison (same or inverse of row 0) — different approach',
+      },
     ],
-    explain: "See Longest Line Of Consecutive One In Matrix pattern"
+    explain: 'See Longest Line Of Consecutive One In Matrix pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Longest Line of Consecutive One in Matrix), what strategy is established?",
+    id: 'init',
+    prompt:
+      'At the start of a run (Longest Line of Consecutive One in Matrix), what strategy is established?',
     choices: [
       {
-        label: "See Longest Line Of Consecutive One — described in INIT caption",
-        correct: true
+        label: 'See Longest Line Of Consecutive One — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Longest Line of Consecutive One: find the longest run of 1s in any of 4 directions — horizontal →, vertical ↓, diagonal ↘, or anti-diagonal ↙. We sweep the matrix once, and for each 1 we extend the run from its neighbours, keeping only the previous row in memory."
+    explain:
+      'Longest Line of Consecutive One: find the longest run of 1s in any of 4 directions — horizontal →, vertical ↓, diagonal ↘, or anti-diagonal ↙. We sweep the matrix once, and for each 1 we extend the run from its neighbours, keeping only the previous row in memory.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"ZERO\" step ((,)=0), what happens?",
+    id: 'key-step',
+    prompt: 'On the "ZERO" step ((,)=0), what happens?',
     choices: [
       {
-        label: "Cell (,) is a 0 — this move caption",
-        correct: true
+        label: 'Cell (,) is a 0 — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Cell (,) is a 0, so no line can pass through it. All four direction lengths reset to 0 here."
+    explain:
+      'Cell (,) is a 0, so no line can pass through it. All four direction lengths reset to 0 here.',
   },
   {
-    id: "state",
-    prompt: "What does the `cur` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `cur` field track in the visualization state?',
     choices: [
       {
-        label: "current cell being processed — updated each frame",
-        correct: true
+        label: 'current cell being processed — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `cur` in sync: current cell being processed"
+    explain: 'The recorder keeps `cur` in sync: current cell being processed',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Longest Line of Consecutive One in Matrix\"?",
+    id: 'complexity',
+    prompt:
+      'What are the time and space complexities for "Longest Line of Consecutive One in Matrix"?',
     choices: [
       {
-        label: "O(m·n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(m·n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
+        label: 'O(1) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n³) time, O(n) space — wrong order of growth"
+        label: 'O(n³) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n log n) per axis time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n log n) per axis time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(m·n). O(n). Longest Line Of Consecutive One In Matrix"
+    explain: 'O(m·n). O(n). Longest Line Of Consecutive One In Matrix',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Sweep complete. The longest line — final DONE caption",
-        correct: true
+        label: 'Sweep complete. The longest line — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Sweep complete. The longest line of consecutive 1s in any direction is ."
-  }
+    explain: 'Sweep complete. The longest line of consecutive 1s in any direction is .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

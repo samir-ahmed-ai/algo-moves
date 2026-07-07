@@ -15,7 +15,12 @@ export function EdgeCasesPanelBody() {
           {count}/{EDGE_CASE_LABELS.length}
         </Pill>
       </div>
-      <Meter value={count} max={EDGE_CASE_LABELS.length} tone={all ? 'good' : 'accent'} height={4} />
+      <Meter
+        value={count}
+        max={EDGE_CASE_LABELS.length}
+        tone={all ? 'good' : 'accent'}
+        height={4}
+      />
       <div className="flex flex-col">
         {EDGE_CASE_LABELS.map((c) => (
           <CheckRow key={c} checked={!!done[c]} onChange={() => toggle(c)}>

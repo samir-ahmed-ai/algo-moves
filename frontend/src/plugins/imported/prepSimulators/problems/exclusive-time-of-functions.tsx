@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -19,19 +25,20 @@ interface ExclState {
   done: boolean;
 }
 
-function record({ n, logs }: ExclInput): Frame<ExclState>[] {  const res = new Array(n).fill(0);
+function record({ n, logs }: ExclInput): Frame<ExclState>[] {
+  const res = new Array(n).fill(0);
   const stack: number[] = [];
   let prev = 0;
 
   const { emit, frames } = createRecorder<ExclState>(() => ({
-        n,
-        res: res.slice(),
-        stack: stack.slice(),
-        prev,
-        op: '',
-        log: '',
-        done: false
-      }));
+    n,
+    res: res.slice(),
+    stack: stack.slice(),
+    prev,
+    op: '',
+    log: '',
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -84,9 +91,7 @@ function View({ frame }: PluginViewProps<ExclState>) {
   const s = frame.state;
   return (
     <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.log || s.op || '—'}
-      </div>
+      <div className={cn(vizText.sm, 'text-ink3')}>{s.log || s.op || '—'}</div>
       <div className={cn('mt-2', vizText.sm, 'text-ink3')}>
         stack: [{s.stack.join(', ') || 'empty'}]
       </div>
@@ -125,132 +130,128 @@ function Inspector({ frame }: InspectorProps<ExclState>) {
 export const manifestId = 'prep-design-exclusive-time-of-functions';
 export const title = 'Exclusive Time of Functions';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Exclusive Time of Functions\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Exclusive Time of Functions"?',
     choices: [
       {
-        label: "Stack — fits this problem",
-        correct: true
+        label: 'Stack — fits this problem',
+        correct: true,
       },
       {
-        label: "Round-robin load balancer — different approach"
+        label: 'Round-robin load balancer — different approach',
       },
       {
-        label: "Bijective tiny URL encode/decode — different approach"
+        label: 'Bijective tiny URL encode/decode — different approach',
       },
       {
-        label: "Design — different approach"
-      }
+        label: 'Design — different approach',
+      },
     ],
-    explain: "See Exclusive Time Of Functions pattern"
+    explain: 'See Exclusive Time Of Functions pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Exclusive Time of Functions), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Exclusive Time of Functions), what strategy is established?',
     choices: [
       {
-        label: "See Exclusive Time Of Functions pattern — described in INIT caption",
-        correct: true
+        label: 'See Exclusive Time Of Functions pattern — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Exclusive Time of Functions: stack tracks active function IDs. On start/end logs, credit elapsed time to stack top."
+    explain:
+      'Exclusive Time of Functions: stack tracks active function IDs. On start/end logs, credit elapsed time to stack top.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"END\" step (fn  @), what happens?",
+    id: 'key-step',
+    prompt: 'On the "END" step (fn  @), what happens?',
     choices: [
       {
-        label: "\"\": credit fn with tick(s), pop — this move caption",
-        correct: true
+        label: '"": credit fn with tick(s), pop — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "\"\": credit fn  with  tick(s), pop stack, prev=."
+    explain: '"": credit fn  with  tick(s), pop stack, prev=.',
   },
   {
-    id: "state",
-    prompt: "What does the `n` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `n` field track in the visualization state?',
     choices: [
       {
-        label: "Field n in state — updated each frame",
-        correct: true
+        label: 'Field n in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `n` on every emit so each frame shows the algorithm mid-step."
+    explain: 'The recorder snapshots `n` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Exclusive Time of Functions\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Exclusive Time of Functions"?',
     choices: [
       {
-        label: "O(logs) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(logs) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(1) time, O(servers) space — wrong order of growth"
+        label: 'O(1) time, O(servers) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(urls) space — wrong order of growth"
-      }
+        label: 'O(1) time, O(urls) space — wrong order of growth',
+      },
     ],
-    explain: "O(logs). O(n). Exclusive Time Of Functions"
+    explain: 'O(logs). O(n). Exclusive Time Of Functions',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "\"\": credit fn with tick(s), pop — final DONE caption",
-        correct: true
+        label: '"": credit fn with tick(s), pop — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "\"\": credit fn  with  tick(s), pop stack, prev=."
-  }
+    explain: '"": credit fn  with  tick(s), pop stack, prev=.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -269,6 +270,8 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as ExclState | undefined;
-    return s?.done ? { ok: true, label: `[${s.res.join(', ')}]` } : { ok: false, label: 'incomplete' };
+    return s?.done
+      ? { ok: true, label: `[${s.res.join(', ')}]` }
+      : { ok: false, label: 'incomplete' };
   },
 };

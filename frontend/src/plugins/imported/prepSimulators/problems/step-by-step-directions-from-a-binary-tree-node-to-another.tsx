@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -40,20 +46,20 @@ function record({ tree, startValue, destValue }: DirectionsInput): Frame<Directi
   let answer: string | null = null;
 
   const { emit, frames } = createRecorder<DirectionsState>(() => ({
-        tree,
-        startValue,
-        destValue,
-        phase,
-        current: null,
-        startPathNodes: startPathNodes.slice(),
-        destPathNodes: destPathNodes.slice(),
-        startDirs,
-        destDirs,
-        found: [],
-        lcaLen,
-        answer,
-        done: false
-      }));
+    tree,
+    startValue,
+    destValue,
+    phase,
+    current: null,
+    startPathNodes: startPathNodes.slice(),
+    destPathNodes: destPathNodes.slice(),
+    startDirs,
+    destDirs,
+    found: [],
+    lcaLen,
+    answer,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -162,7 +168,12 @@ function record({ tree, startValue, destValue }: DirectionsInput): Frame<Directi
       'PREFIX-MATCH',
       `sp[${k}]==dp[${k}]=='${startDirs[k]}'`,
       `Position ${k}: both paths turn '${startDirs[k]}', so they still share node ${tree[sharedNode]}. This turn is above the split — skip it and advance the prefix.`,
-      { phase: 'compare', current: sharedNode, lcaLen: k + 1, found: startPathNodes.slice(0, k + 2) },
+      {
+        phase: 'compare',
+        current: sharedNode,
+        lcaLen: k + 1,
+        found: startPathNodes.slice(0, k + 2),
+      },
     );
     k++;
   }
@@ -192,14 +203,27 @@ function record({ tree, startValue, destValue }: DirectionsInput): Frame<Directi
     'BUILD',
     ups ? `${ups.length}×U` : 'no U',
     `The start path has ${startDirs.length - k} turn(s) below the LCA, so we climb up ${startDirs.length - k} time(s): "${ups || '(none)'}". That lands us on the LCA (node ${tree[lcaNode]}).`,
-    { phase: 'done', current: lcaNode, lcaLen: k, answer: ups, found: startPathNodes.slice(0, k + 1) },
+    {
+      phase: 'done',
+      current: lcaNode,
+      lcaLen: k,
+      answer: ups,
+      found: startPathNodes.slice(0, k + 1),
+    },
   );
 
   emit(
     'DONE',
     answer || '(same node)',
     `Now descend along the dest branch by appending its leftover turns "${tail || '(none)'}". Final directions: "${answer || '(start == dest)'}". Time O(n) — two DFS passes visit each node once; Space O(n) — the path strings and recursion stack.`,
-    { phase: 'done', current: destPathNodes[destPathNodes.length - 1] ?? null, lcaLen: k, answer, found: destPathNodes, done: true },
+    {
+      phase: 'done',
+      current: destPathNodes[destPathNodes.length - 1] ?? null,
+      lcaLen: k,
+      answer,
+      found: destPathNodes,
+      done: true,
+    },
     'good',
   );
 
@@ -214,7 +238,8 @@ function View({ frame }: PluginViewProps<DirectionsState>) {
 
   const nodeClass = (i: number) => {
     if (s.done && (i === startIdx || i === destIdx)) return 'team-2';
-    if (lcaIdx != null && i === lcaIdx && s.phase !== 'find-start' && s.phase !== 'find-dest') return 'team-2';
+    if (lcaIdx != null && i === lcaIdx && s.phase !== 'find-start' && s.phase !== 'find-dest')
+      return 'team-2';
     if (s.current === i) return 'team-1';
     if (s.found.includes(i)) return 'team-2';
     return 'team-0';
@@ -257,7 +282,10 @@ function Inspector({ frame }: InspectorProps<DirectionsState>) {
       <InspectorRow k="current node" v={curVal ?? '—'} />
       <InspectorRow k="sp (root→start)" v={s.startDirs ? `"${s.startDirs}"` : '…'} />
       <InspectorRow k="dp (root→dest)" v={s.destDirs ? `"${s.destDirs}"` : '…'} />
-      <InspectorRow k="prefix / LCA" v={s.lcaLen != null ? `${s.lcaLen} (${lcaVal ?? '—'})` : '…'} />
+      <InspectorRow
+        k="prefix / LCA"
+        v={s.lcaLen != null ? `${s.lcaLen} (${lcaVal ?? '—'})` : '…'}
+      />
       <InspectorRow k="answer" v={s.answer != null ? `"${s.answer}"` : '…'} />
     </VarGrid>
   );
@@ -266,121 +294,128 @@ function Inspector({ frame }: InspectorProps<DirectionsState>) {
 export const manifestId = 'prep-trees-step-by-step-directions-from-a-binary-tree-node-to-another';
 export const title = 'Step-By-Step Directions From a Binary Tree Node to Another';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Step-By-Step Directions From a Binary Tree Node to Another\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Step-By-Step Directions From a Binary Tree Node to Another"?',
     choices: [
       {
-        label: "Two Paths + LCA via Common Prefix — fits this problem",
-        correct: true
+        label: 'Two Paths + LCA via Common Prefix — fits this problem',
+        correct: true,
       },
       {
-        label: "Reverse inorder — different approach"
+        label: 'Reverse inorder — different approach',
       },
       {
-        label: "Mirror compare — different approach"
+        label: 'Mirror compare — different approach',
       },
       {
-        label: "BFS + Direction Toggle — different approach"
-      }
+        label: 'BFS + Direction Toggle — different approach',
+      },
     ],
-    explain: "Find root-to-start path and root-to-dest path (as sequences of 'L'/'R')"
+    explain: "Find root-to-start path and root-to-dest path (as sequences of 'L'/'R')",
   },
   {
-    id: "key-step",
-    prompt: "On the \"LCA\" step (LCA=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "LCA" step (LCA=), what happens?',
     choices: [
       {
-        label: "The common prefix ends at length — this move caption",
-        correct: true
+        label: 'The common prefix ends at length — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "The common prefix ends at length  because . Node  is the lowest common ancestor — from here we go UP out of the start branch, then DOWN the dest branch."
+    explain:
+      'The common prefix ends at length  because . Node  is the lowest common ancestor — from here we go UP out of the start branch, then DOWN the dest branch.',
   },
   {
-    id: "state",
-    prompt: "What does the `current` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `current` field track in the visualization state?',
     choices: [
       {
-        label: "node index currently being visited — updated each frame",
-        correct: true
+        label: 'node index currently being visited — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `current` in sync: node index currently being visited"
+    explain: 'The recorder keeps `current` in sync: node index currently being visited',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Step-By-Step Directions From a Binary Tree Node to Another\"?",
+    id: 'complexity',
+    prompt:
+      'What are the time and space complexities for "Step-By-Step Directions From a Binary Tree Node to Another"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(h) time, O(1) space — wrong order of growth"
-      }
+        label: 'O(h) time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). Find root-to-start path and root-to-dest path (as sequences of 'L'/'R'); Strip the common prefix (LCA). Remaining start path → all 'U's, append remaining dest p"
+    explain:
+      "O(n). O(n). Find root-to-start path and root-to-dest path (as sequences of 'L'/'R'); Strip the common prefix (LCA). Remaining start path → all 'U's, append remaining dest p",
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "The common prefix ends at length — final DONE caption",
-        correct: true
+        label: 'The common prefix ends at length — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "The common prefix ends at length  because . Node  is the lowest common ancestor — from here we go UP out of the start branch, then DOWN the dest branch."
-  }
+    explain:
+      'The common prefix ends at length  because . Node  is the lowest common ancestor — from here we go UP out of the start branch, then DOWN the dest branch.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
   inputs: [
     // Tree: [5,1,2,3,null,6,4]; start = 3, dest = 6 → "UURL".
     // 3 is at L,L (index 3); 6 is at R,L (index 5). LCA = root 5.
-    { id: 'dir1', label: 'start 3 → dest 6 = "UURL"', value: { tree: [5, 1, 2, 3, null, 6, 4], startValue: 3, destValue: 6 } },
+    {
+      id: 'dir1',
+      label: 'start 3 → dest 6 = "UURL"',
+      value: { tree: [5, 1, 2, 3, null, 6, 4], startValue: 3, destValue: 6 },
+    },
     // Tree: [2,1,null]; start = 2, dest = 1 → "L".
-    { id: 'dir2', label: 'start 2 → dest 1 = "L"', value: { tree: [2, 1, null], startValue: 2, destValue: 1 } },
+    {
+      id: 'dir2',
+      label: 'start 2 → dest 1 = "L"',
+      value: { tree: [2, 1, null], startValue: 2, destValue: 1 },
+    },
   ] satisfies SampleInput<DirectionsInput>[],
   record,
   View,

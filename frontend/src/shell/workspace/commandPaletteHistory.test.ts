@@ -48,7 +48,10 @@ describe('commandPaletteHistory', () => {
   });
 
   it('caps the recent-command list', () => {
-    const seeded = Array.from({ length: COMMAND_PALETTE_RECENT_LIMIT }, (_, index) => `command-${index}`);
+    const seeded = Array.from(
+      { length: COMMAND_PALETTE_RECENT_LIMIT },
+      (_, index) => `command-${index}`,
+    );
     expect(pushRecentCommandId(seeded, 'new-command')).toHaveLength(COMMAND_PALETTE_RECENT_LIMIT);
     expect(pushRecentCommandId(seeded, 'new-command')).toEqual([
       'new-command',
@@ -61,6 +64,9 @@ describe('commandPaletteHistory', () => {
     recordCommandPaletteRecentId('settings');
     recordCommandPaletteRecentId('mode:play');
 
-    expect(readStorageJson(STORAGE_KEYS.COMMAND_PALETTE_RECENTS, [])).toEqual(['mode:play', 'settings']);
+    expect(readStorageJson(STORAGE_KEYS.COMMAND_PALETTE_RECENTS, [])).toEqual([
+      'mode:play',
+      'settings',
+    ]);
   });
 });

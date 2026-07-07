@@ -7,7 +7,12 @@ import { isEditableTarget } from '@/lib/utils/keyboard';
 export type CodeBlueprintOverlayProps = Omit<CodeBlueprintPanelProps, 'inline' | 'closeRef'>;
 
 /** Desktop full-page modal for the solution blueprint. */
-export function CodeBlueprintOverlay({ pieces, lang, wrap = false, onClose }: CodeBlueprintOverlayProps) {
+export function CodeBlueprintOverlay({
+  pieces,
+  lang,
+  wrap = false,
+  onClose,
+}: CodeBlueprintOverlayProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -36,9 +41,25 @@ export function CodeBlueprintOverlay({ pieces, lang, wrap = false, onClose }: Co
   }, []);
 
   return createPortal(
-    <div className={cn('code-blueprint-overlay nodrag')} role="dialog" aria-modal="true" aria-label="Solution blueprint">
-      <button type="button" className="code-blueprint-backdrop" aria-label="Close blueprint" onClick={onClose} />
-      <CodeBlueprintPanel pieces={pieces} lang={lang} wrap={wrap} onClose={onClose} closeRef={closeRef} />
+    <div
+      className={cn('code-blueprint-overlay nodrag')}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Solution blueprint"
+    >
+      <button
+        type="button"
+        className="code-blueprint-backdrop"
+        aria-label="Close blueprint"
+        onClick={onClose}
+      />
+      <CodeBlueprintPanel
+        pieces={pieces}
+        lang={lang}
+        wrap={wrap}
+        onClose={onClose}
+        closeRef={closeRef}
+      />
     </div>,
     document.body,
   );

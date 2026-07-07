@@ -127,13 +127,44 @@ function mapSourceToAlgo(src) {
 }
 
 const COLOR_KEYS = [
-  'bg', 'surface', 'surface-2', 'border', 'border-strong', 'text', 'text-2', 'text-3',
-  'accent', 'accent-bg', 'team0-bg', 'team0-stroke', 'team1-bg', 'team1-stroke', 'team1-text',
-  'team2-bg', 'team2-stroke', 'team2-text', 'edge', 'edge-active', 'edge-clash', 'ring',
-  'good', 'good-bg', 'bad', 'bad-bg',
+  'bg',
+  'surface',
+  'surface-2',
+  'border',
+  'border-strong',
+  'text',
+  'text-2',
+  'text-3',
+  'accent',
+  'accent-bg',
+  'team0-bg',
+  'team0-stroke',
+  'team1-bg',
+  'team1-stroke',
+  'team1-text',
+  'team2-bg',
+  'team2-stroke',
+  'team2-text',
+  'edge',
+  'edge-active',
+  'edge-clash',
+  'ring',
+  'good',
+  'good-bg',
+  'bad',
+  'bad-bg',
 ];
 
-const CHROME_KEYS = ['radius', 'sans', 'mono', 'shadow-sm', 'shadow-md', 'shadow-lg', 'shadow-xl', 'border-width'];
+const CHROME_KEYS = [
+  'radius',
+  'sans',
+  'mono',
+  'shadow-sm',
+  'shadow-md',
+  'shadow-lg',
+  'shadow-xl',
+  'border-width',
+];
 
 function splitTokens(tokens) {
   const colors = {};
@@ -148,7 +179,9 @@ function mergeTokens(colors, chrome) {
 }
 
 function tokensToCssVars(tokens) {
-  return Object.entries(tokens).map(([k, v]) => `  --${k}: ${v};`).join('\n');
+  return Object.entries(tokens)
+    .map(([k, v]) => `  --${k}: ${v};`)
+    .join('\n');
 }
 
 function emitBlock(selector, tokens) {
@@ -203,4 +236,6 @@ writeFileSync(outSources, ts);
 
 console.log(`Wrote ${outCss}`);
 console.log(`Wrote ${outSources}`);
-console.log(`Themes: ${BASE_IDS.length} base + ${HYBRIDS.length} hybrids = ${BASE_IDS.length + HYBRIDS.length}`);
+console.log(
+  `Themes: ${BASE_IDS.length} base + ${HYBRIDS.length} hybrids = ${BASE_IDS.length + HYBRIDS.length}`,
+);

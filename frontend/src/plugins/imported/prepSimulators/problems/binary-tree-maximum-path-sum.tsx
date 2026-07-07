@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -30,21 +36,22 @@ const NEG_INF = -(2 ** 31);
 const leftChild = (i: number) => 2 * i + 1;
 const rightChild = (i: number) => 2 * i + 2;
 
-function record({ tree }: PathSumInput): Frame<PathSumState>[] {  const visited: number[] = [];
+function record({ tree }: PathSumInput): Frame<PathSumState>[] {
+  const visited: number[] = [];
   let best = NEG_INF;
 
   const { emit, frames } = createRecorder<PathSumState>(() => ({
-        tree,
-        active: null,
-        visited: visited.slice(),
-        left: null,
-        right: null,
-        through: null,
-        best,
-        gain: null,
-        result: null,
-        done: false
-      }));
+    tree,
+    active: null,
+    visited: visited.slice(),
+    left: null,
+    right: null,
+    through: null,
+    best,
+    gain: null,
+    result: null,
+    done: false,
+  }));
 
   const present = (i: number) => i >= 0 && i < tree.length && tree[i] != null;
 
@@ -133,8 +140,7 @@ function View({ frame }: PluginViewProps<PathSumState>) {
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
-        best ={' '}
-        <span className="font-mono text-ink">{s.best === NEG_INF ? '−∞' : s.best}</span>
+        best = <span className="font-mono text-ink">{s.best === NEG_INF ? '−∞' : s.best}</span>
         {activeVal != null && (
           <>
             {' · '}at node <span className="font-mono text-ink">{activeVal}</span>
@@ -180,117 +186,121 @@ function Inspector({ frame }: InspectorProps<PathSumState>) {
 export const manifestId = 'prep-trees-binary-tree-maximum-path-sum';
 export const title = 'Binary Tree Maximum Path Sum';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Binary Tree Maximum Path Sum\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Binary Tree Maximum Path Sum"?',
     choices: [
       {
-        label: "Post-order DFS — fits this problem",
-        correct: true
+        label: 'Post-order DFS — fits this problem',
+        correct: true,
       },
       {
-        label: "Mirror compare — different approach"
+        label: 'Mirror compare — different approach',
       },
       {
-        label: "BFS + Direction Toggle — different approach"
+        label: 'BFS + Direction Toggle — different approach',
       },
       {
-        label: "Column map BFS — different approach"
-      }
+        label: 'Column map BFS — different approach',
+      },
     ],
-    explain: "Post-order DFS: at each node, compute `left` and `right` subtree max gains (floor at 0 to drop negatives)"
+    explain:
+      'Post-order DFS: at each node, compute `left` and `right` subtree max gains (floor at 0 to drop negatives)',
   },
   {
-    id: "key-step",
-    prompt: "On the \"THROUGH\" step (through = ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "THROUGH" step (through = ), what happens?',
     choices: [
       {
-        label: "A path turning at node — this move caption",
-        correct: true
+        label: 'A path turning at node — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "A path turning at node  is worth  +  +  = , which does not beat the current best of . Leave the global maximum unchanged."
+    explain:
+      'A path turning at node  is worth  +  +  = , which does not beat the current best of . Leave the global maximum unchanged.',
   },
   {
-    id: "state",
-    prompt: "What does the `active` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `active` field track in the visualization state?',
     choices: [
       {
-        label: "node index currently being processed — updated each frame",
-        correct: true
+        label: 'node index currently being processed — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `active` in sync: node index currently being processed (post-order)"
+    explain:
+      'The recorder keeps `active` in sync: node index currently being processed (post-order)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Binary Tree Maximum Path Sum\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Binary Tree Maximum Path Sum"?',
     choices: [
       {
-        label: "O(n) time, O(h) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(h) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n³) time, O(n) space — wrong order of growth"
+        label: 'O(n³) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(h+k) time, O(h) space — wrong order of growth"
+        label: 'O(h+k) time, O(h) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(1) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(h). Post-order DFS: at each node, compute `left` and `right` subtree max gains (floor at 0 to drop negatives); Update global max with `node.Val + left + right` (the"
+    explain:
+      'O(n). O(h). Post-order DFS: at each node, compute `left` and `right` subtree max gains (floor at 0 to drop negatives); Update global max with `node.Val + left + right` (the',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Every node has been visited — final DONE caption",
-        correct: true
+        label: 'Every node has been visited — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Every node has been visited in post-order. The largest path sum found anywhere in the tree is ."
-  }
+    explain:
+      'Every node has been visited in post-order. The largest path sum found anywhere in the tree is .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
   inputs: [
-    { id: 'bmps1', label: '[-10,9,20,null,null,15,7] → 42', value: { tree: [-10, 9, 20, null, null, 15, 7] } },
+    {
+      id: 'bmps1',
+      label: '[-10,9,20,null,null,15,7] → 42',
+      value: { tree: [-10, 9, 20, null, null, 15, 7] },
+    },
     { id: 'bmps2', label: '[1,2,3] → 6', value: { tree: [1, 2, 3] } },
   ] satisfies SampleInput<PathSumInput>[],
   record,

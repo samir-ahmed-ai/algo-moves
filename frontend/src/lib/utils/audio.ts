@@ -83,7 +83,10 @@ const listeners = new Set<(muted: boolean) => void>();
  * saver callback so this pure module never imports the store directly. Safe to
  * call more than once (last wins); until called, sound defaults to unmuted.
  */
-export function configureSoundPersistence(initialMuted: boolean, save: (muted: boolean) => void): void {
+export function configureSoundPersistence(
+  initialMuted: boolean,
+  save: (muted: boolean) => void,
+): void {
   muted = initialMuted;
   persistMuted = save;
 }

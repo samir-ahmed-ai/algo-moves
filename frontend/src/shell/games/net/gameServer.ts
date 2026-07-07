@@ -1,1 +1,1 @@
-export * from '../../realtime/server';
+export * from '@/shell/realtime/server';

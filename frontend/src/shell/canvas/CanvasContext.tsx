@@ -11,11 +11,7 @@ export {
   type CanvasFrame,
 } from '@/lib/canvas';
 
-export {
-  CanvasActionsContext,
-  useCanvasActions,
-  type CanvasActions,
-} from '@/lib/canvas';
+export { CanvasActionsContext, useCanvasActions, type CanvasActions } from '@/lib/canvas';
 
 import { CanvasStaticContext, CanvasFrameContext } from '@/lib/canvas';
 import { CanvasActionsContext } from '@/lib/canvas';

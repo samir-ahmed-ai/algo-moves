@@ -45,10 +45,12 @@ export const badCases: WorkedCase<TrieInput>[] = [
     inputLabel: 'insert ["cat","dog"] · search "cow"',
     returns: 'not found',
     tone: 'bad',
-    question: 'Search walks c → o, but the root has children "c" and "d" only — where does it stop?',
+    question:
+      'Search walks c → o, but the root has children "c" and "d" only — where does it stop?',
     answer:
       'It matches "c" into the cat branch, then looks for an "o" child of "c" and finds none (the only child there is "a"). The walk halts immediately and reports absent — search never scans unrelated branches like "dog".',
   },
 ];
 
-export const intro = 'Trie paths share prefixes; terminal flags distinguish whole words from mere prefixes.';
+export const intro =
+  'Trie paths share prefixes; terminal flags distinguish whole words from mere prefixes.';

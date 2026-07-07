@@ -10,7 +10,8 @@ export const goodCases: WorkedCase<SortInput>[] = [
     returns: 'sorted',
     tone: 'ok',
     question: 'Why sift-down after swapping root with the last heap slot?',
-    answer: 'The new root may violate the heap property; sift-down pushes it down by swapping with the larger child until the max-heap invariant holds.',
+    answer:
+      'The new root may violate the heap property; sift-down pushes it down by swapping with the larger child until the max-heap invariant holds.',
   },
 ];
 
@@ -23,7 +24,8 @@ export const badCases: WorkedCase<SortInput>[] = [
     returns: 'sorted — heap property still holds',
     tone: 'bad',
     question: 'Does heap sort break when all elements are equal?',
-    answer: 'No — comparisons use ≤/≥ so equal children are fine; each extract-max still shrinks the heap by one.',
+    answer:
+      'No — comparisons use ≤/≥ so equal children are fine; each extract-max still shrinks the heap by one.',
   },
 ];
 

@@ -1,10 +1,23 @@
-import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
+import {
+  definePlugin,
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+} from '../../core/types';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, badCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { ArrayRow, type ArrayPointer } from '../../components/board/ArrayRow';
-import { InspectorRow, VizEmpty, VizInspector, VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
+import {
+  InspectorRow,
+  VizEmpty,
+  VizInspector,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+} from '../_shared/vizKit';
 
 export interface LSInput {
   s: string;
@@ -117,13 +130,17 @@ function View({ frame }: PluginViewProps<LSState>) {
   };
   const len = s.right >= s.left ? s.right - s.left + 1 : 0;
   return (
-    <VizStage rail={<>
-      <RailGroup label="window">
-        <RailStat k="substr" v={s.inWindow || '∅'} tone="accent" />
-        <RailStat k="len" v={len} />
-      </RailGroup>
-      <RailResult label="best" value={s.best} tone={s.done ? 'good' : 'accent'} />
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="window">
+            <RailStat k="substr" v={s.inWindow || '∅'} tone="accent" />
+            <RailStat k="len" v={len} />
+          </RailGroup>
+          <RailResult label="best" value={s.best} tone={s.done ? 'good' : 'accent'} />
+        </>
+      }
+    >
       <ArrayRow
         values={s.chars}
         windowRange={hasWindow ? [s.left, s.right] : null}
@@ -144,7 +161,10 @@ function Inspector({ frame }: InspectorProps<LSState>) {
       <InspectorRow k="substring" v={s.inWindow || '∅'} />
       <InspectorRow k="length" v={len} />
       <InspectorRow k="best" v={s.best} />
-      <InspectorRow k="best bounds" v={s.bestRight >= s.bestLeft ? `[${s.bestLeft}, ${s.bestRight}]` : '—'} />
+      <InspectorRow
+        k="best bounds"
+        v={s.bestRight >= s.bestLeft ? `[${s.bestLeft}, ${s.bestRight}]` : '—'}
+      />
     </VizInspector>
   );
 }
@@ -167,16 +187,23 @@ func lengthOfLongestSubstring(s string) int {
 }
 `;
 
-
 const inputs = [
-    { id: 'abcabcbb', label: '"abcabcbb"', value: { s: 'abcabcbb' } },
-    { id: 'pwwkew', label: '"pwwkew"', value: { s: 'pwwkew' } },
-    { id: 'bbbbb', label: '"bbbbb"', value: { s: 'bbbbb' } },
-  ];
+  { id: 'abcabcbb', label: '"abcabcbb"', value: { s: 'abcabcbb' } },
+  { id: 'pwwkew', label: '"pwwkew"', value: { s: 'pwwkew' } },
+  { id: 'bbbbb', label: '"bbbbb"', value: { s: 'bbbbb' } },
+];
 const verdict = verdictAlwaysOk('longest');
 const teaching = wireTeachingStack({
-  record, View, inputs, verdict,
-  practice: { quiz, codePieces, cases: { good: goodCases, bad: badCases, intro, goodLabel: 'window steps' }, simulateQuestion: 'How does the window expand or shrink next?' },
+  record,
+  View,
+  inputs,
+  verdict,
+  practice: {
+    quiz,
+    codePieces,
+    cases: { good: goodCases, bad: badCases, intro, goodLabel: 'window steps' },
+    simulateQuestion: 'How does the window expand or shrink next?',
+  },
 });
 
 export const longestSubstringPlugin = definePlugin<LSInput, LSState>({

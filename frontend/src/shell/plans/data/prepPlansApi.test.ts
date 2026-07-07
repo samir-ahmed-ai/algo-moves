@@ -7,11 +7,11 @@ import {
   updatePrepPlan,
 } from './prepPlansApi';
 
-vi.mock('@/shell/games/data/arcadeClient', () => ({
+vi.mock('@/platform', () => ({
   arcadeFetch: vi.fn(),
 }));
 
-import { arcadeFetch } from '@/shell/games/data/arcadeClient';
+import { arcadeFetch } from '@/platform';
 
 const mockFetch = vi.mocked(arcadeFetch);
 
@@ -21,7 +21,9 @@ describe('prepPlansApi', () => {
   });
 
   it('lists prep plans', async () => {
-    mockFetch.mockResolvedValue([{ id: 'p1', title: 'Comcast', itemCount: 2, completedCount: 1, updatedAt: 't' }]);
+    mockFetch.mockResolvedValue([
+      { id: 'p1', title: 'Comcast', itemCount: 2, completedCount: 1, updatedAt: 't' },
+    ]);
     const rows = await listPrepPlans();
     expect(mockFetch).toHaveBeenCalledWith('/api/prep-plans');
     expect(rows).toHaveLength(1);

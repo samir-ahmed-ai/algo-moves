@@ -35,7 +35,10 @@ export function RecallEditorFooter({
   compact?: boolean;
 }) {
   const toggle = (
-    key: keyof Pick<EditorPrefs, 'wrap' | 'mergeGutter' | 'mergeCollapse' | 'showLineNumbers' | 'highlightChanges'>,
+    key: keyof Pick<
+      EditorPrefs,
+      'wrap' | 'mergeGutter' | 'mergeCollapse' | 'showLineNumbers' | 'highlightChanges'
+    >,
     icon: React.ReactNode,
     title: string,
   ) => (
@@ -61,7 +64,9 @@ export function RecallEditorFooter({
         <ToolbarGroupBtn
           title="Decrease font size"
           disabled={editorPrefs.fontSize <= RECALL_FONT_MIN}
-          onClick={() => setEditorPrefs({ fontSize: clampRecallFontSize(editorPrefs.fontSize - 1) })}
+          onClick={() =>
+            setEditorPrefs({ fontSize: clampRecallFontSize(editorPrefs.fontSize - 1) })
+          }
         >
           <Minus className="h-3 w-3" />
         </ToolbarGroupBtn>
@@ -76,7 +81,9 @@ export function RecallEditorFooter({
         <ToolbarGroupBtn
           title="Increase font size"
           disabled={editorPrefs.fontSize >= RECALL_FONT_MAX}
-          onClick={() => setEditorPrefs({ fontSize: clampRecallFontSize(editorPrefs.fontSize + 1) })}
+          onClick={() =>
+            setEditorPrefs({ fontSize: clampRecallFontSize(editorPrefs.fontSize + 1) })
+          }
         >
           <Plus className="h-3 w-3" />
         </ToolbarGroupBtn>
@@ -92,11 +99,15 @@ export function RecallEditorFooter({
         <ToolbarGroupBtn
           active={editorPrefs.lineHeight !== 'normal'}
           title={`Line height: ${recallLineHeightLabel(editorPrefs.lineHeight)} — click to cycle`}
-          onClick={() => setEditorPrefs({ lineHeight: cycleRecallLineHeight(editorPrefs.lineHeight) })}
+          onClick={() =>
+            setEditorPrefs({ lineHeight: cycleRecallLineHeight(editorPrefs.lineHeight) })
+          }
         >
           <AlignVerticalSpaceAround className="h-3 w-3" />
           {!compact && (
-            <span className="max-w-[3rem] truncate">{recallLineHeightLabel(editorPrefs.lineHeight)}</span>
+            <span className="max-w-[3rem] truncate">
+              {recallLineHeightLabel(editorPrefs.lineHeight)}
+            </span>
           )}
         </ToolbarGroupBtn>
       </ToolbarGroup>
@@ -107,13 +118,18 @@ export function RecallEditorFooter({
         {toggle('mergeGutter', <Columns2 className="h-3 w-3" />, 'Change gutter')}
         {toggle('mergeCollapse', <ChevronsDownUp className="h-3 w-3" />, 'Collapse unchanged')}
         {toggle('showLineNumbers', <Hash className="h-3 w-3" />, 'Line numbers')}
-        <ToolbarGroupBtn title="Reset split to 50/50" onClick={() => setEditorPrefs({ splitPct: 50 })}>
+        <ToolbarGroupBtn
+          title="Reset split to 50/50"
+          onClick={() => setEditorPrefs({ splitPct: 50 })}
+        >
           <SplitSquareHorizontal className="h-3 w-3" />
         </ToolbarGroupBtn>
         <ToolbarGroupBtn
           active={editorPrefs.recallCompact !== false}
           title="Compact editor chrome"
-          onClick={() => setEditorPrefs({ recallCompact: editorPrefs.recallCompact !== false ? false : true })}
+          onClick={() =>
+            setEditorPrefs({ recallCompact: editorPrefs.recallCompact !== false ? false : true })
+          }
         >
           <Minimize2 className="h-3 w-3" />
         </ToolbarGroupBtn>

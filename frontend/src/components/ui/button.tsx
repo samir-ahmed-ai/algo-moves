@@ -31,8 +31,7 @@ export const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 
@@ -42,7 +41,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <Comp
         ref={ref}
-        type={asChild ? undefined : props.type ?? 'button'}
+        type={asChild ? undefined : (props.type ?? 'button')}
         className={cn(buttonVariants({ variant, size }), RADIUS_CTRL, className)}
         {...props}
       />

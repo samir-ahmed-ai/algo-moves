@@ -27,12 +27,16 @@ describe('STORAGE_KEYS', () => {
 
   it('templated keys produce byte-identical strings', () => {
     expect(STORAGE_KEYS.CODE_PHASE('two-sum', 0)).toBe('algo-moves:code-phase:two-sum:0');
-    expect(STORAGE_KEYS.REASSEMBLE_PROGRESS('two-sum', 1)).toBe('algo-moves:reassemble-progress:two-sum:1');
+    expect(STORAGE_KEYS.REASSEMBLE_PROGRESS('two-sum', 1)).toBe(
+      'algo-moves:reassemble-progress:two-sum:1',
+    );
     expect(STORAGE_KEYS.CODE_QUIZ('two-sum', 2)).toBe('algo-moves:code-quiz:two-sum:2');
     expect(STORAGE_KEYS.DRAFT('two-sum', 'recall')).toBe('algo-moves:draft:two-sum:recall');
     expect(STORAGE_KEYS.NOTES('two-sum')).toBe('algo-moves:notes:two-sum');
     expect(STORAGE_KEYS.EDGE_CASES('two-sum')).toBe('algo-moves:edgecases:two-sum');
     expect(STORAGE_KEYS.RUSH_BEST('two-sum', 'recall')).toBe('algo-moves:rush-best:two-sum:recall');
-    expect(STORAGE_KEYS.ASSEMBLE_GAME_BEST('rush', 'two-sum:0')).toBe('algo-moves:assemble-best:rush:two-sum:0');
+    expect(STORAGE_KEYS.ASSEMBLE_GAME_BEST('rush', 'two-sum:0')).toBe(
+      'algo-moves:assemble-best:rush:two-sum:0',
+    );
   });
 });

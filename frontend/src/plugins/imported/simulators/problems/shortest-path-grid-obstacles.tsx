@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+} from '../../../_shared/vizKit';
 
 interface SpgoInput {
   grid: number[][]; // 0 = open, 1 = obstacle
@@ -40,21 +53,32 @@ function record({ grid, k }: SpgoInput): Frame<SpgoState>[] {
   // bestRem[r][c] = the largest remaining-k with which we have reached (r,c).
   const bestRem = Array.from({ length: m }, () => new Array<number>(n).fill(-1));
   const { emit, frames } = createRecorder<SpgoState>(() => ({
-        grid: grid,
-        bestRem: bestRem.map((row) => row.slice()),
-        k: k,
-        cur: null,
-        rem: 0,
-        steps: 0,
-        answer: null,
-        done: false
-      }));
+    grid: grid,
+    bestRem: bestRem.map((row) => row.slice()),
+    k: k,
+    cur: null,
+    rem: 0,
+    steps: 0,
+    answer: null,
+    done: false,
+  }));
   // renamed from snap
 
-  emit('INIT', `${m}×${n} grid · k=${k}`, `Find the fewest moves from (0, 0) to (${m - 1}, ${n - 1}). You may pass through at most k=${k} obstacle (1) cells, so each BFS state is (row, col, remaining eliminations). The answer is the move count when BFS first dequeues the goal, or -1.`, { cur: [0, 0], rem: k, steps: 0, answer: null });
+  emit(
+    'INIT',
+    `${m}×${n} grid · k=${k}`,
+    `Find the fewest moves from (0, 0) to (${m - 1}, ${n - 1}). You may pass through at most k=${k} obstacle (1) cells, so each BFS state is (row, col, remaining eliminations). The answer is the move count when BFS first dequeues the goal, or -1.`,
+    { cur: [0, 0], rem: k, steps: 0, answer: null },
+  );
 
   if (m === 1 && n === 1) {
-    emit('DONE', '0 moves', `Start equals goal, so 0 moves are needed.`, { cur: [0, 0], rem: k, steps: 0, answer: 0 , done: true }, 'good');
+    emit(
+      'DONE',
+      '0 moves',
+      `Start equals goal, so 0 moves are needed.`,
+      { cur: [0, 0], rem: k, steps: 0, answer: 0, done: true },
+      'good',
+    );
     return frames;
   }
 
@@ -75,8 +99,19 @@ function record({ grid, k }: SpgoInput): Frame<SpgoState>[] {
         // Skip if we'd run out of eliminations, or already reached this cell with >= remaining-k.
         if (nextRem < 0 || nextRem <= bestRem[nr][nc]) continue;
         if (nr === m - 1 && nc === n - 1) {
-          emit('GOAL', `reached in ${steps}`, `Stepping from (${r}, ${c}) reaches the goal (${nr}, ${nc}) after ${steps} move${steps === 1 ? '' : 's'}, with ${nextRem} elimination${nextRem === 1 ? '' : 's'} left. This is the first time BFS reaches the goal, so it is the minimum.`, { cur: [nr, nc], rem: nextRem, steps: steps, answer: steps });
-          emit('DONE', `${steps} moves`, `Minimum moves to the goal = ${steps}.`, { cur: [nr, nc], rem: nextRem, steps: steps, answer: steps , done: true }, 'good');
+          emit(
+            'GOAL',
+            `reached in ${steps}`,
+            `Stepping from (${r}, ${c}) reaches the goal (${nr}, ${nc}) after ${steps} move${steps === 1 ? '' : 's'}, with ${nextRem} elimination${nextRem === 1 ? '' : 's'} left. This is the first time BFS reaches the goal, so it is the minimum.`,
+            { cur: [nr, nc], rem: nextRem, steps: steps, answer: steps },
+          );
+          emit(
+            'DONE',
+            `${steps} moves`,
+            `Minimum moves to the goal = ${steps}.`,
+            { cur: [nr, nc], rem: nextRem, steps: steps, answer: steps, done: true },
+            'good',
+          );
           return frames;
         }
         bestRem[nr][nc] = nextRem;
@@ -87,12 +122,23 @@ function record({ grid, k }: SpgoInput): Frame<SpgoState>[] {
         opened.length > 0
           ? `Enqueue states ${opened.join(', ')} for move ${steps}; passing through an obstacle costs one elimination.`
           : `No new states open up from here at this layer.`;
-      emit('EXPAND', `(${r},${c}) rem ${rem}`, `At move ${steps - 1}, expand state (${r}, ${c}) with ${rem} elimination${rem === 1 ? '' : 's'} left. ${expanded}`, { cur: [r, c], rem: rem, steps: steps - 1, answer: null });
+      emit(
+        'EXPAND',
+        `(${r},${c}) rem ${rem}`,
+        `At move ${steps - 1}, expand state (${r}, ${c}) with ${rem} elimination${rem === 1 ? '' : 's'} left. ${expanded}`,
+        { cur: [r, c], rem: rem, steps: steps - 1, answer: null },
+      );
     }
     queue = next;
   }
 
-  emit('DONE', 'no path', `BFS exhausted every reachable state without reaching the goal: the answer is -1.`, { cur: null, rem: 0, steps: steps, answer: -1 , done: true }, 'bad');
+  emit(
+    'DONE',
+    'no path',
+    `BFS exhausted every reachable state without reaching the goal: the answer is -1.`,
+    { cur: null, rem: 0, steps: steps, answer: -1, done: true },
+    'bad',
+  );
   return frames;
 }
 
@@ -107,15 +153,23 @@ function View({ frame }: PluginViewProps<SpgoState>) {
   const answerTone = s.done ? (s.answer !== null && s.answer >= 0 ? 'good' : 'bad') : 'accent';
   const answerValue = s.answer !== null ? s.answer : s.steps;
   return (
-    <VizStage rail={
-      <>
-        <RailGroup label="scan">
-          <RailStat k="moves" v={answerValue} tone="accent" />
-          <RailStat k="rem k" v={s.cur ? s.rem : '—'} />
-        </RailGroup>
-        {s.done && <RailResult label="answer" value={s.answer !== null && s.answer >= 0 ? `${s.answer}` : '-1'} tone={answerTone} />}
-      </>
-    }>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="scan">
+            <RailStat k="moves" v={answerValue} tone="accent" />
+            <RailStat k="rem k" v={s.cur ? s.rem : '—'} />
+          </RailGroup>
+          {s.done && (
+            <RailResult
+              label="answer"
+              value={s.answer !== null && s.answer >= 0 ? `${s.answer}` : '-1'}
+              tone={answerTone}
+            />
+          )}
+        </>
+      }
+    >
       <GridBoard grid={s.grid} cellTone={cellTone} label={label} active={s.cur} cellSize={44} />
     </VizStage>
   );

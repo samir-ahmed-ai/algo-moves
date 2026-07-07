@@ -14,7 +14,8 @@ export const nodeText = {
   '2xs': 'text-[length:var(--node-fs-2xs,0.5625rem)] leading-[var(--lh-tight,1.25)]',
   tight: 'text-[length:var(--node-fs-tight,0.6875rem)] leading-[var(--lh-tight,1.25)]',
   title: 'text-[length:var(--node-fs-title,1rem)] leading-[var(--lh-tight,1.25)]',
-  label: 'text-[length:var(--node-fs-xs,0.75rem)] font-medium uppercase tracking-[0.05em] leading-[var(--lh-tight,1.25)]',
+  label:
+    'text-[length:var(--node-fs-xs,0.75rem)] font-medium uppercase tracking-[0.05em] leading-[var(--lh-tight,1.25)]',
 } as const;
 
 /** Wrap prose/labels inside bounded node width — use on text only, not chrome. */

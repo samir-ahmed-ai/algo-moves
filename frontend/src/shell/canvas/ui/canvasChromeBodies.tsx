@@ -56,7 +56,13 @@ function Segmented<T extends string>({
   );
 }
 
-function ThemePicker({ value, onChange }: { value: ThemePreset; onChange: (v: ThemePreset) => void }) {
+function ThemePicker({
+  value,
+  onChange,
+}: {
+  value: ThemePreset;
+  onChange: (v: ThemePreset) => void;
+}) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const current = THEME_META.find((t) => t.id === value);
@@ -88,7 +94,9 @@ function ThemePicker({ value, onChange }: { value: ThemePreset; onChange: (v: Th
           className="h-4 w-4 shrink-0 rounded-full border border-edge"
           style={{ backgroundColor: current?.swatch }}
         />
-        <span className={cn('min-w-0 flex-1 truncate font-medium text-ink', chromeText.sm)}>{current?.label ?? value}</span>
+        <span className={cn('min-w-0 flex-1 truncate font-medium text-ink', chromeText.sm)}>
+          {current?.label ?? value}
+        </span>
         <Palette className="h-3 w-3 shrink-0 text-ink3" />
       </button>
       {open && (
@@ -113,7 +121,11 @@ function ThemePicker({ value, onChange }: { value: ThemePreset; onChange: (v: Th
                     className="h-6 w-6 shrink-0 rounded-full border border-edge"
                     style={{ backgroundColor: t.swatch }}
                   />
-                  <span className={cn('min-w-0 flex-1 truncate font-medium text-ink', chromeText.sm)}>{t.label}</span>
+                  <span
+                    className={cn('min-w-0 flex-1 truncate font-medium text-ink', chromeText.sm)}
+                  >
+                    {t.label}
+                  </span>
                   {selected && <Check className="h-3 w-3 shrink-0 text-accent" />}
                 </button>
               );
@@ -175,7 +187,12 @@ export function CanvasPropsBody({ hud, compact }: { hud: CanvasHudProps; compact
           checked={edgeOpts.arrow}
           onChange={(v) => setEdgeOpts((o) => ({ ...o, arrow: v }))}
         />
-        <Toggle label="Animations" dense checked={tweaks.animate} onChange={() => toggleTweak('animate')} />
+        <Toggle
+          label="Animations"
+          dense
+          checked={tweaks.animate}
+          onChange={() => toggleTweak('animate')}
+        />
         <Toggle label="Snap to grid" dense checked={snap} onChange={setSnap} />
       </div>
       <Field label="Background" dense>
@@ -239,7 +256,14 @@ export function PanelsBody() {
       {tweakMeta
         .filter((t) => CANVAS_TWEAKS.has(t.key))
         .map((t) => (
-          <Toggle key={t.key} dense label={t.label} hint={t.hint} checked={tweaks[t.key]} onChange={() => toggleTweak(t.key)} />
+          <Toggle
+            key={t.key}
+            dense
+            label={t.label}
+            hint={t.hint}
+            checked={tweaks[t.key]}
+            onChange={() => toggleTweak(t.key)}
+          />
         ))}
     </div>
   );

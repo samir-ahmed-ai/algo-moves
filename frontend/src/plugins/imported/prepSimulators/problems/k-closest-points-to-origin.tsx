@@ -1,8 +1,23 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface KClosestInput {
   points: [number, number][];
@@ -117,7 +132,8 @@ function View({ frame }: PluginViewProps<KClosestState>) {
   const values = s.points.map((p) => p.d2);
   const pointers: ArrayPointer[] = [];
   if (s.i !== null) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
-  if (s.j !== null && s.i !== null) pointers.push({ i: s.j, label: 'j', tone: 'warn', place: 'above' });
+  if (s.j !== null && s.i !== null)
+    pointers.push({ i: s.j, label: 'j', tone: 'warn', place: 'above' });
   if (s.minIdx !== null) pointers.push({ i: s.minIdx, label: 'min', tone: 'good', place: 'below' });
 
   const tone = (i: number) => {
@@ -137,9 +153,7 @@ function View({ frame }: PluginViewProps<KClosestState>) {
     };
   });
 
-  const answerPoints = s.done
-    ? s.points.slice(0, s.answerCount).map((p) => `(${p.x},${p.y})`)
-    : [];
+  const answerPoints = s.done ? s.points.slice(0, s.answerCount).map((p) => `(${p.x},${p.y})`) : [];
 
   const rail = (
     <>
@@ -150,13 +164,7 @@ function View({ frame }: PluginViewProps<KClosestState>) {
         <RailStat k="j" v={s.j !== null && s.i !== null ? s.j : '—'} tone="warn" />
         <RailStat k="sorted" v={s.sortedUpto} />
       </RailGroup>
-      {s.done && (
-        <RailResult
-          label="closest"
-          value={answerPoints.join(', ')}
-          tone="good"
-        />
-      )}
+      {s.done && <RailResult label="closest" value={answerPoints.join(', ')} tone="good" />}
     </>
   );
 
@@ -189,141 +197,156 @@ function Inspector({ frame }: InspectorProps<KClosestState>) {
 export const manifestId = 'prep-math-k-closest-points-to-origin';
 export const title = 'K Closest Points to Origin';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"K Closest Points to Origin\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "K Closest Points to Origin"?',
     choices: [
       {
-        label: "Sort — fits this problem",
-        correct: true
+        label: 'Sort — fits this problem',
+        correct: true,
       },
       {
-        label: "Uniform random in range — different approach"
+        label: 'Uniform random in range — different approach',
       },
       {
-        label: "Gauss sum XOR trick — different approach"
+        label: 'Gauss sum XOR trick — different approach',
       },
       {
-        label: "Enumerate 2 candidates — different approach"
-      }
+        label: 'Enumerate 2 candidates — different approach',
+      },
     ],
-    explain: "See K Closest Points To Origin pattern"
+    explain: 'See K Closest Points To Origin pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (K Closest Points to Origin), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (K Closest Points to Origin), what strategy is established?',
     choices: [
       {
-        label: "See K Closest Points To Origin — described in INIT caption",
-        correct: true
+        label: 'See K Closest Points To Origin — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "K Closest Points to Origin: return the  points nearest (0,0). Distance ordering only needs the squared distance x² + y² (no square root), so we sort by that and take the first ."
+    explain:
+      'K Closest Points to Origin: return the  points nearest (0,0). Distance ordering only needs the squared distance x² + y² (no square root), so we sort by that and take the first .',
   },
   {
-    id: "key-step",
-    prompt: "On the \"COMPARE\" step ( vs ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "COMPARE" step ( vs ), what happens?',
     choices: [
       {
-        label: "Compare position (d²=) against the current — this move caption",
-        correct: true
+        label: 'Compare position (d²=) against the current — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Compare position  (d²=) against the current minimum at  (d²=). ${pts[j].d2 < pts[minIdx].d2 ? "
+    explain:
+      'Compare position  (d²=) against the current minimum at  (d²=). ${pts[j].d2 < pts[minIdx].d2 ? ',
   },
   {
-    id: "state",
-    prompt: "What does the `points` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `points` field track in the visualization state?',
     choices: [
       {
-        label: "current order (mutated as we — updated each frame",
-        correct: true
+        label: 'current order (mutated as we — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `points` in sync: current order (mutated as we sort)"
+    explain: 'The recorder keeps `points` in sync: current order (mutated as we sort)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"K Closest Points to Origin\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "K Closest Points to Origin"?',
     choices: [
       {
-        label: "O(n log n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n log n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n) time, O(1) space — wrong order of growth"
+        label: 'O(n) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
+        label: 'O(1) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(√n) time, O(√n) space — wrong order of growth"
-      }
+        label: 'O(√n) time, O(√n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n log n). O(1). K Closest Points To Origin"
+    explain: 'O(n log n). O(1). K Closest Points To Origin',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "The points are sorted by squared — final DONE caption",
-        correct: true
+        label: 'The points are sorted by squared — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "The points are sorted by squared distance. The first  — ${pts\n      .slice(0, k)\n      .map((p) => "
-  }
+    explain:
+      'The points are sorted by squared distance. The first  — ${pts\n      .slice(0, k)\n      .map((p) => ',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
   inputs: [
-    { id: 'kc1', label: '[[1,3],[-2,2]], k=1', value: { points: [[1, 3], [-2, 2]], k: 1 } },
+    {
+      id: 'kc1',
+      label: '[[1,3],[-2,2]], k=1',
+      value: {
+        points: [
+          [1, 3],
+          [-2, 2],
+        ],
+        k: 1,
+      },
+    },
     {
       id: 'kc2',
       label: '[[3,3],[5,-1],[-2,4]], k=2',
-      value: { points: [[3, 3], [5, -1], [-2, 4]], k: 2 },
+      value: {
+        points: [
+          [3, 3],
+          [5, -1],
+          [-2, 4],
+        ],
+        k: 2,
+      },
     },
   ] satisfies SampleInput<KClosestInput>[],
   record,

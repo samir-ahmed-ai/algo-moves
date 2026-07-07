@@ -65,7 +65,10 @@ const stubPlayer = {
   toggleReverse: () => {},
 };
 
-const stubFrame: Frame<any> = { move: { type: 'INIT', note: 'start', caption: 'Start' }, state: {} };
+const stubFrame: Frame<any> = {
+  move: { type: 'INIT', note: 'start', caption: 'Start' },
+  state: {},
+};
 
 function wrapper({ children }: { children: ReactNode }) {
   return (

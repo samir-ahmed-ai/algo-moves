@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -39,20 +45,21 @@ function applyOp(a: number, b: number, op: string): number {
   }
 }
 
-function record({ tokens }: PostfixInput): Frame<PostfixState>[] {  const stack: number[] = [];
+function record({ tokens }: PostfixInput): Frame<PostfixState>[] {
+  const stack: number[] = [];
 
   const { emit, frames } = createRecorder<PostfixState>(() => ({
-        tokens,
-        ti: null,
-        stack: stack.slice(),
-        a: null,
-        b: null,
-        op: null,
-        pushed: null,
-        highlight: [],
-        result: null,
-        done: false
-      }));
+    tokens,
+    ti: null,
+    stack: stack.slice(),
+    a: null,
+    b: null,
+    op: null,
+    pushed: null,
+    highlight: [],
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -203,132 +210,130 @@ function Inspector({ frame }: InspectorProps<PostfixState>) {
 export const manifestId = 'prep-stacks-queues-calculate-postfix';
 export const title = 'Calculate postfix';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Calculate postfix\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Calculate postfix"?',
     choices: [
       {
-        label: "Postfix evaluation stack — fits this problem",
-        correct: true
+        label: 'Postfix evaluation stack — fits this problem',
+        correct: true,
       },
       {
-        label: "Sliding window queue + running sum — different approach"
+        label: 'Sliding window queue + running sum — different approach',
       },
       {
-        label: "Stack — different approach"
+        label: 'Stack — different approach',
       },
       {
-        label: "Dual-stack infix calculator — different approach"
-      }
+        label: 'Dual-stack infix calculator — different approach',
+      },
     ],
-    explain: "Numbers push; an operator pops two and pushes the result"
+    explain: 'Numbers push; an operator pops two and pushes the result',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Calculate postfix), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Calculate postfix), what strategy is established?',
     choices: [
       {
-        label: "Numbers push; an operator pops two — described in INIT caption",
-        correct: true
+        label: 'Numbers push; an operator pops two — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Postfix (Reverse Polish) evaluation: scan tokens left to right. A number is pushed onto the stack; an operator pops the top two values, applies the op, and pushes the result. When done, the single remaining value is the answer."
+    explain:
+      'Postfix (Reverse Polish) evaluation: scan tokens left to right. A number is pushed onto the stack; an operator pops the top two values, applies the op, and pushes the result. When done, the single remaining value is the answer.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"APPLY\" step (   = ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "APPLY" step (   = ), what happens?',
     choices: [
       {
-        label: "Apply the operator: a b = — this move caption",
-        correct: true
+        label: 'Apply the operator: a b = — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Apply the operator: a  b =    = . Remove both operands and push the result  back onto the stack."
+    explain:
+      'Apply the operator: a  b =    = . Remove both operands and push the result  back onto the stack.',
   },
   {
-    id: "state",
-    prompt: "What does the `ti` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `ti` field track in the visualization state?',
     choices: [
       {
-        label: "index of the token currently — updated each frame",
-        correct: true
+        label: 'index of the token currently — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `ti` in sync: index of the token currently being processed"
+    explain: 'The recorder keeps `ti` in sync: index of the token currently being processed',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Calculate postfix\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Calculate postfix"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(1) amortized time, O(n) space — wrong order of growth"
+        label: 'O(1) amortized time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). switch token; pop b then a; applyOp; stack[0] is answer"
+    explain: 'O(n). O(n). switch token; pop b then a; applyOp; stack[0] is answer',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "All tokens processed. One value remains — final DONE caption",
-        correct: true
+        label: 'All tokens processed. One value remains — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "All tokens processed. One value remains on the stack: . That is the value of the postfix expression."
-  }
+    explain:
+      'All tokens processed. One value remains on the stack: . That is the value of the postfix expression.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

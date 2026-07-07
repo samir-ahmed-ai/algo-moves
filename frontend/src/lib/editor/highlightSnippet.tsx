@@ -10,7 +10,11 @@ import { highlightSnippetPlain, highlightSnippetShiki } from './shikiSnippet';
  * Syntax-colored markup for small reassemble snippets.
  * Prefer HighlightedCode (async Shiki); this sync export uses plain text until Shiki resolves.
  */
-export function highlightSnippet(code: string, lang = 'go', opts?: { gutter?: boolean }): ReactNode {
+export function highlightSnippet(
+  code: string,
+  lang = 'go',
+  opts?: { gutter?: boolean },
+): ReactNode {
   return highlightSnippetPlain(code, lang, opts);
 }
 

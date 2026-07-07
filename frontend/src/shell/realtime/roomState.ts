@@ -1,5 +1,4 @@
 import {
-  collabSession,
   defaultSession,
   isSessionMeta,
   type InterviewRuntime,
@@ -27,13 +26,10 @@ export function isRoomEnvelope(value: unknown): value is RoomSharedEnvelope {
   return !!e && e.v === ROOM_STATE_V && isSessionMeta(e.session);
 }
 
-/** Accept legacy bare {@link CanvasDoc} snapshots and v1 envelopes. */
 export function extractCanvasDoc(value: unknown): CanvasDoc | null {
-  if (isRoomEnvelope(value)) {
-    const doc = value.canvas;
-    return doc && isCanvasDoc(doc) ? doc : null;
-  }
-  return isCanvasDoc(value) ? value : null;
+  if (!isRoomEnvelope(value)) return null;
+  const doc = value.canvas;
+  return doc && isCanvasDoc(doc) ? doc : null;
 }
 
 export function extractSubDocs(value: unknown): Record<string, SubDocSnapshot> {
@@ -45,7 +41,6 @@ export function extractSubDocs(value: unknown): Record<string, SubDocSnapshot> {
 
 export function extractSessionMeta(value: unknown): SessionMeta {
   if (isRoomEnvelope(value)) return value.session;
-  if (isCanvasDoc(value)) return collabSession();
   return defaultSession('solo');
 }
 

@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -48,18 +54,19 @@ function renderLeft(parts: string[], maxWidth: number): string {
   return out;
 }
 
-function record({ words, maxWidth }: JustifyInput): Frame<JustifyState>[] {  const result: string[] = [];
+function record({ words, maxWidth }: JustifyInput): Frame<JustifyState>[] {
+  const result: string[] = [];
 
   const { emit, frames } = createRecorder<JustifyState>(() => ({
-        words,
-        maxWidth,
-        i: null,
-        j: null,
-        lineChars: [],
-        lastLine: false,
-        result: [...result],
-        done: false
-      }));
+    words,
+    maxWidth,
+    i: null,
+    j: null,
+    lineChars: [],
+    lastLine: false,
+    result: [...result],
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -144,7 +151,8 @@ function View({ frame }: PluginViewProps<JustifyState>) {
   // Show spaces as a visible middle-dot glyph so justification reads on the board.
   const cells = s.lineChars.map((ch) => (ch === ' ' ? '·' : ch));
   const pointers: ArrayPointer[] = [];
-  if (s.i !== null && s.i < cells.length) pointers.push({ i: s.i, label: 'line', tone: 'accent', place: 'above' });
+  if (s.i !== null && s.i < cells.length)
+    pointers.push({ i: s.i, label: 'line', tone: 'accent', place: 'above' });
   const tone = (idx: number) => (s.lineChars[idx] === ' ' ? '' : 'match');
   return (
     <div className="board-area">
@@ -192,138 +200,143 @@ function Inspector({ frame }: InspectorProps<JustifyState>) {
 export const manifestId = 'prep-strings-text-justification';
 export const title = 'Text Justification';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Text Justification\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Text Justification"?',
     choices: [
       {
-        label: "Greedy Line Packing — fits this problem",
-        correct: true
+        label: 'Greedy Line Packing — fits this problem',
+        correct: true,
       },
       {
-        label: "Adjacent swap — different approach"
+        label: 'Adjacent swap — different approach',
       },
       {
-        label: "Two pointers — different approach"
+        label: 'Two pointers — different approach',
       },
       {
-        label: "Reverse in place — different approach"
-      }
+        label: 'Reverse in place — different approach',
+      },
     ],
-    explain: "See Text Justification pattern"
+    explain: 'See Text Justification pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Text Justification), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Text Justification), what strategy is established?',
     choices: [
       {
-        label: "See Text Justification pattern — described in INIT caption",
-        correct: true
+        label: 'See Text Justification pattern — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Text Justification: greedily pack as many words as fit into each -wide line, then space them out. Every line except the last is fully justified; the last line is left-justified."
+    explain:
+      'Text Justification: greedily pack as many words as fit into each -wide line, then space them out. Every line except the last is fully justified; the last line is left-justified.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"STOP\" step ( words), what happens?",
+    id: 'key-step',
+    prompt: 'On the "STOP" step ( words), what happens?',
     choices: [
       {
-        label: "No more words fit. words occupy — this move caption",
-        correct: true
+        label: 'No more words fit. words occupy — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "No more words fit.  words occupy  chars, leaving  spaces across  gaps →  per gap, with the leftmost  gap getting one extra."
+    explain:
+      'No more words fit.  words occupy  chars, leaving  spaces across  gaps →  per gap, with the leftmost  gap getting one extra.',
   },
   {
-    id: "state",
-    prompt: "What does the `i` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: "first word index — updated each frame",
-        correct: true
+        label: 'first word index — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `i` in sync: first word index of the current line"
+    explain: 'The recorder keeps `i` in sync: first word index of the current line',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Text Justification\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Text Justification"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n*m) time, O(1) space — wrong order of growth"
+        label: 'O(n*m) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O( time, O(words) space — wrong order of growth"
-      }
+        label: 'O( time, O(words) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). Text Justification"
+    explain: 'O(n). O(n). Text Justification',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "All words placed. The paragraph — final DONE caption",
-        correct: true
+        label: 'All words placed. The paragraph — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "All words placed. The paragraph is  justified line, each exactly  characters wide."
-  }
+    explain: 'All words placed. The paragraph is  justified line, each exactly  characters wide.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
   inputs: [
-    { id: 'tj1', label: '["What","must","be","done"] · w=10', value: { words: ['What', 'must', 'be', 'done'], maxWidth: 10 } },
-    { id: 'tj2', label: '["a","b","c","d","e"] · w=5', value: { words: ['a', 'b', 'c', 'd', 'e'], maxWidth: 5 } },
+    {
+      id: 'tj1',
+      label: '["What","must","be","done"] · w=10',
+      value: { words: ['What', 'must', 'be', 'done'], maxWidth: 10 },
+    },
+    {
+      id: 'tj2',
+      label: '["a","b","c","d","e"] · w=5',
+      value: { words: ['a', 'b', 'c', 'd', 'e'], maxWidth: 5 },
+    },
   ] satisfies SampleInput<JustifyInput>[],
   record,
   View,

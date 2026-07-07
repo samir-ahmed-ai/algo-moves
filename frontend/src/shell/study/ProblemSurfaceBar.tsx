@@ -95,7 +95,9 @@ export function ProblemSurfaceBar({
         <span className="hidden shrink-0 sm:grid sm:place-items-center">{badgeIcon}</span>
       ) : null}
       <div className="min-w-0 flex-1">
-        <span className={cn('block truncate font-semibold text-ink', chromeText.sm)}>{item.title}</span>
+        <span className={cn('block truncate font-semibold text-ink', chromeText.sm)}>
+          {item.title}
+        </span>
         {!isMobile && browseCrumb.track && browseCrumb.category && (
           <span className={cn('block truncate text-ink3', chromeText.xs)}>
             {browseCrumb.track.title} › {browseCrumb.category.title}
@@ -123,7 +125,9 @@ export function ProblemSurfaceBar({
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <span className={cn('hidden px-1 font-mono tabular-nums text-ink3 sm:inline', chromeText.xs)}>
+          <span
+            className={cn('hidden px-1 font-mono tabular-nums text-ink3 sm:inline', chromeText.xs)}
+          >
             {navIdx + 1}/{navList.length}
             {isRunning ? ' plan' : ''}
           </span>
@@ -146,7 +150,9 @@ export function ProblemSurfaceBar({
           value={theme}
           onChange={(v) => setTheme(v as 'light' | 'dark')}
           panelTitle="Theme"
-          triggerIcon={theme === 'dark' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+          triggerIcon={
+            theme === 'dark' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />
+          }
           triggerAriaLabel="Theme"
           compact
           align="right"

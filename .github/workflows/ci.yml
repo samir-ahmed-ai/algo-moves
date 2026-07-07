@@ -36,6 +36,11 @@ jobs:
         with:
           go-version: '1.25'
           cache-dependency-path: backend/go.mod
+      - run: go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.31.1
       - run: go vet ./...
       - run: go test ./...
       - run: go build ./...
+      - name: Verify sqlc generated code is up to date
+        run: |
+          sqlc generate
+          git diff --exit-code internal/arcade/arcadedb/

@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -23,20 +29,21 @@ interface RepeatedSubsState {
 }
 
 function record({ s, k }: RepeatedSubsInput): Frame<RepeatedSubsState>[] {
-  const chars = s.split('');  const seen = new Map<string, number>();
+  const chars = s.split('');
+  const seen = new Map<string, number>();
   const out: string[] = [];
 
   const { emit, frames } = createRecorder<RepeatedSubsState>(() => ({
-        chars,
-        k,
-        i: null,
-        sub: null,
-        count: null,
-        seen: [...seen.entries()],
-        out: out.slice(),
-        justEmitted: false,
-        done: false
-      }));
+    chars,
+    k,
+    i: null,
+    sub: null,
+    count: null,
+    seen: [...seen.entries()],
+    out: out.slice(),
+    justEmitted: false,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -117,18 +124,21 @@ function View({ frame }: PluginViewProps<RepeatedSubsState>) {
         k = <span className="font-mono text-ink">{s.k}</span>
         {s.sub !== null && !s.done && (
           <>
-            {' · '}window ={' '}
-            <span className="font-mono text-ink">"{s.sub}"</span>
+            {' · '}window = <span className="font-mono text-ink">"{s.sub}"</span>
             {s.count !== null && (
               <>
-                {' · '}count ={' '}
-                <span className="font-mono text-ink">{s.count}</span>
+                {' · '}count = <span className="font-mono text-ink">{s.count}</span>
               </>
             )}
           </>
         )}
       </div>
-      <ArrayRow values={s.chars} cellTone={tone} pointers={pointers} windowRange={s.i !== null ? [s.i, winEnd] : null} />
+      <ArrayRow
+        values={s.chars}
+        cellTone={tone}
+        pointers={pointers}
+        windowRange={s.i !== null ? [s.i, winEnd] : null}
+      />
       <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
         seen {'{'}
         {s.seen.map(([sub, c]) => `"${sub}":${c}`).join(', ')}
@@ -159,132 +169,132 @@ function Inspector({ frame }: InspectorProps<RepeatedSubsState>) {
 export const manifestId = 'prep-strings-find-repeated-substrings-size-k';
 export const title = 'Find repeated substrings size K';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Find repeated substrings size K\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Find repeated substrings size K"?',
     choices: [
       {
-        label: "Hash set substrings — fits this problem",
-        correct: true
+        label: 'Hash set substrings — fits this problem',
+        correct: true,
       },
       {
-        label: "Counting — different approach"
+        label: 'Counting — different approach',
       },
       {
-        label: "Greedy line break — different approach"
+        label: 'Greedy line break — different approach',
       },
       {
-        label: "Sliding window — different approach"
-      }
+        label: 'Sliding window — different approach',
+      },
     ],
-    explain: "Slide a length-K window; map tallies each substring"
+    explain: 'Slide a length-K window; map tallies each substring',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Find repeated substrings size K), what strategy is established?",
+    id: 'init',
+    prompt:
+      'At the start of a run (Find repeated substrings size K), what strategy is established?',
     choices: [
       {
-        label: "Slide a length-K window; map tallies — described in INIT caption",
-        correct: true
+        label: 'Slide a length-K window; map tallies — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Find repeated substrings of size : slide a length- window across \"\", tally each substring in a hash map, and collect a substring the moment its count first reaches 2."
+    explain:
+      'Find repeated substrings of size : slide a length- window across "", tally each substring in a hash map, and collect a substring the moment its count first reaches 2.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"REPEAT\" step (\"\" x2), what happens?",
+    id: 'key-step',
+    prompt: 'On the "REPEAT" step ("" x2), what happens?',
     choices: [
       {
-        label: "seen[\"\"] just went from 1 — this move caption",
-        correct: true
+        label: 'seen[""] just went from 1 — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "seen[\"\"] just went from 1 to 2 — this is the first time \"\" repeats, so add it to the result once."
+    explain:
+      'seen[""] just went from 1 to 2 — this is the first time "" repeats, so add it to the result once.',
   },
   {
-    id: "state",
-    prompt: "What does the `chars` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `chars` field track in the visualization state?',
     choices: [
       {
-        label: "the string split into characters — updated each frame",
-        correct: true
+        label: 'the string split into characters — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `chars` in sync: the string split into characters, one per array cell"
+    explain:
+      'The recorder keeps `chars` in sync: the string split into characters, one per array cell',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Find repeated substrings size K\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Find repeated substrings size K"?',
     choices: [
       {
-        label: "O(n*k) time, O(n*k) space — standard bounds here",
-        correct: true
+        label: 'O(n*k) time, O(n*k) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n^2) time, O(n^2) space — wrong order of growth"
+        label: 'O(n^2) time, O(n^2) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
+        label: 'O(1) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n*m) time, O(1) space — wrong order of growth"
-      }
+        label: 'O(n*m) time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(n*k). O(n*k). seen[sub]++; emit when it first hits 2"
+    explain: 'O(n*k). O(n*k). seen[sub]++; emit when it first hits 2',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "seen[\"\"] just went from 1 — final DONE caption",
-        correct: true
+        label: 'seen[""] just went from 1 — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "seen[\"\"] just went from 1 to 2 — this is the first time \"\" repeats, so add it to the result once."
-  }
+    explain:
+      'seen[""] just went from 1 to 2 — this is the first time "" repeats, so add it to the result once.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

@@ -34,8 +34,8 @@ function SignInGate() {
         <BookMarked className="h-12 w-12 text-ink3" strokeWidth={1.3} />
         <h2 className="text-xl font-semibold text-ink">Interview Prep Plans</h2>
         <p className={cn('max-w-xs text-ink3', chromeText.base)}>
-          Sign in to create named study plans, collect problems from any track, and
-          step through them one-by-one before your interview.
+          Sign in to create named study plans, collect problems from any track, and step through
+          them one-by-one before your interview.
         </p>
       </div>
       <button
@@ -113,8 +113,7 @@ function PlanCard({
   onStart: () => void;
   onDelete: () => void;
 }) {
-  const pct =
-    plan.itemCount > 0 ? Math.round((plan.completedCount / plan.itemCount) * 100) : 0;
+  const pct = plan.itemCount > 0 ? Math.round((plan.completedCount / plan.itemCount) * 100) : 0;
   const allDone = plan.itemCount > 0 && plan.completedCount === plan.itemCount;
 
   return (
@@ -127,11 +126,7 @@ function PlanCard({
             allDone ? 'border-good/40 text-good' : 'border-edge text-ink3',
           )}
         >
-          {allDone ? (
-            <CheckCircle2 className="h-4 w-4" />
-          ) : (
-            <Circle className="h-4 w-4" />
-          )}
+          {allDone ? <CheckCircle2 className="h-4 w-4" /> : <Circle className="h-4 w-4" />}
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold text-ink">{plan.title}</p>
@@ -158,10 +153,7 @@ function PlanCard({
       {plan.itemCount > 0 && (
         <div className="h-1 w-full overflow-hidden rounded-full bg-border">
           <div
-            className={cn(
-              'h-full rounded-full transition-all',
-              allDone ? 'bg-good' : 'bg-accent',
-            )}
+            className={cn('h-full rounded-full transition-all', allDone ? 'bg-good' : 'bg-accent')}
             style={{ width: `${pct}%` }}
           />
         </div>
@@ -253,14 +245,11 @@ export function PlansPage() {
     [plan, openProblem, enterWorkspace],
   );
 
-  const handleDelete = useCallback(
-    async (planId: string) => {
-      await deletePrepPlan(planId);
-      setDeleteConfirm(null);
-      setPlans((prev) => prev.filter((p) => p.id !== planId));
-    },
-    [],
-  );
+  const handleDelete = useCallback(async (planId: string) => {
+    await deletePrepPlan(planId);
+    setDeleteConfirm(null);
+    setPlans((prev) => prev.filter((p) => p.id !== planId));
+  }, []);
 
   return (
     <div className="flex h-full flex-col bg-bg">

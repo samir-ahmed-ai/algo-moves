@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -20,19 +26,20 @@ interface Base26State {
   done: boolean;
 }
 
-function record({ n }: Base26Input): Frame<Base26State>[] {  const digits: string[] = [];
+function record({ n }: Base26Input): Frame<Base26State>[] {
+  const digits: string[] = [];
   let cur = n;
 
   const { emit, frames } = createRecorder<Base26State>(() => ({
-        n0: n,
-        n: cur,
-        digits: digits.slice(),
-        rem: null,
-        letter: null,
-        reversed: false,
-        result: null,
-        done: false
-      }));
+    n0: n,
+    n: cur,
+    digits: digits.slice(),
+    rem: null,
+    letter: null,
+    reversed: false,
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -111,8 +118,7 @@ function View({ frame }: PluginViewProps<Base26State>) {
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
         n = <span className="font-mono text-ink">{s.n0}</span>
-        {' · '}remaining ={' '}
-        <span className="font-mono text-ink">{s.n}</span>
+        {' · '}remaining = <span className="font-mono text-ink">{s.n}</span>
       </div>
       <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} />
       <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
@@ -161,132 +167,129 @@ function encode(n: number): string {
 export const manifestId = 'prep-math-base-26-encoding';
 export const title = 'Base 26 encoding';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Base 26 encoding\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Base 26 encoding"?',
     choices: [
       {
-        label: "Bijective base-26 encoding — fits this problem",
-        correct: true
+        label: 'Bijective base-26 encoding — fits this problem',
+        correct: true,
       },
       {
-        label: "Digit reversal — different approach"
+        label: 'Digit reversal — different approach',
       },
       {
-        label: "XOR + popcount — different approach"
+        label: 'XOR + popcount — different approach',
       },
       {
-        label: "Grade-school multiplication — different approach"
-      }
+        label: 'Grade-school multiplication — different approach',
+      },
     ],
-    explain: "Excel columns: A=1..Z=26, then AA; decrement before each mod"
+    explain: 'Excel columns: A=1..Z=26, then AA; decrement before each mod',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Base 26 encoding), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Base 26 encoding), what strategy is established?',
     choices: [
       {
-        label: "Excel columns: A=1..Z=26, then AA; — described in INIT caption",
-        correct: true
+        label: 'Excel columns: A=1..Z=26, then AA; — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Base-26 (Excel-column) encoding of n = . This is a bijective base 26 where A=1..Z=26 and there is no zero digit, so each step decrements n by 1 before taking n % 26. We peel off one letter per step, least-significant first, then reverse."
+    explain:
+      'Base-26 (Excel-column) encoding of n = . This is a bijective base 26 where A=1..Z=26 and there is no zero digit, so each step decrements n by 1 before taking n % 26. We peel off one letter per step, least-significant first, then reverse.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"DIGIT\" step (→), what happens?",
+    id: 'key-step',
+    prompt: 'On the "DIGIT" step (→), what happens?',
     choices: [
       {
-        label: "Take the least-significant base-26 digit: — this move caption",
-        correct: true
+        label: 'Take the least-significant base-26 digit: — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Take the least-significant base-26 digit:  % 26 = , which is the letter '' ('A' + ). Append it to the output buffer."
+    explain:
+      "Take the least-significant base-26 digit:  % 26 = , which is the letter '' ('A' + ). Append it to the output buffer.",
   },
   {
-    id: "state",
-    prompt: "What does the `n0` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `n0` field track in the visualization state?',
     choices: [
       {
-        label: "the original number being encoded — updated each frame",
-        correct: true
+        label: 'the original number being encoded — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `n0` in sync: the original number being encoded"
+    explain: 'The recorder keeps `n0` in sync: the original number being encoded',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Base 26 encoding\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Base 26 encoding"?',
     choices: [
       {
-        label: "O(log n) time, O(log n) space — standard bounds here",
-        correct: true
+        label: 'O(log n) time, O(log n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(log n) time, O(1) space — wrong order of growth"
+        label: 'O(log n) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
+        label: 'O(n²) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(m+n) space — wrong order of growth"
-      }
+        label: 'O(m·n) time, O(m+n) space — wrong order of growth',
+      },
     ],
-    explain: "O(log n). O(log n). while n>0: n--; out+='A'+n%26; n/=26; reverse"
+    explain: "O(log n). O(log n). while n>0: n--; out+='A'+n%26; n/=26; reverse",
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Divide down to move — final DONE caption",
-        correct: true
+        label: 'Divide down to move — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Divide down to move to the next-higher digit: n = ⌊ / 26⌋ = . "
-  }
+    explain: 'Divide down to move to the next-higher digit: n = ⌊ / 26⌋ = . ',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

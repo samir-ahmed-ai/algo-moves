@@ -4,12 +4,7 @@ import { panelCategory, panelTitle } from '../../../core/panelRegistry';
 import type { PanelFlowNode } from '@/core/panelFlowTypes';
 import type { EdgePathType } from '@/lib/canvas/layoutPrefs';
 import { sizeOf } from '../tokens';
-import {
-  defaultNodeIds,
-  isSideTab,
-  modeNodeIds,
-  tabInMode,
-} from './layoutPresets';
+import { defaultNodeIds, isSideTab, modeNodeIds, tabInMode } from './layoutPresets';
 
 /** Shared input port on the visualizer — problem wires here. */
 export const VIZ_INPUT_HANDLE = 'viz-in';
@@ -33,7 +28,9 @@ export function sidePanelTabs(plugin: ProblemPlugin<any, any>, mode: CanvasMode)
 }
 
 export function buildNodes(plugin: ProblemPlugin<any, any>, mode: CanvasMode): PanelFlowNode[] {
-  return defaultNodeIds(plugin, mode).map((id) => makeNode(id, kindTitle(plugin, id), { x: 0, y: 0 }));
+  return defaultNodeIds(plugin, mode).map((id) =>
+    makeNode(id, kindTitle(plugin, id), { x: 0, y: 0 }),
+  );
 }
 
 /** A single node for a kind at a drop position (drag-to-add). */
@@ -67,7 +64,10 @@ const SHELL_WIRES: Record<CanvasMode, [string, string, string?][]> = {
   ],
 };
 
-function pluginWires(plugin: ProblemPlugin<any, any>, mode: CanvasMode): [string, string, string?][] {
+function pluginWires(
+  plugin: ProblemPlugin<any, any>,
+  mode: CanvasMode,
+): [string, string, string?][] {
   if (mode === 'learn') return plugin.wires?.learn ?? plugin.wires?.practice ?? [];
   if (mode === 'play') return plugin.wires?.visualize ?? [];
   return plugin.wires?.[mode] ?? [];
@@ -100,7 +100,11 @@ export function buildEdges(plugin: ProblemPlugin<any, any>, mode: CanvasMode): E
 }
 
 /** Next panel in a mode's wire chain after `fromId`, if any. */
-export function nextPracticePanel(plugin: ProblemPlugin<any, any>, mode: CanvasMode, fromId: string): string | null {
+export function nextPracticePanel(
+  plugin: ProblemPlugin<any, any>,
+  mode: CanvasMode,
+  fromId: string,
+): string | null {
   const edge = allWires(plugin, mode).find(([a]) => a === fromId);
   return edge ? edge[1] : null;
 }

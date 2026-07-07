@@ -31,10 +31,24 @@ export function VimCallout({ children, className }: { children: ReactNode; class
   return <div className={cn('vim-callout', className)}>{children}</div>;
 }
 
-export function VimProgressBar({ value, max, className }: { value: number; max: number; className?: string }) {
+export function VimProgressBar({
+  value,
+  max,
+  className,
+}: {
+  value: number;
+  max: number;
+  className?: string;
+}) {
   const pct = max > 0 ? Math.min(100, Math.round((value / max) * 100)) : 0;
   return (
-    <div className={cn('vim-progress-bar', className)} role="progressbar" aria-valuenow={value} aria-valuemin={0} aria-valuemax={max}>
+    <div
+      className={cn('vim-progress-bar', className)}
+      role="progressbar"
+      aria-valuenow={value}
+      aria-valuemin={0}
+      aria-valuemax={max}
+    >
       <div className="vim-progress-bar__fill" style={{ width: `${pct}%` }} />
     </div>
   );

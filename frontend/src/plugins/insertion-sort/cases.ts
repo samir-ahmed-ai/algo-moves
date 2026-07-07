@@ -10,7 +10,8 @@ export const goodCases: WorkedCase<SortInput>[] = [
     returns: 'sorted',
     tone: 'ok',
     question: 'When inserting key=1, why shift 5 rightward?',
-    answer: 'The sorted prefix [2,5] must stay ordered. 5 > 1, so shift 5 one slot right to open a gap at index 1, then drop 1 there.',
+    answer:
+      'The sorted prefix [2,5] must stay ordered. 5 > 1, so shift 5 one slot right to open a gap at index 1, then drop 1 there.',
   },
 ];
 
@@ -23,8 +24,10 @@ export const badCases: WorkedCase<SortInput>[] = [
     returns: 'sorted with Θ(n²) shifts',
     tone: 'bad',
     question: 'Why is reverse order hard for insertion sort?',
-    answer: 'Each new key walks left across the entire sorted prefix, shifting every larger element — Θ(n²) work.',
+    answer:
+      'Each new key walks left across the entire sorted prefix, shifting every larger element — Θ(n²) work.',
   },
 ];
 
-export const intro = 'Insertion sort grows a sorted prefix: take the next key, shift larger neighbors right, insert the key in the gap.';
+export const intro =
+  'Insertion sort grows a sorted prefix: take the next key, shift larger neighbors right, insert the key in the gap.';

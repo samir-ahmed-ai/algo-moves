@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { collabSession, defaultSession, interviewSession, isSessionMeta } from '@/lib/session';
-import { buildCanvasRoomState, extractCanvasDoc, extractSessionMeta, isRoomEnvelope } from '@/shell/realtime/roomState';
+import {
+  buildCanvasRoomState,
+  extractCanvasDoc,
+  extractSessionMeta,
+  isRoomEnvelope,
+} from '@/shell/realtime/roomState';
 
 import { CanvasDoc } from '@/shell/canvas';
 const sampleDoc: CanvasDoc = {
@@ -28,16 +33,12 @@ describe('session types', () => {
 });
 
 describe('room shared envelope', () => {
-  it('round-trips canvas doc in envelope', () => {
+  it('extracts canvas doc from envelope only', () => {
     const session = collabSession();
     const envelope = buildCanvasRoomState(session, sampleDoc);
     expect(isRoomEnvelope(envelope)).toBe(true);
     expect(extractCanvasDoc(envelope)).toEqual(sampleDoc);
     expect(extractSessionMeta(envelope)).toEqual(session);
-  });
-
-  it('accepts legacy bare canvas doc', () => {
-    expect(extractCanvasDoc(sampleDoc)).toEqual(sampleDoc);
-    expect(extractSessionMeta(sampleDoc).kind).toBe('collab');
+    expect(extractCanvasDoc(sampleDoc)).toBeNull();
   });
 });

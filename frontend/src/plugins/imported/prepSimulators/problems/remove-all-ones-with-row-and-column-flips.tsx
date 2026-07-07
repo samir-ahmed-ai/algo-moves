@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
@@ -20,19 +26,20 @@ interface RemoveOnesState {
   done: boolean;
 }
 
-function record({ grid }: RemoveOnesInput): Frame<RemoveOnesState>[] {  const m = grid.length;
+function record({ grid }: RemoveOnesInput): Frame<RemoveOnesState>[] {
+  const m = grid.length;
   const n = grid[0].length;
 
   const { emit, frames } = createRecorder<RemoveOnesState>(() => ({
-        grid,
-        row: null,
-        col: null,
-        same: true,
-        inv: true,
-        clearedRows: [],
-        result: null,
-        done: false
-      }));
+    grid,
+    row: null,
+    col: null,
+    same: true,
+    inv: true,
+    clearedRows: [],
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -125,8 +132,7 @@ function View({ frame }: PluginViewProps<RemoveOnesState>) {
     if (clearedSet.has(r)) return 'visited';
     return s.grid[r][c] === 1 ? 'land' : '';
   };
-  const active: [number, number] | null =
-    s.row !== null && s.col !== null ? [s.row, s.col] : null;
+  const active: [number, number] | null = s.row !== null && s.col !== null ? [s.row, s.col] : null;
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
@@ -140,13 +146,7 @@ function View({ frame }: PluginViewProps<RemoveOnesState>) {
         </div>
       )}
       {s.result !== null && (
-        <div
-          className={cn(
-            'mt-1 font-mono',
-            vizText.base,
-            s.result ? 'text-good' : 'text-bad',
-          )}
-        >
+        <div className={cn('mt-1 font-mono', vizText.base, s.result ? 'text-good' : 'text-bad')}>
           → {s.result ? 'true (clearable)' : 'false (impossible)'}
         </div>
       )}
@@ -161,8 +161,7 @@ function Inspector({ frame }: InspectorProps<RemoveOnesState>) {
     s.row !== null && s.col !== null && s.row < s.grid.length && s.col < s.grid[0].length
       ? s.grid[s.row][s.col]
       : '—';
-  const ref =
-    s.col !== null && s.col < s.grid[0].length ? s.grid[0][s.col] : '—';
+  const ref = s.col !== null && s.col < s.grid[0].length ? s.grid[0][s.col] : '—';
   return (
     <VarGrid>
       <InspectorRow k="dims (m×n)" v={`${s.grid.length}×${s.grid[0].length}`} />
@@ -173,10 +172,7 @@ function Inspector({ frame }: InspectorProps<RemoveOnesState>) {
       <InspectorRow k="same?" v={s.row !== null && s.row > 0 ? String(s.same) : '—'} />
       <InspectorRow k="inverse?" v={s.row !== null && s.row > 0 ? String(s.inv) : '—'} />
       <InspectorRow k="rows cleared" v={s.clearedRows.length} />
-      <InspectorRow
-        k="answer"
-        v={s.result === null ? '…' : s.result ? 'true' : 'false'}
-      />
+      <InspectorRow k="answer" v={s.result === null ? '…' : s.result ? 'true' : 'false'} />
     </VarGrid>
   );
 }
@@ -184,132 +180,131 @@ function Inspector({ frame }: InspectorProps<RemoveOnesState>) {
 export const manifestId = 'prep-matrices-remove-all-ones-with-row-and-column-flips';
 export const title = 'Remove All Ones With Row and Column Flips';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Remove All Ones With Row and Column Flips\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Remove All Ones With Row and Column Flips"?',
     choices: [
       {
-        label: "Row Comparison (same or inverse of row 0) — fits this problem",
-        correct: true
+        label: 'Row Comparison (same or inverse of row 0) — fits this problem',
+        correct: true,
       },
       {
-        label: "Layer-by-layer 90° rotation — different approach"
+        label: 'Layer-by-layer 90° rotation — different approach',
       },
       {
-        label: "Grid DFS pathfinding — different approach"
+        label: 'Grid DFS pathfinding — different approach',
       },
       {
-        label: "1D meeting point two pointers — different approach"
-      }
+        label: '1D meeting point two pointers — different approach',
+      },
     ],
-    explain: "See Remove All Ones With Row And Column Flips pattern"
+    explain: 'See Remove All Ones With Row And Column Flips pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Remove All Ones With Row and Column Flips), what strategy is established?",
+    id: 'init',
+    prompt:
+      'At the start of a run (Remove All Ones With Row and Column Flips), what strategy is established?',
     choices: [
       {
-        label: "See Remove All Ones With Row — described in INIT caption",
-        correct: true
+        label: 'See Remove All Ones With Row — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "A row flip or column flip toggles a whole line, but it never changes whether two rows agree or disagree in a given column. So every row must end up either identical to row 0 (clear them together) or its exact inverse (flip it first, then clear). We check each row below row 0 against that rule."
+    explain:
+      'A row flip or column flip toggles a whole line, but it never changes whether two rows agree or disagree in a given column. So every row must end up either identical to row 0 (clear them together) or its exact inverse (flip it first, then clear). We check each row below row 0 against that rule.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"CMP\" step (c:  vs ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "CMP" step (c:  vs ), what happens?',
     choices: [
       {
-        label: "Column : grid[][] = grid[0][] = — this move caption",
-        correct: true
+        label: 'Column : grid[][] = grid[0][] = — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Column : grid[][] =   grid[0][] = . ${\n          a === b\n            ? "
+    explain: 'Column : grid[][] =   grid[0][] = . ${\n          a === b\n            ? ',
   },
   {
-    id: "state",
-    prompt: "What does the `row` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `row` field track in the visualization state?',
     choices: [
       {
-        label: "row currently being compared against — updated each frame",
-        correct: true
+        label: 'row currently being compared against — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `row` in sync: row currently being compared against row 0"
+    explain: 'The recorder keeps `row` in sync: row currently being compared against row 0',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Remove All Ones With Row and Column Flips\"?",
+    id: 'complexity',
+    prompt:
+      'What are the time and space complexities for "Remove All Ones With Row and Column Flips"?',
     choices: [
       {
-        label: "O(m·n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(m·n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(m+n) time, O(1) space — wrong order of growth"
+        label: 'O(m+n) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(m·n) space — wrong order of growth"
-      }
+        label: 'O(m·n) time, O(m·n) space — wrong order of growth',
+      },
     ],
-    explain: "O(m·n). O(1). Remove All Ones With Row And Column Flips"
+    explain: 'O(m·n). O(1). Remove All Ones With Row And Column Flips',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Row is now neither the same — final DONE caption",
-        correct: true
+        label: 'Row is now neither the same — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Row  is now neither the same as row 0 nor its inverse — it agrees in some columns and disagrees in others. No combination of row/column flips can reconcile that, so the grid can NEVER be fully cleared. Answer: false."
-  }
+    explain:
+      'Row  is now neither the same as row 0 nor its inverse — it agrees in some columns and disagrees in others. No combination of row/column flips can reconcile that, so the grid can NEVER be fully cleared. Answer: false.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -317,12 +312,24 @@ export const simulator: ProblemSimulator = {
     {
       id: 'ro1',
       label: '[[0,1,0],[1,0,1],[0,1,0]] → true',
-      value: { grid: [[0, 1, 0], [1, 0, 1], [0, 1, 0]] },
+      value: {
+        grid: [
+          [0, 1, 0],
+          [1, 0, 1],
+          [0, 1, 0],
+        ],
+      },
     },
     {
       id: 'ro2',
       label: '[[1,1,0],[0,0,0],[0,0,0]] → false',
-      value: { grid: [[1, 1, 0], [0, 0, 0], [0, 0, 0]] },
+      value: {
+        grid: [
+          [1, 1, 0],
+          [0, 0, 0],
+          [0, 0, 0],
+        ],
+      },
     },
   ] satisfies SampleInput<RemoveOnesInput>[],
   record,

@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -25,24 +31,25 @@ interface KthState {
   done: boolean;
 }
 
-function record({ nums, k }: KthInput): Frame<KthState>[] {  const a = nums.slice();
+function record({ nums, k }: KthInput): Frame<KthState>[] {
+  const a = nums.slice();
   const n = a.length;
   const target = n - k;
 
   const { emit, frames } = createRecorder<KthState>(() => ({
-        a: a.slice(),
-        k,
-        target,
-        lo: 0,
-        hi: n - 1,
-        pivot: null,
-        pivotIdx: null,
-        i: null,
-        store: null,
-        p: null,
-        result: null,
-        done: false
-      }));
+    a: a.slice(),
+    k,
+    target,
+    lo: 0,
+    hi: n - 1,
+    pivot: null,
+    pivotIdx: null,
+    i: null,
+    store: null,
+    p: null,
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -150,7 +157,8 @@ function View({ frame }: PluginViewProps<KthState>) {
   const s = frame.state;
   const pointers: ArrayPointer[] = [];
   if (s.lo >= 0) pointers.push({ i: s.lo, label: 'lo', tone: 'warn', place: 'above' });
-  if (s.hi >= 0 && s.hi !== s.lo) pointers.push({ i: s.hi, label: 'hi', tone: 'warn', place: 'above' });
+  if (s.hi >= 0 && s.hi !== s.lo)
+    pointers.push({ i: s.hi, label: 'hi', tone: 'warn', place: 'above' });
   if (s.i !== null) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'below' });
   if (s.store !== null) pointers.push({ i: s.store, label: 'store', tone: 'good', place: 'below' });
 
@@ -166,12 +174,10 @@ function View({ frame }: PluginViewProps<KthState>) {
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
         k = <span className="font-mono text-ink">{s.k}</span>
-        {' · '}target index = n − k ={' '}
-        <span className="font-mono text-ink">{s.target}</span>
+        {' · '}target index = n − k = <span className="font-mono text-ink">{s.target}</span>
         {s.pivot !== null && s.result === null && (
           <>
-            {' · '}pivot ={' '}
-            <span className="font-mono text-ink">{s.pivot}</span>
+            {' · '}pivot = <span className="font-mono text-ink">{s.pivot}</span>
           </>
         )}
       </div>
@@ -237,138 +243,140 @@ function computeKth(nums: number[], k: number): number {
   return a[lo];
 }
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Find Kth largest\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Find Kth largest"?',
     choices: [
       {
-        label: "Quickselect / partition — fits this problem",
-        correct: true
+        label: 'Quickselect / partition — fits this problem',
+        correct: true,
       },
       {
-        label: "Binary search on answer — different approach"
+        label: 'Binary search on answer — different approach',
       },
       {
-        label: "Hash map chain reconstruction — different approach"
+        label: 'Hash map chain reconstruction — different approach',
       },
       {
-        label: "Two-pass frequency map — different approach"
-      }
+        label: 'Two-pass frequency map — different approach',
+      },
     ],
-    explain: "Partition around a pivot; recurse only the side holding index n-k"
+    explain: 'Partition around a pivot; recurse only the side holding index n-k',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Find Kth largest), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Find Kth largest), what strategy is established?',
     choices: [
       {
-        label: "Partition around a pivot; recurse — described in INIT caption",
-        correct: true
+        label: 'Partition around a pivot; recurse — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Find the th largest value via Quickselect. In fully sorted order the kth largest sits at index n − k =  −  = , so we hunt for whatever value ends up at index  — without sorting the whole array."
+    explain:
+      'Find the th largest value via Quickselect. In fully sorted order the kth largest sits at index n − k =  −  = , so we hunt for whatever value ends up at index  — without sorting the whole array.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"PLACE\" step (pivot@), what happens?",
+    id: 'key-step',
+    prompt: 'On the "PLACE" step (pivot@), what happens?',
     choices: [
       {
-        label: "Swap the pivot into the boundary — this move caption",
-        correct: true
+        label: 'Swap the pivot into the boundary — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Swap the pivot into the boundary slot . Now a[] =  is in its final sorted position: everything left is ≤ it, everything right is > it."
+    explain:
+      'Swap the pivot into the boundary slot . Now a[] =  is in its final sorted position: everything left is ≤ it, everything right is > it.',
   },
   {
-    id: "state",
-    prompt: "What does the `a` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `a` field track in the visualization state?',
     choices: [
       {
-        label: "live array (mutated by partition — updated each frame",
-        correct: true
+        label: 'live array (mutated by partition — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `a` in sync: live array (mutated by partition swaps)"
+    explain: 'The recorder keeps `a` in sync: live array (mutated by partition swaps)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Find Kth largest\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Find Kth largest"?',
     choices: [
       {
-        label: "O(n) average time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) average time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(t log t) time, O(t) space — wrong order of growth"
+        label: 'O(t log t) time, O(t) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(log n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n) average. O(1). target=n-k; partition; move lo/hi toward p"
+    explain: 'O(n) average. O(1). target=n-k; partition; move lo/hi toward p',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "The window collapsed to a single — final DONE caption",
-        correct: true
+        label: 'The window collapsed to a single — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "The window collapsed to a single cell at index  = target , so a[] =  is the th largest value."
-  }
+    explain:
+      'The window collapsed to a single cell at index  = target , so a[] =  is the th largest value.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'kth1', label: '[3,2,1,5,6,4], k=2', value: { nums: [3, 2, 1, 5, 6, 4], k: 2 } },
-    { id: 'kth2', label: '[3,2,3,1,2,4,5,5], k=4 → 3', value: { nums: [3, 2, 3, 1, 2, 4, 5, 5], k: 4 } },
+    {
+      id: 'kth2',
+      label: '[3,2,3,1,2,4,5,5], k=4 → 3',
+      value: { nums: [3, 2, 3, 1, 2, 4, 5, 5], k: 4 },
+    },
   ] satisfies SampleInput<KthInput>[],
   record,
   View,

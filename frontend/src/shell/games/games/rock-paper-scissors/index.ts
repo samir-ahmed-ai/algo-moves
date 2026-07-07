@@ -1,8 +1,9 @@
 import type { GameDef } from '../../types';
+import { GAME_ID_ROCK_PAPER_SCISSORS } from '../../_generated/gameIds';
 import { RockPaperScissors } from './RockPaperScissors';
 
 const rockPaperScissors: GameDef = {
-  id: 'rock-paper-scissors',
+  id: GAME_ID_ROCK_PAPER_SCISSORS,
   title: 'Rock · Paper · Scissors',
   tagline: 'Lock in your throw — best of five decides it.',
   minutes: '~2 min',

@@ -60,7 +60,9 @@ function FloatingChrome() {
           value={theme}
           onChange={(id) => setTheme(id as 'light' | 'dark')}
           panelTitle="Theme"
-          triggerIcon={theme === 'dark' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+          triggerIcon={
+            theme === 'dark' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />
+          }
           compact
           align="left"
         />
@@ -82,7 +84,8 @@ function FloatingChrome() {
                   title: 'Colour-blind',
                   subtitle: 'High-contrast palette',
                   detailTitle: 'Colour-blind palette',
-                  detailDescription: 'Adjusts accent and state colours for colour-blind accessibility.',
+                  detailDescription:
+                    'Adjusts accent and state colours for colour-blind accessibility.',
                 },
               ],
             },
@@ -104,7 +107,10 @@ export function VimDojoPage() {
 
   return (
     <VimGameProvider>
-      <div data-density={density} className="relative flex h-full w-full flex-col overflow-hidden bg-bg min-[960px]:grid min-[960px]:grid-cols-[210px_1fr_210px]">
+      <div
+        data-density={density}
+        className="relative flex h-full w-full flex-col overflow-hidden bg-bg min-[960px]:grid min-[960px]:grid-cols-[210px_1fr_210px]"
+      >
         <VimLevelSidebar />
         <div className="relative flex min-h-0 min-w-0 flex-1 flex-col min-[960px]:col-start-2 min-[960px]:row-start-1">
           <VimMobileTopBar />

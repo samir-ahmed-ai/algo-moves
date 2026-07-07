@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { GraphBoard } from '../../../../components/board/GraphBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 import { circleLayout } from '../../../_shared/graphLayout';
 
 const EDGE_WEIGHT = 6;
@@ -51,19 +65,34 @@ function record({ adj, pos, start }: BSRInput): Frame<BSRState>[] {
   dist[start] = 0;
   color[start] = 2;
   queue.push(start);
-  emit('SEED', `dist[${start + 1}] = 0`, `Seed the queue with the source node ${start + 1}, set its distance to 0, and mark it queued.`, { active: start });
+  emit(
+    'SEED',
+    `dist[${start + 1}] = 0`,
+    `Seed the queue with the source node ${start + 1}, set its distance to 0, and mark it queued.`,
+    { active: start },
+  );
 
   while (queue.length > 0) {
     const v = queue.shift() as number;
     color[v] = 1;
-    emit('VISIT', `visit ${v + 1}`, `Dequeue node ${v + 1} (distance ${dist[v]}) and mark it visited — its shortest distance is now final.`, { active: v });
+    emit(
+      'VISIT',
+      `visit ${v + 1}`,
+      `Dequeue node ${v + 1} (distance ${dist[v]}) and mark it visited — its shortest distance is now final.`,
+      { active: v },
+    );
 
     for (const nb of adj[v]) {
       if (dist[nb] === -1) {
         dist[nb] = dist[v] + EDGE_WEIGHT;
         color[nb] = 2;
         queue.push(nb);
-        emit('RELAX', `dist[${nb + 1}] = ${dist[nb]}`, `Neighbour ${nb + 1} of ${v + 1} is unreached — set dist[${nb + 1}] = ${dist[v]} + ${EDGE_WEIGHT} = ${dist[nb]}, mark it queued, and push it. Queue is now [${queue.map((q) => q + 1).join(', ')}].`, { active: v });
+        emit(
+          'RELAX',
+          `dist[${nb + 1}] = ${dist[nb]}`,
+          `Neighbour ${nb + 1} of ${v + 1} is unreached — set dist[${nb + 1}] = ${dist[v]} + ${EDGE_WEIGHT} = ${dist[nb]}, mark it queued, and push it. Queue is now [${queue.map((q) => q + 1).join(', ')}].`,
+          { active: v },
+        );
       }
     }
   }
@@ -73,7 +102,10 @@ function record({ adj, pos, start }: BSRInput): Frame<BSRState>[] {
   emit(
     'DONE',
     `${reachable} reached`,
-    `Queue empty. From node ${start + 1}: ${reachable} node(s) reached, ${unreachable} left at −1 (unreachable). Distances to all other nodes: [${dist.map((d, i) => (i === start ? null : d)).filter((d) => d !== null).join(', ')}].`,
+    `Queue empty. From node ${start + 1}: ${reachable} node(s) reached, ${unreachable} left at −1 (unreachable). Distances to all other nodes: [${dist
+      .map((d, i) => (i === start ? null : d))
+      .filter((d) => d !== null)
+      .join(', ')}].`,
     { active: null, done: true },
     'good',
   );
@@ -90,31 +122,33 @@ function View({ frame }: PluginViewProps<BSRState>) {
   const s = frame.state;
   const reachable = s.done ? s.dist.filter((d, i) => i !== s.start && d >= 0).length : null;
   return (
-    <VizStage rail={<>
-      <RailStack
-        label="queue"
-        items={s.queue.map((q) => q + 1)}
-        topLabel="front"
-        highlightEnd="bottom"
-      />
-      <RailGroup label="scan">
-        <RailStat k="src" v={s.start + 1} />
-        <RailStat k="cur" v={s.active === null ? '—' : s.active + 1} tone="accent" />
-      </RailGroup>
-      <RailGroup label="dist">
-        {s.dist.map((d, i) => (
-          <RailStat
-            key={i}
-            k={`n${i + 1}`}
-            v={d < 0 ? '∞' : d}
-            tone={i === s.start ? 'accent' : d >= 0 ? 'good' : undefined}
+    <VizStage
+      rail={
+        <>
+          <RailStack
+            label="queue"
+            items={s.queue.map((q) => q + 1)}
+            topLabel="front"
+            highlightEnd="bottom"
           />
-        ))}
-      </RailGroup>
-      {reachable !== null && (
-        <RailResult label="reached" value={reachable} tone="good" />
-      )}
-    </>}>
+          <RailGroup label="scan">
+            <RailStat k="src" v={s.start + 1} />
+            <RailStat k="cur" v={s.active === null ? '—' : s.active + 1} tone="accent" />
+          </RailGroup>
+          <RailGroup label="dist">
+            {s.dist.map((d, i) => (
+              <RailStat
+                key={i}
+                k={`n${i + 1}`}
+                v={d < 0 ? '∞' : d}
+                tone={i === s.start ? 'accent' : d >= 0 ? 'good' : undefined}
+              />
+            ))}
+          </RailGroup>
+          {reachable !== null && <RailResult label="reached" value={reachable} tone="good" />}
+        </>
+      }
+    >
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
@@ -134,12 +168,16 @@ function Inspector({ frame }: InspectorProps<BSRState>) {
     <VarGrid>
       <InspectorRow k="source" v={s.start + 1} />
       <InspectorRow k="current" v={s.active === null ? '—' : s.active + 1} />
-      <InspectorRow k="queue" v={s.queue.length ? `[${s.queue.map((q) => q + 1).join(', ')}]` : '∅'} />
+      <InspectorRow
+        k="queue"
+        v={s.queue.length ? `[${s.queue.map((q) => q + 1).join(', ')}]` : '∅'}
+      />
       <div className="mt-1 border-t border-[var(--border)] pt-1">
         {s.dist.map((d, i) => (
           <InspectorRow key={i} k={`dist[${i + 1}]`} v={d < 0 ? '−1' : d} />
         ))}
-      </div>    </VarGrid>
+      </div>{' '}
+    </VarGrid>
   );
 }
 

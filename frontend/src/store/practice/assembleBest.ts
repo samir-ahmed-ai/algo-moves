@@ -11,18 +11,11 @@ function parseAssembleBestSeconds(value: string | null): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-function resolveAssembleBestSeconds(primary: string | null, legacy: string | null = null): number | null {
-  return parseAssembleBestSeconds(primary) ?? parseAssembleBestSeconds(legacy);
-}
-
 function isBetterAssembleTime(seconds: number, best: number | null): boolean {
   return Number.isFinite(seconds) && seconds > 0 && (best === null || seconds < best);
 }
 
-/**
- * Persisted assemble-game bests — one JSON blob per game per scope, plus legacy
- * rush-best text keys migrated on read.
- */
+/** Persisted assemble-game bests — one JSON blob per game per scope. */
 export function assembleGameStatsStore(scope: string): AssembleGameStatsStore {
   return {
     read<T extends object>(gameId: string, fallback: T): T {
@@ -43,18 +36,19 @@ export function assembleGameStatsStore(scope: string): AssembleGameStatsStore {
 export function readRushBestSeconds(itemId: string, variant: string | number): number | null {
   const scope = `${itemId}:${variant}`;
   const primary = readStorageText(STORAGE_KEYS.ASSEMBLE_GAME_BEST('rush', scope), null);
-  const legacy = readStorageText(STORAGE_KEYS.RUSH_BEST(itemId, variant), null);
-  return resolveAssembleBestSeconds(primary, legacy);
+  return parseAssembleBestSeconds(primary);
 }
 
 export function writeRushBestSeconds(itemId: string, variant: string | number, seconds: number) {
   const scope = `${itemId}:${variant}`;
-  const text = String(seconds);
-  writeStorageText(STORAGE_KEYS.ASSEMBLE_GAME_BEST('rush', scope), text);
-  writeStorageText(STORAGE_KEYS.RUSH_BEST(itemId, variant), text);
+  writeStorageText(STORAGE_KEYS.ASSEMBLE_GAME_BEST('rush', scope), String(seconds));
 }
 
-export function maybeWriteRushBest(itemId: string, variant: string | number, seconds: number): boolean {
+export function maybeWriteRushBest(
+  itemId: string,
+  variant: string | number,
+  seconds: number,
+): boolean {
   if (!isBetterAssembleTime(seconds, readRushBestSeconds(itemId, variant))) return false;
   writeRushBestSeconds(itemId, variant, seconds);
   return true;

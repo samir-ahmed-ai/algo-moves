@@ -6,7 +6,19 @@ import type { InputBuilderKind } from '../../../core/effectTypes';
 import { CategorySelectItems } from '../../../components/shared/CategorySelectItems';
 import { INPUT_BUILDERS } from '../../../effects/inputBuilders';
 
-import { useCanvasFrame, useCanvasStatic, Btn, Chip, Field, Hint, nodeIconGlyph, Section, TextArea, TextInput, nodeText } from '@/shell/canvas';
+import {
+  useCanvasFrame,
+  useCanvasStatic,
+  Btn,
+  Chip,
+  Field,
+  Hint,
+  nodeIconGlyph,
+  Section,
+  TextArea,
+  TextInput,
+  nodeText,
+} from '@/shell/canvas';
 /** Input editor with optional visual builders (pad, beat, arpeggiator, etc.). */
 export function EditorPanelBody() {
   const { plugin, inputId, setInputId, customInput, setCustomInput } = useCanvasStatic();
@@ -31,7 +43,8 @@ export function EditorPanelBody() {
     const d: Record<string, string> = {};
     for (const f of fields ?? []) {
       const v = value?.[f.key];
-      d[f.key] = f.type === 'numberArray' ? (Array.isArray(v) ? v.join(', ') : '') : String(v ?? '');
+      d[f.key] =
+        f.type === 'numberArray' ? (Array.isArray(v) ? v.join(', ') : '') : String(v ?? '');
     }
     return d;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -101,7 +114,9 @@ export function EditorPanelBody() {
               onClick={() => setBuilderKind(b)}
               className={cn(
                 'rounded border px-1.5 py-0.5 capitalize',
-                builderKind === b ? 'border-accent bg-accentbg text-accent' : 'border-edge text-ink2',
+                builderKind === b
+                  ? 'border-accent bg-accentbg text-accent'
+                  : 'border-edge text-ink2',
                 nodeText.xs,
               )}
             >
@@ -126,14 +141,22 @@ export function EditorPanelBody() {
         />
       </Field>
       <div className="flex items-center justify-between gap-2">
-        <Hint>{hasFields ? 'Edit the input, then Run to replay your own case.' : 'Paste a full input as JSON to run a custom dataset.'}</Hint>
+        <Hint>
+          {hasFields
+            ? 'Edit the input, then Run to replay your own case.'
+            : 'Paste a full input as JSON to run a custom dataset.'}
+        </Hint>
         <Chip tone={customInput != null ? 'accent' : 'muted'} mono>
           {customInput != null ? 'custom' : 'sample'}
         </Chip>
       </div>
       {hasFields &&
         fields!.map((f) => (
-          <Field key={f.key} label={f.label} hint={f.type === 'numberArray' ? 'comma / space separated' : undefined}>
+          <Field
+            key={f.key}
+            label={f.label}
+            hint={f.type === 'numberArray' ? 'comma / space separated' : undefined}
+          >
             <TextInput
               value={draft[f.key] ?? ''}
               onChange={(e) => setDraft((d) => ({ ...d, [f.key]: e.target.value }))}

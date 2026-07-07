@@ -1,4 +1,11 @@
-import { useCallback, useState, type Dispatch, type MutableRefObject, type ReactNode, type SetStateAction } from 'react';
+import {
+  useCallback,
+  useState,
+  type Dispatch,
+  type MutableRefObject,
+  type ReactNode,
+  type SetStateAction,
+} from 'react';
 import { createPortal } from 'react-dom';
 import type { EditorView } from '@codemirror/view';
 import {
@@ -77,7 +84,10 @@ function RecallSettingsPopover({
       title: 'Clear draft',
       subtitle: '⌘⇧R',
       active: false,
-      onClick: () => { persistDraft(''); setOpen(false); },
+      onClick: () => {
+        persistDraft('');
+        setOpen(false);
+      },
     },
   ];
 
@@ -93,7 +103,9 @@ function RecallSettingsPopover({
         className={cn(
           'grid place-items-center rounded-md border border-edge bg-panel2/60 transition-colors hover:bg-panel2',
           open && 'border-accent/40 bg-panel2 text-accent',
-          compact ? 'h-[calc(var(--row)*0.875)] w-[calc(var(--row)*0.875)]' : 'h-[var(--row,28px)] w-[var(--row,28px)]',
+          compact
+            ? 'h-[calc(var(--row)*0.875)] w-[calc(var(--row)*0.875)]'
+            : 'h-[var(--row,28px)] w-[var(--row,28px)]',
         )}
       >
         <Settings2 className="h-3.5 w-3.5 text-ink3" />
@@ -110,71 +122,79 @@ function RecallSettingsPopover({
             style={panelStyle}
             className="fixed z-[200] rounded-lg border border-edge bg-panel shadow-[var(--shadow-xl)]"
           >
-          {/* Session */}
-          <div className="p-2">
-            <ChromeLabel className="mb-1.5 px-1">Session</ChromeLabel>
-            <div className="flex gap-1.5">
-              {sessionCards.map((card) => (
-                <button
-                  key={card.id}
-                  type="button"
-                  onClick={card.onClick}
-                  className={cn(
-                    'flex w-[min(8rem,42%)] flex-col items-center gap-1.5 rounded-lg border p-2 text-center transition-colors',
-                    card.active
-                      ? 'border-accent/60 bg-accentbg'
-                      : 'border-edge bg-panel2/60 hover:border-accent/40 hover:bg-panel2',
-                  )}
-                >
-                  <span
+            {/* Session */}
+            <div className="p-2">
+              <ChromeLabel className="mb-1.5 px-1">Session</ChromeLabel>
+              <div className="flex gap-1.5">
+                {sessionCards.map((card) => (
+                  <button
+                    key={card.id}
+                    type="button"
+                    onClick={card.onClick}
                     className={cn(
-                      'grid h-8 w-8 place-items-center rounded-md border border-dashed',
-                      card.active ? 'border-accent/40 bg-panel text-accent' : 'border-edge bg-panel text-ink3',
+                      'flex w-[min(8rem,42%)] flex-col items-center gap-1.5 rounded-lg border p-2 text-center transition-colors',
+                      card.active
+                        ? 'border-accent/60 bg-accentbg'
+                        : 'border-edge bg-panel2/60 hover:border-accent/40 hover:bg-panel2',
                     )}
                   >
-                    {card.icon}
-                  </span>
-                  <span className="w-full">
                     <span
                       className={cn(
-                        'block truncate font-medium',
-                        chromeText.xs,
-                        card.active ? 'text-accent' : 'text-ink',
+                        'grid h-8 w-8 place-items-center rounded-md border border-dashed',
+                        card.active
+                          ? 'border-accent/40 bg-panel text-accent'
+                          : 'border-edge bg-panel text-ink3',
                       )}
                     >
-                      {card.title}
+                      {card.icon}
                     </span>
-                    <span className={cn('block truncate text-ink3', chromeText.xs)}>{card.subtitle}</span>
-                  </span>
-                </button>
-              ))}
+                    <span className="w-full">
+                      <span
+                        className={cn(
+                          'block truncate font-medium',
+                          chromeText.xs,
+                          card.active ? 'text-accent' : 'text-ink',
+                        )}
+                      >
+                        {card.title}
+                      </span>
+                      <span className={cn('block truncate text-ink3', chromeText.xs)}>
+                        {card.subtitle}
+                      </span>
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Editor settings */}
-          <div className="border-t border-edge px-2 pb-2 pt-2">
-            <ChromeLabel className="mb-1.5 px-1">Editor</ChromeLabel>
-            <div className="flex flex-col gap-0.5">
-              {editorItems.map((item) => (
-                <button
-                  key={item.label}
-                  type="button"
-                  disabled={item.disabled}
-                  onClick={() => { if (!item.disabled) item.onClick(); }}
-                  className={cn(
-                    'flex w-full items-center gap-2 rounded-md px-2 py-1 text-left transition-colors disabled:opacity-40',
-                    chromeText.sm,
-                    item.active ? 'bg-accentbg text-accent' : 'text-ink2 hover:bg-panel2 hover:text-ink',
-                  )}
-                >
-                  {item.icon && (
-                    <span className="grid h-4 w-4 shrink-0 place-items-center">{item.icon}</span>
-                  )}
-                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                </button>
-              ))}
+            {/* Editor settings */}
+            <div className="border-t border-edge px-2 pb-2 pt-2">
+              <ChromeLabel className="mb-1.5 px-1">Editor</ChromeLabel>
+              <div className="flex flex-col gap-0.5">
+                {editorItems.map((item) => (
+                  <button
+                    key={item.label}
+                    type="button"
+                    disabled={item.disabled}
+                    onClick={() => {
+                      if (!item.disabled) item.onClick();
+                    }}
+                    className={cn(
+                      'flex w-full items-center gap-2 rounded-md px-2 py-1 text-left transition-colors disabled:opacity-40',
+                      chromeText.sm,
+                      item.active
+                        ? 'bg-accentbg text-accent'
+                        : 'text-ink2 hover:bg-panel2 hover:text-ink',
+                    )}
+                  >
+                    {item.icon && (
+                      <span className="grid h-4 w-4 shrink-0 place-items-center">{item.icon}</span>
+                    )}
+                    <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
           </div>,
           document.body,
         )}
@@ -235,7 +255,9 @@ export function RecallToolbar({
       {showTitle && (
         <>
           <Keyboard className="h-3.5 w-3.5 shrink-0 text-accent" />
-          <span className={cn('mr-0.5 shrink-0 truncate font-medium text-ink', chromeText.xs)}>Recall</span>
+          <span className={cn('mr-0.5 shrink-0 truncate font-medium text-ink', chromeText.xs)}>
+            Recall
+          </span>
           <div className="mx-0.5 h-3.5 w-px shrink-0 bg-edge" />
         </>
       )}

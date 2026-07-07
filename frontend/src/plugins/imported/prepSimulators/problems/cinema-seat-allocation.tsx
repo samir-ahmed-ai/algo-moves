@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -46,18 +52,18 @@ function record({ n, reservedSeats }: CinemaInput): Frame<CinemaState>[] {
   const processed: [number, number][] = [];
 
   const { emit, frames } = createRecorder<CinemaState>(() => ({
-        n,
-        row: null,
-        mask: 0,
-        reservedInRow: [],
-        left: false,
-        mid: false,
-        right: false,
-        granted: [],
-        res,
-        processed: processed.map((p) => [p[0], p[1]] as [number, number]),
-        done: false
-      }));
+    n,
+    row: null,
+    mask: 0,
+    reservedInRow: [],
+    left: false,
+    mid: false,
+    right: false,
+    granted: [],
+    res,
+    processed: processed.map((p) => [p[0], p[1]] as [number, number]),
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -172,8 +178,7 @@ function View({ frame }: PluginViewProps<CinemaState>) {
         <span className="font-mono text-ink">{s.res}</span>
         {s.row !== null && !s.done && (
           <>
-            {' · '}row{' '}
-            <span className="font-mono text-ink">{s.row}</span>
+            {' · '}row <span className="font-mono text-ink">{s.row}</span>
           </>
         )}
       </div>
@@ -209,7 +214,10 @@ function Inspector({ frame }: InspectorProps<CinemaState>) {
     <VarGrid>
       <InspectorRow k="n (rows)" v={s.n} />
       <InspectorRow k="row" v={s.row ?? '—'} />
-      <InspectorRow k="reserved" v={s.reservedInRow.length ? `{${s.reservedInRow.join(',')}}` : '—'} />
+      <InspectorRow
+        k="reserved"
+        v={s.reservedInRow.length ? `{${s.reservedInRow.join(',')}}` : '—'}
+      />
       <InspectorRow k="mask" v={bits} />
       <InspectorRow k="left 2-5" v={s.row !== null ? (s.left ? 'free' : 'blocked') : '—'} />
       <InspectorRow k="mid 4-7" v={s.row !== null ? (s.mid ? 'free' : 'blocked') : '—'} />
@@ -222,132 +230,130 @@ function Inspector({ frame }: InspectorProps<CinemaState>) {
 export const manifestId = 'prep-math-cinema-seat-allocation';
 export const title = 'Cinema Seat Allocation';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Cinema Seat Allocation\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Cinema Seat Allocation"?',
     choices: [
       {
-        label: "Bitmask per Row — fits this problem",
-        correct: true
+        label: 'Bitmask per Row — fits this problem',
+        correct: true,
       },
       {
-        label: "Sort — different approach"
+        label: 'Sort — different approach',
       },
       {
-        label: "Uniform random in range — different approach"
+        label: 'Uniform random in range — different approach',
       },
       {
-        label: "Singleton XOR — different approach"
-      }
+        label: 'Singleton XOR — different approach',
+      },
     ],
-    explain: "See Cinema Seat Allocation pattern"
+    explain: 'See Cinema Seat Allocation pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Cinema Seat Allocation), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Cinema Seat Allocation), what strategy is established?',
     choices: [
       {
-        label: "See Cinema Seat Allocation pattern — described in INIT caption",
-        correct: true
+        label: 'See Cinema Seat Allocation pattern — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Cinema Seat Allocation: each of  rows has 10 seats. A family needs 4 consecutive seats, and only the three windows 2-5, 4-7 or 6-9 count. At most 2 families fit per row, so start optimistically at 2 x  = . Rows with no reservation keep both groups; we only revisit rows that have a reserved seat."
+    explain:
+      'Cinema Seat Allocation: each of  rows has 10 seats. A family needs 4 consecutive seats, and only the three windows 2-5, 4-7 or 6-9 count. At most 2 families fit per row, so start optimistically at 2 x  = . Rows with no reservation keep both groups; we only revisit rows that have a reserved seat.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"CHECK\" step (L= M= R=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "CHECK" step (L= M= R=), what happens?',
     choices: [
       {
-        label: "Test the three windows against row — this move caption",
-        correct: true
+        label: 'Test the three windows against row — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Test the three windows against row : left seats 2-5 , middle seats 4-7 , right seats 6-9 ."
+    explain:
+      'Test the three windows against row : left seats 2-5 , middle seats 4-7 , right seats 6-9 .',
   },
   {
-    id: "state",
-    prompt: "What does the `row` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `row` field track in the visualization state?',
     choices: [
       {
-        label: "row currently inspected (null — updated each frame",
-        correct: true
+        label: 'row currently inspected (null — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `row` in sync: row currently inspected (null before/after loop)"
+    explain: 'The recorder keeps `row` in sync: row currently inspected (null before/after loop)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Cinema Seat Allocation\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Cinema Seat Allocation"?',
     choices: [
       {
-        label: "O(reservations) time, O(reserved rows) — standard bounds here",
-        correct: true
+        label: 'O(reservations) time, O(reserved rows) — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(d) time, O(d) space — wrong order of growth"
+        label: 'O(d) time, O(d) space — wrong order of growth',
       },
       {
-        label: "O(bits set) time, O(1) space — wrong order of growth"
+        label: 'O(bits set) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(1) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(reservations). O(reserved rows). Cinema Seat Allocation"
+    explain: 'O(reservations). O(reserved rows). Cinema Seat Allocation',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "All reserved rows handled — final DONE caption",
-        correct: true
+        label: 'All reserved rows handled — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "All reserved rows handled (each in O(1) work). The remaining  untouched rows still hold 2 families each. Final answer:  families."
-  }
+    explain:
+      'All reserved rows handled (each in O(1) work). The remaining  untouched rows still hold 2 families each. Final answer:  families.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

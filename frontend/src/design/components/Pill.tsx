@@ -25,7 +25,12 @@ export function Pill({
     RADIUS_CTRL,
   );
   return onClick ? (
-    <button type="button" onClick={onClick} title={title} className={cx('nodrag transition-colors', base, cls, 'hover:opacity-80')}>
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      className={cx('nodrag transition-colors', base, cls, 'hover:opacity-80')}
+    >
       {children}
     </button>
   ) : (

@@ -23,7 +23,9 @@ describe('recordWorkspaceFrames', () => {
       summary: 'Demo',
     },
     inputs: [{ id: 'sample', label: 'Sample', value: 1 }],
-    record: (input: number) => [{ move: { type: 'demo', note: `${input}`, caption: 'Demo frame' }, state: input }],
+    record: (input: number) => [
+      { move: { type: 'demo', note: `${input}`, caption: 'Demo frame' }, state: input },
+    ],
     View: () => null,
   };
 
@@ -40,7 +42,15 @@ describe('recordWorkspaceFrames', () => {
   });
 
   it('captures recorder failures without throwing', () => {
-    const result = recordWorkspaceFrames({ ...plugin, record: () => { throw new Error('bad input'); } }, 3);
+    const result = recordWorkspaceFrames(
+      {
+        ...plugin,
+        record: () => {
+          throw new Error('bad input');
+        },
+      },
+      3,
+    );
     expect(result).toEqual({ frames: [], runtimeError: 'bad input' });
   });
 

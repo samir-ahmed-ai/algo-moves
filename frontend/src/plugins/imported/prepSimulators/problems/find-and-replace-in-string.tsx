@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -28,7 +34,8 @@ interface FindReplaceState {
   done: boolean;
 }
 
-function record({ s, indices, sources, targets }: FindReplaceInput): Frame<FindReplaceState>[] {  const m = new Map<number, Op>();
+function record({ s, indices, sources, targets }: FindReplaceInput): Frame<FindReplaceState>[] {
+  const m = new Map<number, Op>();
   for (let k = 0; k < indices.length; k++) {
     m.set(indices[k], { src: sources[k], tgt: targets[k] });
   }
@@ -38,15 +45,15 @@ function record({ s, indices, sources, targets }: FindReplaceInput): Frame<FindR
   let result = '';
 
   const { emit, frames } = createRecorder<FindReplaceState>(() => ({
-        s,
-        map: mapEntries(),
-        i: null,
-        span: 0,
-        matched: null,
-        op: null,
-        result,
-        done: false
-      }));
+    s,
+    map: mapEntries(),
+    i: null,
+    span: 0,
+    matched: null,
+    op: null,
+    result,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -134,7 +141,8 @@ function View({ frame }: PluginViewProps<FindReplaceState>) {
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
-        original string{s.op && !s.done && (
+        original string
+        {s.op && !s.done && (
           <>
             {' · op at '}
             <span className="font-mono text-ink">{s.i}</span>: "
@@ -196,132 +204,130 @@ function compute(input: FindReplaceInput): string {
   return out;
 }
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Find and Replace in String\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Find and Replace in String"?',
     choices: [
       {
-        label: "Index Map — fits this problem",
-        correct: true
+        label: 'Index Map — fits this problem',
+        correct: true,
       },
       {
-        label: "Two Pointers Greedy — different approach"
+        label: 'Two Pointers Greedy — different approach',
       },
       {
-        label: "Hash by signature — different approach"
+        label: 'Hash by signature — different approach',
       },
       {
-        label: "Greedy (keep max in group) — different approach"
-      }
+        label: 'Greedy (keep max in group) — different approach',
+      },
     ],
-    explain: "See Find And Replace In String pattern"
+    explain: 'See Find And Replace In String pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Find and Replace in String), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Find and Replace in String), what strategy is established?',
     choices: [
       {
-        label: "See Find And Replace In String — described in INIT caption",
-        correct: true
+        label: 'See Find And Replace In String — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Find and Replace in String: apply all replacements simultaneously against the ORIGINAL string. First build an index map so we can look up \"does an operation start here?\" in O(1). Then scan left to right."
+    explain:
+      'Find and Replace in String: apply all replacements simultaneously against the ORIGINAL string. First build an index map so we can look up "does an operation start here?" in O(1). Then scan left to right.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"REPLACE\" step (write \"\", jump +), what happens?",
+    id: 'key-step',
+    prompt: 'On the "REPLACE" step (write "", jump +), what happens?',
     choices: [
       {
-        label: "Append target \"\" to the result — this move caption",
-        correct: true
+        label: 'Append target "" to the result — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Append target \"\" to the result and advance i by len(\"\") = , skipping past the whole matched source."
+    explain:
+      'Append target "" to the result and advance i by len("") = , skipping past the whole matched source.',
   },
   {
-    id: "state",
-    prompt: "What does the `s` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `s` field track in the visualization state?',
     choices: [
       {
-        label: "original string — updated each frame",
-        correct: true
+        label: 'original string — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `s` in sync: original string as-is"
+    explain: 'The recorder keeps `s` in sync: original string as-is',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Find and Replace in String\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Find and Replace in String"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
+        label: 'O(1) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n*m) time, O(1) space — wrong order of growth"
+        label: 'O(n*m) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). Find And Replace In String"
+    explain: 'O(n). O(n). Find And Replace In String',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Scan complete. Because every op — final DONE caption",
-        correct: true
+        label: 'Scan complete. Because every op — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Scan complete. Because every op was tested against the ORIGINAL string, the replacements never interfered with each other. Result: \"\"."
-  }
+    explain:
+      'Scan complete. Because every op was tested against the ORIGINAL string, the replacements never interfered with each other. Result: "".',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

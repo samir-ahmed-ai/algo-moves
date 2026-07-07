@@ -34,16 +34,18 @@ export function ProblemOverviewBody({
 
   const onRecallFirst = hasRecall && view === 'animate';
   const footerLabel = onRecallFirst ? 'Recall' : nextLabel;
-  const handleFooterNext = onRecallFirst
-    ? () => setView('recall')
-    : onNext;
+  const handleFooterNext = onRecallFirst ? () => setView('recall') : onNext;
   const showArcRail = hasRecall || !!nextLabel;
 
   useStudioNextShortcut(handleFooterNext, onRecallFirst ? undefined : onNextAll);
 
   const footer = (
     <StudioNextFooter
-      arcRail={showArcRail ? <StudioArcRail view={view} hasRecall={hasRecall} nextLabel={nextLabel} /> : undefined}
+      arcRail={
+        showArcRail ? (
+          <StudioArcRail view={view} hasRecall={hasRecall} nextLabel={nextLabel} />
+        ) : undefined
+      }
       nextLabel={footerLabel}
       onNext={handleFooterNext}
       nextAllLabel={onRecallFirst ? undefined : nextAllLabel}
@@ -90,7 +92,16 @@ export function ProblemOverviewBody({
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [hasRecall, player.next, player.prev, player.togglePlay, player.goTo, player.total, setView, showViz]);
+  }, [
+    hasRecall,
+    player.next,
+    player.prev,
+    player.togglePlay,
+    player.goTo,
+    player.total,
+    setView,
+    showViz,
+  ]);
 
   return (
     <StudioSplitLayout

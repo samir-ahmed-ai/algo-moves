@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface ValidNumberInput {
   s: string;
@@ -173,7 +187,11 @@ function View({ frame }: PluginViewProps<ValidNumberState>) {
         <RailStat k="char" v={s.i !== null ? `'${s.chars[s.i]}'` : '—'} tone="accent" />
       </RailGroup>
       {s.result !== null && (
-        <RailResult label="answer" value={s.result ? 'valid' : 'invalid'} tone={s.result ? 'good' : 'bad'} />
+        <RailResult
+          label="answer"
+          value={s.result ? 'valid' : 'invalid'}
+          tone={s.result ? 'good' : 'bad'}
+        />
       )}
     </>
   );
@@ -209,132 +227,130 @@ function Inspector({ frame }: InspectorProps<ValidNumberState>) {
 export const manifestId = 'prep-strings-valid-number';
 export const title = 'Valid Number';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Valid Number\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Valid Number"?',
     choices: [
       {
-        label: "Single Pass Flags — fits this problem",
-        correct: true
+        label: 'Single Pass Flags — fits this problem',
+        correct: true,
       },
       {
-        label: "Multiset match — different approach"
+        label: 'Multiset match — different approach',
       },
       {
-        label: "Sliding window — different approach"
+        label: 'Sliding window — different approach',
       },
       {
-        label: "Two Pointers Greedy — different approach"
-      }
+        label: 'Two Pointers Greedy — different approach',
+      },
     ],
-    explain: "See Valid Number pattern"
+    explain: 'See Valid Number pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Valid Number), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Valid Number), what strategy is established?',
     choices: [
       {
-        label: "See Valid Number pattern — described in INIT caption",
-        correct: true
+        label: 'See Valid Number pattern — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Valid Number: scan \"\" once, tracking three flags — seenDigit, seenDot, seenExp. Every character must be legal in its position; at the end the string is valid only if at least one digit was seen."
+    explain:
+      'Valid Number: scan "" once, tracking three flags — seenDigit, seenDot, seenExp. Every character must be legal in its position; at the end the string is valid only if at least one digit was seen.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"EXP\" step ('' exp ok), what happens?",
+    id: 'key-step',
+    prompt: 'On the "EXP" step (\'\' exp ok), what happens?',
     choices: [
       {
         label: "'' begins the exponent. Set seenExp — this move caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "'' begins the exponent. Set seenExp = true and reset seenDigit = false, because the part after 'e'/'E' must contain its own digit."
+    explain:
+      "'' begins the exponent. Set seenExp = true and reset seenDigit = false, because the part after 'e'/'E' must contain its own digit.",
   },
   {
-    id: "state",
-    prompt: "What does the `i` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: "char currently under inspection — updated each frame",
-        correct: true
+        label: 'char currently under inspection — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `i` in sync: char currently under inspection"
+    explain: 'The recorder keeps `i` in sync: char currently under inspection',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Valid Number\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Valid Number"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n·26) time, O(n) space — wrong order of growth"
+        label: 'O(n·26) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(log n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). Valid Number"
+    explain: 'O(n). O(1). Valid Number',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
         label: "'' is not a digit, sign — final DONE caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "'' is not a digit, sign, 'e'/'E', or '.', so it can never appear in a valid number. Reject."
-  }
+    explain:
+      "'' is not a digit, sign, 'e'/'E', or '.', so it can never appear in a valid number. Reject.",
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

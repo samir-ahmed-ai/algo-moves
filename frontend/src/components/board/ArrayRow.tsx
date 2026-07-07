@@ -23,7 +23,9 @@ export interface ArrayRowProps {
 
 function Marker({ p }: { p: ArrayPointer }) {
   return (
-    <span className={`arow-ptr ptr-${p.tone ?? 'accent'} ${p.place === 'above' ? 'above' : 'below'}`}>
+    <span
+      className={`arow-ptr ptr-${p.tone ?? 'accent'} ${p.place === 'above' ? 'above' : 'below'}`}
+    >
       {p.place === 'above' ? '▼' : '▲'} {p.label}
     </span>
   );

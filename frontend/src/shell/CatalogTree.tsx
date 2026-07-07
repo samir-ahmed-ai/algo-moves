@@ -30,7 +30,8 @@ export function CatalogTree({ searchQuery = '' }: { searchQuery?: string }) {
       ? (() => {
           for (const track of getTracks()) {
             for (const cat of getCategoriesForTrack(track.id)) {
-              if (getItemsForCategory(cat.id, catalog).some((i) => i.id === activeItemId)) return cat.id;
+              if (getItemsForCategory(cat.id, catalog).some((i) => i.id === activeItemId))
+                return cat.id;
             }
           }
           return undefined;
@@ -72,20 +73,29 @@ export function CatalogTree({ searchQuery = '' }: { searchQuery?: string }) {
 
   const trackItems = filteredTracks.map((track) => {
     const categories = searching
-      ? (track as { categories?: ReturnType<typeof getCategoriesForTrack> }).categories ??
-        getCategoriesForTrack(track.id)
+      ? ((track as { categories?: ReturnType<typeof getCategoriesForTrack> }).categories ??
+        getCategoriesForTrack(track.id))
       : getCategoriesForTrack(track.id);
     const Icon = courseIcon(track.icon);
 
     return (
-      <Accordion.Item key={track.id} value={track.id} className="border-b border-edge last:border-0">
+      <Accordion.Item
+        key={track.id}
+        value={track.id}
+        className="border-b border-edge last:border-0"
+      >
         <Accordion.Header className="flex">
           <Accordion.Trigger className="group/row flex w-full min-h-[var(--row)] items-center gap-1.5 pr-2 text-left transition-colors hover:bg-panel2">
             <span className="grid h-6 w-5 shrink-0 place-items-center text-ink3">
               <ChevronRight className="h-3 w-3 transition-transform duration-200 group-data-[state=open]/row:rotate-90" />
             </span>
             <Icon className="h-3.5 w-3.5 shrink-0 opacity-80 text-ink2" />
-            <span className={cn('min-w-0 flex-1 truncate font-medium text-ink2 group-hover/row:text-ink', chromeText.sm)}>
+            <span
+              className={cn(
+                'min-w-0 flex-1 truncate font-medium text-ink2 group-hover/row:text-ink',
+                chromeText.sm,
+              )}
+            >
               {track.title}
             </span>
             <span className={cn('shrink-0 font-mono tabular-nums text-ink3', chromeText.xs)}>
@@ -115,7 +125,9 @@ export function CatalogTree({ searchQuery = '' }: { searchQuery?: string }) {
                   )}
                 >
                   <span className={cn('min-w-0 flex-1 truncate', chromeText.sm)}>{cat.title}</span>
-                  <span className={cn('shrink-0 font-mono tabular-nums text-ink3', chromeText.xs)}>{count}</span>
+                  <span className={cn('shrink-0 font-mono tabular-nums text-ink3', chromeText.xs)}>
+                    {count}
+                  </span>
                   <LayoutGrid
                     className={cn(
                       'h-3 w-3 shrink-0 transition-opacity',
@@ -132,7 +144,11 @@ export function CatalogTree({ searchQuery = '' }: { searchQuery?: string }) {
   });
 
   if (searching && filteredTracks.length === 0) {
-    return <div className={cn('px-[var(--hpad)] py-2 leading-snug text-ink3', chromeText.sm)}>No matching categories</div>;
+    return (
+      <div className={cn('px-[var(--hpad)] py-2 leading-snug text-ink3', chromeText.sm)}>
+        No matching categories
+      </div>
+    );
   }
 
   if (searching) {

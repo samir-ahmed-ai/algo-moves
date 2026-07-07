@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -17,15 +23,16 @@ interface ReverseFileState {
 }
 
 function record({ content }: ReverseFileInput): Frame<ReverseFileState>[] {
-  const bytes = content.split('');  let i = 0;
+  const bytes = content.split('');
+  let i = 0;
   let j = bytes.length - 1;
 
   const { emit, frames } = createRecorder<ReverseFileState>(() => ({
-        bytes: bytes.slice(),
-        i,
-        j,
-        done: false
-      }));
+    bytes: bytes.slice(),
+    i,
+    j,
+    done: false,
+  }));
 
   emit(
     'READ',
@@ -66,7 +73,8 @@ function View({ frame }: PluginViewProps<ReverseFileState>) {
   const s = frame.state;
   const pointers: ArrayPointer[] = [];
   if (s.i !== null) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
-  if (s.j !== null && s.j !== s.i) pointers.push({ i: s.j, label: 'j', tone: 'warn', place: 'above' });
+  if (s.j !== null && s.j !== s.i)
+    pointers.push({ i: s.j, label: 'j', tone: 'warn', place: 'above' });
   const tone = (idx: number) => {
     if (s.i === idx || s.j === idx) return 'match';
     return '';
@@ -102,112 +110,108 @@ function Inspector({ frame }: InspectorProps<ReverseFileState>) {
 export const manifestId = 'prep-streams-io-reverse-content-of-file-in-place';
 export const title = 'Reverse content of file in place';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Reverse content of file in place\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Reverse content of file in place"?',
     choices: [
       {
-        label: "In-place byte reversal — fits this problem",
-        correct: true
+        label: 'In-place byte reversal — fits this problem',
+        correct: true,
       },
       {
-        label: "Filesystem walk with size filter — different approach"
+        label: 'Filesystem walk with size filter — different approach',
       },
       {
-        label: "Recursive directory walk — different approach"
+        label: 'Recursive directory walk — different approach',
       },
       {
-        label: "Two heaps median — different approach"
-      }
+        label: 'Two heaps median — different approach',
+      },
     ],
-    explain: "Read all bytes; swap ends toward the center; write back"
+    explain: 'Read all bytes; swap ends toward the center; write back',
   },
   {
-    id: "key-step",
+    id: 'key-step',
     prompt: "On the \"SWAP\" step (''↔''), what happens?",
     choices: [
       {
-        label: "Swap bytes at indices and : — this move caption",
-        correct: true
+        label: 'Swap bytes at indices and : — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Swap bytes at indices  and : '' ↔ '', then move i++ and j--."
+    explain: "Swap bytes at indices  and : '' ↔ '', then move i++ and j--.",
   },
   {
-    id: "state",
-    prompt: "What does the `bytes` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `bytes` field track in the visualization state?',
     choices: [
       {
-        label: "Field bytes in state — updated each frame",
-        correct: true
+        label: 'Field bytes in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `bytes` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `bytes` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Reverse content of file in place\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Reverse content of file in place"?',
     choices: [
       {
-        label: "O(file size) time, O(file size) space — standard bounds here",
-        correct: true
+        label: 'O(file size) time, O(file size) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n log k) time, O(k) space — wrong order of growth"
+        label: 'O(n log k) time, O(k) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
+        label: 'O(log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(file size) time, O(1) space — wrong order of growth"
-      }
+        label: 'O(file size) time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(file size). O(file size). ReadFile; reverse slice; WriteFile"
+    explain: 'O(file size). O(file size). ReadFile; reverse slice; WriteFile',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Pointers advanced. — final DONE caption",
-        correct: true
+        label: 'Pointers advanced. — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Pointers advanced. "
-  }
+    explain: 'Pointers advanced. ',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

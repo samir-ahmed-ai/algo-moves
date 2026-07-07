@@ -1,126 +1,136 @@
 import type { PracticeBundle } from '../../../_shared/pluginKit';
 
 export const bundle: PracticeBundle = {
-  "quiz": [
+  quiz: [
     {
-      "id": "category",
-      "prompt": "What graph traversal pattern is used and why is it appropriate here?",
-      "choices": [
+      id: 'category',
+      prompt: 'What graph traversal pattern is used and why is it appropriate here?',
+      choices: [
         {
-          "label": "Level-by-level BFS — because it the first time the",
-          "correct": true
+          label: 'Level-by-level BFS — because it the first time the',
+          correct: true,
         },
         {
-          "label": "DFS with backtracking to enumerate — all paths and pick the minimum"
+          label: 'DFS with backtracking to enumerate — all paths and pick the minimum',
         },
         {
-          "label": "Dijkstra with weight 1 — step to handle non-uniform costs"
+          label: 'Dijkstra with weight 1 — step to handle non-uniform costs',
         },
         {
-          "label": "A* search using Manhattan distance — as the heuristic"
-        }
+          label: 'A* search using Manhattan distance — as the heuristic',
+        },
       ],
-      "explain": "All moves cost 1, so BFS finds the shortest path optimally. DFS could find A path but not necessarily the shortest without exhaustive search. Dijkstra and A* are correct but overkill when all edges are equal."
+      explain:
+        'All moves cost 1, so BFS finds the shortest path optimally. DFS could find A path but not necessarily the shortest without exhaustive search. Dijkstra and A* are correct but overkill when all edges are equal.',
     },
     {
-      "id": "visited-mechanism",
-      "prompt": "How does the code mark cells as visited, and what advantage does this approach have?",
-      "choices": [
+      id: 'visited-mechanism',
+      prompt:
+        'How does the code mark cells as visited, and what advantage does this approach have?',
+      choices: [
         {
-          "label": "It sets grid[nr][nc]=1 when the cell — reusing the input grid as",
-          "correct": true
+          label: 'It sets grid[nr][nc]=1 when the cell — reusing the input grid as',
+          correct: true,
         },
         {
-          "label": "It maintains a separate boolean — matrix vis[][] initialized to false"
+          label: 'It maintains a separate boolean — matrix vis[][] initialized to false',
         },
         {
-          "label": "It stores visited cells in a hash — c) pairs"
+          label: 'It stores visited cells in a hash — c) pairs',
         },
         {
-          "label": "It relies on queue FIFO — ordering to ensure each cell is"
-        }
+          label: 'It relies on queue FIFO — ordering to ensure each cell is',
+        },
       ],
-      "explain": "Since cells that are passable have value 0 and obstacles have value 1, setting grid[nr][nc]=1 immediately upon enqueue permanently marks the cell as visited without allocating a separate structure. This is both space-efficient and prevents duplicate enqueue."
+      explain:
+        'Since cells that are passable have value 0 and obstacles have value 1, setting grid[nr][nc]=1 immediately upon enqueue permanently marks the cell as visited without allocating a separate structure. This is both space-efficient and prevents duplicate enqueue.',
     },
     {
-      "id": "eight-directions",
-      "prompt": "The `dirs` array contains 8 direction vectors instead of the usual 4. What does this enable?",
-      "choices": [
+      id: 'eight-directions',
+      prompt:
+        'The `dirs` array contains 8 direction vectors instead of the usual 4. What does this enable?',
+      choices: [
         {
-          "label": "Diagonal movement allowing paths — corner-touching cells, which the",
-          "correct": true
+          label: 'Diagonal movement allowing paths — corner-touching cells, which the',
+          correct: true,
         },
         {
-          "label": "Reaching cells that are separated — by exactly one obstacle via jumping"
+          label: 'Reaching cells that are separated — by exactly one obstacle via jumping',
         },
         {
-          "label": "Handling grid wrap-around — edges"
+          label: 'Handling grid wrap-around — edges',
         },
         {
-          "label": "Processing the 4 cardinal directions — twice for priority ordering"
-        }
+          label: 'Processing the 4 cardinal directions — twice for priority ordering',
+        },
       ],
-      "explain": "The problem asks for the shortest clear path in an n×n binary grid where movement is 8-directional (horizontal, vertical, and diagonal). The 8 vectors `{-1,-1},{-1,0},{-1,1},{0,-1},{0,1},{1,-1},{1,0},{1,1}` cover all valid neighbors."
+      explain:
+        'The problem asks for the shortest clear path in an n×n binary grid where movement is 8-directional (horizontal, vertical, and diagonal). The 8 vectors `{-1,-1},{-1,0},{-1,1},{0,-1},{0,1},{1,-1},{1,0},{1,1}` cover all valid neighbors.',
     },
     {
-      "id": "steps-init",
-      "prompt": "The variable `steps` is initialized to 1 (not 0) before BFS begins. What does this starting value represent?",
-      "choices": [
+      id: 'steps-init',
+      prompt:
+        'The variable `steps` is initialized to 1 (not 0) before BFS begins. What does this starting value represent?',
+      choices: [
         {
-          "label": "The path length includes — 0) itself, which",
-          "correct": true
+          label: 'The path length includes — 0) itself, which',
+          correct: true,
         },
         {
-          "label": "The BFS always makes — least one incorrect move before"
+          label: 'The BFS always makes — least one incorrect move before',
         },
         {
-          "label": "steps is incremented — level so it starts 1 to account for"
+          label: 'steps is incremented — level so it starts 1 to account for',
         },
         {
-          "label": "1 is a sentinel meaning — 'BFS not yet started'"
-        }
+          label: "1 is a sentinel meaning — 'BFS not yet started'",
+        },
       ],
-      "explain": "The problem defines path length as the number of cells visited (including start and end). The starting cell (0,0) is enqueued with steps=1. Each time the destination is reached, steps already includes the start and end, matching the expected output."
+      explain:
+        'The problem defines path length as the number of cells visited (including start and end). The starting cell (0,0) is enqueued with steps=1. Each time the destination is reached, steps already includes the start and end, matching the expected output.',
     },
     {
-      "id": "base-case",
-      "prompt": "Before BFS starts the code checks `if grid[0][0] != 0 || grid[n-1][n-1] != 0`. What does this guard handle?",
-      "choices": [
+      id: 'base-case',
+      prompt:
+        'Before BFS starts the code checks `if grid[0][0] != 0 || grid[n-1][n-1] != 0`. What does this guard handle?',
+      choices: [
         {
-          "label": "If the start or end — cell is an obstacle (value 1), no",
-          "correct": true
+          label: 'If the start or end — cell is an obstacle (value 1), no',
+          correct: true,
         },
         {
-          "label": "It ensures the grid — square before accessing grid[n-1][n-1]"
+          label: 'It ensures the grid — square before accessing grid[n-1][n-1]',
         },
         {
-          "label": "It handles the n=1 edge — case where start equals end"
+          label: 'It handles the n=1 edge — case where start equals end',
         },
         {
-          "label": "It validates that grid values — are only 0 or 1 before processing"
-        }
+          label: 'It validates that grid values — are only 0 or 1 before processing',
+        },
       ],
-      "explain": "A blocked start or blocked destination makes any path impossible regardless of what lies in between. Checking both early avoids pointless BFS and prevents inadvertently marking (0,0) visited when it is already 1."
+      explain:
+        'A blocked start or blocked destination makes any path impossible regardless of what lies in between. Checking both early avoids pointless BFS and prevents inadvertently marking (0,0) visited when it is already 1.',
     },
     {
-      "id": "complexity",
-      "prompt": "For an n×n grid, what is the time and space complexity?",
-      "choices": [
+      id: 'complexity',
+      prompt: 'For an n×n grid, what is the time and space complexity?',
+      choices: [
         {
-          "label": "O(n²) time and O(n²) space — There are n² cells",
-          "correct": true
+          label: 'O(n²) time and O(n²) space — There are n² cells',
+          correct: true,
         },
         {
-          "label": "O(n) time and O(n) space — There are n² cells"
+          label: 'O(n) time and O(n) space — There are n² cells',
         },
         {
-          "label": "O(n² log n) time — O(n²) space"
+          label: 'O(n² log n) time — O(n²) space',
         },
         {
-          "label": "O(8·n²) time and O(1) space — There are n² cells"
-        }
+          label: 'O(8·n²) time and O(1) space — There are n² cells',
+        },
       ],
-      "explain": "There are n² cells; each is enqueued and dequeued at most once, and each dequeue inspects up to 8 neighbors — all O(1). Total work is O(8·n²) = O(n²). The queue can hold up to O(n²) elements, giving O(n²) space."
-    }
-  ]
+      explain:
+        'There are n² cells; each is enqueued and dequeued at most once, and each dequeue inspects up to 8 neighbors — all O(1). Total work is O(8·n²) = O(n²). The queue can hold up to O(n²) elements, giving O(n²) space.',
+    },
+  ],
 };

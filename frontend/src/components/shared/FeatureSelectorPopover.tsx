@@ -151,7 +151,12 @@ export function FeatureSelectorPopover({
   const [hovered, setHovered] = useState<string | null>(null);
   const close = useCallback(() => setOpen(false), []);
   const panelWidth = useMemo(() => panelWidthForGroups(groups), [groups]);
-  const { anchorRef, panelRef, pos, panelStyle } = useAnchoredPopover(open, close, align, panelWidth);
+  const { anchorRef, panelRef, pos, panelStyle } = useAnchoredPopover(
+    open,
+    close,
+    align,
+    panelWidth,
+  );
 
   const allOptions = groups.flatMap((g) => g.options);
   const selected = allOptions.find((o) => o.id === value);
@@ -232,7 +237,9 @@ export function FeatureSelectorPopover({
           >
             <div className="border-b border-edge px-2.5 py-1.5">
               <p className={cn('min-w-0 truncate', chromeText.xs)}>
-                <span className="font-semibold uppercase tracking-[0.08em] text-ink">{panelTitle}</span>
+                <span className="font-semibold uppercase tracking-[0.08em] text-ink">
+                  {panelTitle}
+                </span>
                 {panelHint && (
                   <>
                     <span className="mx-1.5 text-ink3" aria-hidden>
@@ -247,7 +254,9 @@ export function FeatureSelectorPopover({
             <div className="p-1.5">
               {groups.map((group, gi) => (
                 <div key={gi} className={gi > 0 ? 'mt-1.5' : ''}>
-                  {group.label && <ChromeLabel className="mb-0.5 px-0.5">{group.label}</ChromeLabel>}
+                  {group.label && (
+                    <ChromeLabel className="mb-0.5 px-0.5">{group.label}</ChromeLabel>
+                  )}
                   <div className="flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                     {group.options.map((opt) => {
                       const isSelected = opt.id === value;
@@ -273,7 +282,9 @@ export function FeatureSelectorPopover({
                           )}
                         >
                           {isSelected && (
-                            <Check className={cn('absolute right-1 top-1 h-2.5 w-2.5', tone.check)} />
+                            <Check
+                              className={cn('absolute right-1 top-1 h-2.5 w-2.5', tone.check)}
+                            />
                           )}
                           <span
                             className={cn(
@@ -350,7 +361,13 @@ export function FeatureSelectorPopover({
 }
 
 /** Visually joins adjacent popover triggers into one segmented control. */
-export function ToolbarSegment({ children, className }: { children: ReactNode; className?: string }) {
+export function ToolbarSegment({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
     <div
       className={cn(

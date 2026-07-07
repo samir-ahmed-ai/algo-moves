@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -32,16 +38,17 @@ function formatSize(bytes: number): string {
   return `${bytes}B`;
 }
 
-function record({ entries }: FindLargeInput): Frame<FindLargeState>[] {  const matches: string[] = [];
+function record({ entries }: FindLargeInput): Frame<FindLargeState>[] {
+  const matches: string[] = [];
 
   const { emit, frames } = createRecorder<FindLargeState>(() => ({
-        entries,
-        idx: null,
-        limit: LIMIT,
-        matches: matches.slice(),
-        activePath: null,
-        done: false
-      }));
+    entries,
+    idx: null,
+    limit: LIMIT,
+    matches: matches.slice(),
+    activePath: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -105,7 +112,11 @@ function View({ frame }: PluginViewProps<FindLargeState>) {
             className={cn(
               'flex justify-between rounded px-2 py-0.5 font-mono',
               vizText.sm,
-              s.idx === i ? 'bg-accentbg text-accent' : matchSet.has(e.path) ? 'text-good' : 'text-ink',
+              s.idx === i
+                ? 'bg-accentbg text-accent'
+                : matchSet.has(e.path)
+                  ? 'text-good'
+                  : 'text-ink',
             )}
           >
             <span>
@@ -141,112 +152,108 @@ function Inspector({ frame }: InspectorProps<FindLargeState>) {
 export const manifestId = 'prep-streams-io-find-files-size-larger-than-5m';
 export const title = 'Find files size larger than 5M';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Find files size larger than 5M\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Find files size larger than 5M"?',
     choices: [
       {
-        label: "Filesystem walk with size filter — fits this problem",
-        correct: true
+        label: 'Filesystem walk with size filter — fits this problem',
+        correct: true,
       },
       {
-        label: "Buffered line iterator — different approach"
+        label: 'Buffered line iterator — different approach',
       },
       {
-        label: "In-place byte reversal — different approach"
+        label: 'In-place byte reversal — different approach',
       },
       {
-        label: "Streaming palindrome stack — different approach"
-      }
+        label: 'Streaming palindrome stack — different approach',
+      },
     ],
-    explain: "Walk every file; collect paths over the size threshold"
+    explain: 'Walk every file; collect paths over the size threshold',
   },
   {
-    id: "key-step",
-    prompt: "On the \"SKIP\" step (), what happens?",
+    id: 'key-step',
+    prompt: 'On the "SKIP" step (), what happens?',
     choices: [
       {
-        label: "File \"\" size ≤ 5M — — this move caption",
-        correct: true
+        label: 'File "" size ≤ 5M — — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "File \"\" size  ≤ 5M — skip."
+    explain: 'File "" size  ≤ 5M — skip.',
   },
   {
-    id: "state",
-    prompt: "What does the `entries` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `entries` field track in the visualization state?',
     choices: [
       {
-        label: "Field entries in state — updated each frame",
-        correct: true
+        label: 'Field entries in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `entries` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `entries` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Find files size larger than 5M\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Find files size larger than 5M"?',
     choices: [
       {
-        label: "O(entries) time, O(matches) space — standard bounds here",
-        correct: true
+        label: 'O(entries) time, O(matches) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
+        label: 'O(1) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(entries) time, O(depth) space — wrong order of growth"
+        label: 'O(entries) time, O(depth) space — wrong order of growth',
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(entries). O(matches). filepath.Walk; skip dirs; Size()>5*1024*1024"
+    explain: 'O(entries). O(matches). filepath.Walk; skip dirs; Size()>5*1024*1024',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Walk complete. Found file(s) larger than — final DONE caption",
-        correct: true
+        label: 'Walk complete. Found file(s) larger than — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Walk complete. Found  file(s) larger than 5M: []."
-  }
+    explain: 'Walk complete. Found  file(s) larger than 5M: [].',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -281,6 +288,8 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as FindLargeState | undefined;
-    return s?.done ? { ok: true, label: `${s.matches.length} matches` } : { ok: false, label: 'incomplete' };
+    return s?.done
+      ? { ok: true, label: `${s.matches.length} matches` }
+      : { ok: false, label: 'incomplete' };
   },
 };

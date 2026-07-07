@@ -1,6 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { VIM_LEVELS } from '../levels';
-import { applyMotion, isWalkable, type MazeGrid, type MotionSpec, type Pos, type VimMotionKind } from '../vimMotions';
+import {
+  applyMotion,
+  isWalkable,
+  type MazeGrid,
+  type MotionSpec,
+  type Pos,
+  type VimMotionKind,
+} from '../vimMotions';
 
 function gridFromLevel(level: (typeof VIM_LEVELS)[0]): MazeGrid {
   return level.grid.map((row) => row.replace(/@/g, '.'));
@@ -27,12 +34,7 @@ function allMotionsForLevel(allowed: VimMotionKind[]): MotionSpec[] {
   return specs;
 }
 
-function bfsReachGoal(
-  grid: MazeGrid,
-  start: Pos,
-  goal: Pos,
-  allowed: VimMotionKind[],
-): boolean {
+function bfsReachGoal(grid: MazeGrid, start: Pos, goal: Pos, allowed: VimMotionKind[]): boolean {
   const motions = allMotionsForLevel(allowed);
   const startKey = `${start[0]},${start[1]}`;
   const seen = new Set<string>([startKey]);

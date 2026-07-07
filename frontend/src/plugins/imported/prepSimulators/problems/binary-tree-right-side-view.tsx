@@ -1,7 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailStack, RailResult } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailStack,
+  RailResult,
+} from '../../../_shared/vizKit';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 
 interface RightViewInput {
@@ -127,112 +142,111 @@ function Inspector({ frame }: InspectorProps<RightViewState>) {
 export const manifestId = 'prep-trees-binary-tree-right-side-view';
 export const title = 'Binary Tree Right Side View';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Binary Tree Right Side View\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Binary Tree Right Side View"?',
     choices: [
       {
-        label: "DFS right-first — fits this problem",
-        correct: true
+        label: 'DFS right-first — fits this problem',
+        correct: true,
       },
       {
-        label: "Inorder DFS (find two inversions) — different approach"
+        label: 'Inorder DFS (find two inversions) — different approach',
       },
       {
-        label: "Post-order height — different approach"
+        label: 'Post-order height — different approach',
       },
       {
-        label: "Tree build + iterative pre-order — different approach"
-      }
+        label: 'Tree build + iterative pre-order — different approach',
+      },
     ],
-    explain: "DFS: visit **right child first**, then left. First node at each depth is the rightmost."
+    explain:
+      'DFS: visit **right child first**, then left. First node at each depth is the rightmost.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"VISIT\" step (depth , hidden), what happens?",
+    id: 'key-step',
+    prompt: 'On the "VISIT" step (depth , hidden), what happens?',
     choices: [
       {
-        label: "Node sits at depth , but — this move caption",
-        correct: true
+        label: 'Node sits at depth , but — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Node  sits at depth , but we already saw a node at that depth (), which was further right.  is hidden behind it — visit but do not record."
+    explain:
+      'Node  sits at depth , but we already saw a node at that depth (), which was further right.  is hidden behind it — visit but do not record.',
   },
   {
-    id: "state",
-    prompt: "What does the `current` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `current` field track in the visualization state?',
     choices: [
       {
-        label: "node index being visited (null — updated each frame",
-        correct: true
+        label: 'node index being visited (null — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `current` in sync: node index being visited (null on INIT/DONE)"
+    explain: 'The recorder keeps `current` in sync: node index being visited (null on INIT/DONE)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Binary Tree Right Side View\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Binary Tree Right Side View"?',
     choices: [
       {
-        label: "O(n) time, O(h) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(h) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(h) time, O(1) space — wrong order of growth"
+        label: 'O(h) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(log n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(h). DFS: visit **right child first**, then left. First node at each depth is the rightmost.; If `depth == len(res)`, this is the first node seen at this depth → add"
+    explain:
+      'O(n). O(h). DFS: visit **right child first**, then left. First node at each depth is the rightmost.; If `depth == len(res)`, this is the first node seen at this depth → add',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "DFS finished. Reading top-to-bottom — final DONE caption",
-        correct: true
+        label: 'DFS finished. Reading top-to-bottom — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "DFS finished. Reading top-to-bottom, the rightmost node at each depth gives the right side view: []."
-  }
+    explain:
+      'DFS finished. Reading top-to-bottom, the rightmost node at each depth gives the right side view: [].',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

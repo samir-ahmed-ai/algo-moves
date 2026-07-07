@@ -2,14 +2,7 @@ import type { CanvasMode } from '@/core';
 import type { TrackId } from '@/content';
 
 export type WorkspaceSurface =
-  | 'track-board'
-  | 'category-board'
-  | 'canvas'
-  | 'play'
-  | 'learn'
-  | 'loading'
-  | 'error'
-  | 'empty';
+  'track-board' | 'category-board' | 'canvas' | 'play' | 'learn' | 'loading' | 'error' | 'empty';
 
 export type WorkspaceFallbackTarget = 'catalog' | 'home';
 
@@ -24,7 +17,15 @@ export interface ModeRouterInput {
 }
 
 export function resolveWorkspaceSurface(input: ModeRouterInput): WorkspaceSurface {
-  const { activeTrackId, activeCategoryId, problemFocused, mode, ready, pluginLoading, runtimeError } = input;
+  const {
+    activeTrackId,
+    activeCategoryId,
+    problemFocused,
+    mode,
+    ready,
+    pluginLoading,
+    runtimeError,
+  } = input;
   if (activeTrackId && !activeCategoryId && !problemFocused) return 'track-board';
   if (activeCategoryId && !problemFocused) return 'category-board';
   if (mode === 'visualize' && !problemFocused) return 'canvas';

@@ -57,11 +57,19 @@ export function StudioViewPicker({
   const close = useCallback(() => setOpen(false), []);
   const ordered = flatOrder(avail);
   const panelWidth = useMemo(() => {
-    const maxTabs = Math.max(1, ...stages.map((g) => ordered.filter((t) => t.group === g.id).length));
+    const maxTabs = Math.max(
+      1,
+      ...stages.map((g) => ordered.filter((t) => t.group === g.id).length),
+    );
     const variantCount = variants && variants.length > 1 ? variants.length : 0;
     return panelWidthForTabCount(Math.max(maxTabs, variantCount));
   }, [stages, ordered, variants]);
-  const { anchorRef, panelRef, pos, panelStyle } = useAnchoredPopover(open, close, 'left', panelWidth);
+  const { anchorRef, panelRef, pos, panelStyle } = useAnchoredPopover(
+    open,
+    close,
+    'left',
+    panelWidth,
+  );
 
   const ActiveIcon = active.icon;
 
@@ -89,7 +97,9 @@ export function StudioViewPicker({
         onClick={() => setOpen((v) => !v)}
         className={cn(
           'flex items-center gap-1.5 rounded-md border border-edge bg-panel2/60 shadow-sm transition-colors hover:bg-panel2',
-          compact ? 'h-7 w-7 shrink-0 justify-center px-0 py-0' : 'max-w-[min(220px,42vw)] px-2 py-1',
+          compact
+            ? 'h-7 w-7 shrink-0 justify-center px-0 py-0'
+            : 'max-w-[min(220px,42vw)] px-2 py-1',
           open && 'border-accent/40 bg-panel2',
         )}
       >
@@ -100,7 +110,10 @@ export function StudioViewPicker({
               {active.label}
             </span>
             <ChevronDown
-              className={cn('h-3.5 w-3.5 shrink-0 text-ink3 transition-transform', open && 'rotate-180')}
+              className={cn(
+                'h-3.5 w-3.5 shrink-0 text-ink3 transition-transform',
+                open && 'rotate-180',
+              )}
             />
           </>
         )}
@@ -118,7 +131,9 @@ export function StudioViewPicker({
             className="fixed z-[200] animate-auth-popover-in rounded-md border border-edge bg-panel shadow-[var(--shadow-lg)]"
           >
             <div className="border-b border-edge px-2.5 py-1.5">
-              <p className={cn('font-semibold uppercase tracking-[0.08em] text-ink', chromeText.xs)}>
+              <p
+                className={cn('font-semibold uppercase tracking-[0.08em] text-ink', chromeText.xs)}
+              >
                 Choose view
               </p>
             </div>

@@ -13,7 +13,13 @@ export interface DualHeapBoardProps {
 }
 
 /** Visual for two-heap median / stream problems: low max-heap + high min-heap. */
-export function DualHeapBoard({ low, high, highlightLow, highlightHigh, median }: DualHeapBoardProps) {
+export function DualHeapBoard({
+  low,
+  high,
+  highlightLow,
+  highlightHigh,
+  median,
+}: DualHeapBoardProps) {
   const lowDisplay = [...low].sort((a, b) => b - a);
   const highDisplay = [...high].sort((a, b) => a - b);
   return (
@@ -22,8 +28,14 @@ export function DualHeapBoard({ low, high, highlightLow, highlightHigh, median }
         <div className={cn(vizText.sm, 'text-ink3')}>low (max-heap) · largest of lower half</div>
         <ArrayRow
           values={lowDisplay.length ? lowDisplay.map(String) : ['—']}
-          cellTone={(i) => (highlightLow && i === 0 ? 'match' : lowDisplay[i] !== undefined ? 'found' : '')}
-          pointers={highlightLow && lowDisplay.length ? [{ i: 0, label: 'top', tone: 'accent', place: 'above' }] : []}
+          cellTone={(i) =>
+            highlightLow && i === 0 ? 'match' : lowDisplay[i] !== undefined ? 'found' : ''
+          }
+          pointers={
+            highlightLow && lowDisplay.length
+              ? [{ i: 0, label: 'top', tone: 'accent', place: 'above' }]
+              : []
+          }
           windowRange={null}
         />
       </div>
@@ -31,15 +43,19 @@ export function DualHeapBoard({ low, high, highlightLow, highlightHigh, median }
         <div className={cn(vizText.sm, 'text-ink3')}>high (min-heap) · smallest of upper half</div>
         <ArrayRow
           values={highDisplay.length ? highDisplay.map(String) : ['—']}
-          cellTone={(i) => (highlightHigh && i === 0 ? 'match' : highDisplay[i] !== undefined ? 'found' : '')}
-          pointers={highlightHigh && highDisplay.length ? [{ i: 0, label: 'top', tone: 'accent', place: 'above' }] : []}
+          cellTone={(i) =>
+            highlightHigh && i === 0 ? 'match' : highDisplay[i] !== undefined ? 'found' : ''
+          }
+          pointers={
+            highlightHigh && highDisplay.length
+              ? [{ i: 0, label: 'top', tone: 'accent', place: 'above' }]
+              : []
+          }
           windowRange={null}
         />
       </div>
       {median != null && (
-        <div className={cn('font-mono', vizText.base, 'text-good')}>
-          median = {median}
-        </div>
+        <div className={cn('font-mono', vizText.base, 'text-good')}>median = {median}</div>
       )}
     </div>
   );

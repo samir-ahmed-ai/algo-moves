@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+} from '../../../_shared/vizKit';
 import { toBitStrings } from '../../../_shared/bitUtils';
 
 interface CountBitsInput {
@@ -33,32 +47,64 @@ function lowestSetIndex(value: number, width: number): number | null {
 
 function record({ n, width }: CountBitsInput): Frame<CountBitsState>[] {
   const { emit, frames } = createRecorder<CountBitsState>(() => ({
-        width: width,
-        original: n,
-        bits: toBitStrings(n, width),
-        cur: n,
-        lowIndex: null,
-        count: 0,
-        done: false
-      }));
+    width: width,
+    original: n,
+    bits: toBitStrings(n, width),
+    cur: n,
+    lowIndex: null,
+    count: 0,
+    done: false,
+  }));
 
   let cur = n;
   let count = 0;
 
-  emit('INIT', `n=${n}`, `Count the set (1) bits in ${n} using Brian Kernighan's trick: n & (n − 1) clears the lowest set bit. Each time we do that, we've removed exactly one 1, so we count one loop per set bit.`, { bits: toBitStrings(cur, width), lowIndex: lowestSetIndex(cur, width), count: count, done: false });
+  emit(
+    'INIT',
+    `n=${n}`,
+    `Count the set (1) bits in ${n} using Brian Kernighan's trick: n & (n − 1) clears the lowest set bit. Each time we do that, we've removed exactly one 1, so we count one loop per set bit.`,
+    {
+      bits: toBitStrings(cur, width),
+      lowIndex: lowestSetIndex(cur, width),
+      count: count,
+      done: false,
+    },
+  );
 
   // for n != 0 { n &= n - 1; count++ }
   while (cur !== 0) {
     const low = lowestSetIndex(cur, width);
-    emit('SELECT', `low bit @2^${width - 1 - (low ?? 0)}`, `n = ${cur} is not 0, so at least one bit is set. Its lowest 1 is the highlighted bit. Applying n &= n − 1 will flip exactly that bit to 0.`, { bits: toBitStrings(cur, width), lowIndex: low, count: count, done: false });
+    emit(
+      'SELECT',
+      `low bit @2^${width - 1 - (low ?? 0)}`,
+      `n = ${cur} is not 0, so at least one bit is set. Its lowest 1 is the highlighted bit. Applying n &= n − 1 will flip exactly that bit to 0.`,
+      { bits: toBitStrings(cur, width), lowIndex: low, count: count, done: false },
+    );
 
     const next = cur & (cur - 1);
     count++;
-    emit('CLEAR', `n=${next}, count=${count}`, `n & (n − 1) = ${cur} & ${cur - 1} = ${next}: the lowest 1 is gone. Increment count to ${count}. Continue while n is still non-zero.`, { bits: toBitStrings(next, width), lowIndex: lowestSetIndex(next, width), count: count, done: false }, 'good');
+    emit(
+      'CLEAR',
+      `n=${next}, count=${count}`,
+      `n & (n − 1) = ${cur} & ${cur - 1} = ${next}: the lowest 1 is gone. Increment count to ${count}. Continue while n is still non-zero.`,
+      {
+        bits: toBitStrings(next, width),
+        lowIndex: lowestSetIndex(next, width),
+        count: count,
+        done: false,
+      },
+      'good',
+    );
     cur = next;
   }
 
-  emit('DONE', `${count} set bits`, `n has reached 0, so every 1 bit has been cleared and counted. ${n} has ${count} set bit${count === 1 ? '' : 's'}. Time O(bits set), Space O(1).`, { bits: toBitStrings(0, width), lowIndex: null, count: count, done: true }, 'good');
+  emit(
+    'DONE',
+    `${count} set bits`,
+    `n has reached 0, so every 1 bit has been cleared and counted. ${n} has ${count} set bit${count === 1 ? '' : 's'}. Time O(bits set), Space O(1).`,
+    { bits: toBitStrings(0, width), lowIndex: null, count: count, done: true },
+    'good',
+  );
 
   return frames;
 }
@@ -81,14 +127,18 @@ function View({ frame }: PluginViewProps<CountBitsState>) {
         <RailStat k="n" v={s.cur} tone={s.cur === 0 ? 'bad' : 'accent'} />
         <RailStat k="count" v={s.count} tone={s.count > 0 ? 'good' : undefined} />
       </RailGroup>
-      {s.done && (
-        <RailResult label="set bits" value={s.count} tone="good" />
-      )}
+      {s.done && <RailResult label="set bits" value={s.count} tone="good" />}
     </>
   );
   return (
     <VizStage rail={rail}>
-      <ArrayRow values={s.bits} cellTone={tone} pointers={pointers} windowRange={null} label={powerLabel} />
+      <ArrayRow
+        values={s.bits}
+        cellTone={tone}
+        pointers={pointers}
+        windowRange={null}
+        label={powerLabel}
+      />
     </VizStage>
   );
 }
@@ -101,7 +151,10 @@ function Inspector({ frame }: InspectorProps<CountBitsState>) {
       <InspectorRow k="original n" v={s.original} />
       <InspectorRow k="n (current)" v={s.cur} />
       <InspectorRow k="n binary" v={s.bits.join('')} />
-      <InspectorRow k="lowest set bit" v={s.lowIndex !== null ? 2 ** (s.width - 1 - s.lowIndex) : '—'} />
+      <InspectorRow
+        k="lowest set bit"
+        v={s.lowIndex !== null ? 2 ** (s.width - 1 - s.lowIndex) : '—'}
+      />
       <InspectorRow k="count" v={s.count} />
       <InspectorRow k="status" v={s.done ? 'done' : s.cur === 0 ? 'zero' : 'looping'} />
     </VarGrid>
@@ -111,132 +164,130 @@ function Inspector({ frame }: InspectorProps<CountBitsState>) {
 export const manifestId = 'prep-math-count-set-bits-in-number';
 export const title = 'Count set bits in number';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Count set bits in number\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Count set bits in number"?',
     choices: [
       {
-        label: "Brian Kernighan bit count — fits this problem",
-        correct: true
+        label: 'Brian Kernighan bit count — fits this problem',
+        correct: true,
       },
       {
-        label: "Greedy — different approach"
+        label: 'Greedy — different approach',
       },
       {
-        label: "Big integer string addition — different approach"
+        label: 'Big integer string addition — different approach',
       },
       {
-        label: "Binary search sqrt — different approach"
-      }
+        label: 'Binary search sqrt — different approach',
+      },
     ],
-    explain: "n & (n-1) drops the lowest 1 each iteration"
+    explain: 'n & (n-1) drops the lowest 1 each iteration',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Count set bits in number), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Count set bits in number), what strategy is established?',
     choices: [
       {
-        label: "n & (n-1) drops the lowest — described in INIT caption",
-        correct: true
+        label: 'n & (n-1) drops the lowest — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Count the set (1) bits in  using Brian Kernighan's trick: n & (n − 1) clears the lowest set bit. Each time we do that, we've removed exactly one 1, so we count one loop per set bit."
+    explain:
+      "Count the set (1) bits in  using Brian Kernighan's trick: n & (n − 1) clears the lowest set bit. Each time we do that, we've removed exactly one 1, so we count one loop per set bit.",
   },
   {
-    id: "key-step",
-    prompt: "On the \"CLEAR\" step (n=, count=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "CLEAR" step (n=, count=), what happens?',
     choices: [
       {
-        label: "n & (n − 1) = — this move caption",
-        correct: true
+        label: 'n & (n − 1) = — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "n & (n − 1) =  &  = : the lowest 1 is gone. Increment count to . Continue while n is still non-zero."
+    explain:
+      'n & (n − 1) =  &  = : the lowest 1 is gone. Increment count to . Continue while n is still non-zero.',
   },
   {
-    id: "state",
-    prompt: "What does the `original` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `original` field track in the visualization state?',
     choices: [
       {
-        label: "the number we started — updated each frame",
-        correct: true
+        label: 'the number we started — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `original` in sync: the number we started with (for the header)"
+    explain: 'The recorder keeps `original` in sync: the number we started with (for the header)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Count set bits in number\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Count set bits in number"?',
     choices: [
       {
-        label: "O(bits set) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(bits set) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n) worst case time, O(n) space — wrong order of growth"
+        label: 'O(n) worst case time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n log n) time, O(1) space — wrong order of growth"
+        label: 'O(n log n) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n³) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n³) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(bits set). O(1). count=0; while n!=0 { n&=n-1; count++ }"
+    explain: 'O(bits set). O(1). count=0; while n!=0 { n&=n-1; count++ }',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "n has reached 0, so every — final DONE caption",
-        correct: true
+        label: 'n has reached 0, so every — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "n has reached 0, so every 1 bit has been cleared and counted.  has  set bit. Time O(bits set), Space O(1)."
-  }
+    explain:
+      'n has reached 0, so every 1 bit has been cleared and counted.  has  set bit. Time O(bits set), Space O(1).',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

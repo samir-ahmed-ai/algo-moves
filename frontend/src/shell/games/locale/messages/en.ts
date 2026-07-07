@@ -32,7 +32,7 @@ export const en: ArcadeStrings = {
     roomCodePlaceholder: 'ROOM CODE',
     createRoomError: 'Could not create a room.',
     lanHint:
-      'LAN mode: run make backend-dev and open this site on your machine\'s IP. For internet play, set VITE_GAMES_SERVER_URL at build time.',
+      "LAN mode: run make backend-dev and open this site on your machine's IP. For internet play, set VITE_GAMES_SERVER_URL at build time.",
     yourRoom: 'Your room',
     yourRoomHint: 'Friends can always join you with this code.',
     hostMyRoom: 'Host my room',
@@ -50,7 +50,8 @@ export const en: ArcadeStrings = {
   },
   partnerLeftBanner: {
     title: 'Your partner left.',
-    detailHost: 'The game stays on screen while you wait. Share the room code again, or tap Games above to pick another.',
+    detailHost:
+      'The game stays on screen while you wait. Share the room code again, or tap Games above to pick another.',
     detailGuest:
       'The game stays on screen while you wait. Share the room code again, or ask the host to pick another game.',
   },

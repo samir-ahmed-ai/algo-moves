@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -23,17 +29,18 @@ interface SnapState {
   done: boolean;
 }
 
-function record({ length, ops }: SnapInput): Frame<SnapState>[] {  const snaps: [number, number][][] = Array.from({ length }, () => [[0, 0]]);
+function record({ length, ops }: SnapInput): Frame<SnapState>[] {
+  const snaps: [number, number][][] = Array.from({ length }, () => [[0, 0]]);
   let sid = 0;
 
   const { emit, frames } = createRecorder<SnapState>(() => ({
-        length,
-        snaps: snaps.map((arr) => arr.map((x) => [...x] as [number, number])),
-        sid,
-        op: '',
-        result: null,
-        done: false
-      }));
+    length,
+    snaps: snaps.map((arr) => arr.map((x) => [...x] as [number, number])),
+    sid,
+    op: '',
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -54,7 +61,10 @@ function record({ length, ops }: SnapInput): Frame<SnapState>[] {  const snaps: 
         'SET',
         `[${o.index}]=${o.val}`,
         `Set(${o.index}, ${o.val}) at snapId=${sid}: ${arr.length > 1 && arr[arr.length - 2][0] === sid ? 'update' : 'append'} history entry.`,
-        { op: `set ${o.index}=${o.val}`, snaps: snaps.map((a) => a.map((x) => [...x] as [number, number])) },
+        {
+          op: `set ${o.index}=${o.val}`,
+          snaps: snaps.map((a) => a.map((x) => [...x] as [number, number])),
+        },
       );
     } else if (o.kind === 'snap') {
       sid++;
@@ -79,7 +89,11 @@ function record({ length, ops }: SnapInput): Frame<SnapState>[] {  const snaps: 
         'GET',
         `[${o.index}]=${val}`,
         `Get(${o.index}, snapId=${o.snapId}): binary search → val=${val}.`,
-        { op: `get ${o.index}@${o.snapId}`, result: val, snaps: snaps.map((a) => a.map((x) => [...x] as [number, number])) },
+        {
+          op: `get ${o.index}@${o.snapId}`,
+          result: val,
+          snaps: snaps.map((a) => a.map((x) => [...x] as [number, number])),
+        },
         'good',
       );
     }
@@ -125,112 +139,109 @@ function Inspector({ frame }: InspectorProps<SnapState>) {
 export const manifestId = 'prep-design-snapshot-array';
 export const title = 'Snapshot Array';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Snapshot Array\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Snapshot Array"?',
     choices: [
       {
-        label: "Design — fits this problem",
-        correct: true
+        label: 'Design — fits this problem',
+        correct: true,
       },
       {
-        label: "Hash map + doubly linked list LRU — different approach"
+        label: 'Hash map + doubly linked list LRU — different approach',
       },
       {
-        label: "Heap + Sorted Available Set — different approach"
+        label: 'Heap + Sorted Available Set — different approach',
       },
       {
-        label: "Trie phone directory autocomplete — different approach"
-      }
+        label: 'Trie phone directory autocomplete — different approach',
+      },
     ],
-    explain: "See Snapshot Array pattern"
+    explain: 'See Snapshot Array pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Snapshot Array), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Snapshot Array), what strategy is established?',
     choices: [
       {
-        label: "See Snapshot Array pattern — described in INIT caption",
-        correct: true
+        label: 'See Snapshot Array pattern — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Snapshot Array: each index stores [(snapId,val),...]. Set updates latest entry or appends; Snap() increments sid; Get binary-searches history."
+    explain:
+      'Snapshot Array: each index stores [(snapId,val),...]. Set updates latest entry or appends; Snap() increments sid; Get binary-searches history.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"SNAP\" step (id=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "SNAP" step (id=), what happens?',
     choices: [
       {
-        label: "Snap(): snapshot id saved, sid→. — this move caption",
-        correct: true
+        label: 'Snap(): snapshot id saved, sid→. — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Snap(): snapshot id  saved, sid→."
+    explain: 'Snap(): snapshot id  saved, sid→.',
   },
   {
-    id: "state",
-    prompt: "What does the `length` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `length` field track in the visualization state?',
     choices: [
       {
-        label: "Field length in state — updated each frame",
-        correct: true
+        label: 'Field length in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `length` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `length` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Done. — final DONE caption",
-        correct: true
+        label: 'Done. — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Done."
-  }
+    explain: 'Done.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

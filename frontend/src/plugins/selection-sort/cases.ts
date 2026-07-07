@@ -10,7 +10,8 @@ export const goodCases: WorkedCase<SortInput>[] = [
     returns: 'sorted',
     tone: 'ok',
     question: 'After round 0, which index holds the minimum of the whole array?',
-    answer: 'Scan j from i+1..n-1 tracking minIdx. Here min is 1 at index 3 — swap it with index 0 so the smallest value locks into place.',
+    answer:
+      'Scan j from i+1..n-1 tracking minIdx. Here min is 1 at index 3 — swap it with index 0 so the smallest value locks into place.',
   },
 ];
 
@@ -23,7 +24,8 @@ export const badCases: WorkedCase<SortInput>[] = [
     returns: 'sorted after Θ(n²) comparisons',
     tone: 'bad',
     question: 'Why is this the worst case for selection sort?',
-    answer: 'Each of n-1 rounds scans the entire remaining suffix even when the minimum is obvious — Θ(n²) comparisons regardless of input order.',
+    answer:
+      'Each of n-1 rounds scans the entire remaining suffix even when the minimum is obvious — Θ(n²) comparisons regardless of input order.',
   },
 ];
 

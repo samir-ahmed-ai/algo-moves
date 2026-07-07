@@ -153,7 +153,10 @@ export function getSiblingItems(itemId: string, catalog: Catalog): Item[] {
 }
 
 /** Display breadcrumb: Track › Category › Item */
-export function browseBreadcrumbForItem(itemId: string, catalog: Catalog): {
+export function browseBreadcrumbForItem(
+  itemId: string,
+  catalog: Catalog,
+): {
   track?: BrowseTrack;
   category?: BrowseCategory;
   item?: Item;

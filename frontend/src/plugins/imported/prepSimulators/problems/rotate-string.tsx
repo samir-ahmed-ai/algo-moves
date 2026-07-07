@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -22,22 +28,23 @@ interface RotateState {
   done: boolean;
 }
 
-function record({ s, goal }: RotateInput): Frame<RotateState>[] {  const doubleStr = s + s;
+function record({ s, goal }: RotateInput): Frame<RotateState>[] {
+  const doubleStr = s + s;
   const double = doubleStr.split('');
   const goalArr = goal.split('');
   const n = goal.length;
 
   const { emit, frames } = createRecorder<RotateState>(() => ({
-        double,
-        goal: goalArr,
-        n,
-        lenOk: s.length === goal.length,
-        start: null,
-        cmp: null,
-        cmpOk: null,
-        found: false,
-        done: false
-      }));
+    double,
+    goal: goalArr,
+    n,
+    lenOk: s.length === goal.length,
+    start: null,
+    cmp: null,
+    cmpOk: null,
+    found: false,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -117,9 +124,15 @@ function record({ s, goal }: RotateInput): Frame<RotateState>[] {  const doubleS
 function View({ frame }: PluginViewProps<RotateState>) {
   const s = frame.state;
   const pointers: ArrayPointer[] = [];
-  if (s.start !== null) pointers.push({ i: s.start, label: 'start', tone: 'accent', place: 'above' });
+  if (s.start !== null)
+    pointers.push({ i: s.start, label: 'start', tone: 'accent', place: 'above' });
   if (s.cmp !== null)
-    pointers.push({ i: s.cmp, label: 'cmp', tone: s.cmpOk === false ? 'bad' : 'good', place: 'below' });
+    pointers.push({
+      i: s.cmp,
+      label: 'cmp',
+      tone: s.cmpOk === false ? 'bad' : 'good',
+      place: 'below',
+    });
 
   const windowRange: [number, number] | null =
     s.start !== null ? [s.start, s.start + s.n - 1] : null;
@@ -134,13 +147,17 @@ function View({ frame }: PluginViewProps<RotateState>) {
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
         goal = <span className="font-mono text-ink">"{s.goal.join('')}"</span>
-        {' · '}window ={' '}
-        <span className="font-mono text-ink">{s.n}</span> chars
+        {' · '}window = <span className="font-mono text-ink">{s.n}</span> chars
       </div>
       {s.lenOk ? (
         <>
           <div className={cn('mt-1', vizText.sm, 'text-ink3')}>double = s + s</div>
-          <ArrayRow values={s.double} cellTone={cellTone} pointers={pointers} windowRange={windowRange} />
+          <ArrayRow
+            values={s.double}
+            cellTone={cellTone}
+            pointers={pointers}
+            windowRange={windowRange}
+          />
           <div className={cn('mt-2 font-mono', vizText.sm, 'text-ink3')}>
             goal:&nbsp;
             {s.goal.map((c, k) => (
@@ -160,9 +177,7 @@ function View({ frame }: PluginViewProps<RotateState>) {
           </div>
         </>
       ) : (
-        <div className={cn('mt-2 font-mono text-bad', vizText.base)}>
-          length mismatch → false
-        </div>
+        <div className={cn('mt-2 font-mono text-bad', vizText.base)}>length mismatch → false</div>
       )}
       {s.found && (
         <div className={cn('mt-2 font-mono text-good', vizText.base)}>→ true (rotation found)</div>
@@ -177,8 +192,7 @@ function View({ frame }: PluginViewProps<RotateState>) {
 function Inspector({ frame }: InspectorProps<RotateState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const winStr =
-    s.start !== null ? s.double.slice(s.start, s.start + s.n).join('') : '—';
+  const winStr = s.start !== null ? s.double.slice(s.start, s.start + s.n).join('') : '—';
   return (
     <VarGrid>
       <InspectorRow k="goal" v={`"${s.goal.join('')}"`} />
@@ -194,132 +208,130 @@ function Inspector({ frame }: InspectorProps<RotateState>) {
 export const manifestId = 'prep-strings-rotate-string';
 export const title = 'Rotate string';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Rotate string\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Rotate string"?',
     choices: [
       {
-        label: "Double string trick — fits this problem",
-        correct: true
+        label: 'Double string trick — fits this problem',
+        correct: true,
       },
       {
-        label: "Bijection map — different approach"
+        label: 'Bijection map — different approach',
       },
       {
-        label: "Char frequency — different approach"
+        label: 'Char frequency — different approach',
       },
       {
-        label: "Multiset match — different approach"
-      }
+        label: 'Multiset match — different approach',
+      },
     ],
-    explain: "goal is a window hiding inside s+s"
+    explain: 'goal is a window hiding inside s+s',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Rotate string), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Rotate string), what strategy is established?',
     choices: [
       {
-        label: "goal is a window hiding inside — described in INIT caption",
-        correct: true
+        label: 'goal is a window hiding inside — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Rotate String: goal is a rotation of s iff both have equal length AND goal appears somewhere inside s + s. Every rotation of s is a length- window hiding in the doubled string."
+    explain:
+      'Rotate String: goal is a rotation of s iff both have equal length AND goal appears somewhere inside s + s. Every rotation of s is a length- window hiding in the doubled string.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"WINDOW\" step (start=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "WINDOW" step (start=), what happens?',
     choices: [
       {
-        label: "Try the window starting at index — this move caption",
-        correct: true
+        label: 'Try the window starting at index — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Try the window starting at index : double[..] = \"\". Compare it to goal character by character."
+    explain:
+      'Try the window starting at index : double[..] = "". Compare it to goal character by character.',
   },
   {
-    id: "state",
-    prompt: "What does the `double` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `double` field track in the visualization state?',
     choices: [
       {
-        label: "s + s, split — updated each frame",
-        correct: true
+        label: 's + s, split — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `double` in sync: s + s, split into chars — the track we slide the window along"
+    explain:
+      'The recorder keeps `double` in sync: s + s, split into chars — the track we slide the window along',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Rotate string\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Rotate string"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n·L) time, O(n·L) space — wrong order of growth"
+        label: 'O(n·L) time, O(n·L) space — wrong order of growth',
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). len equal AND goal is substring of s+s"
+    explain: 'O(n). O(n). len equal AND goal is substring of s+s',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "The whole window double[..] equals \"\". — final DONE caption",
-        correct: true
+        label: 'The whole window double[..] equals "". — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "The whole window double[..] equals \"\". goal is a rotation of s — return true."
-  }
+    explain: 'The whole window double[..] equals "". goal is a rotation of s — return true.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

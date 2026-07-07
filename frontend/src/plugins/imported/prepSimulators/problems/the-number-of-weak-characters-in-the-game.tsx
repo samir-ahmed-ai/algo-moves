@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayBars, type BarTone } from '../../../../components/board/ArrayBars';
 import type { ProblemSimulator } from '../types';
@@ -38,17 +44,17 @@ function record({ properties }: WeakInput): Frame<WeakState>[] {
   const n = props.length;
   const weakIdx = new Array<boolean>(n).fill(false);
   const { emit, frames } = createRecorder<WeakState>(() => ({
-        props: props.map((p) => [p[0], p[1]] as Pair),
-        phase: 'sort',
-        cmpA: null,
-        cmpB: null,
-        sortedFrom: n,
-        cur: null,
-        maxDef: 0,
-        weakIdx: weakIdx.slice(),
-        cnt: 0,
-        done: false
-      }));
+    props: props.map((p) => [p[0], p[1]] as Pair),
+    phase: 'sort',
+    cmpA: null,
+    cmpB: null,
+    sortedFrom: n,
+    cur: null,
+    maxDef: 0,
+    weakIdx: weakIdx.slice(),
+    cnt: 0,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -175,18 +181,12 @@ function View({ frame }: PluginViewProps<WeakState>) {
         <span className="font-mono text-ink">defense</span>
         {s.phase === 'sweep' && (
           <>
-            {' · '}maxDef ={' '}
-            <span className="font-mono text-ink">{s.maxDef}</span>
-            {' · '}weak ={' '}
-            <span className="font-mono text-bad">{s.cnt}</span>
+            {' · '}maxDef = <span className="font-mono text-ink">{s.maxDef}</span>
+            {' · '}weak = <span className="font-mono text-bad">{s.cnt}</span>
           </>
         )}
       </div>
-      <ArrayBars
-        values={s.props.map(attackOf)}
-        tone={tone}
-        label={(i) => defenseOf(s.props[i])}
-      />
+      <ArrayBars values={s.props.map(attackOf)} tone={tone} label={(i) => defenseOf(s.props[i])} />
       <div className={cn(vizText.sm, 'text-ink3')}>
         {s.phase === 'sort'
           ? 'sorting by attack ↓ (ties: defense ↑)'
@@ -217,132 +217,132 @@ function Inspector({ frame }: InspectorProps<WeakState>) {
 export const manifestId = 'prep-sorting-the-number-of-weak-characters-in-the-game';
 export const title = 'The Number of Weak Characters in the Game';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"The Number of Weak Characters in the Game\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "The Number of Weak Characters in the Game"?',
     choices: [
       {
-        label: "Sort (attack desc, defense asc) + Max — fits this problem",
-        correct: true
+        label: 'Sort (attack desc, defense asc) + Max — fits this problem',
+        correct: true,
       },
       {
-        label: "Memoized Collatz + Sort — different approach"
+        label: 'Memoized Collatz + Sort — different approach',
       },
       {
-        label: "Greedy Contribution Counting — different approach"
+        label: 'Greedy Contribution Counting — different approach',
       },
       {
-        label: "Sort Frequencies + Greedy — different approach"
-      }
+        label: 'Sort Frequencies + Greedy — different approach',
+      },
     ],
-    explain: "Sort by attack **descending**, ties by defense **ascending**"
+    explain: 'Sort by attack **descending**, ties by defense **ascending**',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (The Number of Weak Characters in the Game), what strategy is established?",
+    id: 'init',
+    prompt:
+      'At the start of a run (The Number of Weak Characters in the Game), what strategy is established?',
     choices: [
       {
-        label: "Sort by attack **descending**, ties — described in INIT caption",
-        correct: true
+        label: 'Sort by attack **descending**, ties — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Weak Characters: a character is weak if some OTHER character has strictly greater attack AND strictly greater defense. We sort by attack descending (ties by defense ascending), then sweep once tracking the largest defense seen so far."
+    explain:
+      'Weak Characters: a character is weak if some OTHER character has strictly greater attack AND strictly greater defense. We sort by attack descending (ties by defense ascending), then sweep once tracking the largest defense seen so far.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"SWAP\" step (<->), what happens?",
+    id: 'key-step',
+    prompt: 'On the "SWAP" step (<->), what happens?',
     choices: [
       {
-        label: "Swap the winner into slot . — this move caption",
-        correct: true
+        label: 'Swap the winner into slot . — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Swap the winner into slot . Now positions 0… are locked in attack-descending order."
+    explain: 'Swap the winner into slot . Now positions 0… are locked in attack-descending order.',
   },
   {
-    id: "state",
-    prompt: "What does the `props` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `props` field track in the visualization state?',
     choices: [
       {
-        label: "current ordering (bars show attack — updated each frame",
-        correct: true
+        label: 'current ordering (bars show attack — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `props` in sync: current ordering (bars show attack, label shows defense)"
+    explain:
+      'The recorder keeps `props` in sync: current ordering (bars show attack, label shows defense)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"The Number of Weak Characters in the Game\"?",
+    id: 'complexity',
+    prompt:
+      'What are the time and space complexities for "The Number of Weak Characters in the Game"?',
     choices: [
       {
-        label: "O(n log n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n log n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n²) time, O(1) space — wrong order of growth"
+        label: 'O(n²) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
+        label: 'O(1) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n log n). O(1). Sort by attack **descending**, ties by defense **ascending**; Sweep left-to-right tracking `maxDef`; if `defense < maxDef`, it's weak"
+    explain:
+      "O(n log n). O(1). Sort by attack **descending**, ties by defense **ascending**; Sweep left-to-right tracking `maxDef`; if `defense < maxDef`, it's weak",
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Sweep complete. character weak. Time O(n — final DONE caption",
-        correct: true
+        label: 'Sweep complete. character weak. Time O(n — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Sweep complete.  character weak. Time O(n log n) for the sort, Space O(1) extra."
-  }
+    explain: 'Sweep complete.  character weak. Time O(n log n) for the sort, Space O(1) extra.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -350,12 +350,23 @@ export const simulator: ProblemSimulator = {
     {
       id: 'wc1',
       label: '[[1,5],[10,4],[4,3]] → 1',
-      value: { properties: [[1, 5], [10, 4], [4, 3]] as Pair[] },
+      value: {
+        properties: [
+          [1, 5],
+          [10, 4],
+          [4, 3],
+        ] as Pair[],
+      },
     },
     {
       id: 'wc2',
       label: '[[2,2],[3,3]] → 1',
-      value: { properties: [[2, 2], [3, 3]] as Pair[] },
+      value: {
+        properties: [
+          [2, 2],
+          [3, 3],
+        ] as Pair[],
+      },
     },
   ] satisfies SampleInput<WeakInput>[],
   record,

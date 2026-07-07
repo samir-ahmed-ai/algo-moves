@@ -53,9 +53,19 @@ function withGoNotes(
       <>
         <Inspector {...props} />
         <VarGrid>
-          {p.notes && <CollapsibleDetails title="Senior takeaways" body={p.notes} maxHeightClass="max-h-[240px]" />}
+          {p.notes && (
+            <CollapsibleDetails
+              title="Senior takeaways"
+              body={p.notes}
+              maxHeightClass="max-h-[240px]"
+            />
+          )}
           {p.approaches && (
-            <CollapsibleDetails title="Design question & model answer" body={p.approaches} maxHeightClass="max-h-[240px]" />
+            <CollapsibleDetails
+              title="Design question & model answer"
+              body={p.approaches}
+              maxHeightClass="max-h-[240px]"
+            />
           )}
         </VarGrid>
       </>

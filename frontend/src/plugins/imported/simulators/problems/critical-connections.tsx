@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { GraphBoard } from '../../../../components/board/GraphBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 import { circleLayout } from '../../../_shared/graphLayout';
 
 interface CCInput {
@@ -52,26 +66,56 @@ function record({ adj, pos }: CCInput): Frame<CCState>[] {
     disc[u] = timer;
     low[u] = timer;
     timer += 1;
-    emit('DISCOVER', `disc[${u}]=${disc[u]}`, `Enter node ${u}: set disc[${u}] = low[${u}] = ${disc[u]}.`, { active: u, inspect: null, highlightEdge: null });
+    emit(
+      'DISCOVER',
+      `disc[${u}]=${disc[u]}`,
+      `Enter node ${u}: set disc[${u}] = low[${u}] = ${disc[u]}.`,
+      { active: u, inspect: null, highlightEdge: null },
+    );
 
     for (const v of adj[u]) {
       if (v === parent) continue;
       if (disc[v] === -1) {
-        emit('TREE', `edge ${u}-${v}`, `Tree edge ${u} → ${v}: ${v} is undiscovered, so recurse into it.`, { active: u, inspect: v, highlightEdge: [u, v] });
+        emit(
+          'TREE',
+          `edge ${u}-${v}`,
+          `Tree edge ${u} → ${v}: ${v} is undiscovered, so recurse into it.`,
+          { active: u, inspect: v, highlightEdge: [u, v] },
+        );
         dfs(v, u);
         if (low[v] < low[u]) {
           low[u] = low[v];
-          emit('LOW', `low[${u}]=${low[u]}`, `Back from ${v}: low[${v}] = ${low[v]} is smaller, so pull low[${u}] down to ${low[u]}.`, { active: u, inspect: v, highlightEdge: [u, v] });
+          emit(
+            'LOW',
+            `low[${u}]=${low[u]}`,
+            `Back from ${v}: low[${v}] = ${low[v]} is smaller, so pull low[${u}] down to ${low[u]}.`,
+            { active: u, inspect: v, highlightEdge: [u, v] },
+          );
         }
         if (low[v] > disc[u]) {
           bridges.push([u, v]);
-          emit('BRIDGE', `bridge ${u}-${v}`, `low[${v}] = ${low[v]} > disc[${u}] = ${disc[u]}: nothing in ${v}'s subtree reaches above ${u}, so edge ${u}-${v} is a bridge.`, { active: u, inspect: v, highlightEdge: [u, v] });
+          emit(
+            'BRIDGE',
+            `bridge ${u}-${v}`,
+            `low[${v}] = ${low[v]} > disc[${u}] = ${disc[u]}: nothing in ${v}'s subtree reaches above ${u}, so edge ${u}-${v} is a bridge.`,
+            { active: u, inspect: v, highlightEdge: [u, v] },
+          );
         } else {
-          emit('NOBRIDGE', `keep ${u}-${v}`, `low[${v}] = ${low[v]} ≤ disc[${u}] = ${disc[u]}: a back-edge bypasses ${u}-${v}, so it is not a bridge.`, { active: u, inspect: v, highlightEdge: [u, v] });
+          emit(
+            'NOBRIDGE',
+            `keep ${u}-${v}`,
+            `low[${v}] = ${low[v]} ≤ disc[${u}] = ${disc[u]}: a back-edge bypasses ${u}-${v}, so it is not a bridge.`,
+            { active: u, inspect: v, highlightEdge: [u, v] },
+          );
         }
       } else if (disc[v] < low[u]) {
         low[u] = disc[v];
-        emit('BACK', `low[${u}]=${low[u]}`, `Back edge ${u} → ${v}: ${v} is already visited at disc ${disc[v]}, so lower low[${u}] to ${low[u]}.`, { active: u, inspect: v, highlightEdge: [u, v] });
+        emit(
+          'BACK',
+          `low[${u}]=${low[u]}`,
+          `Back edge ${u} → ${v}: ${v} is already visited at disc ${disc[v]}, so lower low[${u}] to ${low[u]}.`,
+          { active: u, inspect: v, highlightEdge: [u, v] },
+        );
       }
     }
   };
@@ -79,7 +123,13 @@ function record({ adj, pos }: CCInput): Frame<CCState>[] {
   dfs(0, -1);
 
   const bridgeText = bridges.length ? bridges.map((b) => `(${b[0]}, ${b[1]})`).join(', ') : 'none';
-  emit('DONE', `${bridges.length} bridges`, `DFS complete. Critical connections (bridges): ${bridgeText}.`, { active: null, inspect: null, highlightEdge: null, done: true }, 'good');
+  emit(
+    'DONE',
+    `${bridges.length} bridges`,
+    `DFS complete. Critical connections (bridges): ${bridgeText}.`,
+    { active: null, inspect: null, highlightEdge: null, done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -114,11 +164,17 @@ function View({ frame }: PluginViewProps<CCState>) {
       <GraphBoard
         adj={s.adj}
         pos={s.pos}
-        nodeClass={(node) => (s.disc[node] === -1 ? 'team-0' : node === s.active ? 'team-1' : 'team-2')}
+        nodeClass={(node) =>
+          s.disc[node] === -1 ? 'team-0' : node === s.active ? 'team-1' : 'team-2'
+        }
         activeNode={s.active}
         inspectNode={s.inspect}
         highlightEdge={s.highlightEdge}
-        edgeTone={s.highlightEdge && isBridge(s, s.highlightEdge[0], s.highlightEdge[1]) ? 'clash' : 'active'}
+        edgeTone={
+          s.highlightEdge && isBridge(s, s.highlightEdge[0], s.highlightEdge[1])
+            ? 'clash'
+            : 'active'
+        }
         height={260}
       />
     </VizStage>
@@ -134,7 +190,10 @@ function Inspector({ frame }: InspectorProps<CCState>) {
       <InspectorRow k="current" v={s.active ?? '—'} />
       <InspectorRow k="disc" v={fmt(s.disc)} />
       <InspectorRow k="low" v={fmt(s.low)} />
-      <InspectorRow k="bridges" v={s.bridges.length ? s.bridges.map((b) => `(${b[0]},${b[1]})`).join(' ') : '∅'} />
+      <InspectorRow
+        k="bridges"
+        v={s.bridges.length ? s.bridges.map((b) => `(${b[0]},${b[1]})`).join(' ') : '∅'}
+      />
     </VarGrid>
   );
 }
@@ -146,7 +205,14 @@ const G5: CCInput = {
 };
 // Two triangles joined by a single bridge (1-3).
 const G6: CCInput = {
-  adj: [[1, 2], [0, 2, 3], [0, 1], [1, 4, 5], [3, 5], [3, 4]],
+  adj: [
+    [1, 2],
+    [0, 2, 3],
+    [0, 1],
+    [1, 4, 5],
+    [3, 5],
+    [3, 4],
+  ],
   pos: circleLayout(6),
 };
 

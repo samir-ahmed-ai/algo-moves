@@ -81,8 +81,12 @@ export function StudioArcRail({
               step.state === 'todo' && 'text-ink3/50',
             )}
           >
-            {step.state === 'done' && <Check className="h-2.5 w-2.5 shrink-0 text-good" strokeWidth={2.5} />}
-            {step.state === 'active' && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />}
+            {step.state === 'done' && (
+              <Check className="h-2.5 w-2.5 shrink-0 text-good" strokeWidth={2.5} />
+            )}
+            {step.state === 'active' && (
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+            )}
             {step.label}
           </span>
         </span>

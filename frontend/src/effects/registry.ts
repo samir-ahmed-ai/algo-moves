@@ -59,19 +59,22 @@ export const fastEffect = defineEffect<FastData>({
   meta: { id: 'fast', title: 'Fast', category: 'time' },
   defaultData: { factor: 2 },
   transformFrames: (frames, { factor }) => sampleEveryN(frames, Math.max(1, Math.round(factor))),
-  traceSnippet: ({ factor }) => `fast(×${factor})`,});
+  traceSnippet: ({ factor }) => `fast(×${factor})`,
+});
 
 export const slowEffect = defineEffect<SlowData>({
   meta: { id: 'slow', title: 'Slow', category: 'time' },
   defaultData: { factor: 2 },
   transformFrames: (frames, { factor }) => duplicateEach(frames, Math.max(1, Math.round(factor))),
-  traceSnippet: ({ factor }) => `slow(÷${factor})`,});
+  traceSnippet: ({ factor }) => `slow(÷${factor})`,
+});
 
 export const reverseEffect = defineEffect<ReverseData>({
   meta: { id: 'reverse', title: 'Reverse', category: 'time' },
   defaultData: { enabled: true },
   transformFrames: (frames, { enabled }) => (enabled ? [...frames].reverse() : frames),
-  traceSnippet: () => 'rev()',});
+  traceSnippet: () => 'rev()',
+});
 
 export const palindromeEffect = defineEffect<PalindromeData>({
   meta: { id: 'palindrome', title: 'Palindrome', category: 'time' },
@@ -81,26 +84,32 @@ export const palindromeEffect = defineEffect<PalindromeData>({
     const tail = [...frames].slice(1).reverse();
     return [...frames, ...tail];
   },
-  traceSnippet: () => 'palindrome()',});
+  traceSnippet: () => 'palindrome()',
+});
 
 export const lateEffect = defineEffect<LateData>({
   meta: { id: 'late', title: 'Late', category: 'time' },
   defaultData: { skip: 1 },
   transformFrames: (frames, { skip }) => frames.slice(Math.max(0, skip)),
-  traceSnippet: ({ skip }) => `late(+${skip})`,});
+  traceSnippet: ({ skip }) => `late(+${skip})`,
+});
 
 export const maskEffect = defineEffect<MaskData>({
   meta: { id: 'mask', title: 'Mask', category: 'drill' },
   defaultData: { probability: 0.5, seed: 42 },
   transformFrames: (frames, { probability, seed }) =>
-    frames.filter((_, i) => seededRandom(seed, i) < probability || i === 0 || i === frames.length - 1),
-  traceSnippet: ({ probability }) => `mask(${Math.round(probability * 100)}%)`,});
+    frames.filter(
+      (_, i) => seededRandom(seed, i) < probability || i === 0 || i === frames.length - 1,
+    ),
+  traceSnippet: ({ probability }) => `mask(${Math.round(probability * 100)}%)`,
+});
 
 export const plyEffect = defineEffect<PlyData>({
   meta: { id: 'ply', title: 'Ply', category: 'drill' },
   defaultData: { times: 2 },
   transformFrames: (frames, { times }) => duplicateEach(frames, Math.max(1, times)),
-  traceSnippet: ({ times }) => `ply(×${times})`,});
+  traceSnippet: ({ times }) => `ply(×${times})`,
+});
 
 export const adsrEffect = defineEffect<AdsrData>({
   meta: { id: 'adsr', title: 'Gate', category: 'emphasis' },
@@ -110,7 +119,8 @@ export const adsrEffect = defineEffect<AdsrData>({
     const end = Math.max(start, frames.length - release);
     return frames.slice(start, end || frames.length);
   },
-  traceSnippet: ({ attack, release }) => `gate(${attack}…${release})`,});
+  traceSnippet: ({ attack, release }) => `gate(${attack}…${release})`,
+});
 
 export const EFFECTS: EffectPlugin<any>[] = [
   fastEffect,
@@ -136,14 +146,20 @@ export function isKnownEffectId(id: string): boolean {
 export function applyEffect(id: string, frames: Frame[], data: unknown): Frame[] {
   const effect = effectMap.get(id);
   if (!effect) return frames;
-  const merged = { ...(effect.defaultData as object), ...(data && typeof data === 'object' ? data : {}) };
+  const merged = {
+    ...(effect.defaultData as object),
+    ...(data && typeof data === 'object' ? data : {}),
+  };
   return effect.transformFrames(frames, merged);
 }
 
 export function effectTraceSnippet(id: string, data: unknown): string {
   const effect = effectMap.get(id);
   if (!effect) return id;
-  const merged = { ...(effect.defaultData as object), ...(data && typeof data === 'object' ? data : {}) };
+  const merged = {
+    ...(effect.defaultData as object),
+    ...(data && typeof data === 'object' ? data : {}),
+  };
   return effect.traceSnippet(merged);
 }
 

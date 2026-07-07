@@ -1,8 +1,20 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface IslandInput {
   grid: string[][]; // '1' land, '0' water
@@ -37,8 +49,13 @@ function record({ grid }: IslandInput): Frame<IslandState>[] {
     done: false,
   }));
 
-  const snap = (type: string, note: string, caption: string, cur: [number, number] | null, tone?: 'good') =>
-    emit(type, note, caption, { cur, done: type === 'DONE' }, tone);
+  const snap = (
+    type: string,
+    note: string,
+    caption: string,
+    cur: [number, number] | null,
+    tone?: 'good',
+  ) => emit(type, note, caption, { cur, done: type === 'DONE' }, tone);
 
   snap(
     'INIT',
@@ -51,13 +68,23 @@ function record({ grid }: IslandInput): Frame<IslandState>[] {
     for (let c = 0; c < n; c++) {
       if (grid[r][c] === '1' && !seen[r][c]) {
         count++;
-        snap('ISLAND', `island #${count}`, `Cell (${r}, ${c}) is land and unvisited — start island #${count} and flood-fill from here.`, [r, c]);
+        snap(
+          'ISLAND',
+          `island #${count}`,
+          `Cell (${r}, ${c}) is land and unvisited — start island #${count} and flood-fill from here.`,
+          [r, c],
+        );
         // iterative DFS flood fill
         const stack: [number, number][] = [[r, c]];
         seen[r][c] = true;
         while (stack.length) {
           const [cr, cc] = stack.pop() as [number, number];
-          snap('FILL', `fill (${cr},${cc})`, `Mark (${cr}, ${cc}) as part of island #${count}; push its unvisited land neighbours.`, [cr, cc]);
+          snap(
+            'FILL',
+            `fill (${cr},${cc})`,
+            `Mark (${cr}, ${cc}) as part of island #${count}; push its unvisited land neighbours.`,
+            [cr, cc],
+          );
           for (const [dr, dc] of DIRS) {
             const nr = cr + dr;
             const nc = cc + dc;

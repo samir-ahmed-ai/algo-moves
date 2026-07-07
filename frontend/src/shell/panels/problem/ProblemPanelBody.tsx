@@ -237,7 +237,10 @@ function ExampleInputPicker() {
           <ControlsAccordion
             title="Input preview"
             defaultOpen={!hasDescription}
-            className={cn('border-t-0', (hasDescription || usePills || inputs.length > 4) && 'mt-1.5')}
+            className={cn(
+              'border-t-0',
+              (hasDescription || usePills || inputs.length > 4) && 'mt-1.5',
+            )}
             bodyClassName="pt-1"
           >
             <JsonBlock value={previewValue} />
@@ -297,7 +300,11 @@ export function ProblemPanelBody() {
         </ControlsAccordion>
       )}
       {hasProblemBrief && (
-        <ControlsAccordion title="Problem brief" defaultOpen className={inVisualize ? undefined : 'border-t-0'}>
+        <ControlsAccordion
+          title="Problem brief"
+          defaultOpen
+          className={inVisualize ? undefined : 'border-t-0'}
+        >
           <ProblemBriefBody statements={problemBrief.statements} cases={problemBrief.cases} />
         </ControlsAccordion>
       )}

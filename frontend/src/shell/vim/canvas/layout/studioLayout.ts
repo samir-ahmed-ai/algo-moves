@@ -50,10 +50,7 @@ export function computeResponsiveStudioMetrics(
 ): ResponsiveStudioMetrics {
   const chrome = resolveStudioChrome(viewportWidth);
   const availW = Math.max(320, Math.round(containerWidth - chrome.x * 2));
-  const availH = Math.max(
-    360,
-    Math.round(containerHeight - chrome.top - chrome.bottom),
-  );
+  const availH = Math.max(360, Math.round(containerHeight - chrome.top - chrome.bottom));
   const hudW = availW - 2 * STUDIO_INSET_X;
   const mazeW = hudW;
   const mazeH = Math.max(
@@ -65,7 +62,9 @@ export function computeResponsiveStudioMetrics(
 }
 
 /** Fallback metrics when the container has not been measured yet. */
-export function defaultResponsiveStudioMetrics(hudHeight = HUD_PANEL_HEIGHT): ResponsiveStudioMetrics {
+export function defaultResponsiveStudioMetrics(
+  hudHeight = HUD_PANEL_HEIGHT,
+): ResponsiveStudioMetrics {
   const chrome = resolveStudioChrome(STUDIO_REFERENCE_VIEWPORT_W);
   return computeResponsiveStudioMetrics(
     DEFAULT_LAYOUT_CANVAS_W + chrome.x * 2,

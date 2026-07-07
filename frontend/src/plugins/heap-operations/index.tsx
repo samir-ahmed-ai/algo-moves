@@ -1,11 +1,24 @@
-import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
+import {
+  definePlugin,
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+} from '../../core/types';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, intro } from './cases';
 import { quiz, codePieces } from './practice';
 import { TreeBoard } from '../../components/board/TreeBoard';
 import { QueueTape } from '../../components/board/QueueTape';
-import { InspectorRow, VizEmpty, VizInspector, VizStage, RailGroup, RailStat, RailResult } from '../_shared/vizKit';
+import {
+  InspectorRow,
+  VizEmpty,
+  VizInspector,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+} from '../_shared/vizKit';
 
 type Op = { kind: 'insert'; value: number } | { kind: 'extract' };
 
@@ -34,7 +47,12 @@ function record({ ops }: HeapInput): Frame<HeapState>[] {
     type: string,
     note: string,
     caption: string,
-    fields: { active?: number | null; compareWith?: number | null; swap?: [number, number] | null; op: string },
+    fields: {
+      active?: number | null;
+      compareWith?: number | null;
+      swap?: [number, number] | null;
+      op: string;
+    },
     tone?: 'good',
   ) =>
     frames.push({
@@ -153,12 +171,9 @@ function record({ ops }: HeapInput): Frame<HeapState>[] {
       );
       const last = heap.pop() as number;
       if (heap.length === 0) {
-        emit(
-          'DONE',
-          `extracted ${min}`,
-          `The heap is now empty after extracting ${min}.`,
-          { op: opLabel },
-        );
+        emit('DONE', `extracted ${min}`, `The heap is now empty after extracting ${min}.`, {
+          op: opLabel,
+        });
         continue;
       }
       heap[0] = last;
@@ -193,16 +208,24 @@ function View({ frame }: PluginViewProps<HeapState>) {
   const swapped = (i: number) => s.swap != null && (s.swap[0] === i || s.swap[1] === i);
   const done = s.op === 'done';
   return (
-    <VizStage rail={
-      <>
-        <RailGroup label="op">
-          <RailStat k="current" v={s.op} tone="accent" />
-          <RailStat k="size" v={s.size} />
-          <RailStat k="root (min)" v={s.size ? s.heap[0] : '—'} />
-        </RailGroup>
-        {done && <RailResult label="final heap" value={s.size ? `[${s.heap.join(',')}]` : '∅'} tone={s.size ? 'accent' : 'bad'} />}
-      </>
-    }>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="op">
+            <RailStat k="current" v={s.op} tone="accent" />
+            <RailStat k="size" v={s.size} />
+            <RailStat k="root (min)" v={s.size ? s.heap[0] : '—'} />
+          </RailGroup>
+          {done && (
+            <RailResult
+              label="final heap"
+              value={s.size ? `[${s.heap.join(',')}]` : '∅'}
+              tone={s.size ? 'accent' : 'bad'}
+            />
+          )}
+        </>
+      }
+    >
       <TreeBoard
         tree={s.heap}
         nodeClass={(i) =>
@@ -301,15 +324,26 @@ const script2: Op[] = [
   { kind: 'extract' },
 ];
 
-
 const inputs = [
-    { id: 'script1', label: 'insert 5,3,8,1,4 · extract×2', value: { ops: script1 } },
-    { id: 'script2', label: 'insert 9,6,2,7 · extract · insert 1 · extract', value: { ops: script2 } },
-  ];
+  { id: 'script1', label: 'insert 5,3,8,1,4 · extract×2', value: { ops: script1 } },
+  {
+    id: 'script2',
+    label: 'insert 9,6,2,7 · extract · insert 1 · extract',
+    value: { ops: script2 },
+  },
+];
 const verdict = verdictAlwaysOk('done');
 const teaching = wireTeachingStack({
-  record, View, inputs, verdict,
-  practice: { quiz, codePieces, cases: { good: goodCases, intro, goodLabel: 'heap ops' }, simulateQuestion: 'Which heap index swaps next?' },
+  record,
+  View,
+  inputs,
+  verdict,
+  practice: {
+    quiz,
+    codePieces,
+    cases: { good: goodCases, intro, goodLabel: 'heap ops' },
+    simulateQuestion: 'Which heap index swaps next?',
+  },
 });
 
 export const heapOperationsPlugin = definePlugin<HeapInput, HeapState>({
@@ -318,7 +352,8 @@ export const heapOperationsPlugin = definePlugin<HeapInput, HeapState>({
     title: 'Heap operations',
     difficulty: 'Medium',
     tags: ['heap', 'tree', 'priority-queue'],
-    summary: 'Binary min-heap insert and extract-min on a complete tree, showing sift-up and sift-down step by step.',
+    summary:
+      'Binary min-heap insert and extract-min on a complete tree, showing sift-up and sift-down step by step.',
     source: 'https://leetcode.com/problems/find-k-pairs-with-smallest-sums/',
   },
   inputs,

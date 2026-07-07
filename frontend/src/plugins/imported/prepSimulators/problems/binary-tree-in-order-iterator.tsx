@@ -1,7 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, RailGroup, RailResult, RailStat, RailStack, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  RailGroup,
+  RailResult,
+  RailStat,
+  RailStack,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+} from '../../../_shared/vizKit';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 
 interface BtInOrderInput {
@@ -22,7 +37,8 @@ interface BtInOrderState {
 const L = (i: number) => 2 * i + 1;
 const R = (i: number) => 2 * i + 2;
 
-function record({ tree }: BtInOrderInput): Frame<BtInOrderState>[] {  const stack: number[] = [];
+function record({ tree }: BtInOrderInput): Frame<BtInOrderState>[] {
+  const stack: number[] = [];
   const done: number[] = [];
   const output: number[] = [];
 
@@ -30,44 +46,78 @@ function record({ tree }: BtInOrderInput): Frame<BtInOrderState>[] {  const stac
   const exists = (i: number): boolean => i >= 0 && i < tree.length && tree[i] != null;
 
   const { emit, frames } = createRecorder<BtInOrderState>(() => ({
-        tree: tree,
-        stack: stack.slice(),
-        done: done.slice(),
-        output: output.slice(),
-        hasNext: stack.length > 0,
-        finished: false,
-        active: null
-      }));
+    tree: tree,
+    stack: stack.slice(),
+    done: done.slice(),
+    output: output.slice(),
+    hasNext: stack.length > 0,
+    finished: false,
+    active: null,
+  }));
 
   const pushLeft = (start: number) => {
     let node = start;
     if (!exists(node)) {
-      emit('PUSH_NONE', 'null spine', `No right subtree — nothing to push onto the stack.`, { active: null });
+      emit('PUSH_NONE', 'null spine', `No right subtree — nothing to push onto the stack.`, {
+        active: null,
+      });
       return;
     }
     while (exists(node)) {
       stack.push(node);
-      emit('PUSH', `push ${val(node)}`, `Constructor / pushLeft: push node ${val(node)}, then follow LEFT until null. This stacks the left spine for in-order traversal.`, { active: node });
+      emit(
+        'PUSH',
+        `push ${val(node)}`,
+        `Constructor / pushLeft: push node ${val(node)}, then follow LEFT until null. This stacks the left spine for in-order traversal.`,
+        { active: node },
+      );
       node = L(node);
     }
-    emit('SPINE_DONE', 'left spine done', `Left spine fully stacked. Top of stack (${stack.length ? val(stack[stack.length - 1]) : '—'}) is the next in-order value.`, { active: stack[stack.length - 1] ?? null });
+    emit(
+      'SPINE_DONE',
+      'left spine done',
+      `Left spine fully stacked. Top of stack (${stack.length ? val(stack[stack.length - 1]) : '—'}) is the next in-order value.`,
+      { active: stack[stack.length - 1] ?? null },
+    );
   };
 
-  emit('INIT', 'build iterator', `Binary tree in-order iterator: explicit stack holds the left spine. Constructor pushes all left nodes from root; each \`next()\` pops, yields, then pushLeft(right).`, { active: exists(0) ? 0 : null });
+  emit(
+    'INIT',
+    'build iterator',
+    `Binary tree in-order iterator: explicit stack holds the left spine. Constructor pushes all left nodes from root; each \`next()\` pops, yields, then pushLeft(right).`,
+    { active: exists(0) ? 0 : null },
+  );
 
   pushLeft(0);
 
   while (stack.length > 0) {
     const top = stack[stack.length - 1];
-    emit('HASNEXT', 'hasNext = true', `\`hasNext()\`: stack non-empty — next value is ${val(top)} at stack top.`, { active: top });
+    emit(
+      'HASNEXT',
+      'hasNext = true',
+      `\`hasNext()\`: stack non-empty — next value is ${val(top)} at stack top.`,
+      { active: top },
+    );
     stack.pop();
     done.push(top);
     output.push(val(top));
-    emit('NEXT', `yield ${val(top)}`, `\`next()\`: pop ${val(top)}, emit it. In-order so far: [${output.join(', ')}]. Now pushLeft(node.right).`, { active: top }, 'good');
+    emit(
+      'NEXT',
+      `yield ${val(top)}`,
+      `\`next()\`: pop ${val(top)}, emit it. In-order so far: [${output.join(', ')}]. Now pushLeft(node.right).`,
+      { active: top },
+      'good',
+    );
     pushLeft(R(top));
   }
 
-  emit('FINISHED', `[${output.join(', ')}]`, `Stack empty — iteration complete. Full in-order sequence: [${output.join(', ')}].`, { active: null }, 'good');
+  emit(
+    'FINISHED',
+    `[${output.join(', ')}]`,
+    `Stack empty — iteration complete. Full in-order sequence: [${output.join(', ')}].`,
+    { active: null },
+    'good',
+  );
   return frames;
 }
 
@@ -91,7 +141,11 @@ function View({ frame }: PluginViewProps<BtInOrderState>) {
         <RailStat k="hasNext" v={s.hasNext ? 'true' : 'false'} />
         <RailStat k="yielded" v={s.output.length} />
       </RailGroup>
-      <RailResult label="in-order" value={s.output.length ? `[${s.output.join(', ')}]` : '…'} tone={s.finished ? 'good' : 'accent'} />
+      <RailResult
+        label="in-order"
+        value={s.output.length ? `[${s.output.join(', ')}]` : '…'}
+        tone={s.finished ? 'good' : 'accent'}
+      />
     </>
   );
   return (
@@ -119,112 +173,109 @@ function Inspector({ frame }: InspectorProps<BtInOrderState>) {
 export const manifestId = 'prep-streams-io-binary-tree-in-order-iterator';
 export const title = 'Binary tree in-order iterator';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Binary tree in-order iterator\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Binary tree in-order iterator"?',
     choices: [
       {
-        label: "Iterative inorder with stack — fits this problem",
-        correct: true
+        label: 'Iterative inorder with stack — fits this problem',
+        correct: true,
       },
       {
-        label: "Streaming palindrome stack — different approach"
+        label: 'Streaming palindrome stack — different approach',
       },
       {
-        label: "Min-heap size k — different approach"
+        label: 'Min-heap size k — different approach',
       },
       {
-        label: "Scanner word tokenization — different approach"
-      }
+        label: 'Scanner word tokenization — different approach',
+      },
     ],
-    explain: "Stack the left spine; next pops a node then dives right"
+    explain: 'Stack the left spine; next pops a node then dives right',
   },
   {
-    id: "key-step",
-    prompt: "On the \"NEXT\" step (yield ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "NEXT" step (yield ), what happens?',
     choices: [
       {
-        label: "\\ — this move caption",
-        correct: true
+        label: '\\ — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "\\"
+    explain: '\\',
   },
   {
-    id: "state",
-    prompt: "What does the `tree` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `tree` field track in the visualization state?',
     choices: [
       {
-        label: "Field tree in state — updated each frame",
-        correct: true
+        label: 'Field tree in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `tree` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `tree` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Binary tree in-order iterator\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Binary tree in-order iterator"?',
     choices: [
       {
-        label: "O(1) amortized time, O(h) space — standard bounds here",
-        correct: true
+        label: 'O(1) amortized time, O(h) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(log n) per add time, O(n) space — wrong order of growth"
+        label: 'O(log n) per add time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
+        label: 'O(log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(file size) time, O(1) per line space — wrong order of growth"
-      }
+        label: 'O(file size) time, O(1) per line space — wrong order of growth',
+      },
     ],
-    explain: "O(1) amortized. O(h). ctor pushes lefts; next: pop, then push the right child's lefts"
+    explain:
+      "O(1) amortized. O(h). ctor pushes lefts; next: pop, then push the right child's lefts",
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Stack empty — iteration complete. Full — final DONE caption",
-        correct: true
+        label: 'Stack empty — iteration complete. Full — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Stack empty — iteration complete. Full in-order sequence: []."
-  }
+    explain: 'Stack empty — iteration complete. Full in-order sequence: [].',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

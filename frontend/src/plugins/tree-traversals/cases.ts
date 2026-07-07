@@ -60,6 +60,7 @@ export const badCases: WorkedCase<TreeInput>[] = [
     returns: '1 2 4 5 3 6 7 (not sorted)',
     tone: 'bad',
     question: 'Why is the output not ascending here?',
-    answer: 'In-order is sorted only when the tree is a binary search tree. Node 5 in the left subtree breaks the BST property, so left-node-right no longer emits keys in order.',
+    answer:
+      'In-order is sorted only when the tree is a binary search tree. Node 5 in the left subtree breaks the BST property, so left-node-right no longer emits keys in order.',
   },
 ];

@@ -15,7 +15,9 @@ export function VimLevelSidebar() {
           </span>
           <div className="min-w-0 flex-1">
             <span className="block truncate text-sm font-semibold text-ink">Level</span>
-            <span className="block truncate text-[length:var(--fs-2xs)] text-ink3">{level.title}</span>
+            <span className="block truncate text-[length:var(--fs-2xs)] text-ink3">
+              {level.title}
+            </span>
           </div>
         </header>
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-[var(--hpad)] py-[var(--pad)] text-sm">

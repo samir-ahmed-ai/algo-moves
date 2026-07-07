@@ -42,7 +42,13 @@ export function CopyPanelBody() {
           variant="good"
           size="sm"
           onClick={copy}
-          icon={status === 'copied' ? <Check className={nodeIconGlyph} /> : <Copy className={nodeIconGlyph} />}
+          icon={
+            status === 'copied' ? (
+              <Check className={nodeIconGlyph} />
+            ) : (
+              <Copy className={nodeIconGlyph} />
+            )
+          }
         >
           {status === 'copied' ? 'Copied' : 'Copy'}
         </Btn>

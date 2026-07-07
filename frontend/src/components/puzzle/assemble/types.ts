@@ -9,7 +9,11 @@ export interface AssembleGameStats {
   perfect: boolean;
 }
 
-export function createAssembleGameStats(startMs: number, endMs = Date.now(), mistakes = 0): AssembleGameStats {
+export function createAssembleGameStats(
+  startMs: number,
+  endMs = Date.now(),
+  mistakes = 0,
+): AssembleGameStats {
   return {
     mistakes,
     ms: Math.max(0, endMs - startMs),
@@ -26,7 +30,10 @@ export function parseAssembleBestSeconds(value: string | null): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-export function resolveAssembleBestSeconds(primary: string | null, legacy: string | null = null): number | null {
+export function resolveAssembleBestSeconds(
+  primary: string | null,
+  legacy: string | null = null,
+): number | null {
   return parseAssembleBestSeconds(primary) ?? parseAssembleBestSeconds(legacy);
 }
 

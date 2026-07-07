@@ -65,8 +65,13 @@
 /* ---------------------------- transient tile fx --------------------------- */
 
 @keyframes strokePulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.045); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.045);
+  }
 }
 
 /* offending tile on a shatter — bad stroke + face flash */
@@ -87,8 +92,12 @@
 /* captured tiles unlight in a reverse cascade when the stroke shatters;
  * per-tile delay arrives via --unlight-delay on the tile element */
 @keyframes strokeUnlight {
-  from { background: var(--accent-bg); }
-  to { background: var(--surface-2); }
+  from {
+    background: var(--accent-bg);
+  }
+  to {
+    background: var(--surface-2);
+  }
 }
 .stroke-unlight .blk-face {
   animation: strokeUnlight 200ms ease-out both;
@@ -104,13 +113,21 @@
   animation: strokeSegDraw 80ms linear forwards;
 }
 @keyframes strokeSegDraw {
-  to { stroke-dashoffset: 0; }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 /* shatter: trail flashes bad then retracts via dashoffset */
 @keyframes strokeShatterOut {
-  from { stroke-dashoffset: 0; opacity: 1; }
-  to { stroke-dashoffset: 1; opacity: 0; }
+  from {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  to {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
 }
 .stroke-trail-shatter {
   stroke-dasharray: 1;
@@ -119,7 +136,9 @@
 
 /* early lift: trail ghosts and fades */
 @keyframes strokeLiftFade {
-  to { opacity: 0; }
+  to {
+    opacity: 0;
+  }
 }
 .stroke-trail-lift {
   opacity: 0.7;
@@ -128,8 +147,14 @@
 
 /* win: one good pulse over the finished trail */
 @keyframes strokeWinPulse {
-  from { opacity: 0.9; stroke-width: 6; }
-  to { opacity: 0; stroke-width: 18; }
+  from {
+    opacity: 0.9;
+    stroke-width: 6;
+  }
+  to {
+    opacity: 0;
+    stroke-width: 18;
+  }
 }
 .stroke-win-pulse {
   animation: strokeWinPulse 220ms ease-out forwards;
@@ -138,7 +163,9 @@
 /* ------------------------------ win payoff -------------------------------- */
 
 @keyframes strokeFadeOut {
-  to { opacity: 0; }
+  to {
+    opacity: 0;
+  }
 }
 .stroke-grid-out {
   animation: strokeFadeOut 150ms ease-out forwards;
@@ -146,7 +173,9 @@
 }
 
 @keyframes strokeFadeIn {
-  from { opacity: 0; }
+  from {
+    opacity: 0;
+  }
 }
 .stroke-fade-in {
   animation: strokeFadeIn 150ms ease-out;

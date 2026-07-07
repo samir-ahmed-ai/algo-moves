@@ -7,7 +7,12 @@ import type { CanvasWidget } from './types';
 /** The monospace pill used for section badges (peer count, step index, …). */
 export function SectionBadge({ children }: { children: React.ReactNode }) {
   return (
-    <span className={cn('shrink-0 rounded-full bg-panel2 px-1 py-px font-mono tabular-nums text-ink3', chromeText.xs)}>
+    <span
+      className={cn(
+        'shrink-0 rounded-full bg-panel2 px-1 py-px font-mono tabular-nums text-ink3',
+        chromeText.xs,
+      )}
+    >
       {children}
     </span>
   );

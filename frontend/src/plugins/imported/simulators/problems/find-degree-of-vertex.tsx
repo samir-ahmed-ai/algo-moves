@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GraphBoard } from '../../../../components/board/GraphBoard';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 import { circleLayout } from '../../../_shared/graphLayout';
 
 interface DegInput {
@@ -30,39 +43,66 @@ interface DegState {
 
 function record({ adj, pos, query }: DegInput): Frame<DegState>[] {
   const n = adj.length;
-  const degrees = new Array<number>(n).fill(0);  let bestVertex = 0;
+  const degrees = new Array<number>(n).fill(0);
+  let bestVertex = 0;
   let bestDegree = 0;
 
   const { emit, frames } = createRecorder<DegState>(() => ({
-        adj: adj,
-        pos: pos,
-        query: query,
-        degrees: degrees.slice(),
-        bestVertex: bestVertex,
-        bestDegree: bestDegree,
-        current: null,
-        edge: null,
-        answer: null,
-        done: false
-      }));
+    adj: adj,
+    pos: pos,
+    query: query,
+    degrees: degrees.slice(),
+    bestVertex: bestVertex,
+    bestDegree: bestDegree,
+    current: null,
+    edge: null,
+    answer: null,
+    done: false,
+  }));
 
-  emit('INIT', `degree of ${query}`, `In an undirected graph the degree of a vertex is the number of edges incident to it — equivalently, its neighbour count. We scan every vertex, count its incident edges, and report the degree of the queried vertex ${query}.`, { current: null, edge: null, answer: null });
+  emit(
+    'INIT',
+    `degree of ${query}`,
+    `In an undirected graph the degree of a vertex is the number of edges incident to it — equivalently, its neighbour count. We scan every vertex, count its incident edges, and report the degree of the queried vertex ${query}.`,
+    { current: null, edge: null, answer: null },
+  );
 
   for (let v = 0; v < n; v++) {
-    emit('VERTEX', `scan ${v}`, `Move to vertex ${v}. Walk each of its incident edges, adding one to its degree per edge.`, { current: v, edge: null, answer: null });
+    emit(
+      'VERTEX',
+      `scan ${v}`,
+      `Move to vertex ${v}. Walk each of its incident edges, adding one to its degree per edge.`,
+      { current: v, edge: null, answer: null },
+    );
     for (const u of adj[v]) {
       degrees[v] += 1;
-      emit('EDGE', `${v}-${u}`, `Edge ${v}–${u} is incident to vertex ${v}, so its degree rises to ${degrees[v]}.`, { current: v, edge: [v, u], answer: null });
+      emit(
+        'EDGE',
+        `${v}-${u}`,
+        `Edge ${v}–${u} is incident to vertex ${v}, so its degree rises to ${degrees[v]}.`,
+        { current: v, edge: [v, u], answer: null },
+      );
     }
     if (degrees[v] > bestDegree) {
       bestDegree = degrees[v];
       bestVertex = v;
     }
-    emit('TALLY', `deg(${v})=${degrees[v]}`, `Vertex ${v} has degree ${degrees[v]}. Highest degree so far is ${bestDegree} at vertex ${bestVertex}.`, { current: v, edge: null, answer: null });
+    emit(
+      'TALLY',
+      `deg(${v})=${degrees[v]}`,
+      `Vertex ${v} has degree ${degrees[v]}. Highest degree so far is ${bestDegree} at vertex ${bestVertex}.`,
+      { current: v, edge: null, answer: null },
+    );
   }
 
   const answer = degrees[query];
-  emit('DONE', `deg(${query})=${answer}`, `All degrees counted. The queried vertex ${query} has degree ${answer} (the highest-degree vertex overall is ${bestVertex} with degree ${bestDegree}).`, { current: query, edge: null, answer: answer , done: true }, 'good');
+  emit(
+    'DONE',
+    `deg(${query})=${answer}`,
+    `All degrees counted. The queried vertex ${query} has degree ${answer} (the highest-degree vertex overall is ${bestVertex} with degree ${bestDegree}).`,
+    { current: query, edge: null, answer: answer, done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -76,16 +116,18 @@ function View({ frame }: PluginViewProps<DegState>) {
   const rail = (
     <>
       <RailGroup label="scan">
-        <RailStat k="vertex" v={s.current ?? '—'} tone={s.current !== null ? 'accent' : undefined} />
+        <RailStat
+          k="vertex"
+          v={s.current ?? '—'}
+          tone={s.current !== null ? 'accent' : undefined}
+        />
         <RailStat k="deg" v={s.current !== null ? s.degrees[s.current] : '—'} />
       </RailGroup>
       <RailGroup label="best">
         <RailStat k="v" v={s.bestVertex} />
         <RailStat k="deg" v={s.bestDegree} tone="accent" />
       </RailGroup>
-      {s.answer !== null && (
-        <RailResult label={`deg(${s.query})`} value={s.answer} tone="good" />
-      )}
+      {s.answer !== null && <RailResult label={`deg(${s.query})`} value={s.answer} tone="good" />}
     </>
   );
   return (

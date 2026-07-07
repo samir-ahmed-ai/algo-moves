@@ -1,8 +1,23 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface LevelOrderInput {
   // Binary tree in level-order form; null marks an absent slot.
@@ -40,7 +55,13 @@ function record({ tree }: LevelOrderInput): Frame<LevelOrderState>[] {
   const valAt = (i: number) => tree[i] as number;
 
   if (tree.length === 0 || tree[0] == null) {
-    emit('DONE', 'empty', 'The tree is empty, so the level order traversal is an empty list.', { done: true }, 'bad');
+    emit(
+      'DONE',
+      'empty',
+      'The tree is empty, so the level order traversal is an empty list.',
+      { done: true },
+      'bad',
+    );
     return frames;
   }
 
@@ -132,20 +153,26 @@ function View({ frame }: PluginViewProps<LevelOrderState>) {
   const activeVal = s.active !== null ? String(s.tree[s.active] as number) : '—';
   const levelSoFarStr = s.levelSoFar.length > 0 ? `[${s.levelSoFar.join(', ')}]` : '—';
   return (
-    <VizStage rail={
-      <>
-        <RailStack label="queue" items={queueVals} highlightEnd="bottom" topLabel="front" />
-        <RailGroup label="scan">
-          <RailStat k="level" v={s.level} />
-          <RailStat k="active" v={activeVal} tone="accent" />
-          <RailStat k="so far" v={levelSoFarStr} />
-        </RailGroup>
-        <RailStack label="out" items={outItems} />
-        {s.done && (
-          <RailResult label="levels" value={s.out.length} tone={s.out.length > 0 ? 'good' : 'bad'} />
-        )}
-      </>
-    }>
+    <VizStage
+      rail={
+        <>
+          <RailStack label="queue" items={queueVals} highlightEnd="bottom" topLabel="front" />
+          <RailGroup label="scan">
+            <RailStat k="level" v={s.level} />
+            <RailStat k="active" v={activeVal} tone="accent" />
+            <RailStat k="so far" v={levelSoFarStr} />
+          </RailGroup>
+          <RailStack label="out" items={outItems} />
+          {s.done && (
+            <RailResult
+              label="levels"
+              value={s.out.length}
+              tone={s.out.length > 0 ? 'good' : 'bad'}
+            />
+          )}
+        </>
+      }
+    >
       <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.active} />
     </VizStage>
   );
@@ -159,7 +186,10 @@ function Inspector({ frame }: InspectorProps<LevelOrderState>) {
       <InspectorRow k="level" v={s.level} />
       <InspectorRow k="queue size" v={s.queue.length} />
       <InspectorRow k="active" v={s.active !== null ? (s.tree[s.active] as number) : '—'} />
-      <InspectorRow k="level so far" v={s.levelSoFar.length ? `[${s.levelSoFar.join(', ')}]` : '[]'} />
+      <InspectorRow
+        k="level so far"
+        v={s.levelSoFar.length ? `[${s.levelSoFar.join(', ')}]` : '[]'}
+      />
       <InspectorRow k="visited" v={s.visited.length} />
       <InspectorRow k="levels done" v={s.out.length} />
     </VarGrid>
@@ -169,112 +199,107 @@ function Inspector({ frame }: InspectorProps<LevelOrderState>) {
 export const manifestId = 'prep-trees-level-order';
 export const title = 'Level order';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Level order\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Level order"?',
     choices: [
       {
-        label: "BFS levels — fits this problem",
-        correct: true
+        label: 'BFS levels — fits this problem',
+        correct: true,
       },
       {
-        label: "BST Walk — different approach"
+        label: 'BST Walk — different approach',
       },
       {
-        label: "Controlled Inorder (stack of left spine) — different approach"
+        label: 'Controlled Inorder (stack of left spine) — different approach',
       },
       {
-        label: "Level order connect — different approach"
-      }
+        label: 'Level order connect — different approach',
+      },
     ],
-    explain: "Queue processed in level-size snapshots"
+    explain: 'Queue processed in level-size snapshots',
   },
   {
-    id: "key-step",
-    prompt: "On the \"PUSH\" step (push ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "PUSH" step (push ), what happens?',
     choices: [
       {
-        label: "Node has a left child . — this move caption",
-        correct: true
+        label: 'Node has a left child . — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Node  has a left child . Enqueue it — it belongs to the next level."
+    explain: 'Node  has a left child . Enqueue it — it belongs to the next level.',
   },
   {
-    id: "state",
-    prompt: "What does the `queue` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `queue` field track in the visualization state?',
     choices: [
       {
-        label: "node indices currently waiting — updated each frame",
-        correct: true
+        label: 'node indices currently waiting — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `queue` in sync: node indices currently waiting in the BFS queue"
+    explain: 'The recorder keeps `queue` in sync: node indices currently waiting in the BFS queue',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Level order\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Level order"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(h) time, O(1) space — wrong order of growth"
-      }
+        label: 'O(h) time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). sz=len(q); pop sz nodes, push their children"
+    explain: 'O(n). O(n). sz=len(q); pop sz nodes, push their children',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Every node has been visited. — final DONE caption",
-        correct: true
+        label: 'Every node has been visited. — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Every node has been visited. The traversal produced  level(s): ${out.map((l) => "
-  }
+    explain: 'Every node has been visited. The traversal produced  level(s): ${out.map((l) => ',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

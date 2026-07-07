@@ -1,10 +1,4 @@
-import {
-  codeFolding,
-  foldEffect,
-  foldService,
-  foldState,
-  unfoldAll,
-} from '@codemirror/language';
+import { codeFolding, foldEffect, foldService, foldState, unfoldAll } from '@codemirror/language';
 import type { MergeView } from '@codemirror/merge';
 import type { EditorState, Extension } from '@codemirror/state';
 import type { Command, EditorView } from '@codemirror/view';
@@ -45,7 +39,11 @@ function isSectionHeader(line: string, lang?: string): boolean {
 }
 
 /** Find `{` … `}` body range to fold for a section starting at `lineNo`. */
-export function sectionFoldRange(state: EditorState, lineNo: number, lang?: string): SectionFoldRange | null {
+export function sectionFoldRange(
+  state: EditorState,
+  lineNo: number,
+  lang?: string,
+): SectionFoldRange | null {
   const style = styleLangFromId(lang);
 
   if (style === 'python') {

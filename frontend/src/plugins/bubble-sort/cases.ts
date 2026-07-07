@@ -10,7 +10,8 @@ export const goodCases: WorkedCase<SortInput>[] = [
     returns: 'sorted',
     tone: 'ok',
     question: 'After the first full pass, which index is locked?',
-    answer: 'Adjacent swaps move 4 rightward until it sits at index 3 — the largest value bubbles to the end each pass.',
+    answer:
+      'Adjacent swaps move 4 rightward until it sits at index 3 — the largest value bubbles to the end each pass.',
   },
 ];
 
@@ -23,7 +24,8 @@ export const badCases: WorkedCase<SortInput>[] = [
     returns: 'sorted after Θ(n²) swaps',
     tone: 'bad',
     question: 'Why is reverse input the worst case?',
-    answer: 'Every adjacent pair is out of order, so each pass performs a swap at every position — Θ(n²) comparisons and swaps.',
+    answer:
+      'Every adjacent pair is out of order, so each pass performs a swap at every position — Θ(n²) comparisons and swaps.',
   },
 ];
 

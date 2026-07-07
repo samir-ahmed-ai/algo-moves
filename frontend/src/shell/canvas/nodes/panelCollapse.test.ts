@@ -2,10 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { PanelFlowNode, PanelNodeData } from '@/core/panelFlowTypes';
 import { togglePanelCollapse } from './panelCollapse';
 
-function panel(
-  data: PanelNodeData,
-  overrides: Partial<PanelFlowNode> = {},
-): PanelFlowNode {
+function panel(data: PanelNodeData, overrides: Partial<PanelFlowNode> = {}): PanelFlowNode {
   return {
     id: 'n1',
     type: 'panel',
@@ -28,7 +25,10 @@ describe('togglePanelCollapse', () => {
   });
 
   it('restores fullHeight when expanding', () => {
-    const n = panel({ kind: 'problem', title: 'Problem', collapsed: true, fullHeight: 520 }, { height: 36 });
+    const n = panel(
+      { kind: 'problem', title: 'Problem', collapsed: true, fullHeight: 520 },
+      { height: 36 },
+    );
     const out = togglePanelCollapse(n);
 
     expect(out.height).toBe(520);

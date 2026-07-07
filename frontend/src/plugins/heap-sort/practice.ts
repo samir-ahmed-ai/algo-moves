@@ -12,7 +12,8 @@ export const quiz: QuizQuestion[] = [
       { label: 'Globally sorted — stronger than heap' },
       { label: 'Root only is max — too weak' },
     ],
-    explain: 'The heap property is local: each parent dominates its children; the global maximum sits at index 0.',
+    explain:
+      'The heap property is local: each parent dominates its children; the global maximum sits at index 0.',
   },
 ];
 

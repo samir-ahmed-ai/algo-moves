@@ -97,7 +97,10 @@ describe('migrateLayouts', () => {
 
   it('strips persisted heights while preserving positions and widths', () => {
     const stored: Record<string, LayoutEntry> = {
-      'two-sum:visualize': { nodes: { viz: { position: { x: 5, y: 6 }, width: 700, height: 400 } }, removed: [] },
+      'two-sum:visualize': {
+        nodes: { viz: { position: { x: 5, y: 6 }, width: 700, height: 400 } },
+        removed: [],
+      },
     };
     const out = migrateLayouts(stored);
     const wb = out['two-sum:visualize'].nodes.workbench;

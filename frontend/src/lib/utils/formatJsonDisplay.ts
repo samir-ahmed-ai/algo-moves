@@ -20,7 +20,9 @@ function formatObject(obj: Record<string, unknown>, depth: number): string {
   if (entries.length === 0) return '{}';
   const pad = ' '.repeat(depth * INDENT);
   const inner = ' '.repeat((depth + 1) * INDENT);
-  const lines = entries.map(([k, v]) => `${inner}${JSON.stringify(k)}: ${formatValue(v, depth + 1)}`);
+  const lines = entries.map(
+    ([k, v]) => `${inner}${JSON.stringify(k)}: ${formatValue(v, depth + 1)}`,
+  );
   return `{\n${lines.join(',\n')}\n${pad}}`;
 }
 

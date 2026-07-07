@@ -59,7 +59,12 @@ export function TracePreviewPanel() {
             <X className="h-3 w-3" />
           </button>
         </header>
-        <pre className={cn('ws-scroll max-h-[240px] overflow-auto p-2 font-mono leading-relaxed text-ink2', chromeText.sm)}>
+        <pre
+          className={cn(
+            'ws-scroll max-h-[240px] overflow-auto p-2 font-mono leading-relaxed text-ink2',
+            chromeText.sm,
+          )}
+        >
           {traceText}
         </pre>
       </div>

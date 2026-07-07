@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -31,15 +37,15 @@ function toBits(n: number, width: number): string[] {
 
 function record({ nums }: SingleNumberInput): Frame<SingleNumberState>[] {
   const { emit, frames } = createRecorder<SingleNumberState>(() => ({
-        nums,
-        i: null,
-        prevAcc: null,
-        v: null,
-        acc: 0,
-        bits: BITS,
-        done: false,
-        answer: null
-      }));
+    nums,
+    i: null,
+    prevAcc: null,
+    v: null,
+    acc: 0,
+    bits: BITS,
+    done: false,
+    answer: null,
+  }));
 
   let acc = 0;
 
@@ -84,8 +90,7 @@ function View({ frame }: PluginViewProps<SingleNumberState>) {
   const pointers: ArrayPointer[] = [];
   if (s.i !== null) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
 
-  const tone = (i: number) =>
-    s.done ? '' : s.i === i ? 'match' : '';
+  const tone = (i: number) => (s.done ? '' : s.i === i ? 'match' : '');
 
   const accBits = toBits(s.acc, s.bits);
   const prevBits = s.prevAcc !== null ? toBits(s.prevAcc, s.bits) : null;
@@ -110,15 +115,17 @@ function View({ frame }: PluginViewProps<SingleNumberState>) {
         acc = <span className="font-mono text-ink">{s.acc}</span>
         {s.v !== null && !s.done && (
           <>
-            {' · '}folding nums[{s.i}] ={' '}
-            <span className="font-mono text-ink">{s.v}</span>
+            {' · '}folding nums[{s.i}] = <span className="font-mono text-ink">{s.v}</span>
           </>
         )}
       </div>
 
       <ArrayRow values={s.nums} cellTone={tone} pointers={pointers} windowRange={null} />
 
-      <div className={cn('mt-2 grid gap-x-3 gap-y-1', vizText.sm)} style={{ gridTemplateColumns: 'auto auto' }}>
+      <div
+        className={cn('mt-2 grid gap-x-3 gap-y-1', vizText.sm)}
+        style={{ gridTemplateColumns: 'auto auto' }}
+      >
         {prevBits && vBits && (
           <>
             <span className="text-ink3">prev acc</span>
@@ -128,14 +135,12 @@ function View({ frame }: PluginViewProps<SingleNumberState>) {
           </>
         )}
         <span className={cn(s.done ? 'text-good' : 'text-ink3')}>{s.done ? 'single' : 'acc'}</span>
-        <span>
-          {accBits.map((b, k) =>
-            bitCell(b, prevBits !== null && prevBits[k] !== b, k),
-          )}
-        </span>
+        <span>{accBits.map((b, k) => bitCell(b, prevBits !== null && prevBits[k] !== b, k))}</span>
       </div>
 
-      <div className={cn('mt-1', vizText.xs, 'text-ink3')}>bits (MSB→LSB); matching bits cancel to 0</div>
+      <div className={cn('mt-1', vizText.xs, 'text-ink3')}>
+        bits (MSB→LSB); matching bits cancel to 0
+      </div>
 
       {s.answer !== null && (
         <div className={cn('mt-1 font-mono text-good', vizText.base)}>→ {s.answer}</div>
@@ -162,112 +167,109 @@ function Inspector({ frame }: InspectorProps<SingleNumberState>) {
 export const manifestId = 'prep-math-find-single-number';
 export const title = 'Find single number';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Find single number\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Find single number"?',
     choices: [
       {
-        label: "Singleton XOR — fits this problem",
-        correct: true
+        label: 'Singleton XOR — fits this problem',
+        correct: true,
       },
       {
-        label: "Base conversion repeated divmod — different approach"
+        label: 'Base conversion repeated divmod — different approach',
       },
       {
-        label: "Strobogrammatic map — different approach"
+        label: 'Strobogrammatic map — different approach',
       },
       {
-        label: "Primality trial division — different approach"
-      }
+        label: 'Primality trial division — different approach',
+      },
     ],
-    explain: "Pairs cancel under XOR; the lonely value survives"
+    explain: 'Pairs cancel under XOR; the lonely value survives',
   },
   {
-    id: "key-step",
-    prompt: "On the \"XOR\" step (acc^=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "XOR" step (acc^=), what happens?',
     choices: [
       {
-        label: "Fold in nums[] = : acc — this move caption",
-        correct: true
+        label: 'Fold in nums[] = : acc — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Fold in nums[] = : acc =  ^  = . XOR compares bit by bit — matching bits become 0, differing bits become 1.${\n        canceled\n          ? "
+    explain:
+      'Fold in nums[] = : acc =  ^  = . XOR compares bit by bit — matching bits become 0, differing bits become 1.${\n        canceled\n          ? ',
   },
   {
-    id: "state",
-    prompt: "What does the `i` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: "index of the value — updated each frame",
-        correct: true
+        label: 'index of the value — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `i` in sync: index of the value being folded in this frame"
+    explain: 'The recorder keeps `i` in sync: index of the value being folded in this frame',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Find single number\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Find single number"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(m·n) time, O(m+n) space — wrong order of growth"
+        label: 'O(m·n) time, O(m+n) space — wrong order of growth',
       },
       {
-        label: "O(reservations) time, O(reserved rows) — wrong order of growth"
+        label: 'O(reservations) time, O(reserved rows) — wrong order of growth',
       },
       {
-        label: "O(log x) time, O(1) space — wrong order of growth"
-      }
+        label: 'O(log x) time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). acc=0; acc^=each num; return acc"
+    explain: 'O(n). O(1). acc=0; acc^=each num; return acc',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Every duplicate paired off to 0 — final DONE caption",
-        correct: true
+        label: 'Every duplicate paired off to 0 — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Every duplicate paired off to 0, so what remains is the single number: . This ran in O(n) time and O(1) space — one accumulator, one pass."
-  }
+    explain:
+      'Every duplicate paired off to 0, so what remains is the single number: . This ran in O(n) time and O(1) space — one accumulator, one pass.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

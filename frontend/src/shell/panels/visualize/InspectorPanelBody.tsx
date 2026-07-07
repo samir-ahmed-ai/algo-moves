@@ -1,7 +1,13 @@
 import { ScanSearch } from 'lucide-react';
 import { MetricsBody } from './MetricsPanelBody';
 
-import { useCanvasFrame, useCanvasStatic, ControlsAccordion, EmptyState, Pill } from '@/shell/canvas';
+import {
+  useCanvasFrame,
+  useCanvasStatic,
+  ControlsAccordion,
+  EmptyState,
+  Pill,
+} from '@/shell/canvas';
 export function InspectorPaneContent() {
   const { plugin } = useCanvasStatic();
   const { frame } = useCanvasFrame();

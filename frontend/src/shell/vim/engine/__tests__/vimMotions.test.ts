@@ -1,12 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { applyMotion, isWalkable } from '../vimMotions';
 
-const grid = [
-  '#####',
-  '#.@.#',
-  '#...#',
-  '#####',
-];
+const grid = ['#####', '#.@.#', '#...#', '#####'];
 
 describe('vimMotions', () => {
   it('detects walkable cells', () => {

@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { GraphBoard } from '../../../../components/board/GraphBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 import { circleLayout } from '../../../_shared/graphLayout';
 
 interface CGInput {
@@ -46,37 +59,71 @@ function record({ adj, pos }: CGInput): Frame<CGState>[] {
 
   const dfs = (v: number) => {
     color[v] = 2;
-    emit('ENTER', `clone ${v}`, `First visit to node ${v} — create its clone and memoise it before recursing, so a cycle back to ${v} reuses this copy.`, { active: v, inspect: null, highlightEdge: null });
+    emit(
+      'ENTER',
+      `clone ${v}`,
+      `First visit to node ${v} — create its clone and memoise it before recursing, so a cycle back to ${v} reuses this copy.`,
+      { active: v, inspect: null, highlightEdge: null },
+    );
     color[v] = 1;
     cloned += 1;
 
     for (const nb of adj[v]) {
       if (color[nb] === 0) {
-        emit('DESCEND', `edge ${v}→${nb}`, `Node ${v} has neighbour ${nb}, which is not cloned yet — recurse into ${nb} to build its copy.`, { active: v, inspect: nb, highlightEdge: [v, nb] });
+        emit(
+          'DESCEND',
+          `edge ${v}→${nb}`,
+          `Node ${v} has neighbour ${nb}, which is not cloned yet — recurse into ${nb} to build its copy.`,
+          { active: v, inspect: nb, highlightEdge: [v, nb] },
+        );
         dfs(nb);
-        emit('RETURN', `wire ${v}-${nb}`, `Back at node ${v}: attach the freshly cloned ${nb} to ${v}'s neighbour list.`, { active: v, inspect: nb, highlightEdge: [v, nb] });
+        emit(
+          'RETURN',
+          `wire ${v}-${nb}`,
+          `Back at node ${v}: attach the freshly cloned ${nb} to ${v}'s neighbour list.`,
+          { active: v, inspect: nb, highlightEdge: [v, nb] },
+        );
       } else {
-        emit('MEMO', `reuse ${nb}`, `Neighbour ${nb} is already cloned — reuse the memoised copy and add it to node ${v}'s neighbours (no re-visit).`, { active: v, inspect: nb, highlightEdge: [v, nb] });
+        emit(
+          'MEMO',
+          `reuse ${nb}`,
+          `Neighbour ${nb} is already cloned — reuse the memoised copy and add it to node ${v}'s neighbours (no re-visit).`,
+          { active: v, inspect: nb, highlightEdge: [v, nb] },
+        );
       }
     }
   };
 
   dfs(0);
 
-  emit('DONE', `${cloned} cloned`, `DFS finished — all ${cloned} node${cloned === 1 ? '' : 's'} cloned and every edge rewired onto the copies.`, { active: null, inspect: null, highlightEdge: null, done: true }, 'good');
+  emit(
+    'DONE',
+    `${cloned} cloned`,
+    `DFS finished — all ${cloned} node${cloned === 1 ? '' : 's'} cloned and every edge rewired onto the copies.`,
+    { active: null, inspect: null, highlightEdge: null, done: true },
+    'good',
+  );
   return frames;
 }
 
 function View({ frame }: PluginViewProps<CGState>) {
   const s = frame.state;
   return (
-    <VizStage rail={<>
-      <RailGroup label="progress">
-        <RailStat k="current" v={s.active ?? '—'} tone="accent" />
-        <RailStat k="cloned" v={`${s.cloned}/${s.adj.length}`} tone={s.cloned === s.adj.length ? 'good' : undefined} />
-      </RailGroup>
-      {s.done && <RailResult label="result" value={`${s.cloned} cloned`} tone="good" />}
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="progress">
+            <RailStat k="current" v={s.active ?? '—'} tone="accent" />
+            <RailStat
+              k="cloned"
+              v={`${s.cloned}/${s.adj.length}`}
+              tone={s.cloned === s.adj.length ? 'good' : undefined}
+            />
+          </RailGroup>
+          {s.done && <RailResult label="result" value={`${s.cloned} cloned`} tone="good" />}
+        </>
+      }
+    >
       <GraphBoard
         adj={s.adj}
         pos={s.pos}

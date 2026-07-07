@@ -1,126 +1,134 @@
 import type { PracticeBundle } from '../../../_shared/pluginKit';
 
 export const bundle: PracticeBundle = {
-  "quiz": [
+  quiz: [
     {
-      "id": "category",
-      "prompt": "Graph Traversal implements two traversal strategies. Which pair does the code provide?",
-      "choices": [
+      id: 'category',
+      prompt:
+        'Graph Traversal implements two traversal strategies. Which pair does the code provide?',
+      choices: [
         {
-          "label": "Recursive DFS and iterative BFS — btGraphDfs calls itself recursively",
-          "correct": true
+          label: 'Recursive DFS and iterative BFS — btGraphDfs calls itself recursively',
+          correct: true,
         },
         {
-          "label": "Iterative DFS and iterative BFS — btGraphDfs calls itself"
+          label: 'Iterative DFS and iterative BFS — btGraphDfs calls itself',
         },
         {
-          "label": "Recursive DFS and recursive BFS — btGraphDfs calls itself"
+          label: 'Recursive DFS and recursive BFS — btGraphDfs calls itself',
         },
         {
-          "label": "BFS and Dijkstra's shortest path — btGraphDfs calls itself"
-        }
+          label: "BFS and Dijkstra's shortest path — btGraphDfs calls itself",
+        },
       ],
-      "explain": "`btGraphDfs` calls itself recursively for DFS, while `graphTraversalBFS` drains an explicit slice-queue iteratively. There is no recursive BFS in this code."
+      explain:
+        '`btGraphDfs` calls itself recursively for DFS, while `graphTraversalBFS` drains an explicit slice-queue iteratively. There is no recursive BFS in this code.',
     },
     {
-      "id": "visited-timing-bfs",
-      "prompt": "In `graphTraversalBFS`, when is a node marked visited?",
-      "choices": [
+      id: 'visited-timing-bfs',
+      prompt: 'In `graphTraversalBFS`, when is a node marked visited?',
+      choices: [
         {
-          "label": "When it is enqueued — being processed)",
-          "correct": true
+          label: 'When it is enqueued — being processed)',
+          correct: true,
         },
         {
-          "label": "On dequeue — marks node as being processed"
+          label: 'On dequeue — marks node as being processed',
         },
         {
-          "label": "After all its neighbors — been enqueued"
+          label: 'After all its neighbors — been enqueued',
         },
         {
-          "label": "It is not marked; — queue alone prevents duplicates"
-        }
+          label: 'It is not marked; — queue alone prevents duplicates',
+        },
       ],
-      "explain": "`visited[nb] = true` is set alongside `q = append(q, nb)`. Marking at enqueue prevents the same node from being added to the queue more than once, which would cause duplicate visits."
+      explain:
+        '`visited[nb] = true` is set alongside `q = append(q, nb)`. Marking at enqueue prevents the same node from being added to the queue more than once, which would cause duplicate visits.',
     },
     {
-      "id": "visited-timing-dfs",
-      "prompt": "In `btGraphDfs`, where does visited marking happen relative to the recursive calls?",
-      "choices": [
+      id: 'visited-timing-dfs',
+      prompt: 'In `btGraphDfs`, where does visited marking happen relative to the recursive calls?',
+      choices: [
         {
-          "label": "Before recursing into neighbors — = true` then the neighbor loop)",
-          "correct": true
+          label: 'Before recursing into neighbors — = true` then the neighbor loop)',
+          correct: true,
         },
         {
-          "label": "After returning from all recursive — calls"
+          label: 'After returning from all recursive — calls',
         },
         {
-          "label": "Inside the neighbor loop — just before each recursive call"
+          label: 'Inside the neighbor loop — just before each recursive call',
         },
         {
-          "label": "At the end of the function — after appending to order"
-        }
+          label: 'At the end of the function — after appending to order',
+        },
       ],
-      "explain": "`visited[n] = true` and `*order = append(*order, n.Label)` both happen before the neighbor loop. This ensures a node is marked (and recorded) immediately on first visit so cycles don't cause infinite recursion."
+      explain:
+        "`visited[n] = true` and `*order = append(*order, n.Label)` both happen before the neighbor loop. This ensures a node is marked (and recorded) immediately on first visit so cycles don't cause infinite recursion.",
     },
     {
-      "id": "nil-guard",
-      "prompt": "Which traversal has an explicit `nil` guard for the source node, and which does not?",
-      "choices": [
+      id: 'nil-guard',
+      prompt:
+        'Which traversal has an explicit `nil` guard for the source node, and which does not?',
+      choices: [
         {
-          "label": "BFS guards `if src == — nil { return nil }`; DFS checks `if n",
-          "correct": true
+          label: 'BFS guards `if src == — nil { return nil }`; DFS checks `if n',
+          correct: true,
         },
         {
-          "label": "DFS guards `if n == — nil { return }`; BFS has no nil check"
+          label: 'DFS guards `if n == — nil { return }`; BFS has no nil check',
         },
         {
-          "label": "Both guard against nil — a top-level check before doing"
+          label: 'Both guard against nil — a top-level check before doing',
         },
         {
-          "label": "Neither checks for nil; — nil input would panic"
-        }
+          label: 'Neither checks for nil; — nil input would panic',
+        },
       ],
-      "explain": "`graphTraversalBFS` has `if src == nil { return nil }` at the top. `btGraphDfs` checks `if n == nil || visited[n]` which doubles as both the nil guard and the cycle-break condition."
+      explain:
+        '`graphTraversalBFS` has `if src == nil { return nil }` at the top. `btGraphDfs` checks `if n == nil || visited[n]` which doubles as both the nil guard and the cycle-break condition.',
     },
     {
-      "id": "dfs-order-storage",
-      "prompt": "How does the recursive DFS accumulate the visitation order across calls?",
-      "choices": [
+      id: 'dfs-order-storage',
+      prompt: 'How does the recursive DFS accumulate the visitation order across calls?',
+      choices: [
         {
-          "label": "Through an `*order *[]int` pointer — parameter that each call appends to",
-          "correct": true
+          label: 'Through an `*order *[]int` pointer — parameter that each call appends to',
+          correct: true,
         },
         {
-          "label": "Each call returns a slice — that the caller concatenates"
+          label: 'Each call returns a slice — that the caller concatenates',
         },
         {
-          "label": "A package-level global slice — appended to"
+          label: 'A package-level global slice — appended to',
         },
         {
-          "label": "The order is stored — a field on each GraphNode"
-        }
+          label: 'The order is stored — a field on each GraphNode',
+        },
       ],
-      "explain": "`btGraphDfs(n *GraphNode, visited map[*GraphNode]bool, order *[]int)` takes a pointer to the order slice and does `*order = append(*order, n.Label)`, so every recursive call mutates the same shared slice rather than returning and merging results."
+      explain:
+        '`btGraphDfs(n *GraphNode, visited map[*GraphNode]bool, order *[]int)` takes a pointer to the order slice and does `*order = append(*order, n.Label)`, so every recursive call mutates the same shared slice rather than returning and merging results.',
     },
     {
-      "id": "complexity",
-      "prompt": "What are the time and space complexities of each traversal?",
-      "choices": [
+      id: 'complexity',
+      prompt: 'What are the time and space complexities of each traversal?',
+      choices: [
         {
-          "label": "Both O(V+E) time and O(V) — space",
-          "correct": true
+          label: 'Both O(V+E) time and O(V) — space',
+          correct: true,
         },
         {
-          "label": "DFS O(V) time, BFS O(V+E) — time; both O(V) space"
+          label: 'DFS O(V) time, BFS O(V+E) — time; both O(V) space',
         },
         {
-          "label": "Both O(V+E) time and O(V+E) — space"
+          label: 'Both O(V+E) time and O(V+E) — space',
         },
         {
-          "label": "Both O(V²) time due — the visited map lookup"
-        }
+          label: 'Both O(V²) time due — the visited map lookup',
+        },
       ],
-      "explain": "Both DFS and BFS visit every vertex and edge exactly once: O(V+E) time. The visited map, queue/stack, and output slice each hold at most V entries: O(V) auxiliary space."
-    }
-  ]
+      explain:
+        'Both DFS and BFS visit every vertex and edge exactly once: O(V+E) time. The visited map, queue/stack, and output slice each hold at most V entries: O(V) auxiliary space.',
+    },
+  ],
 };

@@ -1,5 +1,5 @@
 /** Top-level app pages — pathname segment before the hash. */
-export type AppPage = 'home' | 'mobile' | 'vim' | 'games' | 'workspace' | 'plans';
+export type AppPage = 'home' | 'mobile' | 'vim' | 'games' | 'workspace' | 'plans' | 'resumes';
 
 const PAGE_SEGMENTS: Record<AppPage, string> = {
   home: 'home',
@@ -8,6 +8,7 @@ const PAGE_SEGMENTS: Record<AppPage, string> = {
   games: 'games',
   workspace: 'workspace',
   plans: 'plans',
+  resumes: 'resumes',
 };
 
 /** Vite base path without trailing slash, e.g. "" or "/algo-moves". */
@@ -55,36 +56,14 @@ export function buildAppUrl(page: AppPage, hashBody = '', search = ''): string {
 }
 
 /** Update the browser URL to a page + optional hash body. */
-export function writeAppUrl(page: AppPage, hashBody = '', opts?: { replace?: boolean; search?: string }) {
+export function writeAppUrl(
+  page: AppPage,
+  hashBody = '',
+  opts?: { replace?: boolean; search?: string },
+) {
   if (typeof location === 'undefined') return;
   const search = opts?.search ?? location.search;
   const url = buildAppUrl(page, hashBody, search);
   if (opts?.replace !== false) history.replaceState(null, '', url);
   else history.pushState(null, '', url);
-}
-
-/** Strip legacy `#page/...` hashes into `/page#...` on first load. */
-export function normalizeLegacyUrl() {
-  if (typeof location === 'undefined') return;
-  if (parsePageFromPathname(location.pathname)) return;
-
-  const body = getHashBody(location.hash);
-  if (!body) return;
-
-  if (body === 'home') {
-    history.replaceState(null, '', buildAppUrl('home', '', location.search));
-    return;
-  }
-
-  for (const page of ['mobile', 'vim', 'games', 'plans'] as const) {
-    if (body === page || body.startsWith(`${page}/`)) {
-      const hashBody = body === page ? '' : body.slice(page.length + 1);
-      history.replaceState(null, '', buildAppUrl(page, hashBody, location.search));
-      return;
-    }
-  }
-
-  if (body.startsWith('s=') || body.includes('&s=')) {
-    history.replaceState(null, '', buildAppUrl('workspace', body, location.search));
-  }
 }

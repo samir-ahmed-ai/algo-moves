@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -22,16 +28,17 @@ const PAIRS: Record<string, string> = { ')': '(', ']': '[', '}': '{' };
 const OPENS = new Set(['(', '[', '{']);
 
 function record({ str }: ParensInput): Frame<ParensState>[] {
-  const chars = [...str];  const stack: string[] = [];
+  const chars = [...str];
+  const stack: string[] = [];
 
   const { emit, frames } = createRecorder<ParensState>(() => ({
-        chars,
-        i: null,
-        stack: stack.slice(),
-        matchAt: null,
-        result: null,
-        done: false
-      }));
+    chars,
+    i: null,
+    stack: stack.slice(),
+    matchAt: null,
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -151,13 +158,7 @@ function View({ frame }: PluginViewProps<ParensState>) {
         {']'}
       </div>
       {s.result !== null && (
-        <div
-          className={cn(
-            'mt-1 font-mono',
-            vizText.base,
-            s.result ? 'text-good' : 'text-bad',
-          )}
-        >
+        <div className={cn('mt-1 font-mono', vizText.base, s.result ? 'text-good' : 'text-bad')}>
           → {s.result ? 'valid' : 'invalid'}
         </div>
       )}
@@ -187,132 +188,130 @@ function Inspector({ frame }: InspectorProps<ParensState>) {
 export const manifestId = 'prep-stacks-queues-validate-parentheses';
 export const title = 'Validate parentheses';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Validate parentheses\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Validate parentheses"?',
     choices: [
       {
-        label: "Stack bracket matching — fits this problem",
-        correct: true
+        label: 'Stack bracket matching — fits this problem',
+        correct: true,
       },
       {
-        label: "Dual Stack (counts + strings) — different approach"
+        label: 'Dual Stack (counts + strings) — different approach',
       },
       {
-        label: "Shunting-yard (no parens) — different approach"
+        label: 'Shunting-yard (no parens) — different approach',
       },
       {
-        label: "Right-to-Left Max Scan — different approach"
-      }
+        label: 'Right-to-Left Max Scan — different approach',
+      },
     ],
-    explain: "Push every open; each close must equal the stack top"
+    explain: 'Push every open; each close must equal the stack top',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Validate parentheses), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Validate parentheses), what strategy is established?',
     choices: [
       {
-        label: "Push every open; each close must — described in INIT caption",
-        correct: true
+        label: 'Push every open; each close must — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Validate parentheses on \"\". Scan left to right: push every opening bracket onto a stack; each closing bracket must match the bracket on top of the stack. Time O(n), space O(n)."
+    explain:
+      'Validate parentheses on "". Scan left to right: push every opening bracket onto a stack; each closing bracket must match the bracket on top of the stack. Time O(n), space O(n).',
   },
   {
-    id: "key-step",
-    prompt: "On the \"FAIL\" step ( ≠ ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "FAIL" step ( ≠ ), what happens?',
     choices: [
       {
         label: "'' should close a '', but — this move caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "'' should close a '', but the top of the stack is ''. The brackets are interleaved wrong, so the string is invalid."
+    explain:
+      "'' should close a '', but the top of the stack is ''. The brackets are interleaved wrong, so the string is invalid.",
   },
   {
-    id: "state",
-    prompt: "What does the `chars` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `chars` field track in the visualization state?',
     choices: [
       {
-        label: "the bracket string, one char — updated each frame",
-        correct: true
+        label: 'the bracket string, one char — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `chars` in sync: the bracket string, one char per cell"
+    explain: 'The recorder keeps `chars` in sync: the bracket string, one char per cell',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Validate parentheses\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Validate parentheses"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n³) time, O(n) space — wrong order of growth"
+        label: 'O(n³) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(1) per next time, O(k) space — wrong order of growth"
+        label: 'O(1) per next time, O(k) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(log n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). pairs map; mismatch/empty -> false; empty at end -> valid"
+    explain: 'O(n). O(n). pairs map; mismatch/empty -> false; empty at end -> valid',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
         label: "'' matches the '' on top — final DONE caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "'' matches the '' on top of the stack (opened at index ), so pop it.  open bracket still pending."
-  }
+    explain:
+      "'' matches the '' on top of the stack (opened at index ), so pop it.  open bracket still pending.",
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

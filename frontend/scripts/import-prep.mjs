@@ -50,25 +50,61 @@ const TOPIC_META = {
 
 // Free-text pattern/topic words → known tag ids (unknown ones degrade gracefully).
 const TAG_MAP = {
-  array: 'array', string: 'string', tree: 'tree', heap: 'heap', grid: 'grid',
-  matrix: 'grid', stack: 'stack', queue: 'queue', trie: 'trie', hash: 'hash-map',
-  'hash-map': 'hash-map', 'linked-list': 'linked-list', 'two-pointers': 'two-pointers',
-  'two-pointer': 'two-pointers', 'sliding-window': 'sliding-window', greedy: 'greedy',
-  recursion: 'recursion', dfs: 'dfs', bfs: 'bfs', math: 'math', bitmask: 'bitmask',
-  sorting: 'sorting', sort: 'sorting', intervals: 'intervals', interval: 'intervals',
-  'prefix-sum': 'prefix-sum', design: 'design', simulation: 'simulation',
+  array: 'array',
+  string: 'string',
+  tree: 'tree',
+  heap: 'heap',
+  grid: 'grid',
+  matrix: 'grid',
+  stack: 'stack',
+  queue: 'queue',
+  trie: 'trie',
+  hash: 'hash-map',
+  'hash-map': 'hash-map',
+  'linked-list': 'linked-list',
+  'two-pointers': 'two-pointers',
+  'two-pointer': 'two-pointers',
+  'sliding-window': 'sliding-window',
+  greedy: 'greedy',
+  recursion: 'recursion',
+  dfs: 'dfs',
+  bfs: 'bfs',
+  math: 'math',
+  bitmask: 'bitmask',
+  sorting: 'sorting',
+  sort: 'sorting',
+  intervals: 'intervals',
+  interval: 'intervals',
+  'prefix-sum': 'prefix-sum',
+  design: 'design',
+  simulation: 'simulation',
 };
 
 const TOPIC_TAG = {
-  arrays: 'array', strings: 'string', trees: 'tree', math: 'math', design: 'design',
-  matrices: 'grid', 'linked-lists': 'linked-list', 'stacks-queues': 'stack',
-  'streams-io': 'design', 'hash-maps': 'hash-map', intervals: 'intervals',
-  sorting: 'sorting', 'prefix-sum': 'prefix-sum', tries: 'trie',
-  database: 'database', 'sliding-window': 'sliding-window',
+  arrays: 'array',
+  strings: 'string',
+  trees: 'tree',
+  math: 'math',
+  design: 'design',
+  matrices: 'grid',
+  'linked-lists': 'linked-list',
+  'stacks-queues': 'stack',
+  'streams-io': 'design',
+  'hash-maps': 'hash-map',
+  intervals: 'intervals',
+  sorting: 'sorting',
+  'prefix-sum': 'prefix-sum',
+  tries: 'trie',
+  database: 'database',
+  'sliding-window': 'sliding-window',
 };
 
 function slugify(s) {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60);
 }
 
 /** Strip a leading "1.8 " / "14.17 " numeric chapter prefix → { number, title }. */
@@ -80,7 +116,10 @@ function splitNumberPrefix(raw) {
 
 /** Normalize a title for cross-manifest dedupe (drop chapter number + punctuation). */
 function normTitle(raw) {
-  return splitNumberPrefix(raw).title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  return splitNumberPrefix(raw)
+    .title.toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 function readFileSafe(p) {
@@ -244,7 +283,9 @@ for (const [topic, problems] of Object.entries(idx.topics ?? {})) {
   }
 }
 
-out.sort((a, b) => (a.topic === b.topic ? a.title.localeCompare(b.title) : a.topic.localeCompare(b.topic)));
+out.sort((a, b) =>
+  a.topic === b.topic ? a.title.localeCompare(b.title) : a.topic.localeCompare(b.topic),
+);
 
 if (out.length === 0 && existsSync(join(ROOT, 'src', 'plugins', 'imported', 'prepManifest.ts'))) {
   console.error(
@@ -268,7 +309,9 @@ writeFileSync(join(dest, 'prepManifest.ts'), header);
 
 const byTopic = {};
 for (const p of out) byTopic[p.topicTitle] = (byTopic[p.topicTitle] || 0) + 1;
-if (skipped.length) console.warn(`Skipped ${skipped.length} entries with no solution.go:`, skipped.slice(0, 10));
-if (collisions.length) console.warn(`Dropped ${collisions.length} entries with a colliding prep id:`, collisions);
+if (skipped.length)
+  console.warn(`Skipped ${skipped.length} entries with no solution.go:`, skipped.slice(0, 10));
+if (collisions.length)
+  console.warn(`Dropped ${collisions.length} entries with a colliding prep id:`, collisions);
 console.log(`Using prep source: ${PREP} (${prepVia})`);
 console.log(`Imported ${out.length} prep problems →`, byTopic);

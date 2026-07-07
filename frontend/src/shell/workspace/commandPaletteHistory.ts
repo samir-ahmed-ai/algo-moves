@@ -11,7 +11,11 @@ export function readCommandPaletteRecentIds(): string[] {
   return readStorageJson(STORAGE_KEYS.COMMAND_PALETTE_RECENTS, [], isRecentCommandIds);
 }
 
-export function pushRecentCommandId(recentIds: string[], commandId: string, limit = COMMAND_PALETTE_RECENT_LIMIT): string[] {
+export function pushRecentCommandId(
+  recentIds: string[],
+  commandId: string,
+  limit = COMMAND_PALETTE_RECENT_LIMIT,
+): string[] {
   return [commandId, ...recentIds.filter((id) => id !== commandId)].slice(0, limit);
 }
 

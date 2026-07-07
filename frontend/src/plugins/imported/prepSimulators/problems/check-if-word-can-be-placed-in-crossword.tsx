@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -40,23 +46,20 @@ function record({ board: rows, word }: CrosswordInput): Frame<CrosswordState>[] 
   const n = board[0]?.length ?? 0;
   const wLen = word.length;
   const { emit, frames } = createRecorder<CrosswordState>(() => ({
-        board,
-        word,
-        seg: [],
-        active: null,
-        axis: null,
-        fwdOk: null,
-        bwdOk: null,
-        placed: [],
-        result: null,
-        done: false
-      }));
+    board,
+    word,
+    seg: [],
+    active: null,
+    axis: null,
+    fwdOk: null,
+    bwdOk: null,
+    placed: [],
+    result: null,
+    done: false,
+  }));
 
   // Tries a collected segment against `word`; returns the matching orientation or null.
-  const tryMatch = (
-    seg: Cell[],
-    axis: 'row' | 'col',
-  ): 'fwd' | 'bwd' | null => {
+  const tryMatch = (seg: Cell[], axis: 'row' | 'col'): 'fwd' | 'bwd' | null => {
     if (seg.length !== wLen) {
       if (seg.length > 0) {
         emit(
@@ -170,9 +173,7 @@ function inSeg(seg: { r: number; c: number }[], r: number, c: number) {
 
 function View({ frame }: PluginViewProps<CrosswordState>) {
   const s = frame.state;
-  const display: string[][] = s.board.map((row) =>
-    row.map((ch) => (ch === ' ' ? '·' : ch)),
-  );
+  const display: string[][] = s.board.map((row) => row.map((ch) => (ch === ' ' ? '·' : ch)));
   const tone = (r: number, c: number) => {
     if (inSeg(s.placed, r, c)) return 'path';
     if (s.board[r][c] === '#') return 'water';
@@ -198,13 +199,7 @@ function View({ frame }: PluginViewProps<CrosswordState>) {
         </div>
       )}
       {s.result !== null && (
-        <div
-          className={cn(
-            'mt-1 font-mono',
-            vizText.base,
-            s.result ? 'text-good' : 'text-ink2',
-          )}
-        >
+        <div className={cn('mt-1 font-mono', vizText.base, s.result ? 'text-good' : 'text-ink2')}>
           → {s.result ? 'true (placeable)' : 'false (no slot)'}
         </div>
       )}
@@ -222,7 +217,10 @@ function Inspector({ frame }: InspectorProps<CrosswordState>) {
       <InspectorRow k="axis" v={s.axis ?? '—'} />
       <InspectorRow k="head" v={s.active ? `(${s.active[0]},${s.active[1]})` : '—'} />
       <InspectorRow k="segment len" v={s.seg.length} />
-      <InspectorRow k="fwd / bwd" v={s.fwdOk === null ? '—' : `${s.fwdOk ? '✓' : '✗'} / ${s.bwdOk ? '✓' : '✗'}`} />
+      <InspectorRow
+        k="fwd / bwd"
+        v={s.fwdOk === null ? '—' : `${s.fwdOk ? '✓' : '✗'} / ${s.bwdOk ? '✓' : '✗'}`}
+      />
       <InspectorRow k="result" v={s.result === null ? '…' : s.result ? 'true' : 'false'} />
     </VarGrid>
   );
@@ -231,132 +229,131 @@ function Inspector({ frame }: InspectorProps<CrosswordState>) {
 export const manifestId = 'prep-matrices-check-if-word-can-be-placed-in-crossword';
 export const title = 'Check if Word Can Be Placed In Crossword';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Check if Word Can Be Placed In Crossword\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Check if Word Can Be Placed In Crossword"?',
     choices: [
       {
-        label: "Segment Extraction + Forward/Backward — fits this problem",
-        correct: true
+        label: 'Segment Extraction + Forward/Backward — fits this problem',
+        correct: true,
       },
       {
-        label: "Single Pass — different approach"
+        label: 'Single Pass — different approach',
       },
       {
-        label: "Staircase Search — different approach"
+        label: 'Staircase Search — different approach',
       },
       {
-        label: "DFS + Memoization — different approach"
-      }
+        label: 'DFS + Memoization — different approach',
+      },
     ],
-    explain: "See Check If Word Can Be Placed In Crossword pattern"
+    explain: 'See Check If Word Can Be Placed In Crossword pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Check if Word Can Be Placed In Crossword), what strategy is established?",
+    id: 'init',
+    prompt:
+      'At the start of a run (Check if Word Can Be Placed In Crossword), what strategy is established?',
     choices: [
       {
-        label: "See Check If Word — described in INIT caption",
-        correct: true
+        label: 'See Check If Word — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Check if Word Can Be Placed In Crossword: slide \"\" into any horizontal or vertical slot. Scan every row, then every column, breaking each line into segments at '#' walls, and test each full-length segment forward and backward. Time O(m·n), Space O(max(m,n))."
+    explain:
+      'Check if Word Can Be Placed In Crossword: slide "" into any horizontal or vertical slot. Scan every row, then every column, breaking each line into segments at \'#\' walls, and test each full-length segment forward and backward. Time O(m·n), Space O(max(m,n)).',
   },
   {
-    id: "key-step",
-    prompt: "On the \"PLACE\" step (row  ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "PLACE" step (row  ), what happens?',
     choices: [
       {
-        label: "\"\" fits this horizontal slot — this move caption",
-        correct: true
+        label: '"" fits this horizontal slot — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "\"\" fits this horizontal slot in row  (). The word can be placed — return true."
+    explain: '"" fits this horizontal slot in row  (). The word can be placed — return true.',
   },
   {
-    id: "state",
-    prompt: "What does the `board` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `board` field track in the visualization state?',
     choices: [
       {
-        label: "Field board in state — updated each frame",
-        correct: true
+        label: 'Field board in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `board` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `board` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Check if Word Can Be Placed In Crossword\"?",
+    id: 'complexity',
+    prompt:
+      'What are the time and space complexities for "Check if Word Can Be Placed In Crossword"?',
     choices: [
       {
-        label: "O(m·n) time, O(max(m,n)) space — standard bounds here",
-        correct: true
+        label: 'O(m·n) time, O(max(m,n)) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(m+n) time, O(n) space — wrong order of growth"
+        label: 'O(m+n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m·n·4^s) time, O(s) space — wrong order of growth"
+        label: 'O(m·n·4^s) time, O(s) space — wrong order of growth',
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n²) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(m·n). O(max(m,n)). Check If Word Can Be Placed In Crossword"
+    explain: 'O(m·n). O(max(m,n)). Check If Word Can Be Placed In Crossword',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "\"\" fits this vertical slot — final DONE caption",
-        correct: true
+        label: '"" fits this vertical slot — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "\"\" fits this vertical slot in column  (). The word can be placed — return true."
-  }
+    explain: '"" fits this vertical slot in column  (). The word can be placed — return true.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

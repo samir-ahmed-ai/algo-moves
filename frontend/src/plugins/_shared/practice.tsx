@@ -60,7 +60,8 @@ export function makeQuizPanel(quiz: QuizQuestion[], config: QuizConfig = {}) {
 
     const rawQ = quiz[i];
     const q = useMemo(
-      () => (rawQ ? shuffleQuizQuestion(rawQ, quizQuestionSeed(shuffleSeed, i), shuffleChoices) : rawQ),
+      () =>
+        rawQ ? shuffleQuizQuestion(rawQ, quizQuestionSeed(shuffleSeed, i), shuffleChoices) : rawQ,
       [rawQ, shuffleSeed, i, shuffleChoices],
     );
     const answered = picked !== null;
@@ -120,7 +121,13 @@ export function makeQuizPanel(quiz: QuizQuestion[], config: QuizConfig = {}) {
       const accuracy = quizAccuracy(score, total);
       return (
         <div className="flex flex-col items-center gap-1.5 py-1">
-          <div className={cn('font-semibold leading-none tabular-nums text-ink', vizText.expr, vizText.mono)}>
+          <div
+            className={cn(
+              'font-semibold leading-none tabular-nums text-ink',
+              vizText.expr,
+              vizText.mono,
+            )}
+          >
             {score}
             <span className={cn(vizText.base, 'text-ink3')}>/{total}</span>
           </div>
@@ -131,7 +138,10 @@ export function makeQuizPanel(quiz: QuizQuestion[], config: QuizConfig = {}) {
           <button
             type="button"
             onClick={restart}
-            className={cn('mt-0.5 inline-flex items-center gap-1 rounded-md border border-edge px-2 py-1 text-ink2 transition-colors hover:border-accent hover:text-ink', vizText.xs)}
+            className={cn(
+              'mt-0.5 inline-flex items-center gap-1 rounded-md border border-edge px-2 py-1 text-ink2 transition-colors hover:border-accent hover:text-ink',
+              vizText.xs,
+            )}
           >
             <RotateCcw className="h-3 w-3" /> Retry
           </button>
@@ -142,8 +152,12 @@ export function makeQuizPanel(quiz: QuizQuestion[], config: QuizConfig = {}) {
     return (
       <div className="code-studio-quiz-step flex flex-col gap-1.5">
         <div className="flex items-center gap-2">
-          <span className={cn('shrink-0 rounded-full bg-panel2 px-2 py-0.5 text-ink3', vizText.xs)}>Question {i + 1}/{total}</span>
-          <span className={cn('shrink-0 rounded-full bg-panel2 px-2 py-0.5 text-ink3', vizText.xs)}>Score {score}✓</span>
+          <span className={cn('shrink-0 rounded-full bg-panel2 px-2 py-0.5 text-ink3', vizText.xs)}>
+            Question {i + 1}/{total}
+          </span>
+          <span className={cn('shrink-0 rounded-full bg-panel2 px-2 py-0.5 text-ink3', vizText.xs)}>
+            Score {score}✓
+          </span>
           <div className="flex min-w-0 flex-1 gap-0.5">
             {quiz.map((_, idx) => (
               <span
@@ -163,7 +177,10 @@ export function makeQuizPanel(quiz: QuizQuestion[], config: QuizConfig = {}) {
                         ? 'mobile-progress-step--active w-3/5 bg-edge'
                         : 'w-0',
                   )}
-                  style={{ background: idx <= i ? (idx < i ? 'var(--good)' : 'var(--accent)') : 'transparent' }}
+                  style={{
+                    background:
+                      idx <= i ? (idx < i ? 'var(--good)' : 'var(--accent)') : 'transparent',
+                  }}
                 />
               </span>
             ))}
@@ -171,7 +188,13 @@ export function makeQuizPanel(quiz: QuizQuestion[], config: QuizConfig = {}) {
           <span className={cn('shrink-0 tabular-nums text-ink3', vizText.xs, vizText.mono)}>
             {i + 1}/{quiz.length}
           </span>
-          <span className={cn('shrink-0 rounded bg-panel2 px-1 py-px tabular-nums text-ink2', vizText.xs, vizText.mono)}>
+          <span
+            className={cn(
+              'shrink-0 rounded bg-panel2 px-1 py-px tabular-nums text-ink2',
+              vizText.xs,
+              vizText.mono,
+            )}
+          >
             {score}✓
           </span>
         </div>
@@ -195,13 +218,22 @@ export function makeQuizPanel(quiz: QuizQuestion[], config: QuizConfig = {}) {
                 disabled={answered}
                 className={cn(
                   'quiz-choice mobile-choice flex items-start gap-1.5 rounded-md border px-1.5 py-1 text-left transition-all',
-                  state === 'idle' && 'border-edge bg-panel2/40 text-ink hover:border-accent/60 hover:bg-panel2',
-                  state === 'correct' && 'quiz-choice-correct mobile-choice-correct border-good bg-goodbg/85 text-good',
-                  state === 'wrong' && 'quiz-choice-wrong mobile-choice-wrong border-bad bg-badbg/85 text-bad',
-                  state === 'dim' && 'quiz-choice-dim mobile-choice-dim border-edge text-ink3 opacity-50',
+                  state === 'idle' &&
+                    'border-edge bg-panel2/40 text-ink hover:border-accent/60 hover:bg-panel2',
+                  state === 'correct' &&
+                    'quiz-choice-correct mobile-choice-correct border-good bg-goodbg/85 text-good',
+                  state === 'wrong' &&
+                    'quiz-choice-wrong mobile-choice-wrong border-bad bg-badbg/85 text-bad',
+                  state === 'dim' &&
+                    'quiz-choice-dim mobile-choice-dim border-edge text-ink3 opacity-50',
                 )}
               >
-                <span className={cn('grid h-4 w-4 shrink-0 place-items-center rounded bg-panel font-mono font-semibold text-ink3', vizText['2xs'])}>
+                <span
+                  className={cn(
+                    'grid h-4 w-4 shrink-0 place-items-center rounded bg-panel font-mono font-semibold text-ink3',
+                    vizText['2xs'],
+                  )}
+                >
                   {answered && c.correct ? (
                     <Check className="h-2.5 w-2.5" />
                   ) : answered && idx === picked ? (
@@ -224,7 +256,10 @@ export function makeQuizPanel(quiz: QuizQuestion[], config: QuizConfig = {}) {
             <button
               type="button"
               onClick={afterAnswer}
-              className={cn('inline-flex shrink-0 items-center gap-0.5 rounded-md bg-accent px-2 py-0.5 font-medium text-white hover:opacity-90', vizText['2xs'])}
+              className={cn(
+                'inline-flex shrink-0 items-center gap-0.5 rounded-md bg-accent px-2 py-0.5 font-medium text-white hover:opacity-90',
+                vizText['2xs'],
+              )}
             >
               Try again
               <ChevronRight className="h-3 w-3" />
@@ -360,7 +395,8 @@ export function makeSimulatePanel<I, S>(config: SimulateConfig<I, S>) {
             </button>
           ))}
           <span className="sim-meta">
-            Step {k + 1} / {frames.length}{mistakes > 0 ? ` · ${mistakes} mistake${mistakes === 1 ? '' : 's'}` : ''}
+            Step {k + 1} / {frames.length}
+            {mistakes > 0 ? ` · ${mistakes} mistake${mistakes === 1 ? '' : 's'}` : ''}
           </span>
         </div>
 
@@ -383,13 +419,17 @@ export function makeSimulatePanel<I, S>(config: SimulateConfig<I, S>) {
             {feedback && !done && (
               <div className="quiz-explain mt-2 flex items-start gap-1.5 rounded-lg border-l-2 border-bad bg-badbg/15 px-2 py-1.5">
                 <span className={cn('shrink-0 font-semibold text-bad', vizText.xs)}>Try again</span>
-                <p className={cn('min-w-0 flex-1 leading-snug text-ink2', vizText.xs)}>{feedback}</p>
+                <p className={cn('min-w-0 flex-1 leading-snug text-ink2', vizText.xs)}>
+                  {feedback}
+                </p>
               </div>
             )}
 
             {done ? (
               <div className="sim-finish">
-                {result && <div className={`verdict ${result.ok ? 'ok' : 'bad'}`}>{result.label}</div>}
+                {result && (
+                  <div className={`verdict ${result.ok ? 'ok' : 'bad'}`}>{result.label}</div>
+                )}
                 <button className="primary" onClick={() => pickInput(inputId)}>
                   ↺ replay
                 </button>
@@ -404,7 +444,11 @@ export function makeSimulatePanel<I, S>(config: SimulateConfig<I, S>) {
                       className={cn(
                         'sim-option',
                         wrong === o && 'sim-option--wrong',
-                        picked === o && opt && o === opt.correct ? 'sim-option--correct' : picked === o && wrong !== o ? 'sim-option--selected' : '',
+                        picked === o && opt && o === opt.correct
+                          ? 'sim-option--correct'
+                          : picked === o && wrong !== o
+                            ? 'sim-option--selected'
+                            : '',
                         picked !== o && wrong !== o ? 'sim-option--idle' : '',
                       )}
                       onClick={() => choose(o)}
@@ -488,7 +532,10 @@ function CaseCard<I, S>({
   // still finishes in ~TARGET_LOOP_MS without per-frame ticks dragging on.
   const stride = Math.max(1, Math.ceil(frames.length / TARGET_STEPS));
   const ticks = Math.min(frames.length, TARGET_STEPS);
-  const stepDelay = Math.max(MIN_STEP_MS, Math.min(MAX_STEP_MS, Math.round(TARGET_LOOP_MS / ticks)));
+  const stepDelay = Math.max(
+    MIN_STEP_MS,
+    Math.min(MAX_STEP_MS, Math.round(TARGET_LOOP_MS / ticks)),
+  );
 
   const [k, setK] = useState(0);
   const [playing, setPlaying] = useState(true);
@@ -525,16 +572,21 @@ function CaseCard<I, S>({
     setPlaying(false);
     setK((x) => Math.max(0, Math.min(last, x + d)));
   };
-    const toneChip =
-      tone === 'ok'
-        ? 'rounded-full border border-good bg-goodbg/35 text-good'
-        : 'rounded-full border border-bad bg-badbg/35 text-bad';
+  const toneChip =
+    tone === 'ok'
+      ? 'rounded-full border border-good bg-goodbg/35 text-good'
+      : 'rounded-full border border-bad bg-badbg/35 text-bad';
 
   return (
-    <div ref={ref} className="flex flex-col gap-2 rounded-[var(--radius)] border border-edge bg-panel p-3">
+    <div
+      ref={ref}
+      className="flex flex-col gap-2 rounded-[var(--radius)] border border-edge bg-panel p-3"
+    >
       <div className="flex items-center justify-between gap-2">
         <span className={cn('font-medium text-ink', vizText.base)}>{c.title}</span>
-        <span className={cn('shrink-0 px-2 py-0.5', vizText.xs, vizText.mono, toneChip)}>{tone}</span>
+        <span className={cn('shrink-0 px-2 py-0.5', vizText.xs, vizText.mono, toneChip)}>
+          {tone}
+        </span>
         {c.returns && (
           <span
             className={cn(
@@ -561,11 +613,13 @@ function CaseCard<I, S>({
       {animated && (
         <>
           <div className={cn('flex items-center gap-1.5 text-ink3', vizText.xs)}>
-            <span className={cn(toneChip, 'px-2 py-0.5')}>
-              {playing ? 'auto-play' : 'paused'}
+            <span className={cn(toneChip, 'px-2 py-0.5')}>{playing ? 'auto-play' : 'paused'}</span>
+            <span className="rounded-full border border-edge bg-panel2 px-2 py-0.5 text-ink3">
+              frame {k + 1}/{frames.length}
             </span>
-            <span className="rounded-full border border-edge bg-panel2 px-2 py-0.5 text-ink3">frame {k + 1}/{frames.length}</span>
-            <span className="rounded-full border border-edge bg-panel2 px-2 py-0.5 text-ink3">stride {stride}x</span>
+            <span className="rounded-full border border-edge bg-panel2 px-2 py-0.5 text-ink3">
+              stride {stride}x
+            </span>
           </div>
 
           <div
@@ -595,10 +649,22 @@ function CaseCard<I, S>({
             >
               {playing ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
             </button>
-            <button type="button" className={ctrlBtn} title="Step back" aria-label="Step back" onClick={() => step(-1)}>
+            <button
+              type="button"
+              className={ctrlBtn}
+              title="Step back"
+              aria-label="Step back"
+              onClick={() => step(-1)}
+            >
               <ChevronLeft className="h-3.5 w-3.5" />
             </button>
-            <button type="button" className={ctrlBtn} title="Step forward" aria-label="Step forward" onClick={() => step(1)}>
+            <button
+              type="button"
+              className={ctrlBtn}
+              title="Step forward"
+              aria-label="Step forward"
+              onClick={() => step(1)}
+            >
               <ChevronRight className="h-3.5 w-3.5" />
             </button>
             <input
@@ -657,7 +723,9 @@ export function makeCasesPanel<I, S>(config: CasesConfig<I, S>) {
       v: c.id,
       label: (
         <span className="inline-flex items-center gap-1" title={c.title}>
-          <span className={cn('h-1.5 w-1.5 rounded-full', c.tone === 'bad' ? 'bg-bad' : 'bg-good')} />
+          <span
+            className={cn('h-1.5 w-1.5 rounded-full', c.tone === 'bad' ? 'bg-bad' : 'bg-good')}
+          />
           {i + 1}
         </span>
       ),

@@ -145,7 +145,11 @@ export function PanelNodeHeader({
         setTracePreviewOpen(true);
       },
     },
-    { label: data.collapsed ? 'Restore panel' : 'Minimize panel', icon: <ChevronsDownUp className={nodeIconGlyph} />, onClick: minimize },
+    {
+      label: data.collapsed ? 'Restore panel' : 'Minimize panel',
+      icon: <ChevronsDownUp className={nodeIconGlyph} />,
+      onClick: minimize,
+    },
     { label: 'Focus panel', icon: <Crosshair className={nodeIconGlyph} />, onClick: focus },
     { label: 'Cycle accent', icon: <Palette className={nodeIconGlyph} />, onClick: cycleAccent },
     {
@@ -206,9 +210,17 @@ export function PanelNodeHeader({
   const showInlineSideToggle = showSideToggle && !isViz && !isWorkbench;
 
   return (
-    <PanelHeader selected={selected} collapsed={collapsed} locked={locked} density={density} className={headerClassName}>
+    <PanelHeader
+      selected={selected}
+      collapsed={collapsed}
+      locked={locked}
+      density={density}
+      className={headerClassName}
+    >
       {!locked && mode !== 'visualize' && <PanelHeaderGrip density={density} />}
-      <PanelHeaderIcon density={density}>{panelKindIcon(data.kind) ?? <FileQuestion className={nodeIconGlyph} />}</PanelHeaderIcon>
+      <PanelHeaderIcon density={density}>
+        {panelKindIcon(data.kind) ?? <FileQuestion className={nodeIconGlyph} />}
+      </PanelHeaderIcon>
 
       <PanelHeaderTitle density={density} className={locked ? 'cursor-default' : undefined}>
         {data.title}

@@ -1,11 +1,5 @@
 import { useRef } from 'react';
-import {
-  ReactFlow,
-  ReactFlowProvider,
-  Background,
-  BackgroundVariant,
-  Panel,
-} from '@xyflow/react';
+import { ReactFlow, ReactFlowProvider, Background, BackgroundVariant, Panel } from '@xyflow/react';
 import { cn } from '@/lib/utils/cn';
 import { KeyboardHud } from '../ui/KeyboardHud';
 import { onVimFlowError } from './canvasFlowErrors';
@@ -23,7 +17,10 @@ function VimDojoFlow() {
   const { grid } = useVimGame();
   useVimKeyboard();
 
-  const { nodes, edges, onNodesChange, onEdgesChange, cellSize } = useStudioLayout(grid, containerRef);
+  const { nodes, edges, onNodesChange, onEdgesChange, cellSize } = useStudioLayout(
+    grid,
+    containerRef,
+  );
 
   return (
     <VimLayoutProvider cellSize={cellSize}>

@@ -1,8 +1,23 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailStack, RailResult } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailStack,
+  RailResult,
+} from '../../../_shared/vizKit';
 
 interface SubarrayInput {
   nums: number[];
@@ -108,21 +123,30 @@ function View({ frame }: PluginViewProps<SubarrayState>) {
   };
   const mapItems = s.map.map(([rem, idx]) => `${rem}:${idx}`);
   return (
-    <VizStage railWidth={150} rail={<>
-      <RailGroup label="scan">
-        <RailStat k="k" v={s.k} />
-        <RailStat k="prefix%k" v={s.prefix ?? '—'} tone="accent" />
-        <RailStat k="prev idx" v={s.prev ?? '—'} tone={s.prev !== null && s.prev >= 0 ? 'good' : undefined} />
-      </RailGroup>
-      <RailStack label="map (rem:idx)" items={mapItems} />
-      {s.result !== null && (
-        <RailResult
-          label="answer"
-          value={s.result ? 'true' : 'false'}
-          tone={s.result ? 'good' : 'bad'}
-        />
-      )}
-    </>}>
+    <VizStage
+      railWidth={150}
+      rail={
+        <>
+          <RailGroup label="scan">
+            <RailStat k="k" v={s.k} />
+            <RailStat k="prefix%k" v={s.prefix ?? '—'} tone="accent" />
+            <RailStat
+              k="prev idx"
+              v={s.prev ?? '—'}
+              tone={s.prev !== null && s.prev >= 0 ? 'good' : undefined}
+            />
+          </RailGroup>
+          <RailStack label="map (rem:idx)" items={mapItems} />
+          {s.result !== null && (
+            <RailResult
+              label="answer"
+              value={s.result ? 'true' : 'false'}
+              tone={s.result ? 'good' : 'bad'}
+            />
+          )}
+        </>
+      }
+    >
       <ArrayRow values={s.nums} cellTone={tone} pointers={pointers} windowRange={s.window} />
     </VizStage>
   );
@@ -139,10 +163,7 @@ function Inspector({ frame }: InspectorProps<SubarrayState>) {
       <InspectorRow k="prefix % k" v={s.prefix ?? '—'} />
       <InspectorRow k="first seen at" v={s.prev ?? '—'} />
       <InspectorRow k="map size" v={s.map.length} />
-      <InspectorRow
-        k="result"
-        v={s.result === null ? '…' : s.result ? 'true' : 'false'}
-      />
+      <InspectorRow k="result" v={s.result === null ? '…' : s.result ? 'true' : 'false'} />
     </VarGrid>
   );
 }
@@ -150,129 +171,128 @@ function Inspector({ frame }: InspectorProps<SubarrayState>) {
 export const manifestId = 'prep-prefix-sum-continuous-subarray-sum';
 export const title = 'Continuous Subarray Sum';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Continuous Subarray Sum\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Continuous Subarray Sum"?',
     choices: [
       {
-        label: "Prefix Sum Mod Map — fits this problem",
-        correct: true
+        label: 'Prefix Sum Mod Map — fits this problem',
+        correct: true,
       },
       {
-        label: "Prefix Sum Map — different approach"
+        label: 'Prefix Sum Map — different approach',
       },
       {
-        label: "Difference Array + Prefix Sum — different approach"
-      }
+        label: 'Difference Array + Prefix Sum — different approach',
+      },
     ],
-    explain: "`prefix[j] - prefix[i]` is a multiple of `k` iff `prefix[j] % k == prefix[i] % k`"
+    explain: '`prefix[j] - prefix[i]` is a multiple of `k` iff `prefix[j] % k == prefix[i] % k`',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Continuous Subarray Sum), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Continuous Subarray Sum), what strategy is established?',
     choices: [
       {
-        label: "`prefix[j] - prefix[i]` is a multiple — described in INIT caption",
-        correct: true
+        label: '`prefix[j] - prefix[i]` is a multiple — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Continuous Subarray Sum: is there a subarray of length >= 2 whose sum is a multiple of ? Key fact: sum(i+1..j) is a multiple of  exactly when prefix[j] %  == prefix[i] % . We seed the map with remainder 0 -> index -1 so a whole prefix that is itself a multiple counts."
+    explain:
+      'Continuous Subarray Sum: is there a subarray of length >= 2 whose sum is a multiple of ? Key fact: sum(i+1..j) is a multiple of  exactly when prefix[j] %  == prefix[i] % . We seed the map with remainder 0 -> index -1 so a whole prefix that is itself a multiple counts.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"TOOSHORT\" step (gap <2), what happens?",
+    id: 'key-step',
+    prompt: 'On the "TOOSHORT" step (gap <2), what happens?',
     choices: [
       {
-        label: "Remainder was last seen at index — this move caption",
-        correct: true
+        label: 'Remainder was last seen at index — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Remainder  was last seen at index , but  −  =  < 2, so the subarray would have length 1. Keep the earlier index  (we want the first occurrence) and move on."
+    explain:
+      'Remainder  was last seen at index , but  −  =  < 2, so the subarray would have length 1. Keep the earlier index  (we want the first occurrence) and move on.',
   },
   {
-    id: "state",
-    prompt: "What does the `i` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: "current index being scanned — updated each frame",
-        correct: true
+        label: 'current index being scanned — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `i` in sync: current index being scanned"
+    explain: 'The recorder keeps `i` in sync: current index being scanned',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Continuous Subarray Sum\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Continuous Subarray Sum"?',
     choices: [
       {
-        label: "O(n) time, O(min(n,k)) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(min(n,k)) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n+m) time, O(n) space — wrong order of growth"
+        label: 'O(n+m) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
+        label: 'O(n²) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(1) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(min(n,k)). `prefix[j] - prefix[i]` is a multiple of `k` iff `prefix[j] % k == prefix[i] % k`; Store first occurrence index of each `prefix % k` in a map; seed `{0: -1}` fo"
+    explain:
+      'O(n). O(min(n,k)). `prefix[j] - prefix[i]` is a multiple of `k` iff `prefix[j] % k == prefix[i] % k`; Store first occurrence index of each `prefix % k` in a map; seed `{0: -1}` fo',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Remainder is new — record map[] — final DONE caption",
-        correct: true
+        label: 'Remainder is new — record map[] — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Remainder  is new — record map[] =  as its first occurrence so a later match can form a subarray back to here."
-  }
+    explain:
+      'Remainder  is new — record map[] =  as its first occurrence so a later match can form a subarray back to here.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

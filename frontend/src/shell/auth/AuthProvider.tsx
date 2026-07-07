@@ -15,9 +15,10 @@ import {
   isArcadeConfigured,
   setPersonalRoomCode,
   setSessionToken,
-} from '@/shell/games/data/arcadeClient';
-import { getProfile, updateProfile } from '@/shell/games/data/db';
-import type { Profile } from '@/shell/games/data/types';
+  getProfile,
+  updateProfile,
+  type Profile,
+} from '@/platform';
 
 export interface AuthApi {
   configured: boolean;
@@ -27,7 +28,11 @@ export interface AuthApi {
   isAnonymous: boolean;
   ensureSignedIn: () => Promise<string | null>;
   updateMyProfile: (patch: Partial<Pick<Profile, 'display_name' | 'avatar_seed'>>) => Promise<void>;
-  signUpEmail: (email: string, password: string, displayName: string) => Promise<{ error?: string }>;
+  signUpEmail: (
+    email: string,
+    password: string,
+    displayName: string,
+  ) => Promise<{ error?: string }>;
   signInEmail: (email: string, password: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;

@@ -64,12 +64,11 @@ export interface Verdict {
 /** Top-level canvas modes shown in the HUD. */
 export type CanvasMode = 'play' | 'learn' | 'visualize';
 
-/** Plugin tab mode — `practice` is a legacy alias for `learn`. */
 export type PluginTabMode = CanvasMode | 'practice';
 
-/** Normalize share URL / legacy mode strings to a canvas mode. */
+/** Normalize share URL mode strings to a canvas mode. */
 export function normalizeCanvasMode(m?: string): CanvasMode {
-  if (m === 'learn' || m === 'practice' || m === 'code') return 'learn';
+  if (m === 'learn' || m === 'code') return 'learn';
   if (m === 'visualize') return 'visualize';
   return 'play';
 }

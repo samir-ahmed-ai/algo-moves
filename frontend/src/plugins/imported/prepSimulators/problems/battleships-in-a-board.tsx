@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -20,21 +26,22 @@ interface BattleshipsState {
   done: boolean;
 }
 
-function record({ board }: BattleshipsInput): Frame<BattleshipsState>[] {  const counted: [number, number][] = [];
+function record({ board }: BattleshipsInput): Frame<BattleshipsState>[] {
+  const counted: [number, number][] = [];
   let count = 0;
   const rows = board.length;
   const cols = board[0]?.length ?? 0;
 
   const { emit, frames } = createRecorder<BattleshipsState>(() => ({
-        board,
-        i: null,
-        j: null,
-        count,
-        counted: counted.map((c): [number, number] => [c[0], c[1]]),
-        isShip: false,
-        isCorner: false,
-        done: false
-      }));
+    board,
+    i: null,
+    j: null,
+    count,
+    counted: counted.map((c): [number, number] => [c[0], c[1]]),
+    isShip: false,
+    isCorner: false,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -68,7 +75,9 @@ function record({ board }: BattleshipsInput): Frame<BattleshipsState>[] {  const
           'good',
         );
       } else {
-        const reason = !up ? `the cell above (${i - 1}, ${j}) is also 'X'` : `the cell to the left (${i}, ${j - 1}) is also 'X'`;
+        const reason = !up
+          ? `the cell above (${i - 1}, ${j}) is also 'X'`
+          : `the cell to the left (${i}, ${j - 1}) is also 'X'`;
         emit(
           'BODY',
           `(${i},${j}) body`,
@@ -105,14 +114,19 @@ function View({ frame }: PluginViewProps<BattleshipsState>) {
         ships counted = <span className="font-mono text-ink">{s.count}</span>
         {active && (
           <>
-            {' · '}at (<span className="font-mono text-ink">{active[0]}, {active[1]}</span>)
+            {' · '}at (
+            <span className="font-mono text-ink">
+              {active[0]}, {active[1]}
+            </span>
+            )
           </>
         )}
       </div>
       <GridBoard grid={grid} cellTone={cellTone} active={active} />
       <div className={cn(vizText.xs, 'text-ink3')}>
         <span className="font-mono text-good">highlighted</span> = counted top-left corner ·{' '}
-        <span className="font-mono">X</span> = ship body · <span className="font-mono">·</span> = water
+        <span className="font-mono">X</span> = ship body · <span className="font-mono">·</span> =
+        water
       </div>
       {s.done && (
         <div className={cn('mt-1 font-mono text-good', vizText.base)}>
@@ -132,7 +146,10 @@ function Inspector({ frame }: InspectorProps<BattleshipsState>) {
       <InspectorRow k="cell (i,j)" v={s.i !== null && s.j !== null ? `(${s.i}, ${s.j})` : '—'} />
       <InspectorRow k="value" v={cell === null ? '—' : cell === 'X' ? "'X'" : "'.'"} />
       <InspectorRow k="is ship" v={s.isShip ? 'yes' : 'no'} />
-      <InspectorRow k="top-left corner" v={s.isCorner ? 'yes — counted' : s.isShip ? 'no (body)' : '—'} />
+      <InspectorRow
+        k="top-left corner"
+        v={s.isCorner ? 'yes — counted' : s.isShip ? 'no (body)' : '—'}
+      />
       <InspectorRow k="ships" v={s.count} />
       <InspectorRow k="status" v={s.done ? 'done' : 'scanning'} />
     </VarGrid>
@@ -142,132 +159,129 @@ function Inspector({ frame }: InspectorProps<BattleshipsState>) {
 export const manifestId = 'prep-matrices-battleships-in-a-board';
 export const title = 'Battleships in a Board';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Battleships in a Board\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Battleships in a Board"?',
     choices: [
       {
-        label: "Single Pass — fits this problem",
-        correct: true
+        label: 'Single Pass — fits this problem',
+        correct: true,
       },
       {
-        label: "4-direction DP — different approach"
+        label: '4-direction DP — different approach',
       },
       {
-        label: "Row Comparison (same or inverse of row 0) — different approach"
+        label: 'Row Comparison (same or inverse of row 0) — different approach',
       },
       {
-        label: "Grid DFS pathfinding — different approach"
-      }
+        label: 'Grid DFS pathfinding — different approach',
+      },
     ],
-    explain: "See Battleships In A Board pattern"
+    explain: 'See Battleships In A Board pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Battleships in a Board), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Battleships in a Board), what strategy is established?',
     choices: [
       {
-        label: "See Battleships In A Board pattern — described in INIT caption",
-        correct: true
+        label: 'See Battleships In A Board pattern — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Battleships in a Board: count how many ships ('X' runs) sit on the grid. The trick is a single O(m·n) pass with no extra space — count only a ship's top-left corner: an 'X' whose neighbours above and to the left are NOT 'X'."
+    explain:
+      "Battleships in a Board: count how many ships ('X' runs) sit on the grid. The trick is a single O(m·n) pass with no extra space — count only a ship's top-left corner: an 'X' whose neighbours above and to the left are NOT 'X'.",
   },
   {
-    id: "key-step",
-    prompt: "On the \"CORNER\" step (ship #), what happens?",
+    id: 'key-step',
+    prompt: 'On the "CORNER" step (ship #), what happens?',
     choices: [
       {
         label: "Cell (, ) is 'X' — this move caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Cell (, ) is 'X' and both its top neighbour ${i === 0 ? '(off-board)' : "
+    explain: "Cell (, ) is 'X' and both its top neighbour ${i === 0 ? '(off-board)' : ",
   },
   {
-    id: "state",
-    prompt: "What does the `i` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: "current row — updated each frame",
-        correct: true
+        label: 'current row — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `i` in sync: current row"
+    explain: 'The recorder keeps `i` in sync: current row',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Battleships in a Board\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Battleships in a Board"?',
     choices: [
       {
-        label: "O(m·n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(m·n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n³) time, O(n) space — wrong order of growth"
+        label: 'O(n³) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n log n) per axis time, O(n) space — wrong order of growth"
+        label: 'O(n log n) per axis time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(m·n). O(1). Battleships In A Board"
+    explain: 'O(m·n). O(1). Battleships In A Board',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Finished the single pass over — final DONE caption",
-        correct: true
+        label: 'Finished the single pass over — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Finished the single pass over all  cells. Each ship was counted exactly once at its top-left corner, giving  battleship."
-  }
+    explain:
+      'Finished the single pass over all  cells. Each ship was counted exactly once at its top-left corner, giving  battleship.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

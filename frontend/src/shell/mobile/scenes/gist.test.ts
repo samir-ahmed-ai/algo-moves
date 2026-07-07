@@ -24,7 +24,8 @@ describe('gist', () => {
     const priority = problems.filter((i) => (PRIORITY as readonly string[]).includes(shapeFor(i)));
     expect(priority.length).toBeGreaterThan(60);
     for (const item of priority) {
-      const curated = PROBLEM_GISTS[item.id] ?? (item.pluginId ? PROBLEM_GISTS[item.pluginId] : undefined);
+      const curated =
+        PROBLEM_GISTS[item.id] ?? (item.pluginId ? PROBLEM_GISTS[item.pluginId] : undefined);
       expect(curated, `missing curated gist for ${item.id}`).toBeTruthy();
       expect(curated!.length, item.id).toBeLessThanOrEqual(100);
     }

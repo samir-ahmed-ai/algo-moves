@@ -3,7 +3,15 @@ import { GraduationCap } from 'lucide-react';
 import { patternsForTags } from '../../../content';
 import { cn } from '@/lib/utils/cn';
 
-import { useCanvasStatic, Banner, Chip, EmptyState, Label, Section, nodeText } from '@/shell/canvas';
+import {
+  useCanvasStatic,
+  Banner,
+  Chip,
+  EmptyState,
+  Label,
+  Section,
+  nodeText,
+} from '@/shell/canvas';
 function PatField({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div>
@@ -19,7 +27,11 @@ export function PatternPanelBody() {
   const cards = patternsForTags(item.tags);
   if (cards.length === 0) {
     return (
-      <EmptyState icon={<GraduationCap className="h-5 w-5" />} title="No pattern yet" hint="This problem's tags have no pattern card." />
+      <EmptyState
+        icon={<GraduationCap className="h-5 w-5" />}
+        title="No pattern yet"
+        hint="This problem's tags have no pattern card."
+      />
     );
   }
   return (
@@ -38,8 +50,14 @@ export function PatternPanelBody() {
             <PatField label="Complexity">{c.complexity}</PatField>
             {c.tradeoff && <PatField label="Brute force vs optimal">{c.tradeoff}</PatField>}
             <PatField label="Real-world">{c.realWorld}</PatField>
-            {c.pitfall && <Banner tone="bad" label="Common pitfall">{c.pitfall}</Banner>}
-            <Banner tone="accent" label="Interview tip">{c.interviewTip}</Banner>
+            {c.pitfall && (
+              <Banner tone="bad" label="Common pitfall">
+                {c.pitfall}
+              </Banner>
+            )}
+            <Banner tone="accent" label="Interview tip">
+              {c.interviewTip}
+            </Banner>
           </div>
         </Section>
       ))}

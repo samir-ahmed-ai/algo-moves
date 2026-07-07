@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, RailGroup, RailResult, RailStat, RailStack, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  RailGroup,
+  RailResult,
+  RailStat,
+  RailStack,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+} from '../../../_shared/vizKit';
 
 interface RsqInput {
   matrix: number[][];
@@ -26,24 +40,36 @@ interface RsqState {
 function record({ matrix, row1, col1, row2, col2 }: RsqInput): Frame<RsqState>[] {
   const m = matrix.length;
   const n = matrix[0].length;
-  const pre: (number | null)[][] = Array.from({ length: m + 1 }, () => new Array<number | null>(n + 1).fill(null));
+  const pre: (number | null)[][] = Array.from({ length: m + 1 }, () =>
+    new Array<number | null>(n + 1).fill(null),
+  );
   const query = { row1, col1, row2, col2 };
   const { emit, frames } = createRecorder<RsqState>(() => ({
-        matrix: matrix,
-        pre: pre.map((r) => r.slice()),
-        query: query,
-        cur: null,
-        corners: [],
-        answer: null,
-        done: false
-      }));
+    matrix: matrix,
+    pre: pre.map((r) => r.slice()),
+    query: query,
+    cur: null,
+    corners: [],
+    answer: null,
+    done: false,
+  }));
 
-  emit('INIT', `${m}×${n} matrix`, `Range Sum Query 2D: build a (${m + 1}×${n + 1}) prefix-sum table where pre[i][j] is the sum of every matrix cell in rows 0..${'<'}${'i'} and cols 0..${'<'}${'j'}. The padded zero row and column make the recurrence clean.`, { cur: null, corners: [], answer: null });
+  emit(
+    'INIT',
+    `${m}×${n} matrix`,
+    `Range Sum Query 2D: build a (${m + 1}×${n + 1}) prefix-sum table where pre[i][j] is the sum of every matrix cell in rows 0..${'<'}${'i'} and cols 0..${'<'}${'j'}. The padded zero row and column make the recurrence clean.`,
+    { cur: null, corners: [], answer: null },
+  );
 
   // Zero-padding row and column.
   for (let j = 0; j <= n; j++) pre[0][j] = 0;
   for (let i = 0; i <= m; i++) pre[i][0] = 0;
-  emit('BASE', `border = 0`, `Base case: every cell in row 0 and column 0 of the prefix table is 0 — an empty rectangle sums to 0.`, { cur: null, corners: [], answer: null });
+  emit(
+    'BASE',
+    `border = 0`,
+    `Base case: every cell in row 0 and column 0 of the prefix table is 0 — an empty rectangle sums to 0.`,
+    { cur: null, corners: [], answer: null },
+  );
 
   for (let i = 1; i <= m; i++) {
     for (let j = 1; j <= n; j++) {
@@ -52,11 +78,21 @@ function record({ matrix, row1, col1, row2, col2 }: RsqInput): Frame<RsqState>[]
       const left = pre[i][j - 1] as number;
       const diag = pre[i - 1][j - 1] as number;
       pre[i][j] = cell + top + left - diag;
-      emit('FILL', `pre[${i}][${j}]=${pre[i][j]}`, `pre[${i}][${j}] = matrix[${i - 1}][${j - 1}](${cell}) + pre[${i - 1}][${j}](${top}) + pre[${i}][${j - 1}](${left}) − pre[${i - 1}][${j - 1}](${diag}) = ${pre[i][j]}.`, { cur: [i, j], corners: [], answer: null });
+      emit(
+        'FILL',
+        `pre[${i}][${j}]=${pre[i][j]}`,
+        `pre[${i}][${j}] = matrix[${i - 1}][${j - 1}](${cell}) + pre[${i - 1}][${j}](${top}) + pre[${i}][${j - 1}](${left}) − pre[${i - 1}][${j - 1}](${diag}) = ${pre[i][j]}.`,
+        { cur: [i, j], corners: [], answer: null },
+      );
     }
   }
 
-  emit('FULL', `table done`, `The prefix-sum table is complete. Any rectangle sum is now an O(1) query via inclusion-exclusion. Let us query sumRegion(${row1}, ${col1}, ${row2}, ${col2}).`, { cur: null, corners: [], answer: null });
+  emit(
+    'FULL',
+    `table done`,
+    `The prefix-sum table is complete. Any rectangle sum is now an O(1) query via inclusion-exclusion. Let us query sumRegion(${row1}, ${col1}, ${row2}, ${col2}).`,
+    { cur: null, corners: [], answer: null },
+  );
 
   // Inclusion-exclusion corners (in pre coordinates).
   const A: [number, number] = [row2 + 1, col2 + 1]; // +
@@ -74,13 +110,39 @@ function record({ matrix, row1, col1, row2, col2 }: RsqInput): Frame<RsqState>[]
     { cell: D, sign: 1 },
   ];
 
-  emit('QUERY', `+pre[${A[0]}][${A[1]}]=${vA}`, `Start with the big rectangle pre[${A[0]}][${A[1]}] = ${vA}: the sum of everything from the origin to the bottom-right corner of the query.`, { cur: A, corners: [all[0]], answer: null });
-  emit('QUERY', `−pre[${B[0]}][${B[1]}]=${vB}`, `Subtract the band above the query: pre[${B[0]}][${B[1]}] = ${vB}.`, { cur: B, corners: [all[0], all[1]], answer: null });
-  emit('QUERY', `−pre[${C[0]}][${C[1]}]=${vC}`, `Subtract the band left of the query: pre[${C[0]}][${C[1]}] = ${vC}.`, { cur: C, corners: [all[0], all[1], all[2]], answer: null });
+  emit(
+    'QUERY',
+    `+pre[${A[0]}][${A[1]}]=${vA}`,
+    `Start with the big rectangle pre[${A[0]}][${A[1]}] = ${vA}: the sum of everything from the origin to the bottom-right corner of the query.`,
+    { cur: A, corners: [all[0]], answer: null },
+  );
+  emit(
+    'QUERY',
+    `−pre[${B[0]}][${B[1]}]=${vB}`,
+    `Subtract the band above the query: pre[${B[0]}][${B[1]}] = ${vB}.`,
+    { cur: B, corners: [all[0], all[1]], answer: null },
+  );
+  emit(
+    'QUERY',
+    `−pre[${C[0]}][${C[1]}]=${vC}`,
+    `Subtract the band left of the query: pre[${C[0]}][${C[1]}] = ${vC}.`,
+    { cur: C, corners: [all[0], all[1], all[2]], answer: null },
+  );
   const answer = vA - vB - vC + vD;
-  emit('QUERY', `+pre[${D[0]}][${D[1]}]=${vD}`, `The top-left overlap was removed twice, so add it back: pre[${D[0]}][${D[1]}] = ${vD}.`, { cur: D, corners: all, answer: null });
+  emit(
+    'QUERY',
+    `+pre[${D[0]}][${D[1]}]=${vD}`,
+    `The top-left overlap was removed twice, so add it back: pre[${D[0]}][${D[1]}] = ${vD}.`,
+    { cur: D, corners: all, answer: null },
+  );
 
-  emit('DONE', `sum = ${answer}`, `sumRegion(${row1}, ${col1}, ${row2}, ${col2}) = ${vA} − ${vB} − ${vC} + ${vD} = ${answer}.`, { cur: null, corners: all, answer: answer , done: true }, 'good');
+  emit(
+    'DONE',
+    `sum = ${answer}`,
+    `sumRegion(${row1}, ${col1}, ${row2}, ${col2}) = ${vA} − ${vB} − ${vC} + ${vD} = ${answer}.`,
+    { cur: null, corners: all, answer: answer, done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -88,7 +150,9 @@ function buildDisplay(state: RsqState): (number | string)[][] {
   const m = state.matrix.length;
   const n = state.matrix[0].length;
   // +1 for the prefix index header row/col labels (0..n / 0..m).
-  const display: (number | string)[][] = Array.from({ length: m + 2 }, () => new Array<number | string>(n + 2).fill(''));
+  const display: (number | string)[][] = Array.from({ length: m + 2 }, () =>
+    new Array<number | string>(n + 2).fill(''),
+  );
   display[0][0] = 'pre';
   for (let j = 0; j <= n; j++) display[0][j + 1] = `j${j}`;
   for (let i = 0; i <= m; i++) display[i + 1][0] = `i${i}`;
@@ -116,7 +180,10 @@ function View({ frame }: PluginViewProps<RsqState>) {
     return v === null ? '' : 'visited';
   };
   const cellVal = s.cur ? s.pre[s.cur[0]][s.cur[1]] : null;
-  const corners = s.corners.map(({ cell, sign }) => ({ label: `${sign > 0 ? '+' : '−'}[${cell[0]},${cell[1]}]`, tone: sign === 1 ? 'good' as const : 'bad' as const }));
+  const corners = s.corners.map(({ cell, sign }) => ({
+    label: `${sign > 0 ? '+' : '−'}[${cell[0]},${cell[1]}]`,
+    tone: sign === 1 ? ('good' as const) : ('bad' as const),
+  }));
   const rail = (
     <>
       <RailGroup label="query">
@@ -130,7 +197,11 @@ function View({ frame }: PluginViewProps<RsqState>) {
         </RailGroup>
       )}
       {corners.length > 0 && <RailStack label="corners" items={corners} />}
-      <RailResult label="sumRegion" value={s.answer === null ? '…' : s.answer} tone={s.done ? 'good' : 'accent'} />
+      <RailResult
+        label="sumRegion"
+        value={s.answer === null ? '…' : s.answer}
+        tone={s.done ? 'good' : 'accent'}
+      />
     </>
   );
   return (
@@ -149,7 +220,10 @@ function Inspector({ frame }: InspectorProps<RsqState>) {
   return (
     <VarGrid>
       <InspectorRow k="matrix" v={`${s.matrix.length}×${s.matrix[0].length}`} />
-      <InspectorRow k="query" v={`(${s.query.row1},${s.query.col1})→(${s.query.row2},${s.query.col2})`} />
+      <InspectorRow
+        k="query"
+        v={`(${s.query.row1},${s.query.col1})→(${s.query.row2},${s.query.col2})`}
+      />
       <InspectorRow k="cell" v={s.cur ? `pre[${s.cur[0]}][${s.cur[1]}]` : '—'} />
       <InspectorRow k="cell value" v={cellStr} />
       <InspectorRow k="sumRegion" v={answer} />
@@ -165,12 +239,32 @@ export const simulator: ProblemSimulator = {
     {
       id: 'sample',
       label: 'sumRegion(1,1,2,2)',
-      value: { matrix: [[3, 0, 1, 4], [5, 6, 3, 2], [1, 2, 0, 1]], row1: 1, col1: 1, row2: 2, col2: 2 },
+      value: {
+        matrix: [
+          [3, 0, 1, 4],
+          [5, 6, 3, 2],
+          [1, 2, 0, 1],
+        ],
+        row1: 1,
+        col1: 1,
+        row2: 2,
+        col2: 2,
+      },
     },
     {
       id: 'top-left',
       label: 'sumRegion(0,0,1,1)',
-      value: { matrix: [[3, 0, 1, 4], [5, 6, 3, 2], [1, 2, 0, 1]], row1: 0, col1: 0, row2: 1, col2: 1 },
+      value: {
+        matrix: [
+          [3, 0, 1, 4],
+          [5, 6, 3, 2],
+          [1, 2, 0, 1],
+        ],
+        row1: 0,
+        col1: 0,
+        row2: 1,
+        col2: 1,
+      },
     },
   ] satisfies SampleInput<RsqInput>[],
   record,

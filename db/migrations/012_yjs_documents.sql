@@ -1,8 +1,8 @@
 -- Yjs CRDT document persistence for Hocuspocus (canvas room codes as document names).
-CREATE TABLE IF NOT EXISTS yjs_documents (
-  name TEXT PRIMARY KEY,
-  data BYTEA NOT NULL,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+create table if not exists public.yjs_documents (
+  name       text primary key,
+  data       bytea not null,
+  updated_at timestamptz not null default now()
 );
 
-CREATE INDEX IF NOT EXISTS yjs_documents_updated_at_idx ON yjs_documents (updated_at DESC);
+create index if not exists yjs_documents_updated_at_idx on public.yjs_documents (updated_at desc);

@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -22,13 +28,13 @@ interface DupState {
 
 function record({ nums }: DupInput): Frame<DupState>[] {
   const { emit, frames } = createRecorder<DupState>(() => ({
-        nums,
-        slow: 0,
-        fast: 0,
-        phase: 'init',
-        meetAt: null,
-        result: null
-      }));
+    nums,
+    slow: 0,
+    fast: 0,
+    phase: 'init',
+    meetAt: null,
+    result: null,
+  }));
 
   // Treat each value as a "next index" pointer: i -> nums[i]. Because values are
   // in [1, n-1] and there are n entries, a duplicate forces a cycle, and the
@@ -150,7 +156,10 @@ function Inspector({ frame }: InspectorProps<DupState>) {
       <InspectorRow k="phase" v={s.phase} />
       <InspectorRow k="slow (index)" v={s.slow} />
       <InspectorRow k="fast (index)" v={s.fast} />
-      <InspectorRow k="nums[slow]" v={s.slow >= 0 && s.slow < s.nums.length ? s.nums[s.slow] : '—'} />
+      <InspectorRow
+        k="nums[slow]"
+        v={s.slow >= 0 && s.slow < s.nums.length ? s.nums[s.slow] : '—'}
+      />
       <InspectorRow k="meet point" v={s.meetAt ?? '—'} />
       <InspectorRow k="duplicate" v={s.result ?? (s.phase === 'done' ? 'none' : '…')} />
     </VarGrid>
@@ -160,132 +169,130 @@ function Inspector({ frame }: InspectorProps<DupState>) {
 export const manifestId = 'prep-arrays-find-duplicate-number';
 export const title = 'Find duplicate number';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Find duplicate number\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Find duplicate number"?',
     choices: [
       {
-        label: "Floyd cycle — fits this problem",
-        correct: true
+        label: 'Floyd cycle — fits this problem',
+        correct: true,
       },
       {
-        label: "Heap + math — different approach"
+        label: 'Heap + math — different approach',
       },
       {
-        label: "One pass min price — different approach"
+        label: 'One pass min price — different approach',
       },
       {
-        label: "Two pointers swap — different approach"
-      }
+        label: 'Two pointers swap — different approach',
+      },
     ],
-    explain: "Values are jump links; the cycle's entrance is the duplicate"
+    explain: "Values are jump links; the cycle's entrance is the duplicate",
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Find duplicate number), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Find duplicate number), what strategy is established?',
     choices: [
       {
         label: "Values are jump links; the cycle's — described in INIT caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Find Duplicate (Floyd's tortoise & hare): read each value as a jump link i → nums[i]. A repeated value makes the chain loop, and the loop's entrance is the duplicate. Start slow one hop in (nums[0]=) and fast two hops in (nums[nums[0]]=)."
+    explain:
+      "Find Duplicate (Floyd's tortoise & hare): read each value as a jump link i → nums[i]. A repeated value makes the chain loop, and the loop's entrance is the duplicate. Start slow one hop in (nums[0]=) and fast two hops in (nums[nums[0]]=).",
   },
   {
-    id: "key-step",
-    prompt: "On the \"RESET\" step (slow=0), what happens?",
+    id: 'key-step',
+    prompt: 'On the "RESET" step (slow=0), what happens?',
     choices: [
       {
-        label: "Phase 2 — reset slow back — this move caption",
-        correct: true
+        label: 'Phase 2 — reset slow back — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Phase 2 — reset slow back to the start (index 0). Now advance both pointers one hop at a time; the spot where they meet is the cycle's entrance, which is the duplicate value."
+    explain:
+      "Phase 2 — reset slow back to the start (index 0). Now advance both pointers one hop at a time; the spot where they meet is the cycle's entrance, which is the duplicate value.",
   },
   {
-    id: "state",
-    prompt: "What does the `slow` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `slow` field track in the visualization state?',
     choices: [
       {
-        label: "tortoise index — updated each frame",
-        correct: true
+        label: 'tortoise index — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `slow` in sync: tortoise index"
+    explain: 'The recorder keeps `slow` in sync: tortoise index',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Find duplicate number\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Find duplicate number"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n³) time, O(n) space — wrong order of growth"
+        label: 'O(n³) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
+        label: 'O(log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). phase1 slow/fast till meet; phase2 reset slow=0, step both by 1"
+    explain: 'O(n). O(1). phase1 slow/fast till meet; phase2 reset slow=0, step both by 1',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Phase 2 done — the pointers — final DONE caption",
-        correct: true
+        label: 'Phase 2 done — the pointers — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Phase 2 done — the pointers meet at index . That index is the cycle entrance, so the duplicated number is ."
-  }
+    explain:
+      'Phase 2 done — the pointers meet at index . That index is the cycle entrance, so the duplicated number is .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from 'react';
 import { type CodePiece } from '@/lib/code';
 import {
   clearQuizProgress,
@@ -44,7 +51,9 @@ export function useCodeStudioMachine({
   const [phaseTransition, setPhaseTransition] = useState(false);
   const [reassembleKey, setReassembleKey] = useState(0);
 
-  const [phase, setPhase] = useState<CodeStudioPhase>(() => phaseLock ?? loadPhase(itemId, active, av));
+  const [phase, setPhase] = useState<CodeStudioPhase>(
+    () => phaseLock ?? loadPhase(itemId, active, av),
+  );
 
   const loadDraft = useCallback(
     (opts?: { itemSwitch?: boolean }) => loadPersistedDraft(draftKey, opts),

@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -20,18 +26,19 @@ interface StepsState {
 }
 
 function record({ s }: StepsInput): Frame<StepsState>[] {
-  const chars = s.split('');  let steps = 0;
+  const chars = s.split('');
+  let steps = 0;
   let carry = 0;
 
   const { emit, frames } = createRecorder<StepsState>(() => ({
-        chars,
-        i: null,
-        bit: null,
-        carry,
-        val: null,
-        steps,
-        done: false
-      }));
+    chars,
+    i: null,
+    bit: null,
+    carry,
+    val: null,
+    steps,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -78,7 +85,8 @@ function record({ s }: StepsInput): Frame<StepsState>[] {
 function View({ frame }: PluginViewProps<StepsState>) {
   const s = frame.state;
   const pointers: ArrayPointer[] = [];
-  if (s.i !== null && !s.done) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
+  if (s.i !== null && !s.done)
+    pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
   const tone = (i: number): string => {
     if (s.done && i === 0) return 'found';
     if (s.i === i && !s.done) return 'match';
@@ -91,8 +99,7 @@ function View({ frame }: PluginViewProps<StepsState>) {
         carry = <span className="font-mono text-ink">{s.carry}</span>
         {s.val !== null && !s.done && (
           <>
-            {' · '}bit + carry ={' '}
-            <span className="font-mono text-ink">{s.val}</span>
+            {' · '}bit + carry = <span className="font-mono text-ink">{s.val}</span>
           </>
         )}
       </div>
@@ -113,7 +120,10 @@ function Inspector({ frame }: InspectorProps<StepsState>) {
       <InspectorRow k="bit s[i]" v={s.bit ?? '—'} />
       <InspectorRow k="carry" v={s.carry} />
       <InspectorRow k="bit + carry" v={s.val ?? '—'} />
-      <InspectorRow k="parity" v={s.val === null ? '—' : s.val % 2 === 1 ? 'odd (+2)' : 'even (+1)'} />
+      <InspectorRow
+        k="parity"
+        v={s.val === null ? '—' : s.val % 2 === 1 ? 'odd (+2)' : 'even (+1)'}
+      />
       <InspectorRow k="steps" v={s.steps} />
     </VarGrid>
   );
@@ -134,135 +144,137 @@ function numSteps(s: string): number {
   return steps + carry;
 }
 
-export const manifestId = 'prep-strings-number-of-steps-to-reduce-a-number-in-binary-representation-';
+export const manifestId =
+  'prep-strings-number-of-steps-to-reduce-a-number-in-binary-representation-';
 export const title = 'Number of Steps to Reduce a Number in Binary to One';
-
-
-
-
-
 
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Number of Steps to Reduce a Number in Binary to One\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Number of Steps to Reduce a Number in Binary to One"?',
     choices: [
       {
-        label: "Right-to-Left with Carry — fits this problem",
-        correct: true
+        label: 'Right-to-Left with Carry — fits this problem',
+        correct: true,
       },
       {
-        label: "Multi-pointer Buckets — different approach"
+        label: 'Multi-pointer Buckets — different approach',
       },
       {
-        label: "Bitmask Hash Set — different approach"
+        label: 'Bitmask Hash Set — different approach',
       },
       {
-        label: "DP reachability — different approach"
-      }
+        label: 'DP reachability — different approach',
+      },
     ],
-    explain: "See Number Of Steps To Reduce A Number In Binary Representation To One pattern"
+    explain: 'See Number Of Steps To Reduce A Number In Binary Representation To One pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Number of Steps to Reduce a Number in Binary to One), what strategy is established?",
+    id: 'init',
+    prompt:
+      'At the start of a run (Number of Steps to Reduce a Number in Binary to One), what strategy is established?',
     choices: [
       {
-        label: "See Number Of Steps To Reduce — described in INIT caption",
-        correct: true
+        label: 'See Number Of Steps To Reduce — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Reduce the binary number  to 1. Rule: if the number is even, halve it (drop the last bit — 1 step); if odd, add 1 (2 steps to also halve). We simulate this bit-by-bit from the right, carrying a +1 when needed. Time O(n), Space O(1)."
+    explain:
+      'Reduce the binary number  to 1. Rule: if the number is even, halve it (drop the last bit — 1 step); if odd, add 1 (2 steps to also halve). We simulate this bit-by-bit from the right, carrying a +1 when needed. Time O(n), Space O(1).',
   },
   {
-    id: "key-step",
-    prompt: "On the \"EVEN\" step (+1), what happens?",
+    id: 'key-step',
+    prompt: 'On the "EVEN" step (+1), what happens?',
     choices: [
       {
-        label: "Bit at index is ; — this move caption",
-        correct: true
+        label: 'Bit at index is ; — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Bit at index  is ; with incoming carry  the value is , which is even. Just halve it — 1 step. No carry produced."
+    explain:
+      'Bit at index  is ; with incoming carry  the value is , which is even. Just halve it — 1 step. No carry produced.',
   },
   {
-    id: "state",
-    prompt: "What does the `i` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: "current bit being processed — updated each frame",
-        correct: true
+        label: 'current bit being processed — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `i` in sync: current bit being processed (right-to-left, stops before index 0)"
+    explain:
+      'The recorder keeps `i` in sync: current bit being processed (right-to-left, stops before index 0)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Number of Steps to Reduce a Number in Binary to One\"?",
+    id: 'complexity',
+    prompt:
+      'What are the time and space complexities for "Number of Steps to Reduce a Number in Binary to One"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
+        label: 'O(n²) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n^2) time, O(1) space — wrong order of growth"
+        label: 'O(n^2) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n^2) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n^2) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). Number Of Steps To Reduce A Number In Binary Representation To One"
+    explain: 'O(n). O(1). Number Of Steps To Reduce A Number In Binary Representation To One',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Reached the leading bit (index 0). — final DONE caption",
-        correct: true
+        label: 'Reached the leading bit (index 0). — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Reached the leading bit (index 0). Any leftover carry () is one final +1 step to turn the top bits into a single 1. Total steps = ."
-  }
+    explain:
+      'Reached the leading bit (index 0). Any leftover carry () is one final +1 step to turn the top bits into a single 1. Total steps = .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

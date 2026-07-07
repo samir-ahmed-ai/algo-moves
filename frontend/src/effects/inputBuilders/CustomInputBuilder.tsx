@@ -36,7 +36,12 @@ export function CustomInputBuilder({ onApply }: { onApply: (value: unknown) => v
           ))}
         </div>
       </Field>
-      <TextArea value={text} onChange={(e) => setText(e.target.value)} rows={5} className="font-mono" />
+      <TextArea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        rows={5}
+        className="font-mono"
+      />
       {err && <span className="text-bad text-xs">{err}</span>}
       <Btn variant="good" size="sm" onClick={apply}>
         Apply JSON

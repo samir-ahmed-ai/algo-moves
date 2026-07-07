@@ -45,8 +45,12 @@ export function GameChooser() {
 
   return (
     <div>
-      <h2 className="mb-1 text-center text-xl font-extrabold tracking-tight text-ink">{t.room.chooseGame}</h2>
-      <p className="mb-4 text-center text-sm text-ink3">{t.room.playersHere(playerCount, capacity)}</p>
+      <h2 className="mb-1 text-center text-xl font-extrabold tracking-tight text-ink">
+        {t.room.chooseGame}
+      </h2>
+      <p className="mb-4 text-center text-sm text-ink3">
+        {t.room.playersHere(playerCount, capacity)}
+      </p>
 
       <div className="mb-4 flex items-center justify-center">
         <FeatureSelectorPopover
@@ -119,14 +123,17 @@ function GameChooserCard({
   const fits = playerCount >= cap.min && playerCount <= cap.max;
   const meta = localizedGameMeta(game, locale);
   const color = gameAccentColor(game);
-  const paceLabel = game.pace === 'turns' ? `🔄 ${t.picker.paceTurns}` : `⚡ ${t.picker.paceTogether}`;
+  const paceLabel =
+    game.pace === 'turns' ? `🔄 ${t.picker.paceTurns}` : `⚡ ${t.picker.paceTogether}`;
 
   return (
     <div className="flex min-w-0 flex-col">
       <div
         className={cn(
           'group relative flex h-full flex-col rounded-2xl border-2 bg-panel/70 transition-all',
-          fits ? 'hover:-translate-y-0.5 hover:bg-panel hover:shadow-[var(--shadow-md)]' : 'opacity-50',
+          fits
+            ? 'hover:-translate-y-0.5 hover:bg-panel hover:shadow-[var(--shadow-md)]'
+            : 'opacity-50',
         )}
         style={fits ? { borderColor: `${color}40` } : { borderColor: 'var(--edge)' }}
       >
@@ -157,7 +164,9 @@ function GameChooserCard({
           </span>
 
           <span className="flex w-full min-w-0 flex-1 flex-col items-center gap-1">
-            <span className="line-clamp-2 text-sm font-bold leading-tight text-ink">{meta.title}</span>
+            <span className="line-clamp-2 text-sm font-bold leading-tight text-ink">
+              {meta.title}
+            </span>
             <span className="flex flex-wrap items-center justify-center gap-1">
               {game.category ? <CategoryBadge category={game.category} /> : null}
               {!fits ? (

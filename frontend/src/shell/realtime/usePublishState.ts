@@ -13,7 +13,11 @@ import { useEffect, useRef } from 'react';
  *
  *   usePublishState(role === 'host', [board, gen], () => publishBoard(board, gen));
  */
-export function usePublishState(enabled: boolean, deps: readonly unknown[], publish: () => void): void {
+export function usePublishState(
+  enabled: boolean,
+  deps: readonly unknown[],
+  publish: () => void,
+): void {
   const publishRef = useRef(publish);
   publishRef.current = publish;
   useEffect(() => {

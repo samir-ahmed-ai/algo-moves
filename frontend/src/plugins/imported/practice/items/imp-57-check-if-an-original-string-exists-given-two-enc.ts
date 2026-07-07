@@ -1,126 +1,137 @@
 import type { PracticeBundle } from '../../../_shared/pluginKit';
 
 export const bundle: PracticeBundle = {
-  "quiz": [
+  quiz: [
     {
-      "id": "category",
-      "prompt": "What algorithmic pattern does `possiblyEquals` use to decide if s1 and s2 could decode to the same string?",
-      "choices": [
+      id: 'category',
+      prompt:
+        'What algorithmic pattern does `possiblyEquals` use to decide if s1 and s2 could decode to the same string?',
+      choices: [
         {
-          "label": "Memoized DFS over a 3-D — state (i, j, diff)",
-          "correct": true
+          label: 'Memoized DFS over a 3-D — state (i, j, diff)',
+          correct: true,
         },
         {
-          "label": "Bottom-up 2D DP table — j)"
+          label: 'Bottom-up 2D DP table — j)',
         },
         {
-          "label": "BFS expanding all reachable (i — j) pairs level by level"
+          label: 'BFS expanding all reachable (i — j) pairs level by level',
         },
         {
-          "label": "Greedy: consume the smaller — The code calls btPossiblyEquals"
-        }
+          label: 'Greedy: consume the smaller — The code calls btPossiblyEquals',
+        },
       ],
-      "explain": "The code calls `btPossiblyEquals` recursively on state `(i, j, diff)` and caches results in a `map[[3]int]bool`. BFS and bottom-up DP don't appear; greedy can't handle ambiguous digit runs."
+      explain:
+        "The code calls `btPossiblyEquals` recursively on state `(i, j, diff)` and caches results in a `map[[3]int]bool`. BFS and bottom-up DP don't appear; greedy can't handle ambiguous digit runs.",
     },
     {
-      "id": "state-meaning",
-      "prompt": "In `btPossiblyEquals`, what does the integer `diff` represent at any point in the recursion?",
-      "choices": [
+      id: 'state-meaning',
+      prompt:
+        'In `btPossiblyEquals`, what does the integer `diff` represent at any point in the recursion?',
+      choices: [
         {
-          "label": "How many more characters s1 — has consumed than s2 from their",
-          "correct": true
+          label: 'How many more characters s1 — has consumed than s2 from their',
+          correct: true,
         },
         {
-          "label": "The total number of characters — remaining unmatched across both"
+          label: 'The total number of characters — remaining unmatched across both',
         },
         {
-          "label": "The index difference between i — and j"
+          label: 'The index difference between i — and j',
         },
         {
-          "label": "The numeric value — last digit run parsed from s1"
-        }
+          label: 'The numeric value — last digit run parsed from s1',
+        },
       ],
-      "explain": "When a digit run of value `num` is seen in s1 the code does `diff+num`; a digit run in s2 does `diff-num`. So `diff > 0` means s1's decoded side is ahead by that many characters, waiting for s2 to catch up."
+      explain:
+        "When a digit run of value `num` is seen in s1 the code does `diff+num`; a digit run in s2 does `diff-num`. So `diff > 0` means s1's decoded side is ahead by that many characters, waiting for s2 to catch up.",
     },
     {
-      "id": "digit-branching",
-      "prompt": "Why does the digit-handling loop (e.g., `for p := i; p < m && s1[p] >= '0'...`) iterate instead of consuming the whole digit run at once?",
-      "choices": [
+      id: 'digit-branching',
+      prompt:
+        "Why does the digit-handling loop (e.g., `for p := i; p < m && s1[p] >= '0'...`) iterate instead of consuming the whole digit run at once?",
+      choices: [
         {
-          "label": "Because any prefix — digit run is a valid interpretation",
-          "correct": true
+          label: 'Because any prefix — digit run is a valid interpretation',
+          correct: true,
         },
         {
-          "label": "To avoid integer overflow — the number exceeds 32 bits"
+          label: 'To avoid integer overflow — the number exceeds 32 bits',
         },
         {
-          "label": "Because only single-digit runs — allowed by the encoding"
+          label: 'Because only single-digit runs — allowed by the encoding',
         },
         {
-          "label": "To match the digit run — character-by-character against s2"
-        }
+          label: 'To match the digit run — character-by-character against s2',
+        },
       ],
-      "explain": "The encoded strings can represent any positive integer, and each prefix of a digit sequence is a separate valid number. The loop tries every prefix (1, 12, 123, …) and recurses from `p+1`, capturing all valid interpretations."
+      explain:
+        'The encoded strings can represent any positive integer, and each prefix of a digit sequence is a separate valid number. The loop tries every prefix (1, 12, 123, …) and recurses from `p+1`, capturing all valid interpretations.',
     },
     {
-      "id": "base-case",
-      "prompt": "What is the base case of `btPossiblyEquals` and what must be true for it to return `true`?",
-      "choices": [
+      id: 'base-case',
+      prompt:
+        'What is the base case of `btPossiblyEquals` and what must be true for it to return `true`?',
+      choices: [
         {
-          "label": "Both i == m and j == n — and diff == 0",
-          "correct": true
+          label: 'Both i == m and j == n — and diff == 0',
+          correct: true,
         },
         {
-          "label": "Either i == m or j == n — with no constraint on diff"
+          label: 'Either i == m or j == n — with no constraint on diff',
         },
         {
-          "label": "diff == 0 at any point — regardless of i and j"
+          label: 'diff == 0 at any point — regardless of i and j',
         },
         {
-          "label": "i == m and j — == n, regardless of the value of diff"
-        }
+          label: 'i == m and j — == n, regardless of the value of diff',
+        },
       ],
-      "explain": "The check `if i == m && j == n { return diff == 0 }` requires both strings to be fully consumed AND no outstanding imbalance. A nonzero diff means one decoded string is still longer than the other."
+      explain:
+        'The check `if i == m && j == n { return diff == 0 }` requires both strings to be fully consumed AND no outstanding imbalance. A nonzero diff means one decoded string is still longer than the other.',
     },
     {
-      "id": "complexity",
-      "prompt": "What are the time and space complexities of `possiblyEquals`?",
-      "choices": [
+      id: 'complexity',
+      prompt: 'What are the time and space complexities of `possiblyEquals`?',
+      choices: [
         {
-          "label": "O(m·n·2000) time and O(m·n·2000) — The memo key is (i, j, diff) where i",
-          "correct": true
+          label: 'O(m·n·2000) time and O(m·n·2000) — The memo key is (i, j, diff) where i',
+          correct: true,
         },
         {
-          "label": "O(m·n) time and O(m·n) space — The memo key is (i, j, diff)"
+          label: 'O(m·n) time and O(m·n) space — The memo key is (i, j, diff)',
         },
         {
-          "label": "O(2^(m+n)) time and O(m+n) space — The memo key is (i, j, diff)"
+          label: 'O(2^(m+n)) time and O(m+n) space — The memo key is (i, j, diff)',
         },
         {
-          "label": "O(m·n·max(m — n)) time and The memo key is (i, j,"
-        }
+          label: 'O(m·n·max(m — n)) time and The memo key is (i, j,',
+        },
       ],
-      "explain": "The memo key is `(i, j, diff)` where i ∈ [0,m], j ∈ [0,n], and diff ∈ [−999, 999] (up to 2000 values given digit runs ≤ 999). Each unique state is computed once, giving O(m·n·2000) for both time and space."
+      explain:
+        'The memo key is `(i, j, diff)` where i ∈ [0,m], j ∈ [0,n], and diff ∈ [−999, 999] (up to 2000 values given digit runs ≤ 999). Each unique state is computed once, giving O(m·n·2000) for both time and space.',
     },
     {
-      "id": "letter-match",
-      "prompt": "When `diff == 0` and both `s1[i]` and `s2[j]` are letters, what does the code require to advance both pointers?",
-      "choices": [
+      id: 'letter-match',
+      prompt:
+        'When `diff == 0` and both `s1[i]` and `s2[j]` are letters, what does the code require to advance both pointers?',
+      choices: [
         {
-          "label": "The two letters must — equal: s1[i] == s2[j]",
-          "correct": true
+          label: 'The two letters must — equal: s1[i] == s2[j]',
+          correct: true,
         },
         {
-          "label": "Either letter can be anything; — only position alignment matters"
+          label: 'Either letter can be anything; — only position alignment matters',
         },
         {
-          "label": "The letters must differ — the edit distance remains zero"
+          label: 'The letters must differ — the edit distance remains zero',
         },
         {
-          "label": "One letter must — vowel and the other a consonant"
-        }
+          label: 'One letter must — vowel and the other a consonant',
+        },
       ],
-      "explain": "The code checks `s1[i] == s2[j] && btPossiblyEquals(s1, s2, i+1, j+1, 0, ...)`. When diff is zero both strings must be at the same position in the decoded original, so the characters must match exactly."
-    }
-  ]
+      explain:
+        'The code checks `s1[i] == s2[j] && btPossiblyEquals(s1, s2, i+1, j+1, 0, ...)`. When diff is zero both strings must be at the same position in the decoded original, so the characters must match exactly.',
+    },
+  ],
 };

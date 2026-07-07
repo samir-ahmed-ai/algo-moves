@@ -7,11 +7,23 @@ import { useGameRoom } from '../../net/useGameRoom';
 import { useGameChannel } from '../../net/useGameChannel';
 import { useMatchReporter } from '../../net/useMatchReporter';
 import { usePublishState } from '../../net/usePublishState';
-import { mergeNestedRoomState, useAdoptNestedState, useSharedStateRef } from '../../net/nestedRoomState';
+import {
+  mergeNestedRoomState,
+  useAdoptNestedState,
+  useSharedStateRef,
+} from '../../net/nestedRoomState';
 import { Avatar } from '../../ui/Avatar';
 import { Confetti, CountdownRing } from '../../ui/effects';
 import { usePrefersReducedMotion } from '../../ui/hooks';
-import { GameArena, GameBody, ResultBanner, RoundProgress, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
+import {
+  GameArena,
+  GameBody,
+  ResultBanner,
+  RoundProgress,
+  TouchButton,
+  TurnBadge,
+  WaitingForPeer,
+} from '../../ui/gamesUi';
 import {
   ROUND_MS,
   REVEAL_MS,
@@ -38,15 +50,18 @@ function isWyrState(v: unknown): v is WyrState {
   if (!v || typeof v !== 'object') return false;
   const o = v as Record<string, unknown>;
   return (
-    typeof o.phase === 'string'
-    && (o.phase === 'category-pick' || o.phase === 'picking' || o.phase === 'reveal' || o.phase === 'over')
-    && typeof o.round === 'number'
-    && (o.deadline === null || typeof o.deadline === 'number')
-    && typeof o.answers === 'object'
-    && o.answers !== null
-    && typeof o.scores === 'object'
-    && o.scores !== null
-    && Array.isArray(o.prompts)
+    typeof o.phase === 'string' &&
+    (o.phase === 'category-pick' ||
+      o.phase === 'picking' ||
+      o.phase === 'reveal' ||
+      o.phase === 'over') &&
+    typeof o.round === 'number' &&
+    (o.deadline === null || typeof o.deadline === 'number') &&
+    typeof o.answers === 'object' &&
+    o.answers !== null &&
+    typeof o.scores === 'object' &&
+    o.scores !== null &&
+    Array.isArray(o.prompts)
   );
 }
 
@@ -54,7 +69,8 @@ export function WouldYouRather() {
   const { locale } = useGamesLocale();
   const s = useMemo(() => getWouldYouRatherStrings(locale), [locale]);
   const arcade = useMemo(() => getArcadeStrings(locale), [locale]);
-  const { self, peer, players, connected, role, isSpectator, publishState, sharedState } = useGameRoom();
+  const { self, peer, players, connected, role, isSpectator, publishState, sharedState } =
+    useGameRoom();
   const { report } = useMatchReporter('would-you-rather');
   const isHost = role === 'host';
   const reduced = usePrefersReducedMotion();
@@ -169,9 +185,10 @@ export function WouldYouRather() {
 
   // --- Derived ---
   const myId = self?.id ?? '';
-  const myPick = myId && state.phase !== 'category-pick'
-    ? ((state.answers[state.round] ?? {})[myId] ?? null)
-    : null;
+  const myPick =
+    myId && state.phase !== 'category-pick'
+      ? ((state.answers[state.round] ?? {})[myId] ?? null)
+      : null;
 
   const matchCount = useMemo(() => {
     let n = 0;
@@ -179,17 +196,29 @@ export function WouldYouRather() {
     for (let r = 0; r < state.round; r++) {
       if (isMatch(state.answers[r] ?? {}, playerIds)) n++;
     }
-    if (state.phase === 'reveal' && isMatch(state.answers[state.round] ?? {}, players.map((p) => p.id))) n++;
+    if (
+      state.phase === 'reveal' &&
+      isMatch(
+        state.answers[state.round] ?? {},
+        players.map((p) => p.id),
+      )
+    )
+      n++;
     return n;
   }, [state, players]);
 
   // --- Match reporting ---
   const reportedRef = useRef(false);
   useEffect(() => {
-    if (state.phase !== 'over') { reportedRef.current = false; return; }
+    if (state.phase !== 'over') {
+      reportedRef.current = false;
+      return;
+    }
     if (reportedRef.current) return;
     reportedRef.current = true;
-    const sorted = [...players].sort((a, b) => (state.scores[b.id] ?? 0) - (state.scores[a.id] ?? 0));
+    const sorted = [...players].sort(
+      (a, b) => (state.scores[b.id] ?? 0) - (state.scores[a.id] ?? 0),
+    );
     const topScore = state.scores[sorted[0]?.id] ?? 0;
     void report(
       sorted.map((p) => ({
@@ -215,12 +244,18 @@ export function WouldYouRather() {
 
   // ---- Category picker (host only at game start) ----
   if (state.phase === 'category-pick') {
-    return <CategoryPicker strings={s} isHost={isHost} onStart={(cats) => {
-      const seed = Date.now() & 0xffffffff;
-      const partial = startGame(cats, seed);
-      setState((prev) => ({ ...prev, ...partial }));
-      send({ kind: 'start', seed, categories: cats });
-    }} />;
+    return (
+      <CategoryPicker
+        strings={s}
+        isHost={isHost}
+        onStart={(cats) => {
+          const seed = Date.now() & 0xffffffff;
+          const partial = startGame(cats, seed);
+          setState((prev) => ({ ...prev, ...partial }));
+          send({ kind: 'start', seed, categories: cats });
+        }}
+      />
+    );
   }
 
   const prompt = state.prompts[state.round];
@@ -243,7 +278,9 @@ export function WouldYouRather() {
         />
         <ScoreBoard players={players} scores={state.scores} />
         {isHost ? (
-          <TouchButton variant="primary" size="md" className="w-full" onClick={rematch}>{s.playAgain}</TouchButton>
+          <TouchButton variant="primary" size="md" className="w-full" onClick={rematch}>
+            {s.playAgain}
+          </TouchButton>
         ) : (
           <p className="text-center text-sm text-ink3">{s.spectatorWaiting}</p>
         )}
@@ -270,11 +307,15 @@ export function WouldYouRather() {
 
       <GameArena accent="#e879a0">
         <div className="rounded-lg bg-gradient-to-br from-pink-500/15 via-accent/10 to-purple-500/10 border border-pink-500/25 p-2.5 text-center">
-          <p className="text-[length:var(--fs-2xs)] font-bold uppercase tracking-widest text-pink-500 mb-1">{s.wouldYouRather}</p>
+          <p className="text-[length:var(--fs-2xs)] font-bold uppercase tracking-widest text-pink-500 mb-1">
+            {s.wouldYouRather}
+          </p>
           <p className="text-sm font-bold leading-snug text-ink">{prompt.a}</p>
           <div className="my-1.5 flex items-center gap-2">
             <div className="flex-1 h-px bg-edge" />
-            <span className="text-[length:var(--fs-2xs)] font-semibold text-ink3 px-1">{s.orLabel}</span>
+            <span className="text-[length:var(--fs-2xs)] font-semibold text-ink3 px-1">
+              {s.orLabel}
+            </span>
             <div className="flex-1 h-px bg-edge" />
           </div>
           <p className="text-sm font-bold leading-snug text-ink">{prompt.b}</p>
@@ -302,7 +343,10 @@ export function WouldYouRather() {
                 setState((prev) => {
                   if (prev.phase !== 'picking') return prev;
                   const r = prev.answers[prev.round] ?? {};
-                  return { ...prev, answers: { ...prev.answers, [prev.round]: { ...r, [myId]: choice } } };
+                  return {
+                    ...prev,
+                    answers: { ...prev.answers, [prev.round]: { ...r, [myId]: choice } },
+                  };
                 });
                 send({ kind: 'answer', round: state.round, choice });
               }
@@ -474,13 +518,20 @@ function OptionButton({
         disabled && !selected && 'opacity-50',
       )}
     >
-      <span className={cn(
-        'mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold border-2',
-        selected ? 'border-accent bg-accent text-white' : 'border-edge2 text-ink3',
-      )}>
+      <span
+        className={cn(
+          'mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold border-2',
+          selected ? 'border-accent bg-accent text-white' : 'border-edge2 text-ink3',
+        )}
+      >
         {choice.toUpperCase()}
       </span>
-      <span className={cn('flex-1 text-sm font-semibold leading-snug', selected ? 'text-accent' : 'text-ink')}>
+      <span
+        className={cn(
+          'flex-1 text-sm font-semibold leading-snug',
+          selected ? 'text-accent' : 'text-ink',
+        )}
+      >
         {text}
         {selected && <span className="ms-2 text-xs opacity-70">✓ Picked!</span>}
       </span>
@@ -506,10 +557,12 @@ function RevealPanel({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className={cn(
-        'text-center rounded-xl border-2 py-1.5 px-2.5 font-bold text-xs transition-all',
-        matched ? 'border-good/50 bg-goodbg text-good' : 'border-edge bg-panel2 text-ink2',
-      )}>
+      <div
+        className={cn(
+          'text-center rounded-xl border-2 py-1.5 px-2.5 font-bold text-xs transition-all',
+          matched ? 'border-good/50 bg-goodbg text-good' : 'border-edge bg-panel2 text-ink2',
+        )}
+      >
         {matched ? s.matched : s.noMatch}
       </div>
 
@@ -521,10 +574,18 @@ function RevealPanel({
           return (
             <div
               key={p.id}
-              style={reduced ? undefined : { animation: `wyrReveal 380ms both`, animationDelay: `${i * 100}ms` }}
+              style={
+                reduced
+                  ? undefined
+                  : { animation: `wyrReveal 380ms both`, animationDelay: `${i * 100}ms` }
+              }
               className={cn(
                 'flex flex-col items-center gap-1 rounded-xl border-2 p-2 text-center',
-                matched ? 'border-good/50 bg-goodbg text-good' : onWinSide ? 'border-edge bg-panel2 text-ink2' : 'border-edge bg-panel text-ink3',
+                matched
+                  ? 'border-good/50 bg-goodbg text-good'
+                  : onWinSide
+                    ? 'border-edge bg-panel2 text-ink2'
+                    : 'border-edge bg-panel text-ink3',
               )}
             >
               <Avatar seed={p.id} name={p.name} size={26} />
@@ -553,21 +614,34 @@ function HeartMeter({ matched, total }: { matched: number; total: number }) {
     <div className="flex flex-col items-center gap-1.5">
       <div className="flex gap-0.5">
         {Array.from({ length: total }, (_, i) => (
-          <span key={i} className={cn('text-base transition-all', i < matched ? 'opacity-100' : 'opacity-20')}>
+          <span
+            key={i}
+            className={cn('text-base transition-all', i < matched ? 'opacity-100' : 'opacity-20')}
+          >
             💕
           </span>
         ))}
       </div>
-      <p className="text-[length:var(--fs-2xs)] text-ink3 font-medium">{matched} / {total} matches</p>
+      <p className="text-[length:var(--fs-2xs)] text-ink3 font-medium">
+        {matched} / {total} matches
+      </p>
     </div>
   );
 }
 
-function ScoreBoard({ players, scores }: { players: { id: string; name: string }[]; scores: Record<string, number> }) {
+function ScoreBoard({
+  players,
+  scores,
+}: {
+  players: { id: string; name: string }[];
+  scores: Record<string, number>;
+}) {
   const ranked = [...players].sort((a, b) => (scores[b.id] ?? 0) - (scores[a.id] ?? 0));
   return (
     <div className="rounded-xl border border-edge bg-panel2 p-2.5">
-      <p className="mb-1.5 text-[length:var(--fs-2xs)] font-bold uppercase tracking-widest text-ink3">Score</p>
+      <p className="mb-1.5 text-[length:var(--fs-2xs)] font-bold uppercase tracking-widest text-ink3">
+        Score
+      </p>
       <div className="flex flex-col gap-1.5">
         {ranked.map((p, i) => (
           <div key={p.id} className="flex items-center gap-2">
@@ -587,9 +661,14 @@ function EndSummaryEffects({ ratio, reduced }: { ratio: number; reduced: boolean
   useEffect(() => {
     if (firedRef.current) return;
     firedRef.current = true;
-    if (ratio >= 0.75) { playCue('win'); if (!reduced) hapticSuccess(); }
-    else if (ratio >= 0.5) playCue('draw');
-    else { playCue('lose'); hapticError(); }
+    if (ratio >= 0.75) {
+      playCue('win');
+      if (!reduced) hapticSuccess();
+    } else if (ratio >= 0.5) playCue('draw');
+    else {
+      playCue('lose');
+      hapticError();
+    }
   }, [ratio, reduced]);
   return null;
 }

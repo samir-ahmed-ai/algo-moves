@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GraphBoard } from '../../../../components/board/GraphBoard';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, VarGrid, VizEmpty, VizStage, RailStack, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailStack,
+  RailGroup,
+  RailStat,
+  RailResult,
+} from '../../../_shared/vizKit';
 import { circleLayout } from '../../../_shared/graphLayout';
 
 interface PPInput {
@@ -30,35 +44,56 @@ function record({ adj, pos, src, dest }: PPInput): Frame<PPState>[] {
   const path: number[] = [src];
   const results: number[][] = [];
   const { emit, frames } = createRecorder<PPState>(() => ({
-        adj: adj,
-        pos: pos,
-        src: src,
-        dest: dest,
-        path: path.slice(),
-        visited: visited.slice(),
-        results: results.map((p) => p.slice()),
-        edge: null,
-        done: false
-      }));
+    adj: adj,
+    pos: pos,
+    src: src,
+    dest: dest,
+    path: path.slice(),
+    visited: visited.slice(),
+    results: results.map((p) => p.slice()),
+    edge: null,
+    done: false,
+  }));
 
   visited[src] = true;
-  emit('INIT', `start ${src}`, `Enumerate every directed path from source ${src} to destination ${dest}. We do a depth-first search, pushing each node onto the current path and marking it visited; when we reach ${dest} we snapshot the path, then backtrack to explore other branches.`, { edge: null });
+  emit(
+    'INIT',
+    `start ${src}`,
+    `Enumerate every directed path from source ${src} to destination ${dest}. We do a depth-first search, pushing each node onto the current path and marking it visited; when we reach ${dest} we snapshot the path, then backtrack to explore other branches.`,
+    { edge: null },
+  );
 
   const dfs = (v: number): void => {
     if (v === dest) {
       results.push(path.slice());
-      emit('FOUND', `path #${results.length}`, `Reached destination ${dest}. Record the completed path [${path.join(' → ')}] — that is path #${results.length}.`, { edge: null }, 'good');
+      emit(
+        'FOUND',
+        `path #${results.length}`,
+        `Reached destination ${dest}. Record the completed path [${path.join(' → ')}] — that is path #${results.length}.`,
+        { edge: null },
+        'good',
+      );
       return;
     }
     for (const nb of adj[v]) {
       if (!visited[nb]) {
         visited[nb] = true;
         path.push(nb);
-        emit('ENTER', `${v}→${nb}`, `From node ${v}, follow the edge to unvisited neighbour ${nb}. The current path grows to [${path.join(' → ')}].`, { edge: [v, nb] });
+        emit(
+          'ENTER',
+          `${v}→${nb}`,
+          `From node ${v}, follow the edge to unvisited neighbour ${nb}. The current path grows to [${path.join(' → ')}].`,
+          { edge: [v, nb] },
+        );
         dfs(nb);
         path.pop();
         visited[nb] = false;
-        emit('BACKTRACK', `pop ${nb}`, `Exhausted everything reachable through ${nb}; backtrack by popping it. The path shrinks back to [${path.join(' → ')}] and ${nb} becomes available again.`, { edge: [v, nb] });
+        emit(
+          'BACKTRACK',
+          `pop ${nb}`,
+          `Exhausted everything reachable through ${nb}; backtrack by popping it. The path shrinks back to [${path.join(' → ')}] and ${nb} becomes available again.`,
+          { edge: [v, nb] },
+        );
       }
     }
   };
@@ -66,7 +101,13 @@ function record({ adj, pos, src, dest }: PPInput): Frame<PPState>[] {
   dfs(src);
 
   const list = results.map((p) => `[${p.join('→')}]`).join(', ');
-  emit('DONE', `${results.length} paths`, `Search complete. There are ${results.length} directed paths from ${src} to ${dest}: ${list}.`, { edge: null , done: true }, 'good');
+  emit(
+    'DONE',
+    `${results.length} paths`,
+    `Search complete. There are ${results.length} directed paths from ${src} to ${dest}: ${list}.`,
+    { edge: null, done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -81,16 +122,26 @@ function View({ frame }: PluginViewProps<PPState>) {
   const pathItems = s.path.map(String);
   const resultItems = s.results.map((p) => p.join('→'));
   return (
-    <VizStage rail={<>
-      <RailStack label="path" items={pathItems} />
-      <RailStack label="found" items={resultItems} highlightEnd="bottom" topLabel="latest" />
-      <RailGroup label="scan">
-        <RailStat k="src" v={s.src} />
-        <RailStat k="dst" v={s.dest} />
-        <RailStat k="at" v={s.path.length ? s.path[s.path.length - 1] : '—'} tone="accent" />
-      </RailGroup>
-      {s.done && <RailResult label="paths" value={s.results.length} tone={s.results.length > 0 ? 'good' : 'bad'} />}
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailStack label="path" items={pathItems} />
+          <RailStack label="found" items={resultItems} highlightEnd="bottom" topLabel="latest" />
+          <RailGroup label="scan">
+            <RailStat k="src" v={s.src} />
+            <RailStat k="dst" v={s.dest} />
+            <RailStat k="at" v={s.path.length ? s.path[s.path.length - 1] : '—'} tone="accent" />
+          </RailGroup>
+          {s.done && (
+            <RailResult
+              label="paths"
+              value={s.results.length}
+              tone={s.results.length > 0 ? 'good' : 'bad'}
+            />
+          )}
+        </>
+      }
+    >
       <GraphBoard
         adj={s.adj}
         pos={s.pos}

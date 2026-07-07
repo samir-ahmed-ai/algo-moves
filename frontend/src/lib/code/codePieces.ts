@@ -51,7 +51,10 @@ function isSplitBoundary(trimmed: string): boolean {
 
 /** True when every non-empty line is exactly `{` or `}`. */
 export function isBraceOnlyPiece(code: string): boolean {
-  const lines = code.split('\n').map((l) => l.trim()).filter(Boolean);
+  const lines = code
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
   return lines.length > 0 && lines.every((l) => l === '{' || l === '}');
 }
 
@@ -90,7 +93,10 @@ export function mergeBraceOnlyPieces(pieces: CodePiece[]): CodePiece[] {
 
 /** True when every non-empty line is preamble (package, import, comments). */
 export function isPreambleOnlyPiece(code: string): boolean {
-  const lines = code.split('\n').map((l) => l.trim()).filter(Boolean);
+  const lines = code
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean);
   return lines.length > 0 && lines.every(isHeaderLine);
 }
 
@@ -215,7 +221,10 @@ function coarsenPieces(pieces: CodePiece[]): CodePiece[] {
   for (const p of pieces) {
     const lines = p.code.split('\n').length;
     const bufLines = buf.reduce((n, b) => n + b.code.split('\n').length, 0);
-    if (buf.length > 0 && (bufLines + lines > MAX_PIECE_LINES || merged.length + buf.length >= pieces.length - 1)) {
+    if (
+      buf.length > 0 &&
+      (bufLines + lines > MAX_PIECE_LINES || merged.length + buf.length >= pieces.length - 1)
+    ) {
       flush();
     }
     buf.push(p);

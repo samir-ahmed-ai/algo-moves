@@ -11,10 +11,7 @@ import type { ProblemPlugin } from '@/core/types';
  */
 export function usePluginFrames(plugin: ProblemPlugin, input?: ProblemPlugin['inputs'][number]) {
   const chosen = input ?? plugin.inputs[0];
-  const baseFrames = useMemo(
-    () => (chosen ? plugin.record(chosen.value) : []),
-    [plugin, chosen],
-  );
+  const baseFrames = useMemo(() => (chosen ? plugin.record(chosen.value) : []), [plugin, chosen]);
   const player = usePlayer(Math.max(baseFrames.length, 1));
   const frame = baseFrames[player.index] ?? baseFrames[0];
   return { input: chosen, baseFrames, player, frame, ready: baseFrames.length > 0 };

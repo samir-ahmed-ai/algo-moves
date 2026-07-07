@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, VarGrid, VizEmpty, VizStage, RailStack, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailStack,
+  RailGroup,
+  RailStat,
+  RailResult,
+} from '../../../_shared/vizKit';
 
 interface PermInput {
   nums: number[];
@@ -17,45 +31,73 @@ interface PermState {
   done: boolean;
 }
 
-function record({ nums }: PermInput): Frame<PermState>[] {  const used: boolean[] = nums.map(() => false);
+function record({ nums }: PermInput): Frame<PermState>[] {
+  const used: boolean[] = nums.map(() => false);
   const cur: number[] = [];
   const results: number[][] = [];
 
   const { emit, frames } = createRecorder<PermState>(() => ({
-        nums: nums.slice(),
-        used: used.slice(),
-        cur: cur.slice(),
-        results: results.map((r) => r.slice()),
-        pick: null,
-        done: false
-      }));
+    nums: nums.slice(),
+    used: used.slice(),
+    cur: cur.slice(),
+    results: results.map((r) => r.slice()),
+    pick: null,
+    done: false,
+  }));
 
   const fmt = (xs: number[]) => `[${xs.join(', ')}]`;
 
   const fact = (k: number): number => (k <= 1 ? 1 : k * fact(k - 1));
 
-  emit('INIT', `${nums.length}! perms`, `Generate every ordering of ${fmt(nums)}. A used[] flag marks elements already placed; at each position pick any unused element, recurse, then unmark it to free that branch. There are ${nums.length}! = ${fact(nums.length)} permutations.`, { pick: null });
+  emit(
+    'INIT',
+    `${nums.length}! perms`,
+    `Generate every ordering of ${fmt(nums)}. A used[] flag marks elements already placed; at each position pick any unused element, recurse, then unmark it to free that branch. There are ${nums.length}! = ${fact(nums.length)} permutations.`,
+    { pick: null },
+  );
 
   const btPerm = () => {
     if (cur.length === nums.length) {
       results.push(cur.slice());
-      emit('RECORD', `+${fmt(cur)}`, `All ${nums.length} positions filled — record the permutation ${fmt(cur)} (${results.length} so far).`, { pick: null }, 'good');
+      emit(
+        'RECORD',
+        `+${fmt(cur)}`,
+        `All ${nums.length} positions filled — record the permutation ${fmt(cur)} (${results.length} so far).`,
+        { pick: null },
+        'good',
+      );
       return;
     }
     for (let i = 0; i < nums.length; i++) {
       if (used[i]) continue;
       used[i] = true;
       cur.push(nums[i]);
-      emit('CHOOSE', `place ${nums[i]}`, `Place nums[${i}] = ${nums[i]} at position ${cur.length - 1} and recurse on the remaining elements. cur = ${fmt(cur)}.`, { pick: i });
+      emit(
+        'CHOOSE',
+        `place ${nums[i]}`,
+        `Place nums[${i}] = ${nums[i]} at position ${cur.length - 1} and recurse on the remaining elements. cur = ${fmt(cur)}.`,
+        { pick: i },
+      );
       btPerm();
       cur.pop();
       used[i] = false;
-      emit('BACKTRACK', `free ${nums[i]}`, `Backtrack: free nums[${i}] = ${nums[i]} so a different element can take position ${cur.length}. cur = ${fmt(cur)}.`, { pick: i });
+      emit(
+        'BACKTRACK',
+        `free ${nums[i]}`,
+        `Backtrack: free nums[${i}] = ${nums[i]} so a different element can take position ${cur.length}. cur = ${fmt(cur)}.`,
+        { pick: i },
+      );
     }
   };
 
   btPerm();
-  emit('DONE', `${results.length} perms`, `All orderings explored — ${results.length} permutations of ${fmt(nums)}.`, { pick: null , done: true }, 'good');
+  emit(
+    'DONE',
+    `${results.length} perms`,
+    `All orderings explored — ${results.length} permutations of ${fmt(nums)}.`,
+    { pick: null, done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -70,14 +112,16 @@ function View({ frame }: PluginViewProps<PermState>) {
   };
   return (
     <VizStage
-      rail={<>
-        <RailGroup label="current">
-          <RailStat k="cur" v={`[${s.cur.join(', ')}]`} tone="accent" />
-          <RailStat k="pick" v={s.pick !== null ? s.nums[s.pick] : '—'} />
-        </RailGroup>
-        <RailStack label="results" items={s.results.map((r) => `[${r.join(', ')}]`)} />
-        {s.done && <RailResult label="found" value={s.results.length} tone="good" />}
-      </>}
+      rail={
+        <>
+          <RailGroup label="current">
+            <RailStat k="cur" v={`[${s.cur.join(', ')}]`} tone="accent" />
+            <RailStat k="pick" v={s.pick !== null ? s.nums[s.pick] : '—'} />
+          </RailGroup>
+          <RailStack label="results" items={s.results.map((r) => `[${r.join(', ')}]`)} />
+          {s.done && <RailResult label="found" value={s.results.length} tone="good" />}
+        </>
+      }
     >
       <ArrayRow values={s.nums} cellTone={tone} pointers={pointers} />
     </VizStage>

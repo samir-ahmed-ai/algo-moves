@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -35,7 +41,8 @@ interface DeepCopyState {
   done: boolean;
 }
 
-function record({ nodes }: DeepCopyInput): Frame<DeepCopyState>[] {  const vals = nodes.map((n) => n.val);
+function record({ nodes }: DeepCopyInput): Frame<DeepCopyState>[] {
+  const vals = nodes.map((n) => n.val);
   const next = nodes.map((n) => n.next);
   const random = nodes.map((n) => n.random);
   const cloned = new Array<boolean>(nodes.length).fill(false);
@@ -45,20 +52,26 @@ function record({ nodes }: DeepCopyInput): Frame<DeepCopyState>[] {  const vals 
   const label = (i: number | null) => (i === null ? 'nil' : `node ${i} (val ${vals[i]})`);
 
   const { emit, frames } = createRecorder<DeepCopyState>(() => ({
-        vals,
-        next,
-        random,
-        cur: null,
-        from: null,
-        link: null,
-        cloned: cloned.slice(),
-        seen: seenOrder.slice(),
-        cacheHit: false,
-        done: false
-      }));
+    vals,
+    next,
+    random,
+    cur: null,
+    from: null,
+    link: null,
+    cloned: cloned.slice(),
+    seen: seenOrder.slice(),
+    cacheHit: false,
+    done: false,
+  }));
 
   if (nodes.length === 0) {
-    emit('DONE', 'empty', 'The list is empty (head is nil), so the deep copy is also nil. Nothing to clone.', { done: true }, 'good');
+    emit(
+      'DONE',
+      'empty',
+      'The list is empty (head is nil), so the deep copy is also nil. Nothing to clone.',
+      { done: true },
+      'good',
+    );
     return frames;
   }
 
@@ -142,7 +155,12 @@ function View({ frame }: PluginViewProps<DeepCopyState>) {
   const s = frame.state;
   const pointers: ArrayPointer[] = [];
   if (s.cur !== null) {
-    pointers.push({ i: s.cur, label: s.cacheHit ? 'cached' : 'clone', tone: s.cacheHit ? 'good' : 'accent', place: 'above' });
+    pointers.push({
+      i: s.cur,
+      label: s.cacheHit ? 'cached' : 'clone',
+      tone: s.cacheHit ? 'good' : 'accent',
+      place: 'above',
+    });
   }
   if (s.from !== null && s.from !== s.cur) {
     pointers.push({ i: s.from, label: 'from', tone: 'warn', place: 'below' });
@@ -161,8 +179,7 @@ function View({ frame }: PluginViewProps<DeepCopyState>) {
         cloned <span className="font-mono text-ink">{s.seen.length}</span> / {s.vals.length}
         {s.link && !s.done && (
           <>
-            {' · '}following{' '}
-            <span className="font-mono text-ink">{s.link}</span>
+            {' · '}following <span className="font-mono text-ink">{s.link}</span>
           </>
         )}
       </div>
@@ -177,7 +194,9 @@ function View({ frame }: PluginViewProps<DeepCopyState>) {
         {'}'}
       </div>
       {s.done && (
-        <div className={cn('mt-1 font-mono text-good', vizText.base)}>→ deep copy of {s.vals.length} node(s)</div>
+        <div className={cn('mt-1 font-mono text-good', vizText.base)}>
+          → deep copy of {s.vals.length} node(s)
+        </div>
       )}
     </div>
   );
@@ -203,132 +222,131 @@ function Inspector({ frame }: InspectorProps<DeepCopyState>) {
 export const manifestId = 'prep-linked-lists-deep-copy-random-pointers';
 export const title = 'Deep copy random pointers';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Deep copy random pointers\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Deep copy random pointers"?',
     choices: [
       {
-        label: "Hash map clone — fits this problem",
-        correct: true
+        label: 'Hash map clone — fits this problem',
+        correct: true,
       },
       {
-        label: "Circular Scan (3 cases) — different approach"
+        label: 'Circular Scan (3 cases) — different approach',
       },
       {
-        label: "Digit carry — different approach"
+        label: 'Digit carry — different approach',
       },
       {
-        label: "Iterative reverse — different approach"
-      }
+        label: 'Iterative reverse — different approach',
+      },
     ],
-    explain: "Map original->clone; recurse Next and Random off the cache"
+    explain: 'Map original->clone; recurse Next and Random off the cache',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Deep copy random pointers), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Deep copy random pointers), what strategy is established?',
     choices: [
       {
-        label: "Map original->clone; recurse Next — described in INIT caption",
-        correct: true
+        label: 'Map original->clone; recurse Next — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Deep copy a linked list whose nodes carry an extra Random pointer. We walk the structure recursively and keep a cache seen[original] = clone, so every original node is built exactly once and both its Next and Random links can point at the right clones. Time O(n), space O(n)."
+    explain:
+      'Deep copy a linked list whose nodes carry an extra Random pointer. We walk the structure recursively and keep a cache seen[original] = clone, so every original node is built exactly once and both its Next and Random links can point at the right clones. Time O(n), space O(n).',
   },
   {
-    id: "key-step",
-    prompt: "On the \"CLONE\" step (clone ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "CLONE" step (clone ), what happens?',
     choices: [
       {
-        label: "First time we reach . Allocate — this move caption",
-        correct: true
+        label: 'First time we reach . Allocate — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "First time we reach . Allocate a fresh clone with the same value () and store seen[] = clone right away, before recursing — caching up front is what makes the Random pointers safe."
+    explain:
+      'First time we reach . Allocate a fresh clone with the same value () and store seen[] = clone right away, before recursing — caching up front is what makes the Random pointers safe.',
   },
   {
-    id: "state",
-    prompt: "What does the `vals` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `vals` field track in the visualization state?',
     choices: [
       {
-        label: "original node values, in chain — updated each frame",
-        correct: true
+        label: 'original node values, in chain — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `vals` in sync: original node values, in chain order — the visible array"
+    explain:
+      'The recorder keeps `vals` in sync: original node values, in chain order — the visible array',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Deep copy random pointers\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Deep copy random pointers"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(1) space — wrong order of growth"
+        label: 'O(n) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(m+n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(m+n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). seen[n] returns cached; clone Next and Random recursively"
+    explain: 'O(n). O(n). seen[n] returns cached; clone Next and Random recursively',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Every reachable node has been cloned — final DONE caption",
-        correct: true
+        label: 'Every reachable node has been cloned — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Every reachable node has been cloned once and both its Next and Random links rewired to point at clones — the cache holds  entries. The deep copy is complete and fully independent of the original."
-  }
+    explain:
+      'Every reachable node has been cloned once and both its Next and Random links rewired to point at clones — the cache holds  entries. The deep copy is complete and fully independent of the original.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

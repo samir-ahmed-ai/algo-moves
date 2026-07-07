@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -33,7 +39,8 @@ function reverseNumber(input: number): number {
   return neg ? -rev : rev;
 }
 
-function record({ n: input }: ReverseInput): Frame<ReverseState>[] {  const neg = input < 0;
+function record({ n: input }: ReverseInput): Frame<ReverseState>[] {
+  const neg = input < 0;
   const magnitude = Math.abs(input);
   const digits = String(magnitude).split('');
   const total = digits.length;
@@ -42,16 +49,16 @@ function record({ n: input }: ReverseInput): Frame<ReverseState>[] {  const neg 
   let rev = 0;
 
   const { emit, frames } = createRecorder<ReverseState>(() => ({
-        original: input,
-        neg,
-        digits,
-        n,
-        rev,
-        popped: null,
-        consumed: 0,
-        done: false,
-        answer: null
-      }));
+    original: input,
+    neg,
+    digits,
+    n,
+    rev,
+    popped: null,
+    consumed: 0,
+    done: false,
+    answer: null,
+  }));
 
   emit(
     'INIT',
@@ -109,7 +116,8 @@ function View({ frame }: PluginViewProps<ReverseState>) {
   // pointer sits on the right-most not-yet-consumed digit.
   const activeIdx = s.done ? -1 : total - 1 - s.consumed;
   const pointers: ArrayPointer[] = [];
-  if (activeIdx >= 0) pointers.push({ i: activeIdx, label: 'n%10', tone: 'accent', place: 'above' });
+  if (activeIdx >= 0)
+    pointers.push({ i: activeIdx, label: 'n%10', tone: 'accent', place: 'above' });
   const tone = (i: number) => {
     if (s.done) return 'found';
     // consumed digits are the last `consumed` cells (right side)
@@ -160,132 +168,128 @@ function Inspector({ frame }: InspectorProps<ReverseState>) {
 export const manifestId = 'prep-math-reverse-number';
 export const title = 'Reverse number';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Reverse number\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Reverse number"?',
     choices: [
       {
-        label: "Digit reversal — fits this problem",
-        correct: true
+        label: 'Digit reversal — fits this problem',
+        correct: true,
       },
       {
-        label: "FizzBuzz conditional — different approach"
+        label: 'FizzBuzz conditional — different approach',
       },
       {
-        label: "Math (sum - n*min) — different approach"
+        label: 'Math (sum - n*min) — different approach',
       },
       {
-        label: "Base conversion repeated divmod — different approach"
-      }
+        label: 'Base conversion repeated divmod — different approach',
+      },
     ],
-    explain: "Pop the last digit and push it onto the reversed value"
+    explain: 'Pop the last digit and push it onto the reversed value',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Reverse number), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Reverse number), what strategy is established?',
     choices: [
       {
-        label: "Pop the last digit and push — described in INIT caption",
-        correct: true
+        label: 'Pop the last digit and push — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Reverse Number: flip the digit order of . We peel the last digit off n with n % 10 and push it onto a growing reversed value rev, then drop that digit with n /= 10. Sign is handled separately."
+    explain:
+      'Reverse Number: flip the digit order of . We peel the last digit off n with n % 10 and push it onto a growing reversed value rev, then drop that digit with n /= 10. Sign is handled separately.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"DIV\" step (/10 → ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "DIV" step (/10 → ), what happens?',
     choices: [
       {
-        label: "Drop that digit with integer division: — this move caption",
-        correct: true
+        label: 'Drop that digit with integer division: — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Drop that digit with integer division: n =  / 10 = . "
+    explain: 'Drop that digit with integer division: n =  / 10 = . ',
   },
   {
-    id: "state",
-    prompt: "What does the `original` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `original` field track in the visualization state?',
     choices: [
       {
-        label: "the input, signed — updated each frame",
-        correct: true
+        label: 'the input, signed — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `original` in sync: the input, signed"
+    explain: 'The recorder keeps `original` in sync: the input, signed',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Reverse number\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Reverse number"?',
     choices: [
       {
-        label: "O(log n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(log n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(1) time, O(1) space — wrong order of growth"
+        label: 'O(1) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
+        label: 'O(n²) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(m+n) space — wrong order of growth"
-      }
+        label: 'O(m·n) time, O(m+n) space — wrong order of growth',
+      },
     ],
-    explain: "O(log n). O(1). rev=rev*10+n%10; n/=10"
+    explain: 'O(log n). O(1). rev=rev*10+n%10; n/=10',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "n reached 0, so every digit — final DONE caption",
-        correct: true
+        label: 'n reached 0, so every digit — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "n reached 0, so every digit has been moved. rev = ${neg ? "
-  }
+    explain: 'n reached 0, so every digit has been moved. rev = ${neg ? ',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

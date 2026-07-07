@@ -1,38 +1,22 @@
 /**
  * Resolves where the realtime game server lives and builds connection URLs.
- *
- * Priority:
- *  1. `VITE_GAMES_SERVER_URL` build-time env (e.g. https://games.example.com) —
- *     use this for a real internet deployment.
- *  2. Same host as the frontend on port 8080 — the zero-config LAN default, so
- *     opening the site on your laptop's IP from two phones just works.
  */
+import {
+  apiServerHttpBase,
+  gameServerHttpBase,
+  hasConfiguredApiServer,
+} from '@/lib/network/apiServer';
 
-const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no I, O, 0, 1
+export { apiServerHttpBase, gameServerHttpBase, hasConfiguredApiServer as hasConfiguredServer };
 
-function envUrl(): string | null {
-  const raw = (import.meta.env.VITE_GAMES_SERVER_URL as string | undefined)?.trim();
-  return raw ? raw.replace(/\/+$/, '') : null;
-}
+const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
-/** HTTP(S) base for REST calls like `/new` and `/healthz`. */
-export function gameServerHttpBase(): string {
-  const env = envUrl();
-  if (env) return env;
-  if (typeof location === 'undefined') return 'http://localhost:8080';
-  const proto = location.protocol === 'https:' ? 'https:' : 'http:';
-  return `${proto}//${location.hostname}:8080`;
-}
-
-/** How a client wants to join: reconnect id, spectate, and desired room size. */
 export interface JoinOpts {
   pid?: string;
   asSpectator?: boolean;
-  /** Player seats to size a freshly-created room to (ignored for existing rooms). */
   capacity?: number;
 }
 
-/** WebSocket URL to join a room. http→ws and https→wss are derived automatically. */
 export function gameServerWsUrl(room: string, name: string, opts: JoinOpts = {}): string {
   const ws = gameServerHttpBase().replace(/^http/, 'ws');
   const params = new URLSearchParams({ room: room.toUpperCase(), name });
@@ -42,7 +26,6 @@ export function gameServerWsUrl(room: string, name: string, opts: JoinOpts = {})
   return `${ws}/ws?${params.toString()}`;
 }
 
-/** A stable per-player id used to reclaim the same room slot/role across reconnects. */
 export function makePlayerId(): string {
   if (typeof crypto.randomUUID === 'function') return crypto.randomUUID();
   const buf = new Uint32Array(4);
@@ -50,26 +33,15 @@ export function makePlayerId(): string {
   return Array.from(buf, (n) => n.toString(16)).join('');
 }
 
-/** Whether a custom server was configured (affects the "how to run it" hint). */
-export function hasConfiguredServer(): boolean {
-  return envUrl() !== null;
-}
-
-/** Mint a collision-free room code from the game server. */
 export async function fetchNewRoomCode(): Promise<string> {
   const res = await fetch(`${gameServerHttpBase()}/new`);
-  if (!res.ok) {
-    throw new Error('Could not reach the game server.');
-  }
+  if (!res.ok) throw new Error('Could not reach the game server.');
   const body = (await res.json()) as { code?: string };
   const code = body.code?.trim().toUpperCase();
-  if (!code || code.length < 4) {
-    throw new Error('Invalid room code from server.');
-  }
+  if (!code || code.length < 4) throw new Error('Invalid room code from server.');
   return normalizeRoomCode(code);
 }
 
-/** A short, screen-friendly room code generated client-side (crypto-random). */
 export function makeRoomCode(len = 4): string {
   const buf = new Uint32Array(len);
   crypto.getRandomValues(buf);
@@ -78,7 +50,6 @@ export function makeRoomCode(len = 4): string {
   return out;
 }
 
-/** Normalise user-typed codes: upper-case, keep only alphabet chars, cap length. */
 export function normalizeRoomCode(input: string, len = 4): string {
   return input
     .toUpperCase()

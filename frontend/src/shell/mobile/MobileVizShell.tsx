@@ -8,7 +8,13 @@ import { FlipFrame } from '@/components/shared/FlipFrame';
 import { VizFitBox } from '@/components/shared/vizFit';
 
 /** Lightweight plugin animation runner for the mobile swipe deck. */
-export function MobileVizShell({ plugin, onWatched }: { plugin: ProblemPlugin; onWatched?: () => void }) {
+export function MobileVizShell({
+  plugin,
+  onWatched,
+}: {
+  plugin: ProblemPlugin;
+  onWatched?: () => void;
+}) {
   const { input, baseFrames, player, frame } = usePluginFrames(plugin);
   const View = plugin.View;
   const caption = (frame?.move?.note?.trim() || frame?.move?.caption?.trim()) ?? '';
@@ -56,7 +62,10 @@ export function MobileVizShell({ plugin, onWatched }: { plugin: ProblemPlugin; o
         )}
         data-noswipe
       >
-        <VizFitBox className="h-full min-h-0 w-full" remeasureKey={`${plugin.meta.id}-${player.index}-${frame.move.type}`}>
+        <VizFitBox
+          className="h-full min-h-0 w-full"
+          remeasureKey={`${plugin.meta.id}-${player.index}-${frame.move.type}`}
+        >
           <FlipFrame frameKey={player.index} resetKey={plugin.meta.id}>
             <ErrorBoundary resetKey={`${plugin.meta.id}:${player.index}`} label={plugin.meta.id}>
               <View frame={frame} />
@@ -65,7 +74,10 @@ export function MobileVizShell({ plugin, onWatched }: { plugin: ProblemPlugin; o
         </VizFitBox>
       </div>
 
-      <div className="mobile-viz-transport mt-2 shrink-0 rounded-2xl border border-edge bg-panel px-3 py-2" data-noswipe>
+      <div
+        className="mobile-viz-transport mt-2 shrink-0 rounded-2xl border border-edge bg-panel px-3 py-2"
+        data-noswipe
+      >
         <div className="flex min-w-0 items-center gap-1">
           <button
             type="button"
@@ -79,7 +91,11 @@ export function MobileVizShell({ plugin, onWatched }: { plugin: ProblemPlugin; o
           <button
             type="button"
             onClick={player.togglePlay}
-            className={cn(btn, !player.isPlaying && 'bg-accent text-white enabled:hover:bg-accent enabled:hover:text-white')}
+            className={cn(
+              btn,
+              !player.isPlaying &&
+                'bg-accent text-white enabled:hover:bg-accent enabled:hover:text-white',
+            )}
             aria-label={player.isPlaying ? 'Pause' : 'Play'}
           >
             {player.isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
@@ -94,7 +110,10 @@ export function MobileVizShell({ plugin, onWatched }: { plugin: ProblemPlugin; o
             <SkipForward className="h-4 w-4" />
           </button>
           <div className="ml-auto flex items-center gap-1.5">
-            <label className="flex items-center gap-1 text-[length:var(--fs-tight)] text-ink3" title="Playback speed">
+            <label
+              className="flex items-center gap-1 text-[length:var(--fs-tight)] text-ink3"
+              title="Playback speed"
+            >
               <span className="font-mono tabular-nums">{player.speed.toFixed(1)}×</span>
               <input
                 type="range"

@@ -1,7 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty, PathDisplay } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  PathDisplay,
+} from '../../../_shared/vizKit';
 
 interface LettersInput {
   digits: string;
@@ -17,39 +32,62 @@ interface LettersState {
 
 const PHONE_PAD = ['0', '1', 'abc', 'def', 'ghi', 'jkl', 'mno', 'pqrs', 'tuv', 'wxyz'];
 
-function record({ digits }: LettersInput): Frame<LettersState>[] {  const results: string[] = [];
+function record({ digits }: LettersInput): Frame<LettersState>[] {
+  const results: string[] = [];
 
   const { emit, frames } = createRecorder<LettersState>(() => ({
-        digits: digits,
-        results: results.slice(),
-        idx: 0,
-        path: '',
-        done: false
-      }));
+    digits: digits,
+    results: results.slice(),
+    idx: 0,
+    path: '',
+    done: false,
+  }));
 
   const mapping = digits
     .split('')
     .map((d) => `${d}→${PHONE_PAD[Number(d)]}`)
     .join('  ');
 
-  emit('INIT', `"${digits}"`, `Each digit maps to keypad letters (${mapping}). Take the Cartesian product: for each letter of the current digit, recurse to the next digit; when all ${digits.length} digits are placed, record the word.`, { idx: 0, path: '' });
+  emit(
+    'INIT',
+    `"${digits}"`,
+    `Each digit maps to keypad letters (${mapping}). Take the Cartesian product: for each letter of the current digit, recurse to the next digit; when all ${digits.length} digits are placed, record the word.`,
+    { idx: 0, path: '' },
+  );
 
   const bt = (idx: number, path: string) => {
     if (idx === digits.length) {
       results.push(path);
-      emit('RECORD', `+"${path}"`, `All ${digits.length} digits placed — record the combination "${path}" (${results.length} so far).`, { idx: idx, path: path }, 'good');
+      emit(
+        'RECORD',
+        `+"${path}"`,
+        `All ${digits.length} digits placed — record the combination "${path}" (${results.length} so far).`,
+        { idx: idx, path: path },
+        'good',
+      );
       return;
     }
     const letters = PHONE_PAD[Number(digits[idx])];
     for (let i = 0; i < letters.length; i++) {
       const ch = letters[i];
-      emit('CHOOSE', `'${ch}'`, `Digit ${digits[idx]} offers "${letters}". Pick '${ch}' and move to digit index ${idx + 1}. path = "${path + ch}".`, { idx: idx, path: path + ch });
+      emit(
+        'CHOOSE',
+        `'${ch}'`,
+        `Digit ${digits[idx]} offers "${letters}". Pick '${ch}' and move to digit index ${idx + 1}. path = "${path + ch}".`,
+        { idx: idx, path: path + ch },
+      );
       bt(idx + 1, path + ch);
     }
   };
 
   bt(0, '');
-  emit('DONE', `${results.length} combos`, `Every letter at every digit explored — ${results.length} combinations for "${digits}".`, { idx: digits.length, path: '' , done: true }, 'good');
+  emit(
+    'DONE',
+    `${results.length} combos`,
+    `Every letter at every digit explored — ${results.length} combinations for "${digits}".`,
+    { idx: digits.length, path: '', done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -63,7 +101,11 @@ function View({ frame }: PluginViewProps<LettersState>) {
       </RailGroup>
       <RailStack label="combinations" items={s.results} />
       {s.done && (
-        <RailResult label="count" value={s.results.length} tone={s.results.length > 0 ? 'good' : 'bad'} />
+        <RailResult
+          label="count"
+          value={s.results.length}
+          tone={s.results.length > 0 ? 'good' : 'bad'}
+        />
       )}
     </>
   );

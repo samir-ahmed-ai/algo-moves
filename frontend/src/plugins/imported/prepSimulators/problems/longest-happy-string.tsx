@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -26,7 +32,8 @@ interface HappyState {
 
 const CHARS = ['a', 'b', 'c'] as const;
 
-function record({ a, b, c }: HappyInput): Frame<HappyState>[] {  const res: string[] = [];
+function record({ a, b, c }: HappyInput): Frame<HappyState>[] {
+  const res: string[] = [];
   // Mutable counts keyed by char; we re-sort a copy every round like the Go code.
   const counts: CountEntry[] = [
     { ch: 'a', cnt: a },
@@ -35,16 +42,21 @@ function record({ a, b, c }: HappyInput): Frame<HappyState>[] {  const res: stri
   ];
 
   const { emit, frames } = createRecorder<HappyState>(() => ({
-        res: res.slice(),
-        counts: [],
-        pickIdx: null,
-        skipIdx: null,
-        done: false
-      }));
+    res: res.slice(),
+    counts: [],
+    pickIdx: null,
+    skipIdx: null,
+    done: false,
+  }));
 
   const sortedView = () => counts.slice().sort((x, y) => y.cnt - x.cnt);
 
-  emit('INIT', `a=${a} b=${b} c=${c}`, `Longest Happy String: build the longest string using a=${a} 'a', b=${b} 'b', c=${c} 'c' with no three of the same letter in a row. Greedily, each round we try the letter with the most remaining.`, { counts: sortedView().map((e) => ({ ...e })), pickIdx: null, skipIdx: null, done: false });
+  emit(
+    'INIT',
+    `a=${a} b=${b} c=${c}`,
+    `Longest Happy String: build the longest string using a=${a} 'a', b=${b} 'b', c=${c} 'c' with no three of the same letter in a row. Greedily, each round we try the letter with the most remaining.`,
+    { counts: sortedView().map((e) => ({ ...e })), pickIdx: null, skipIdx: null, done: false },
+  );
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
@@ -64,15 +76,28 @@ function record({ a, b, c }: HappyInput): Frame<HappyState>[] {  const res: stri
     }
 
     if (pick === -1) {
-      emit('DONE', `len=${res.length}`, `No letter can be appended — either everything is used up, or the only letters left would form three in a row. The happy string is "${res.join('')}" (length ${res.length}).`, { counts: sorted.map((e) => ({ ...e })), pickIdx: null, skipIdx: null, done: true }, 'good');
+      emit(
+        'DONE',
+        `len=${res.length}`,
+        `No letter can be appended — either everything is used up, or the only letters left would form three in a row. The happy string is "${res.join('')}" (length ${res.length}).`,
+        { counts: sorted.map((e) => ({ ...e })), pickIdx: null, skipIdx: null, done: true },
+        'good',
+      );
       break;
     }
 
     const chosen = sorted[pick].ch;
     if (skip !== null) {
-      emit('SKIP', `skip ${sorted[skip].ch}`, `The highest-remaining letter '${sorted[skip].ch}' already sits at the tail twice ("${res
+      emit(
+        'SKIP',
+        `skip ${sorted[skip].ch}`,
+        `The highest-remaining letter '${sorted[skip].ch}' already sits at the tail twice ("${res
           .slice(-2)
-          .join('')}"), so using it again would make three in a row. Skip it and drop to the next-best letter.`, { counts: sorted.map((e) => ({ ...e })), pickIdx: pick, skipIdx: skip, done: false });
+          .join(
+            '',
+          )}"), so using it again would make three in a row. Skip it and drop to the next-best letter.`,
+        { counts: sorted.map((e) => ({ ...e })), pickIdx: pick, skipIdx: skip, done: false },
+      );
     }
 
     // Append the chosen char and decrement its real count.
@@ -80,8 +105,18 @@ function record({ a, b, c }: HappyInput): Frame<HappyState>[] {  const res: stri
     const real = counts.find((e) => e.ch === chosen)!;
     real.cnt--;
     const after = sortedView();
-    emit('PICK', `+${chosen}`, `Append '${chosen}' (the letter with the most remaining that is still legal here). It now has ${real.cnt} left. String so far: "${res.join('')}".`, { counts: after.map((e) => ({ ...e })), pickIdx: // locate the chosen char in the freshly-sorted view for the pointer
-      after.findIndex((e) => e.ch === chosen), skipIdx: null, done: false });
+    emit(
+      'PICK',
+      `+${chosen}`,
+      `Append '${chosen}' (the letter with the most remaining that is still legal here). It now has ${real.cnt} left. String so far: "${res.join('')}".`,
+      {
+        counts: after.map((e) => ({ ...e })),
+        // locate the chosen char in the freshly-sorted view for the pointer
+        pickIdx: after.findIndex((e) => e.ch === chosen),
+        skipIdx: null,
+        done: false,
+      },
+    );
   }
 
   return frames;
@@ -171,132 +206,130 @@ function solve(a: number, b: number, c: number): string {
 export const manifestId = 'prep-strings-longest-happy-string';
 export const title = 'Longest Happy String';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Longest Happy String\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Longest Happy String"?',
     choices: [
       {
-        label: "Greedy (pick highest count) — fits this problem",
-        correct: true
+        label: 'Greedy (pick highest count) — fits this problem',
+        correct: true,
       },
       {
-        label: "Counter — different approach"
+        label: 'Counter — different approach',
       },
       {
-        label: "Trie (count at each node) — different approach"
+        label: 'Trie (count at each node) — different approach',
       },
       {
-        label: "Hash Map (diff key) — different approach"
-      }
+        label: 'Hash Map (diff key) — different approach',
+      },
     ],
-    explain: "See Longest Happy String pattern"
+    explain: 'See Longest Happy String pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Longest Happy String), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Longest Happy String), what strategy is established?',
     choices: [
       {
-        label: "See Longest Happy String pattern — described in INIT caption",
-        correct: true
+        label: 'See Longest Happy String pattern — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Longest Happy String: build the longest string using a= 'a', b= 'b', c= 'c' with no three of the same letter in a row. Greedily, each round we try the letter with the most remaining."
+    explain:
+      "Longest Happy String: build the longest string using a= 'a', b= 'b', c= 'c' with no three of the same letter in a row. Greedily, each round we try the letter with the most remaining.",
   },
   {
-    id: "key-step",
-    prompt: "On the \"PICK\" step (+), what happens?",
+    id: 'key-step',
+    prompt: 'On the "PICK" step (+), what happens?',
     choices: [
       {
         label: "Append '' (the letter — this move caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Append '' (the letter with the most remaining that is still legal here). It now has  left. String so far: \"\"."
+    explain:
+      'Append \'\' (the letter with the most remaining that is still legal here). It now has  left. String so far: "".',
   },
   {
-    id: "state",
-    prompt: "What does the `res` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `res` field track in the visualization state?',
     choices: [
       {
-        label: "characters chosen so far — updated each frame",
-        correct: true
+        label: 'characters chosen so far — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `res` in sync: characters chosen so far, in order"
+    explain: 'The recorder keeps `res` in sync: characters chosen so far, in order',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Longest Happy String\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Longest Happy String"?',
     choices: [
       {
-        label: "O(a+b+c) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(a+b+c) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O( time, O(words) space — wrong order of growth"
+        label: 'O( time, O(words) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(1) space — wrong order of growth"
+        label: 'O(n) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n²) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(a+b+c). O(1). Longest Happy String"
+    explain: 'O(a+b+c). O(1). Longest Happy String',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "No letter can be appended — — final DONE caption",
-        correct: true
+        label: 'No letter can be appended — — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "No letter can be appended — either everything is used up, or the only letters left would form three in a row. The happy string is \"\" (length )."
-  }
+    explain:
+      'No letter can be appended — either everything is used up, or the only letters left would form three in a row. The happy string is "" (length ).',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

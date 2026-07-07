@@ -18,10 +18,14 @@ export function VimMobileTopBar() {
         aria-expanded={open}
       >
         <div className="min-w-0">
-          <p className="text-[length:var(--fs-2xs)] font-medium uppercase tracking-wide text-ink3">Level</p>
+          <p className="text-[length:var(--fs-2xs)] font-medium uppercase tracking-wide text-ink3">
+            Level
+          </p>
           <p className="truncate text-sm font-semibold text-ink">{level.title}</p>
         </div>
-        <ChevronDown className={cn('h-4 w-4 shrink-0 text-ink3 transition-transform', open && 'rotate-180')} />
+        <ChevronDown
+          className={cn('h-4 w-4 shrink-0 text-ink3 transition-transform', open && 'rotate-180')}
+        />
       </button>
       {open ? (
         <div className="max-h-48 overflow-y-auto border-t border-edge/40 px-3 py-2">

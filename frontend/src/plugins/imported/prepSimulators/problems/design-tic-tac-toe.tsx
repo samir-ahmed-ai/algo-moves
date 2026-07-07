@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -27,7 +33,8 @@ interface TttState {
   done: boolean;
 }
 
-function record({ n, moves }: TttInput): Frame<TttState>[] {  const board: (number | null)[][] = Array.from({ length: n }, () => Array(n).fill(null));
+function record({ n, moves }: TttInput): Frame<TttState>[] {
+  const board: (number | null)[][] = Array.from({ length: n }, () => Array(n).fill(null));
   const rows = new Array(n).fill(0);
   const cols = new Array(n).fill(0);
   let diag = 0;
@@ -35,16 +42,16 @@ function record({ n, moves }: TttInput): Frame<TttState>[] {  const board: (numb
   let winner: number | null = null;
 
   const { emit, frames } = createRecorder<TttState>(() => ({
-        n,
-        board: board.map((r) => r.slice()),
-        rows: rows.slice(),
-        cols: cols.slice(),
-        diag,
-        antiDiag,
-        op: '',
-        winner,
-        done: false
-      }));
+    n,
+    board: board.map((r) => r.slice()),
+    rows: rows.slice(),
+    cols: cols.slice(),
+    diag,
+    antiDiag,
+    op: '',
+    winner,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -62,7 +69,9 @@ function record({ n, moves }: TttInput): Frame<TttState>[] {  const board: (numb
     if (row + col === n - 1) antiDiag += add;
     const abs = (x: number) => (x < 0 ? -x : x);
     const w =
-      abs(rows[row]) === n || abs(cols[col]) === n || abs(diag) === n || abs(antiDiag) === n ? player : 0;
+      abs(rows[row]) === n || abs(cols[col]) === n || abs(diag) === n || abs(antiDiag) === n
+        ? player
+        : 0;
     if (w) winner = w;
     emit(
       'MOVE',
@@ -92,7 +101,10 @@ function View({ frame }: PluginViewProps<TttState>) {
         {s.op || '—'}
         {s.winner && <span className="ml-2 font-mono text-good">winner P{s.winner}</span>}
       </div>
-      <div className="mt-2 inline-grid gap-0.5" style={{ gridTemplateColumns: `repeat(${s.n}, minmax(0, 1fr))` }}>
+      <div
+        className="mt-2 inline-grid gap-0.5"
+        style={{ gridTemplateColumns: `repeat(${s.n}, minmax(0, 1fr))` }}
+      >
         {s.board.flatMap((row, r) =>
           row.map((cell, c) => (
             <div
@@ -100,7 +112,11 @@ function View({ frame }: PluginViewProps<TttState>) {
               className={cn(
                 'flex h-8 w-8 items-center justify-center rounded border font-mono',
                 vizText.sm,
-                cell === 1 ? 'border-accent bg-accentbg text-accent' : cell === 2 ? 'border-bad bg-bad/10 text-bad' : 'border-edge text-ink3',
+                cell === 1
+                  ? 'border-accent bg-accentbg text-accent'
+                  : cell === 2
+                    ? 'border-bad bg-bad/10 text-bad'
+                    : 'border-edge text-ink3',
               )}
             >
               {cell === 1 ? 'X' : cell === 2 ? 'O' : '·'}
@@ -129,112 +145,108 @@ function Inspector({ frame }: InspectorProps<TttState>) {
 export const manifestId = 'prep-design-design-tic-tac-toe';
 export const title = 'Design Tic-Tac-Toe';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Design Tic-Tac-Toe\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Design Tic-Tac-Toe"?',
     choices: [
       {
-        label: "Design — fits this problem",
-        correct: true
+        label: 'Design — fits this problem',
+        correct: true,
       },
       {
-        label: "Stack — different approach"
+        label: 'Stack — different approach',
       },
       {
-        label: "Two Heaps — different approach"
+        label: 'Two Heaps — different approach',
       },
       {
-        label: "Round-robin load balancer — different approach"
-      }
+        label: 'Round-robin load balancer — different approach',
+      },
     ],
-    explain: "See Design Tic Tac Toe pattern"
+    explain: 'See Design Tic Tac Toe pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Design Tic-Tac-Toe), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Design Tic-Tac-Toe), what strategy is established?',
     choices: [
       {
-        label: "See Design Tic Tac Toe pattern — described in INIT caption",
-        correct: true
+        label: 'See Design Tic Tac Toe pattern — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Design Tic-Tac-Toe: track row/col/diag sums (+1 player1, -1 player2). |sum|==n means win — O(1) per move."
+    explain:
+      'Design Tic-Tac-Toe: track row/col/diag sums (+1 player1, -1 player2). |sum|==n means win — O(1) per move.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"MOVE\" step (P @(,)), what happens?",
+    id: 'key-step',
+    prompt: 'On the "MOVE" step (P @(,)), what happens?',
     choices: [
       {
-        label: "Move(,, player=): rows[]=, cols[]=. ${w ? — this move caption",
-        correct: true
+        label: 'Move(,, player=): rows[]=, cols[]=. ${w ? — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Move(,, player=): rows[]=, cols[]=. ${w ? "
+    explain: 'Move(,, player=): rows[]=, cols[]=. ${w ? ',
   },
   {
-    id: "state",
-    prompt: "What does the `n` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `n` field track in the visualization state?',
     choices: [
       {
-        label: "Field n in state — updated each frame",
-        correct: true
+        label: 'Field n in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `n` on every emit so each frame shows the algorithm mid-step."
+    explain: 'The recorder snapshots `n` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Move(,, player=): rows[]=, cols[]=. ${w ? — final DONE caption",
-        correct: true
+        label: 'Move(,, player=): rows[]=, cols[]=. ${w ? — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Move(,, player=): rows[]=, cols[]=. ${w ? "
-  }
+    explain: 'Move(,, player=): rows[]=, cols[]=. ${w ? ',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -259,6 +271,8 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as TttState | undefined;
-    return s?.done ? { ok: true, label: s.winner ? `P${s.winner} wins` : 'no winner' } : { ok: false, label: 'incomplete' };
+    return s?.done
+      ? { ok: true, label: s.winner ? `P${s.winner} wins` : 'no winner' }
+      : { ok: false, label: 'incomplete' };
   },
 };

@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -20,17 +26,18 @@ interface SwapLRState {
   done: boolean;
 }
 
-function record({ start, target }: SwapLRInput): Frame<SwapLRState>[] {  const n = start.length;
+function record({ start, target }: SwapLRInput): Frame<SwapLRState>[] {
+  const n = start.length;
 
   const { emit, frames } = createRecorder<SwapLRState>(() => ({
-        start,
-        target,
-        i: null,
-        j: null,
-        result: null,
-        reason: '',
-        done: false
-      }));
+    start,
+    target,
+    i: null,
+    j: null,
+    result: null,
+    reason: '',
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -81,7 +88,13 @@ function record({ start, target }: SwapLRInput): Frame<SwapLRState>[] {  const n
         'FAIL',
         'letter count differs',
         `One pointer reached the end while the other still has a letter (i=${i}, j=${j}). The two strings have a different number of L/R letters, so it is impossible.`,
-        { i: i < n ? i : null, j: j < n ? j : null, result: false, reason: 'unequal L/R counts', done: true },
+        {
+          i: i < n ? i : null,
+          j: j < n ? j : null,
+          result: false,
+          reason: 'unequal L/R counts',
+          done: true,
+        },
         'bad',
       );
       return frames;
@@ -189,8 +202,7 @@ function View({ frame }: PluginViewProps<SwapLRState>) {
     return '';
   };
 
-  const verdictText =
-    s.result === true ? 'true' : s.result === false ? 'false' : '…';
+  const verdictText = s.result === true ? 'true' : s.result === false ? 'false' : '…';
   const verdictTone =
     s.result === true ? 'text-good' : s.result === false ? 'text-bad' : 'text-ink3';
 
@@ -202,12 +214,20 @@ function View({ frame }: PluginViewProps<SwapLRState>) {
         <span className="font-mono text-ink">X</span> is blank
       </div>
       <div className={cn('mt-1', vizText.xs, 'text-ink3')}>start</div>
-      <ArrayRow values={startChars} cellTone={startTone} pointers={startPointers} windowRange={null} />
+      <ArrayRow
+        values={startChars}
+        cellTone={startTone}
+        pointers={startPointers}
+        windowRange={null}
+      />
       <div className={cn('mt-1', vizText.xs, 'text-ink3')}>target</div>
-      <ArrayRow values={targetChars} cellTone={targetTone} pointers={targetPointers} windowRange={null} />
-      {s.reason && (
-        <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>{s.reason}</div>
-      )}
+      <ArrayRow
+        values={targetChars}
+        cellTone={targetTone}
+        pointers={targetPointers}
+        windowRange={null}
+      />
+      {s.reason && <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>{s.reason}</div>}
       <div className={cn('mt-1 font-mono', vizText.base, verdictTone)}>→ {verdictText}</div>
     </div>
   );
@@ -240,137 +260,138 @@ function Inspector({ frame }: InspectorProps<SwapLRState>) {
 export const manifestId = 'prep-strings-swap-adjacent-in-lr-string';
 export const title = 'Swap Adjacent in LR String';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Swap Adjacent in LR String\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Swap Adjacent in LR String"?',
     choices: [
       {
-        label: "Two Pointers — fits this problem",
-        correct: true
+        label: 'Two Pointers — fits this problem',
+        correct: true,
       },
       {
-        label: "Multi-pointer Buckets — different approach"
+        label: 'Multi-pointer Buckets — different approach',
       },
       {
-        label: "Bitmask Hash Set — different approach"
+        label: 'Bitmask Hash Set — different approach',
       },
       {
-        label: "DP reachability — different approach"
-      }
+        label: 'DP reachability — different approach',
+      },
     ],
-    explain: "See Swap Adjacent In Lr String pattern"
+    explain: 'See Swap Adjacent In Lr String pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Swap Adjacent in LR String), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Swap Adjacent in LR String), what strategy is established?',
     choices: [
       {
-        label: "See Swap Adjacent In Lr String — described in INIT caption",
-        correct: true
+        label: 'See Swap Adjacent In Lr String — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Swap Adjacent in LR String: an 'L' can only move left and an 'R' can only move right (past 'X' blanks). Walk both strings with two pointers, skipping 'X', and check the non-X letters match in order with the right position constraint."
+    explain:
+      "Swap Adjacent in LR String: an 'L' can only move left and an 'R' can only move right (past 'X' blanks). Walk both strings with two pointers, skipping 'X', and check the non-X letters match in order with the right position constraint.",
   },
   {
-    id: "key-step",
-    prompt: "On the \"COMPARE\" step ( vs ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "COMPARE" step ( vs ), what happens?',
     choices: [
       {
-        label: "Compare the next real letters: start[] — this move caption",
-        correct: true
+        label: 'Compare the next real letters: start[] — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Compare the next real letters: start[] = '' and target[] = ''. They must be the same letter."
+    explain:
+      "Compare the next real letters: start[] = '' and target[] = ''. They must be the same letter.",
   },
   {
-    id: "state",
-    prompt: "What does the `start` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `start` field track in the visualization state?',
     choices: [
       {
-        label: "start string — updated each frame",
-        correct: true
+        label: 'start string — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `start` in sync: start string as-is"
+    explain: 'The recorder keeps `start` in sync: start string as-is',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Swap Adjacent in LR String\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Swap Adjacent in LR String"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
+        label: 'O(n²) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n^2) time, O(1) space — wrong order of growth"
+        label: 'O(n^2) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n^2) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n^2) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). Swap Adjacent In Lr String"
+    explain: 'O(n). O(1). Swap Adjacent In Lr String',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
         label: "'' at start[] can reach target[]: — final DONE caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "'' at start[] can reach target[]: ${a === 'L' ? "
-  }
+    explain: "'' at start[] can reach target[]: ${a === 'L' ? ",
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
   inputs: [
-    { id: 'lr1', label: '"RXXLRXRXL" → "XRLXXRRLX"', value: { start: 'RXXLRXRXL', target: 'XRLXXRRLX' } },
+    {
+      id: 'lr1',
+      label: '"RXXLRXRXL" → "XRLXXRRLX"',
+      value: { start: 'RXXLRXRXL', target: 'XRLXXRRLX' },
+    },
     { id: 'lr2', label: '"XL" → "LX" (L can move left)', value: { start: 'XL', target: 'LX' } },
   ] satisfies SampleInput<SwapLRInput>[],
   record,

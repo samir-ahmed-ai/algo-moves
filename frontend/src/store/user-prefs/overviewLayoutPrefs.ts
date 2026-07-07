@@ -42,7 +42,10 @@ function load(): OverviewLayoutPrefs {
 
 const store = createSyncStore<OverviewLayoutPrefs>(KEY, load);
 
-export function useOverviewLayoutPrefs(): [OverviewLayoutPrefs, (patch: Partial<OverviewLayoutPrefs>) => void] {
+export function useOverviewLayoutPrefs(): [
+  OverviewLayoutPrefs,
+  (patch: Partial<OverviewLayoutPrefs>) => void,
+] {
   const current = store.use();
   const set = useCallback((patch: Partial<OverviewLayoutPrefs>) => {
     store.set(clampPrefs({ ...store.get(), ...patch }));

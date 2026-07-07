@@ -1,1 +1,1 @@
-export * from '../../realtime/protocol';
+export * from '@/shell/realtime/protocol';

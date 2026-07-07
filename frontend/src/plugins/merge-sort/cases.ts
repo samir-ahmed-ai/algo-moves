@@ -10,7 +10,8 @@ export const goodCases: WorkedCase<SortInput>[] = [
     returns: 'sorted',
     tone: 'ok',
     question: 'When merging runs [2] and [1], which front element is written first?',
-    answer: 'Compare fronts of both runs: 1 < 2, so 1 is copied first. Merge sort always picks the smaller of the two run heads.',
+    answer:
+      'Compare fronts of both runs: 1 < 2, so 1 is copied first. Merge sort always picks the smaller of the two run heads.',
   },
 ];
 
@@ -23,7 +24,8 @@ export const badCases: WorkedCase<SortInput>[] = [
     returns: 'sorted in O(n log n) time',
     tone: 'bad',
     question: 'Why is merge sort still O(n log n) on reverse order?',
-    answer: 'Every merge still touches each element once per level; run width doubles each pass regardless of input order.',
+    answer:
+      'Every merge still touches each element once per level; run width doubles each pass regardless of input order.',
   },
 ];
 

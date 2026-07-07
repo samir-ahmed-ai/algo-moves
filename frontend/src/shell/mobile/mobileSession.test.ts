@@ -28,7 +28,12 @@ describe('mobileSession', () => {
   });
 
   it('round-trips session data', () => {
-    saveMobileSession({ topicId: 'prep-arrays-all', itemId: 'prep-arrays-two-sum', pIdx: 2, cIdx: 1 });
+    saveMobileSession({
+      topicId: 'prep-arrays-all',
+      itemId: 'prep-arrays-two-sum',
+      pIdx: 2,
+      cIdx: 1,
+    });
     expect(loadMobileSession()).toEqual({
       topicId: 'prep-arrays-all',
       itemId: 'prep-arrays-two-sum',
@@ -51,7 +56,12 @@ describe('mobileSession', () => {
   });
 
   it('keeps session for Continue after partial progress', () => {
-    saveMobileSession({ topicId: 'prep-arrays-all', itemId: 'prep-arrays-two-sum', pIdx: 2, cIdx: 1 });
+    saveMobileSession({
+      topicId: 'prep-arrays-all',
+      itemId: 'prep-arrays-two-sum',
+      pIdx: 2,
+      cIdx: 1,
+    });
     expect(loadMobileSession()?.pIdx).toBe(2);
     expect(loadMobileSession()?.cIdx).toBe(1);
   });

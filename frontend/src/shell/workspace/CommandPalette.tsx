@@ -21,7 +21,10 @@ export interface CommandPaletteSection {
   commands: CommandPaletteCommand[];
 }
 
-export function filterCommands(commands: CommandPaletteCommand[], query: string): CommandPaletteCommand[] {
+export function filterCommands(
+  commands: CommandPaletteCommand[],
+  query: string,
+): CommandPaletteCommand[] {
   const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
   if (terms.length === 0) return commands;
   return commands
@@ -54,7 +57,8 @@ function scoreCommand(command: CommandPaletteCommand, terms: string[]): number {
     if (hint === term) score += 3;
     else if (hint.includes(term)) score += 1;
     if (id.includes(term)) score += 1;
-    if (keywords.includes(term) || (compactTerm && compactKeywords.includes(compactTerm))) score += 2;
+    if (keywords.includes(term) || (compactTerm && compactKeywords.includes(compactTerm)))
+      score += 2;
   }
 
   return score;
@@ -66,7 +70,11 @@ function compactCommandText(value: string): string {
 
 export type CommandSelectionKey = 'ArrowDown' | 'ArrowUp' | 'Home' | 'End';
 
-export function resolveCommandSelection(current: number, count: number, key: CommandSelectionKey): number {
+export function resolveCommandSelection(
+  current: number,
+  count: number,
+  key: CommandSelectionKey,
+): number {
   if (count <= 0) return 0;
   const clamped = Math.min(Math.max(current, 0), count - 1);
   if (key === 'Home') return 0;
@@ -74,7 +82,10 @@ export function resolveCommandSelection(current: number, count: number, key: Com
   return (clamped + (key === 'ArrowDown' ? 1 : -1) + count) % count;
 }
 
-export function buildOpenProblemCommand(item: Item, openProblem: (id: string) => void): CommandPaletteCommand {
+export function buildOpenProblemCommand(
+  item: Item,
+  openProblem: (id: string) => void,
+): CommandPaletteCommand {
   return {
     id: `open:${item.id}`,
     label: `Open ${item.title}`,
@@ -93,7 +104,9 @@ export function buildOpenProblemCommand(item: Item, openProblem: (id: string) =>
 }
 
 function compactKeywords(values: Array<string | undefined>): string[] {
-  return Array.from(new Set(values.map((value) => value?.trim()).filter((value): value is string => !!value)));
+  return Array.from(
+    new Set(values.map((value) => value?.trim()).filter((value): value is string => !!value)),
+  );
 }
 
 function parseCommandSelectionKey(key: string): CommandSelectionKey | null {
@@ -110,12 +123,16 @@ export function buildCommandPaletteSections(
   if (query.trim()) return [{ id: 'results', label: 'Results', commands: filtered }];
 
   const byId = new Map(filtered.map((command) => [command.id, command] as const));
-  const recentCommands = recentCommandIds.map((id) => byId.get(id)).filter((command): command is CommandPaletteCommand => !!command);
+  const recentCommands = recentCommandIds
+    .map((id) => byId.get(id))
+    .filter((command): command is CommandPaletteCommand => !!command);
   const recentIds = new Set(recentCommands.map((command) => command.id));
   const sections: CommandPaletteSection[] = [];
-  if (recentCommands.length > 0) sections.push({ id: 'recent', label: 'Recent', commands: recentCommands });
+  if (recentCommands.length > 0)
+    sections.push({ id: 'recent', label: 'Recent', commands: recentCommands });
   const allCommands = filtered.filter((command) => !recentIds.has(command.id));
-  if (allCommands.length > 0) sections.push({ id: 'all', label: 'All commands', commands: allCommands });
+  if (allCommands.length > 0)
+    sections.push({ id: 'all', label: 'All commands', commands: allCommands });
   return sections;
 }
 
@@ -144,7 +161,9 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
   const titleId = useId();
 
   const commands = useMemo<CommandPaletteCommand[]>(() => {
-    const problemCmds = catalog.items.filter((it) => it.pluginId).map((it) => buildOpenProblemCommand(it, openProblem));
+    const problemCmds = catalog.items
+      .filter((it) => it.pluginId)
+      .map((it) => buildOpenProblemCommand(it, openProblem));
     const actions: CommandPaletteCommand[] = [
       {
         id: 'mode:play',
@@ -255,8 +274,14 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
     themePreset,
   ]);
 
-  const sections = useMemo(() => buildCommandPaletteSections(commands, q, recentCommandIds), [commands, q, recentCommandIds]);
-  const visibleCommands = useMemo(() => sections.flatMap((section) => section.commands), [sections]);
+  const sections = useMemo(
+    () => buildCommandPaletteSections(commands, q, recentCommandIds),
+    [commands, q, recentCommandIds],
+  );
+  const visibleCommands = useMemo(
+    () => sections.flatMap((section) => section.commands),
+    [sections],
+  );
   const commandIndexById = useMemo(
     () => new Map(visibleCommands.map((command, index) => [command.id, index] as const)),
     [visibleCommands],
@@ -313,7 +338,10 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
             }
           }}
           placeholder="Search problems, panels, effects..."
-          className={cn('w-full border-b border-edge bg-transparent px-[var(--hpad)] py-[var(--pad)] text-ink outline-none placeholder:text-ink3', chromeText.base)}
+          className={cn(
+            'w-full border-b border-edge bg-transparent px-[var(--hpad)] py-[var(--pad)] text-ink outline-none placeholder:text-ink3',
+            chromeText.base,
+          )}
           role="combobox"
           aria-autocomplete="list"
           aria-controls={listboxId}
@@ -326,13 +354,25 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
             ? 'No matching commands'
             : `${visibleCommands.length} command${visibleCommands.length === 1 ? '' : 's'} available`}
         </div>
-        <div id={listboxId} className="ws-scroll max-h-[50vh] overflow-auto py-0.5" role="listbox" aria-label="Commands">
+        <div
+          id={listboxId}
+          className="ws-scroll max-h-[50vh] overflow-auto py-0.5"
+          role="listbox"
+          aria-label="Commands"
+        >
           {visibleCommands.length === 0 ? (
-            <div className={cn('px-[var(--hpad)] py-[var(--pad)] text-ink3', chromeText.base)}>No matches.</div>
+            <div className={cn('px-[var(--hpad)] py-[var(--pad)] text-ink3', chromeText.base)}>
+              No matches.
+            </div>
           ) : (
             sections.map((section) => (
               <div key={section.id}>
-                <div className={cn('px-[var(--hpad)] pt-[var(--pad)] pb-[var(--gap)] text-[length:var(--fs-tight)] font-semibold uppercase tracking-[0.18em] text-ink3', chromeText.base)}>
+                <div
+                  className={cn(
+                    'px-[var(--hpad)] pt-[var(--pad)] pb-[var(--gap)] text-[length:var(--fs-tight)] font-semibold uppercase tracking-[0.18em] text-ink3',
+                    chromeText.base,
+                  )}
+                >
                   {section.label}
                 </div>
                 {section.commands.map((command) => {
@@ -349,11 +389,15 @@ export function CommandPalette({ inputId, onClose }: { inputId: string; onClose:
                       onClick={() => exec(command)}
                       className={cn(
                         'flex w-full min-h-[var(--row)] items-center justify-between gap-[var(--gap)] px-[var(--hpad)] py-[var(--gap)] text-left',
-                        index === clampedSel ? 'bg-accentbg text-accent' : 'text-ink2 hover:bg-panel2',
+                        index === clampedSel
+                          ? 'bg-accentbg text-accent'
+                          : 'text-ink2 hover:bg-panel2',
                       )}
                     >
                       <span className="truncate">{command.label}</span>
-                      {command.hint && <ChromeToken className="shrink-0">{command.hint}</ChromeToken>}
+                      {command.hint && (
+                        <ChromeToken className="shrink-0">{command.hint}</ChromeToken>
+                      )}
                     </button>
                   );
                 })}

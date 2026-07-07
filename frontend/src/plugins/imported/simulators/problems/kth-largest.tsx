@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface KthInput {
   nums: number[];
@@ -35,28 +48,31 @@ function record({ nums, k }: KthInput): Frame<KthState>[] {
   let answer: number | null = null;
   let found: number | null = null;
 
-  const { emit, frames } = createRecorder<KthState>(() => ({
-    values: a.slice(),
-    k,
-    target,
-    lo: 0,
-    hi: n - 1,
-    pivotIdx: null,
-    pivot: null,
-    i: null,
-    pos: null,
-    swapped: null,
-    dead: dead.slice(),
-    found,
-    answer,
-    done: false,
-  }), {
-    merge: (base, partial) => ({
-      ...base,
-      ...partial,
-      done: partial.done ?? base.done,
+  const { emit, frames } = createRecorder<KthState>(
+    () => ({
+      values: a.slice(),
+      k,
+      target,
+      lo: 0,
+      hi: n - 1,
+      pivotIdx: null,
+      pivot: null,
+      i: null,
+      pos: null,
+      swapped: null,
+      dead: dead.slice(),
+      found,
+      answer,
+      done: false,
     }),
-  });
+    {
+      merge: (base, partial) => ({
+        ...base,
+        ...partial,
+        done: partial.done ?? base.done,
+      }),
+    },
+  );
 
   const emitDone = (
     type: string,
@@ -172,13 +188,15 @@ function View({ frame }: PluginViewProps<KthState>) {
   const s = frame.state;
   const live = s.lo <= s.hi && !s.done;
   const pointers: ArrayPointer[] = [];
-  if (s.pivotIdx !== null) pointers.push({ i: s.pivotIdx, label: 'pivot', tone: 'warn', place: 'above' });
+  if (s.pivotIdx !== null)
+    pointers.push({ i: s.pivotIdx, label: 'pivot', tone: 'warn', place: 'above' });
   if (s.i !== null) pointers.push({ i: s.i, label: 'i', tone: 'good', place: 'above' });
   if (live) {
     pointers.push({ i: s.lo, label: 'lo', tone: 'accent', place: 'below' });
     pointers.push({ i: s.hi, label: 'hi', tone: 'bad', place: 'below' });
   }
-  if (s.pos !== null && !s.done) pointers.push({ i: s.pos, label: 'pos', tone: 'good', place: 'below' });
+  if (s.pos !== null && !s.done)
+    pointers.push({ i: s.pos, label: 'pos', tone: 'good', place: 'below' });
   const tone = (i: number) => {
     if (s.found === i) return 'found';
     if (s.swapped && (s.swapped[0] === i || s.swapped[1] === i)) return 'mid';
@@ -200,9 +218,7 @@ function View({ frame }: PluginViewProps<KthState>) {
         <RailStat k="pivot" v={s.pivot ?? '—'} tone="warn" />
         <RailStat k="pos" v={s.pos ?? '—'} />
       </RailGroup>
-      {s.answer !== null && (
-        <RailResult label="answer" value={s.answer} tone="good" />
-      )}
+      {s.answer !== null && <RailResult label="answer" value={s.answer} tone="good" />}
     </>
   );
   return (
@@ -234,7 +250,11 @@ export const title = 'Kth Largest Element in an Array';
 export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'k1', label: '[3,2,1,5,6,4], k=2 → 5', value: { nums: [3, 2, 1, 5, 6, 4], k: 2 } },
-    { id: 'k2', label: '[3,2,3,1,2,4,5,5,6], k=4 → 4', value: { nums: [3, 2, 3, 1, 2, 4, 5, 5, 6], k: 4 } },
+    {
+      id: 'k2',
+      label: '[3,2,3,1,2,4,5,5,6], k=4 → 4',
+      value: { nums: [3, 2, 3, 1, 2, 4, 5, 5, 6], k: 4 },
+    },
   ] satisfies SampleInput<KthInput>[],
   record,
   View,

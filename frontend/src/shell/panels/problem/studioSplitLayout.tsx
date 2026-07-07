@@ -35,7 +35,9 @@ export function StudioSplitLayout({
   const { item } = useCanvasStatic();
   const conceptCourse = isConceptCourse(item);
   const [layout, setLayout] = useOverviewLayoutPrefs();
-  const problemSplit = conceptCourse ? conceptOverviewProblemPct(layout.problemPct) : layout.problemPct;
+  const problemSplit = conceptCourse
+    ? conceptOverviewProblemPct(layout.problemPct)
+    : layout.problemPct;
   const collapsed = layout.problemCollapsed;
 
   useEffect(() => {
@@ -74,7 +76,13 @@ export function StudioSplitLayout({
           firstWidthPx={collapsed ? PROBLEM_COLUMN_RAIL_W : undefined}
           firstClassName="studio-problem-pane"
           className="min-h-0 flex-1"
-          first={collapsed ? <ProblemCollapsedRail onExpand={() => setLayout({ problemCollapsed: false })} /> : problem}
+          first={
+            collapsed ? (
+              <ProblemCollapsedRail onExpand={() => setLayout({ problemCollapsed: false })} />
+            ) : (
+              problem
+            )
+          }
           second={second}
         />
         {footer ? <StudioSplitFooter>{footer}</StudioSplitFooter> : null}
@@ -91,7 +99,13 @@ function StudioSplitFooter({ children }: { children: ReactNode }) {
   );
 }
 
-export function StudioContentPanel({ children, className }: { children: ReactNode; className?: string }) {
+export function StudioContentPanel({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-2">

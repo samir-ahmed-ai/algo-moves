@@ -58,8 +58,8 @@ describe('Phase 8 store slices', () => {
     expect(getEdgeCases('two-sum')['Empty input (length 0)']).toBe(true);
   });
 
-  it('assembleBest migrates legacy rush keys', () => {
-    localStorage.setItem('algo-moves:rush-best:two-sum:0', '12.5');
+  it('assembleBest persists rush scores', () => {
+    expect(maybeWriteRushBest('two-sum', 0, 12.5)).toBe(true);
     expect(readRushBestSeconds('two-sum', 0)).toBe(12.5);
     expect(maybeWriteRushBest('two-sum', 0, 10)).toBe(true);
     expect(readRushBestSeconds('two-sum', 0)).toBe(10);

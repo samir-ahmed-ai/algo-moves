@@ -34,3 +34,11 @@ export {
   isRoomEnvelope,
   type RoomSharedEnvelope,
 } from './roomState';
+export {
+  RoomCommsProvider,
+  useRoomComms,
+  type ChatMessage,
+  type Identity,
+  type Reaction,
+  type RoomComms,
+} from './useRoomComms';

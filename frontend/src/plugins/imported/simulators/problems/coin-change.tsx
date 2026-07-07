@@ -1,9 +1,23 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  vizText,
+} from '../../../_shared/vizKit';
 
 interface CoinInput {
   coins: number[];
@@ -102,7 +116,8 @@ function View({ frame }: PluginViewProps<CoinState>) {
   const cells = s.dp.map((v) => (v === INF ? '∞' : v));
   const pointers: ArrayPointer[] = [];
   if (s.a !== null) pointers.push({ i: s.a, label: 'a', tone: 'accent', place: 'above' });
-  if (s.from !== null) pointers.push({ i: s.from, label: `a−${s.coin}`, tone: 'warn', place: 'below' });
+  if (s.from !== null)
+    pointers.push({ i: s.from, label: `a−${s.coin}`, tone: 'warn', place: 'below' });
   const tone = (i: number) => (s.a === i ? 'found' : s.dp[i] !== INF ? 'match' : '');
   const reachable = s.dp[s.amount] !== INF;
   const answerKnown = reachable || s.done;
@@ -145,7 +160,10 @@ function Inspector({ frame }: InspectorProps<CoinState>) {
       <InspectorRow k="winning coin" v={s.coin ?? '—'} />
       <InspectorRow k="dp[a−coin]" v={s.from !== null ? cell(s.from) : '—'} />
       <InspectorRow k="dp[a]" v={s.a !== null ? cell(s.a) : '—'} />
-      <InspectorRow k="answer" v={known ? (s.dp[s.amount] === INF ? '−1' : `${s.dp[s.amount]} coins`) : '…filling'} />
+      <InspectorRow
+        k="answer"
+        v={known ? (s.dp[s.amount] === INF ? '−1' : `${s.dp[s.amount]} coins`) : '…filling'}
+      />
     </VarGrid>
   );
 }

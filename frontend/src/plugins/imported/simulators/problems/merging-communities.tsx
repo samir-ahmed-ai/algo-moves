@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { GraphBoard } from '../../../../components/board/GraphBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 import { circleLayout } from '../../../_shared/graphLayout';
 
 /** "M a b" merges the communities of a and b; "Q a" reports a's community size. People are 1-indexed in the op list. */
@@ -113,8 +126,7 @@ function record({ n, ops, pos }: MCInput): Frame<MCState>[] {
     }
   }
 
-  const finalNote =
-    answer !== null ? `last Q = ${answer}` : `${components} communities`;
+  const finalNote = answer !== null ? `last Q = ${answer}` : `${components} communities`;
   const finalCaption =
     answer !== null
       ? `All operations replayed. The final query reported a community of size ${answer}; ${components} ${components === 1 ? 'community remains' : 'communities remain'} overall.`
@@ -220,6 +232,9 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as MCState | undefined;
-    return { ok: true, label: s?.answer !== null && s ? `last Q = ${s.answer}` : `${s?.components ?? 0} communities` };
+    return {
+      ok: true,
+      label: s?.answer !== null && s ? `last Q = ${s.answer}` : `${s?.components ?? 0} communities`,
+    };
   },
 };

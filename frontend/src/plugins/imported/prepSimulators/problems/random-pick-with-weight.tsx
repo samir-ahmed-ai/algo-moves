@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -19,20 +25,21 @@ interface PickWState {
   done: boolean;
 }
 
-function record({ weights, targets }: PickWInput): Frame<PickWState>[] {  const prefix: number[] = [];
+function record({ weights, targets }: PickWInput): Frame<PickWState>[] {
+  const prefix: number[] = [];
   for (let i = 0; i < weights.length; i++) {
     prefix.push(i === 0 ? weights[0] : prefix[i - 1] + weights[i]);
   }
   const total = prefix[prefix.length - 1];
 
   const { emit, frames } = createRecorder<PickWState>(() => ({
-        weights: [...weights],
-        prefix: prefix.slice(),
-        target: 0,
-        picked: -1,
-        op: '',
-        done: false
-      }));
+    weights: [...weights],
+    prefix: prefix.slice(),
+    target: 0,
+    picked: -1,
+    op: '',
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -112,112 +119,109 @@ function Inspector({ frame }: InspectorProps<PickWState>) {
 export const manifestId = 'prep-design-random-pick-with-weight';
 export const title = 'Random Pick with Weight';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Random Pick with Weight\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Random Pick with Weight"?',
     choices: [
       {
-        label: "Design — fits this problem",
-        correct: true
+        label: 'Design — fits this problem',
+        correct: true,
       },
       {
-        label: "Heap + Sorted Available Set — different approach"
+        label: 'Heap + Sorted Available Set — different approach',
       },
       {
-        label: "Trie phone directory autocomplete — different approach"
+        label: 'Trie phone directory autocomplete — different approach',
       },
       {
-        label: "Jump Array — different approach"
-      }
+        label: 'Jump Array — different approach',
+      },
     ],
-    explain: "See Random Pick With Weight pattern"
+    explain: 'See Random Pick With Weight pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Random Pick with Weight), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Random Pick with Weight), what strategy is established?',
     choices: [
       {
-        label: "See Random Pick With Weight pattern — described in INIT caption",
-        correct: true
+        label: 'See Random Pick With Weight pattern — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Random Pick with Weight: prefix sums define buckets. PickIndex draws target in [1,sum], binary search prefix for index."
+    explain:
+      'Random Pick with Weight: prefix sums define buckets. PickIndex draws target in [1,sum], binary search prefix for index.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"PICK\" step (target= → ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "PICK" step (target= → ), what happens?',
     choices: [
       {
-        label: "PickIndex(): target= in [1,]. Binary — this move caption",
-        correct: true
+        label: 'PickIndex(): target= in [1,]. Binary — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "PickIndex(): target= in [1,]. Binary search prefix → index  (weight )."
+    explain: 'PickIndex(): target= in [1,]. Binary search prefix → index  (weight ).',
   },
   {
-    id: "state",
-    prompt: "What does the `weights` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `weights` field track in the visualization state?',
     choices: [
       {
-        label: "Field weights in state — updated each frame",
-        correct: true
+        label: 'Field weights in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `weights` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `weights` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "PickIndex(): target= in [1,]. Binary — final DONE caption",
-        correct: true
+        label: 'PickIndex(): target= in [1,]. Binary — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "PickIndex(): target= in [1,]. Binary search prefix → index  (weight )."
-  }
+    explain: 'PickIndex(): target= in [1,]. Binary search prefix → index  (weight ).',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

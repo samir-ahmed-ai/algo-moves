@@ -49,7 +49,11 @@ function hostSlots(data: PanelNodeData): (string | null)[] {
 }
 
 /** True when assigning child into host would create a parent cycle. */
-export function wouldCreateLayoutCycle(nodes: PanelFlowNode[], hostId: string, childId: string): boolean {
+export function wouldCreateLayoutCycle(
+  nodes: PanelFlowNode[],
+  hostId: string,
+  childId: string,
+): boolean {
   if (hostId === childId) return true;
   let cur: string | undefined = hostId;
   const seen = new Set<string>();
@@ -76,7 +80,11 @@ function clearChildFromAllSlots(nodes: PanelFlowNode[], childId: string): PanelF
   });
 }
 
-function unparentNode(nodes: PanelFlowNode[], childId: string, absPosition?: { x: number; y: number }): PanelFlowNode[] {
+function unparentNode(
+  nodes: PanelFlowNode[],
+  childId: string,
+  absPosition?: { x: number; y: number },
+): PanelFlowNode[] {
   const child = nodeById(nodes, childId);
   if (!child?.parentId) return nodes;
 
@@ -243,7 +251,10 @@ export function relayoutHostSlots(nodes: PanelFlowNode[], hostId: string): Panel
 }
 
 /** When hosts are deleted, unparent slotted children onto the canvas. */
-export function unparentOnHostDelete(nodes: PanelFlowNode[], deletedIds: Set<string>): PanelFlowNode[] {
+export function unparentOnHostDelete(
+  nodes: PanelFlowNode[],
+  deletedIds: Set<string>,
+): PanelFlowNode[] {
   let next = nodes;
   for (const hostId of deletedIds) {
     const host = nodeById(next, hostId);

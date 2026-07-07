@@ -13,10 +13,7 @@ export interface TreeWalkState {
   done: boolean;
 }
 
-export function createTreeRecorder(
-  tree: LevelOrderTree,
-  overrides?: Partial<TreeWalkState>,
-) {
+export function createTreeRecorder(tree: LevelOrderTree, overrides?: Partial<TreeWalkState>) {
   return createRecorder<TreeWalkState>(() => ({
     tree,
     current: null,

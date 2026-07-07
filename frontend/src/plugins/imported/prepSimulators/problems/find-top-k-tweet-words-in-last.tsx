@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -31,22 +37,23 @@ interface TopKState {
   phase: 'scan' | 'count' | 'sort' | 'done';
 }
 
-function record({ tweets, now, window, k }: TopKInput): Frame<TopKState>[] {  const counts = new Map<string, number>();
+function record({ tweets, now, window, k }: TopKInput): Frame<TopKState>[] {
+  const counts = new Map<string, number>();
   const lo = now - window;
 
   const { emit, frames } = createRecorder<TopKState>(() => ({
-        tweets,
-        now,
-        window,
-        k,
-        lo,
-        i: null,
-        inWindow: null,
-        counts: [...counts.entries()],
-        ranked: null,
-        result: null,
-        phase: 'scan'
-      }));
+    tweets,
+    now,
+    window,
+    k,
+    lo,
+    i: null,
+    inWindow: null,
+    counts: [...counts.entries()],
+    ranked: null,
+    result: null,
+    phase: 'scan',
+  }));
 
   emit(
     'INIT',
@@ -129,7 +136,10 @@ function View({ frame }: PluginViewProps<TopKState>) {
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
-        window = <span className="font-mono text-ink">[{s.lo} … {s.now}]</span>
+        window ={' '}
+        <span className="font-mono text-ink">
+          [{s.lo} … {s.now}]
+        </span>
         {' · '}k = <span className="font-mono text-ink">{s.k}</span>
       </div>
       <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} />
@@ -177,132 +187,129 @@ function computeResult(input: TopKInput): string[] {
   return ranked.slice(0, Math.min(input.k, ranked.length)).map(([w]) => w);
 }
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Find top K tweet words in last\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Find top K tweet words in last"?',
     choices: [
       {
-        label: "Sliding window + frequency map — fits this problem",
-        correct: true
+        label: 'Sliding window + frequency map — fits this problem',
+        correct: true,
       },
       {
-        label: "Frequency map + bucket sort — different approach"
+        label: 'Frequency map + bucket sort — different approach',
       },
       {
-        label: "Union-find via email index — different approach"
+        label: 'Union-find via email index — different approach',
       },
       {
-        label: "Sort by distance to origin — different approach"
-      }
+        label: 'Sort by distance to origin — different approach',
+      },
     ],
-    explain: "Keep tweets inside [now-window, now], count words, take top k"
+    explain: 'Keep tweets inside [now-window, now], count words, take top k',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Find top K tweet words in last), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Find top K tweet words in last), what strategy is established?',
     choices: [
       {
-        label: "Keep tweets inside [now-window, now] — described in INIT caption",
-        correct: true
+        label: 'Keep tweets inside [now-window, now] — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Find the top  tweet words within the last  time units. A tweet at time t is kept only when  ≤ t ≤  (inside the window now − window … now). We count words inside that window, then rank by frequency."
+    explain:
+      'Find the top  tweet words within the last  time units. A tweet at time t is kept only when  ≤ t ≤  (inside the window now − window … now). We count words inside that window, then rank by frequency.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"COUNT\" step ( → ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "COUNT" step ( → ), what happens?',
     choices: [
       {
-        label: "Tweet (\"\", t=) sits inside — this move caption",
-        correct: true
+        label: 'Tweet ("", t=) sits inside — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Tweet  (\"\", t=) sits inside  … , so it counts. counts[\"\"] = ."
+    explain: 'Tweet  ("", t=) sits inside  … , so it counts. counts[""] = .',
   },
   {
-    id: "state",
-    prompt: "What does the `lo` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `lo` field track in the visualization state?',
     choices: [
       {
-        label: "earliest time still inside — updated each frame",
-        correct: true
+        label: 'earliest time still inside — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `lo` in sync: earliest time still inside the window (now - window)"
+    explain:
+      'The recorder keeps `lo` in sync: earliest time still inside the window (now - window)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Find top K tweet words in last\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Find top K tweet words in last"?',
     choices: [
       {
-        label: "O(t log t) time, O(t) space — standard bounds here",
-        correct: true
+        label: 'O(t log t) time, O(t) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(1) per op time, O(n) space — wrong order of growth"
+        label: 'O(1) per op time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n³) time, O(n) space — wrong order of growth"
+        label: 'O(n³) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) average time, O(1) space — wrong order of growth"
-      }
+        label: 'O(n) average time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(t log t). O(t). filter by time; count; sort desc by cnt; first k words"
+    explain: 'O(t log t). O(t). filter by time; count; sort desc by cnt; first k words',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Tweet (\"\", t=) sits inside — final DONE caption",
-        correct: true
+        label: 'Tweet ("", t=) sits inside — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Tweet  (\"\", t=) sits inside  … , so it counts. counts[\"\"] = ."
-  }
+    explain: 'Tweet  ("", t=) sits inside  … , so it counts. counts[""] = .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

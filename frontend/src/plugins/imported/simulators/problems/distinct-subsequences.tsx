@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface DSInput {
   s: string; // source
@@ -22,18 +35,28 @@ function record({ s, t }: DSInput): Frame<DSState>[] {
   const n = t.length;
   const dp: number[][] = Array.from({ length: m + 1 }, () => new Array<number>(n + 1).fill(-1));
   const { emit, frames } = createRecorder<DSState>(() => ({
-        s: s,
-        t: t,
-        dp: dp.map((r) => r.slice()),
-        cur: null,
-        done: false
-      }));
+    s: s,
+    t: t,
+    dp: dp.map((r) => r.slice()),
+    cur: null,
+    done: false,
+  }));
 
-  emit('INIT', `"${s}" / "${t}"`, `Distinct Subsequences: count how many distinct subsequences of "${s}" equal "${t}". dp[i][j] is the number of ways the first i chars of "${s}" can form the first j chars of "${t}", built bottom-up.`, { cur: null });
+  emit(
+    'INIT',
+    `"${s}" / "${t}"`,
+    `Distinct Subsequences: count how many distinct subsequences of "${s}" equal "${t}". dp[i][j] is the number of ways the first i chars of "${s}" can form the first j chars of "${t}", built bottom-up.`,
+    { cur: null },
+  );
 
   for (let i = 0; i <= m; i++) {
     dp[i][0] = 1;
-    emit('BASE', `dp[${i}][0]=1`, `Base case: the empty target "" can always be formed exactly 1 way (pick nothing), so dp[${i}][0] = 1.`, { cur: [i, 0] });
+    emit(
+      'BASE',
+      `dp[${i}][0]=1`,
+      `Base case: the empty target "" can always be formed exactly 1 way (pick nothing), so dp[${i}][0] = 1.`,
+      { cur: [i, 0] },
+    );
   }
 
   for (let i = 1; i <= m; i++) {
@@ -44,22 +67,40 @@ function record({ s, t }: DSInput): Frame<DSState>[] {
       if (cs === ct) {
         const take = dp[i - 1][j - 1];
         dp[i][j] = skip + take;
-        emit('FILL', `dp[${i}][${j}]=${dp[i][j]}`, `'${cs}' == '${ct}': either skip this '${cs}' (dp[${i - 1}][${j}]=${skip}) or use it to match (dp[${i - 1}][${j - 1}]=${take}). dp[${i}][${j}] = ${skip} + ${take} = ${dp[i][j]}.`, { cur: [i, j] });
+        emit(
+          'FILL',
+          `dp[${i}][${j}]=${dp[i][j]}`,
+          `'${cs}' == '${ct}': either skip this '${cs}' (dp[${i - 1}][${j}]=${skip}) or use it to match (dp[${i - 1}][${j - 1}]=${take}). dp[${i}][${j}] = ${skip} + ${take} = ${dp[i][j]}.`,
+          { cur: [i, j] },
+        );
       } else {
         dp[i][j] = skip;
-        emit('FILL', `dp[${i}][${j}]=${dp[i][j]}`, `'${cs}' != '${ct}': this '${cs}' cannot match '${ct}', so just carry from above. dp[${i}][${j}] = dp[${i - 1}][${j}] = ${skip}.`, { cur: [i, j] });
+        emit(
+          'FILL',
+          `dp[${i}][${j}]=${dp[i][j]}`,
+          `'${cs}' != '${ct}': this '${cs}' cannot match '${ct}', so just carry from above. dp[${i}][${j}] = dp[${i - 1}][${j}] = ${skip}.`,
+          { cur: [i, j] },
+        );
       }
     }
   }
 
-  emit('DONE', `${dp[m][n]} ways`, `The table is full. dp[${m}][${n}] = ${dp[m][n]}, so "${s}" contains ${dp[m][n]} distinct subsequence(s) equal to "${t}".`, { cur: [m, n] , done: true }, 'good');
+  emit(
+    'DONE',
+    `${dp[m][n]} ways`,
+    `The table is full. dp[${m}][${n}] = ${dp[m][n]}, so "${s}" contains ${dp[m][n]} distinct subsequence(s) equal to "${t}".`,
+    { cur: [m, n], done: true },
+    'good',
+  );
   return frames;
 }
 
 function buildDisplay(state: DSState): (number | string)[][] {
   const m = state.s.length;
   const n = state.t.length;
-  const display: (number | string)[][] = Array.from({ length: m + 2 }, () => new Array<number | string>(n + 2).fill(''));
+  const display: (number | string)[][] = Array.from({ length: m + 2 }, () =>
+    new Array<number | string>(n + 2).fill(''),
+  );
   display[0][1] = 'ε';
   for (let j = 0; j < n; j++) display[0][j + 2] = state.t[j];
   display[1][0] = 'ε';
@@ -78,8 +119,11 @@ function View({ frame }: PluginViewProps<DSState>) {
   const m = state.s.length;
   const n = state.t.length;
   const ans = state.dp[m][n] >= 0 ? state.dp[m][n] : undefined;
-  const cell = (r: number, c: number) => (r >= 0 && c >= 0 && state.dp[r]?.[c] >= 0 ? state.dp[r][c] : '—');
-  const displayActive: [number, number] | null = state.cur ? [state.cur[0] + 1, state.cur[1] + 1] : null;
+  const cell = (r: number, c: number) =>
+    r >= 0 && c >= 0 && state.dp[r]?.[c] >= 0 ? state.dp[r][c] : '—';
+  const displayActive: [number, number] | null = state.cur
+    ? [state.cur[0] + 1, state.cur[1] + 1]
+    : null;
   const cellTone = (r: number, c: number) => {
     if (r === 0 || c === 0) return 'land';
     if (state.cur && state.cur[0] + 1 === r && state.cur[1] + 1 === c) return 'active';
@@ -92,11 +136,19 @@ function View({ frame }: PluginViewProps<DSState>) {
         <RailStat k="t" v={`"${state.t}"`} />
       </RailGroup>
       <RailGroup label="cell">
-        <RailStat k="cur" v={state.cur ? `[${state.cur[0]}][${state.cur[1]}]` : '—'} tone="accent" />
+        <RailStat
+          k="cur"
+          v={state.cur ? `[${state.cur[0]}][${state.cur[1]}]` : '—'}
+          tone="accent"
+        />
         <RailStat k="skip" v={state.cur ? cell(state.cur[0] - 1, state.cur[1]) : '—'} />
         <RailStat k="take" v={state.cur ? cell(state.cur[0] - 1, state.cur[1] - 1) : '—'} />
       </RailGroup>
-      <RailResult label="ways" value={ans !== undefined ? ans : '…'} tone={state.done ? 'good' : 'accent'} />
+      <RailResult
+        label="ways"
+        value={ans !== undefined ? ans : '…'}
+        tone={state.done ? 'good' : 'accent'}
+      />
     </>
   );
   return (
@@ -111,7 +163,8 @@ function Inspector({ frame }: InspectorProps<DSState>) {
   const state = frame.state;
   const m = state.s.length;
   const n = state.t.length;
-  const cell = (r: number, c: number) => (r >= 0 && c >= 0 && state.dp[r]?.[c] >= 0 ? state.dp[r][c] : '—');
+  const cell = (r: number, c: number) =>
+    r >= 0 && c >= 0 && state.dp[r]?.[c] >= 0 ? state.dp[r][c] : '—';
   const answer = state.dp[m][n] >= 0 ? state.dp[m][n] : '…filling';
   return (
     <VarGrid>
@@ -119,7 +172,10 @@ function Inspector({ frame }: InspectorProps<DSState>) {
       <InspectorRow k="t (target)" v={`"${state.t}"`} />
       <InspectorRow k="cell" v={state.cur ? `dp[${state.cur[0]}][${state.cur[1]}]` : '—'} />
       <InspectorRow k="skip (above)" v={state.cur ? cell(state.cur[0] - 1, state.cur[1]) : '—'} />
-      <InspectorRow k="take (diagonal)" v={state.cur ? cell(state.cur[0] - 1, state.cur[1] - 1) : '—'} />
+      <InspectorRow
+        k="take (diagonal)"
+        v={state.cur ? cell(state.cur[0] - 1, state.cur[1] - 1) : '—'}
+      />
       <InspectorRow k="dp[m][n]" v={answer} />
     </VarGrid>
   );

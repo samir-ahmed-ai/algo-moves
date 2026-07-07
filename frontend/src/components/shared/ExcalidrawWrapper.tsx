@@ -119,7 +119,11 @@ export function ExcalidrawWrapper({
   }, [collaborators]);
 
   const handleChange = useCallback(
-    (elements: readonly WhiteboardElement[], appState: Record<string, unknown>, files: Record<string, unknown>) => {
+    (
+      elements: readonly WhiteboardElement[],
+      appState: Record<string, unknown>,
+      files: Record<string, unknown>,
+    ) => {
       if (applyingRemote.current) return;
       flushPending();
       debounceTimer.current = setTimeout(() => {
@@ -158,7 +162,9 @@ export function ExcalidrawWrapper({
         }
       >
         <LazyExcalidraw
-          excalidrawAPI={(api: unknown) => { apiRef.current = api as ExcalidrawAPI; }}
+          excalidrawAPI={(api: unknown) => {
+            apiRef.current = api as ExcalidrawAPI;
+          }}
           theme={dark ? 'dark' : 'light'}
           gridModeEnabled={false}
           viewModeEnabled={readOnly}

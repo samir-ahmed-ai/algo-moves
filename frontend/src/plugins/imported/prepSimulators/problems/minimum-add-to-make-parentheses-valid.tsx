@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -19,17 +25,18 @@ interface MinAddState {
 }
 
 function record({ s }: MinAddInput): Frame<MinAddState>[] {
-  const chars = s.split('');  let open = 0;
+  const chars = s.split('');
+  let open = 0;
   let close = 0;
 
   const { emit, frames } = createRecorder<MinAddState>(() => ({
-        chars,
-        i: null,
-        open,
-        close,
-        action: null,
-        done: false
-      }));
+    chars,
+    i: null,
+    open,
+    close,
+    action: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -98,8 +105,7 @@ function View({ frame }: PluginViewProps<MinAddState>) {
       <div className={cn(vizText.sm, 'text-ink3')}>
         open = <span className="font-mono text-ink">{s.open}</span>
         {' · '}close = <span className="font-mono text-ink">{s.close}</span>
-        {' · '}to add ={' '}
-        <span className="font-mono text-ink">{s.open + s.close}</span>
+        {' · '}to add = <span className="font-mono text-ink">{s.open + s.close}</span>
       </div>
       <ArrayRow values={s.chars} cellTone={tone} pointers={pointers} windowRange={null} />
       {s.done && (
@@ -128,132 +134,131 @@ function Inspector({ frame }: InspectorProps<MinAddState>) {
 export const manifestId = 'prep-strings-minimum-add-to-make-parentheses-valid';
 export const title = 'Minimum Add to Make Parentheses Valid';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Minimum Add to Make Parentheses Valid\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Minimum Add to Make Parentheses Valid"?',
     choices: [
       {
-        label: "Counter — fits this problem",
-        correct: true
+        label: 'Counter — fits this problem',
+        correct: true,
       },
       {
-        label: "Bitmask Hash Set — different approach"
+        label: 'Bitmask Hash Set — different approach',
       },
       {
-        label: "DP reachability — different approach"
+        label: 'DP reachability — different approach',
       },
       {
-        label: "Greedy (pick highest count) — different approach"
-      }
+        label: 'Greedy (pick highest count) — different approach',
+      },
     ],
-    explain: "See Minimum Add To Make Parentheses Valid pattern"
+    explain: 'See Minimum Add To Make Parentheses Valid pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Minimum Add to Make Parentheses Valid), what strategy is established?",
+    id: 'init',
+    prompt:
+      'At the start of a run (Minimum Add to Make Parentheses Valid), what strategy is established?',
     choices: [
       {
-        label: "See Minimum Add To Make Parentheses — described in INIT caption",
-        correct: true
+        label: 'See Minimum Add To Make Parentheses — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Minimum Add to Make Parentheses Valid: scan left to right with two counters. open = unmatched '(' still waiting for a ')'; close = orphan ')' that has no '(' to its left. The answer is open + close. Time O(n), Space O(1)."
+    explain:
+      "Minimum Add to Make Parentheses Valid: scan left to right with two counters. open = unmatched '(' still waiting for a ')'; close = orphan ')' that has no '(' to its left. The answer is open + close. Time O(n), Space O(1).",
   },
   {
-    id: "key-step",
-    prompt: "On the \"MATCH\" step (open=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "MATCH" step (open=), what happens?',
     choices: [
       {
         label: "Char is ')' and there — this move caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Char  is ')' and there is a waiting '(' (open was ). They pair up, so decrement open to . No insertion needed."
+    explain:
+      "Char  is ')' and there is a waiting '(' (open was ). They pair up, so decrement open to . No insertion needed.",
   },
   {
-    id: "state",
-    prompt: "What does the `i` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: "current index being scanned — updated each frame",
-        correct: true
+        label: 'current index being scanned — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `i` in sync: current index being scanned"
+    explain: 'The recorder keeps `i` in sync: current index being scanned',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Minimum Add to Make Parentheses Valid\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Minimum Add to Make Parentheses Valid"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n^2) time, O(1) space — wrong order of growth"
+        label: 'O(n^2) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n^2) time, O(n) space — wrong order of growth"
+        label: 'O(n^2) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n·L) time, O(n·L) space — wrong order of growth"
-      }
+        label: 'O(n·L) time, O(n·L) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). Minimum Add To Make Parentheses Valid"
+    explain: 'O(n). O(1). Minimum Add To Make Parentheses Valid',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
         label: "Scan finished. '(' are still unmatched — final DONE caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Scan finished.  '(' are still unmatched (each needs a ')') and  ')' were orphans (each needed a '('). Minimum insertions = open + close =  +  = ."
-  }
+    explain:
+      "Scan finished.  '(' are still unmatched (each needs a ')') and  ')' were orphans (each needed a '('). Minimum insertions = open + close =  +  = .",
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

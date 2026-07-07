@@ -67,17 +67,34 @@ function formatBareSpacing(bare: string, style: StyleLang): string {
 
   // 3. Compound operators (longest first). Guards prevent `==` matching inside `===`.
   for (const op of [
-    '<<=', '>>=', '===', '!==', '==', '!=', '<=', '>=',
-    '&&', '||', '+=', '-=', '*=', '/=', '%=', '&=', '|=', '^=',
-    '<<', '>>', '=>',
+    '<<=',
+    '>>=',
+    '===',
+    '!==',
+    '==',
+    '!=',
+    '<=',
+    '>=',
+    '&&',
+    '||',
+    '+=',
+    '-=',
+    '*=',
+    '/=',
+    '%=',
+    '&=',
+    '|=',
+    '^=',
+    '<<',
+    '>>',
+    '=>',
   ]) {
     const esc = op.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const first = esc[0];
     const last = esc[esc.length - 1];
-    const lb = first === '=' || first === '!' || first === '<' || first === '>'
-      ? `(?<![${first}=!<>])` : '';
-    const la = last === '=' || last === '>' || last === '<'
-      ? `(?![${last}=])` : '';
+    const lb =
+      first === '=' || first === '!' || first === '<' || first === '>' ? `(?<![${first}=!<>])` : '';
+    const la = last === '=' || last === '>' || last === '<' ? `(?![${last}=])` : '';
     s = s.replace(new RegExp(`${lb}${esc}${la}`, 'g'), ` ${op} `);
   }
 
@@ -89,10 +106,7 @@ function formatBareSpacing(bare: string, style: StyleLang): string {
   );
 
   // 5. Arithmetic / bitwise binary operators (exclude `*` — handled separately).
-  s = s.replace(
-    /([a-zA-Z0-9_\])])\s*([+\-/%&|^])\s*([a-zA-Z0-9_(\[])/g,
-    '$1 $2 $3',
-  );
+  s = s.replace(/([a-zA-Z0-9_\])])\s*([+\-/%&|^])\s*([a-zA-Z0-9_(\[])/g, '$1 $2 $3');
 
   // 5b. Multiplication `*` only in clear arithmetic contexts (not pointer types).
   s = s.replace(/([)\]0-9])\s*\*\s*([(\[0-9a-zA-Z_])/g, '$1 * $2');
@@ -157,7 +171,12 @@ export function formatLineSpacing(line: string, style: StyleLang): string {
   const trimmed = line.trim();
   if (!trimmed) return '';
   // Leave comment-only lines intact (only trim trailing space)
-  if (trimmed.startsWith('//') || trimmed.startsWith('#') || trimmed.startsWith('/*') || trimmed.startsWith('*')) {
+  if (
+    trimmed.startsWith('//') ||
+    trimmed.startsWith('#') ||
+    trimmed.startsWith('/*') ||
+    trimmed.startsWith('*')
+  ) {
     return line.trimEnd();
   }
   const indent = line.slice(0, line.length - line.trimStart().length);
@@ -195,8 +214,15 @@ function shouldExpandBlock(headBeforeBrace: string): boolean {
   // Last identifier is a block keyword
   const lastWord = /\b(\w+)\s*$/.exec(h)?.[1];
   const BLOCK_KW_LAST = new Set([
-    'else', 'try', 'finally', 'do',
-    'struct', 'interface', 'enum', 'class', 'namespace',
+    'else',
+    'try',
+    'finally',
+    'do',
+    'struct',
+    'interface',
+    'enum',
+    'class',
+    'namespace',
   ]);
   if (lastWord && BLOCK_KW_LAST.has(lastWord)) return true;
 
@@ -204,8 +230,21 @@ function shouldExpandBlock(headBeforeBrace: string): boolean {
   // (handles `func foo() ReturnType {`, `for {`, `switch x {`)
   const firstWord = /^\s*(\w+)/.exec(h)?.[1];
   const BLOCK_KW_FIRST = new Set([
-    'func', 'function', 'if', 'for', 'while', 'switch', 'select',
-    'case', 'default', 'try', 'catch', 'finally', 'class', 'struct', 'interface',
+    'func',
+    'function',
+    'if',
+    'for',
+    'while',
+    'switch',
+    'select',
+    'case',
+    'default',
+    'try',
+    'catch',
+    'finally',
+    'class',
+    'struct',
+    'interface',
   ]);
   if (firstWord && BLOCK_KW_FIRST.has(firstWord)) return true;
 
@@ -239,7 +278,10 @@ function expandInlineBraces(source: string, unit: string): string {
 
   for (const raw of source.replace(/\n+$/, '').split('\n')) {
     const trimmed = raw.trim();
-    if (!trimmed) { out.push(''); continue; }
+    if (!trimmed) {
+      out.push('');
+      continue;
+    }
 
     const indent = raw.slice(0, raw.length - raw.trimStart().length);
     const { bare, slots } = protectLiterals(trimmed);
@@ -315,7 +357,10 @@ export function braceFormat(source: string, unit: string): string {
 
   for (const raw of source.replace(/\n+$/, '').split('\n')) {
     const trimmed = raw.trim();
-    if (!trimmed) { out.push(''); continue; }
+    if (!trimmed) {
+      out.push('');
+      continue;
+    }
 
     // Count only `{}` (not `()[]`) after masking literals
     const { bare } = protectLiterals(trimmed);

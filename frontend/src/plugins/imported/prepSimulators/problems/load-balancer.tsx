@@ -1,13 +1,16 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
 
-type LbOp =
-  | { kind: 'next' }
-  | { kind: 'add'; server: string }
-  | { kind: 'remove'; server: string };
+type LbOp = { kind: 'next' } | { kind: 'add'; server: string } | { kind: 'remove'; server: string };
 
 interface LbInput {
   servers: string[];
@@ -23,17 +26,18 @@ interface LbState {
   done: boolean;
 }
 
-function record({ servers: init, ops }: LbInput): Frame<LbState>[] {  let servers = [...init];
+function record({ servers: init, ops }: LbInput): Frame<LbState>[] {
+  let servers = [...init];
   let index = 0;
 
   const { emit, frames } = createRecorder<LbState>(() => ({
-        servers: servers.slice(),
-        index,
-        op: '',
-        result: '',
-        ok: null,
-        done: false
-      }));
+    servers: servers.slice(),
+    index,
+    op: '',
+    result: '',
+    ok: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -45,7 +49,13 @@ function record({ servers: init, ops }: LbInput): Frame<LbState>[] {  let server
   for (const o of ops) {
     if (o.kind === 'next') {
       if (servers.length === 0) {
-        emit('NEXT', 'empty', `nextServer(): no servers → ("", false).`, { op: 'next', result: '', ok: false }, 'bad');
+        emit(
+          'NEXT',
+          'empty',
+          `nextServer(): no servers → ("", false).`,
+          { op: 'next', result: '', ok: false },
+          'bad',
+        );
       } else {
         const server = servers[index];
         emit(
@@ -68,11 +78,16 @@ function record({ servers: init, ops }: LbInput): Frame<LbState>[] {  let server
       if (i >= 0) {
         servers.splice(i, 1);
         if (index >= servers.length) index = 0;
-        emit('REMOVE', o.server, `removeServer("${o.server}"): pool now [${servers.join(', ')}], index=${index}.`, {
-          op: `remove ${o.server}`,
-          servers: servers.slice(),
-          index,
-        });
+        emit(
+          'REMOVE',
+          o.server,
+          `removeServer("${o.server}"): pool now [${servers.join(', ')}], index=${index}.`,
+          {
+            op: `remove ${o.server}`,
+            servers: servers.slice(),
+            index,
+          },
+        );
       }
     }
   }
@@ -87,7 +102,9 @@ function View({ frame }: PluginViewProps<LbState>) {
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
         {s.op || '—'}
-        {s.ok !== null && s.result && <span className="ml-2 font-mono text-good">→ {s.result}</span>}
+        {s.ok !== null && s.result && (
+          <span className="ml-2 font-mono text-good">→ {s.result}</span>
+        )}
       </div>
       <div className={cn('mt-2', vizText.sm, 'text-ink3')}>index = {s.index}</div>
       <div className="mt-1 flex flex-wrap gap-1">
@@ -126,72 +143,68 @@ function Inspector({ frame }: InspectorProps<LbState>) {
 export const manifestId = 'prep-design-load-balancer';
 export const title = 'Load balancer';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Load balancer\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Load balancer"?',
     choices: [
       {
-        label: "Round-robin load balancer — fits this problem",
-        correct: true
+        label: 'Round-robin load balancer — fits this problem',
+        correct: true,
       },
       {
-        label: "Hash map + doubly linked list LRU — different approach"
+        label: 'Hash map + doubly linked list LRU — different approach',
       },
       {
-        label: "Stack — different approach"
+        label: 'Stack — different approach',
       },
       {
-        label: "Trie phone directory autocomplete — different approach"
-      }
+        label: 'Trie phone directory autocomplete — different approach',
+      },
     ],
-    explain: "Circular index cycling through the backend list"
+    explain: 'Circular index cycling through the backend list',
   },
   {
-    id: "state",
-    prompt: "What does the `servers` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `servers` field track in the visualization state?',
     choices: [
       {
-        label: "Field servers in state — updated each frame",
-        correct: true
+        label: 'Field servers in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `servers` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `servers` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Load balancer\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Load balancer"?',
     choices: [
       {
-        label: "O(1) time, O(servers) space — standard bounds here",
-        correct: true
+        label: 'O(1) time, O(servers) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(1) get/put time, O(capacity) space — wrong order of growth"
+        label: 'O(1) get/put time, O(capacity) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
+        label: 'O(1) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(1). O(servers). server=servers[idx]; idx=(idx+1)%len"
-  }
+    explain: 'O(1). O(servers). server=servers[idx]; idx=(idx+1)%len',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -201,7 +214,13 @@ export const simulator: ProblemSimulator = {
       label: 'round-robin + add/remove',
       value: {
         servers: ['A', 'B'],
-        ops: [{ kind: 'next' }, { kind: 'next' }, { kind: 'next' }, { kind: 'add', server: 'C' }, { kind: 'next' }],
+        ops: [
+          { kind: 'next' },
+          { kind: 'next' },
+          { kind: 'next' },
+          { kind: 'add', server: 'C' },
+          { kind: 'next' },
+        ],
       },
     },
   ] satisfies SampleInput<LbInput>[],
@@ -210,6 +229,8 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as LbState | undefined;
-    return s?.done ? { ok: true, label: `${s.servers.length} servers` } : { ok: false, label: 'incomplete' };
+    return s?.done
+      ? { ok: true, label: `${s.servers.length} servers` }
+      : { ok: false, label: 'incomplete' };
   },
 };

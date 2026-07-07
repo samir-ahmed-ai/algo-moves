@@ -8,7 +8,14 @@ export * from './graphRecord';
 export * from './gridRecord';
 import type { ComponentType } from 'react';
 import type { CodePiece } from '@/lib/code';
-import type { Frame, PluginTab, PluginWires, QuizQuestion, SampleInput, Verdict } from '../../core/types';
+import type {
+  Frame,
+  PluginTab,
+  PluginWires,
+  QuizQuestion,
+  SampleInput,
+  Verdict,
+} from '../../core/types';
 import { splitCodeIntoPieces } from '@/lib/code';
 import { makeCasesPanel, makeQuizPanel, makeSimulatePanel, type WorkedCase } from './practice';
 
@@ -113,6 +120,9 @@ export function wireTeachingStack<I, S>(config: TeachingStackConfig<I, S>): Teac
 export function definePluginView<S>(config: {
   View: ComponentType<{ frame: Frame<S> }>;
   Inspector: ComponentType<{ frame: Frame<S> | null }>;
-}): { View: ComponentType<{ frame: Frame<S> }>; Inspector: ComponentType<{ frame: Frame<S> | null }> } {
+}): {
+  View: ComponentType<{ frame: Frame<S> }>;
+  Inspector: ComponentType<{ frame: Frame<S> | null }>;
+} {
   return config;
 }

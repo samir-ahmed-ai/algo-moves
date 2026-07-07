@@ -36,7 +36,11 @@ export function GridBoard({
             <div
               key={`${r}-${c}`}
               className={`grid-cell ${cellTone?.(r, c) ?? ''} ${isActive ? 'active' : ''} ${onCellClick ? 'nodrag' : ''}`}
-              style={{ width: cellSize, height: cellSize, cursor: onCellClick ? 'pointer' : undefined }}
+              style={{
+                width: cellSize,
+                height: cellSize,
+                cursor: onCellClick ? 'pointer' : undefined,
+              }}
               onClick={onCellClick ? () => onCellClick(r, c) : undefined}
             >
               {label ? label(r, c) : v}

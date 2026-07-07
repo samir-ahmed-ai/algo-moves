@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -22,24 +28,31 @@ interface SideViewState {
   done: boolean;
 }
 
-function record({ tree }: SideViewInput): Frame<SideViewState>[] {  const visited: number[] = [];
+function record({ tree }: SideViewInput): Frame<SideViewState>[] {
+  const visited: number[] = [];
   const view: number[] = [];
 
   const { emit, frames } = createRecorder<SideViewState>(() => ({
-        tree,
-        queue: [],
-        current: null,
-        level: 0,
-        posInLevel: null,
-        levelSize: null,
-        visited: visited.slice(),
-        view: view.slice(),
-        done: false
-      }));
+    tree,
+    queue: [],
+    current: null,
+    level: 0,
+    posInLevel: null,
+    levelSize: null,
+    visited: visited.slice(),
+    view: view.slice(),
+    done: false,
+  }));
 
   // Empty tree (root is null / absent).
   if (tree.length === 0 || tree[0] == null) {
-    emit('DONE', 'empty', 'The tree is empty, so the side view is an empty list. Nothing to do.', { done: true }, 'good');
+    emit(
+      'DONE',
+      'empty',
+      'The tree is empty, so the side view is an empty list. Nothing to do.',
+      { done: true },
+      'good',
+    );
     return frames;
   }
 
@@ -74,7 +87,15 @@ function record({ tree }: SideViewInput): Frame<SideViewState>[] {  const visite
           'SEE',
           `see ${val}`,
           `Position i = ${i} equals sz − 1 = ${sz - 1}: this is the rightmost node on level ${level}. Append its value ${val} to the side view.`,
-          { current: nodeIdx, queue: queue.slice(), level, posInLevel: i, levelSize: sz, view: view.slice(), visited: visited.slice() },
+          {
+            current: nodeIdx,
+            queue: queue.slice(),
+            level,
+            posInLevel: i,
+            levelSize: sz,
+            view: view.slice(),
+            visited: visited.slice(),
+          },
           'good',
         );
       } else {
@@ -83,7 +104,15 @@ function record({ tree }: SideViewInput): Frame<SideViewState>[] {  const visite
           'SKIP',
           `skip ${val}`,
           `Position i = ${i} is not the last on this level (sz − 1 = ${sz - 1}), so node ${val} is hidden behind a node further right. Dequeue it but do not add it to the view.`,
-          { current: nodeIdx, queue: queue.slice(), level, posInLevel: i, levelSize: sz, view: view.slice(), visited: visited.slice() },
+          {
+            current: nodeIdx,
+            queue: queue.slice(),
+            level,
+            posInLevel: i,
+            levelSize: sz,
+            view: view.slice(),
+            visited: visited.slice(),
+          },
         );
       }
 
@@ -100,7 +129,15 @@ function record({ tree }: SideViewInput): Frame<SideViewState>[] {  const visite
           'ENQ',
           `enqueue ${childVals}`,
           `Enqueue ${val}'s child${added.length === 1 ? '' : 'ren'} ${childVals} to the back of the queue so the next level is processed left-to-right.`,
-          { current: nodeIdx, queue: queue.slice(), level, posInLevel: i, levelSize: sz, view: view.slice(), visited: visited.slice() },
+          {
+            current: nodeIdx,
+            queue: queue.slice(),
+            level,
+            posInLevel: i,
+            levelSize: sz,
+            view: view.slice(),
+            visited: visited.slice(),
+          },
         );
       }
     }
@@ -162,7 +199,10 @@ function Inspector({ frame }: InspectorProps<SideViewState>) {
       <InspectorRow k="i (pos in level)" v={s.posInLevel ?? '—'} />
       <InspectorRow k="node" v={curVal ?? '—'} />
       <InspectorRow k="queue size" v={s.queue.length} />
-      <InspectorRow k="side view" v={s.view.length ? `[${s.view.join(', ')}]` : s.done ? '[]' : '…'} />
+      <InspectorRow
+        k="side view"
+        v={s.view.length ? `[${s.view.join(', ')}]` : s.done ? '[]' : '…'}
+      />
     </VarGrid>
   );
 }
@@ -170,132 +210,130 @@ function Inspector({ frame }: InspectorProps<SideViewState>) {
 export const manifestId = 'prep-trees-print-side-view';
 export const title = 'Print side view';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Print side view\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Print side view"?',
     choices: [
       {
-        label: "BFS rightmost — fits this problem",
-        correct: true
+        label: 'BFS rightmost — fits this problem',
+        correct: true,
       },
       {
-        label: "Two Pointers (linked-list intersection — different approach"
+        label: 'Two Pointers (linked-list intersection — different approach',
       },
       {
-        label: "DFS with max tracking — different approach"
+        label: 'DFS with max tracking — different approach',
       },
       {
-        label: "BFS + Sort per column — different approach"
-      }
+        label: 'BFS + Sort per column — different approach',
+      },
     ],
-    explain: "Take the last node seen on each BFS level"
+    explain: 'Take the last node seen on each BFS level',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Print side view), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Print side view), what strategy is established?',
     choices: [
       {
-        label: "Take the last node seen — described in INIT caption",
-        correct: true
+        label: 'Take the last node seen — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Right-side view: standing to the RIGHT of the tree, we see only the last node on each level. We BFS level by level; on every level the final node dequeued (i === sz − 1) is the one we can see."
+    explain:
+      'Right-side view: standing to the RIGHT of the tree, we see only the last node on each level. We BFS level by level; on every level the final node dequeued (i === sz − 1) is the one we can see.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"SKIP\" step (skip ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "SKIP" step (skip ), what happens?',
     choices: [
       {
-        label: "Position i = — this move caption",
-        correct: true
+        label: 'Position i = — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Position i =  is not the last on this level (sz − 1 = ), so node  is hidden behind a node further right. Dequeue it but do not add it to the view."
+    explain:
+      'Position i =  is not the last on this level (sz − 1 = ), so node  is hidden behind a node further right. Dequeue it but do not add it to the view.',
   },
   {
-    id: "state",
-    prompt: "What does the `queue` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `queue` field track in the visualization state?',
     choices: [
       {
-        label: "node indices still waiting — updated each frame",
-        correct: true
+        label: 'node indices still waiting — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `queue` in sync: node indices still waiting in the BFS queue"
+    explain: 'The recorder keeps `queue` in sync: node indices still waiting in the BFS queue',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Print side view\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Print side view"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(h) time, O(1) space — wrong order of growth"
+        label: 'O(h) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
+        label: 'O(log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(1) amortized time, O(h) space — wrong order of growth"
-      }
+        label: 'O(1) amortized time, O(h) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). i==sz-1 -> append node.Val"
+    explain: 'O(n). O(n). i==sz-1 -> append node.Val',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "The queue is empty — every — final DONE caption",
-        correct: true
+        label: 'The queue is empty — every — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "The queue is empty — every level has been processed. The side view, top to bottom, is []."
-  }
+    explain:
+      'The queue is empty — every level has been processed. The side view, top to bottom, is [].',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

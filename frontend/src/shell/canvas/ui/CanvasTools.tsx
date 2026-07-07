@@ -59,7 +59,10 @@ export function HudBtn({
         !tone && variant === 'solid' && active && 'bg-accent text-white',
         !tone && variant === 'solid' && !active && 'text-ink2 hover:bg-panel2 hover:text-ink',
         !tone && variant === 'soft' && active && 'bg-accentbg text-accent',
-        !tone && variant === 'soft' && !active && 'text-ink2 enabled:hover:bg-panel2 enabled:hover:text-ink',
+        !tone &&
+          variant === 'soft' &&
+          !active &&
+          'text-ink2 enabled:hover:bg-panel2 enabled:hover:text-ink',
       )}
     >
       {children}
@@ -200,7 +203,8 @@ export function LaserPointer({ host }: { host: React.RefObject<HTMLElement | nul
       style={{
         left: pos.x,
         top: pos.y,
-        background: 'radial-gradient(circle, rgba(255,60,60,0.95) 0%, rgba(255,60,60,0.4) 45%, transparent 70%)',
+        background:
+          'radial-gradient(circle, rgba(255,60,60,0.95) 0%, rgba(255,60,60,0.4) 45%, transparent 70%)',
         boxShadow: '0 0 12px 4px rgba(255,60,60,0.45)',
       }}
     />
@@ -215,9 +219,26 @@ export interface MenuItem {
 }
 
 /** A right-click context menu rendered at screen coordinates. */
-export function ContextMenu({ x, y, items, onClose }: { x: number; y: number; items: MenuItem[]; onClose: () => void }) {
+export function ContextMenu({
+  x,
+  y,
+  items,
+  onClose,
+}: {
+  x: number;
+  y: number;
+  items: MenuItem[];
+  onClose: () => void;
+}) {
   return (
-    <div className="absolute inset-0 z-50" onClick={onClose} onContextMenu={(e) => { e.preventDefault(); onClose(); }}>
+    <div
+      className="absolute inset-0 z-50"
+      onClick={onClose}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        onClose();
+      }}
+    >
       <div
         className="absolute min-w-[168px] overflow-hidden rounded-[var(--radius)] border border-edge bg-panel/95 py-0.5 shadow-[var(--shadow-xl)] backdrop-blur"
         style={{ left: x, top: y }}
@@ -236,7 +257,9 @@ export function ContextMenu({ x, y, items, onClose }: { x: number; y: number; it
               it.danger ? 'text-bad' : 'text-ink2 hover:text-ink',
             )}
           >
-            {it.icon && <span className="grid h-4 w-4 place-items-center text-ink3">{it.icon}</span>}
+            {it.icon && (
+              <span className="grid h-4 w-4 place-items-center text-ink3">{it.icon}</span>
+            )}
             {it.label}
           </button>
         ))}

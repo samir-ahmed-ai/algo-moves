@@ -1,9 +1,10 @@
 import type { GameDef } from '../../types';
+import { GAME_ID_MIND_MELD } from '../../_generated/gameIds';
 import { MindMeld } from './MindMeld';
 import { getMindMeldStrings } from './strings';
 
 const mindMeld: GameDef = {
-  id: 'mind-meld',
+  id: GAME_ID_MIND_MELD,
   title: 'نسرين',
   tagline: 'Answer this-or-thats and see how in sync you two really are.',
   minutes: '~3 min',

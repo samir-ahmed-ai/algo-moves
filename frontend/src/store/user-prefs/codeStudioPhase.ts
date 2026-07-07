@@ -1,4 +1,9 @@
-import { readStorageJson, readStorageText, removeStorageValue, writeStorageJson } from '@/store/persistence/storage';
+import {
+  readStorageJson,
+  readStorageText,
+  removeStorageValue,
+  writeStorageJson,
+} from '@/store/persistence/storage';
 import { STORAGE_KEYS } from '@/store/storageKeys';
 export type CodeStudioPhase = 'quiz' | 'reassemble' | 'recall';
 
@@ -78,7 +83,9 @@ function isQuizProgress(value: unknown): value is QuizProgress {
     typeof candidate.index === 'number' &&
     typeof candidate.score === 'number' &&
     typeof candidate.done === 'boolean' &&
-    (candidate.answered === undefined || candidate.answered === null || typeof candidate.answered === 'number')
+    (candidate.answered === undefined ||
+      candidate.answered === null ||
+      typeof candidate.answered === 'number')
   );
 }
 
@@ -98,7 +105,11 @@ export function loadReassembleProgress(itemId: string, langIdx: number): Reassem
   return readStorageJson(progressKey(itemId, langIdx), null, isReassembleProgress);
 }
 
-export function saveReassembleProgress(itemId: string, langIdx: number, progress: ReassembleProgress) {
+export function saveReassembleProgress(
+  itemId: string,
+  langIdx: number,
+  progress: ReassembleProgress,
+) {
   writeStorageJson(progressKey(itemId, langIdx), progress);
 }
 

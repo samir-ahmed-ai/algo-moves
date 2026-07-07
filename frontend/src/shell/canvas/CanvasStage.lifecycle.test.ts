@@ -107,9 +107,11 @@ describe('CanvasStage lifecycle — undo history', () => {
   it('records structural node moves and undo restores the prior snapshot', () => {
     let nodes: PanelFlowNode[] = [panelNode('code', 0)];
     const edges: Edge[] = [];
-    const setNodes = vi.fn((updater: PanelFlowNode[] | ((prev: PanelFlowNode[]) => PanelFlowNode[])) => {
-      nodes = typeof updater === 'function' ? updater(nodes) : updater;
-    });
+    const setNodes = vi.fn(
+      (updater: PanelFlowNode[] | ((prev: PanelFlowNode[]) => PanelFlowNode[])) => {
+        nodes = typeof updater === 'function' ? updater(nodes) : updater;
+      },
+    );
     const setEdges = vi.fn();
 
     const { result, rerender } = renderHook(

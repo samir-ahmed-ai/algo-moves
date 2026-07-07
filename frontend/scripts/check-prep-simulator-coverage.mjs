@@ -31,4 +31,6 @@ if (missing.length) {
   for (const id of missing) console.error(`  ${id}`);
   process.exit(1);
 }
-console.log(`check-prep-simulator-coverage: ok (${ids.length} prep problems, ${simIds.size} simulators)`);
+console.log(
+  `check-prep-simulator-coverage: ok (${ids.length} prep problems, ${simIds.size} simulators)`,
+);

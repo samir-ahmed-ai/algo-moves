@@ -27,19 +27,18 @@ export {
   CanvasCollabProvider,
   useCanvasCollab,
   useCanvasCollabOptional,
-} from './collab/CanvasCollabProvider';
-export { NodePresenceAvatars } from './collab/NodePresenceAvatars';
-export { SubDocSyncProvider, useSubDocSyncContext } from './collab/sync/SubDocSyncProvider';
-export { useSubDocSync } from './collab/sync/useSubDocSync';
-export { useQuizHostRelay } from './collab/sync/useQuizHostRelay';
-export type { CanvasDoc } from './collab/protocol/collabProtocol';
-export { isCanvasDoc } from './collab/protocol/canvasDoc';
-export {
+  NodePresenceAvatars,
+  SubDocSyncProvider,
+  useSubDocSyncContext,
+  useSubDocSync,
+  useQuizHostRelay,
+  type CanvasDoc,
+  isCanvasDoc,
   SUBDOC_TAG,
   type SubDocSnapshot,
   type WhiteboardPayload,
   type EditorPayload,
-} from './collab/protocol/subdocProtocol';
+} from '@/shell/collab';
 
 // Layout
 export {
@@ -96,7 +95,12 @@ export {
 
 // Frame
 export { stepExampleInput, exampleInputIndex } from './frame/exampleInputNav';
-export { buildCanvasFrame, organizeCurrentCanvasFrame, type CanvasFrameInput, type SavedNodeLayout } from './frame/canvasFrame';
+export {
+  buildCanvasFrame,
+  organizeCurrentCanvasFrame,
+  type CanvasFrameInput,
+  type SavedNodeLayout,
+} from './frame/canvasFrame';
 
 // Nodes
 export { PanelNode } from './nodes/PanelNode';

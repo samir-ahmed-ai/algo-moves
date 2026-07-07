@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GraphBoard } from '../../../../components/board/GraphBoard';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 import { circleLayout } from '../../../_shared/graphLayout';
 
 interface MSInput {
@@ -38,17 +51,22 @@ function insertTop3(top: number[], node: number, scores: number[]): number[] {
 function record({ scores, edges, adj, pos }: MSInput): Frame<MSState>[] {
   const n = scores.length;
   const { emit, frames } = createRecorder<MSState>(() => ({
-        scores: scores,
-        adj: adj,
-        pos: pos,
-        edge: null,
-        seq: [],
-        best: 0,
-        bestSeq: [],
-        done: false
-      }));
+    scores: scores,
+    adj: adj,
+    pos: pos,
+    edge: null,
+    seq: [],
+    best: 0,
+    bestSeq: [],
+    done: false,
+  }));
 
-  emit('INIT', 'top-3', `We want a 4-node path a-u-v-b (all distinct) maximizing scores[a]+scores[u]+scores[v]+scores[b]. For each node we keep only its 3 highest-scoring neighbours — that is enough to dodge collisions — then for every edge (u, v) we try the best a near u and b near v.`, { edge: null, seq: [], best: -1, bestSeq: [] });
+  emit(
+    'INIT',
+    'top-3',
+    `We want a 4-node path a-u-v-b (all distinct) maximizing scores[a]+scores[u]+scores[v]+scores[b]. For each node we keep only its 3 highest-scoring neighbours — that is enough to dodge collisions — then for every edge (u, v) we try the best a near u and b near v.`,
+    { edge: null, seq: [], best: -1, bestSeq: [] },
+  );
 
   const top3: number[][] = Array.from({ length: n }, () => []);
   for (const [u, v] of edges) {
@@ -60,7 +78,12 @@ function record({ scores, edges, adj, pos }: MSInput): Frame<MSState>[] {
   let bestSeq: number[] = [];
 
   for (const [u, v] of edges) {
-    emit('EDGE', `edge ${u}-${v}`, `Scan edge ${u}-${v} (scores ${scores[u]} and ${scores[v]}). Try each top-3 neighbour a of ${u} and b of ${v}, keeping all four distinct.`, { edge: [u, v], seq: [], best: best, bestSeq: bestSeq });
+    emit(
+      'EDGE',
+      `edge ${u}-${v}`,
+      `Scan edge ${u}-${v} (scores ${scores[u]} and ${scores[v]}). Try each top-3 neighbour a of ${u} and b of ${v}, keeping all four distinct.`,
+      { edge: [u, v], seq: [], best: best, bestSeq: bestSeq },
+    );
     for (const a of top3[u]) {
       if (a === v) continue;
       for (const b of top3[v]) {
@@ -70,16 +93,32 @@ function record({ scores, edges, adj, pos }: MSInput): Frame<MSState>[] {
         if (s > best) {
           best = s;
           bestSeq = seq;
-          emit('IMPROVE', `score ${s}`, `Path ${a}-${u}-${v}-${b} scores ${scores[a]}+${scores[u]}+${scores[v]}+${scores[b]} = ${s}, a new best.`, { edge: [u, v], seq: seq, best: best, bestSeq: bestSeq });
+          emit(
+            'IMPROVE',
+            `score ${s}`,
+            `Path ${a}-${u}-${v}-${b} scores ${scores[a]}+${scores[u]}+${scores[v]}+${scores[b]} = ${s}, a new best.`,
+            { edge: [u, v], seq: seq, best: best, bestSeq: bestSeq },
+          );
         } else {
-          emit('TRY', `score ${s}`, `Path ${a}-${u}-${v}-${b} scores ${s}, not better than the current best ${best}.`, { edge: [u, v], seq: seq, best: best, bestSeq: bestSeq });
+          emit(
+            'TRY',
+            `score ${s}`,
+            `Path ${a}-${u}-${v}-${b} scores ${s}, not better than the current best ${best}.`,
+            { edge: [u, v], seq: seq, best: best, bestSeq: bestSeq },
+          );
         }
       }
     }
   }
 
   const ans = best < 0 ? '-1 (no valid 4-node path)' : `${best} via ${bestSeq.join('-')}`;
-  emit('DONE', `${best}`, `All edges scanned. Maximum score = ${ans}.`, { edge: null, seq: bestSeq, best: best, bestSeq: bestSeq , done: true }, 'good');
+  emit(
+    'DONE',
+    `${best}`,
+    `All edges scanned. Maximum score = ${ans}.`,
+    { edge: null, seq: bestSeq, best: best, bestSeq: bestSeq, done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -101,7 +140,11 @@ function View({ frame }: PluginViewProps<MSState>) {
       </RailGroup>
       <RailResult
         label="best"
-        value={s.best < 0 ? '−1' : `${s.best}${s.bestSeq.length === 4 ? ` [${s.bestSeq.join('-')}]` : ''}`}
+        value={
+          s.best < 0
+            ? '−1'
+            : `${s.best}${s.bestSeq.length === 4 ? ` [${s.bestSeq.join('-')}]` : ''}`
+        }
         tone={s.done ? 'good' : s.best >= 0 ? 'accent' : 'bad'}
       />
     </>
@@ -144,20 +187,26 @@ function build(scores: number[], edgeList: [number, number][]): MSInput {
   return { scores, edges: edgeList, adj, pos: circleLayout(scores.length) };
 }
 
-const G5 = build([5, 2, 9, 8, 4], [
-  [0, 1],
-  [1, 2],
-  [2, 3],
-  [0, 2],
-  [1, 3],
-  [2, 4],
-]);
-const G4 = build([5, 2, 9, 1], [
-  [0, 1],
-  [1, 2],
-  [2, 3],
-  [0, 3],
-]);
+const G5 = build(
+  [5, 2, 9, 8, 4],
+  [
+    [0, 1],
+    [1, 2],
+    [2, 3],
+    [0, 2],
+    [1, 3],
+    [2, 4],
+  ],
+);
+const G4 = build(
+  [5, 2, 9, 1],
+  [
+    [0, 1],
+    [1, 2],
+    [2, 3],
+    [0, 3],
+  ],
+);
 
 export const manifestId = 'imp-19-maximum-score-of-a-node-sequence';
 export const title = 'Maximum Score of a Node Sequence';

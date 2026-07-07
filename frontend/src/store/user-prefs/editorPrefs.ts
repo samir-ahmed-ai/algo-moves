@@ -45,21 +45,35 @@ const DEFAULTS: EditorPrefs = {
 };
 
 function load(): EditorPrefs {
-  const data = readStorageJson(KEY, null as Partial<EditorPrefs> | null, (value): value is Partial<EditorPrefs> => {
-    return value !== null && typeof value === 'object';
-  });
+  const data = readStorageJson(
+    KEY,
+    null as Partial<EditorPrefs> | null,
+    (value): value is Partial<EditorPrefs> => {
+      return value !== null && typeof value === 'object';
+    },
+  );
   if (!data) return DEFAULTS;
   return {
     vim: Boolean(data.vim),
     wrap: Boolean(data.wrap),
-    splitPct: clampCodeSplitPct(typeof data.splitPct === 'number' ? data.splitPct : DEFAULTS.splitPct),
-    recallCompact: data.recallCompact !== undefined ? Boolean(data.recallCompact) : DEFAULTS.recallCompact,
+    splitPct: clampCodeSplitPct(
+      typeof data.splitPct === 'number' ? data.splitPct : DEFAULTS.splitPct,
+    ),
+    recallCompact:
+      data.recallCompact !== undefined ? Boolean(data.recallCompact) : DEFAULTS.recallCompact,
     mergeGutter: data.mergeGutter !== undefined ? Boolean(data.mergeGutter) : DEFAULTS.mergeGutter,
-    mergeCollapse: data.mergeCollapse !== undefined ? Boolean(data.mergeCollapse) : DEFAULTS.mergeCollapse,
-    fontSize: clampRecallFontSize(typeof data.fontSize === 'number' ? data.fontSize : DEFAULTS.fontSize),
+    mergeCollapse:
+      data.mergeCollapse !== undefined ? Boolean(data.mergeCollapse) : DEFAULTS.mergeCollapse,
+    fontSize: clampRecallFontSize(
+      typeof data.fontSize === 'number' ? data.fontSize : DEFAULTS.fontSize,
+    ),
     lineHeight: isRecallLineHeight(data.lineHeight) ? data.lineHeight : DEFAULTS.lineHeight,
-    showLineNumbers: data.showLineNumbers !== undefined ? Boolean(data.showLineNumbers) : DEFAULTS.showLineNumbers,
-    highlightChanges: data.highlightChanges !== undefined ? Boolean(data.highlightChanges) : DEFAULTS.highlightChanges,
+    showLineNumbers:
+      data.showLineNumbers !== undefined ? Boolean(data.showLineNumbers) : DEFAULTS.showLineNumbers,
+    highlightChanges:
+      data.highlightChanges !== undefined
+        ? Boolean(data.highlightChanges)
+        : DEFAULTS.highlightChanges,
   };
 }
 

@@ -6,8 +6,8 @@ import { readStorageText, writeStorageText } from '@/store/persistence';
 import { STORAGE_KEYS } from '@/store/storageKeys';
 import { getArcadeStrings, useGamesLocale } from '../locale';
 import { useGameRoom } from '../net/useGameRoom';
-import { useAuth } from '../data/AuthProvider';
-import { getPersonalRoomCode } from '../data/arcadeClient';
+import { useAuth } from '@/shell/auth/AuthProvider';
+import { getPersonalRoomCode } from '@/platform';
 import { fetchNewRoomCode, hasConfiguredServer, normalizeRoomCode } from '../net/gameServer';
 import { Avatar } from '../ui/Avatar';
 import { Glyph, TouchButton, CategoryBadge } from '../ui/gamesUi';
@@ -100,7 +100,8 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
   };
 
   const connecting = status === 'connecting';
-  const bannerError = createError ?? (error && (status === 'error' || status === 'full') ? error : null);
+  const bannerError =
+    createError ?? (error && (status === 'error' || status === 'full') ? error : null);
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-6">
@@ -125,7 +126,9 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
 
       {/* Name input */}
       <label className="flex flex-col gap-2 text-start">
-        <span className="text-xs font-bold uppercase tracking-widest text-ink3">{t.lobby.yourName}</span>
+        <span className="text-xs font-bold uppercase tracking-widest text-ink3">
+          {t.lobby.yourName}
+        </span>
         <div className="flex items-center gap-3">
           {name.trim() ? (
             <div className="shrink-0">
@@ -147,7 +150,9 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
       <div className="rounded-2xl border border-edge bg-panel p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-widest text-ink3">{t.lobby.yourRoom}</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-ink3">
+              {t.lobby.yourRoom}
+            </p>
             <p className="mt-1 font-mono text-3xl font-bold uppercase tracking-[0.35em] text-ink">
               {normalizeRoomCode(personalRoomCode)}
             </p>
@@ -176,10 +181,18 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
 
       {/* Create / Join tabs */}
       <div className="grid grid-cols-2 gap-1.5 rounded-2xl border border-edge bg-panel2 p-1.5">
-        <TabButton active={tab === 'create'} onClick={() => setTab('create')} icon={<Plus className="h-4 w-4" />}>
+        <TabButton
+          active={tab === 'create'}
+          onClick={() => setTab('create')}
+          icon={<Plus className="h-4 w-4" />}
+        >
           {t.lobby.createTab}
         </TabButton>
-        <TabButton active={tab === 'join'} onClick={() => setTab('join')} icon={<Users className="h-4 w-4" />}>
+        <TabButton
+          active={tab === 'join'}
+          onClick={() => setTab('join')}
+          icon={<Users className="h-4 w-4" />}
+        >
           {t.lobby.joinTab}
         </TabButton>
       </div>
@@ -187,7 +200,9 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
       {tab === 'create' ? (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <span className="text-xs font-bold uppercase tracking-widest text-ink3">{t.room.capacity}</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-ink3">
+              {t.room.capacity}
+            </span>
             <div className="grid grid-cols-4 gap-1.5 rounded-2xl border border-edge bg-panel2 p-1.5">
               {CAPACITIES.map((c) => (
                 <button
@@ -196,9 +211,7 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
                   onClick={() => setCapacity(c)}
                   className={cn(
                     'min-h-11 rounded-xl text-sm font-bold transition-all touch-manipulation',
-                    capacity === c
-                      ? 'bg-accent text-white shadow-sm'
-                      : 'text-ink3 hover:text-ink',
+                    capacity === c ? 'bg-accent text-white shadow-sm' : 'text-ink3 hover:text-ink',
                   )}
                 >
                   {c}
@@ -209,7 +222,13 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
               <p className="text-xs text-accent font-medium text-center">💕 Perfect for two!</p>
             )}
           </div>
-          <TouchButton variant="primary" size="lg" busy={connecting} disabled={!nameOk} onClick={createRoom}>
+          <TouchButton
+            variant="primary"
+            size="lg"
+            busy={connecting}
+            disabled={!nameOk}
+            onClick={createRoom}
+          >
             {connecting ? t.lobby.creatingRoom : t.lobby.createRoom}
           </TouchButton>
         </div>
@@ -279,7 +298,9 @@ function HeroBanner() {
 function GamePreviewStrip() {
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-xs font-bold uppercase tracking-widest text-ink3 px-0.5">Games available</p>
+      <p className="text-xs font-bold uppercase tracking-widest text-ink3 px-0.5">
+        Games available
+      </p>
       <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch]">
         {GAMES.map((game) => {
           const color = gameAccentColor(game);
@@ -295,7 +316,10 @@ function GamePreviewStrip() {
               >
                 <Glyph markup={game.glyph} className="h-5 w-5" />
               </span>
-              <span className="text-[length:var(--fs-2xs)] font-bold text-ink leading-tight text-center" style={{ maxWidth: 68 }}>
+              <span
+                className="text-[length:var(--fs-2xs)] font-bold text-ink leading-tight text-center"
+                style={{ maxWidth: 68 }}
+              >
                 {game.title.length > 12 ? game.title.slice(0, 11) + '…' : game.title}
               </span>
               {game.category ? <CategoryBadge category={game.category} /> : null}

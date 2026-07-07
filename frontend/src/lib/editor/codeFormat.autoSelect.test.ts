@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { EditorState } from '@codemirror/state';
-import { autoSelectAndIndent, formatSelectedText, formatEditorText, indentExtensionsForLang } from './codeFormat';
+import {
+  autoSelectAndIndent,
+  formatSelectedText,
+  formatEditorText,
+  indentExtensionsForLang,
+} from './codeFormat';
 import { languageExtension } from './languageExtension';
 
 describe('formatSelectedText', () => {

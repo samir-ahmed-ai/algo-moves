@@ -1,8 +1,23 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface SubarraySumInput {
   nums: number[];
@@ -21,21 +36,22 @@ interface SubarraySumState {
   done: boolean;
 }
 
-function record({ nums, k }: SubarraySumInput): Frame<SubarraySumState>[] {  const prefixMap = new Map<number, number>([[0, 1]]);
+function record({ nums, k }: SubarraySumInput): Frame<SubarraySumState>[] {
+  const prefixMap = new Map<number, number>([[0, 1]]);
   let sum = 0;
   let cnt = 0;
 
   const { emit, frames } = createRecorder<SubarraySumState>(() => ({
-        nums,
-        k,
-        i: null,
-        sum,
-        need: null,
-        prefix: [...prefixMap.entries()],
-        added: null,
-        cnt,
-        done: false
-      }));
+    nums,
+    k,
+    i: null,
+    sum,
+    need: null,
+    prefix: [...prefixMap.entries()],
+    added: null,
+    cnt,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -99,16 +115,24 @@ function View({ frame }: PluginViewProps<SubarraySumState>) {
   const tone = (i: number) => (s.i === i ? 'match' : '');
   const prefixItems = s.prefix.map(([v, c]) => `${v}:${c}`);
   return (
-    <VizStage rail={<>
-      <RailGroup label="scan">
-        <RailStat k="k" v={s.k} />
-        <RailStat k="i" v={s.i ?? '—'} />
-        <RailStat k="sum" v={s.sum} tone="accent" />
-        <RailStat k="need" v={s.need ?? '—'} />
-      </RailGroup>
-      <RailStack label="prefix map" items={prefixItems} topLabel="latest" />
-      <RailResult label="count" value={s.cnt} tone={s.done ? 'good' : s.added !== null && s.added > 0 ? 'accent' : undefined} />
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="scan">
+            <RailStat k="k" v={s.k} />
+            <RailStat k="i" v={s.i ?? '—'} />
+            <RailStat k="sum" v={s.sum} tone="accent" />
+            <RailStat k="need" v={s.need ?? '—'} />
+          </RailGroup>
+          <RailStack label="prefix map" items={prefixItems} topLabel="latest" />
+          <RailResult
+            label="count"
+            value={s.cnt}
+            tone={s.done ? 'good' : s.added !== null && s.added > 0 ? 'accent' : undefined}
+          />
+        </>
+      }
+    >
       <ArrayRow values={s.nums} cellTone={tone} pointers={pointers} windowRange={null} />
     </VizStage>
   );
@@ -134,135 +158,136 @@ function Inspector({ frame }: InspectorProps<SubarraySumState>) {
 export const manifestId = 'prep-prefix-sum-subarray-sum-equals-k';
 export const title = 'Subarray Sum Equals K';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Subarray Sum Equals K\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Subarray Sum Equals K"?',
     choices: [
       {
-        label: "Prefix Sum Map — fits this problem",
-        correct: true
+        label: 'Prefix Sum Map — fits this problem',
+        correct: true,
       },
       {
-        label: "Difference Array + Prefix Sum — different approach"
+        label: 'Difference Array + Prefix Sum — different approach',
       },
       {
-        label: "Prefix Sum Mod Map — different approach"
-      }
+        label: 'Prefix Sum Mod Map — different approach',
+      },
     ],
-    explain: "If `prefix[j] - prefix[i] == k`, then subarray `[i+1..j]` sums to `k`"
+    explain: 'If `prefix[j] - prefix[i] == k`, then subarray `[i+1..j]` sums to `k`',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Subarray Sum Equals K), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Subarray Sum Equals K), what strategy is established?',
     choices: [
       {
-        label: "If `prefix[j] - prefix[i] == k` — described in INIT caption",
-        correct: true
+        label: 'If `prefix[j] - prefix[i] == k` — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Subarray Sum Equals K: count subarrays summing to . Key idea — if prefix[j] − prefix[i] = , then the slice (i+1 .. j) sums to . We scan once, keeping a map of how many times each running prefix sum has occurred. Seed it with {0: 1} so a whole-prefix match counts."
+    explain:
+      'Subarray Sum Equals K: count subarrays summing to . Key idea — if prefix[j] − prefix[i] = , then the slice (i+1 .. j) sums to . We scan once, keeping a map of how many times each running prefix sum has occurred. Seed it with {0: 1} so a whole-prefix match counts.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"MISS\" step (+0), what happens?",
+    id: 'key-step',
+    prompt: 'On the "MISS" step (+0), what happens?',
     choices: [
       {
-        label: "is not in the map — this move caption",
-        correct: true
+        label: 'is not in the map — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: " is not in the map, so no subarray ending at index  sums to . The count stays ."
+    explain: ' is not in the map, so no subarray ending at index  sums to . The count stays .',
   },
   {
-    id: "state",
-    prompt: "What does the `i` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: "current index being processed — updated each frame",
-        correct: true
+        label: 'current index being processed — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `i` in sync: current index being processed"
+    explain: 'The recorder keeps `i` in sync: current index being processed',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Subarray Sum Equals K\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Subarray Sum Equals K"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m+n) time, O(n) space — wrong order of growth"
+        label: 'O(m+n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(min(n,k)) space — wrong order of growth"
-      }
+        label: 'O(n) time, O(min(n,k)) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). If `prefix[j] - prefix[i] == k`, then subarray `[i+1..j]` sums to `k`; Use a hashmap counting how many times each prefix sum has occurred"
+    explain:
+      'O(n). O(n). If `prefix[j] - prefix[i] == k`, then subarray `[i+1..j]` sums to `k`; Use a hashmap counting how many times each prefix sum has occurred',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Scan complete. subarray sum to . — final DONE caption",
-        correct: true
+        label: 'Scan complete. subarray sum to . — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Scan complete.  subarray sum to ."
-  }
+    explain: 'Scan complete.  subarray sum to .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
   inputs: [
     { id: 'ssk1', label: '[1,1,1], k=2', value: { nums: [1, 1, 1], k: 2 } },
-    { id: 'ssk2', label: '[3,4,7,2,-3,1,4,2], k=7', value: { nums: [3, 4, 7, 2, -3, 1, 4, 2], k: 7 } },
+    {
+      id: 'ssk2',
+      label: '[3,4,7,2,-3,1,4,2], k=7',
+      value: { nums: [3, 4, 7, 2, -3, 1, 4, 2], k: 7 },
+    },
   ] satisfies SampleInput<SubarraySumInput>[],
   record,
   View,

@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -26,25 +32,32 @@ interface CountRangeState {
   done: boolean;
 }
 
-function record({ intervals }: CountRangeInput): Frame<CountRangeState>[] {  const sorted = intervals.slice().sort((a, b) => a.start - b.start);
+function record({ intervals }: CountRangeInput): Frame<CountRangeState>[] {
+  const sorted = intervals.slice().sort((a, b) => a.start - b.start);
   const merged: [number, number][] = [];
 
   const { emit, frames } = createRecorder<CountRangeState>(() => ({
-        sorted,
-        i: null,
-        j: null,
-        groupStart: null,
-        groupEnd: null,
-        merged: merged.map((m) => [m[0], m[1]] as [number, number]),
-        rangeSum: 0,
-        lastSpan: null,
-        done: false
-      }));
+    sorted,
+    i: null,
+    j: null,
+    groupStart: null,
+    groupEnd: null,
+    merged: merged.map((m) => [m[0], m[1]] as [number, number]),
+    rangeSum: 0,
+    lastSpan: null,
+    done: false,
+  }));
 
   const fmt = (iv: Interval) => `[${iv.start},${iv.end}]`;
 
   if (sorted.length === 0) {
-    emit('DONE', 'empty', 'No intervals were given, so the covered range sums to 0.', { done: true, rangeSum: 0 }, 'bad');
+    emit(
+      'DONE',
+      'empty',
+      'No intervals were given, so the covered range sums to 0.',
+      { done: true, rangeSum: 0 },
+      'bad',
+    );
     return frames;
   }
 
@@ -153,8 +166,7 @@ function View({ frame }: PluginViewProps<CountRangeState>) {
       </div>
       <ArrayRow values={values} cellTone={tone} pointers={pointers} windowRange={null} />
       <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
-        merged{' '}
-        {s.merged.length ? s.merged.map((m) => `[${m[0]},${m[1]}]`).join(' ') : '·'}
+        merged {s.merged.length ? s.merged.map((m) => `[${m[0]},${m[1]}]`).join(' ') : '·'}
       </div>
       {s.lastSpan !== null && !s.done && (
         <div className={cn('mt-1 font-mono text-good', vizText.sm)}>+{s.lastSpan} integers</div>
@@ -191,132 +203,128 @@ function Inspector({ frame }: InspectorProps<CountRangeState>) {
 export const manifestId = 'prep-intervals-count-intervals-range';
 export const title = 'Count intervals range';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Count intervals range\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Count intervals range"?',
     choices: [
       {
-        label: "Sort + merge coverage — fits this problem",
-        correct: true
+        label: 'Sort + merge coverage — fits this problem',
+        correct: true,
       },
       {
-        label: "Sort by end + DP + binary search — different approach"
+        label: 'Sort by end + DP + binary search — different approach',
       },
       {
-        label: "Brute-force nearest store by distance — different approach"
+        label: 'Brute-force nearest store by distance — different approach',
       },
       {
-        label: "Sort Starts/Ends + Sweep — different approach"
-      }
+        label: 'Sort Starts/Ends + Sweep — different approach',
+      },
     ],
-    explain: "Merge touching intervals; sum each merged group's span"
+    explain: "Merge touching intervals; sum each merged group's span",
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Count intervals range), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Count intervals range), what strategy is established?',
     choices: [
       {
-        label: "Merge touching intervals; sum each merged — described in INIT caption",
-        correct: true
+        label: 'Merge touching intervals; sum each merged — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Count Intervals Range: total number of distinct integers covered by the union of these intervals. Sort by start, then sweep left to right merging intervals that touch or overlap (start ≤ end+1), adding end−start+1 for each merged group."
+    explain:
+      'Count Intervals Range: total number of distinct integers covered by the union of these intervals. Sort by start, then sweep left to right merging intervals that touch or overlap (start ≤ end+1), adding end−start+1 for each merged group.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"STOP\" step (gap before ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "STOP" step (gap before ), what happens?',
     choices: [
       {
-        label: "starts at > end+1 (+1), leaving — this move caption",
-        correct: true
+        label: 'starts at > end+1 (+1), leaving — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: " starts at  > end+1 (+1), leaving a gap. The current group [,] is complete."
+    explain: ' starts at  > end+1 (+1), leaving a gap. The current group [,] is complete.',
   },
   {
-    id: "state",
-    prompt: "What does the `sorted` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `sorted` field track in the visualization state?',
     choices: [
       {
-        label: "intervals after sorting by start — updated each frame",
-        correct: true
+        label: 'intervals after sorting by start — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `sorted` in sync: intervals after sorting by start"
+    explain: 'The recorder keeps `sorted` in sync: intervals after sorting by start',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Count intervals range\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Count intervals range"?',
     choices: [
       {
-        label: "O(n log n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n log n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n^2) time, O(n) space — wrong order of growth"
+        label: 'O(n^2) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
+        label: 'O(log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m+n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(m+n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n log n). O(1). sort by start; extend while start<=end+1; add end-start+1"
+    explain: 'O(n log n). O(1). sort by start; extend while start<=end+1; add end-start+1',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Swept all intervals. The merged groups — final DONE caption",
-        correct: true
+        label: 'Swept all intervals. The merged groups — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Swept all intervals. The merged groups ${merged.map((m) => "
-  }
+    explain: 'Swept all intervals. The merged groups ${merged.map((m) => ',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

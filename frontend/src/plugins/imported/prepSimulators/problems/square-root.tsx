@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -29,15 +35,15 @@ function candidateCount(x: number): number {
 
 function record({ x }: SqrtInput): Frame<SqrtState>[] {
   const { emit, frames } = createRecorder<SqrtState>(() => ({
-        x,
-        lo: null,
-        mid: null,
-        hi: null,
-        ans: 1,
-        check: null,
-        result: null,
-        done: false
-      }));
+    x,
+    lo: null,
+    mid: null,
+    hi: null,
+    ans: 1,
+    check: null,
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -134,12 +140,14 @@ function View({ frame }: PluginViewProps<SqrtState>) {
   const values: number[] = Array.from({ length: n }, (_, i) => i + 1);
 
   const pointers: ArrayPointer[] = [];
-  if (s.lo !== null && s.lo >= 0 && s.lo < n) pointers.push({ i: s.lo, label: 'lo', tone: 'good', place: 'below' });
-  if (s.hi !== null && s.hi >= 0 && s.hi < n) pointers.push({ i: s.hi, label: 'hi', tone: 'bad', place: 'below' });
-  if (s.mid !== null && s.mid >= 0 && s.mid < n) pointers.push({ i: s.mid, label: 'mid', tone: 'accent', place: 'above' });
+  if (s.lo !== null && s.lo >= 0 && s.lo < n)
+    pointers.push({ i: s.lo, label: 'lo', tone: 'good', place: 'below' });
+  if (s.hi !== null && s.hi >= 0 && s.hi < n)
+    pointers.push({ i: s.hi, label: 'hi', tone: 'bad', place: 'below' });
+  if (s.mid !== null && s.mid >= 0 && s.mid < n)
+    pointers.push({ i: s.mid, label: 'mid', tone: 'accent', place: 'above' });
 
-  const inRange = (i: number) =>
-    s.lo !== null && s.hi !== null && i >= s.lo && i <= s.hi;
+  const inRange = (i: number) => s.lo !== null && s.hi !== null && i >= s.lo && i <= s.hi;
 
   const tone = (i: number) => {
     if (s.done && s.result !== null && i === s.result - 1) return 'found';
@@ -153,8 +161,8 @@ function View({ frame }: PluginViewProps<SqrtState>) {
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
-        x = <span className="font-mono text-ink">{s.x}</span> · candidates 1..⌊x/2⌋ ·{' '}
-        best ans = <span className="font-mono text-ink">{s.ans}</span>
+        x = <span className="font-mono text-ink">{s.x}</span> · candidates 1..⌊x/2⌋ · best ans ={' '}
+        <span className="font-mono text-ink">{s.ans}</span>
       </div>
       {n > 0 ? (
         <ArrayRow values={values} cellTone={tone} pointers={pointers} windowRange={null} />
@@ -165,7 +173,9 @@ function View({ frame }: PluginViewProps<SqrtState>) {
         <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>{s.check}</div>
       )}
       {s.result !== null && (
-        <div className={cn('mt-1 font-mono text-good', vizText.base)}>→ floor(√{s.x}) = {s.result}</div>
+        <div className={cn('mt-1 font-mono text-good', vizText.base)}>
+          → floor(√{s.x}) = {s.result}
+        </div>
       )}
     </div>
   );
@@ -190,132 +200,130 @@ function Inspector({ frame }: InspectorProps<SqrtState>) {
 export const manifestId = 'prep-math-square-root';
 export const title = 'Square root';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Square root\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Square root"?',
     choices: [
       {
-        label: "Binary search sqrt — fits this problem",
-        correct: true
+        label: 'Binary search sqrt — fits this problem',
+        correct: true,
       },
       {
-        label: "XOR + popcount — different approach"
+        label: 'XOR + popcount — different approach',
       },
       {
-        label: "Grade-school multiplication — different approach"
+        label: 'Grade-school multiplication — different approach',
       },
       {
-        label: "atoi parse with overflow guard — different approach"
-      }
+        label: 'atoi parse with overflow guard — different approach',
+      },
     ],
-    explain: "Binary search the answer in [1, x/2]"
+    explain: 'Binary search the answer in [1, x/2]',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Square root), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Square root), what strategy is established?',
     choices: [
       {
-        label: "Binary search the answer in [1 — described in INIT caption",
-        correct: true
+        label: 'Binary search the answer in [1 — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Square Root: compute floor(√) — the largest integer whose square is at most . Instead of scanning, we binary-search the answer in the range [1, ⌊x/2⌋]. Time O(log x), Space O(1)."
+    explain:
+      'Square Root: compute floor(√) — the largest integer whose square is at most . Instead of scanning, we binary-search the answer in the range [1, ⌊x/2⌋]. Time O(log x), Space O(1).',
   },
   {
-    id: "key-step",
-    prompt: "On the \"MID\" step (mid=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "MID" step (mid=), what happens?',
     choices: [
       {
-        label: "Pick mid = lo + (hi−lo)/2 — this move caption",
-        correct: true
+        label: 'Pick mid = lo + (hi−lo)/2 — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Pick mid = lo + (hi−lo)/2 = . Test whether mid fits: compare mid ≤ ⌊/mid⌋ = ⌊/⌋ =  (an overflow-safe way to ask mid·mid ≤ )."
+    explain:
+      'Pick mid = lo + (hi−lo)/2 = . Test whether mid fits: compare mid ≤ ⌊/mid⌋ = ⌊/⌋ =  (an overflow-safe way to ask mid·mid ≤ ).',
   },
   {
-    id: "state",
-    prompt: "What does the `ans` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `ans` field track in the visualization state?',
     choices: [
       {
-        label: "best integer whose square — updated each frame",
-        correct: true
+        label: 'best integer whose square — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `ans` in sync: best integer whose square is <= x so far"
+    explain: 'The recorder keeps `ans` in sync: best integer whose square is <= x so far',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Square root\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Square root"?',
     choices: [
       {
-        label: "O(log x) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(log x) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(log n) time, O(1) space — wrong order of growth"
+        label: 'O(log n) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n³) time, O(n) space — wrong order of growth"
+        label: 'O(n³) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(m+n) space — wrong order of growth"
-      }
+        label: 'O(m·n) time, O(m+n) space — wrong order of growth',
+      },
     ],
-    explain: "O(log x). O(1). mid<=x/mid -> ans=mid, lo=mid+1; else hi=mid-1"
+    explain: 'O(log x). O(1). mid<=x/mid -> ans=mid, lo=mid+1; else hi=mid-1',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "lo passed hi, so the search — final DONE caption",
-        correct: true
+        label: 'lo passed hi, so the search — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "lo passed hi, so the search is done. The largest integer whose square is ≤  is . floor(√) = ."
-  }
+    explain:
+      'lo passed hi, so the search is done. The largest integer whose square is ≤  is . floor(√) = .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

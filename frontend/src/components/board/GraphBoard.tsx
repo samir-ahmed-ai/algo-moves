@@ -51,7 +51,11 @@ export function GraphBoard({
       const key = directed ? `${v}->${u}` : `${Math.min(u, v)}-${Math.max(u, v)}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      const hot = highlightEdge !== null && (directed ? highlightEdge[0] === v && highlightEdge[1] === u : isSameEdge(highlightEdge, v, u));
+      const hot =
+        highlightEdge !== null &&
+        (directed
+          ? highlightEdge[0] === v && highlightEdge[1] === u
+          : isSameEdge(highlightEdge, v, u));
       const stroke = hot
         ? edgeTone === 'clash'
           ? 'var(--edge-clash)'
@@ -81,7 +85,15 @@ export function GraphBoard({
           stroke={stroke}
           strokeWidth={hot ? 3 : 1.5}
           strokeLinecap="round"
-          markerEnd={directed ? (hot ? (edgeTone === 'clash' ? 'url(#arrow-clash)' : 'url(#arrow-hot)') : 'url(#arrow)') : undefined}
+          markerEnd={
+            directed
+              ? hot
+                ? edgeTone === 'clash'
+                  ? 'url(#arrow-clash)'
+                  : 'url(#arrow-hot)'
+                : 'url(#arrow)'
+              : undefined
+          }
         />,
       );
       if (edgeLabel) {
@@ -91,8 +103,23 @@ export function GraphBoard({
           const my = (pos[v][1] + pos[u][1]) / 2;
           labels.push(
             <g key={`l-${key}`}>
-              <rect x={mx - 9} y={my - 9} width={18} height={18} rx={4} fill="var(--surface)" stroke="var(--border)" strokeWidth={1} />
-              <text x={mx} y={my + 4} textAnchor="middle" className="node-label node-label--edge" style={{ fill: 'var(--text-2)' }}>
+              <rect
+                x={mx - 9}
+                y={my - 9}
+                width={18}
+                height={18}
+                rx={4}
+                fill="var(--surface)"
+                stroke="var(--border)"
+                strokeWidth={1}
+              />
+              <text
+                x={mx}
+                y={my + 4}
+                textAnchor="middle"
+                className="node-label node-label--edge"
+                style={{ fill: 'var(--text-2)' }}
+              >
                 {w}
               </text>
             </g>,
@@ -115,13 +142,37 @@ export function GraphBoard({
     >
       {directed && (
         <defs>
-          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <marker
+            id="arrow"
+            viewBox="0 0 10 10"
+            refX="8"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto-start-reverse"
+          >
             <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--edge)" />
           </marker>
-          <marker id="arrow-hot" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <marker
+            id="arrow-hot"
+            viewBox="0 0 10 10"
+            refX="8"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto-start-reverse"
+          >
             <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)" />
           </marker>
-          <marker id="arrow-clash" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <marker
+            id="arrow-clash"
+            viewBox="0 0 10 10"
+            refX="8"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto-start-reverse"
+          >
             <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--edge-clash)" />
           </marker>
         </defs>

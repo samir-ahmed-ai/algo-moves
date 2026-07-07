@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { NaryTreeBoard, type NaryNode } from '../../../../components/board/NaryTreeBoard';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface DistanceInput {
   /** Flat n-ary tree; node 0 is the root, children are indices into this list. */
@@ -38,7 +52,8 @@ interface DistanceState {
   done: boolean;
 }
 
-function record({ nodes, a, b }: DistanceInput): Frame<DistanceState>[] {  const label = (i: number) => nodes[i]?.label ?? `#${i}`;
+function record({ nodes, a, b }: DistanceInput): Frame<DistanceState>[] {
+  const label = (i: number) => nodes[i]?.label ?? `#${i}`;
 
   const base: DistanceState = {
     nodes,
@@ -58,10 +73,15 @@ function record({ nodes, a, b }: DistanceInput): Frame<DistanceState>[] {  const
   };
 
   const { emit, frames } = createRecorder<DistanceState>(() => ({
-        ...base
-      }));
+    ...base,
+  }));
 
-  emit('INIT', `dist(${label(a)}, ${label(b)})`, `Distance of two nodes in an n-ary tree. Plan: find the lowest common ancestor (LCA) of ${label(a)} and ${label(b)}, then add the two downward level distances from the LCA. Answer = levelDistance(lca, a) + levelDistance(lca, b). Time O(n), Space O(h).`, { phase: 'lca' });
+  emit(
+    'INIT',
+    `dist(${label(a)}, ${label(b)})`,
+    `Distance of two nodes in an n-ary tree. Plan: find the lowest common ancestor (LCA) of ${label(a)} and ${label(b)}, then add the two downward level distances from the LCA. Answer = levelDistance(lca, a) + levelDistance(lca, b). Time O(n), Space O(h).`,
+    { phase: 'lca' },
+  );
 
   // --- Phase 1: LCA (faithful recursive post-order, counting matching subtrees) ---
   const lcaVisited: number[] = [];
@@ -69,10 +89,20 @@ function record({ nodes, a, b }: DistanceInput): Frame<DistanceState>[] {  const
   const findLca = (root: number): number | null => {
     lcaVisited.push(root);
     if (root === a || root === b) {
-      emit('LCA_HIT', `reached ${label(root)}`, `Recursing into ${label(root)}: it is one of our targets, so this subtree reports ${label(root)} back up to its parent.`, { phase: 'lca', active: root, visited: [...lcaVisited] });
+      emit(
+        'LCA_HIT',
+        `reached ${label(root)}`,
+        `Recursing into ${label(root)}: it is one of our targets, so this subtree reports ${label(root)} back up to its parent.`,
+        { phase: 'lca', active: root, visited: [...lcaVisited] },
+      );
       return root;
     }
-    emit('LCA_DESCEND', `visit ${label(root)}`, `Visiting ${label(root)}. Neither target yet, so we recurse into each child and count how many child subtrees contain a target.`, { phase: 'lca', active: root, visited: [...lcaVisited] });
+    emit(
+      'LCA_DESCEND',
+      `visit ${label(root)}`,
+      `Visiting ${label(root)}. Neither target yet, so we recurse into each child and count how many child subtrees contain a target.`,
+      { phase: 'lca', active: root, visited: [...lcaVisited] },
+    );
 
     let found: number | null = null;
     let count = 0;
@@ -85,11 +115,22 @@ function record({ nodes, a, b }: DistanceInput): Frame<DistanceState>[] {  const
     }
 
     if (count >= 2) {
-      emit('LCA_FOUND', `LCA = ${label(root)}`, `Two different child subtrees of ${label(root)} each returned a target, so the paths to ${label(a)} and ${label(b)} split here. ${label(root)} is the lowest common ancestor.`, { phase: 'lca', active: root, visited: [...lcaVisited], lca: root }, 'good');
+      emit(
+        'LCA_FOUND',
+        `LCA = ${label(root)}`,
+        `Two different child subtrees of ${label(root)} each returned a target, so the paths to ${label(a)} and ${label(b)} split here. ${label(root)} is the lowest common ancestor.`,
+        { phase: 'lca', active: root, visited: [...lcaVisited], lca: root },
+        'good',
+      );
       return root;
     }
     if (found !== null) {
-      emit('LCA_BUBBLE', `bubble ${label(found)}`, `Only one subtree under ${label(root)} contained a target (${label(found)}). ${label(root)} is not the split point, so it passes ${label(found)} further up.`, { phase: 'lca', active: root, visited: [...lcaVisited] });
+      emit(
+        'LCA_BUBBLE',
+        `bubble ${label(found)}`,
+        `Only one subtree under ${label(root)} contained a target (${label(found)}). ${label(root)} is not the split point, so it passes ${label(found)} further up.`,
+        { phase: 'lca', active: root, visited: [...lcaVisited] },
+      );
     }
     return found;
   };
@@ -100,7 +141,12 @@ function record({ nodes, a, b }: DistanceInput): Frame<DistanceState>[] {  const
   // --- Phase 2: levelDistance via BFS from the LCA ---
   const levelDistance = (from: number, target: number): number => {
     if (from === target) {
-      emit('LEVEL_ZERO', `${label(target)} is the LCA`, `Measuring from the LCA ${label(from)} down to ${label(target)}: it is the LCA itself, so the level distance is 0.`, { phase: 'level', active: from, lca, measureTo: target, level: 0, visited: [from] });
+      emit(
+        'LEVEL_ZERO',
+        `${label(target)} is the LCA`,
+        `Measuring from the LCA ${label(from)} down to ${label(target)}: it is the LCA itself, so the level distance is 0.`,
+        { phase: 'level', active: from, lca, measureTo: target, level: 0, visited: [from] },
+      );
       return 0;
     }
 
@@ -108,7 +154,20 @@ function record({ nodes, a, b }: DistanceInput): Frame<DistanceState>[] {  const
     let frontier: number[] = [...nodes[from].children];
     const seen: number[] = [from];
 
-    emit('LEVEL_START', `BFS from ${label(from)}`, `Measuring from LCA ${label(from)} down to ${label(target)}. Start a level-by-level BFS: level 0 is the LCA, its children sit at level 1.`, { phase: 'level', active: from, lca, measureTo: target, level, frontier: [...frontier], visited: [...seen] });
+    emit(
+      'LEVEL_START',
+      `BFS from ${label(from)}`,
+      `Measuring from LCA ${label(from)} down to ${label(target)}. Start a level-by-level BFS: level 0 is the LCA, its children sit at level 1.`,
+      {
+        phase: 'level',
+        active: from,
+        lca,
+        measureTo: target,
+        level,
+        frontier: [...frontier],
+        visited: [...seen],
+      },
+    );
 
     while (frontier.length > 0) {
       level++;
@@ -116,12 +175,39 @@ function record({ nodes, a, b }: DistanceInput): Frame<DistanceState>[] {  const
       for (const node of frontier) {
         seen.push(node);
         if (node === target) {
-          emit('LEVEL_HIT', `${label(target)} at level ${level}`, `Found ${label(target)} on BFS level ${level}. So the downward distance from the LCA ${label(from)} to ${label(target)} is ${level}.`, { phase: 'level', active: node, lca, measureTo: target, level, frontier: [...frontier], visited: [...seen] }, 'good');
+          emit(
+            'LEVEL_HIT',
+            `${label(target)} at level ${level}`,
+            `Found ${label(target)} on BFS level ${level}. So the downward distance from the LCA ${label(from)} to ${label(target)} is ${level}.`,
+            {
+              phase: 'level',
+              active: node,
+              lca,
+              measureTo: target,
+              level,
+              frontier: [...frontier],
+              visited: [...seen],
+            },
+            'good',
+          );
           return level;
         }
         for (const c of nodes[node].children) next.push(c);
       }
-      emit('LEVEL_STEP', `level ${level}`, `Scanned every node on level ${level} without hitting ${label(target)}. Descend to level ${level + 1} using their children as the new frontier.`, { phase: 'level', active: null, lca, measureTo: target, level, frontier: [...next], visited: [...seen] });
+      emit(
+        'LEVEL_STEP',
+        `level ${level}`,
+        `Scanned every node on level ${level} without hitting ${label(target)}. Descend to level ${level + 1} using their children as the new frontier.`,
+        {
+          phase: 'level',
+          active: null,
+          lca,
+          measureTo: target,
+          level,
+          frontier: [...next],
+          visited: [...seen],
+        },
+      );
       frontier = next;
     }
     return -1;
@@ -133,7 +219,13 @@ function record({ nodes, a, b }: DistanceInput): Frame<DistanceState>[] {  const
   base.distB = distB;
   const answer = distA + distB;
 
-  emit('DONE', `distance = ${answer}`, `Combine the two downward distances: levelDistance(${label(lca)}, ${label(a)}) = ${distA} and levelDistance(${label(lca)}, ${label(b)}) = ${distB}. The distance between ${label(a)} and ${label(b)} is ${distA} + ${distB} = ${answer}.`, { phase: 'done', lca, distA, distB, answer, done: true, visited: [lca, a, b] }, 'good');
+  emit(
+    'DONE',
+    `distance = ${answer}`,
+    `Combine the two downward distances: levelDistance(${label(lca)}, ${label(a)}) = ${distA} and levelDistance(${label(lca)}, ${label(b)}) = ${distB}. The distance between ${label(a)} and ${label(b)} is ${distA} + ${distB} = ${answer}.`,
+    { phase: 'done', lca, distA, distB, answer, done: true, visited: [lca, a, b] },
+    'good',
+  );
 
   return frames;
 }
@@ -157,7 +249,11 @@ function View({ frame }: PluginViewProps<DistanceState>) {
       <RailGroup label="search">
         <RailStat k="phase" v={s.phase} />
         <RailStat k="active" v={label(s.active)} tone="accent" />
-        <RailStat k="LCA" v={s.lca !== null ? label(s.lca) : '…'} tone={s.lca !== null ? 'good' : undefined} />
+        <RailStat
+          k="LCA"
+          v={s.lca !== null ? label(s.lca) : '…'}
+          tone={s.lca !== null ? 'good' : undefined}
+        />
         {s.phase === 'level' && s.measureTo !== null && (
           <>
             <RailStat k="→" v={label(s.measureTo)} />
@@ -169,9 +265,7 @@ function View({ frame }: PluginViewProps<DistanceState>) {
         <RailStat k={`d(lca,${label(s.a)})`} v={s.distA ?? '…'} />
         <RailStat k={`d(lca,${label(s.b)})`} v={s.distB ?? '…'} />
       </RailGroup>
-      {s.answer !== null && (
-        <RailResult label="distance" value={s.answer} tone="good" />
-      )}
+      {s.answer !== null && <RailResult label="distance" value={s.answer} tone="good" />}
     </>
   );
   return (
@@ -213,141 +307,139 @@ export const title = 'Find distance of two nodes';
 //  8
 const SAMPLE_NODES: NaryNode[] = [
   { label: '1', children: [1, 2, 3] }, // 0
-  { label: '2', children: [4, 5] },    // 1
-  { label: '3', children: [] },        // 2
-  { label: '4', children: [6] },       // 3
-  { label: '5', children: [7] },       // 4
-  { label: '6', children: [] },        // 5
-  { label: '7', children: [] },        // 6
-  { label: '8', children: [] },        // 7
+  { label: '2', children: [4, 5] }, // 1
+  { label: '3', children: [] }, // 2
+  { label: '4', children: [6] }, // 3
+  { label: '5', children: [7] }, // 4
+  { label: '6', children: [] }, // 5
+  { label: '7', children: [] }, // 6
+  { label: '8', children: [] }, // 7
 ];
-
-
-
-
-
 
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Find distance of two nodes\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Find distance of two nodes"?',
     choices: [
       {
-        label: "LCA + level distance BFS — fits this problem",
-        correct: true
+        label: 'LCA + level distance BFS — fits this problem',
+        correct: true,
       },
       {
-        label: "BST range check — different approach"
+        label: 'BST range check — different approach',
       },
       {
-        label: "Post-order DFS — different approach"
+        label: 'Post-order DFS — different approach',
       },
       {
-        label: "DFS path — different approach"
-      }
+        label: 'DFS path — different approach',
+      },
     ],
-    explain: "Distance = depth(a) + depth(b) measured down from their LCA"
+    explain: 'Distance = depth(a) + depth(b) measured down from their LCA',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Find distance of two nodes), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Find distance of two nodes), what strategy is established?',
     choices: [
       {
-        label: "Distance = depth(a) + depth(b) measured — described in INIT caption",
-        correct: true
+        label: 'Distance = depth(a) + depth(b) measured — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Distance of two nodes in an n-ary tree. Plan: find the lowest common ancestor (LCA) of  and , then add the two downward level distances from the LCA. Answer = levelDistance(lca, a) + levelDistance(lca, b). Time O(n), Space O(h)."
+    explain:
+      'Distance of two nodes in an n-ary tree. Plan: find the lowest common ancestor (LCA) of  and , then add the two downward level distances from the LCA. Answer = levelDistance(lca, a) + levelDistance(lca, b). Time O(n), Space O(h).',
   },
   {
-    id: "key-step",
-    prompt: "On the \"LEVEL_ZERO\" step ( is the LCA), what happens?",
+    id: 'key-step',
+    prompt: 'On the "LEVEL_ZERO" step ( is the LCA), what happens?',
     choices: [
       {
-        label: "Measuring from the LCA down — this move caption",
-        correct: true
+        label: 'Measuring from the LCA down — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Measuring from the LCA  down to : it is the LCA itself, so the level distance is 0."
+    explain: 'Measuring from the LCA  down to : it is the LCA itself, so the level distance is 0.',
   },
   {
-    id: "state",
-    prompt: "What does the `nodes` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `nodes` field track in the visualization state?',
     choices: [
       {
-        label: "Field nodes in state — updated each frame",
-        correct: true
+        label: 'Field nodes in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `nodes` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `nodes` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Find distance of two nodes\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Find distance of two nodes"?',
     choices: [
       {
-        label: "O(n) time, O(h) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(h) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
+        label: 'O(1) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(1) space — wrong order of growth"
-      }
+        label: 'O(n) time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(h). find LCA; levelDistance(lca,a) + levelDistance(lca,b)"
+    explain: 'O(n). O(h). find LCA; levelDistance(lca,a) + levelDistance(lca,b)',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Combine the two downward distances: — final DONE caption",
-        correct: true
+        label: 'Combine the two downward distances: — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Combine the two downward distances: levelDistance(, ) =  and levelDistance(, ) = . The distance between  and  is  +  = ."
-  }
+    explain:
+      'Combine the two downward distances: levelDistance(, ) =  and levelDistance(, ) = . The distance between  and  is  +  = .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

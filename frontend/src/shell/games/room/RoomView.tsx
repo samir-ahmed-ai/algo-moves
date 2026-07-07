@@ -25,8 +25,14 @@ export function RoomView() {
   const currentGame = getGame(ss.game);
   const started = ss.started === true && !!currentGame;
 
-  if (!currentGame) return <Staging>{role === 'host' ? <GameChooser /> : <WaitingForHost />}</Staging>;
-  if (!started) return <Staging game={currentGame}><ReadyRoom game={currentGame} /></Staging>;
+  if (!currentGame)
+    return <Staging>{role === 'host' ? <GameChooser /> : <WaitingForHost />}</Staging>;
+  if (!started)
+    return (
+      <Staging game={currentGame}>
+        <ReadyRoom game={currentGame} />
+      </Staging>
+    );
   return <PlayArea game={currentGame} />;
 }
 
@@ -35,7 +41,9 @@ function Staging({ game, children }: { game?: GameDef; children: ReactNode }) {
   const { locale } = useGamesLocale();
   const t = useArcadeStrings();
   const { room } = useGameRoom();
-  const serverHint = hasConfiguredServer() ? t.waitingRoom.serverHintDeployed : t.waitingRoom.serverHintLan;
+  const serverHint = hasConfiguredServer()
+    ? t.waitingRoom.serverHintDeployed
+    : t.waitingRoom.serverHintLan;
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-2.5">
@@ -62,7 +70,8 @@ function WaitingForHost() {
 function ReadyRoom({ game }: { game: GameDef }) {
   const { locale } = useGamesLocale();
   const t = useArcadeStrings();
-  const { players, playerCount, role, isSpectator, sharedState, publishState, capacity } = useGameRoom();
+  const { players, playerCount, role, isSpectator, sharedState, publishState, capacity } =
+    useGameRoom();
   const { ready, setReady, readyIds } = useRoomComms();
   const meta = localizedGameMeta(game, locale);
   const cap = gameCapacity(game);
@@ -130,10 +139,21 @@ function ReadyRoom({ game }: { game: GameDef }) {
 
       {isHost ? (
         <div className="flex w-full max-w-xs flex-col gap-2">
-          <TouchButton variant="primary" size="md" disabled={!canStart} onClick={start} icon={<Play className="h-4 w-4" />} className="w-full">
+          <TouchButton
+            variant="primary"
+            size="md"
+            disabled={!canStart}
+            onClick={start}
+            icon={<Play className="h-4 w-4" />}
+            className="w-full"
+          >
             {t.room.start}
           </TouchButton>
-          <button type="button" onClick={changeGame} className="inline-flex min-h-10 items-center justify-center gap-1.5 text-xs text-ink3 hover:text-ink">
+          <button
+            type="button"
+            onClick={changeGame}
+            className="inline-flex min-h-10 items-center justify-center gap-1.5 text-xs text-ink3 hover:text-ink"
+          >
             <ArrowLeft className="h-3.5 w-3.5" /> {t.room.changeGame}
           </button>
         </div>
@@ -141,7 +161,9 @@ function ReadyRoom({ game }: { game: GameDef }) {
 
       <SessionStandings />
 
-      <p className="text-[length:var(--fs-tight)] text-ink3">{t.room.playersHere(playerCount, capacity)}</p>
+      <p className="text-[length:var(--fs-tight)] text-ink3">
+        {t.room.playersHere(playerCount, capacity)}
+      </p>
     </div>
   );
 }
@@ -162,12 +184,18 @@ function SessionStandings() {
 
   return (
     <div className="w-full rounded-2xl border border-edge bg-panel/50 p-3 text-start">
-      <p className="mb-2 text-xs font-bold uppercase tracking-widest text-ink3">{t.room.standings}</p>
+      <p className="mb-2 text-xs font-bold uppercase tracking-widest text-ink3">
+        {t.room.standings}
+      </p>
       <ul className="flex flex-col gap-2">
         {ranked.map(({ p, wins }, i) => (
           <li key={p.id} className="flex items-center gap-2 text-sm">
             <span className="w-5 text-center text-sm">
-              {wins > 0 && wins === topWins && i === 0 ? '👑' : <span className="text-xs font-bold text-ink3">{i + 1}</span>}
+              {wins > 0 && wins === topWins && i === 0 ? (
+                '👑'
+              ) : (
+                <span className="text-xs font-bold text-ink3">{i + 1}</span>
+              )}
             </span>
             <Avatar seed={p.id} name={p.name} size={22} />
             <span className="min-w-0 flex-1 truncate font-medium text-ink">{p.name}</span>

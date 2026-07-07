@@ -1,7 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 import { GridBoard } from '../../../../components/board/GridBoard';
 
 interface SpiralInput {
@@ -61,7 +76,14 @@ function record({ matrix }: SpiralInput): Frame<SpiralState>[] {
   ) => emit(type, note, caption, { active, done }, tone);
 
   if (rows === 0 || cols === 0) {
-    snap('DONE', 'empty', 'The matrix is empty, so the spiral order is the empty list.', null, true, 'good');
+    snap(
+      'DONE',
+      'empty',
+      'The matrix is empty, so the spiral order is the empty list.',
+      null,
+      true,
+      'good',
+    );
     return frames;
   }
 
@@ -206,7 +228,12 @@ function View({ frame }: PluginViewProps<SpiralState>) {
             <RailStat k="rows" v={`[${s.top}..${s.bot}]`} />
             <RailStat k="cols" v={`[${s.left}..${s.right}]`} />
           </RailGroup>
-          <RailStack label="result" items={s.res.map(String)} highlightEnd="bottom" topLabel="last" />
+          <RailStack
+            label="result"
+            items={s.res.map(String)}
+            highlightEnd="bottom"
+            topLabel="last"
+          />
           {s.done && <RailResult label="order" value={`[${s.res.join(', ')}]`} tone="good" />}
         </>
       }
@@ -235,72 +262,67 @@ function Inspector({ frame }: InspectorProps<SpiralState>) {
 export const manifestId = 'prep-matrices-spiral-matrix';
 export const title = 'Spiral Matrix';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Spiral Matrix\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Spiral Matrix"?',
     choices: [
       {
-        label: "Boundary Simulation — fits this problem",
-        correct: true
+        label: 'Boundary Simulation — fits this problem',
+        correct: true,
       },
       {
-        label: "Staircase Search — different approach"
+        label: 'Staircase Search — different approach',
       },
       {
-        label: "DFS + Memoization — different approach"
+        label: 'DFS + Memoization — different approach',
       },
       {
-        label: "Spiral four-boundary shrink — different approach"
-      }
+        label: 'Spiral four-boundary shrink — different approach',
+      },
     ],
-    explain: "See Spiral Matrix pattern"
+    explain: 'See Spiral Matrix pattern',
   },
   {
-    id: "state",
-    prompt: "What does the `active` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `active` field track in the visualization state?',
     choices: [
       {
-        label: "cell appended this frame — updated each frame",
-        correct: true
+        label: 'cell appended this frame — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `active` in sync: cell appended this frame"
+    explain: 'The recorder keeps `active` in sync: cell appended this frame',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Spiral Matrix\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Spiral Matrix"?',
     choices: [
       {
-        label: "O(m·n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(m·n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
+        label: 'O(1) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n³) time, O(n) space — wrong order of growth"
+        label: 'O(n³) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n log n) per axis time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n log n) per axis time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(m·n). O(1). Spiral Matrix"
-  }
+    explain: 'O(m·n). O(1). Spiral Matrix',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

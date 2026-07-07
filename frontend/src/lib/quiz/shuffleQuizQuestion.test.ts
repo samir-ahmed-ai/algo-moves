@@ -5,12 +5,7 @@ const q = {
   id: 't',
   prompt: 'p',
   explain: 'e',
-  choices: [
-    { label: 'A', correct: true },
-    { label: 'B' },
-    { label: 'C' },
-    { label: 'D' },
-  ],
+  choices: [{ label: 'A', correct: true }, { label: 'B' }, { label: 'C' }, { label: 'D' }],
 };
 
 describe('shuffleQuizQuestion', () => {

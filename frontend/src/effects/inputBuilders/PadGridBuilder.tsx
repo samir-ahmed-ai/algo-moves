@@ -59,7 +59,9 @@ export function PadGridBuilder({
                       className={cn(
                         'h-6 w-6 rounded-sm border transition-colors',
                         nodeText['2xs'],
-                        on ? 'border-accent bg-accent/30 text-ink' : 'border-edge bg-panel2 text-ink3',
+                        on
+                          ? 'border-accent bg-accent/30 text-ink'
+                          : 'border-edge bg-panel2 text-ink3',
                         grouped && 'ring-1 ring-accent',
                         playhead && 'ring-2 ring-good',
                       )}
@@ -95,7 +97,10 @@ export function PadGridBuilder({
           <button
             key={p.label}
             type="button"
-            className={cn('rounded border border-edge px-1.5 py-0.5 text-ink2 hover:bg-panel2', nodeText.xs)}
+            className={cn(
+              'rounded border border-edge px-1.5 py-0.5 text-ink2 hover:bg-panel2',
+              nodeText.xs,
+            )}
             onClick={() => setGrid(createPadGrid(p.steps, p.pulses))}
           >
             Euclid {p.label}

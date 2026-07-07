@@ -8,7 +8,7 @@ export const HUD_COLUMN_GAP = 2;
 export const STUDIO_INSET_X = 10;
 export const HUD_PANEL_HEIGHT = 176;
 /** Full studio canvas width minus horizontal insets (860 - 2×10 = 840). */
-export const HUD_PANEL_WIDTH = (1280 - 2 * ORBIT_PANEL_WIDTH) - 2 * STUDIO_INSET_X;
+export const HUD_PANEL_WIDTH = 1280 - 2 * ORBIT_PANEL_WIDTH - 2 * STUDIO_INSET_X;
 
 /** Gap between HUD and maze. */
 export const ORBIT_V_GAP = 12;

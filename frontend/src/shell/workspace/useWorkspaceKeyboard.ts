@@ -51,7 +51,9 @@ export interface WorkspaceKeyboardSnapshot {
   hasNextProblemNav?: boolean;
 }
 
-export function resolveWorkspaceKeyboardAction(input: WorkspaceKeyboardSnapshot): WorkspaceKeyboardAction {
+export function resolveWorkspaceKeyboardAction(
+  input: WorkspaceKeyboardSnapshot,
+): WorkspaceKeyboardAction {
   if ((input.metaKey || input.ctrlKey) && input.key.toLowerCase() === 'k') return 'toggle-palette';
   if (input.editableTarget) return 'none';
 

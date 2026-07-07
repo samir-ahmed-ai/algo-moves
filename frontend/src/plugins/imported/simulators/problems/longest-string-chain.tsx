@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface ChainInput {
   words: string[];
@@ -26,16 +39,21 @@ function record({ words }: ChainInput): Frame<ChainState>[] {
 
   const dp = new Array<number>(n).fill(0);
   const { emit, frames } = createRecorder<ChainState>(() => ({
-        sorted: sorted,
-        dp: dp.slice(),
-        i: null,
-        from: null,
-        pred: null,
-        best: 0,
-        done: false
-      }));
+    sorted: sorted,
+    dp: dp.slice(),
+    i: null,
+    from: null,
+    pred: null,
+    best: 0,
+    done: false,
+  }));
 
-  emit('INIT', `n=${n}`, `Longest String Chain. Sort the words by length → [${sorted.join(', ')}]. dp[w] = the longest chain ending at word w, built by deleting one character to find a shorter predecessor already seen.`, { i: null, from: null, pred: null, best: 0 });
+  emit(
+    'INIT',
+    `n=${n}`,
+    `Longest String Chain. Sort the words by length → [${sorted.join(', ')}]. dp[w] = the longest chain ending at word w, built by deleting one character to find a shorter predecessor already seen.`,
+    { i: null, from: null, pred: null, best: 0 },
+  );
 
   let best = 0;
   for (let i = 0; i < n; i++) {
@@ -62,7 +80,13 @@ function record({ words }: ChainInput): Frame<ChainState>[] {
     emit('FILL', `dp["${w}"]=${cur}`, caption, { i: i, from: from, pred: pred, best: best });
   }
 
-  emit('DONE', `chain = ${best}`, `Every word is processed. The answer is max(dp) = ${best}, the length of the longest string chain.`, { i: null, from: null, pred: null, best: best , done: true }, 'good');
+  emit(
+    'DONE',
+    `chain = ${best}`,
+    `Every word is processed. The answer is max(dp) = ${best}, the length of the longest string chain.`,
+    { i: null, from: null, pred: null, best: best, done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -70,14 +94,20 @@ function View({ frame }: PluginViewProps<ChainState>) {
   const s = frame.state;
   const cells = s.dp.map((v) => (v === 0 ? '·' : v));
   const pointers: ArrayPointer[] = [];
-  if (s.i !== null) pointers.push({ i: s.i, label: `w "${s.sorted[s.i]}"`, tone: 'accent', place: 'above' });
-  if (s.from !== null) pointers.push({ i: s.from, label: `pred "${s.pred}"`, tone: 'warn', place: 'below' });
+  if (s.i !== null)
+    pointers.push({ i: s.i, label: `w "${s.sorted[s.i]}"`, tone: 'accent', place: 'above' });
+  if (s.from !== null)
+    pointers.push({ i: s.from, label: `pred "${s.pred}"`, tone: 'warn', place: 'below' });
   const tone = (i: number) => (s.i === i ? 'found' : s.dp[i] !== 0 ? 'match' : '');
   const cell = (i: number | null) => (i !== null && s.dp[i] !== 0 ? s.dp[i] : '—');
   const rail = (
     <>
       <RailGroup label="scan">
-        <RailStat k="w" v={s.i !== null ? `"${s.sorted[s.i]}"` : '—'} tone={s.i !== null ? 'accent' : undefined} />
+        <RailStat
+          k="w"
+          v={s.i !== null ? `"${s.sorted[s.i]}"` : '—'}
+          tone={s.i !== null ? 'accent' : undefined}
+        />
         <RailStat k="pred" v={s.pred !== null ? `"${s.pred}"` : '—'} />
         <RailStat k="dp[pred]" v={cell(s.from)} />
         <RailStat k="dp[w]" v={cell(s.i)} />
@@ -87,7 +117,13 @@ function View({ frame }: PluginViewProps<ChainState>) {
   );
   return (
     <VizStage rail={rail} railWidth={150}>
-      <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} label={(i) => s.sorted[i]} />
+      <ArrayRow
+        values={cells}
+        cellTone={tone}
+        pointers={pointers}
+        windowRange={null}
+        label={(i) => s.sorted[i]}
+      />
     </VizStage>
   );
 }
@@ -112,8 +148,16 @@ export const title = 'Longest String Chain';
 
 export const simulator: ProblemSimulator = {
   inputs: [
-    { id: 'lsc6', label: '["a","b","ba","bca","bda","bdca"]', value: { words: ['a', 'b', 'ba', 'bca', 'bda', 'bdca'] } },
-    { id: 'lsc5', label: '["xbc","pcxbcf","xb","cxbc","pcxbc"]', value: { words: ['xbc', 'pcxbcf', 'xb', 'cxbc', 'pcxbc'] } },
+    {
+      id: 'lsc6',
+      label: '["a","b","ba","bca","bda","bdca"]',
+      value: { words: ['a', 'b', 'ba', 'bca', 'bda', 'bdca'] },
+    },
+    {
+      id: 'lsc5',
+      label: '["xbc","pcxbcf","xb","cxbc","pcxbc"]',
+      value: { words: ['xbc', 'pcxbcf', 'xb', 'cxbc', 'pcxbc'] },
+    },
   ] satisfies SampleInput<ChainInput>[],
   record,
   View,

@@ -32,18 +32,29 @@ describe('filterCommands', () => {
   });
 
   it('requires every query term to match somewhere in the command', () => {
-    expect(filterCommands(commands, 'two easy').map((command) => command.id)).toEqual(['open:two-sum']);
+    expect(filterCommands(commands, 'two easy').map((command) => command.id)).toEqual([
+      'open:two-sum',
+    ]);
     expect(filterCommands(commands, 'two panel')).toEqual([]);
   });
 
   it('matches aliases and punctuation-free queries', () => {
-    expect(filterCommands(commands, 'colorblind').map((command) => command.id)).toEqual(['palette']);
-    expect(filterCommands(commands, 'two-sum').map((command) => command.id)).toEqual(['open:two-sum']);
-    expect(filterCommands(commands, 'twosum').map((command) => command.id)).toEqual(['open:two-sum']);
+    expect(filterCommands(commands, 'colorblind').map((command) => command.id)).toEqual([
+      'palette',
+    ]);
+    expect(filterCommands(commands, 'two-sum').map((command) => command.id)).toEqual([
+      'open:two-sum',
+    ]);
+    expect(filterCommands(commands, 'twosum').map((command) => command.id)).toEqual([
+      'open:two-sum',
+    ]);
   });
 
   it('prioritizes label-prefix matches while preserving stable ties', () => {
-    expect(filterCommands(commands, 'mode').map((command) => command.id)).toEqual(['mode:play', 'mode:practice']);
+    expect(filterCommands(commands, 'mode').map((command) => command.id)).toEqual([
+      'mode:play',
+      'mode:practice',
+    ]);
   });
 });
 

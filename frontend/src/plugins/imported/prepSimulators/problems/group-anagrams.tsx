@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -31,22 +37,23 @@ function signature(word: string): string {
   return word.split('').sort().join('');
 }
 
-function record({ strs }: GroupAnagramsInput): Frame<GroupAnagramsState>[] {  const groups = new Map<string, string[]>();
+function record({ strs }: GroupAnagramsInput): Frame<GroupAnagramsState>[] {
+  const groups = new Map<string, string[]>();
 
   const snapshotGroups = (): GroupEntry[] =>
     [...groups.entries()].map(([key, words]) => ({ key, words: [...words] }));
 
   const { emit, frames } = createRecorder<GroupAnagramsState>(() => ({
-        strs,
-        wi: null,
-        word: '',
-        ci: null,
-        key: '',
-        groups: snapshotGroups(),
-        hitKey: null,
-        isNewGroup: false,
-        done: false
-      }));
+    strs,
+    wi: null,
+    word: '',
+    ci: null,
+    key: '',
+    groups: snapshotGroups(),
+    hitKey: null,
+    isNewGroup: false,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -194,132 +201,130 @@ function Inspector({ frame }: InspectorProps<GroupAnagramsState>) {
 export const manifestId = 'prep-strings-group-anagrams';
 export const title = 'Group anagrams';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Group anagrams\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Group anagrams"?',
     choices: [
       {
-        label: "Hash by signature — fits this problem",
-        correct: true
+        label: 'Hash by signature — fits this problem',
+        correct: true,
       },
       {
-        label: "Adjacent swap — different approach"
+        label: 'Adjacent swap — different approach',
       },
       {
-        label: "Two pointers — different approach"
+        label: 'Two pointers — different approach',
       },
       {
-        label: "Reverse in place — different approach"
-      }
+        label: 'Reverse in place — different approach',
+      },
     ],
-    explain: "26-letter count string is the bucket key"
+    explain: '26-letter count string is the bucket key',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Group anagrams), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Group anagrams), what strategy is established?',
     choices: [
       {
-        label: "26-letter count string is the bucket — described in INIT caption",
-        correct: true
+        label: '26-letter count string is the bucket — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Group anagrams: two words are anagrams when their letters match. We give each word a signature — its letters sorted — and bucket words that share a signature into the same group."
+    explain:
+      'Group anagrams: two words are anagrams when their letters match. We give each word a signature — its letters sorted — and bucket words that share a signature into the same group.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"COUNT\" step (+), what happens?",
+    id: 'key-step',
+    prompt: 'On the "COUNT" step (+), what happens?',
     choices: [
       {
-        label: "Fold letter \"\" (index ) — this move caption",
-        correct: true
+        label: 'Fold letter "" (index ) — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Fold letter \"\" (index ) into the signature. Collecting all letters of \"\" so we can sort them into a canonical key."
+    explain:
+      'Fold letter "" (index ) into the signature. Collecting all letters of "" so we can sort them into a canonical key.',
   },
   {
-    id: "state",
-    prompt: "What does the `wi` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `wi` field track in the visualization state?',
     choices: [
       {
-        label: "index of the word currently — updated each frame",
-        correct: true
+        label: 'index of the word currently — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `wi` in sync: index of the word currently being processed"
+    explain: 'The recorder keeps `wi` in sync: index of the word currently being processed',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Group anagrams\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Group anagrams"?',
     choices: [
       {
-        label: "O(n*k) time, O(n*k) space — standard bounds here",
-        correct: true
+        label: 'O(n*k) time, O(n*k) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n·L) time, O(n·L) space — wrong order of growth"
+        label: 'O(n·L) time, O(n·L) space — wrong order of growth',
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n*k). O(n*k). key=string(26 counts); map key->list"
+    explain: 'O(n*k). O(n*k). key=string(26 counts); map key->list',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Every word is bucketed. The map — final DONE caption",
-        correct: true
+        label: 'Every word is bucketed. The map — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Every word is bucketed. The map has  group(s) — that is the number of distinct anagram families among the input."
-  }
+    explain:
+      'Every word is bucketed. The map has  group(s) — that is the number of distinct anagram families among the input.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

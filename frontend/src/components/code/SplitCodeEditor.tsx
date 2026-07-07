@@ -321,7 +321,11 @@ export function SplitCodeEditor({
           </div>
         )}
         <div
-          style={showLeft ? { flex: `0 0 ${100 - splitPct}%`, maxWidth: `${100 - splitPct}%` } : { flex: '1 1 100%' }}
+          style={
+            showLeft
+              ? { flex: `0 0 ${100 - splitPct}%`, maxWidth: `${100 - splitPct}%` }
+              : { flex: '1 1 100%' }
+          }
           className={cn(
             'truncate font-mono uppercase tracking-wide text-ink3',
             compact ? 'px-2 py-0.5' : 'px-2.5 py-1',
@@ -332,7 +336,10 @@ export function SplitCodeEditor({
         </div>
       </div>
       <div ref={containerRef} className="relative min-h-0 flex-1 overflow-hidden">
-        <div ref={hostRef} className={cn('cm-merge-diff-host nodrag h-full min-h-0', compact && 'cm-merge-compact')} />
+        <div
+          ref={hostRef}
+          className={cn('cm-merge-diff-host nodrag h-full min-h-0', compact && 'cm-merge-compact')}
+        />
         {showLeft && (
           <div
             {...handleProps}

@@ -1,9 +1,10 @@
-/// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import { visualizer } from 'rollup-plugin-visualizer';
 
-const devPort = Number((globalThis as { process?: { env?: { PORT?: string } } }).process?.env?.PORT) || 4321;
+const devPort =
+  Number((globalThis as { process?: { env?: { PORT?: string } } }).process?.env?.PORT) || 4321;
 const alphaBucket = (name: string) => {
   const first = name[0]?.toLowerCase() ?? 'z';
   if (first <= 'f') return 'a-f';
@@ -12,9 +13,22 @@ const alphaBucket = (name: string) => {
   return 's-z';
 };
 
+const analyze = Boolean(process.env.ANALYZE);
+
 export default defineConfig({
   plugins: [
     react(),
+    ...(analyze
+      ? [
+          visualizer({
+            filename: 'dist/stats.html',
+            template: 'treemap',
+            gzipSize: true,
+            brotliSize: true,
+            open: false,
+          }),
+        ]
+      : []),
     VitePWA({
       registerType: 'autoUpdate',
       // Keep the hand-crafted manifest.webmanifest in public/ rather than
@@ -67,9 +81,13 @@ export default defineConfig({
             if (has('yjs') || has('hocuspocus') || has('lib0')) return 'yjs-collab';
             return;
           }
-          const importedSim = normalized.match(/\/plugins\/imported\/simulators\/problems\/([^/]+)\.tsx$/);
+          const importedSim = normalized.match(
+            /\/plugins\/imported\/simulators\/problems\/([^/]+)\.tsx$/,
+          );
           if (importedSim) return `plugins-imported-sim-${alphaBucket(importedSim[1])}`;
-          const prepSim = normalized.match(/\/plugins\/imported\/prepSimulators\/problems\/([^/]+)\.tsx$/);
+          const prepSim = normalized.match(
+            /\/plugins\/imported\/prepSimulators\/problems\/([^/]+)\.tsx$/,
+          );
           if (prepSim) return `plugins-prep-sim-${alphaBucket(prepSim[1])}`;
           if (has('/plugins/imported/prepManifest')) return 'plugins-prep-manifest';
           if (has('/plugins/imported/manifest')) return 'plugins-imported-manifest';
@@ -86,28 +104,6 @@ export default defineConfig({
           if (has('/plugins/go-course/')) return 'plugins-go-course-runtime';
           return;
         },
-      },
-    },
-  },
-  test: {
-    environment: 'node',
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json-summary', 'html'],
-      reportsDirectory: './coverage',
-      include: ['src/**/*.{ts,tsx}'],
-      exclude: [
-        'src/**/*.{test,spec}.{ts,tsx}',
-        'src/**/__tests__/**',
-        'src/plugins/_generated/**',
-        'src/plugins/imported/manifest.ts',
-        'src/plugins/imported/prepManifest.ts',
-      ],
-      thresholds: {
-        lines: 35,
-        functions: 35,
-        branches: 30,
-        statements: 35,
       },
     },
   },

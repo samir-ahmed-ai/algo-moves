@@ -23,7 +23,9 @@ describe('quizCorrectnessIssues', () => {
   it('flags missing correct choice', () => {
     expect(
       quizCorrectnessIssues(
-        q({ choices: [{ label: 'Only one — no correct flag' }, { label: 'Also none — different' }] }),
+        q({
+          choices: [{ label: 'Only one — no correct flag' }, { label: 'Also none — different' }],
+        }),
       ),
     ).toContain('expected 1 correct choice, got 0');
   });

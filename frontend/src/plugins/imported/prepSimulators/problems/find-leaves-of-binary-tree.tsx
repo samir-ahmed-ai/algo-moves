@@ -1,8 +1,23 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailStack, RailResult } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailStack,
+  RailResult,
+} from '../../../_shared/vizKit';
 
 interface LeavesInput {
   /** Level-order array; null marks an absent child slot. Children of i are 2i+1, 2i+2. */
@@ -19,28 +34,39 @@ interface LeavesState {
   done: boolean;
 }
 
-function record({ tree }: LeavesInput): Frame<LeavesState>[] {  const height = new Array<number | null>(tree.length).fill(null);
+function record({ tree }: LeavesInput): Frame<LeavesState>[] {
+  const height = new Array<number | null>(tree.length).fill(null);
   const visited: number[] = [];
   const layers: number[][] = [];
 
   const { emit, frames } = createRecorder<LeavesState>(() => ({
-        tree: tree,
-        visited: visited.slice(),
-        height: height.slice(),
-        layers: layers.map((l) => l.slice()),
-        active: null,
-        removedLayer: null,
-        done: false
-      }));
+    tree: tree,
+    visited: visited.slice(),
+    height: height.slice(),
+    layers: layers.map((l) => l.slice()),
+    active: null,
+    removedLayer: null,
+    done: false,
+  }));
   // renamed from snap
 
-  emit('INIT', `${visited.length} placed`, `Find Leaves groups every node by its height — the distance to its farthest leaf. Leaves have height 0, their parents height 1, and so on. A post-order DFS computes each height from the children, then drops the node into layer[height].`, { active: null, removedLayer: null, done: false });
+  emit(
+    'INIT',
+    `${visited.length} placed`,
+    `Find Leaves groups every node by its height — the distance to its farthest leaf. Leaves have height 0, their parents height 1, and so on. A post-order DFS computes each height from the children, then drops the node into layer[height].`,
+    { active: null, removedLayer: null, done: false },
+  );
 
   // dfs returns the height of node index i, or -1 for a missing node (mirrors Go's nil -> -1).
   const dfs = (i: number): number => {
     if (i >= tree.length || tree[i] == null) return -1;
 
-    emit('ENTER', `node ${tree[i]}`, `Descend into node ${tree[i]}. Before we can place it we must know how tall its subtrees are, so recurse left then right first (post-order).`, { active: i, removedLayer: null, done: false });
+    emit(
+      'ENTER',
+      `node ${tree[i]}`,
+      `Descend into node ${tree[i]}. Before we can place it we must know how tall its subtrees are, so recurse left then right first (post-order).`,
+      { active: i, removedLayer: null, done: false },
+    );
 
     const left = dfs(2 * i + 1);
     const right = dfs(2 * i + 2);
@@ -51,16 +77,27 @@ function record({ tree }: LeavesInput): Frame<LeavesState>[] {  const height = n
     height[i] = h;
     visited.push(i);
 
-    emit('PLACE', `h=${h}`, `Node ${tree[i]}: left height ${left}, right height ${right}, so its height is max(${left}, ${right}) + 1 = ${h}. It joins layer ${h}${h === 0 ? ' (a leaf)' : ''}, which now reads [${layers[h].join(', ')}].`, { active: i, removedLayer: h, done: false });
+    emit(
+      'PLACE',
+      `h=${h}`,
+      `Node ${tree[i]}: left height ${left}, right height ${right}, so its height is max(${left}, ${right}) + 1 = ${h}. It joins layer ${h}${h === 0 ? ' (a leaf)' : ''}, which now reads [${layers[h].join(', ')}].`,
+      { active: i, removedLayer: h, done: false },
+    );
 
     return h;
   };
 
   dfs(0);
 
-  emit('DONE', `${layers.length} layers`, `Every node is placed. The result peels the tree leaf-layer by leaf-layer: ${layers
+  emit(
+    'DONE',
+    `${layers.length} layers`,
+    `Every node is placed. The result peels the tree leaf-layer by leaf-layer: ${layers
       .map((l, idx) => `layer ${idx} = [${l.join(', ')}]`)
-      .join(', ')}.`, { active: null, removedLayer: null, done: true }, 'good');
+      .join(', ')}.`,
+    { active: null, removedLayer: null, done: true },
+    'good',
+  );
 
   return frames;
 }
@@ -75,7 +112,10 @@ function View({ frame }: PluginViewProps<LeavesState>) {
   };
   const activeVal = s.active !== null ? s.tree[s.active] : null;
   const activeHeight = s.active !== null ? s.height[s.active] : null;
-  const layerItems = s.layers.map((l, idx) => ({ label: `L${idx}[${l.join(',')}]`, tone: idx === s.removedLayer ? 'accent' as const : undefined }));
+  const layerItems = s.layers.map((l, idx) => ({
+    label: `L${idx}[${l.join(',')}]`,
+    tone: idx === s.removedLayer ? ('accent' as const) : undefined,
+  }));
   const resultLabel = s.done ? s.layers.map((l) => `[${l.join(',')}]`).join('') : undefined;
   const rail = (
     <>
@@ -85,7 +125,9 @@ function View({ frame }: PluginViewProps<LeavesState>) {
         <RailStat k="placed" v={s.visited.length} />
       </RailGroup>
       <RailStack label="layers" items={layerItems} />
-      {s.done && resultLabel !== undefined && <RailResult label="answer" value={resultLabel} tone="good" />}
+      {s.done && resultLabel !== undefined && (
+        <RailResult label="answer" value={resultLabel} tone="good" />
+      )}
     </>
   );
   return (
@@ -118,132 +160,131 @@ function Inspector({ frame }: InspectorProps<LeavesState>) {
 export const manifestId = 'prep-trees-find-leaves-of-binary-tree';
 export const title = 'Find Leaves of Binary Tree';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Find Leaves of Binary Tree\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Find Leaves of Binary Tree"?',
     choices: [
       {
-        label: "Height-based DFS — fits this problem",
-        correct: true
+        label: 'Height-based DFS — fits this problem',
+        correct: true,
       },
       {
-        label: "Mirror compare — different approach"
+        label: 'Mirror compare — different approach',
       },
       {
-        label: "BFS + Column Map — different approach"
+        label: 'BFS + Column Map — different approach',
       },
       {
-        label: "Column map BFS — different approach"
-      }
+        label: 'Column map BFS — different approach',
+      },
     ],
-    explain: "A node's \"height\" (distance to farthest leaf) determines which group it belongs to"
+    explain: 'A node\'s "height" (distance to farthest leaf) determines which group it belongs to',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Find Leaves of Binary Tree), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Find Leaves of Binary Tree), what strategy is established?',
     choices: [
       {
-        label: "A node's \"height\" (distance to farthest — described in INIT caption",
-        correct: true
+        label: 'A node\'s "height" (distance to farthest — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Find Leaves groups every node by its height — the distance to its farthest leaf. Leaves have height 0, their parents height 1, and so on. A post-order DFS computes each height from the children, then drops the node into layer[height]."
+    explain:
+      'Find Leaves groups every node by its height — the distance to its farthest leaf. Leaves have height 0, their parents height 1, and so on. A post-order DFS computes each height from the children, then drops the node into layer[height].',
   },
   {
-    id: "key-step",
-    prompt: "On the \"PLACE\" step (h=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "PLACE" step (h=), what happens?',
     choices: [
       {
-        label: "Node : left height , right — this move caption",
-        correct: true
+        label: 'Node : left height , right — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Node : left height , right height , so its height is max(, ) + 1 = . It joins layer , which now reads []."
+    explain:
+      'Node : left height , right height , so its height is max(, ) + 1 = . It joins layer , which now reads [].',
   },
   {
-    id: "state",
-    prompt: "What does the `active` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `active` field track in the visualization state?',
     choices: [
       {
-        label: "node index currently being processed — updated each frame",
-        correct: true
+        label: 'node index currently being processed — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `active` in sync: node index currently being processed"
+    explain: 'The recorder keeps `active` in sync: node index currently being processed',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Find Leaves of Binary Tree\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Find Leaves of Binary Tree"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n³) time, O(n) space — wrong order of growth"
+        label: 'O(n³) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(h+k) time, O(h) space — wrong order of growth"
+        label: 'O(h+k) time, O(h) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(1) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). A node's \"height\" (distance to farthest leaf) determines which group it belongs to; Leaves have height 0, their parents height 1, etc."
+    explain:
+      'O(n). O(n). A node\'s "height" (distance to farthest leaf) determines which group it belongs to; Leaves have height 0, their parents height 1, etc.',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Every node is placed. The result — final DONE caption",
-        correct: true
+        label: 'Every node is placed. The result — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Every node is placed. The result peels the tree leaf-layer by leaf-layer: ${layers\n      .map((l, idx) => "
-  }
+    explain:
+      'Every node is placed. The result peels the tree leaf-layer by leaf-layer: ${layers\n      .map((l, idx) => ',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

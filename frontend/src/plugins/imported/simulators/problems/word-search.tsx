@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailStack, RailResult } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailStack,
+  RailResult,
+} from '../../../_shared/vizKit';
 
 interface WordSearchInput {
   board: string[][];
@@ -68,7 +82,12 @@ function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
 
   const dfs = (r: number, c: number, idx: number): boolean => {
     if (r < 0 || r >= m || c < 0 || c >= n) {
-      snap('MISMATCH', 'off board', `Step off the board (${r}, ${c}) — out of bounds, so this path fails.`, null);
+      snap(
+        'MISMATCH',
+        'off board',
+        `Step off the board (${r}, ${c}) — out of bounds, so this path fails.`,
+        null,
+      );
       return false;
     }
     if (onPath.has(key(r, c))) {
@@ -103,7 +122,14 @@ function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
 
     if (idx + 1 === word.length) {
       found = true;
-      snap('FOUND', 'word complete', `All ${word.length} letters of "${word}" matched along this path — the word exists.`, [r, c], false, 'good');
+      snap(
+        'FOUND',
+        'word complete',
+        `All ${word.length} letters of "${word}" matched along this path — the word exists.`,
+        [r, c],
+        false,
+        'good',
+      );
       return true;
     }
 
@@ -128,7 +154,12 @@ function record({ board, word }: WordSearchInput): Frame<WordSearchState>[] {
   outer: for (let r = 0; r < m; r++) {
     for (let c = 0; c < n; c++) {
       if (board[r][c] === word[0]) {
-        snap('TRY', `start (${r},${c})`, `Try starting the search at (${r}, ${c}) — its letter '${board[r][c]}' matches the first letter '${word[0]}'.`, [r, c]);
+        snap(
+          'TRY',
+          `start (${r},${c})`,
+          `Try starting the search at (${r}, ${c}) — its letter '${board[r][c]}' matches the first letter '${word[0]}'.`,
+          [r, c],
+        );
       }
       if (dfs(r, c, 0)) {
         answer = true;
@@ -167,7 +198,13 @@ function View({ frame }: PluginViewProps<WordSearchState>) {
         <RailStat k="cell" v={s.cur ? `(${s.cur[0]},${s.cur[1]})` : '—'} />
       </RailGroup>
       <RailStack label="path" items={pathItems} />
-      {s.done && <RailResult label="found" value={s.found ? 'true' : 'false'} tone={s.found ? 'good' : 'bad'} />}
+      {s.done && (
+        <RailResult
+          label="found"
+          value={s.found ? 'true' : 'false'}
+          tone={s.found ? 'good' : 'bad'}
+        />
+      )}
     </>
   );
   return (

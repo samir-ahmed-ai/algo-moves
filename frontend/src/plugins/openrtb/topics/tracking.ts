@@ -11,7 +11,8 @@ export const tracking: GoTopic = {
       title: 'Impression Pixel Firing',
       difficulty: 'Easy',
       tags: ['impression', 'pixel', 'tracking', 'HTTP-GET', 'idempotent', 'deduplication'],
-      summary: 'How 1×1 impression pixels work, deduplication by impression ID, and server implementation.',
+      summary:
+        'How 1×1 impression pixels work, deduplication by impression ID, and server implementation.',
       pattern: 'Impression pixel',
       visual:
         'Creative renders → browser fires GET /imp?aid=xxx → server increments counter → returns 1×1 transparent GIF. Deduplicate by (impression_id, timestamp_window) to prevent double-counting.',
@@ -137,7 +138,10 @@ func main() {
           id: 'ortb-imp-pixel-when',
           prompt: 'An impression pixel embedded in ad markup is fired:',
           choices: [
-            { label: 'Browser render — fires HTTP GET when it renders the <img> pixel tag', correct: true },
+            {
+              label: 'Browser render — fires HTTP GET when it renders the <img> pixel tag',
+              correct: true,
+            },
             { label: 'Exchange server — fires the pixel on auction winner selection' },
             { label: 'DSP server — fires the pixel when it sends the BidResponse' },
             { label: 'SSP — fires the pixel when it delivers markup to the browser' },
@@ -149,7 +153,10 @@ func main() {
           id: 'ortb-imp-dedup',
           prompt: 'Why might a single ad impression fire the same pixel URL more than once?',
           choices: [
-            { label: 'Browser re-render — preload, BFCache, or page reload re-renders markup', correct: true },
+            {
+              label: 'Browser re-render — preload, BFCache, or page reload re-renders markup',
+              correct: true,
+            },
             { label: 'Exchange fires — exchange fires pixel per DSP, not per impression render' },
             { label: 'Macro substitution — each substitution does not fire a separate pixel' },
             { label: 'Shared URL — multiple impressions do not share the same pixel URL' },
@@ -161,13 +168,16 @@ func main() {
           id: 'ortb-imp-gif-response',
           prompt: 'Why does an impression tracking server return a 1×1 transparent GIF?',
           choices: [
-            { label: 'Valid image — browser requires an image for <img>; 1x1 GIF is invisible', correct: true },
+            {
+              label: 'Valid image — browser requires an image for <img>; 1x1 GIF is invisible',
+              correct: true,
+            },
             { label: 'Size claim — GIF is not the smallest HTTP response format available' },
             { label: 'Retry claim — 204 No Content does not cause browsers to retry' },
             { label: 'Metadata claim — transparent GIFs carry no DSP audience data' },
           ],
           explain:
-            'An <img> tag requires an image response. If the server returns an error (4xx/5xx) or a non-image response, some browsers log console errors or mark the element as broken. A 1×1 transparent GIF (35 bytes) is invisible to users, satisfies the browser\'s image requirement, and signals a successful tracking event. Some modern trackers use HTTP 204 No Content via fetch() beacons instead of image pixels.',
+            "An <img> tag requires an image response. If the server returns an error (4xx/5xx) or a non-image response, some browsers log console errors or mark the element as broken. A 1×1 transparent GIF (35 bytes) is invisible to users, satisfies the browser's image requirement, and signals a successful tracking event. Some modern trackers use HTTP 204 No Content via fetch() beacons instead of image pixels.",
         },
       ],
       design: {
@@ -293,7 +303,10 @@ func main() {
           id: 'ortb-click-302-vs-301',
           prompt: 'A click tracking server must use HTTP 302 (not 301) for redirects. Why?',
           choices: [
-            { label: '301 is cached permanently — repeat clicks bypass the tracker silently', correct: true },
+            {
+              label: '301 is cached permanently — repeat clicks bypass the tracker silently',
+              correct: true,
+            },
             { label: 'Speed claim — 302 is not faster; both redirects involve a round-trip' },
             { label: 'TLS claim — 301 and 302 both work on HTTP and HTTPS' },
             { label: 'Spec claim — OpenRTB does not mandate HTTP 302 for click redirects' },
@@ -303,9 +316,13 @@ func main() {
         },
         {
           id: 'ortb-click-openredirect',
-          prompt: 'A click tracking endpoint blindly redirects to any URL passed in a "dest" query parameter. The security vulnerability is:',
+          prompt:
+            'A click tracking endpoint blindly redirects to any URL passed in a "dest" query parameter. The security vulnerability is:',
           choices: [
-            { label: 'Open redirect — phishing URLs disguised under a trusted ad domain', correct: true },
+            {
+              label: 'Open redirect — phishing URLs disguised under a trusted ad domain',
+              correct: true,
+            },
             { label: 'CSRF — the redirect forges requests on behalf of the user' },
             { label: 'SQL injection claim — this is an open redirect, not SQL injection' },
             { label: 'Clickjacking — the redirect embeds an iFrame on the target page' },
@@ -315,22 +332,26 @@ func main() {
         },
         {
           id: 'ortb-click-attribution',
-          prompt: 'A user clicks an ad on Monday and converts on Wednesday. Last-click attribution would credit:',
+          prompt:
+            'A user clicks an ad on Monday and converts on Wednesday. Last-click attribution would credit:',
           choices: [
-            { label: 'The ad click on Monday — the last touchpoint before conversion', correct: true },
+            {
+              label: 'The ad click on Monday — the last touchpoint before conversion',
+              correct: true,
+            },
             { label: 'The impression on Sunday (if any) — the first touchpoint' },
-            { label: 'The advertiser — conversions don\'t credit ad interactions' },
+            { label: "The advertiser — conversions don't credit ad interactions" },
             { label: 'The SSP — it served the impression that led to the click' },
           ],
           explain:
-            'Last-click attribution assigns 100% of conversion credit to the final click before the conversion event. It\'s the simplest model and the default for most DSPs. Modern attribution models (data-driven, time-decay, first-click, multi-touch) attempt to distribute credit across all touchpoints more fairly. The click tracking chain creates the log of touchpoints that attribution systems consume.',
+            "Last-click attribution assigns 100% of conversion credit to the final click before the conversion event. It's the simplest model and the default for most DSPs. Modern attribution models (data-driven, time-decay, first-click, multi-touch) attempt to distribute credit across all touchpoints more fairly. The click tracking chain creates the log of touchpoints that attribution systems consume.",
         },
       ],
       design: {
         prompt:
           'You need to build a click tracking system that handles 50k clicks/second, deduplicates within a 5-minute window, and logs each unique click to a data warehouse for attribution. How would you design it?',
         answer:
-          '1. Click handler: stateless Go HTTP server behind a load balancer. Parse cid + validate dest URL. Use distributed dedup key = cid, stored in Redis with 5-minute TTL (SETNX). If already seen, still redirect (don\'t penalise the user) but don\'t log.\n2. Write-behind logging: unique clicks go to a local ring buffer. Background goroutine batches them to Kafka (topic: clicks) every 50 ms.\n3. Data warehouse: Kafka consumer writes click events to BigQuery/Snowflake partitioned by day and advertiser_id for attribution joins.\n4. HMAC-signed click URLs: sign the dest parameter with an HMAC (secret rotated daily). Handler verifies signature before redirecting. Prevents open redirect abuse.\n5. Scale: Redis cluster (16 shards) for dedup at 50k RPS. Ring buffer per pod (size 10k) flushes to Kafka. Kafka partition by advertiser_id for ordered attribution.',
+          "1. Click handler: stateless Go HTTP server behind a load balancer. Parse cid + validate dest URL. Use distributed dedup key = cid, stored in Redis with 5-minute TTL (SETNX). If already seen, still redirect (don't penalise the user) but don't log.\n2. Write-behind logging: unique clicks go to a local ring buffer. Background goroutine batches them to Kafka (topic: clicks) every 50 ms.\n3. Data warehouse: Kafka consumer writes click events to BigQuery/Snowflake partitioned by day and advertiser_id for attribution joins.\n4. HMAC-signed click URLs: sign the dest parameter with an HMAC (secret rotated daily). Handler verifies signature before redirecting. Prevents open redirect abuse.\n5. Scale: Redis cluster (16 shards) for dedup at 50k RPS. Ring buffer per pod (size 10k) flushes to Kafka. Kafka partition by advertiser_id for ordered attribution.",
       },
       keyPoints: [
         'Click redirect chain: exchange click handler → DSP click handler → advertiser landing page.',
@@ -413,7 +434,7 @@ func (m MacroSet) Apply(template string, urlEncode bool) string {
 		if urlEncode {
 			val = url.QueryEscape(v)
 		}
-		args = append(args, "${"+k+"}", val)
+		args = append(args, "${'+k+'}", val)
 	}
 	return strings.NewReplacer(args...).Replace(template)
 }
@@ -452,7 +473,10 @@ func main() {
           id: 'ortb-macro-lurl-use',
           prompt: 'The \${AUCTION_LOSS} macro is only valid in which field?',
           choices: [
-            { label: 'Bid.lurl — loss notification URL, called by the exchange on bid loss', correct: true },
+            {
+              label: 'Bid.lurl — loss notification URL, called by the exchange on bid loss',
+              correct: true,
+            },
             { label: 'Bid.nurl — win notice URL' },
             { label: 'Bid.adm — ad markup body' },
             { label: 'Bid.burl — billing notice URL' },
@@ -462,21 +486,29 @@ func main() {
         },
         {
           id: 'ortb-macro-when-substitute',
-          prompt: 'A DSP includes \${AUCTION_PRICE} in its Bid.adm markup. When is this macro replaced?',
+          prompt:
+            'A DSP includes \${AUCTION_PRICE} in its Bid.adm markup. When is this macro replaced?',
           choices: [
-            { label: 'Exchange on winner selection — only exchange knows the clearing price', correct: true },
+            {
+              label: 'Exchange on winner selection — only exchange knows the clearing price',
+              correct: true,
+            },
             { label: 'Browser on creative render — browser has no access to clearing price' },
             { label: 'DSP before BidResponse — DSP does not know the clearing price yet' },
             { label: 'SSP on exchange response — SSP receives markup after substitution' },
           ],
           explain:
-            'The exchange is the only party that knows the clearing price at the time of substitution. The DSP doesn\'t know if it won or at what clearing price until the exchange notifies it. Therefore, macros in adm are substituted by the exchange before forwarding markup to the SSP, not by the DSP and not by the browser.',
+            "The exchange is the only party that knows the clearing price at the time of substitution. The DSP doesn't know if it won or at what clearing price until the exchange notifies it. Therefore, macros in adm are substituted by the exchange before forwarding markup to the SSP, not by the DSP and not by the browser.",
         },
         {
           id: 'ortb-macro-missing',
-          prompt: 'Your exchange does not support the \${AUCTION_BID_ID} macro. The DSP includes it in a tracking URL. What happens?',
+          prompt:
+            'Your exchange does not support the \${AUCTION_BID_ID} macro. The DSP includes it in a tracking URL. What happens?',
           choices: [
-            { label: 'Literal macro — DSP tracking receives the unsubstituted placeholder', correct: true },
+            {
+              label: 'Literal macro — DSP tracking receives the unsubstituted placeholder',
+              correct: true,
+            },
             { label: 'HTTP 400 — the exchange rejects BidResponse with unsupported macro' },
             { label: 'Empty string — the exchange substitutes nothing for unknown macros' },
             { label: 'Param removed — the exchange strips unknown macros from URLs' },
@@ -504,12 +536,13 @@ func main() {
       title: 'Billing Reconciliation & Discrepancy',
       difficulty: 'Medium',
       tags: ['reconciliation', 'discrepancy', 'billing', 'impression-counting', 'IAS', 'fraud'],
-      summary: 'Why exchange and DSP impression counts diverge, acceptable discrepancy, and reconciliation.',
+      summary:
+        'Why exchange and DSP impression counts diverge, acceptable discrepancy, and reconciliation.',
       pattern: 'Discrepancy analysis',
       visual:
         'Exchange nurl count (server-side) vs DSP pixel count (client-side). Normal: 5-10% discrepancy. Above 20%: investigate. Causes: browser block, timeout, lost pixels, bot traffic, race conditions.',
       memorize:
-        'Discrepancy sources: (1) nurl fired but pixel blocked (ad blocker), (2) pixel fired but nurl lost (network), (3) IVT (bots don\'t fire pixels), (4) race conditions, (5) timezone/window mismatch. Industry standard: ≤ 10% acceptable.',
+        "Discrepancy sources: (1) nurl fired but pixel blocked (ad blocker), (2) pixel fired but nurl lost (network), (3) IVT (bots don't fire pixels), (4) race conditions, (5) timezone/window mismatch. Industry standard: ≤ 10% acceptable.",
       scene:
         'A warehouse inventory: the shipping manifest (exchange nurl = won the bid) and the delivery receipt (DSP pixel = user saw the ad) rarely match perfectly. Industry standard says within 10% is fine. Beyond 20%, something is broken.',
       time: '—',
@@ -601,21 +634,29 @@ func main() {
       quiz: [
         {
           id: 'ortb-reconcile-authority',
-          prompt: 'When the exchange impression count and the DSP impression count differ for billing purposes, which is generally considered authoritative?',
+          prompt:
+            'When the exchange impression count and the DSP impression count differ for billing purposes, which is generally considered authoritative?',
           choices: [
-            { label: 'Exchange authoritative — nurl/burl more reliable than client pixels', correct: true },
+            {
+              label: 'Exchange authoritative — nurl/burl more reliable than client pixels',
+              correct: true,
+            },
             { label: 'DSP authoritative — it has first-hand knowledge of its own bids and wins' },
             { label: 'Third-party vendor — it is a neutral party for discrepancy resolution' },
             { label: 'Average counts — neither party is authoritative alone' },
           ],
           explain:
-            'Exchange server-to-server counts (nurl/burl) are considered more authoritative than DSP pixel counts because they don\'t depend on browser rendering, user connectivity, or ad blockers. Standard industry agreements use exchange counts for billing settlement, with a contractual discrepancy allowance of 5–10% for DSP pixel undercounting.',
+            "Exchange server-to-server counts (nurl/burl) are considered more authoritative than DSP pixel counts because they don't depend on browser rendering, user connectivity, or ad blockers. Standard industry agreements use exchange counts for billing settlement, with a contractual discrepancy allowance of 5–10% for DSP pixel undercounting.",
         },
         {
           id: 'ortb-reconcile-ivt',
-          prompt: 'Invalid traffic (IVT) — bots and non-human traffic — tends to create which type of discrepancy?',
+          prompt:
+            'Invalid traffic (IVT) — bots and non-human traffic — tends to create which type of discrepancy?',
           choices: [
-            { label: 'Exchange overcounts — bots fire nurl but skip browser pixel render', correct: true },
+            {
+              label: 'Exchange overcounts — bots fire nurl but skip browser pixel render',
+              correct: true,
+            },
             { label: 'DSP overcounts — bots click repeatedly, inflating DSP pixel counts' },
             { label: 'Zero discrepancy claim — bots never perfectly replicate human pixels' },
             { label: 'Negative discrepancy — bots fire pixels without a corresponding bid win' },
@@ -625,20 +666,24 @@ func main() {
         },
         {
           id: 'ortb-reconcile-window',
-          prompt: 'DSP reports 90,000 impressions and exchange reports 100,000 for the same day. The contract allows 10% discrepancy. Should the DSP pay for 100,000 or 90,000?',
+          prompt:
+            'DSP reports 90,000 impressions and exchange reports 100,000 for the same day. The contract allows 10% discrepancy. Should the DSP pay for 100,000 or 90,000?',
           choices: [
-            { label: '100,000 — exchange count authoritative; 10% within tolerance', correct: true },
+            {
+              label: '100,000 — exchange count authoritative; 10% within tolerance',
+              correct: true,
+            },
             { label: '90,000 — the DSP pays only for impressions it measured' },
             { label: '95,000 — the average of both counts as a compromise' },
             { label: 'Disputed — both parties must agree on a common third-party count first' },
           ],
           explain:
-            'Standard contract terms (IAB guidelines) state that the exchange\'s server-side count is authoritative for billing, and a discrepancy of up to 10% is within the acceptable tolerance. The DSP pays for 100,000 impressions. If discrepancy were >10% (e.g. 90k vs 100k = 10% = borderline), the parties would typically negotiate or refer to a third-party verification vendor.',
+            "Standard contract terms (IAB guidelines) state that the exchange's server-side count is authoritative for billing, and a discrepancy of up to 10% is within the acceptable tolerance. The DSP pays for 100,000 impressions. If discrepancy were >10% (e.g. 90k vs 100k = 10% = borderline), the parties would typically negotiate or refer to a third-party verification vendor.",
         },
       ],
       design: {
         prompt:
-          'You notice a 25% discrepancy between your exchange\'s nurl count and the DSP\'s pixel count for a specific publisher. Walk through your investigation process.',
+          "You notice a 25% discrepancy between your exchange's nurl count and the DSP's pixel count for a specific publisher. Walk through your investigation process.",
         answer:
           '1. Scope the discrepancy: is it publisher-wide or specific to certain ad formats, placements, or devices? Filter by browser (ad-block rate varies hugely by demographics).\n2. Ad blocker analysis: compare desktop vs mobile. Desktop has 20–30% ad block rates; mobile is typically < 5%. High desktop % suggests ad blocking.\n3. Creative load time: measure time from nurl (exchange) to pixel fire. If creative takes > 5 seconds to load, some users close the tab before the pixel fires.\n4. IVT check: cross-reference with a third-party verification vendor (IAS/DV) report for the same publisher. High IVT = bot traffic inflating exchange counts.\n5. Publisher content: did the publisher launch a new placement? Some in-stream video placements have high nurl-to-pixel ratios due to user skipping before video loads.\n6. Technical check: verify DSP pixel is present in all ad markup variants (A/B test, different creative sizes). A missing pixel in one creative variant explains partial discrepancy.',
       },

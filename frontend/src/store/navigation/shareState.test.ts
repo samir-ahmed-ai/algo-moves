@@ -1,5 +1,12 @@
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
-import { resolveShareItemId, encodeShare, decodeShare, buildInviteUrl, buildWorkspaceEntryUrl, readRoomFromUrl } from './shareState';
+import {
+  resolveShareItemId,
+  encodeShare,
+  decodeShare,
+  buildInviteUrl,
+  buildWorkspaceEntryUrl,
+  readRoomFromUrl,
+} from './shareState';
 
 describe('shareState', () => {
   describe('encodeShare / decodeShare round-trip', () => {
@@ -94,7 +101,9 @@ describe('shareState', () => {
     });
 
     it('resolves from manifest id number when item is omitted', () => {
-      expect(resolveShareItemId({ id: '1.6', mode: 'learn' })).toBe('prep-arrays-find-duplicate-and-missing');
+      expect(resolveShareItemId({ id: '1.6', mode: 'learn' })).toBe(
+        'prep-arrays-find-duplicate-and-missing',
+      );
     });
 
     it('prefers valid item slug over id', () => {
@@ -117,10 +126,7 @@ describe('shareState', () => {
     });
 
     it('embeds room in the share hash', () => {
-      const url = buildInviteUrl(
-        { mode: 'visualize', focus: 'canvas', theme: 'dark' },
-        'WXYZ9999',
-      );
+      const url = buildInviteUrl({ mode: 'visualize', focus: 'canvas', theme: 'dark' }, 'WXYZ9999');
       expect(url).toContain('/workspace#s=');
       const hashPart = url.split('#s=')[1];
       const decoded = decodeShare(hashPart);

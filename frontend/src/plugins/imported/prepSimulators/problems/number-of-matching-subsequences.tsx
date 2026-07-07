@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -40,20 +46,21 @@ function snapshot(buckets: Buckets): Buckets {
   return out;
 }
 
-function record({ s, words }: MatchInput): Frame<MatchState>[] {  const buckets: Buckets = {};
+function record({ s, words }: MatchInput): Frame<MatchState>[] {
+  const buckets: Buckets = {};
   const matched: string[] = [];
 
   const { emit, frames } = createRecorder<MatchState>(() => ({
-        s,
-        i: null,
-        ch: null,
-        buckets: snapshot(buckets),
-        pulled: [],
-        active: null,
-        matched: matched.slice(),
-        count: matched.length,
-        done: false
-      }));
+    s,
+    i: null,
+    ch: null,
+    buckets: snapshot(buckets),
+    pulled: [],
+    active: null,
+    matched: matched.slice(),
+    count: matched.length,
+    done: false,
+  }));
 
   // Seed each word into the bucket keyed by its first character.
   for (const w of words) {
@@ -158,8 +165,7 @@ function View({ frame }: PluginViewProps<MatchState>) {
         s = <span className="font-mono text-ink">"{s.s}"</span>
         {s.ch !== null && !s.done && (
           <>
-            {' · '}scanning{' '}
-            <span className="font-mono text-ink">'{s.ch}'</span>
+            {' · '}scanning <span className="font-mono text-ink">'{s.ch}'</span>
           </>
         )}
       </div>
@@ -173,19 +179,11 @@ function View({ frame }: PluginViewProps<MatchState>) {
         ) : (
           entries.map(([key, list]) => (
             <div key={key} className={cn('font-mono', vizText.xs)}>
-              <span
-                className={cn(
-                  s.ch === key && !s.done ? 'text-accent' : 'text-ink2',
-                )}
-              >
+              <span className={cn(s.ch === key && !s.done ? 'text-accent' : 'text-ink2')}>
                 '{key}'
               </span>
               <span className="text-ink3">{' → '}</span>
-              <span className="text-ink">
-                {list
-                  .map((c) => `"${c.word}"@${c.idx}`)
-                  .join(', ')}
-              </span>
+              <span className="text-ink">{list.map((c) => `"${c.word}"@${c.idx}`).join(', ')}</span>
             </div>
           ))
         )}
@@ -227,138 +225,144 @@ function Inspector({ frame }: InspectorProps<MatchState>) {
 export const manifestId = 'prep-strings-number-of-matching-subsequences';
 export const title = 'Number of Matching Subsequences';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Number of Matching Subsequences\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Number of Matching Subsequences"?',
     choices: [
       {
-        label: "Multi-pointer Buckets — fits this problem",
-        correct: true
+        label: 'Multi-pointer Buckets — fits this problem',
+        correct: true,
       },
       {
-        label: "Expand center — different approach"
+        label: 'Expand center — different approach',
       },
       {
-        label: "Two Pointers Greedy — different approach"
+        label: 'Two Pointers Greedy — different approach',
       },
       {
-        label: "Hash set substrings — different approach"
-      }
+        label: 'Hash set substrings — different approach',
+      },
     ],
-    explain: "See Number Of Matching Subsequences pattern"
+    explain: 'See Number Of Matching Subsequences pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Number of Matching Subsequences), what strategy is established?",
+    id: 'init',
+    prompt:
+      'At the start of a run (Number of Matching Subsequences), what strategy is established?',
     choices: [
       {
-        label: "See Number Of Matching Subsequences — described in INIT caption",
-        correct: true
+        label: 'See Number Of Matching Subsequences — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Number of Matching Subsequences: count how many of the  words are subsequences of \"\". Each word waits in the bucket of the next character it needs; every word starts in the bucket of its first letter."
+    explain:
+      'Number of Matching Subsequences: count how many of the  words are subsequences of "". Each word waits in the bucket of the next character it needs; every word starts in the bucket of its first letter.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"MATCH\" step (\"\"), what happens?",
+    id: 'key-step',
+    prompt: 'On the "MATCH" step (""), what happens?',
     choices: [
       {
-        label: "\"\" consumed its last character '' — this move caption",
-        correct: true
+        label: '"" consumed its last character \'\' — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "\"\" consumed its last character '' — it is a full subsequence of \"\". Count it. Total so far: ."
+    explain:
+      '"" consumed its last character \'\' — it is a full subsequence of "". Count it. Total so far: .',
   },
   {
-    id: "state",
-    prompt: "What does the `s` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `s` field track in the visualization state?',
     choices: [
       {
-        label: "the source string, one char — updated each frame",
-        correct: true
+        label: 'the source string, one char — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `s` in sync: the source string, one char per array cell"
+    explain: 'The recorder keeps `s` in sync: the source string, one char per array cell',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Number of Matching Subsequences\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Number of Matching Subsequences"?',
     choices: [
       {
-        label: "O( time, O(words) space — standard bounds here",
-        correct: true
+        label: 'O( time, O(words) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n^2) time, O(1) space — wrong order of growth"
+        label: 'O(n^2) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
+        label: 'O(1) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n·L) time, O(n·L) space — wrong order of growth"
-      }
+        label: 'O(n·L) time, O(n·L) space — wrong order of growth',
+      },
     ],
-    explain: "O(. O(words). Number Of Matching Subsequences"
+    explain: 'O(. O(words). Number Of Matching Subsequences',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Finished scanning \"\". of word(s) — final DONE caption",
-        correct: true
+        label: 'Finished scanning "". of word(s) — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Finished scanning \"\".  of  word(s) were subsequences${\n      matched.length ? "
-  }
+    explain: 'Finished scanning "".  of  word(s) were subsequences${\n      matched.length ? ',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
   inputs: [
-    { id: 'nms1', label: 's="abcde", words=[a,bb,acd,ace]', value: { s: 'abcde', words: ['a', 'bb', 'acd', 'ace'] } },
-    { id: 'nms2', label: 's="dsahjpjauf", words=[ahjpjau,ja,ahbwzgqnuk,tnmlanowax]', value: { s: 'dsahjpjauf', words: ['ahjpjau', 'ja', 'ahbwzgqnuk', 'tnmlanowax'] } },
+    {
+      id: 'nms1',
+      label: 's="abcde", words=[a,bb,acd,ace]',
+      value: { s: 'abcde', words: ['a', 'bb', 'acd', 'ace'] },
+    },
+    {
+      id: 'nms2',
+      label: 's="dsahjpjauf", words=[ahjpjau,ja,ahbwzgqnuk,tnmlanowax]',
+      value: { s: 'dsahjpjauf', words: ['ahjpjau', 'ja', 'ahbwzgqnuk', 'tnmlanowax'] },
+    },
   ] satisfies SampleInput<MatchInput>[],
   record,
   View,

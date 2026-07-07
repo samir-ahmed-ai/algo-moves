@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -22,7 +28,8 @@ interface ListToBstState {
   done: boolean;
 }
 
-function record({ list }: ListToBstInput): Frame<ListToBstState>[] {  const n = list.length;
+function record({ list }: ListToBstInput): Frame<ListToBstState>[] {
+  const n = list.length;
 
   // Map each build(l, r) call to a stable level-order tree slot so the whole
   // tree is laid out consistently as nodes get filled in. Root = slot 0,
@@ -35,14 +42,14 @@ function record({ list }: ListToBstInput): Frame<ListToBstState>[] {  const n = 
   let cur = 0;
 
   const { emit, frames } = createRecorder<ListToBstState>(() => ({
-        list,
-        cur: cur < n ? cur : null,
-        tree: tree.slice(),
-        status: status.slice(),
-        active: null,
-        built: built.slice(),
-        done: false
-      }));
+    list,
+    cur: cur < n ? cur : null,
+    tree: tree.slice(),
+    status: status.slice(),
+    active: null,
+    built: built.slice(),
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -52,7 +59,13 @@ function record({ list }: ListToBstInput): Frame<ListToBstState>[] {  const n = 
   );
 
   if (n === 0) {
-    emit('DONE', 'empty', 'The list is empty, so the BST is empty — return null.', { done: true }, 'bad');
+    emit(
+      'DONE',
+      'empty',
+      'The list is empty, so the BST is empty — return null.',
+      { done: true },
+      'bad',
+    );
     return frames;
   }
 
@@ -160,7 +173,9 @@ function View({ frame }: PluginViewProps<ListToBstState>) {
       <div className={cn('mt-1 font-mono', vizText.base, s.done ? 'text-good' : 'text-ink')}>
         in-order taken: {s.built.length ? s.built.join(', ') : '·'}
       </div>
-      <div className={cn('mt-1', vizText.sm, 'text-ink3')}>current subtree ringed; roots taken in sorted order</div>
+      <div className={cn('mt-1', vizText.sm, 'text-ink3')}>
+        current subtree ringed; roots taken in sorted order
+      </div>
     </div>
   );
 }
@@ -173,7 +188,10 @@ function Inspector({ frame }: InspectorProps<ListToBstState>) {
       <InspectorRow k="list length" v={s.list.length} />
       <InspectorRow k="head cursor" v={s.cur !== null ? s.list[s.cur] : 'end'} />
       <InspectorRow k="roots taken" v={s.built.length} />
-      <InspectorRow k="active subtree" v={s.active !== null && s.tree[s.active] != null ? s.tree[s.active] : '—'} />
+      <InspectorRow
+        k="active subtree"
+        v={s.active !== null && s.tree[s.active] != null ? s.tree[s.active] : '—'}
+      />
       <InspectorRow k="root" v={s.tree[0] != null ? s.tree[0] : '…'} />
       <InspectorRow k="in-order" v={s.built.length ? s.built.join(',') : '…'} />
     </VarGrid>
@@ -183,132 +201,130 @@ function Inspector({ frame }: InspectorProps<ListToBstState>) {
 export const manifestId = 'prep-trees-convert-sorted-linked-list-to-bst';
 export const title = 'Convert sorted linked list to BST';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Convert sorted linked list to BST\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Convert sorted linked list to BST"?',
     choices: [
       {
-        label: "Inorder simulation — fits this problem",
-        correct: true
+        label: 'Inorder simulation — fits this problem',
+        correct: true,
       },
       {
-        label: "Prefix sum on tree — different approach"
+        label: 'Prefix sum on tree — different approach',
       },
       {
-        label: "Reverse inorder — different approach"
+        label: 'Reverse inorder — different approach',
       },
       {
-        label: "Mirror compare — different approach"
-      }
+        label: 'Mirror compare — different approach',
+      },
     ],
-    explain: "Build in inorder, consuming the list head left-to-right"
+    explain: 'Build in inorder, consuming the list head left-to-right',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Convert sorted linked list to BST), what strategy is established?",
+    id: 'init',
+    prompt:
+      'At the start of a run (Convert sorted linked list to BST), what strategy is established?',
     choices: [
       {
-        label: "Build in inorder, consuming the list — described in INIT caption",
-        correct: true
+        label: 'Build in inorder, consuming the list — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Convert an ascending sorted linked list into a height-balanced BST. First count the  nodes, then build the tree by an in-order recursion: for each range pick the middle as a node, build its left subtree first, consume the current list head as this node's value, then build the right subtree. Because we build in-order and the list is sorted, the head cursor always lines up with the next value to place. Time O(n), Space O(n)."
+    explain:
+      "Convert an ascending sorted linked list into a height-balanced BST. First count the  nodes, then build the tree by an in-order recursion: for each range pick the middle as a node, build its left subtree first, consume the current list head as this node's value, then build the right subtree. Because we build in-order and the list is sorted, the head cursor always lines up with the next value to place. Time O(n), Space O(n).",
   },
   {
-    id: "key-step",
-    prompt: "On the \"ADVANCE\" step (cur→), what happens?",
+    id: 'key-step',
+    prompt: 'On the "ADVANCE" step (cur→), what happens?',
     choices: [
       {
-        label: "Advance the head cursor past . — this move caption",
-        correct: true
+        label: 'Advance the head cursor past . — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Advance the head cursor past . It now points at , ready to feed the right subtree."
+    explain: 'Advance the head cursor past . It now points at , ready to feed the right subtree.',
   },
   {
-    id: "state",
-    prompt: "What does the `list` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `list` field track in the visualization state?',
     choices: [
       {
-        label: "the sorted list values, head — updated each frame",
-        correct: true
+        label: 'the sorted list values, head — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `list` in sync: the sorted list values, head → tail"
+    explain: 'The recorder keeps `list` in sync: the sorted list values, head → tail',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Convert sorted linked list to BST\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Convert sorted linked list to BST"?',
     choices: [
       {
-        label: "O(n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n^2) time, O(h) space — wrong order of growth"
+        label: 'O(n^2) time, O(h) space — wrong order of growth',
       },
       {
-        label: "O(n³) time, O(n) space — wrong order of growth"
+        label: 'O(n³) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(h+k) time, O(h) space — wrong order of growth"
-      }
+        label: 'O(h+k) time, O(h) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(n). build left; take cur as root and advance; build right"
+    explain: 'O(n). O(n). build left; take cur as root and advance; build right',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "The whole list has been consumed — final DONE caption",
-        correct: true
+        label: 'The whole list has been consumed — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "The whole list has been consumed in order and the balanced BST is built. Its in-order traversal is exactly the original sorted list . Return the root ."
-  }
+    explain:
+      'The whole list has been consumed in order and the balanced BST is built. Its in-order traversal is exactly the original sorted list . Return the root .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

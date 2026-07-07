@@ -1,9 +1,7 @@
 import type { CanvasWidget, WidgetTab } from './types';
 import { BUILTIN_WIDGETS } from './builtins';
-import { COLLAB_WIDGETS } from '../collab/collabWidgets';
-import { INTERVIEW_WIDGETS } from '../collab/interview/interviewWidgets';
-import { SESSIONS_LIST_WIDGET } from '../collab/interview/SessionsListWidget';
-import { SAVED_CANVASES_WIDGET } from '../collab/SavedCanvasesWidget';
+import { COLLAB_WIDGETS, SAVED_CANVASES_WIDGET } from '@/shell/collab';
+import { INTERVIEW_WIDGETS, SESSIONS_LIST_WIDGET } from '@/shell/interview';
 
 /**
  * The full set of registered canvas widgets — the single source the sidebar

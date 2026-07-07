@@ -1,4 +1,10 @@
-import { definePlugin, type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../core/types';
+import {
+  definePlugin,
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../core/types';
 import { GridBoard } from '../../components/board/GridBoard';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { goodCases, badCases } from './cases';
@@ -146,14 +152,22 @@ function View({ frame, onSelectNode }: PluginViewProps<QueensState>) {
     Array.from({ length: s.n }, (_, c) => (s.queens[r] === c ? '♛' : '')),
   );
   return (
-    <VizStage rail={<>
-      <RailGroup label="progress">
-        <RailStat k="placed" v={`${s.placedRows} / ${s.n}`} tone="accent" />
-        <RailStat k="placements" v={s.placements} />
-        <RailStat k="backtracks" v={s.backtracks} />
-      </RailGroup>
-      <RailResult label="solved" value={s.solved ? 'yes' : 'no'} tone={s.solved ? 'good' : 'accent'} />
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="progress">
+            <RailStat k="placed" v={`${s.placedRows} / ${s.n}`} tone="accent" />
+            <RailStat k="placements" v={s.placements} />
+            <RailStat k="backtracks" v={s.backtracks} />
+          </RailGroup>
+          <RailResult
+            label="solved"
+            value={s.solved ? 'yes' : 'no'}
+            tone={s.solved ? 'good' : 'accent'}
+          />
+        </>
+      }
+    >
       <GridBoard
         grid={grid}
         cellTone={(r, c) => {

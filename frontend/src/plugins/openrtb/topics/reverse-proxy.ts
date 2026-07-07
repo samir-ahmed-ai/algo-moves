@@ -11,7 +11,8 @@ export const reverseProxy: GoTopic = {
       title: 'Reverse Proxy with httputil',
       difficulty: 'Medium',
       tags: ['reverse-proxy', 'httputil', 'net/http', 'Director', 'ModifyResponse'],
-      summary: 'Using net/http/httputil.ReverseProxy to forward ad requests and transform responses.',
+      summary:
+        'Using net/http/httputil.ReverseProxy to forward ad requests and transform responses.',
       pattern: 'httputil.ReverseProxy',
       visual:
         'ReverseProxy{Director: mutate req, Transport: forward, ModifyResponse: transform resp}. Director rewrites Host + URL. ModifyResponse rewrites body (inject tracking, macros).',
@@ -113,7 +114,10 @@ func main() {
           id: 'ortb-proxy-director',
           prompt: 'In httputil.ReverseProxy, the Director function is called:',
           choices: [
-            { label: 'Before forwarding — Director mutates the outgoing *http.Request', correct: true },
+            {
+              label: 'Before forwarding — Director mutates the outgoing *http.Request',
+              correct: true,
+            },
             { label: 'After response claim — Director runs before forwarding, not after' },
             { label: 'Concurrent claim — Director runs before the upstream call, not during' },
             { label: 'Creation-time claim — Director is called per-request, not at creation' },
@@ -123,9 +127,13 @@ func main() {
         },
         {
           id: 'ortb-proxy-xforwardedfor',
-          prompt: 'Why might an ad proxy strip or carefully control the X-Forwarded-For header forwarded to the ad server?',
+          prompt:
+            'Why might an ad proxy strip or carefully control the X-Forwarded-For header forwarded to the ad server?',
           choices: [
-            { label: 'IP leak prevention — strips internal proxy IPs before forwarding', correct: true },
+            {
+              label: 'IP leak prevention — strips internal proxy IPs before forwarding',
+              correct: true,
+            },
             { label: 'HTTPS-only claim — X-Forwarded-For is needed for HTTP and HTTPS alike' },
             { label: 'Caching claim — X-Forwarded-For does not cause ad server caching issues' },
             { label: 'Auto-strip claim — httputil.ReverseProxy does not strip X-Forwarded-For' },
@@ -135,15 +143,19 @@ func main() {
         },
         {
           id: 'ortb-proxy-modifyresponse',
-          prompt: 'After ModifyResponse replaces resp.Body with a new buffer, what else must you update?',
+          prompt:
+            'After ModifyResponse replaces resp.Body with a new buffer, what else must you update?',
           choices: [
-            { label: 'ContentLength field — update to match new body size after replacement', correct: true },
+            {
+              label: 'ContentLength field — update to match new body size after replacement',
+              correct: true,
+            },
             { label: 'resp.StatusCode — ModifyResponse must return 200 OK' },
             { label: 'resp.Header["Transfer-Encoding"] — set to "identity"' },
             { label: 'Auto-recalc claim — proxy does not auto-recalculate Content-Length' },
           ],
           explain:
-            'When you replace resp.Body, the Content-Length header still reflects the original body size. If the client uses Content-Length for buffering, it will read the wrong amount of data. Set resp.ContentLength = int64(len(newBody)) and delete Content-Encoding (since you\'ve decompressed and re-encoded, any gzip/br encoding is now invalid).',
+            "When you replace resp.Body, the Content-Length header still reflects the original body size. If the client uses Content-Length for buffering, it will read the wrong amount of data. Set resp.ContentLength = int64(len(newBody)) and delete Content-Encoding (since you've decompressed and re-encoded, any gzip/br encoding is now invalid).",
         },
       ],
       design: {
@@ -194,7 +206,7 @@ import (
 func FireNotice(noticeURL string, macros map[string]string) {
 	u := noticeURL
 	for k, v := range macros {
-		u = strings.ReplaceAll(u, "${"+k+"}", url.QueryEscape(v))
+		u = strings.ReplaceAll(u, "${'+k+'}", url.QueryEscape(v))
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -295,53 +307,65 @@ func main() {
       quiz: [
         {
           id: 'ortb-win-goroutine',
-          prompt: 'Why should nurl and burl calls always be made in fire-and-forget goroutines rather than in-line before responding to the SSP?',
+          prompt:
+            'Why should nurl and burl calls always be made in fire-and-forget goroutines rather than in-line before responding to the SSP?',
           choices: [
-            { label: 'Latency concern — nurl blocks on DSP network call, adding 10–50 ms', correct: true },
+            {
+              label: 'Latency concern — nurl blocks on DSP network call, adding 10–50 ms',
+              correct: true,
+            },
             { label: 'Spec requirement claim — OpenRTB spec does not require goroutines' },
             { label: 'Reachability claim — nurl endpoint is reachable right after auction' },
             { label: 'HTTP client claim — Go HTTP client works in regular functions too' },
           ],
           explain:
-            'nurl/burl are HTTP GETs to the DSP\'s tracking server. The DSP\'s server may have variable latency (10–100 ms). Doing this synchronously would add that latency to the SSP\'s critical path — adding to the user-visible time before the ad markup is returned. Fire-and-forget goroutines decouple notice delivery from the auction response path entirely.',
+            "nurl/burl are HTTP GETs to the DSP's tracking server. The DSP's server may have variable latency (10–100 ms). Doing this synchronously would add that latency to the SSP's critical path — adding to the user-visible time before the ad markup is returned. Fire-and-forget goroutines decouple notice delivery from the auction response path entirely.",
         },
         {
           id: 'ortb-win-retry',
-          prompt: 'A DSP\'s nurl endpoint returns HTTP 500. Should the exchange retry the nurl call?',
+          prompt:
+            "A DSP's nurl endpoint returns HTTP 500. Should the exchange retry the nurl call?",
           choices: [
-            { label: 'Yes + backoff — 2–3 retries with exponential backoff; revenue-critical', correct: true },
+            {
+              label: 'Yes + backoff — 2–3 retries with exponential backoff; revenue-critical',
+              correct: true,
+            },
             { label: 'Fire-and-forget claim — nurl needs only one attempt; no retry required' },
             { label: 'Double-billing claim — retrying nurl would double-bill the DSP' },
             { label: 'Yes — retry indefinitely until the DSP returns HTTP 200' },
           ],
           explain:
-            'nurl delivery failures directly affect the DSP\'s revenue reporting — a missed nurl means the DSP doesn\'t know it won. Best practice: 2–3 retries with exponential backoff (e.g. 100 ms, 500 ms). Limit total retry window to ~5 seconds to avoid holding goroutines. Note: burl retries are more critical than nurl since burl = billable event; missing burl = revenue leak.',
+            "nurl delivery failures directly affect the DSP's revenue reporting — a missed nurl means the DSP doesn't know it won. Best practice: 2–3 retries with exponential backoff (e.g. 100 ms, 500 ms). Limit total retry window to ~5 seconds to avoid holding goroutines. Note: burl retries are more critical than nurl since burl = billable event; missing burl = revenue leak.",
         },
         {
           id: 'ortb-win-clearing-price',
-          prompt: 'The exchange fills \${AUCTION_PRICE} in the nurl with the clearing price. In a first-price auction, this equals:',
+          prompt:
+            'The exchange fills \${AUCTION_PRICE} in the nurl with the clearing price. In a first-price auction, this equals:',
           choices: [
-            { label: "Winner's bid price — what the winning DSP actually pays in first-price", correct: true },
+            {
+              label: "Winner's bid price — what the winning DSP actually pays in first-price",
+              correct: true,
+            },
             { label: 'Second-highest bid — this is the clearing price in second-price auctions' },
             { label: 'Publisher floor — minimum CPM the publisher set for the slot' },
             { label: 'Average bid claim — clearing price is not an average of all bids' },
           ],
           explain:
-            'In a first-price auction, the winner pays their bid — so \${AUCTION_PRICE} = winner\'s bid. In a second-price auction, \${AUCTION_PRICE} = clearing price = max(floor, second-highest bid). The DSP should always record the macro value (not their own bid) as their actual spend for accurate cost tracking.',
+            "In a first-price auction, the winner pays their bid — so \${AUCTION_PRICE} = winner's bid. In a second-price auction, \${AUCTION_PRICE} = clearing price = max(floor, second-highest bid). The DSP should always record the macro value (not their own bid) as their actual spend for accurate cost tracking.",
         },
       ],
       design: {
         prompt:
           'Your exchange must guarantee at-least-once delivery of burl (billing notice) calls even under exchange pod restarts. How would you implement this durably?',
         answer:
-          '1. Write-ahead log: before responding to the SSP, append (burl_url, clearing_price, expiry_time) to a local write-ahead log (e.g. WAL file or embedded key-value store).\n2. Background worker: a separate goroutine reads from the WAL and fires bURL calls with retries (3 attempts, exponential backoff).\n3. On success: mark the entry as delivered and delete from WAL.\n4. On pod restart: on startup, scan the WAL for undelivered entries and re-fire them. Use entry expiry_time to drop stale entries (e.g. >1 hour).\n5. Exactly-once semantics: include a unique idempotency key in the burl query string (e.g. auction ID + imp ID). The DSP\'s billing handler must be idempotent — deduplicate by this key using a Redis SETNX with TTL.',
+          "1. Write-ahead log: before responding to the SSP, append (burl_url, clearing_price, expiry_time) to a local write-ahead log (e.g. WAL file or embedded key-value store).\n2. Background worker: a separate goroutine reads from the WAL and fires bURL calls with retries (3 attempts, exponential backoff).\n3. On success: mark the entry as delivered and delete from WAL.\n4. On pod restart: on startup, scan the WAL for undelivered entries and re-fire them. Use entry expiry_time to drop stale entries (e.g. >1 hour).\n5. Exactly-once semantics: include a unique idempotency key in the burl query string (e.g. auction ID + imp ID). The DSP's billing handler must be idempotent — deduplicate by this key using a Redis SETNX with TTL.",
       },
       keyPoints: [
         'nurl fires server-to-server at auction win time; burl fires at billable impression event.',
         'Always fire nurl/burl in goroutines — never block the SSP response on notice delivery.',
         'Retry nurl/burl on 5xx with 2–3 attempts + exponential backoff; log failures.',
         'DSP billing handler must be idempotent — use auction ID as deduplication key.',
-        'Clearing price in macros differs by auction type: FP = winner\'s bid, SP = second-highest.',
+        "Clearing price in macros differs by auction type: FP = winner's bid, SP = second-highest.",
       ],
     },
     {
@@ -349,7 +373,8 @@ func main() {
       title: 'Markup Serving & AUCTION_PRICE Macro',
       difficulty: 'Medium',
       tags: ['adm', 'AUCTION_PRICE', 'macros', 'markup', 'CDN', 'creative'],
-      summary: 'Two markup-serving modes (inline adm vs nurl), macro substitution, and creative delivery.',
+      summary:
+        'Two markup-serving modes (inline adm vs nurl), macro substitution, and creative delivery.',
       pattern: 'Markup serving modes',
       visual:
         'Mode 1: adm in BidResponse → exchange passes to publisher directly. Mode 2: nurl → exchange GETs markup from DSP → passes to publisher. In both cases, exchange substitutes \${AUCTION_PRICE} before delivery.',
@@ -359,7 +384,8 @@ func main() {
         'Dinner delivery: adm = "meal is inside the box, already prepared." nurl = "call the restaurant to collect the meal on win." Either way, the waiter (exchange) writes the final bill (\${AUCTION_PRICE}) on the receipt before handing it to the customer (SSP).',
       time: 'O(|markup|) for macro substitution',
       space: 'O(|markup|)',
-      code: `package main
+      code:
+        `package main
 
 import (
 	"fmt"
@@ -426,7 +452,7 @@ func main() {
 
 	// Inline markup with \${AUCTION_PRICE} used for a tracking call.
 	adm := \`<div><img src="https://px.track.com/imp?p=\${AUCTION_PRICE}&aid=\${AUCTION_ID}" width="1" height="1"/>` +
-		`<a href="https://click.track.com/click?bid=\${AUCTION_BID_ID}">Ad content</a></div>\`
+        `<a href="https://click.track.com/click?bid=\${AUCTION_BID_ID}">Ad content</a></div>\`
 
 	fmt.Println("=== Markup substitution ===")
 	fmt.Println(SubstituteMarkup(adm, v))
@@ -444,9 +470,13 @@ func main() {
       quiz: [
         {
           id: 'ortb-markup-who-substitutes',
-          prompt: 'In the standard OpenRTB workflow, who performs \${AUCTION_PRICE} macro substitution?',
+          prompt:
+            'In the standard OpenRTB workflow, who performs \${AUCTION_PRICE} macro substitution?',
           choices: [
-            { label: 'Exchange substitutes — replaces macros in adm/nurl before SSP delivery', correct: true },
+            {
+              label: 'Exchange substitutes — replaces macros in adm/nurl before SSP delivery',
+              correct: true,
+            },
             { label: 'DSP substitutes claim — DSPs embed macros; exchange replaces them' },
             { label: "The publisher's browser — it replaces macros when the creative renders" },
             { label: 'SSP substitutes claim — SSP receives markup after exchange substitution' },
@@ -456,27 +486,35 @@ func main() {
         },
         {
           id: 'ortb-markup-encoding',
-          prompt: 'When \${AUCTION_PRICE} appears inside a URL query parameter in adm markup, how should it be substituted?',
+          prompt:
+            'When \${AUCTION_PRICE} appears inside a URL query parameter in adm markup, how should it be substituted?',
           choices: [
-            { label: 'URL-encoded — percent-encode the substituted value in URL contexts', correct: true },
+            {
+              label: 'URL-encoded — percent-encode the substituted value in URL contexts',
+              correct: true,
+            },
             { label: 'Base64-encoded claim — base64 is not required; URL-encode is correct' },
             { label: 'Left raw claim — URL encoding required for macro values in URL context' },
             { label: 'HTML-entity claim — HTML entity encoding applies to markup, not macros' },
           ],
           explain:
-            'The OpenRTB spec is explicit: when macros appear as URL parameters, values must be URL-encoded to avoid breaking the URL structure. Prices are numeric and don\'t contain special characters, but other macros (IDs with special chars) do. Apply consistent URL encoding for all macro values in URL contexts. In plain markup body text (non-URL context), use raw values.',
+            "The OpenRTB spec is explicit: when macros appear as URL parameters, values must be URL-encoded to avoid breaking the URL structure. Prices are numeric and don't contain special characters, but other macros (IDs with special chars) do. Apply consistent URL encoding for all macro values in URL contexts. In plain markup body text (non-URL context), use raw values.",
         },
         {
           id: 'ortb-markup-adm-vs-nurl-latency',
-          prompt: 'Serving markup via adm (inline in BidResponse) vs nurl (exchange fetches from DSP on win) — which has lower latency for the publisher?',
+          prompt:
+            'Serving markup via adm (inline in BidResponse) vs nurl (exchange fetches from DSP on win) — which has lower latency for the publisher?',
           choices: [
-            { label: 'adm — markup is already in the BidResponse; no extra DSP round-trip', correct: true },
+            {
+              label: 'adm — markup is already in the BidResponse; no extra DSP round-trip',
+              correct: true,
+            },
             { label: 'nurl latency claim — nurl adds a DSP round-trip, not removes it' },
             { label: 'Equal claim — exchange does not buffer markup for either path' },
             { label: 'nurl browser claim — adm does not require a separate browser fetch' },
           ],
           explain:
-            'With adm, the exchange has the markup in hand as soon as it selects the winner — no extra network call needed. With nurl, the exchange must make an additional HTTP GET to the DSP\'s server to retrieve the markup, adding 5–30 ms of DSP server latency. For low-latency exchange integrations, adm is preferred; nurl is used for dynamic creative generation or when markup is too large to embed in the BidResponse.',
+            "With adm, the exchange has the markup in hand as soon as it selects the winner — no extra network call needed. With nurl, the exchange must make an additional HTTP GET to the DSP's server to retrieve the markup, adding 5–30 ms of DSP server latency. For low-latency exchange integrations, adm is preferred; nurl is used for dynamic creative generation or when markup is too large to embed in the BidResponse.",
         },
       ],
       design: {
@@ -498,14 +536,15 @@ func main() {
       title: 'CDN Creatives & Creative Auditing',
       difficulty: 'Easy',
       tags: ['CDN', 'creative', 'IURL', 'crid', 'brand-safety', 'audit'],
-      summary: 'Hosting creatives on CDN, the iurl audit snapshot, and brand-safety classification.',
+      summary:
+        'Hosting creatives on CDN, the iurl audit snapshot, and brand-safety classification.',
       pattern: 'CDN + creative audit',
       visual:
         'DSP hosts creative assets on CDN (low latency). Bid.iurl = a static snapshot URL for exchange auditing. Exchange checks crid + iurl in asynchronous audit pipeline (brand-safety, malware scan). New crid → audit queue; audited crid → approved/blocked.',
       memorize:
         'IURL = image URL for audit (not the live creative). CRID = stable creative ID. New CRID → audit. Approved CRIDs run immediately. Blocked CRIDs → no fill. CDN for static assets, DSP server only for dynamic (personalized) markup.',
       scene:
-        'A billboard company reviewing submitted artwork: iurl is the proof PDF the artist sends for review. crid is the artwork reference number. The billboard (exchange) doesn\'t post the ad until the artwork is approved. If the artist changes the artwork but keeps the same reference number, that\'s fraud.',
+        "A billboard company reviewing submitted artwork: iurl is the proof PDF the artist sends for review. crid is the artwork reference number. The billboard (exchange) doesn't post the ad until the artwork is approved. If the artist changes the artwork but keeps the same reference number, that's fraud.",
       time: 'O(1) per bid; O(audit_pipeline) async',
       space: '—',
       code: `package main
@@ -619,31 +658,41 @@ func main() {
           id: 'ortb-cdn-iurl',
           prompt: 'The Bid.iurl field contains:',
           choices: [
-            { label: 'Audit snapshot — static creative image for brand-safety review', correct: true },
+            {
+              label: 'Audit snapshot — static creative image for brand-safety review',
+              correct: true,
+            },
             { label: 'Live creative URL — iurl is for audit only, not the served creative' },
             { label: 'Impression pixel — iurl is a creative snapshot, not a tracking pixel' },
             { label: 'Landing page — iurl is for audit, not the click-through destination' },
           ],
           explain:
-            'iurl (Image URL) is a static snapshot of the creative intended for the exchange\'s audit pipeline — not the live creative served to users. The exchange\'s brand-safety crawler fetches this URL to scan for prohibited content, malware, or policy violations. It\'s separate from the actual adm creative markup.',
+            "iurl (Image URL) is a static snapshot of the creative intended for the exchange's audit pipeline — not the live creative served to users. The exchange's brand-safety crawler fetches this URL to scan for prohibited content, malware, or policy violations. It's separate from the actual adm creative markup.",
         },
         {
           id: 'ortb-cdn-crid-stability',
-          prompt: 'An exchange allows a DSP to skip creative audit for already-approved crid values. What attack does this create if crid is not stable?',
+          prompt:
+            'An exchange allows a DSP to skip creative audit for already-approved crid values. What attack does this create if crid is not stable?',
           choices: [
-            { label: 'Creative substitution — approve benign then swap in malicious markup', correct: true },
-            { label: 'Bid shading — the DSP underbids knowing the exchange won\'t re-check' },
+            {
+              label: 'Creative substitution — approve benign then swap in malicious markup',
+              correct: true,
+            },
+            { label: "Bid shading — the DSP underbids knowing the exchange won't re-check" },
             { label: 'Frequency cap bypass — recycled crids reset user impression counts' },
             { label: 'Price floor bypass — old crids have lower floor prices cached' },
           ],
           explain:
-            'If a DSP changes creative markup but reuses an already-approved crid, the exchange\'s audit cache considers it safe and serves it immediately without re-review. This is a known attack: submit a benign ad to get the crid approved, then change the adm to serve malware or prohibited content. Defence: hash the adm or iurl on every bid and invalidate the approved status if the hash changes.',
+            "If a DSP changes creative markup but reuses an already-approved crid, the exchange's audit cache considers it safe and serves it immediately without re-review. This is a known attack: submit a benign ad to get the crid approved, then change the adm to serve malware or prohibited content. Defence: hash the adm or iurl on every bid and invalidate the approved status if the hash changes.",
         },
         {
           id: 'ortb-cdn-https',
           prompt: 'Why should CDN-hosted creative assets always be served over HTTPS?',
           choices: [
-            { label: 'Mixed-content block — browsers block HTTP assets on HTTPS pages', correct: true },
+            {
+              label: 'Mixed-content block — browsers block HTTP assets on HTTPS pages',
+              correct: true,
+            },
             { label: 'HTTP/2 speed claim — HTTPS speed gain is unrelated to ad serving policy' },
             { label: 'Spec requirement claim — OpenRTB 2.6 does not mandate HTTPS for all URLs' },
             { label: 'Ad-blocker claim — ad blockers target domains, not HTTP vs HTTPS' },

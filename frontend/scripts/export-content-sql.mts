@@ -23,47 +23,116 @@ import { goCoursePlugins } from '@/plugins/go-course';
 import { openrtbPlugins } from '@/plugins/openrtb';
 import { catalog } from '@/content';
 import { ARCHIPELAGO_REGIONS, PROBLEM_STORY } from '@/plugins/imported/story/archipelago';
+import { PREP_DATA } from '@/plugins/imported/prepManifest';
+
+const prepComplexity = new Map(
+  PREP_DATA.map((p) => [p.id, { time: p.time ?? null, space: p.space ?? null }]),
+);
 
 type Family = 'DataStructures' | 'Algorithms' | 'Design' | 'Go' | 'Other';
 
 /** Course id -> curriculum family, for the browse/atlas grouping. */
 const FAMILY: Record<string, Family> = {
-  arrays: 'DataStructures', trees: 'DataStructures', heaps: 'DataStructures', 'linked-lists': 'DataStructures',
-  'prep-arrays': 'DataStructures', 'prep-strings': 'DataStructures', 'prep-hash-maps': 'DataStructures',
-  'prep-linked-lists': 'DataStructures', 'prep-stacks-queues': 'DataStructures', 'prep-trees': 'DataStructures',
-  'prep-tries': 'DataStructures', 'prep-matrices': 'DataStructures',
-  backtracking: 'Algorithms', graphs: 'Algorithms', 'binary-search': 'Algorithms', 'dynamic-programming': 'Algorithms',
-  greedy: 'Algorithms', 'prep-intervals': 'Algorithms', 'prep-prefix-sum': 'Algorithms',
-  'prep-sliding-window': 'Algorithms', 'prep-sorting': 'Algorithms', 'prep-math': 'Algorithms',
-  'prep-design': 'Design', 'prep-streams-io': 'Design',
+  arrays: 'DataStructures',
+  trees: 'DataStructures',
+  heaps: 'DataStructures',
+  'linked-lists': 'DataStructures',
+  'prep-arrays': 'DataStructures',
+  'prep-strings': 'DataStructures',
+  'prep-hash-maps': 'DataStructures',
+  'prep-linked-lists': 'DataStructures',
+  'prep-stacks-queues': 'DataStructures',
+  'prep-trees': 'DataStructures',
+  'prep-tries': 'DataStructures',
+  'prep-matrices': 'DataStructures',
+  backtracking: 'Algorithms',
+  graphs: 'Algorithms',
+  'binary-search': 'Algorithms',
+  'dynamic-programming': 'Algorithms',
+  greedy: 'Algorithms',
+  'prep-intervals': 'Algorithms',
+  'prep-prefix-sum': 'Algorithms',
+  'prep-sliding-window': 'Algorithms',
+  'prep-sorting': 'Algorithms',
+  'prep-math': 'Algorithms',
+  'prep-design': 'Design',
+  'prep-streams-io': 'Design',
   'go-senior': 'Go',
   'openrtb-eng': 'Go',
   'prep-database': 'Other',
 };
 
 const familyOf = (id: string): Family =>
-  FAMILY[id] ?? (id.startsWith('go') ? 'Go' : id.startsWith('ortb-') || id.startsWith('openrtb') ? 'Go' : id.startsWith('prep-') ? 'DataStructures' : 'Other');
+  FAMILY[id] ??
+  (id.startsWith('go')
+    ? 'Go'
+    : id.startsWith('ortb-') || id.startsWith('openrtb')
+      ? 'Go'
+      : id.startsWith('prep-')
+        ? 'DataStructures'
+        : 'Other');
 
 const groupOf = (id: string): string =>
-  id === 'go-senior' || id.startsWith('go-') ? 'go-course'
-  : id === 'openrtb-eng' || id.startsWith('openrtb-') || id.startsWith('ortb-') ? 'openrtb'
-  : id.startsWith('prep-') ? 'prep' : 'curated';
+  id === 'go-senior' || id.startsWith('go-')
+    ? 'go-course'
+    : id === 'openrtb-eng' || id.startsWith('openrtb-') || id.startsWith('ortb-')
+      ? 'openrtb'
+      : id.startsWith('prep-')
+        ? 'prep'
+        : 'curated';
 
 // ---- SQL literal helpers (standard single-quote escaping; safe for any text) ----
-const q = (v: string | null | undefined): string => (v == null ? 'null' : `'${String(v).replace(/'/g, "''")}'`);
+const q = (v: string | null | undefined): string =>
+  v == null ? 'null' : `'${String(v).replace(/'/g, "''")}'`;
 const num = (n: number | null | undefined): string => (n == null ? 'null' : String(Math.trunc(n)));
 const bool = (b: boolean): string => (b ? 'true' : 'false');
-const arr = (a: string[]): string => (a.length ? `array[${a.map(q).join(',')}]::text[]` : `'{}'::text[]`);
+const arr = (a: string[]): string =>
+  a.length ? `array[${a.map(q).join(',')}]::text[]` : `'{}'::text[]`;
 const jsonb = (v: unknown): string => `'${JSON.stringify(v).replace(/'/g, "''")}'::jsonb`;
 
 // ---- Collect problems from every plugin group (first registration wins) ----
-const GROUPS: ProblemPlugin<any, any>[][] = [curatedPlugins, importedPlugins, prepPlugins, goCoursePlugins, openrtbPlugins];
+const GROUPS: ProblemPlugin<any, any>[][] = [
+  curatedPlugins,
+  importedPlugins,
+  prepPlugins,
+  goCoursePlugins,
+  openrtbPlugins,
+];
 
-interface SolRow { problemId: string; lang: string; file: string; code: string; primary: boolean; sort: number }
-interface QRow { id: string; problemId: string; prompt: string; explain: string | null; sort: number }
-interface ChoiceRow { id: string; questionId: string; label: string; correct: boolean; sort: number }
+interface SolRow {
+  problemId: string;
+  lang: string;
+  file: string;
+  code: string;
+  primary: boolean;
+  sort: number;
+}
+interface QRow {
+  id: string;
+  problemId: string;
+  prompt: string;
+  explain: string | null;
+  sort: number;
+}
+interface ChoiceRow {
+  id: string;
+  questionId: string;
+  label: string;
+  correct: boolean;
+  sort: number;
+}
 
-const problemRows: { id: string; title: string; difficulty: string; summary: string | null; source: string | null; narrative: string | null; region: string | null }[] = [];
+const problemRows: {
+  id: string;
+  title: string;
+  difficulty: string;
+  summary: string | null;
+  source: string | null;
+  narrative: string | null;
+  region: string | null;
+  timeComplexity: string | null;
+  spaceComplexity: string | null;
+}[] = [];
 const solRows: SolRow[] = [];
 const quizQRows: QRow[] = [];
 const choiceRows: ChoiceRow[] = [];
@@ -77,6 +146,7 @@ for (const plugins of GROUPS) {
     if (problemIds.has(m.id)) continue; // dedupe, mirroring the registry
     problemIds.add(m.id);
 
+    const cx = prepComplexity.get(m.id);
     problemRows.push({
       id: m.id,
       title: m.title,
@@ -85,6 +155,8 @@ for (const plugins of GROUPS) {
       source: m.source ?? null,
       narrative: PROBLEM_STORY[m.id]?.narrative ?? null,
       region: PROBLEM_STORY[m.id]?.regionId ?? null,
+      timeComplexity: cx?.time ?? null,
+      spaceComplexity: cx?.space ?? null,
     });
 
     for (const t of m.tags ?? []) {
@@ -94,23 +166,38 @@ for (const plugins of GROUPS) {
 
     const codes = [
       ...(p.code ? [{ ...p.code, primary: true }] : []),
-      ...((p.extraCode ?? []).map((c) => ({ ...c, primary: false }))),
+      ...(p.extraCode ?? []).map((c) => ({ ...c, primary: false })),
     ];
     const seenSol = new Set<string>();
     codes.forEach((c, i) => {
       const lang = c.lang ?? 'go';
       let file = c.file ?? 'solution';
       let key = `${lang}::${file}`;
-      while (seenSol.has(key)) { file = `${file}~${i}`; key = `${lang}::${file}`; }
+      while (seenSol.has(key)) {
+        file = `${file}~${i}`;
+        key = `${lang}::${file}`;
+      }
       seenSol.add(key);
       solRows.push({ problemId: m.id, lang, file, code: c.text, primary: c.primary, sort: i });
     });
 
     (p.quiz ?? []).forEach((qq, qi) => {
       const qid = `${m.id}::${qq.id}`;
-      quizQRows.push({ id: qid, problemId: m.id, prompt: qq.prompt, explain: qq.explain ?? null, sort: qi });
+      quizQRows.push({
+        id: qid,
+        problemId: m.id,
+        prompt: qq.prompt,
+        explain: qq.explain ?? null,
+        sort: qi,
+      });
       qq.choices.forEach((ch, ci) => {
-        choiceRows.push({ id: `${qid}#${ci}`, questionId: qid, label: ch.label, correct: !!ch.correct, sort: ci });
+        choiceRows.push({
+          id: `${qid}#${ci}`,
+          questionId: qid,
+          label: ch.label,
+          correct: !!ch.correct,
+          sort: ci,
+        });
       });
     });
   }
@@ -118,17 +205,33 @@ for (const plugins of GROUPS) {
 
 // ---- Catalog structure (courses / topics / items) from the assembled catalog ----
 const courseRows = catalog.courses.map((c, i) => ({
-  id: c.id, title: c.title, summary: c.summary ?? null, icon: c.icon ?? null,
-  group: groupOf(c.id), family: familyOf(c.id), sort: i,
+  id: c.id,
+  title: c.title,
+  summary: c.summary ?? null,
+  icon: c.icon ?? null,
+  group: groupOf(c.id),
+  family: familyOf(c.id),
+  sort: i,
 }));
 
 const storyRegionRows = ARCHIPELAGO_REGIONS.map((r) => ({
-  id: r.id, courseId: r.courseId, codeName: r.codeName, title: r.title,
-  subtitle: r.subtitle, blurb: r.blurb, sort: r.order,
+  id: r.id,
+  courseId: r.courseId,
+  codeName: r.codeName,
+  title: r.title,
+  subtitle: r.subtitle,
+  blurb: r.blurb,
+  sort: r.order,
 }));
 
 const topicRows = catalog.courses.flatMap((c) =>
-  c.topics.map((t, i) => ({ id: t.id, courseId: c.id, title: t.title, summary: t.summary ?? null, sort: i })),
+  c.topics.map((t, i) => ({
+    id: t.id,
+    courseId: c.id,
+    title: t.title,
+    summary: t.summary ?? null,
+    sort: i,
+  })),
 );
 
 const itemRows = catalog.items.map((it, i) => ({
@@ -165,35 +268,86 @@ const insert = (table: string, cols: string, rows: string[]) => {
   L.push('');
 };
 
-insert('public.courses', 'id, title, summary, icon, "group", family, sort_order',
-  courseRows.map((c) => `(${q(c.id)}, ${q(c.title)}, ${q(c.summary)}, ${q(c.icon)}, ${q(c.group)}, ${q(c.family)}, ${num(c.sort)})`));
+insert(
+  'public.courses',
+  'id, title, summary, icon, "group", family, sort_order',
+  courseRows.map(
+    (c) =>
+      `(${q(c.id)}, ${q(c.title)}, ${q(c.summary)}, ${q(c.icon)}, ${q(c.group)}, ${q(c.family)}, ${num(c.sort)})`,
+  ),
+);
 
-insert('public.story_regions', 'id, course_id, code_name, title, subtitle, blurb, sort_order',
-  storyRegionRows.map((r) => `(${q(r.id)}, ${q(r.courseId)}, ${q(r.codeName)}, ${q(r.title)}, ${q(r.subtitle)}, ${q(r.blurb)}, ${num(r.sort)})`));
+insert(
+  'public.story_regions',
+  'id, course_id, code_name, title, subtitle, blurb, sort_order',
+  storyRegionRows.map(
+    (r) =>
+      `(${q(r.id)}, ${q(r.courseId)}, ${q(r.codeName)}, ${q(r.title)}, ${q(r.subtitle)}, ${q(r.blurb)}, ${num(r.sort)})`,
+  ),
+);
 
-insert('public.topics', 'id, course_id, title, summary, sort_order',
-  topicRows.map((t) => `(${q(t.id)}, ${q(t.courseId)}, ${q(t.title)}, ${q(t.summary)}, ${num(t.sort)})`));
+insert(
+  'public.topics',
+  'id, course_id, title, summary, sort_order',
+  topicRows.map(
+    (t) => `(${q(t.id)}, ${q(t.courseId)}, ${q(t.title)}, ${q(t.summary)}, ${num(t.sort)})`,
+  ),
+);
 
-insert('public.problems', 'id, title, difficulty, summary, source_url, region_id, narrative',
-  problemRows.map((p) => `(${q(p.id)}, ${q(p.title)}, ${q(p.difficulty)}, ${q(p.summary)}, ${q(p.source)}, ${q(p.region)}, ${q(p.narrative)})`));
+insert(
+  'public.problems',
+  'id, title, difficulty, summary, source_url, region_id, narrative, time_complexity, space_complexity',
+  problemRows.map(
+    (p) =>
+      `(${q(p.id)}, ${q(p.title)}, ${q(p.difficulty)}, ${q(p.summary)}, ${q(p.source)}, ${q(p.region)}, ${q(p.narrative)}, ${q(p.timeComplexity)}, ${q(p.spaceComplexity)})`,
+  ),
+);
 
-insert('public.tags', 'id, label', [...tagSet].sort().map((t) => `(${q(t)}, ${q(t)})`));
+insert(
+  'public.tags',
+  'id, label',
+  [...tagSet].sort().map((t) => `(${q(t)}, ${q(t)})`),
+);
 
-insert('public.problem_tags', 'problem_id, tag_id',
-  problemTagRows.map((pt) => `(${q(pt.problemId)}, ${q(pt.tagId)})`));
+insert(
+  'public.problem_tags',
+  'problem_id, tag_id',
+  problemTagRows.map((pt) => `(${q(pt.problemId)}, ${q(pt.tagId)})`),
+);
 
-insert('public.solutions', 'problem_id, language, file, code, is_primary, sort_order',
-  solRows.map((s) => `(${q(s.problemId)}, ${q(s.lang)}, ${q(s.file)}, ${q(s.code)}, ${bool(s.primary)}, ${num(s.sort)})`));
+insert(
+  'public.solutions',
+  'problem_id, language, file, code, is_primary, sort_order',
+  solRows.map(
+    (s) =>
+      `(${q(s.problemId)}, ${q(s.lang)}, ${q(s.file)}, ${q(s.code)}, ${bool(s.primary)}, ${num(s.sort)})`,
+  ),
+);
 
-insert('public.quiz_questions', 'id, problem_id, prompt, explain, sort_order',
-  quizQRows.map((qq) => `(${q(qq.id)}, ${q(qq.problemId)}, ${q(qq.prompt)}, ${q(qq.explain)}, ${num(qq.sort)})`));
+insert(
+  'public.quiz_questions',
+  'id, problem_id, prompt, explain, sort_order',
+  quizQRows.map(
+    (qq) => `(${q(qq.id)}, ${q(qq.problemId)}, ${q(qq.prompt)}, ${q(qq.explain)}, ${num(qq.sort)})`,
+  ),
+);
 
-insert('public.quiz_choices', 'id, question_id, label, is_correct, sort_order',
-  choiceRows.map((c) => `(${q(c.id)}, ${q(c.questionId)}, ${q(c.label)}, ${bool(c.correct)}, ${num(c.sort)})`));
+insert(
+  'public.quiz_choices',
+  'id, question_id, label, is_correct, sort_order',
+  choiceRows.map(
+    (c) => `(${q(c.id)}, ${q(c.questionId)}, ${q(c.label)}, ${bool(c.correct)}, ${num(c.sort)})`,
+  ),
+);
 
-insert('public.items', 'id, course_id, topic_id, problem_id, kind, title, summary, difficulty, estimated_minutes, prereqs, sort_order',
-  itemRows.map((it) =>
-    `(${q(it.id)}, ${q(it.courseId)}, ${q(it.topicId)}, ${q(it.problemId)}, ${q(it.kind)}, ${q(it.title)}, ${q(it.summary)}, ${q(it.difficulty)}, ${num(it.estimatedMinutes)}, ${arr(it.prereqs)}, ${num(it.sort)})`));
+insert(
+  'public.items',
+  'id, course_id, topic_id, problem_id, kind, title, summary, difficulty, estimated_minutes, prereqs, sort_order',
+  itemRows.map(
+    (it) =>
+      `(${q(it.id)}, ${q(it.courseId)}, ${q(it.topicId)}, ${q(it.problemId)}, ${q(it.kind)}, ${q(it.title)}, ${q(it.summary)}, ${q(it.difficulty)}, ${num(it.estimatedMinutes)}, ${arr(it.prereqs)}, ${num(it.sort)})`,
+  ),
+);
 
 L.push('commit;');
 L.push('');
@@ -201,7 +355,16 @@ L.push('');
 const sql = L.join('\n');
 
 const outPath = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'db', 'content_seed.sql');
-const embedPath = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'backend', 'internal', 'arcade', 'seeds', 'content_seed.sql');
+const embedPath = join(
+  dirname(fileURLToPath(import.meta.url)),
+  '..',
+  '..',
+  'backend',
+  'internal',
+  'arcade',
+  'seeds',
+  'content_seed.sql',
+);
 const check = process.argv.includes('--check');
 const counts =
   `${courseRows.length} courses, ${storyRegionRows.length} story regions, ${topicRows.length} topics, ` +
@@ -218,5 +381,7 @@ if (check) {
 } else {
   writeFileSync(outPath, sql);
   writeFileSync(embedPath, sql);
-  console.log(`✓ wrote db/content_seed.sql and backend/internal/arcade/seeds/content_seed.sql — ${counts}.`);
+  console.log(
+    `✓ wrote db/content_seed.sql and backend/internal/arcade/seeds/content_seed.sql — ${counts}.`,
+  );
 }

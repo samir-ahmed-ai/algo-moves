@@ -35,10 +35,10 @@ export const LEGACY_ITEM_REDIRECTS: Record<string, string> = {
   'number-of-islands': 'number-of-islands',
   'course-schedule': 'course-schedule',
   'topological-sort': 'topological-sort',
-  'dijkstra': 'dijkstra',
+  dijkstra: 'dijkstra',
   'climbing-stairs': 'climbing-stairs',
   'edit-distance': 'edit-distance',
-  'subsets': 'subsets',
+  subsets: 'subsets',
 };
 
 /** Resolve share state item id through legacy redirects (item ids unchanged; pluginIds migrated). */
@@ -75,7 +75,10 @@ function getHashParam(hash: string, key: string): string | null {
 
 export function encodeShare(s: ShareState): string {
   try {
-    return btoa(encodeURIComponent(JSON.stringify(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    return btoa(encodeURIComponent(JSON.stringify(s)))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
   } catch {
     return '';
   }
@@ -136,7 +139,12 @@ export function buildWorkspaceEntryUrl(input: {
 
 /** Invite link for a live collab/interview room (includes workspace context + room code). */
 export function buildInviteUrl(s: ShareState, room: string): string {
-  const base = buildShareUrl({ ...s, room, focus: s.focus ?? 'canvas', mode: s.mode ?? 'visualize' });
+  const base = buildShareUrl({
+    ...s,
+    room,
+    focus: s.focus ?? 'canvas',
+    mode: s.mode ?? 'visualize',
+  });
   return base;
 }
 

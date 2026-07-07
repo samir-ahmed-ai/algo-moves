@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -39,18 +45,17 @@ function record({ buildings }: SkylineInput): Frame<SkylineState>[] {
   let currMax = 0;
   const result: [number, number][] = [];
 
-  const snapHeights = (): [number, number][] =>
-    [...heights.entries()].sort((a, c) => c[0] - a[0]);
+  const snapHeights = (): [number, number][] => [...heights.entries()].sort((a, c) => c[0] - a[0]);
 
   const { emit, frames } = createRecorder<SkylineState>(() => ({
-        events,
-        cur: null,
-        heights: snapHeights(),
-        currMax,
-        newMax: null,
-        result: result.map((p) => [p[0], p[1]]),
-        done: false
-      }));
+    events,
+    cur: null,
+    heights: snapHeights(),
+    currMax,
+    newMax: null,
+    result: result.map((p) => [p[0], p[1]]),
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -136,16 +141,14 @@ function View({ frame }: PluginViewProps<SkylineState>) {
     });
   }
   const justEmitted = frame.move.type === 'EMIT';
-  const tone = (i: number) =>
-    s.cur === i ? (justEmitted ? 'found' : 'match') : '';
+  const tone = (i: number) => (s.cur === i ? (justEmitted ? 'found' : 'match') : '');
 
   const maxShown = s.newMax ?? s.currMax;
 
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
-        sweep events (sorted) · currMax ={' '}
-        <span className="font-mono text-ink">{s.currMax}</span>
+        sweep events (sorted) · currMax = <span className="font-mono text-ink">{s.currMax}</span>
         {s.newMax !== null && s.newMax !== s.currMax && (
           <>
             {' → '}
@@ -159,7 +162,9 @@ function View({ frame }: PluginViewProps<SkylineState>) {
         {s.heights.map(([h, c]) => `${h}:${c}`).join(', ')}
         {'}'} · tallest = <span className="text-ink">{maxShown}</span>
       </div>
-      <div className={cn('mt-1 font-mono', vizText.sm, s.result.length ? 'text-good' : 'text-ink3')}>
+      <div
+        className={cn('mt-1 font-mono', vizText.sm, s.result.length ? 'text-good' : 'text-ink3')}
+      >
         skyline → {s.result.length ? s.result.map((p) => `(${p[0]},${p[1]})`).join(' ') : '·'}
       </div>
     </div>
@@ -186,132 +191,130 @@ function Inspector({ frame }: InspectorProps<SkylineState>) {
 export const manifestId = 'prep-intervals-draw-skyline';
 export const title = 'Draw skyline';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Draw skyline\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Draw skyline"?',
     choices: [
       {
-        label: "Sweep line with height events — fits this problem",
-        correct: true
+        label: 'Sweep line with height events — fits this problem',
+        correct: true,
       },
       {
-        label: "Brute-force nearest store by distance — different approach"
+        label: 'Brute-force nearest store by distance — different approach',
       },
       {
-        label: "Sort + Greedy Merge — different approach"
+        label: 'Sort + Greedy Merge — different approach',
       },
       {
-        label: "Axis-separated rectangle overlap — different approach"
-      }
+        label: 'Axis-separated rectangle overlap — different approach',
+      },
     ],
-    explain: "Sweep x events; keep a multiset of active heights; emit when the max changes"
+    explain: 'Sweep x events; keep a multiset of active heights; emit when the max changes',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Draw skyline), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Draw skyline), what strategy is established?',
     choices: [
       {
-        label: "Sweep x events; keep a multiset — described in INIT caption",
-        correct: true
+        label: 'Sweep x events; keep a multiset — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Draw Skyline (sweep line): each building [L,R,h] becomes two x-events — a start (encoded as −h) and an end (encoded as +h). Sorting by (x, signedHeight) makes starts win ties so a taller building opens before a shorter one closes. We keep a multiset of active heights {0:1} and emit a key-point whenever the tallest active height changes."
+    explain:
+      'Draw Skyline (sweep line): each building [L,R,h] becomes two x-events — a start (encoded as −h) and an end (encoded as +h). Sorting by (x, signedHeight) makes starts win ties so a taller building opens before a shorter one closes. We keep a multiset of active heights {0:1} and emit a key-point whenever the tallest active height changes.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"EMIT\" step ((,)), what happens?",
+    id: 'key-step',
+    prompt: 'On the "EMIT" step ((,)), what happens?',
     choices: [
       {
-        label: "The tallest active height changed — this move caption",
-        correct: true
+        label: 'The tallest active height changed — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "The tallest active height changed from  to , so the skyline turns here: emit key-point (, ). This marks where the visible roofline steps up or down."
+    explain:
+      'The tallest active height changed from  to , so the skyline turns here: emit key-point (, ). This marks where the visible roofline steps up or down.',
   },
   {
-    id: "state",
-    prompt: "What does the `cur` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `cur` field track in the visualization state?',
     choices: [
       {
-        label: "index of the event — updated each frame",
-        correct: true
+        label: 'index of the event — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `cur` in sync: index of the event being processed"
+    explain: 'The recorder keeps `cur` in sync: index of the event being processed',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Draw skyline\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Draw skyline"?',
     choices: [
       {
-        label: "O(n^2) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n^2) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
+        label: 'O(n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n²) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n^2). O(n). start=-h, end=+h; sort by (x,height); track height counts; record max changes"
+    explain:
+      'O(n^2). O(n). start=-h, end=+h; sort by (x,height); track height counts; record max changes',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "All events processed. The skyline — final DONE caption",
-        correct: true
+        label: 'All events processed. The skyline — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "All events processed. The skyline is the  emitted key-points: ${result.map((p) => "
-  }
+    explain: 'All events processed. The skyline is the  emitted key-points: ${result.map((p) => ',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -319,12 +322,23 @@ export const simulator: ProblemSimulator = {
     {
       id: 'sk1',
       label: '[[2,9,10],[3,7,15],[5,12,12]]',
-      value: { buildings: [[2, 9, 10], [3, 7, 15], [5, 12, 12]] },
+      value: {
+        buildings: [
+          [2, 9, 10],
+          [3, 7, 15],
+          [5, 12, 12],
+        ],
+      },
     },
     {
       id: 'sk2',
       label: '[[1,5,3],[2,8,4]]',
-      value: { buildings: [[1, 5, 3], [2, 8, 4]] },
+      value: {
+        buildings: [
+          [1, 5, 3],
+          [2, 8, 4],
+        ],
+      },
     },
   ] satisfies SampleInput<SkylineInput>[],
   record,

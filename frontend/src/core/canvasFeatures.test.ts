@@ -22,7 +22,6 @@ describe('normalizeCanvasMode', () => {
     expect(normalizeCanvasMode('play')).toBe('play');
     expect(normalizeCanvasMode('visualize')).toBe('visualize');
     expect(normalizeCanvasMode('learn')).toBe('learn');
-    expect(normalizeCanvasMode('practice')).toBe('learn');
   });
 });
 

@@ -43,7 +43,12 @@ export function recordGridBfs(
   options: {
     initCaption: string;
     passable: (r: number, c: number, val: number) => boolean;
-    onCell?: (r: number, c: number, emit: GridEmit, ctx: { visited: boolean[][]; dist: number[][]; queue: [number, number][] }) => boolean;
+    onCell?: (
+      r: number,
+      c: number,
+      emit: GridEmit,
+      ctx: { visited: boolean[][]; dist: number[][]; queue: [number, number][] },
+    ) => boolean;
     onFinish?: (emit: GridEmit) => void;
   },
 ): Frame<GridRecordState>[] {
@@ -68,7 +73,11 @@ export function recordGridBfs(
 
   while (queue.length > 0) {
     const [r, c] = queue.shift()!;
-    emit('VISIT', `(${r},${c})`, `Process cell (${r}, ${c}) with value ${grid[r][c]}.`, { cur: [r, c], visited, dist });
+    emit('VISIT', `(${r},${c})`, `Process cell (${r}, ${c}) with value ${grid[r][c]}.`, {
+      cur: [r, c],
+      visited,
+      dist,
+    });
     if (options.onCell?.(r, c, emit, { visited, dist, queue })) break;
     for (const [dr, dc] of dirs) {
       const nr = r + dr;
@@ -78,7 +87,11 @@ export function recordGridBfs(
       visited[nr][nc] = true;
       dist[nr][nc] = dist[r][c] + 1;
       queue.push([nr, nc]);
-      emit('ENQUEUE', `→(${nr},${nc})`, `Move to (${nr}, ${nc}), dist=${dist[nr][nc]}.`, { cur: [nr, nc], visited, dist });
+      emit('ENQUEUE', `→(${nr},${nc})`, `Move to (${nr}, ${nc}), dist=${dist[nr][nc]}.`, {
+        cur: [nr, nc],
+        visited,
+        dist,
+      });
     }
   }
 
@@ -89,7 +102,9 @@ export function recordGridBfs(
 /** Fill a DP table row-by-row, emitting one frame per cell update. */
 export function recordDpFill<T extends Record<string, unknown>>(
   makeBase: () => T,
-  fill: (emit: (type: string, note: string, caption: string, partial?: Partial<T>, tone?: Tone) => void) => void,
+  fill: (
+    emit: (type: string, note: string, caption: string, partial?: Partial<T>, tone?: Tone) => void,
+  ) => void,
 ): Frame<T>[] {
   const { emit, frames } = createRecorder(makeBase);
   fill(emit);

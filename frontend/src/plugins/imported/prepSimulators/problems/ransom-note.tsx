@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -21,19 +27,20 @@ interface RansomState {
   done: boolean;
 }
 
-function record({ note, magazine }: RansomInput): Frame<RansomState>[] {  const noteChars = note.split('');
+function record({ note, magazine }: RansomInput): Frame<RansomState>[] {
+  const noteChars = note.split('');
   const cnt = new Map<string, number>();
 
   const { emit, frames } = createRecorder<RansomState>(() => ({
-        note: noteChars,
-        magazine,
-        cnt: [...cnt.entries()],
-        i: null,
-        cur: null,
-        available: null,
-        result: null,
-        done: false
-      }));
+    note: noteChars,
+    magazine,
+    cnt: [...cnt.entries()],
+    i: null,
+    cur: null,
+    available: null,
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -107,24 +114,18 @@ function View({ frame }: PluginViewProps<RansomState>) {
     if (i === s.i) return s.result === false ? 'dead' : 'match';
     return i < s.i ? 'found' : '';
   };
-  const poolText = s.cnt.length
-    ? s.cnt.map(([ch, n]) => `${ch}:${n}`).join('  ')
-    : '(empty)';
+  const poolText = s.cnt.length ? s.cnt.map(([ch, n]) => `${ch}:${n}`).join('  ') : '(empty)';
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
         magazine = <span className="font-mono text-ink">"{s.magazine}"</span>
       </div>
       <ArrayRow values={s.note} cellTone={tone} pointers={pointers} windowRange={null} />
-      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>pool {'{'} {poolText} {'}'}</div>
+      <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
+        pool {'{'} {poolText} {'}'}
+      </div>
       {s.result !== null && (
-        <div
-          className={cn(
-            'mt-1 font-mono',
-            vizText.base,
-            s.result ? 'text-good' : 'text-bad',
-          )}
-        >
+        <div className={cn('mt-1 font-mono', vizText.base, s.result ? 'text-good' : 'text-bad')}>
           → {String(s.result)}
         </div>
       )}
@@ -142,10 +143,7 @@ function Inspector({ frame }: InspectorProps<RansomState>) {
       <InspectorRow k="need char" v={s.cur ? `'${s.cur}'` : '—'} />
       <InspectorRow k="available" v={s.available ?? '—'} />
       <InspectorRow k="distinct in pool" v={s.cnt.length} />
-      <InspectorRow
-        k="result"
-        v={s.result === null ? (s.done ? 'none' : '…') : String(s.result)}
-      />
+      <InspectorRow k="result" v={s.result === null ? (s.done ? 'none' : '…') : String(s.result)} />
     </VarGrid>
   );
 }
@@ -153,132 +151,128 @@ function Inspector({ frame }: InspectorProps<RansomState>) {
 export const manifestId = 'prep-strings-ransom-note';
 export const title = 'Ransom note';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Ransom note\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Ransom note"?',
     choices: [
       {
-        label: "Char frequency — fits this problem",
-        correct: true
+        label: 'Char frequency — fits this problem',
+        correct: true,
       },
       {
-        label: "Index Map — different approach"
+        label: 'Index Map — different approach',
       },
       {
-        label: "Counter — different approach"
+        label: 'Counter — different approach',
       },
       {
-        label: "Two Pointers — different approach"
-      }
+        label: 'Two Pointers — different approach',
+      },
     ],
-    explain: "Spend magazine letters to build the note"
+    explain: 'Spend magazine letters to build the note',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Ransom note), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Ransom note), what strategy is established?',
     choices: [
       {
-        label: "Spend magazine letters to build — described in INIT caption",
-        correct: true
+        label: 'Spend magazine letters to build — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Ransom Note: can we spell \"\" using only the letters in the magazine \"\", each magazine letter used at most once? Count every magazine letter, then spend one per note letter."
+    explain:
+      'Ransom Note: can we spell "" using only the letters in the magazine "", each magazine letter used at most once? Count every magazine letter, then spend one per note letter.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"FAIL\" step (no ''), what happens?",
+    id: 'key-step',
+    prompt: 'On the "FAIL" step (no \'\'), what happens?',
     choices: [
       {
         label: "The pool has zero '' left — this move caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "The pool has zero '' left, so the note cannot be spelled. Return false."
+    explain: "The pool has zero '' left, so the note cannot be spelled. Return false.",
   },
   {
-    id: "state",
-    prompt: "What does the `note` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `note` field track in the visualization state?',
     choices: [
       {
-        label: "ransom note chars we must — updated each frame",
-        correct: true
+        label: 'ransom note chars we must — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `note` in sync: ransom note chars we must spell"
+    explain: 'The recorder keeps `note` in sync: ransom note chars we must spell',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Ransom note\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Ransom note"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O( time, O(1) space — wrong order of growth"
+        label: 'O( time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n*k) time, O(n*k) space — wrong order of growth"
+        label: 'O(n*k) time, O(n*k) space — wrong order of growth',
       },
       {
-        label: "O(n³) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n³) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). count magazine; for each note char: 0 -> false else --"
+    explain: 'O(n). O(1). count magazine; for each note char: 0 -> false else --',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
         label: "Spend one '' from the pool: — final DONE caption",
-        correct: true
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Spend one '' from the pool: its count drops  → . Move to the next note letter."
-  }
+    explain: "Spend one '' from the pool: its count drops  → . Move to the next note letter.",
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

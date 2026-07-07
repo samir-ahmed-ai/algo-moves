@@ -50,7 +50,10 @@ export function Stat({
 
 export function StatGrid({ children, cols = 2 }: { children: ReactNode; cols?: number }) {
   return (
-    <div className="grid gap-x-4" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+    <div
+      className="grid gap-x-4"
+      style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+    >
       {children}
     </div>
   );

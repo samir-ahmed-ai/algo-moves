@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
@@ -22,24 +28,25 @@ interface RainState {
   done: boolean;
 }
 
-function record({ height }: RainInput): Frame<RainState>[] {  let l = 0;
+function record({ height }: RainInput): Frame<RainState>[] {
+  let l = 0;
   let r = height.length - 1;
   let maxL = 0;
   let maxR = 0;
   let water = 0;
 
   const { emit, frames } = createRecorder<RainState>(() => ({
-        height,
-        l,
-        r,
-        maxL,
-        maxR,
-        water,
-        side: null,
-        filled: null,
-        added: 0,
-        done: false
-      }));
+    height,
+    l,
+    r,
+    maxL,
+    maxR,
+    water,
+    side: null,
+    filled: null,
+    added: 0,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -113,11 +120,18 @@ function record({ height }: RainInput): Frame<RainState>[] {  let l = 0;
 
 function View({ frame }: PluginViewProps<RainState>) {
   const s = frame.state;
-  if (s.height.length === 0) return <div className="board-area"><VizEmpty message="empty" /></div>;
+  if (s.height.length === 0)
+    return (
+      <div className="board-area">
+        <VizEmpty message="empty" />
+      </div>
+    );
 
   const pointers: ArrayPointer[] = [];
-  if (s.l !== null && s.l <= (s.r ?? s.l)) pointers.push({ i: s.l, label: 'l', tone: 'accent', place: 'below' });
-  if (s.r !== null && s.r >= (s.l ?? s.r)) pointers.push({ i: s.r, label: 'r', tone: 'warn', place: 'below' });
+  if (s.l !== null && s.l <= (s.r ?? s.l))
+    pointers.push({ i: s.l, label: 'l', tone: 'accent', place: 'below' });
+  if (s.r !== null && s.r >= (s.l ?? s.r))
+    pointers.push({ i: s.r, label: 'r', tone: 'warn', place: 'below' });
 
   const tone = (i: number) => {
     if (s.filled === i) return 'in-window';
@@ -165,132 +179,131 @@ function Inspector({ frame }: InspectorProps<RainState>) {
 export const manifestId = 'prep-stacks-queues-trapping-rain-water';
 export const title = 'Trapping Rain Water';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Trapping Rain Water\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Trapping Rain Water"?',
     choices: [
       {
-        label: "Two Pointers — fits this problem",
-        correct: true
+        label: 'Two Pointers — fits this problem',
+        correct: true,
       },
       {
-        label: "Shunting-yard (no parens) — different approach"
+        label: 'Shunting-yard (no parens) — different approach',
       },
       {
-        label: "Right-to-Left Max Scan — different approach"
+        label: 'Right-to-Left Max Scan — different approach',
       },
       {
-        label: "Sliding window queue + running sum — different approach"
-      }
+        label: 'Sliding window queue + running sum — different approach',
+      },
     ],
-    explain: "Two pointers `l=0, r=n-1`, track `maxL` and `maxR`"
+    explain: 'Two pointers `l=0, r=n-1`, track `maxL` and `maxR`',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Trapping Rain Water), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Trapping Rain Water), what strategy is established?',
     choices: [
       {
-        label: "Two pointers `l=0, r=n-1`, track `maxL` — described in INIT caption",
-        correct: true
+        label: 'Two pointers `l=0, r=n-1`, track `maxL` — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Trapping Rain Water: each bar is a wall of the given height; water pools in the dips between taller walls. Two pointers l=0 and r= close inward, tracking maxL and maxR — the tallest wall seen from each side."
+    explain:
+      'Trapping Rain Water: each bar is a wall of the given height; water pools in the dips between taller walls. Two pointers l=0 and r= close inward, tracking maxL and maxR — the tallest wall seen from each side.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"WATER_L\" step (+ at ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "WATER_L" step (+ at ), what happens?',
     choices: [
       {
-        label: "height[]= is below the left wall — this move caption",
-        correct: true
+        label: 'height[]= is below the left wall — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "height[]= is below the left wall maxL=, so water fills the gap: maxL − height[] =  −  = . Total water is now ."
+    explain:
+      'height[]= is below the left wall maxL=, so water fills the gap: maxL − height[] =  −  = . Total water is now .',
   },
   {
-    id: "state",
-    prompt: "What does the `l` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `l` field track in the visualization state?',
     choices: [
       {
-        label: "left pointer — updated each frame",
-        correct: true
+        label: 'left pointer — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `l` in sync: left pointer"
+    explain: 'The recorder keeps `l` in sync: left pointer',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Trapping Rain Water\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Trapping Rain Water"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n³) time, O(n) space — wrong order of growth"
+        label: 'O(n³) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(k) space — wrong order of growth"
+        label: 'O(n) time, O(k) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(log n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). Two pointers `l=0, r=n-1`, track `maxL` and `maxR`; If `height[l] < height[r]`: water at `l` is determined by `maxL` → process left side"
+    explain:
+      'O(n). O(1). Two pointers `l=0, r=n-1`, track `maxL` and `maxR`; If `height[l] < height[r]`: water at `l` is determined by `maxL` → process left side',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "The pointers met, so every bar — final DONE caption",
-        correct: true
+        label: 'The pointers met, so every bar — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "The pointers met, so every bar has been settled. The total trapped rain water is  units."
-  }
+    explain:
+      'The pointers met, so every bar has been settled. The total trapped rain water is  units.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

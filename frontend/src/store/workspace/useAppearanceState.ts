@@ -5,7 +5,10 @@ import { normalizeLayoutPreset, type LayoutPreset } from '@/lib/canvas/layoutPre
 import type { Density, Palette, Theme, Tweaks, WorkspaceDefaults } from './workspace';
 
 /** Theme, palette, density and display tweaks, plus the document-element sync effects. */
-export function useAppearanceState(shared: ShareState | null, savedDefaults: Partial<WorkspaceDefaults>) {
+export function useAppearanceState(
+  shared: ShareState | null,
+  savedDefaults: Partial<WorkspaceDefaults>,
+) {
   const [theme, setTheme] = useState<Theme>(shared?.theme === 'light' ? 'light' : 'dark');
   const [density, setDensity] = useState<Density>(savedDefaults.density ?? 'compact');
   const [palette, setPalette] = useState<Palette>(shared?.palette === 'cb' ? 'cb' : 'default');
@@ -28,7 +31,10 @@ export function useAppearanceState(shared: ShareState | null, savedDefaults: Par
     setDensity((d) => (d === 'compact' ? 'ultra' : d === 'ultra' ? 'spacious' : 'compact'));
   }, []);
 
-  const toggleTweak = useCallback((k: keyof Tweaks) => setTweaks((t) => ({ ...t, [k]: !t[k] })), []);
+  const toggleTweak = useCallback(
+    (k: keyof Tweaks) => setTweaks((t) => ({ ...t, [k]: !t[k] })),
+    [],
+  );
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');

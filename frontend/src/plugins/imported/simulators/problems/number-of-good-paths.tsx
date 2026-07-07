@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GraphBoard } from '../../../../components/board/GraphBoard';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  RailGroup,
+  RailResult,
+  RailStat,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+} from '../../../_shared/vizKit';
 import { circleLayout } from '../../../_shared/graphLayout';
 
 interface GPInput {
@@ -26,7 +39,8 @@ interface GPState {
 
 function record({ vals, adj, pos }: GPInput): Frame<GPState>[] {
   const n = vals.length;
-  const parent = Array.from({ length: n }, (_, i) => i);  let res = n;
+  const parent = Array.from({ length: n }, (_, i) => i);
+  let res = n;
 
   const find = (x: number): number => {
     while (parent[x] !== x) {
@@ -37,19 +51,24 @@ function record({ vals, adj, pos }: GPInput): Frame<GPState>[] {
   };
 
   const { emit, frames } = createRecorder<GPState>(() => ({
-        vals: vals,
-        adj: adj,
-        pos: pos,
-        parent: parent.slice(),
-        res: res,
-        active: null,
-        inspect: null,
-        highlightEdge: null,
-        groupVal: null,
-        done: false
-      }));
+    vals: vals,
+    adj: adj,
+    pos: pos,
+    parent: parent.slice(),
+    res: res,
+    active: null,
+    inspect: null,
+    highlightEdge: null,
+    groupVal: null,
+    done: false,
+  }));
 
-  emit('INIT', `res=${res}`, `A good path has equal endpoint values with every node in between no larger. Process nodes by value, ascending. For each value group we union neighbours that are ≤ the current value, then count pairs inside each component. Start res = ${n} (each node is a trivial good path).`, { active: null, inspect: null, highlightEdge: null, groupVal: null });
+  emit(
+    'INIT',
+    `res=${res}`,
+    `A good path has equal endpoint values with every node in between no larger. Process nodes by value, ascending. For each value group we union neighbours that are ≤ the current value, then count pairs inside each component. Start res = ${n} (each node is a trivial good path).`,
+    { active: null, inspect: null, highlightEdge: null, groupVal: null },
+  );
 
   const ids = Array.from({ length: n }, (_, i) => i).sort((a, b) => vals[a] - vals[b]);
 
@@ -59,7 +78,12 @@ function record({ vals, adj, pos }: GPInput): Frame<GPState>[] {
     while (j < n && vals[ids[j]] === vals[ids[i]]) j += 1;
     const val = vals[ids[i]];
     const groupNodes = ids.slice(i, j);
-    emit('GROUP', `value ${val}`, `Process the value group ${val}: nodes [${groupNodes.join(', ')}]. Union each of them with any neighbour whose value is ≤ ${val}.`, { active: null, inspect: null, highlightEdge: null, groupVal: val });
+    emit(
+      'GROUP',
+      `value ${val}`,
+      `Process the value group ${val}: nodes [${groupNodes.join(', ')}]. Union each of them with any neighbour whose value is ≤ ${val}.`,
+      { active: null, inspect: null, highlightEdge: null, groupVal: val },
+    );
 
     for (let k = i; k < j; k++) {
       const u = ids[k];
@@ -70,9 +94,19 @@ function record({ vals, adj, pos }: GPInput): Frame<GPState>[] {
           if (ru !== rv) {
             if (vals[ru] < vals[rv]) parent[ru] = rv;
             else parent[rv] = ru;
-            emit('UNION', `union ${u}-${v}`, `Neighbour ${v} (value ${vals[v]}) ≤ ${vals[u]}, so union ${u} and ${v} into one component.`, { active: u, inspect: v, highlightEdge: [u, v], groupVal: val });
+            emit(
+              'UNION',
+              `union ${u}-${v}`,
+              `Neighbour ${v} (value ${vals[v]}) ≤ ${vals[u]}, so union ${u} and ${v} into one component.`,
+              { active: u, inspect: v, highlightEdge: [u, v], groupVal: val },
+            );
           } else {
-            emit('SAME', `skip ${u}-${v}`, `Neighbour ${v} (value ${vals[v]}) ≤ ${vals[u]}, but ${u} and ${v} are already in the same component.`, { active: u, inspect: v, highlightEdge: [u, v], groupVal: val });
+            emit(
+              'SAME',
+              `skip ${u}-${v}`,
+              `Neighbour ${v} (value ${vals[v]}) ≤ ${vals[u]}, but ${u} and ${v} are already in the same component.`,
+              { active: u, inspect: v, highlightEdge: [u, v], groupVal: val },
+            );
           }
         }
       }
@@ -87,12 +121,23 @@ function record({ vals, adj, pos }: GPInput): Frame<GPState>[] {
     for (const c of cnt.values()) added += (c * (c - 1)) / 2;
     res += added;
     const sizes = [...cnt.values()].join(', ');
-    emit('COUNT', `+${added}`, `Within value ${val}, the components hold [${sizes}] of these nodes. Each component of size c adds c·(c−1)/2 good paths: +${added}. res = ${res}.`, { active: null, inspect: null, highlightEdge: null, groupVal: val });
+    emit(
+      'COUNT',
+      `+${added}`,
+      `Within value ${val}, the components hold [${sizes}] of these nodes. Each component of size c adds c·(c−1)/2 good paths: +${added}. res = ${res}.`,
+      { active: null, inspect: null, highlightEdge: null, groupVal: val },
+    );
 
     i = j;
   }
 
-  emit('DONE', `${res} good paths`, `All value groups processed. Total good paths = ${res}.`, { active: null, inspect: null, highlightEdge: null, groupVal: null , done: true }, 'good');
+  emit(
+    'DONE',
+    `${res} good paths`,
+    `All value groups processed. Total good paths = ${res}.`,
+    { active: null, inspect: null, highlightEdge: null, groupVal: null, done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -105,13 +150,17 @@ function team(s: GPState, node: number): string {
 function View({ frame }: PluginViewProps<GPState>) {
   const s = frame.state;
   return (
-    <VizStage rail={<>
-      <RailGroup label="scan">
-        <RailStat k="value" v={s.groupVal ?? '—'} tone="accent" />
-        <RailStat k="paths" v={s.res} />
-      </RailGroup>
-      {s.done && <RailResult label="answer" value={s.res} tone="good" />}
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="scan">
+            <RailStat k="value" v={s.groupVal ?? '—'} tone="accent" />
+            <RailStat k="paths" v={s.res} />
+          </RailGroup>
+          {s.done && <RailResult label="answer" value={s.res} tone="good" />}
+        </>
+      }
+    >
       <GraphBoard
         adj={s.adj}
         pos={s.pos}

@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -27,16 +33,16 @@ function record({ nums: input }: NextPermInput): Frame<NextPermState>[] {
   const nums = input.slice();
   const n = nums.length;
   const { emit, frames } = createRecorder<NextPermState>(() => ({
-        nums: nums.slice(),
-        phase: 'find-dip',
-        i: null,
-        j: null,
-        cmp: null,
-        lo: null,
-        hi: null,
-        reversed: [],
-        done: false
-      }));
+    nums: nums.slice(),
+    phase: 'find-dip',
+    i: null,
+    j: null,
+    cmp: null,
+    lo: null,
+    hi: null,
+    reversed: [],
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -200,7 +206,8 @@ function View({ frame }: PluginViewProps<NextPermState>) {
 function Inspector({ frame }: InspectorProps<NextPermState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const at = (idx: number | null) => (idx !== null && idx >= 0 && idx < s.nums.length ? s.nums[idx] : '—');
+  const at = (idx: number | null) =>
+    idx !== null && idx >= 0 && idx < s.nums.length ? s.nums[idx] : '—';
   return (
     <VarGrid>
       <InspectorRow k="phase" v={s.phase} />
@@ -208,7 +215,10 @@ function Inspector({ frame }: InspectorProps<NextPermState>) {
       <InspectorRow k="nums[i]" v={at(s.i)} />
       <InspectorRow k="j (swap)" v={s.j ?? '—'} />
       <InspectorRow k="nums[j]" v={at(s.j)} />
-      <InspectorRow k="reverse [l,r]" v={s.lo !== null && s.hi !== null ? `[${s.lo}, ${s.hi}]` : '—'} />
+      <InspectorRow
+        k="reverse [l,r]"
+        v={s.lo !== null && s.hi !== null ? `[${s.lo}, ${s.hi}]` : '—'}
+      />
       <InspectorRow k="nums" v={`[${s.nums.join(', ')}]`} />
     </VarGrid>
   );
@@ -217,132 +227,130 @@ function Inspector({ frame }: InspectorProps<NextPermState>) {
 export const manifestId = 'prep-arrays-next-permutation';
 export const title = 'Next permutation';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Next permutation\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Next permutation"?',
     choices: [
       {
-        label: "Scan from right — fits this problem",
-        correct: true
+        label: 'Scan from right — fits this problem',
+        correct: true,
       },
       {
-        label: "Two pointers swap — different approach"
+        label: 'Two pointers swap — different approach',
       },
       {
-        label: "Two pointers — different approach"
+        label: 'Two pointers — different approach',
       },
       {
-        label: "Monotonic stack — different approach"
-      }
+        label: 'Monotonic stack — different approach',
+      },
     ],
-    explain: "From the right find the dip, swap with next-bigger, flip the tail up"
+    explain: 'From the right find the dip, swap with next-bigger, flip the tail up',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Next permutation), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Next permutation), what strategy is established?',
     choices: [
       {
-        label: "From the right find the dip — described in INIT caption",
-        correct: true
+        label: 'From the right find the dip — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Next permutation: rearrange the numbers into the next lexicographically larger ordering, in place. Scan from the right to find the dip, swap it with the next-bigger element, then flip the tail. Time O(n), Space O(1)."
+    explain:
+      'Next permutation: rearrange the numbers into the next lexicographically larger ordering, in place. Scan from the right to find the dip, swap it with the next-bigger element, then flip the tail. Time O(n), Space O(1).',
   },
   {
-    id: "key-step",
-    prompt: "On the \"SWAP_TARGET\" step (j=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "SWAP_TARGET" step (j=), what happens?',
     choices: [
       {
-        label: "nums[] (=) > pivot (=). This — this move caption",
-        correct: true
+        label: 'nums[] (=) > pivot (=). This — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "nums[] (=) > pivot  (=). This is the next-bigger value; swap it into the pivot position."
+    explain:
+      'nums[] (=) > pivot  (=). This is the next-bigger value; swap it into the pivot position.',
   },
   {
-    id: "state",
-    prompt: "What does the `i` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: "pivot index (first nums[i] < — updated each frame",
-        correct: true
+        label: 'pivot index (first nums[i] < — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `i` in sync: pivot index (first nums[i] < nums[i+1] from the right)"
+    explain:
+      'The recorder keeps `i` in sync: pivot index (first nums[i] < nums[i+1] from the right)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Next permutation\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Next permutation"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
+        label: 'O(log n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n+m) time, O(1) space — wrong order of growth"
-      }
+        label: 'O(n+m) time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). i: first nums[i]<nums[i+1]; j: rightmost >nums[i]; swap; reverse suffix"
+    explain: 'O(n). O(1). i: first nums[i]<nums[i+1]; j: rightmost >nums[i]; swap; reverse suffix',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Done. The next permutation is []. — final DONE caption",
-        correct: true
+        label: 'Done. The next permutation is []. — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Done. The next permutation is []."
-  }
+    explain: 'Done. The next permutation is [].',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

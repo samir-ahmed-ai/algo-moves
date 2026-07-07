@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  RailGroup,
+  RailResult,
+  RailStat,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+} from '../../../_shared/vizKit';
 
 interface GoodNodesInput {
   // Level-order binary tree; null marks an absent slot. Children of i are 2i+1, 2i+2.
@@ -143,112 +157,110 @@ function Inspector({ frame }: InspectorProps<GoodNodesState>) {
 export const manifestId = 'prep-trees-count-good-nodes-in-binary-tree';
 export const title = 'Count Good Nodes in Binary Tree';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Count Good Nodes in Binary Tree\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Count Good Nodes in Binary Tree"?',
     choices: [
       {
-        label: "DFS with max tracking — fits this problem",
-        correct: true
+        label: 'DFS with max tracking — fits this problem',
+        correct: true,
       },
       {
-        label: "BFS levels — different approach"
+        label: 'BFS levels — different approach',
       },
       {
-        label: "BFS + Direction Toggle — different approach"
+        label: 'BFS + Direction Toggle — different approach',
       },
       {
-        label: "Inorder DFS (find two inversions) — different approach"
-      }
+        label: 'Inorder DFS (find two inversions) — different approach',
+      },
     ],
-    explain: "DFS passing `maxVal` seen so far on the path from root"
+    explain: 'DFS passing `maxVal` seen so far on the path from root',
   },
   {
-    id: "key-step",
-    prompt: "On the \"SKIP\" step ( < ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "SKIP" step ( < ), what happens?',
     choices: [
       {
-        label: "Visit node . maxVal on this — this move caption",
-        correct: true
+        label: 'Visit node . maxVal on this — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Visit node . maxVal on this path is , and  < , so an ancestor is larger — node  is NOT good. Carry maxVal =  unchanged into its children."
+    explain:
+      'Visit node . maxVal on this path is , and  < , so an ancestor is larger — node  is NOT good. Carry maxVal =  unchanged into its children.',
   },
   {
-    id: "state",
-    prompt: "What does the `current` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `current` field track in the visualization state?',
     choices: [
       {
-        label: "node index being visited — updated each frame",
-        correct: true
+        label: 'node index being visited — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `current` in sync: node index being visited"
+    explain: 'The recorder keeps `current` in sync: node index being visited',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Count Good Nodes in Binary Tree\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Count Good Nodes in Binary Tree"?',
     choices: [
       {
-        label: "O(n) time, O(h) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(h) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(h) time, O(1) space — wrong order of growth"
+        label: 'O(h) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(log n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(h). DFS passing `maxVal` seen so far on the path from root; If `node.Val >= maxVal`, it's good; update `maxVal`"
+    explain:
+      "O(n). O(h). DFS passing `maxVal` seen so far on the path from root; If `node.Val >= maxVal`, it's good; update `maxVal`",
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "DFS is complete. Every path — final DONE caption",
-        correct: true
+        label: 'DFS is complete. Every path — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "DFS is complete. Every path was checked against its running maximum, giving  good node in the tree. Time O(n) — one visit per node; Space O(h) — the recursion stack is as deep as the tree."
-  }
+    explain:
+      'DFS is complete. Every path was checked against its running maximum, giving  good node in the tree. Time O(n) — one visit per node; Space O(h) — the recursion stack is as deep as the tree.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

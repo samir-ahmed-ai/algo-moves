@@ -1,5 +1,11 @@
 import type { ComponentType } from 'react';
-import type { Frame, InspectorProps, PluginViewProps, SampleInput, Verdict } from '../../../core/types';
+import type {
+  Frame,
+  InspectorProps,
+  PluginViewProps,
+  SampleInput,
+  Verdict,
+} from '../../../core/types';
 import type { PracticeBundle } from '../../_shared/pluginKit';
 
 /**

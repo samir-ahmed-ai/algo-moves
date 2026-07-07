@@ -8,9 +8,22 @@ export const prepPlugins: ProblemPlugin<any, any>[] = PREP_DATA.map(makePrepPlug
 
 /** Curated sidebar order for the prep library (fundamentals → structures → advanced). */
 const TOPIC_ORDER = [
-  'arrays', 'strings', 'hash-maps', 'linked-lists', 'stacks-queues', 'trees', 'tries',
-  'matrices', 'intervals', 'prefix-sum', 'sliding-window', 'sorting', 'math', 'design',
-  'streams-io', 'database',
+  'arrays',
+  'strings',
+  'hash-maps',
+  'linked-lists',
+  'stacks-queues',
+  'trees',
+  'tries',
+  'matrices',
+  'intervals',
+  'prefix-sum',
+  'sliding-window',
+  'sorting',
+  'math',
+  'design',
+  'streams-io',
+  'database',
 ];
 
 /** A standalone `prep-*` library course per prep topic (appended after curated courses). */
@@ -28,18 +41,18 @@ export const prepCourses: CourseDef[] = (() => {
   return [...byTopic.entries()]
     .sort(([a], [b]) => rank(a) - rank(b))
     .map(([topic, problems]) => {
-    const courseId = `prep-${topic}`;
-    const items: ItemDef[] = problems
-      .slice()
-      .sort((a, b) => a.title.localeCompare(b.title))
-      .map((p) => ({ id: p.id, kind: 'problem', pluginId: p.id, status: 'todo' }));
-    const onlyTopic: TopicDef = { id: `${courseId}-all`, title: problems[0].topicTitle, items };
-    return {
-      id: courseId,
-      title: problems[0].course,
-      summary: `${problems.length} ${problems[0].topicTitle} problems from your prep study collection.`,
-      icon: problems[0].courseIcon,
-      topics: [onlyTopic],
-    };
-  });
+      const courseId = `prep-${topic}`;
+      const items: ItemDef[] = problems
+        .slice()
+        .sort((a, b) => a.title.localeCompare(b.title))
+        .map((p) => ({ id: p.id, kind: 'problem', pluginId: p.id, status: 'todo' }));
+      const onlyTopic: TopicDef = { id: `${courseId}-all`, title: problems[0].topicTitle, items };
+      return {
+        id: courseId,
+        title: problems[0].course,
+        summary: `${problems.length} ${problems[0].topicTitle} problems from your prep study collection.`,
+        icon: problems[0].courseIcon,
+        topics: [onlyTopic],
+      };
+    });
 })();

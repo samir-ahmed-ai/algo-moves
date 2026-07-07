@@ -35,7 +35,10 @@ export function patchPanelStyle(
 ): PanelNodeStyle | undefined {
   if (patch === null) return undefined;
   const next = { ...prev };
-  for (const [k, v] of Object.entries(patch) as [keyof PanelNodeStyle, PanelNodeStyle[keyof PanelNodeStyle]][]) {
+  for (const [k, v] of Object.entries(patch) as [
+    keyof PanelNodeStyle,
+    PanelNodeStyle[keyof PanelNodeStyle],
+  ][]) {
     if (v === undefined) delete next[k];
     else next[k] = v as never;
   }

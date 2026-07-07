@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -45,17 +51,17 @@ function record({ points, angle, location }: VisibleInput): Frame<VisibleState>[
   const round1 = (x: number) => Math.round(x * 10) / 10;
 
   const { emit, frames } = createRecorder<VisibleState>(() => ({
-        angle,
-        location,
-        same,
-        angles,
-        i: null,
-        j: null,
-        best: 0,
-        bestRange: null,
-        answer: null,
-        done: false
-      }));
+    angle,
+    location,
+    same,
+    angles,
+    i: null,
+    j: null,
+    best: 0,
+    bestRange: null,
+    answer: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -125,7 +131,14 @@ function record({ points, angle, location }: VisibleInput): Frame<VisibleState>[
     'DONE',
     `${answer} visible`,
     `Best wedge captured ${best} angled point(s); add the ${same} coincident one(s) for ${best} + ${same} = ${answer} visible points.`,
-    { i: bestRange ? bestRange[0] : null, j: bestRange ? bestRange[1] + 1 : null, best, bestRange, answer, done: true },
+    {
+      i: bestRange ? bestRange[0] : null,
+      j: bestRange ? bestRange[1] + 1 : null,
+      best,
+      bestRange,
+      answer,
+      done: true,
+    },
     'good',
   );
   return frames;
@@ -139,7 +152,11 @@ function View({ frame }: PluginViewProps<VisibleState>) {
   if (s.i !== null) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
   if (s.j !== null) pointers.push({ i: s.j, label: 'j', tone: 'warn', place: 'above' });
   const win: [number, number] | null =
-    s.done && s.bestRange ? s.bestRange : s.i !== null && s.j !== null && s.j > s.i ? [s.i, s.j - 1] : null;
+    s.done && s.bestRange
+      ? s.bestRange
+      : s.i !== null && s.j !== null && s.j > s.i
+        ? [s.i, s.j - 1]
+        : null;
   const tone = (idx: number) =>
     s.done && s.bestRange && idx >= s.bestRange[0] && idx <= s.bestRange[1] ? 'found' : '';
   return (
@@ -156,7 +173,9 @@ function View({ frame }: PluginViewProps<VisibleState>) {
       )}
       <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
         window width ={' '}
-        <span className="text-ink">{s.i !== null && s.j !== null ? Math.max(0, s.j - s.i) : 0}</span>
+        <span className="text-ink">
+          {s.i !== null && s.j !== null ? Math.max(0, s.j - s.i) : 0}
+        </span>
       </div>
       {s.answer !== null && (
         <div className={cn('mt-1 font-mono text-good', vizText.base)}>→ {s.answer} visible</div>
@@ -186,132 +205,131 @@ function Inspector({ frame }: InspectorProps<VisibleState>) {
 export const manifestId = 'prep-math-maximum-number-of-visible-points';
 export const title = 'Maximum Number of Visible Points';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Maximum Number of Visible Points\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Maximum Number of Visible Points"?',
     choices: [
       {
-        label: "Sort + Sliding Window (atan2) — fits this problem",
-        correct: true
+        label: 'Sort + Sliding Window (atan2) — fits this problem',
+        correct: true,
       },
       {
-        label: "Binary Exponentiation — different approach"
+        label: 'Binary Exponentiation — different approach',
       },
       {
-        label: "Brian Kernighan bit count — different approach"
+        label: 'Brian Kernighan bit count — different approach',
       },
       {
-        label: "Sort — different approach"
-      }
+        label: 'Sort — different approach',
+      },
     ],
-    explain: "See Maximum Number Of Visible Points pattern"
+    explain: 'See Maximum Number Of Visible Points pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Maximum Number of Visible Points), what strategy is established?",
+    id: 'init',
+    prompt:
+      'At the start of a run (Maximum Number of Visible Points), what strategy is established?',
     choices: [
       {
-        label: "See Maximum Number Of Visible Points — described in INIT caption",
-        correct: true
+        label: 'See Maximum Number Of Visible Points — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Maximum Number of Visible Points: standing at [, ] we can rotate a wedge of °.  point(s) sit exactly on us and are always counted. The other  point(s) become polar angles: °."
+    explain:
+      'Maximum Number of Visible Points: standing at [, ] we can rotate a wedge of °.  point(s) sit exactly on us and are always counted. The other  point(s) become polar angles: °.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"BEST\" step (best=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "BEST" step (best=), what happens?',
     choices: [
       {
-        label: "Window [, ] holds point(s) within — this move caption",
-        correct: true
+        label: 'Window [, ] holds point(s) within — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Window [, ] holds  point(s) within ° — a new maximum. best = ."
+    explain: 'Window [, ] holds  point(s) within ° — a new maximum. best = .',
   },
   {
-    id: "state",
-    prompt: "What does the `same` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `same` field track in the visualization state?',
     choices: [
       {
-        label: "points sitting exactly — updated each frame",
-        correct: true
+        label: 'points sitting exactly — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `same` in sync: points sitting exactly on the location — always visible"
+    explain:
+      'The recorder keeps `same` in sync: points sitting exactly on the location — always visible',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Maximum Number of Visible Points\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Maximum Number of Visible Points"?',
     choices: [
       {
-        label: "O(n log n) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n log n) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(max(len)) time, O(max(len)) space — wrong order of growth"
+        label: 'O(max(len)) time, O(max(len)) space — wrong order of growth',
       },
       {
-        label: "O(log exp) time, O(1) space — wrong order of growth"
-      }
+        label: 'O(log exp) time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(n log n). O(n). Maximum Number Of Visible Points"
+    explain: 'O(n log n). O(n). Maximum Number Of Visible Points',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "There are no points away — final DONE caption",
-        correct: true
+        label: 'There are no points away — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "There are no points away from our location, so only the  coincident point(s) are visible. Answer = ."
-  }
+    explain:
+      'There are no points away from our location, so only the  coincident point(s) are visible. Answer = .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -319,12 +337,27 @@ export const simulator: ProblemSimulator = {
     {
       id: 'vp1',
       label: '[[2,1],[2,2],[3,3]] a=90 @ [1,1]',
-      value: { points: [[2, 1], [2, 2], [3, 3]], angle: 90, location: [1, 1] },
+      value: {
+        points: [
+          [2, 1],
+          [2, 2],
+          [3, 3],
+        ],
+        angle: 90,
+        location: [1, 1],
+      },
     },
     {
       id: 'vp2',
       label: '[[1,0],[2,1]] a=13 @ [1,1]',
-      value: { points: [[1, 0], [2, 1]], angle: 13, location: [1, 1] },
+      value: {
+        points: [
+          [1, 0],
+          [2, 1],
+        ],
+        angle: 13,
+        location: [1, 1],
+      },
     },
   ] satisfies SampleInput<VisibleInput>[],
   record,

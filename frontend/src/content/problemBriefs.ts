@@ -51,9 +51,7 @@ function ensurePeriod(s: string): string {
 }
 
 function gistForItem(item: Item): string | undefined {
-  return (
-    PROBLEM_GISTS[item.id] ?? (item.pluginId ? PROBLEM_GISTS[item.pluginId] : undefined)
-  );
+  return PROBLEM_GISTS[item.id] ?? (item.pluginId ? PROBLEM_GISTS[item.pluginId] : undefined);
 }
 
 function overrideForItem(item: Item): Partial<ProblemBrief> | undefined {
@@ -128,7 +126,9 @@ function casesFromInputs(inputs: SampleInput[]): ProblemBriefCase[] {
   return inputs.slice(0, 2).map((inp, i) => ({
     label: `Example ${i + 1}`,
     input:
-      inp.label.startsWith('[') || inp.label.includes('=') ? inp.label : formatJsonDisplay(inp.value),
+      inp.label.startsWith('[') || inp.label.includes('=')
+        ? inp.label
+        : formatJsonDisplay(inp.value),
     note: inp.hint,
   }));
 }

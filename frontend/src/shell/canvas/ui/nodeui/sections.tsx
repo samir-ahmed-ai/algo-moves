@@ -32,7 +32,13 @@ export function Section({
               onClick={() => setOpen((o) => !o)}
               className="nodrag flex flex-1 items-center gap-1.5 text-left transition-colors hover:opacity-80"
             >
-              <ChevronDown className={cn(nodeIconGlyph, 'text-ink3 transition-transform', !open && '-rotate-90')} />
+              <ChevronDown
+                className={cn(
+                  nodeIconGlyph,
+                  'text-ink3 transition-transform',
+                  !open && '-rotate-90',
+                )}
+              />
               <Label>{title}</Label>
             </button>
           ) : (
@@ -83,20 +89,43 @@ export function ControlsAccordion({
     if (controlledOpen === undefined) setInternalOpen(next);
   };
   return (
-    <div className={cn('border-t border-edge/60', fill && 'flex min-h-0 flex-1 flex-col', className)}>
+    <div
+      className={cn('border-t border-edge/60', fill && 'flex min-h-0 flex-1 flex-col', className)}
+    >
       <button
         type="button"
         onClick={toggle}
         aria-expanded={open}
-        className={cn('nodrag flex w-full items-center gap-1 py-1 font-mono text-ink3 transition-colors hover:text-ink2', nodeText.xs)}
+        className={cn(
+          'nodrag flex w-full items-center gap-1 py-1 font-mono text-ink3 transition-colors hover:text-ink2',
+          nodeText.xs,
+        )}
       >
-        {accent && <span className="h-1 w-1 shrink-0 rounded-full" style={{ background: accent }} aria-hidden />}
+        {accent && (
+          <span
+            className="h-1 w-1 shrink-0 rounded-full"
+            style={{ background: accent }}
+            aria-hidden
+          />
+        )}
         <span className={cn('min-w-0 flex-1 text-left', nodeTextWrap)}>{title}</span>
         {right}
-        <ChevronDown className={cn('ml-auto shrink-0 transition-transform', nodeIconGlyph, !open && '-rotate-90')} />
+        <ChevronDown
+          className={cn(
+            'ml-auto shrink-0 transition-transform',
+            nodeIconGlyph,
+            !open && '-rotate-90',
+          )}
+        />
       </button>
       {open && (
-        <div className={cn('flex flex-col gap-1 pb-1', fill && 'min-h-0 flex-1 overflow-hidden', bodyClassName)}>
+        <div
+          className={cn(
+            'flex flex-col gap-1 pb-1',
+            fill && 'min-h-0 flex-1 overflow-hidden',
+            bodyClassName,
+          )}
+        >
           {children}
         </div>
       )}

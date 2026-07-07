@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface EDInput {
   a: string;
@@ -30,8 +43,13 @@ function record({ a, b }: EDInput): Frame<EDState>[] {
     done: false,
   }));
 
-  const snap = (type: string, note: string, caption: string, cur: [number, number] | null, tone?: 'good') =>
-    emit(type, note, caption, { cur, done: type === 'DONE' }, tone);
+  const snap = (
+    type: string,
+    note: string,
+    caption: string,
+    cur: [number, number] | null,
+    tone?: 'good',
+  ) => emit(type, note, caption, { cur, done: type === 'DONE' }, tone);
 
   snap(
     'INIT',
@@ -42,11 +60,21 @@ function record({ a, b }: EDInput): Frame<EDState>[] {
 
   for (let i = 0; i <= m; i++) {
     dp[i][0] = i;
-    snap('BASE', `dp[${i}][0]=${i}`, `Base case: turning the first ${i} char(s) of "${a}" into "" needs ${i} deletion(s), so dp[${i}][0] = ${i}.`, [i, 0]);
+    snap(
+      'BASE',
+      `dp[${i}][0]=${i}`,
+      `Base case: turning the first ${i} char(s) of "${a}" into "" needs ${i} deletion(s), so dp[${i}][0] = ${i}.`,
+      [i, 0],
+    );
   }
   for (let j = 1; j <= n; j++) {
     dp[0][j] = j;
-    snap('BASE', `dp[0][${j}]=${j}`, `Base case: turning "" into the first ${j} char(s) of "${b}" needs ${j} insertion(s), so dp[0][${j}] = ${j}.`, [0, j]);
+    snap(
+      'BASE',
+      `dp[0][${j}]=${j}`,
+      `Base case: turning "" into the first ${j} char(s) of "${b}" needs ${j} insertion(s), so dp[0][${j}] = ${j}.`,
+      [0, j],
+    );
   }
 
   for (let i = 1; i <= m; i++) {
@@ -77,14 +105,22 @@ function record({ a, b }: EDInput): Frame<EDState>[] {
     }
   }
 
-  snap('DONE', `${dp[m][n]} edits`, `The table is full. dp[${m}][${n}] = ${dp[m][n]}, so turning "${a}" into "${b}" takes ${dp[m][n]} edit(s).`, [m, n], 'good');
+  snap(
+    'DONE',
+    `${dp[m][n]} edits`,
+    `The table is full. dp[${m}][${n}] = ${dp[m][n]}, so turning "${a}" into "${b}" takes ${dp[m][n]} edit(s).`,
+    [m, n],
+    'good',
+  );
   return frames;
 }
 
 function buildDisplay(s: EDState): (number | string)[][] {
   const m = s.a.length;
   const n = s.b.length;
-  const display: (number | string)[][] = Array.from({ length: m + 2 }, () => new Array<number | string>(n + 2).fill(''));
+  const display: (number | string)[][] = Array.from({ length: m + 2 }, () =>
+    new Array<number | string>(n + 2).fill(''),
+  );
   display[0][0] = '';
   display[0][1] = 'ε';
   for (let j = 0; j < n; j++) display[0][j + 2] = s.b[j];
@@ -115,13 +151,17 @@ function View({ frame }: PluginViewProps<EDState>) {
   const curVal = s.cur && s.dp[s.cur[0]][s.cur[1]] >= 0 ? s.dp[s.cur[0]][s.cur[1]] : '—';
   const cellLabel = s.cur ? `dp[${s.cur[0]}][${s.cur[1]}]` : '—';
   return (
-    <VizStage rail={<>
-      <RailGroup label="cell">
-        <RailStat k="pos" v={cellLabel} />
-        <RailStat k="val" v={curVal} tone="accent" />
-      </RailGroup>
-      <RailResult label="distance" value={dist} tone={s.done ? 'good' : 'accent'} />
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="cell">
+            <RailStat k="pos" v={cellLabel} />
+            <RailStat k="val" v={curVal} tone="accent" />
+          </RailGroup>
+          <RailResult label="distance" value={dist} tone={s.done ? 'good' : 'accent'} />
+        </>
+      }
+    >
       <GridBoard grid={display} cellTone={cellTone} active={displayActive} cellSize={34} />
     </VizStage>
   );
@@ -151,7 +191,11 @@ export const title = 'Edit Distance';
 export const simulator: ProblemSimulator = {
   inputs: [
     { id: 'horse-ros', label: '"horse" → "ros" (3)', value: { a: 'horse', b: 'ros' } },
-    { id: 'intention-execution', label: '"intention" → "execution" (5)', value: { a: 'intention', b: 'execution' } },
+    {
+      id: 'intention-execution',
+      label: '"intention" → "execution" (5)',
+      value: { a: 'intention', b: 'execution' },
+    },
   ] satisfies SampleInput<EDInput>[],
   record,
   View,

@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayBars, type BarTone } from '../../../../components/board/ArrayBars';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, VarGrid, VizEmpty, VizStage, RailGroup, RailStat, RailResult } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+} from '../../../_shared/vizKit';
 
 interface EqualSumInput {
   nums1: number[];
@@ -26,7 +40,8 @@ interface EqualSumState {
 
 const FULL = 6; // a six-sided die: values 1..6
 
-function record({ nums1, nums2 }: EqualSumInput): Frame<EqualSumState>[] {  // contrib is always shown as 6 buckets (indices 0..5); slot c holds dice that
+function record({ nums1, nums2 }: EqualSumInput): Frame<EqualSumState>[] {
+  // contrib is always shown as 6 buckets (indices 0..5); slot c holds dice that
   // can shift the gap by exactly c. We snapshot a copy in every frame.
   const buildContrib = (smaller: number[], larger: number[]): number[] => {
     const c = new Array<number>(FULL).fill(0);
@@ -40,17 +55,17 @@ function record({ nums1, nums2 }: EqualSumInput): Frame<EqualSumState>[] {  // c
   const sumOf = (a: number[]) => a.reduce((t, x) => t + x, 0);
 
   const { emit, frames } = createRecorder<EqualSumState>(() => ({
-        contrib: new Array<number>(FULL).fill(0),
-        c: null,
-        diff: 0,
-        ops: 0,
-        taken: 0,
-        sum1: sumOf(nums1),
-        sum2: sumOf(nums2),
-        result: null,
-        failed: false,
-        done: false,
-      }));
+    contrib: new Array<number>(FULL).fill(0),
+    c: null,
+    diff: 0,
+    ops: 0,
+    taken: 0,
+    sum1: sumOf(nums1),
+    sum2: sumOf(nums2),
+    result: null,
+    failed: false,
+    done: false,
+  }));
 
   // Base state used before contributions are computed.
   let st: EqualSumState = {
@@ -68,6 +83,18 @@ function record({ nums1, nums2 }: EqualSumInput): Frame<EqualSumState>[] {  // c
 
   // Feasibility guard: each die ranges 1..6, so one array can never reach the
   // other's sum if it is more than 6x longer (all 1s vs all 6s extreme).
+  emit(
+    'INIT',
+    `sum1=${st.sum1} sum2=${st.sum2}`,
+    `Each value is a die in 1..6. We want sum(nums1) = sum(nums2) using the fewest single-die changes. Start sums: nums1=${st.sum1}, nums2=${st.sum2}.`,
+    st,
+  );
+  emit(
+    'SETUP',
+    `len ${nums1.length} vs ${nums2.length}`,
+    `Compare array lengths before tallying contributions: nums1 has ${nums1.length} dice, nums2 has ${nums2.length}.`,
+    st,
+  );
   if (nums1.length > nums2.length * FULL || nums2.length > nums1.length * FULL) {
     emit(
       'IMPOSSIBLE',
@@ -78,13 +105,6 @@ function record({ nums1, nums2 }: EqualSumInput): Frame<EqualSumState>[] {  // c
     );
     return frames;
   }
-
-  emit(
-    'INIT',
-    `sum1=${st.sum1} sum2=${st.sum2}`,
-    `Each value is a die in 1..6. We want sum(nums1) = sum(nums2) using the fewest single-die changes. Start sums: nums1=${st.sum1}, nums2=${st.sum2}.`,
-    st,
-  );
 
   // Make nums1 the smaller-sum side so every useful move closes the gap.
   let smaller = nums1;
@@ -242,138 +262,147 @@ function Inspector({ frame }: InspectorProps<EqualSumState>) {
 export const manifestId = 'prep-sorting-equal-sum-arrays-with-minimum-number-of-operations';
 export const title = 'Equal Sum Arrays with Minimum Number of Operations';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Equal Sum Arrays with Minimum Number of Operations\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Equal Sum Arrays with Minimum Number of Operations"?',
     choices: [
       {
-        label: "Greedy Contribution Counting — fits this problem",
-        correct: true
+        label: 'Greedy Contribution Counting — fits this problem',
+        correct: true,
       },
       {
-        label: "Bucket Sort — different approach"
+        label: 'Bucket Sort — different approach',
       },
       {
-        label: "Sort Frequencies + Greedy — different approach"
+        label: 'Sort Frequencies + Greedy — different approach',
       },
       {
-        label: "Sort (attack desc, defense asc) + Max — different approach"
-      }
+        label: 'Sort (attack desc, defense asc) + Max — different approach',
+      },
     ],
-    explain: "If `min_possible_sum > max_possible_sum` of the other → `-1`"
+    explain: 'If `min_possible_sum > max_possible_sum` of the other → `-1`',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Equal Sum Arrays with Minimum Number of Operations), what strategy is established?",
+    id: 'init',
+    prompt:
+      'At the start of a run (Equal Sum Arrays with Minimum Number of Operations), what strategy is established?',
     choices: [
       {
-        label: "If `min_possible_sum > max_possible_sum` — described in INIT caption",
-        correct: true
+        label: 'If `min_possible_sum > max_possible_sum` — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Each value is a die in 1..6. We want sum(nums1) = sum(nums2) using the fewest single-die changes. Start sums: nums1=, nums2=."
+    explain:
+      'Each value is a die in 1..6. We want sum(nums1) = sum(nums2) using the fewest single-die changes. Start sums: nums1=, nums2=.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"SKIP\" step (bucket  empty), what happens?",
+    id: 'key-step',
+    prompt: 'On the "SKIP" step (bucket  empty), what happens?',
     choices: [
       {
-        label: "Bucket is empty — no die — this move caption",
-        correct: true
+        label: 'Bucket is empty — no die — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Bucket  is empty — no die can move the gap by . Drop to the next-smaller contribution."
+    explain:
+      'Bucket  is empty — no die can move the gap by . Drop to the next-smaller contribution.',
   },
   {
-    id: "state",
-    prompt: "What does the `c` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `c` field track in the visualization state?',
     choices: [
       {
-        label: "contribution bucket currently — updated each frame",
-        correct: true
+        label: 'contribution bucket currently — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `c` in sync: contribution bucket currently being processed (5..1)"
+    explain: 'The recorder keeps `c` in sync: contribution bucket currently being processed (5..1)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Equal Sum Arrays with Minimum Number of Operations\"?",
+    id: 'complexity',
+    prompt:
+      'What are the time and space complexities for "Equal Sum Arrays with Minimum Number of Operations"?',
     choices: [
       {
-        label: "O(n+m) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n+m) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n·log n·C) time, O(n) space — wrong order of growth"
+        label: 'O(n·log n·C) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n²) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n+m). O(1). If `min_possible_sum > max_possible_sum` of the other → `-1`; Make `nums1` the smaller sum. For each element: max contribution = `6-x` (increase) or `x-1` (decr"
+    explain:
+      'O(n+m). O(1). If `min_possible_sum > max_possible_sum` of the other → `-1`; Make `nums1` the smaller sum. For each element: max contribution = `6-x` (increase) or `x-1` (decr',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "The gap is fully closed using — final DONE caption",
-        correct: true
+        label: 'The gap is fully closed using — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "The gap is fully closed using the largest contributions first. Minimum operations = ."
-  }
+    explain:
+      'The gap is fully closed using the largest contributions first. Minimum operations = .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
   inputs: [
-    { id: 'es1', label: '[1,2,3,4,5,6] vs [1,1,2,2,2,2]', value: { nums1: [1, 2, 3, 4, 5, 6], nums2: [1, 1, 2, 2, 2, 2] } },
-    { id: 'es2', label: '[1,1,1,1,1,1,1] vs [6]', value: { nums1: [1, 1, 1, 1, 1, 1, 1], nums2: [6] } },
+    {
+      id: 'es1',
+      label: '[1,2,3,4,5,6] vs [1,1,2,2,2,2]',
+      value: { nums1: [1, 2, 3, 4, 5, 6], nums2: [1, 1, 2, 2, 2, 2] },
+    },
+    {
+      id: 'es2',
+      label: '[1,1,1,1,1,1,1] vs [6]',
+      value: { nums1: [1, 1, 1, 1, 1, 1, 1], nums2: [6] },
+    },
   ] satisfies SampleInput<EqualSumInput>[],
   record,
   View,

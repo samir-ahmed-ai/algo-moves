@@ -62,7 +62,11 @@ export function toggleEdgeCase(itemId: string, label: string): Record<string, bo
 }
 
 export function useEdgeCases(itemId: string): [Record<string, boolean>, (label: string) => void] {
-  const done = useSyncExternalStore(subscribe, () => load(itemId), () => load(itemId));
+  const done = useSyncExternalStore(
+    subscribe,
+    () => load(itemId),
+    () => load(itemId),
+  );
   const toggle = useCallback((label: string) => toggleEdgeCase(itemId, label), [itemId]);
   return [done, toggle];
 }

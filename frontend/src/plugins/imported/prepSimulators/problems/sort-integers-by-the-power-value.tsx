@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { ArrayBars, type BarTone } from '../../../../components/board/ArrayBars';
@@ -26,7 +32,8 @@ interface PowerValueState {
   done: boolean;
 }
 
-function record({ lo, hi, k }: PowerValueInput): Frame<PowerValueState>[] {  const memo = new Map<number, number>();
+function record({ lo, hi, k }: PowerValueInput): Frame<PowerValueState>[] {
+  const memo = new Map<number, number>();
 
   const power = (n: number): number => {
     if (n === 1) return 0;
@@ -42,18 +49,18 @@ function record({ lo, hi, k }: PowerValueInput): Frame<PowerValueState>[] {  con
   const powers = values.map((v) => power(v));
 
   const { emit, frames } = createRecorder<PowerValueState>(() => ({
-        lo,
-        hi,
-        k,
-        values: values.slice(),
-        powers: powers.slice(),
-        memo: [...memo.entries()],
-        pos: null,
-        cursor: null,
-        inserted: null,
-        result: null,
-        done: false
-      }));
+    lo,
+    hi,
+    k,
+    values: values.slice(),
+    powers: powers.slice(),
+    memo: [...memo.entries()],
+    pos: null,
+    cursor: null,
+    inserted: null,
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -130,13 +137,23 @@ function View({ frame }: PluginViewProps<PowerValueState>) {
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
-        range <span className="font-mono text-ink">[{s.lo}..{s.hi}]</span>
+        range{' '}
+        <span className="font-mono text-ink">
+          [{s.lo}..{s.hi}]
+        </span>
         {' · '}k = <span className="font-mono text-ink">{s.k}</span>
         {' · '}answer ={' '}
         <span className="font-mono text-ink">{s.result !== null ? s.result : '…'}</span>
       </div>
-      <ArrayBars values={s.powers} tone={tone} label={(i) => s.values[i]} max={Math.max(1, ...s.powers)} />
-      <div className={cn(vizText.xs, 'text-ink3')}>bar height = Collatz power · label = the integer</div>
+      <ArrayBars
+        values={s.powers}
+        tone={tone}
+        label={(i) => s.values[i]}
+        max={Math.max(1, ...s.powers)}
+      />
+      <div className={cn(vizText.xs, 'text-ink3')}>
+        bar height = Collatz power · label = the integer
+      </div>
     </div>
   );
 }
@@ -164,132 +181,132 @@ function Inspector({ frame }: InspectorProps<PowerValueState>) {
 export const manifestId = 'prep-sorting-sort-integers-by-the-power-value';
 export const title = 'Sort Integers by The Power Value';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Sort Integers by The Power Value\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Sort Integers by The Power Value"?',
     choices: [
       {
-        label: "Memoized Collatz + Sort — fits this problem",
-        correct: true
+        label: 'Memoized Collatz + Sort — fits this problem',
+        correct: true,
       },
       {
-        label: "Sort (attack desc, defense asc) + Max — different approach"
+        label: 'Sort (attack desc, defense asc) + Max — different approach',
       },
       {
-        label: "Greedy Contribution Counting — different approach"
+        label: 'Greedy Contribution Counting — different approach',
       },
       {
-        label: "Sort Frequencies + Greedy — different approach"
-      }
+        label: 'Sort Frequencies + Greedy — different approach',
+      },
     ],
-    explain: "Compute Collatz power for each number with memoization (recursive)"
+    explain: 'Compute Collatz power for each number with memoization (recursive)',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Sort Integers by The Power Value), what strategy is established?",
+    id: 'init',
+    prompt:
+      'At the start of a run (Sort Integers by The Power Value), what strategy is established?',
     choices: [
       {
-        label: "Compute Collatz power for each number — described in INIT caption",
-        correct: true
+        label: 'Compute Collatz power for each number — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Sort Integers by The Power Value: list every integer in [, ], then sort them by Collatz power (the number of steps to reach 1, halving evens and doing 3n+1 on odds), breaking ties by the smaller value. The answer is the k-th element (k=)."
+    explain:
+      'Sort Integers by The Power Value: list every integer in [, ], then sort them by Collatz power (the number of steps to reach 1, halving evens and doing 3n+1 on odds), breaking ties by the smaller value. The answer is the k-th element (k=).',
   },
   {
-    id: "key-step",
-    prompt: "On the \"SHIFT\" step ( > ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "SHIFT" step ( > ), what happens?',
     choices: [
       {
-        label: "has key (power , value ) — this move caption",
-        correct: true
+        label: 'has key (power , value ) — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: " has key (power , value ) which outranks the key (power , value ), so shift  one slot right to make room."
+    explain:
+      ' has key (power , value ) which outranks the key (power , value ), so shift  one slot right to make room.',
   },
   {
-    id: "state",
-    prompt: "What does the `values` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `values` field track in the visualization state?',
     choices: [
       {
-        label: "the integers, in current (partially — updated each frame",
-        correct: true
+        label: 'the integers, in current (partially — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `values` in sync: the integers, in current (partially sorted) order"
+    explain:
+      'The recorder keeps `values` in sync: the integers, in current (partially sorted) order',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Sort Integers by The Power Value\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Sort Integers by The Power Value"?',
     choices: [
       {
-        label: "O(n·log n·C) time, O(n) space — standard bounds here",
-        correct: true
+        label: 'O(n·log n·C) time, O(n) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
+        label: 'O(n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n·log n·C). O(n). Compute Collatz power for each number with memoization (recursive); Sort `[lo..hi]` by `(power, value)`, return k-th element"
+    explain:
+      'O(n·log n·C). O(n). Compute Collatz power for each number with memoization (recursive); Sort `[lo..hi]` by `(power, value)`, return k-th element',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Fully sorted by (power, value). — final DONE caption",
-        correct: true
+        label: 'Fully sorted by (power, value). — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Fully sorted by (power, value). The k-th element (index ) is  — that is the answer."
-  }
+    explain: 'Fully sorted by (power, value). The k-th element (index ) is  — that is the answer.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

@@ -80,7 +80,9 @@ export function SwipeModeQrPromo({ onOpenDevice }: { onOpenDevice: () => void })
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
-          <p className="mt-0.5 text-[length:var(--fs-tight)] leading-relaxed text-ink3">Scan the QR code or copy the link.</p>
+          <p className="mt-0.5 text-[length:var(--fs-tight)] leading-relaxed text-ink3">
+            Scan the QR code or copy the link.
+          </p>
           <div className="mx-auto mt-3 grid w-fit place-items-center rounded-md border border-edge bg-white p-2">
             <QRCodeSVG value={url} size={144} level="M" title="Swipe mode URL" />
           </div>
@@ -112,8 +114,9 @@ export function SwipeModeQrPromo({ onOpenDevice }: { onOpenDevice: () => void })
           </div>
           {isLocalhost && (
             <p className="mt-2 text-[length:var(--fs-2xs)] leading-relaxed text-ink3">
-              For phone scanning, open this page via the <strong className="font-medium text-ink2">Network</strong>{' '}
-              URL from the dev server terminal (same Wi‑Fi).
+              For phone scanning, open this page via the{' '}
+              <strong className="font-medium text-ink2">Network</strong> URL from the dev server
+              terminal (same Wi‑Fi).
             </p>
           )}
         </div>

@@ -53,7 +53,9 @@ export function PresetPopover({
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} aria-hidden />
           <div className="absolute right-0 top-[calc(100%+6px)] z-50 w-[min(90vw,18rem)] rounded-lg border border-edge bg-panel p-2 shadow-[var(--shadow-xl)]">
             <h4 className={cn('mb-0.5 font-semibold text-ink', chromeText.sm)}>Layout presets</h4>
-            <p className={cn('mb-2 text-ink3', chromeText.sm)}>One-click canvas arrangements for different workflows.</p>
+            <p className={cn('mb-2 text-ink3', chromeText.sm)}>
+              One-click canvas arrangements for different workflows.
+            </p>
             <div className="flex flex-col gap-1.5">
               {(Object.keys(LAYOUT_PRESET_META) as LayoutPreset[]).map((id) => {
                 const p = LAYOUT_PRESET_META[id];
@@ -68,9 +70,13 @@ export function PresetPopover({
                       {PRESET_ICONS[id]}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className={cn('block font-medium text-ink', chromeText.base)}>{p.label}</span>
+                      <span className={cn('block font-medium text-ink', chromeText.base)}>
+                        {p.label}
+                      </span>
                       <span className={cn('block text-ink3', chromeText.sm)}>{p.description}</span>
-                      <span className={cn('mt-1 block font-mono tracking-tight text-ink3', nodeText.xs)}>
+                      <span
+                        className={cn('mt-1 block font-mono tracking-tight text-ink3', nodeText.xs)}
+                      >
                         {p.sketch}
                       </span>
                     </span>
@@ -79,7 +85,12 @@ export function PresetPopover({
               })}
             </div>
             {applied && (
-              <div className={cn('mt-2 flex items-center gap-1.5 rounded-md bg-accentbg px-2 py-1.5 text-accent', chromeText.sm)}>
+              <div
+                className={cn(
+                  'mt-2 flex items-center gap-1.5 rounded-md bg-accentbg px-2 py-1.5 text-accent',
+                  chromeText.sm,
+                )}
+              >
                 <Check className="h-3.5 w-3.5" />
                 Applied {applied}
               </div>

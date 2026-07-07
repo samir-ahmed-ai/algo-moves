@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -40,7 +46,13 @@ interface MNode {
 
 function build(nodes: NodeSpec[]): MNode | null {
   if (nodes.length === 0) return null;
-  const ms: MNode[] = nodes.map((n, id) => ({ id, val: n.val, prev: null, next: null, child: null }));
+  const ms: MNode[] = nodes.map((n, id) => ({
+    id,
+    val: n.val,
+    prev: null,
+    next: null,
+    child: null,
+  }));
   nodes.forEach((n, id) => {
     ms[id].next = n.next >= 0 ? ms[n.next] : null;
     ms[id].child = n.child >= 0 ? ms[n.child] : null;
@@ -48,7 +60,8 @@ function build(nodes: NodeSpec[]): MNode | null {
   return ms[0];
 }
 
-function record({ nodes }: FlattenInput): Frame<FlattenState>[] {  const head = build(nodes);
+function record({ nodes }: FlattenInput): Frame<FlattenState>[] {
+  const head = build(nodes);
 
   // The flattened order is exactly DFS preorder (node, then child subtree, then
   // the saved next). Precompute it so the View can show each value in its final
@@ -68,23 +81,32 @@ function record({ nodes }: FlattenInput): Frame<FlattenState>[] {  const head = 
   const allVals = order.map((nd) => nd.val);
   const total = order.length;
 
-  const { emit, frames } = createRecorder<FlattenState>(() => ({
-        chain: allVals.map(() => '·'),
-        prevPos: null,
-        curPos: null,
-        linkedCount: 0,
-        descending: false,
-        done: false
-      }), {
-    merge: (base, partial) => {
-      const linkedCount = partial.linkedCount ?? base.linkedCount;
-      const chain = allVals.map((v, i) => (i < linkedCount ? v : '·'));
-      return { ...base, ...partial, chain, linkedCount };
+  const { emit, frames } = createRecorder<FlattenState>(
+    () => ({
+      chain: allVals.map(() => '·'),
+      prevPos: null,
+      curPos: null,
+      linkedCount: 0,
+      descending: false,
+      done: false,
+    }),
+    {
+      merge: (base, partial) => {
+        const linkedCount = partial.linkedCount ?? base.linkedCount;
+        const chain = allVals.map((v, i) => (i < linkedCount ? v : '·'));
+        return { ...base, ...partial, chain, linkedCount };
+      },
     },
-  });
+  );
 
   if (!head) {
-    emit('DONE', 'empty', 'The list is empty, so the flattened list is also empty.', { done: true }, 'good');
+    emit(
+      'DONE',
+      'empty',
+      'The list is empty, so the flattened list is also empty.',
+      { done: true },
+      'good',
+    );
     return frames;
   }
 
@@ -171,8 +193,10 @@ function record({ nodes }: FlattenInput): Frame<FlattenState>[] {  const head = 
 function View({ frame }: PluginViewProps<FlattenState>) {
   const s = frame.state;
   const pointers: ArrayPointer[] = [];
-  if (s.prevPos !== null) pointers.push({ i: s.prevPos, label: 'prev', tone: 'warn', place: 'below' });
-  if (s.curPos !== null) pointers.push({ i: s.curPos, label: 'node', tone: 'accent', place: 'above' });
+  if (s.prevPos !== null)
+    pointers.push({ i: s.prevPos, label: 'prev', tone: 'warn', place: 'below' });
+  if (s.curPos !== null)
+    pointers.push({ i: s.curPos, label: 'node', tone: 'accent', place: 'above' });
 
   const tone = (i: number) => {
     if (s.done) return 'found';
@@ -187,11 +211,15 @@ function View({ frame }: PluginViewProps<FlattenState>) {
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
         flattened so far:{' '}
-        <span className="font-mono text-ink">{linkedVals.length ? linkedVals.join(' → ') : '—'}</span>
+        <span className="font-mono text-ink">
+          {linkedVals.length ? linkedVals.join(' → ') : '—'}
+        </span>
       </div>
       <ArrayRow values={s.chain} cellTone={tone} pointers={pointers} windowRange={null} />
       <div className={cn('mt-1', vizText.sm, 'text-ink3')}>
-        {s.descending ? 'descending into a child sublist…' : 'columns are the final flat order; · = not stitched yet'}
+        {s.descending
+          ? 'descending into a child sublist…'
+          : 'columns are the final flat order; · = not stitched yet'}
       </div>
     </div>
   );
@@ -216,132 +244,131 @@ function Inspector({ frame }: InspectorProps<FlattenState>) {
 export const manifestId = 'prep-linked-lists-flatten-doubly-linked-list';
 export const title = 'Flatten doubly linked list';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Flatten doubly linked list\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Flatten doubly linked list"?',
     choices: [
       {
-        label: "DFS flatten — fits this problem",
-        correct: true
+        label: 'DFS flatten — fits this problem',
+        correct: true,
       },
       {
-        label: "Josephus simulation — different approach"
+        label: 'Josephus simulation — different approach',
       },
       {
-        label: "Interweave (3-pass, no map) — different approach"
+        label: 'Interweave (3-pass, no map) — different approach',
       },
       {
-        label: "Iterative Group Reversal — different approach"
-      }
+        label: 'Iterative Group Reversal — different approach',
+      },
     ],
-    explain: "DFS preorder: splice each child list in before moving to the sibling"
+    explain: 'DFS preorder: splice each child list in before moving to the sibling',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Flatten doubly linked list), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Flatten doubly linked list), what strategy is established?',
     choices: [
       {
-        label: "DFS preorder: splice each child list — described in INIT caption",
-        correct: true
+        label: 'DFS preorder: splice each child list — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Flatten the multilevel doubly linked list into a single level. We DFS in preorder: each time a node has a child, splice that whole child sublist in right after it, then continue with the saved next. We keep a running tail \"prev\" and link prev↔node as we go."
+    explain:
+      'Flatten the multilevel doubly linked list into a single level. We DFS in preorder: each time a node has a child, splice that whole child sublist in right after it, then continue with the saved next. We keep a running tail "prev" and link prev↔node as we go.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"DESCEND\" step (child of ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "DESCEND" step (child of ), what happens?',
     choices: [
       {
-        label: "has a child list. Recurse — this move caption",
-        correct: true
+        label: 'has a child list. Recurse — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: " has a child list. Recurse into the child first (DFS), flatten it, and remember its tail so we can re-attach the saved next afterwards."
+    explain:
+      ' has a child list. Recurse into the child first (DFS), flatten it, and remember its tail so we can re-attach the saved next afterwards.',
   },
   {
-    id: "state",
-    prompt: "What does the `prevPos` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `prevPos` field track in the visualization state?',
     choices: [
       {
-        label: "position in `chain` — updated each frame",
-        correct: true
+        label: 'position in `chain` — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `prevPos` in sync: position in `chain` of the running tail (`prev`)"
+    explain:
+      'The recorder keeps `prevPos` in sync: position in `chain` of the running tail (`prev`)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Flatten doubly linked list\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Flatten doubly linked list"?',
     choices: [
       {
-        label: "O(n) time, O(h) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(h) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
+        label: 'O(n²) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
+        label: 'O(n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(1) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(h). link prev<->node; recurse child then next; keep tail as prev"
+    explain: 'O(n). O(h). link prev<->node; recurse child then next; keep tail as prev',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Every level is spliced into one — final DONE caption",
-        correct: true
+        label: 'Every level is spliced into one — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Every level is spliced into one chain. The flattened order is . Time O(n) — each node visited once; Space O(h) — recursion depth is the multilevel height."
-  }
+    explain:
+      'Every level is spliced into one chain. The flattened order is . Time O(n) — each node visited once; Space O(h) — recursion depth is the multilevel height.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

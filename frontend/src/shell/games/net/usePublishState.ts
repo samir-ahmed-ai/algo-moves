@@ -1,1 +1,1 @@
-export { usePublishState } from '../../realtime/usePublishState';
+export { usePublishState } from '@/shell/realtime/usePublishState';

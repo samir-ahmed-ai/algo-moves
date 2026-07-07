@@ -1,8 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GraphBoard } from '../../../../components/board/GraphBoard';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 import { layeredLayout } from '../../../_shared/graphLayout';
 
 interface RInput {
@@ -65,26 +79,41 @@ function record({ recipes, ingredients, supplies }: RInput): Frame<RState>[] {
   const queue: number[] = supplyNodes.slice();
   const made: number[] = [];
   const { emit, frames } = createRecorder<RState>(() => ({
-        adj: adj,
-        pos: pos,
-        labels: labels,
-        isRecipe: isRecipe,
-        color: color.slice(),
-        queue: queue.slice(),
-        indeg: indeg.slice(),
-        made: made.slice(),
-        active: null,
-        done: false
-      }));
+    adj: adj,
+    pos: pos,
+    labels: labels,
+    isRecipe: isRecipe,
+    color: color.slice(),
+    queue: queue.slice(),
+    indeg: indeg.slice(),
+    made: made.slice(),
+    active: null,
+    done: false,
+  }));
 
-  emit('INIT', 'build graph', `Model it as a DAG: draw an edge from each ingredient to every recipe that needs it, and set each recipe's in-degree to its ingredient count. A recipe is makeable once every ingredient pointing at it is available. Start a queue with the given supplies: [${supplies.join(', ')}].`, { active: null });
+  emit(
+    'INIT',
+    'build graph',
+    `Model it as a DAG: draw an edge from each ingredient to every recipe that needs it, and set each recipe's in-degree to its ingredient count. A recipe is makeable once every ingredient pointing at it is available. Start a queue with the given supplies: [${supplies.join(', ')}].`,
+    { active: null },
+  );
 
-  emit('SEED', `available [${supplies.join(', ')}]`, `The supplies [${supplies.join(', ')}] are available with nothing to wait on, so they seed the queue.`, { active: null });
+  emit(
+    'SEED',
+    `available [${supplies.join(', ')}]`,
+    `The supplies [${supplies.join(', ')}] are available with nothing to wait on, so they seed the queue.`,
+    { active: null },
+  );
 
   while (queue.length > 0) {
     const v = queue.shift() as number;
     color[v] = 1;
-    emit('POP', `have ${labels[v]}`, `"${labels[v]}" is now available — release it to every recipe that depends on it.`, { active: v });
+    emit(
+      'POP',
+      `have ${labels[v]}`,
+      `"${labels[v]}" is now available — release it to every recipe that depends on it.`,
+      { active: v },
+    );
 
     for (const nb of adj[v]) {
       indeg[nb]--;
@@ -92,15 +121,31 @@ function record({ recipes, ingredients, supplies }: RInput): Frame<RState>[] {
         color[nb] = 2;
         queue.push(nb);
         made.push(nb);
-        emit('MADE', `make ${labels[nb]}`, `"${labels[v]}" was the last ingredient "${labels[nb]}" was waiting on — all its inputs are ready, so "${labels[nb]}" is makeable. Add it to the answer and queue it as a new ingredient.`, { active: v });
+        emit(
+          'MADE',
+          `make ${labels[nb]}`,
+          `"${labels[v]}" was the last ingredient "${labels[nb]}" was waiting on — all its inputs are ready, so "${labels[nb]}" is makeable. Add it to the answer and queue it as a new ingredient.`,
+          { active: v },
+        );
       } else {
-        emit('WAIT', `${labels[nb]} needs ${indeg[nb]}`, `"${labels[nb]}" still needs ${indeg[nb]} more ingredient${indeg[nb] === 1 ? '' : 's'} before it can be made.`, { active: nb });
+        emit(
+          'WAIT',
+          `${labels[nb]} needs ${indeg[nb]}`,
+          `"${labels[nb]}" still needs ${indeg[nb]} more ingredient${indeg[nb] === 1 ? '' : 's'} before it can be made.`,
+          { active: nb },
+        );
       }
     }
   }
 
   const answer = made.map((m) => labels[m]);
-  emit('DONE', `recipes ${answer.length}`, `Queue drained — the makeable recipes are [${answer.join(', ')}].`, { active: null , done: true }, 'good');
+  emit(
+    'DONE',
+    `recipes ${answer.length}`,
+    `Queue drained — the makeable recipes are [${answer.join(', ')}].`,
+    { active: null, done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -115,10 +160,7 @@ function View({ frame }: PluginViewProps<RState>) {
         topLabel="front"
         highlightEnd="bottom"
       />
-      <RailStack
-        label="made"
-        items={s.made.map((m) => s.labels[m])}
-      />
+      <RailStack label="made" items={s.made.map((m) => s.labels[m])} />
       <RailGroup label="scan">
         <RailStat k="current" v={s.active !== null ? s.labels[s.active] : '—'} tone="accent" />
         <RailStat k="done" v={`${s.made.length}/${recipeCount}`} />
@@ -154,8 +196,14 @@ function Inspector({ frame }: InspectorProps<RState>) {
   return (
     <VarGrid>
       <InspectorRow k="current" v={s.active !== null ? s.labels[s.active] : '—'} />
-      <InspectorRow k="queue" v={s.queue.length ? `[${s.queue.map((n) => s.labels[n]).join(', ')}]` : '∅'} />
-      <InspectorRow k="made" v={s.made.length ? `[${s.made.map((m) => s.labels[m]).join(', ')}]` : '∅'} />
+      <InspectorRow
+        k="queue"
+        v={s.queue.length ? `[${s.queue.map((n) => s.labels[n]).join(', ')}]` : '∅'}
+      />
+      <InspectorRow
+        k="made"
+        v={s.made.length ? `[${s.made.map((m) => s.labels[m]).join(', ')}]` : '∅'}
+      />
       <InspectorRow k="recipes done" v={`${s.made.length} / ${recipeCount}`} />
     </VarGrid>
   );
@@ -174,7 +222,9 @@ export const manifestId = 'imp-15-find-all-possible-recipes-from-given-supplies'
 export const title = 'Find All Possible Recipes from Given Supplies';
 
 export const simulator: ProblemSimulator = {
-  inputs: [{ id: 'sandwich', label: 'bread → sandwich', value: SANDWICH }] satisfies SampleInput<RInput>[],
+  inputs: [
+    { id: 'sandwich', label: 'bread → sandwich', value: SANDWICH },
+  ] satisfies SampleInput<RInput>[],
   record,
   View,
   Inspector,

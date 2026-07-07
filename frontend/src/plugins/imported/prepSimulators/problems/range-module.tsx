@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -54,7 +60,11 @@ function queryRange(intervals: [number, number][], left: number, right: number):
   return lo < intervals.length && intervals[lo][0] <= left && intervals[lo][1] >= right;
 }
 
-function removeRange(intervals: [number, number][], left: number, right: number): [number, number][] {
+function removeRange(
+  intervals: [number, number][],
+  left: number,
+  right: number,
+): [number, number][] {
   const result: [number, number][] = [];
   for (const iv of intervals) {
     if (iv[1] <= left || iv[0] >= right) {
@@ -67,16 +77,17 @@ function removeRange(intervals: [number, number][], left: number, right: number)
   return result;
 }
 
-function record({ ops }: RangeInput): Frame<RangeState>[] {  let intervals: [number, number][] = [];
+function record({ ops }: RangeInput): Frame<RangeState>[] {
+  let intervals: [number, number][] = [];
 
   const { emit, frames } = createRecorder<RangeState>(() => ({
-        intervals: intervals.map((x) => [...x] as [number, number]),
-        op: '',
-        left: null,
-        right: null,
-        result: null,
-        done: false
-      }));
+    intervals: intervals.map((x) => [...x] as [number, number]),
+    op: '',
+    left: null,
+    right: null,
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -92,7 +103,12 @@ function record({ ops }: RangeInput): Frame<RangeState>[] {  let intervals: [num
         'ADD',
         `[${o.left},${o.right}]`,
         `AddRange(${o.left},${o.right}): merge into sorted intervals → [${intervals.map((x) => `[${x[0]},${x[1]}]`).join(', ')}].`,
-        { op: `add [${o.left},${o.right}]`, left: o.left, right: o.right, intervals: intervals.map((x) => [...x] as [number, number]) },
+        {
+          op: `add [${o.left},${o.right}]`,
+          left: o.left,
+          right: o.right,
+          intervals: intervals.map((x) => [...x] as [number, number]),
+        },
       );
     } else if (o.kind === 'query') {
       const ok = queryRange(intervals, o.left, o.right);
@@ -100,7 +116,13 @@ function record({ ops }: RangeInput): Frame<RangeState>[] {  let intervals: [num
         ok ? 'QUERY' : 'MISS',
         String(ok),
         `QueryRange(${o.left},${o.right}): ${ok ? 'fully covered' : 'not covered'} → ${ok}.`,
-        { op: `query [${o.left},${o.right}]`, left: o.left, right: o.right, result: ok, intervals: intervals.map((x) => [...x] as [number, number]) },
+        {
+          op: `query [${o.left},${o.right}]`,
+          left: o.left,
+          right: o.right,
+          result: ok,
+          intervals: intervals.map((x) => [...x] as [number, number]),
+        },
         ok ? 'good' : 'bad',
       );
     } else {
@@ -109,7 +131,12 @@ function record({ ops }: RangeInput): Frame<RangeState>[] {  let intervals: [num
         'REMOVE',
         `[${o.left},${o.right}]`,
         `RemoveRange(${o.left},${o.right}): carve hole → [${intervals.map((x) => `[${x[0]},${x[1]}]`).join(', ')}].`,
-        { op: `remove [${o.left},${o.right}]`, left: o.left, right: o.right, intervals: intervals.map((x) => [...x] as [number, number]) },
+        {
+          op: `remove [${o.left},${o.right}]`,
+          left: o.left,
+          right: o.right,
+          intervals: intervals.map((x) => [...x] as [number, number]),
+        },
       );
     }
   }
@@ -125,7 +152,9 @@ function View({ frame }: PluginViewProps<RangeState>) {
       <div className={cn(vizText.sm, 'text-ink3')}>
         {s.op || '—'}
         {s.result !== null && (
-          <span className={cn('ml-2 font-mono', s.result ? 'text-good' : 'text-bad')}>{String(s.result)}</span>
+          <span className={cn('ml-2 font-mono', s.result ? 'text-good' : 'text-bad')}>
+            {String(s.result)}
+          </span>
         )}
       </div>
       <div className="mt-2 space-y-1">
@@ -135,7 +164,9 @@ function View({ frame }: PluginViewProps<RangeState>) {
             className={cn(
               'rounded border px-2 py-0.5 font-mono',
               vizText.sm,
-              s.left !== null && a <= s.left && b >= (s.right ?? 0) ? 'border-accent bg-accentbg' : 'border-edge',
+              s.left !== null && a <= s.left && b >= (s.right ?? 0)
+                ? 'border-accent bg-accentbg'
+                : 'border-edge',
             )}
           >
             [{a}, {b}]
@@ -162,92 +193,88 @@ function Inspector({ frame }: InspectorProps<RangeState>) {
 export const manifestId = 'prep-design-range-module';
 export const title = 'Range Module';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Range Module\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Range Module"?',
     choices: [
       {
-        label: "Design — fits this problem",
-        correct: true
+        label: 'Design — fits this problem',
+        correct: true,
       },
       {
-        label: "Hash map + doubly linked list LRU — different approach"
+        label: 'Hash map + doubly linked list LRU — different approach',
       },
       {
-        label: "Heap + Sorted Available Set — different approach"
+        label: 'Heap + Sorted Available Set — different approach',
       },
       {
-        label: "Trie phone directory autocomplete — different approach"
-      }
+        label: 'Trie phone directory autocomplete — different approach',
+      },
     ],
-    explain: "See Range Module pattern"
+    explain: 'See Range Module pattern',
   },
   {
-    id: "key-step",
-    prompt: "On the \"REMOVE\" step ([,]), what happens?",
+    id: 'key-step',
+    prompt: 'On the "REMOVE" step ([,]), what happens?',
     choices: [
       {
-        label: "RemoveRange(,): carve hole → — this move caption",
-        correct: true
+        label: 'RemoveRange(,): carve hole → — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "RemoveRange(,): carve hole → [${intervals.map((x) => "
+    explain: 'RemoveRange(,): carve hole → [${intervals.map((x) => ',
   },
   {
-    id: "state",
-    prompt: "What does the `intervals` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `intervals` field track in the visualization state?',
     choices: [
       {
-        label: "Field intervals in state — updated each frame",
-        correct: true
+        label: 'Field intervals in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `intervals` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `intervals` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Done. — final DONE caption",
-        correct: true
+        label: 'Done. — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Done."
-  }
+    explain: 'Done.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -270,6 +297,8 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as RangeState | undefined;
-    return s?.done ? { ok: true, label: `${s.intervals.length} intervals` } : { ok: false, label: 'incomplete' };
+    return s?.done
+      ? { ok: true, label: `${s.intervals.length} intervals` }
+      : { ok: false, label: 'incomplete' };
   },
 };

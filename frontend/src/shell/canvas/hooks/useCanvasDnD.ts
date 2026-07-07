@@ -1,4 +1,10 @@
-import { useCallback, type DragEvent, type Dispatch, type MutableRefObject, type SetStateAction } from 'react';
+import {
+  useCallback,
+  type DragEvent,
+  type Dispatch,
+  type MutableRefObject,
+  type SetStateAction,
+} from 'react';
 import type { Edge } from '@xyflow/react';
 import type { CanvasMode, ProblemPlugin } from '../../../core';
 import type { PanelFlowNode } from '@/core/panelFlowTypes';
@@ -86,7 +92,17 @@ export function useCanvasDnD({
       if (newEdges.length) setEdges((eds) => [...eds, ...newEdges]);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [plugin, mode, historyKey, edgeOpts, edges, screenToFlowPosition, setNodes, setEdges, onProblemDrop],
+    [
+      plugin,
+      mode,
+      historyKey,
+      edgeOpts,
+      edges,
+      screenToFlowPosition,
+      setNodes,
+      setEdges,
+      onProblemDrop,
+    ],
   );
 
   return { onDragOver, onDragLeave, onDrop };

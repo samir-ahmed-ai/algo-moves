@@ -1,6 +1,13 @@
 import { useEffect } from 'react';
 import { ArrowDown, ArrowUp, Eye, Loader2, Lock, Minus, Plus } from 'lucide-react';
-import { GameBody, GameArena, ResultBanner, TouchButton, TurnBadge, WaitingForPeer } from '../../ui/gamesUi';
+import {
+  GameBody,
+  GameArena,
+  ResultBanner,
+  TouchButton,
+  TurnBadge,
+  WaitingForPeer,
+} from '../../ui/gamesUi';
 import { Confetti, CountdownRing } from '../../ui/effects';
 import { usePrefersReducedMotion } from '../../ui/hooks';
 import { Avatar } from '../../ui/Avatar';
@@ -25,10 +32,26 @@ import { useCountdown } from '../../engine';
 
 const HEAT_STYLE: Record<HeatLevel, { text: string; ring: string; bar: string }> = {
   burning: { text: 'text-bad', ring: 'border-bad/60 bg-bad/10 text-bad', bar: 'bg-bad' },
-  hot: { text: 'text-orange-500', ring: 'border-orange-400/60 bg-orange-400/10 text-orange-500', bar: 'bg-orange-500' },
-  warm: { text: 'text-amber-500', ring: 'border-amber-400/60 bg-amber-400/10 text-amber-600', bar: 'bg-amber-500' },
-  cold: { text: 'text-sky-500', ring: 'border-sky-400/60 bg-sky-400/10 text-sky-500', bar: 'bg-sky-500' },
-  freezing: { text: 'text-blue-500', ring: 'border-blue-400/60 bg-blue-400/10 text-blue-500', bar: 'bg-blue-500' },
+  hot: {
+    text: 'text-orange-500',
+    ring: 'border-orange-400/60 bg-orange-400/10 text-orange-500',
+    bar: 'bg-orange-500',
+  },
+  warm: {
+    text: 'text-amber-500',
+    ring: 'border-amber-400/60 bg-amber-400/10 text-amber-600',
+    bar: 'bg-amber-500',
+  },
+  cold: {
+    text: 'text-sky-500',
+    ring: 'border-sky-400/60 bg-sky-400/10 text-sky-500',
+    bar: 'bg-sky-500',
+  },
+  freezing: {
+    text: 'text-blue-500',
+    ring: 'border-blue-400/60 bg-blue-400/10 text-blue-500',
+    bar: 'bg-blue-500',
+  },
 };
 
 export function NumberDuel() {
@@ -102,7 +125,13 @@ export function NumberDuel() {
       {phase === 'setup' && (
         <GameArena accent="#6366f1">
           <Dial value={num} onChange={setNum} label={strings.pickSecret} />
-          <TouchButton variant="primary" size="md" className="w-full" icon={<Lock className="h-4 w-4" />} onClick={lockSecret}>
+          <TouchButton
+            variant="primary"
+            size="md"
+            className="w-full"
+            icon={<Lock className="h-4 w-4" />}
+            onClick={lockSecret}
+          >
             {strings.lockItIn}
           </TouchButton>
         </GameArena>
@@ -115,12 +144,16 @@ export function NumberDuel() {
       {phase === 'watching' && (
         <GameArena accent="#6366f1">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">{strings.yourSecret}</span>
+            <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">
+              {strings.yourSecret}
+            </span>
             <span className="rounded-full border border-accent/40 bg-accentbg px-2.5 py-0.5 font-mono text-lg font-bold tabular-nums text-accent">
               {secret}
             </span>
           </div>
-          <p className="text-center text-xs text-ink2">{strings.peerIsGuessing(peerName, attempts.length)}</p>
+          <p className="text-center text-xs text-ink2">
+            {strings.peerIsGuessing(peerName, attempts.length)}
+          </p>
           <RangeTrack attempts={attempts} />
           <GuessLog attempts={attempts} strings={strings} />
         </GameArena>
@@ -184,7 +217,9 @@ function Scoreboard({
     <div className="flex items-center justify-center gap-3 text-center">
       <ScoreCell name={meName} count={myCount} active={myGuessing} />
       <div className="flex flex-col items-center gap-0.5">
-        <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">vs</span>
+        <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">
+          vs
+        </span>
         <span className="font-mono text-[length:var(--fs-2xs)] tabular-nums text-ink3">
           {round}/{total}
         </span>
@@ -208,10 +243,19 @@ function ScoreCell({
   return (
     <div className="min-w-0 flex-1">
       <div className="truncate text-xs font-semibold text-ink2">{name}</div>
-      <div className={cn('font-mono text-2xl font-bold tabular-nums', muted ? 'text-ink3' : 'text-accent')}>
+      <div
+        className={cn(
+          'font-mono text-2xl font-bold tabular-nums',
+          muted ? 'text-ink3' : 'text-accent',
+        )}
+      >
         {count ?? '—'}
       </div>
-      {active ? <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-accent">live</span> : null}
+      {active ? (
+        <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-accent">
+          live
+        </span>
+      ) : null}
     </div>
   );
 }
@@ -278,7 +322,9 @@ function GuessingArena({
   return (
     <GameArena accent="#6366f1">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">{strings.yourGuess}</span>
+        <span className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">
+          {strings.yourGuess}
+        </span>
         {!reduced ? (
           <CountdownRing progress={progress} size={36} tone={timerTone} label={String(remaining)} />
         ) : (
@@ -310,14 +356,18 @@ function HeatStrip({
   const style = HEAT_STYLE[attempt.heat];
   return (
     <div className="flex items-center gap-2">
-      <span className="shrink-0 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">{strings.proximity}</span>
+      <span className="shrink-0 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">
+        {strings.proximity}
+      </span>
       <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-panel2">
         <div
           className={cn('h-full rounded-full transition-[width] duration-300', style.bar)}
           style={{ width: `${Math.round(attempt.frac * 100)}%` }}
         />
       </div>
-      <span className={cn('shrink-0 text-xs font-bold', style.text)}>{strings.heat[attempt.heat]}</span>
+      <span className={cn('shrink-0 text-xs font-bold', style.text)}>
+        {strings.heat[attempt.heat]}
+      </span>
     </div>
   );
 }
@@ -364,7 +414,9 @@ function Dial({
   return (
     <div>
       {label ? (
-        <p className="mb-1.5 text-center text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">{label}</p>
+        <p className="mb-1.5 text-center text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">
+          {label}
+        </p>
       ) : null}
       <div className="flex items-center justify-center gap-3">
         <button
@@ -375,7 +427,9 @@ function Dial({
         >
           <Minus className="h-4 w-4" />
         </button>
-        <span className="min-w-[3ch] text-center font-mono text-4xl font-bold tabular-nums text-accent">{value}</span>
+        <span className="min-w-[3ch] text-center font-mono text-4xl font-bold tabular-nums text-accent">
+          {value}
+        </span>
         <button
           type="button"
           onClick={() => set(value + 1)}
@@ -413,7 +467,10 @@ function GuessLog({
       </span>
       <div className="flex gap-1.5 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {attempts.map((a, i) => {
-          const heatRing = a.result === 'correct' ? 'border-good/50 bg-good/10 text-good' : HEAT_STYLE[a.heat].ring;
+          const heatRing =
+            a.result === 'correct'
+              ? 'border-good/50 bg-good/10 text-good'
+              : HEAT_STYLE[a.heat].ring;
           return (
             <span
               key={i}
@@ -504,7 +561,13 @@ function Over({
     <div className="flex flex-col gap-3">
       <ResultBanner
         tone={tone}
-        title={tone === 'win' ? strings.youWin : tone === 'lose' ? strings.peerWins(peerName) : strings.tie}
+        title={
+          tone === 'win'
+            ? strings.youWin
+            : tone === 'lose'
+              ? strings.peerWins(peerName)
+              : strings.tie
+        }
         detail={strings.matchSummary(myCount, peerCount, peerName)}
       />
       <TouchButton variant="primary" size="md" className="w-full" onClick={onRematch}>
@@ -540,7 +603,11 @@ function SpectatorView({
         <GameArena accent="#6366f1">
           <div className="grid grid-cols-2 gap-2">
             <SpectatorSeat name={snapshot.keeperName} sub={strings.spectatorSecretHidden} />
-            <SpectatorSeat name={snapshot.guesserName} sub={strings.guessCount(snapshot.attempts.length)} accent />
+            <SpectatorSeat
+              name={snapshot.guesserName}
+              sub={strings.guessCount(snapshot.attempts.length)}
+              accent
+            />
           </div>
           <RangeTrack attempts={snapshot.attempts} />
           <GuessLog attempts={snapshot.attempts} strings={strings} />
@@ -559,7 +626,9 @@ function SpectatorSeat({ name, sub, accent }: { name: string; sub: string; accen
       )}
     >
       <Avatar seed={name} name={name} size={28} />
-      <span className={cn('truncate text-xs font-semibold', accent ? 'text-accent' : 'text-ink')}>{name}</span>
+      <span className={cn('truncate text-xs font-semibold', accent ? 'text-accent' : 'text-ink')}>
+        {name}
+      </span>
       <span className="text-[length:var(--fs-2xs)] text-ink3">{sub}</span>
     </div>
   );

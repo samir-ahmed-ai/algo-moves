@@ -11,16 +11,9 @@ describe('initialBrowseFromHash', () => {
     });
   });
 
-  it('hydrates track and category from mobile hash', () => {
+  it('hydrates track and category from mobile pathname hash', () => {
     expect(
       initialBrowseFromHash('#track/data-structures/category/prep-arrays-all', null, '/mobile'),
-    ).toEqual({
-      trackId: 'data-structures',
-      categoryId: 'prep-arrays-all',
-      topicId: null,
-    });
-    expect(
-      initialBrowseFromHash('#mobile/track/data-structures/category/prep-arrays-all'),
     ).toEqual({
       trackId: 'data-structures',
       categoryId: 'prep-arrays-all',
@@ -39,7 +32,11 @@ describe('initialBrowseFromHash', () => {
   it('ignores mobile hash when a shared item link is present', () => {
     const sharedItem = catalog.firstItemId;
     expect(
-      initialBrowseFromHash('#mobile/track/data-structures/category/prep-arrays-all', sharedItem),
+      initialBrowseFromHash(
+        '#track/data-structures/category/prep-arrays-all',
+        sharedItem,
+        '/mobile',
+      ),
     ).toEqual({
       trackId: null,
       categoryId: null,

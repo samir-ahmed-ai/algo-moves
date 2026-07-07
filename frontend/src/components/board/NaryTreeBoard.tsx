@@ -77,14 +77,28 @@ export function NaryTreeBoard({
   }
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} width={width} height={height} role="img" aria-label="trie board" style={style}>
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      width={width}
+      height={height}
+      role="img"
+      aria-label="trie board"
+      style={style}
+    >
       {edges}
       {nodes.map((nd, i) => {
-        const ring: CSSProperties = activeNode === i ? { stroke: 'var(--ring)', strokeWidth: 4 } : {};
+        const ring: CSSProperties =
+          activeNode === i ? { stroke: 'var(--ring)', strokeWidth: 4 } : {};
         return (
           <g key={i} className={`${nodeClass(i)} nodrag`}>
             <circle cx={px(i)} cy={py(i)} r={nodeRadius} style={ring} />
-            <text x={px(i)} y={py(i) + 4} textAnchor="middle" className="node-label" style={{ fontSize: 'var(--node-fs-xs, 12px)' }}>
+            <text
+              x={px(i)}
+              y={py(i) + 4}
+              textAnchor="middle"
+              className="node-label"
+              style={{ fontSize: 'var(--node-fs-xs, 12px)' }}
+            >
               {nd.label}
             </text>
           </g>

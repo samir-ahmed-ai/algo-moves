@@ -52,7 +52,8 @@ export function useCanvasEdgeConnection({
   );
 
   const isValidConnection = useCallback(
-    (c: Connection | Edge) => c.source !== c.target && !edges.some((e) => e.source === c.source && e.target === c.target),
+    (c: Connection | Edge) =>
+      c.source !== c.target && !edges.some((e) => e.source === c.source && e.target === c.target),
     [edges],
   );
 

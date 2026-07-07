@@ -8,8 +8,14 @@ import { BigOPanelBody } from './BigOPanelBody';
 import { Transport } from '../shared/Transport';
 
 import { isConceptCourse } from '@/lib/canvas/conceptCourse';
-import { useCanvasFrame, useCanvasStatic, ControlsAccordion, nodeText, VizFitBox } from '@/shell/canvas';
-import { useCanvasFrameFollow } from '@/shell/canvas/collab/sync/useCanvasFrameFollow';
+import {
+  useCanvasFrame,
+  useCanvasStatic,
+  ControlsAccordion,
+  nodeText,
+  VizFitBox,
+} from '@/shell/canvas';
+import { useCanvasFrameFollow } from '@/shell/collab';
 
 /**
  * Stacked: the board renders at natural size on the top row, the Controls rail
@@ -51,13 +57,7 @@ export function VizPanelBody({
 
   return (
     <div
-      className={cn(
-        'flex flex-col',
-        nodeText.base,
-        inVisualize
-          ? 'gap-0'
-          : 'h-full min-h-0 gap-2',
-      )}
+      className={cn('flex flex-col', nodeText.base, inVisualize ? 'gap-0' : 'h-full min-h-0 gap-2')}
     >
       {!inVisualize && !conceptCourse && (
         <MoveOrbit frames={frames} index={player.index} onSeek={player.goTo} />

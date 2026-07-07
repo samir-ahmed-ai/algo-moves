@@ -1,4 +1,9 @@
-import { definePlugin, type Frame, type InspectorProps, type PluginViewProps } from '../../core/types';
+import {
+  definePlugin,
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+} from '../../core/types';
 import { wireTeachingStack } from '../_shared/pluginKit';
 import { verdictAlwaysOk } from '../_shared/verdictKit';
 import { goodCases, badCases, intro } from './cases';
@@ -152,7 +157,17 @@ function record({ values: initial }: SortInput): Frame<SortState>[] {
     stack.push([lo, i - 1]);
   }
 
-  emit('DONE', 'sorted ✓', `Every range has been partitioned and every pivot seated — the array is fully sorted.`, null, null, null, null, null, 'good');
+  emit(
+    'DONE',
+    'sorted ✓',
+    `Every range has been partitioned and every pivot seated — the array is fully sorted.`,
+    null,
+    null,
+    null,
+    null,
+    null,
+    'good',
+  );
   return frames;
 }
 
@@ -170,20 +185,28 @@ function View({ frame }: PluginViewProps<SortState>) {
   const range = s.lo !== null && s.hi !== null ? `[${s.lo},${s.hi}]` : '—';
   const pivotVal = s.pivotIdx !== null ? s.values[s.pivotIdx] : '—';
   return (
-    <VizStage rail={<>
-      <RailGroup label="partition">
-        <RailStat k="range" v={range} />
-        <RailStat k="pivot" v={pivotVal} tone="accent" />
-        <RailStat k="i" v={s.i ?? '—'} />
-        <RailStat k="j" v={s.j ?? '—'} />
-      </RailGroup>
-      <RailGroup label="stats">
-        <RailStat k="cmps" v={s.comparisons} />
-        <RailStat k="swaps" v={s.swaps} />
-        <RailStat k="fixed" v={`${finalized}/${s.values.length}`} tone={done ? 'good' : undefined} />
-      </RailGroup>
-      {done && <RailResult label="result" value="sorted ✓" tone="good" />}
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="partition">
+            <RailStat k="range" v={range} />
+            <RailStat k="pivot" v={pivotVal} tone="accent" />
+            <RailStat k="i" v={s.i ?? '—'} />
+            <RailStat k="j" v={s.j ?? '—'} />
+          </RailGroup>
+          <RailGroup label="stats">
+            <RailStat k="cmps" v={s.comparisons} />
+            <RailStat k="swaps" v={s.swaps} />
+            <RailStat
+              k="fixed"
+              v={`${finalized}/${s.values.length}`}
+              tone={done ? 'good' : undefined}
+            />
+          </RailGroup>
+          {done && <RailResult label="result" value="sorted ✓" tone="good" />}
+        </>
+      }
+    >
       <ArrayBars values={s.values} tone={tone} height={242} />
     </VizStage>
   );
@@ -257,14 +280,22 @@ function quickSort(nums: number[], lo = 0, hi = nums.length - 1): void {
 `;
 
 const inputs = [
-    { id: 'mix', label: '[5, 2, 8, 1, 9, 3, 7]', value: { values: [5, 2, 8, 1, 9, 3, 7] } },
-    { id: 'rev', label: '[7, 6, 5, 4, 3, 2] · worst', value: { values: [7, 6, 5, 4, 3, 2] } },
-    { id: 'dup', label: '[4, 2, 4, 1, 3, 2, 4] · dups', value: { values: [4, 2, 4, 1, 3, 2, 4] } },
-  ];
+  { id: 'mix', label: '[5, 2, 8, 1, 9, 3, 7]', value: { values: [5, 2, 8, 1, 9, 3, 7] } },
+  { id: 'rev', label: '[7, 6, 5, 4, 3, 2] · worst', value: { values: [7, 6, 5, 4, 3, 2] } },
+  { id: 'dup', label: '[4, 2, 4, 1, 3, 2, 4] · dups', value: { values: [4, 2, 4, 1, 3, 2, 4] } },
+];
 const verdict = verdictAlwaysOk('sorted');
 const teaching = wireTeachingStack({
-  record, View, inputs, verdict,
-  practice: { quiz, codePieces, cases: { good: goodCases, bad: badCases, intro, goodLabel: 'partition steps' }, simulateQuestion: 'Which partition step happens next?' },
+  record,
+  View,
+  inputs,
+  verdict,
+  practice: {
+    quiz,
+    codePieces,
+    cases: { good: goodCases, bad: badCases, intro, goodLabel: 'partition steps' },
+    simulateQuestion: 'Which partition step happens next?',
+  },
 });
 
 export const quickSortPlugin = definePlugin<SortInput, SortState>({
@@ -273,7 +304,8 @@ export const quickSortPlugin = definePlugin<SortInput, SortState>({
     title: 'Quick sort',
     difficulty: 'Medium',
     tags: ['array', 'sorting'],
-    summary: 'Pick a pivot, partition smaller values left and larger right with Lomuto, seat the pivot, then sort each side — driven by an explicit range stack.',
+    summary:
+      'Pick a pivot, partition smaller values left and larger right with Lomuto, seat the pivot, then sort each side — driven by an explicit range stack.',
     source: 'https://en.wikipedia.org/wiki/Quicksort',
   },
   inputs,

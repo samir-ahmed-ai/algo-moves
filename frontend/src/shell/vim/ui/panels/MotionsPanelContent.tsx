@@ -22,7 +22,9 @@ export function MotionsPanelContent() {
           onClick={toggleHint}
           className={cn(
             'nodrag grid h-8 w-8 place-items-center rounded-md border transition-colors',
-            showHint ? 'border-accent bg-accentbg text-accent' : 'border-edge text-ink3 hover:bg-panel2',
+            showHint
+              ? 'border-accent bg-accentbg text-accent'
+              : 'border-edge text-ink3 hover:bg-panel2',
           )}
           title="Toggle hint"
           aria-label="Toggle hint"

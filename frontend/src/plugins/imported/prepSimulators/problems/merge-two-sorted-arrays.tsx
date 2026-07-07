@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -27,20 +33,21 @@ interface MergeState {
 }
 
 function record({ a, m, b, n }: MergeInput): Frame<MergeState>[] {
-  const work = a.slice();  const filled = new Array<boolean>(work.length).fill(false);
+  const work = a.slice();
+  const filled = new Array<boolean>(work.length).fill(false);
 
   const { emit, frames } = createRecorder<MergeState>(() => ({
-        a: work.slice(),
-        b,
-        m,
-        n,
-        i: null,
-        j: null,
-        k: null,
-        filled: filled.slice(),
-        chose: null,
-        done: false
-      }));
+    a: work.slice(),
+    b,
+    m,
+    n,
+    i: null,
+    j: null,
+    k: null,
+    filled: filled.slice(),
+    chose: null,
+    done: false,
+  }));
 
   let i = m - 1;
   let j = n - 1;
@@ -145,7 +152,8 @@ function View({ frame }: PluginViewProps<MergeState>) {
       {s.chose && !s.done && (
         <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink3')}>
           took larger from{' '}
-          <span className={s.chose === 'a' ? 'text-accent' : 'text-good'}>{s.chose}</span> → a[{s.k}]
+          <span className={s.chose === 'a' ? 'text-accent' : 'text-good'}>{s.chose}</span> → a[{s.k}
+          ]
         </div>
       )}
       {s.done && (
@@ -176,132 +184,129 @@ function Inspector({ frame }: InspectorProps<MergeState>) {
 export const manifestId = 'prep-arrays-merge-two-sorted-arrays';
 export const title = 'Merge two sorted arrays';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Merge two sorted arrays\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Merge two sorted arrays"?',
     choices: [
       {
-        label: "Merge from end — fits this problem",
-        correct: true
+        label: 'Merge from end — fits this problem',
+        correct: true,
       },
       {
-        label: "Monotonic stack — different approach"
+        label: 'Monotonic stack — different approach',
       },
       {
-        label: "Prefix + suffix pass — different approach"
+        label: 'Prefix + suffix pass — different approach',
       },
       {
-        label: "Greedy reach — different approach"
-      }
+        label: 'Greedy reach — different approach',
+      },
     ],
-    explain: "Fill a from the back, dropping in the larger tail each step"
+    explain: 'Fill a from the back, dropping in the larger tail each step',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Merge two sorted arrays), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Merge two sorted arrays), what strategy is established?',
     choices: [
       {
-        label: "Fill a from the back, dropping — described in INIT caption",
-        correct: true
+        label: 'Fill a from the back, dropping — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Merge  values of b into a, which holds  real values followed by  empty slots. Walk all three pointers from the back: i over a's prefix, j over b, k over a's write position. Writing largest-first means we never overwrite an a-value we still need."
+    explain:
+      "Merge  values of b into a, which holds  real values followed by  empty slots. Walk all three pointers from the back: i over a's prefix, j over b, k over a's write position. Writing largest-first means we never overwrite an a-value we still need.",
   },
   {
-    id: "key-step",
-    prompt: "On the \"WRITE\" step (a[]=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "WRITE" step (a[]=), what happens?',
     choices: [
       {
-        label: "Place at a[] and step i — this move caption",
-        correct: true
+        label: 'Place at a[] and step i — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Place  at a[] and step i back to ."
+    explain: 'Place  at a[] and step i back to .',
   },
   {
-    id: "state",
-    prompt: "What does the `a` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `a` field track in the visualization state?',
     choices: [
       {
-        label: "a, mutated in place — updated each frame",
-        correct: true
+        label: 'a, mutated in place — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `a` in sync: a, mutated in place as we merge from the back"
+    explain: 'The recorder keeps `a` in sync: a, mutated in place as we merge from the back',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Merge two sorted arrays\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Merge two sorted arrays"?',
     choices: [
       {
-        label: "O(n+m) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n+m) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(1) space — wrong order of growth"
+        label: 'O(n) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n²) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n+m). O(1). i,j,k from ends; place larger of a[i],b[j] at k--"
+    explain: 'O(n+m). O(1). i,j,k from ends; place larger of a[i],b[j] at k--',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "j has run out, so every — final DONE caption",
-        correct: true
+        label: 'j has run out, so every — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "j has run out, so every b-value is placed. Any a-values below k were already in order and never needed to move. a is now fully sorted: []."
-  }
+    explain:
+      'j has run out, so every b-value is placed. Any a-values below k were already in order and never needed to move. a is now fully sorted: [].',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

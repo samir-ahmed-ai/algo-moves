@@ -11,7 +11,9 @@ export function dedentForDisplay(code: string): string {
 
 /** Rough row count for masonry packing (includes wrapped long lines). */
 export function estimatePieceRows(code: string, wrapCols = 32): number {
-  return code.split('\n').reduce((rows, line) => rows + Math.max(1, Math.ceil(line.length / wrapCols)), 0);
+  return code
+    .split('\n')
+    .reduce((rows, line) => rows + Math.max(1, Math.ceil(line.length / wrapCols)), 0);
 }
 
 export interface TrayLayoutItem {

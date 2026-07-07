@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface ShelfInput {
   books: [number, number][]; // [thickness, height]
@@ -24,18 +37,26 @@ function record({ books, shelfWidth }: ShelfInput): Frame<ShelfState>[] {
   const n = books.length;
   const dp = new Array<number>(n + 1).fill(INF);
   const { emit, frames } = createRecorder<ShelfState>(() => ({
-        books: books,
-        shelfWidth: shelfWidth,
-        dp: dp.slice(),
-        i: null,
-        from: null,
-        done: false
-      }));
+    books: books,
+    shelfWidth: shelfWidth,
+    dp: dp.slice(),
+    i: null,
+    from: null,
+    done: false,
+  }));
 
-  emit('INIT', `${n} books, width ${shelfWidth}`, `Filling Bookcase Shelves: place the ${n} books in order on shelves of width ${shelfWidth}, minimizing total height. dp[i] = the least total height to shelve the first i books, built up from i = 0.`, { i: null, from: null });
+  emit(
+    'INIT',
+    `${n} books, width ${shelfWidth}`,
+    `Filling Bookcase Shelves: place the ${n} books in order on shelves of width ${shelfWidth}, minimizing total height. dp[i] = the least total height to shelve the first i books, built up from i = 0.`,
+    { i: null, from: null },
+  );
 
   dp[0] = 0;
-  emit('BASE', 'dp[0]=0', `Base case: shelving 0 books needs no height. dp[0] = 0.`, { i: 0, from: null });
+  emit('BASE', 'dp[0]=0', `Base case: shelving 0 books needs no height. dp[0] = 0.`, {
+    i: 0,
+    from: null,
+  });
 
   for (let i = 1; i <= n; i++) {
     let w = 0;
@@ -55,10 +76,21 @@ function record({ books, shelfWidth }: ShelfInput): Frame<ShelfState>[] {
     dp[i] = best;
     const start = (bestFrom as number) + 1; // first book index (1-based) on the last shelf
     const shelfH = best - dp[bestFrom as number];
-    emit('FILL', `dp[${i}]=${best}`, `Best for the first ${i} books: put books ${start}..${i} on the last shelf (height ${shelfH}) on top of dp[${bestFrom}] (=${dp[bestFrom as number]}), so dp[${i}] = ${dp[bestFrom as number]} + ${shelfH} = ${best}.`, { i: i, from: bestFrom });
+    emit(
+      'FILL',
+      `dp[${i}]=${best}`,
+      `Best for the first ${i} books: put books ${start}..${i} on the last shelf (height ${shelfH}) on top of dp[${bestFrom}] (=${dp[bestFrom as number]}), so dp[${i}] = ${dp[bestFrom as number]} + ${shelfH} = ${best}.`,
+      { i: i, from: bestFrom },
+    );
   }
 
-  emit('DONE', `${dp[n]} height`, `The table is full. dp[${n}] = ${dp[n]}, so the minimum total shelf height for all ${n} books is ${dp[n]}.`, { i: n, from: null , done: true }, 'good');
+  emit(
+    'DONE',
+    `${dp[n]} height`,
+    `The table is full. dp[${n}] = ${dp[n]}, so the minimum total shelf height for all ${n} books is ${dp[n]}.`,
+    { i: n, from: null, done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -74,15 +106,23 @@ function View({ frame }: PluginViewProps<ShelfState>) {
   const cell = (idx: number | null) =>
     idx !== null && idx >= 0 && idx < s.dp.length ? (s.dp[idx] >= INF ? '∞' : s.dp[idx]) : '—';
   return (
-    <VizStage rail={<>
-      <RailGroup label="scan">
-        <RailStat k="i" v={s.i ?? '—'} tone="accent" />
-        <RailStat k="from" v={s.from !== null ? s.from : '—'} tone="warn" />
-        <RailStat k="dp[from]" v={cell(s.from)} />
-        <RailStat k="dp[i]" v={cell(s.i)} />
-      </RailGroup>
-      <RailResult label="answer" value={done ? `${s.dp[n]}` : '…'} tone={done ? 'good' : 'accent'} />
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="scan">
+            <RailStat k="i" v={s.i ?? '—'} tone="accent" />
+            <RailStat k="from" v={s.from !== null ? s.from : '—'} tone="warn" />
+            <RailStat k="dp[from]" v={cell(s.from)} />
+            <RailStat k="dp[i]" v={cell(s.i)} />
+          </RailGroup>
+          <RailResult
+            label="answer"
+            value={done ? `${s.dp[n]}` : '…'}
+            tone={done ? 'good' : 'accent'}
+          />
+        </>
+      }
+    >
       <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} />
     </VizStage>
   );
@@ -91,7 +131,8 @@ function View({ frame }: PluginViewProps<ShelfState>) {
 function Inspector({ frame }: InspectorProps<ShelfState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const cell = (idx: number) => (idx >= 0 && idx < s.dp.length ? (s.dp[idx] >= INF ? '∞' : s.dp[idx]) : '—');
+  const cell = (idx: number) =>
+    idx >= 0 && idx < s.dp.length ? (s.dp[idx] >= INF ? '∞' : s.dp[idx]) : '—';
   const n = s.books.length;
   const done = s.dp[n] < INF;
   return (

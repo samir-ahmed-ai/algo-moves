@@ -110,6 +110,8 @@ export interface WorkspaceNavigationCtx {
   enterGames: (roomCode?: string) => void;
   /** Enter the interview prep plans hub. */
   enterPlans: () => void;
+  /** Enter the resume template creator hub. */
+  enterResumes: () => void;
 }
 
 export type WorkspaceCtx = WorkspaceAppearanceCtx & WorkspaceChromeCtx & WorkspaceNavigationCtx;

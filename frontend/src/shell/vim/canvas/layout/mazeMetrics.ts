@@ -84,7 +84,11 @@ export function computeMazeFillCellSize(
 }
 
 /** Pick a cell size so the board fits within a max inner width (e.g. narrow viewports). */
-export function fitMazeCellSize(grid: MazeGrid, maxInnerW: number, maxCellSize = MAZE_CELL_SIZE): number {
+export function fitMazeCellSize(
+  grid: MazeGrid,
+  maxInnerW: number,
+  maxCellSize = MAZE_CELL_SIZE,
+): number {
   const cols = grid.reduce((m, row) => Math.max(m, row.length), 0);
   if (cols <= 0) return maxCellSize;
   const gapX = Math.max(0, cols - 1) * MAZE_GRID_GAP;

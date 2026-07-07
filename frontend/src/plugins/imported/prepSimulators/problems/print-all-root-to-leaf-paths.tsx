@@ -1,7 +1,22 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import type { ProblemSimulator } from '../types';
 import { createRecorder } from '../../../_shared/createRecorder';
-import { VizStage, RailGroup, RailStat, RailResult, RailStack, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  RailStack,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 
 interface PathsInput {
@@ -122,19 +137,21 @@ function View({ frame }: PluginViewProps<PathsState>) {
     if (visitedSet.has(i)) return 'team-2';
     return 'team-0';
   };
-  const pathVals = s.path.map((i) => (s.tree[i] as number));
+  const pathVals = s.path.map((i) => s.tree[i] as number);
   const outLabels = s.out.map((p) => p.join('→'));
   return (
-    <VizStage rail={<>
-      <RailStack label="path" items={pathVals.map(String)} />
-      <RailStack label="out" items={outLabels} />
-      <RailGroup label="scan">
-        <RailStat k="depth" v={s.path.length} />
-      </RailGroup>
-      {s.done && (
-        <RailResult label="paths" value={s.out.length} tone="good" />
-      )}
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailStack label="path" items={pathVals.map(String)} />
+          <RailStack label="out" items={outLabels} />
+          <RailGroup label="scan">
+            <RailStat k="depth" v={s.path.length} />
+          </RailGroup>
+          {s.done && <RailResult label="paths" value={s.out.length} tone="good" />}
+        </>
+      }
+    >
       <TreeBoard tree={s.tree} nodeClass={nodeClass} activeNode={s.current} />
     </VizStage>
   );
@@ -144,7 +161,7 @@ function Inspector({ frame }: InspectorProps<PathsState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
   const cur = s.current !== null ? (s.tree[s.current] as number) : '—';
-  const pathVals = s.path.map((i) => (s.tree[i] as number));
+  const pathVals = s.path.map((i) => s.tree[i] as number);
   return (
     <VarGrid>
       <InspectorRow k="current node" v={cur} />
@@ -158,112 +175,107 @@ function Inspector({ frame }: InspectorProps<PathsState>) {
 export const manifestId = 'prep-trees-print-all-root-to-leaf-paths';
 export const title = 'Print all root to leaf paths';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Print all root to leaf paths\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Print all root to leaf paths"?',
     choices: [
       {
-        label: "DFS path — fits this problem",
-        correct: true
+        label: 'DFS path — fits this problem',
+        correct: true,
       },
       {
-        label: "Level order fill — different approach"
+        label: 'Level order fill — different approach',
       },
       {
-        label: "Stack iterative — different approach"
+        label: 'Stack iterative — different approach',
       },
       {
-        label: "BFS rightmost — different approach"
-      }
+        label: 'BFS rightmost — different approach',
+      },
     ],
-    explain: "Push value on entry, snapshot a copy at each leaf, pop on exit"
+    explain: 'Push value on entry, snapshot a copy at each leaf, pop on exit',
   },
   {
-    id: "key-step",
-    prompt: "On the \"GO_LEFT\" step (→ ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "GO_LEFT" step (→ ), what happens?',
     choices: [
       {
-        label: "Node has a left child . — this move caption",
-        correct: true
+        label: 'Node has a left child . — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Node  has a left child . Recurse left before right."
+    explain: 'Node  has a left child . Recurse left before right.',
   },
   {
-    id: "state",
-    prompt: "What does the `current` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `current` field track in the visualization state?',
     choices: [
       {
-        label: "index of node being visited — updated each frame",
-        correct: true
+        label: 'index of node being visited — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `current` in sync: index of node being visited (ring)"
+    explain: 'The recorder keeps `current` in sync: index of node being visited (ring)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Print all root to leaf paths\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Print all root to leaf paths"?',
     choices: [
       {
-        label: "O(n^2) time, O(h) space — standard bounds here",
-        correct: true
+        label: 'O(n^2) time, O(h) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
+        label: 'O(n²) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(h) space — wrong order of growth"
+        label: 'O(n) time, O(h) space — wrong order of growth',
       },
       {
-        label: "O(n log n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n log n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n^2). O(h). leaf -> copy path into out; always pop on return"
+    explain: 'O(n^2). O(h). leaf -> copy path into out; always pop on return',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Traversal finished. We collected — final DONE caption",
-        correct: true
+        label: 'Traversal finished. We collected — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Traversal finished. We collected  root→leaf path: ${out\n      .map((p) => "
-  }
+    explain: 'Traversal finished. We collected  root→leaf path: ${out\n      .map((p) => ',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

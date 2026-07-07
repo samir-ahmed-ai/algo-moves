@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { GridBoard } from '../../../../components/board/GridBoard';
 import type { ProblemSimulator } from '../types';
-import { InspectorRow, RailGroup, RailResult, RailStat, VarGrid, VizEmpty, VizStage } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  RailGroup,
+  RailResult,
+  RailStat,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+} from '../../../_shared/vizKit';
 
 const MOD = 1_000_000_007;
 
@@ -62,25 +75,46 @@ function sumRow(row: number[]): number {
 function record({ n }: AttInput): Frame<AttState>[] {
   const full = buildTable(n);
   const { emit, frames } = createRecorder<AttState>(() => ({
-        n: n,
-        day: null,
-        table: full.slice(0, 1).map((r) => r.slice()),
-        answer: null,
-        done: false
-      }));
+    n: n,
+    day: null,
+    table: full.slice(0, 1).map((r) => r.slice()),
+    answer: null,
+    done: false,
+  }));
 
-  emit('INIT', `n=${n}`, `Student Attendance Record II: count valid length-${n} records (fewer than 2 total 'A', never 3 'L' in a row) mod 1e9+7. Each cell = how many records sit in one of the 6 states A0L0…A1L2 after that many days, where AxLy means x absences so far and y trailing 'L's.`, { day: null, table: full.slice(0, 1).map((r) => r.slice()), answer: null });
+  emit(
+    'INIT',
+    `n=${n}`,
+    `Student Attendance Record II: count valid length-${n} records (fewer than 2 total 'A', never 3 'L' in a row) mod 1e9+7. Each cell = how many records sit in one of the 6 states A0L0…A1L2 after that many days, where AxLy means x absences so far and y trailing 'L's.`,
+    { day: null, table: full.slice(0, 1).map((r) => r.slice()), answer: null },
+  );
 
   // Day 1 base case.
-  emit('BASE', 'day 1 seeded', `Day 1 base case: a 1-char record is "P" (state A0L0), "L" (state A0L1) or "A" (state A1L0) — one record each, so those three cells are 1.`, { day: 1, table: full.slice(0, 2).map((r) => r.slice()), answer: null });
+  emit(
+    'BASE',
+    'day 1 seeded',
+    `Day 1 base case: a 1-char record is "P" (state A0L0), "L" (state A0L1) or "A" (state A1L0) — one record each, so those three cells are 1.`,
+    { day: 1, table: full.slice(0, 2).map((r) => r.slice()), answer: null },
+  );
 
   for (let i = 2; i <= n; i++) {
     const row = full[i];
-    emit('FILL', `day ${i}`, `Day ${i}: extend every day-${i - 1} record by one of P/L/A. P resets trailing L's, L bumps them up (3 L's is illegal so A?L2 has no L-child), A is only allowed from a 0-absence state and lands in A1L0. The 6 counts become [${row.join(', ')}].`, { day: i, table: full.slice(0, i + 1).map((r) => r.slice()), answer: null });
+    emit(
+      'FILL',
+      `day ${i}`,
+      `Day ${i}: extend every day-${i - 1} record by one of P/L/A. P resets trailing L's, L bumps them up (3 L's is illegal so A?L2 has no L-child), A is only allowed from a 0-absence state and lands in A1L0. The 6 counts become [${row.join(', ')}].`,
+      { day: i, table: full.slice(0, i + 1).map((r) => r.slice()), answer: null },
+    );
   }
 
   const answer = n === 0 ? 1 : sumRow(full[n]);
-  emit('DONE', `${answer} records`, `Sum the 6 counts on day ${n}: ${full[n].join(' + ')} = ${answer}. So there are ${answer} valid attendance records of length ${n}.`, { day: n, table: full.slice(0, n + 1).map((r) => r.slice()), answer: answer , done: true }, 'good');
+  emit(
+    'DONE',
+    `${answer} records`,
+    `Sum the 6 counts on day ${n}: ${full[n].join(' + ')} = ${answer}. So there are ${answer} valid attendance records of length ${n}.`,
+    { day: n, table: full.slice(0, n + 1).map((r) => r.slice()), answer: answer, done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -102,14 +136,22 @@ function View({ frame }: PluginViewProps<AttState>) {
   const rowSum = row ? sumRow(row) : null;
 
   return (
-    <VizStage rail={<>
-      <RailGroup label="scan">
-        <RailStat k="n" v={s.n} />
-        <RailStat k="day" v={s.day ?? '—'} tone="accent" />
-        <RailStat k="row sum" v={rowSum ?? '—'} />
-      </RailGroup>
-      <RailResult label="answer" value={s.answer !== null ? `${s.answer}` : '…'} tone={s.done ? 'good' : 'accent'} />
-    </>}>
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="scan">
+            <RailStat k="n" v={s.n} />
+            <RailStat k="day" v={s.day ?? '—'} tone="accent" />
+            <RailStat k="row sum" v={rowSum ?? '—'} />
+          </RailGroup>
+          <RailResult
+            label="answer"
+            value={s.answer !== null ? `${s.answer}` : '…'}
+            tone={s.done ? 'good' : 'accent'}
+          />
+        </>
+      }
+    >
       <GridBoard grid={grid} cellTone={cellTone} active={null} cellSize={52} />
     </VizStage>
   );

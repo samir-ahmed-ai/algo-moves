@@ -18,7 +18,7 @@ export const exchangeAuction: GoTopic = {
       memorize:
         'Fan-out: go httpPost(ctx, dsp) for each DSP. Fan-in: select{ case r:=<-ch, case <-ctx.Done() }. Buffered channel cap=N so goroutines never block. Drain channel after deadline.',
       scene:
-        'A restaurant firing orders to the entire kitchen simultaneously: one goroutine per station. The expediter (fan-in) collects dishes as they\'re ready. When the guest\'s patience (deadline) runs out, whatever arrived on the pass goes out — the rest gets bin\'d.',
+        "A restaurant firing orders to the entire kitchen simultaneously: one goroutine per station. The expediter (fan-in) collects dishes as they're ready. When the guest's patience (deadline) runs out, whatever arrived on the pass goes out — the rest gets bin'd.",
       time: 'O(N) goroutines, O(tmax) wall-clock',
       space: 'O(N) buffered channel + goroutines',
       code: `package main
@@ -138,11 +138,15 @@ func main() {
       quiz: [
         {
           id: 'ortb-fanout-buffered',
-          prompt: 'Why must the channel used for DSP results have a buffer equal to the number of DSPs?',
+          prompt:
+            'Why must the channel used for DSP results have a buffer equal to the number of DSPs?',
           choices: [
-            { label: 'Buffered channel — goroutines send without blocking after deadline', correct: true },
+            {
+              label: 'Buffered channel — goroutines send without blocking after deadline',
+              correct: true,
+            },
             { label: 'Must-buffer claim — unbuffered channels work across goroutines too' },
-            { label: 'Ordered results claim — buffered channels don\'t guarantee arrival order' },
+            { label: "Ordered results claim — buffered channels don't guarantee arrival order" },
             { label: 'No unbuffered claim — unbuffered channels are valid in production' },
           ],
           explain:
@@ -150,9 +154,13 @@ func main() {
         },
         {
           id: 'ortb-fanout-smart-selection',
-          prompt: 'A production exchange has 50 registered DSPs but only fans out to 5–10 per auction. What criterion is most commonly used to choose which DSPs to invite?',
+          prompt:
+            'A production exchange has 50 registered DSPs but only fans out to 5–10 per auction. What criterion is most commonly used to choose which DSPs to invite?',
           choices: [
-            { label: 'Targeting + history — win rate, fill rate, geo/format match per DSP', correct: true },
+            {
+              label: 'Targeting + history — win rate, fill rate, geo/format match per DSP',
+              correct: true,
+            },
             { label: 'Alphabetical claim — DSP selection by name ignores targeting quality' },
             { label: 'Round-robin claim — rotation ignores DSP targeting match quality' },
             { label: 'Pre-paid claim — floor prepayment does not determine DSP selection' },
@@ -162,22 +170,26 @@ func main() {
         },
         {
           id: 'ortb-fanout-goroutine-lifetime',
-          prompt: 'After context deadline expires and your fan-in loop exits, DSP goroutines that haven\'t finished yet will:',
+          prompt:
+            "After context deadline expires and your fan-in loop exits, DSP goroutines that haven't finished yet will:",
           choices: [
-            { label: 'Complete + send — exits normally; buffered channel absorbs the result', correct: true },
+            {
+              label: 'Complete + send — exits normally; buffered channel absorbs the result',
+              correct: true,
+            },
             { label: 'Hang-forever claim — ctx cancels pending HTTP calls immediately' },
-            { label: 'Runtime kill claim — Go runtime doesn\'t kill goroutines on ctx done' },
-            { label: 'Panic claim — goroutines send to buffered channel, which isn\'t closed' },
+            { label: "Runtime kill claim — Go runtime doesn't kill goroutines on ctx done" },
+            { label: "Panic claim — goroutines send to buffered channel, which isn't closed" },
           ],
           explain:
-            'Context cancellation signals the http.Client to abort the in-flight request, so slow DSP goroutines will unblock quickly with a context error. They then try to send the error result to the buffered channel — this succeeds immediately since the buffer has capacity. Once they\'ve sent, the goroutines exit. The channel is closed by the WaitGroup-tracking goroutine after all N workers finish.',
+            "Context cancellation signals the http.Client to abort the in-flight request, so slow DSP goroutines will unblock quickly with a context error. They then try to send the error result to the buffered channel — this succeeds immediately since the buffer has capacity. Once they've sent, the goroutines exit. The channel is closed by the WaitGroup-tracking goroutine after all N workers finish.",
         },
       ],
       design: {
         prompt:
           'Your exchange fans out to 10 DSPs and must return to the SSP in 100 ms. One DSP consistently responds in 90–95 ms (close to tmax but usually under). How do you handle this DSP without missing the overall deadline?',
         answer:
-          '1. Hedged requests: send the request to the slow DSP\'s primary endpoint at t=0; if no response by t=50 ms, simultaneously send to its backup endpoint. First response wins. This halves the effective tail latency.\n2. Per-DSP deadline: set a per-DSP context deadline at tmax-10ms (90 ms) rather than the full tmax. Returns the bid 10 ms before you need to respond to the SSP.\n3. Circuit breaker: track the DSP\'s p99 latency over a rolling window. If p99 > 80% of tmax, temporarily exclude the DSP from auctions and reset after 30 seconds.\n4. Capacity admission: some exchanges allow DSPs to publish a capacity signal (qps_limit). Fan out only when the DSP has available capacity.\n5. Async billing: don\'t block response on billing/nurl calls — fire them in background goroutines after the winner is selected.',
+          "1. Hedged requests: send the request to the slow DSP's primary endpoint at t=0; if no response by t=50 ms, simultaneously send to its backup endpoint. First response wins. This halves the effective tail latency.\n2. Per-DSP deadline: set a per-DSP context deadline at tmax-10ms (90 ms) rather than the full tmax. Returns the bid 10 ms before you need to respond to the SSP.\n3. Circuit breaker: track the DSP's p99 latency over a rolling window. If p99 > 80% of tmax, temporarily exclude the DSP from auctions and reset after 30 seconds.\n4. Capacity admission: some exchanges allow DSPs to publish a capacity signal (qps_limit). Fan out only when the DSP has available capacity.\n5. Async billing: don't block response on billing/nurl calls — fire them in background goroutines after the winner is selected.",
       },
       keyPoints: [
         'Fan-out: one goroutine per DSP, all launched simultaneously within the tmax context.',
@@ -199,7 +211,7 @@ func main() {
       memorize:
         'Hedge = send backup at hedge_ms if primary silent. First response wins. Cancel loser. hedge_ms ≈ primary_p50 + 10 ms. Latency gain: cuts p99 to p50+hedge.',
       scene:
-        'Ordering pizza: if delivery hasn\'t arrived in 40 minutes, call a second shop. Whichever shows up first, you eat. Cancel the other order.',
+        "Ordering pizza: if delivery hasn't arrived in 40 minutes, call a second shop. Whichever shows up first, you eat. Cancel the other order.",
       time: 'O(1) wall-clock improvement: p99 → p50 + hedge_delay',
       space: 'O(1) extra goroutine per hedged request',
       code: `package main
@@ -294,7 +306,8 @@ func main() {
       quiz: [
         {
           id: 'ortb-hedge-latency-math',
-          prompt: 'Your DSP has p50=30ms and p99=90ms responses. You hedge at t=40ms with a backup replica that has p50=25ms. The effective p99 of the hedged call is approximately:',
+          prompt:
+            'Your DSP has p50=30ms and p99=90ms responses. You hedge at t=40ms with a backup replica that has p50=25ms. The effective p99 of the hedged call is approximately:',
           choices: [
             { label: '65 ms — hedge_delay + backup_p50 = 40 + 25 ms', correct: true },
             { label: '30 ms claim — hedging affects p50 by adding backup requests' },
@@ -314,29 +327,32 @@ func main() {
             { label: 'GC block claim — a timer goroutine does not prevent GC from running' },
           ],
           explain:
-            'When a primary response is slow, the backup call fires — adding an extra HTTP request to the DSP for each tail-latency event. If p99 tail is 5% of traffic and you hedge 5% of requests, you add ~5% load on DSP endpoints. In exchange integrations, it\'s polite to inform DSPs that you hedge and only count one win per hedged pair. The DSP will receive two requests but should only process one win notice.',
+            "When a primary response is slow, the backup call fires — adding an extra HTTP request to the DSP for each tail-latency event. If p99 tail is 5% of traffic and you hedge 5% of requests, you add ~5% load on DSP endpoints. In exchange integrations, it's polite to inform DSPs that you hedge and only count one win per hedged pair. The DSP will receive two requests but should only process one win notice.",
         },
         {
           id: 'ortb-hedge-sync-once',
           prompt: 'sync.Once in the hedged request implementation ensures:',
           choices: [
-            { label: 'First completes — sync.Once ensures only one goroutine sends the result', correct: true },
+            {
+              label: 'First completes — sync.Once ensures only one goroutine sends the result',
+              correct: true,
+            },
             { label: 'Primary wins claim — whichever finishes first wins; not always primary' },
             { label: 'Both run claim — both goroutines run; slower result is discarded' },
             { label: 'Concurrent-safe claim — sync.Once is safe for concurrent use' },
           ],
           explain:
-            'sync.Once.Do executes its argument function exactly once across all goroutines that call it. In the hedged implementation, both the primary and backup goroutines try to send their result via once.Do. The first to succeed sends; the second\'s once.Do is a no-op. This guarantees exactly one result in the channel regardless of which goroutine finishes first.',
+            "sync.Once.Do executes its argument function exactly once across all goroutines that call it. In the hedged implementation, both the primary and backup goroutines try to send their result via once.Do. The first to succeed sends; the second's once.Do is a no-op. This guarantees exactly one result in the channel regardless of which goroutine finishes first.",
         },
       ],
       design: {
         prompt:
-          'You want to add a circuit breaker to your exchange\'s DSP fan-out to automatically exclude consistently slow or erroring DSPs from auctions. What metrics would you track and what would your state machine look like?',
+          "You want to add a circuit breaker to your exchange's DSP fan-out to automatically exclude consistently slow or erroring DSPs from auctions. What metrics would you track and what would your state machine look like?",
         answer:
           'Metrics per DSP (rolling 60-second window): (a) timeout rate = requests timing out / total requests, (b) error rate = HTTP 5xx + connection errors / total, (c) p99 latency.\n\nCircuit breaker states:\n- Closed (normal): DSP is included in auctions. Monitor metrics.\n- Open (tripped): DSP is excluded. Tripped when timeout_rate > 20% OR error_rate > 10% OR p99 > 90% of tmax. Duration: 30 seconds.\n- Half-open (probe): after open duration, send 1% of traffic to DSP. If success rate > 90% for 10 requests, close. Else reopen for another 30 seconds.\n\nGo implementation: atomic counters per DSP in a sliding window (ring buffer of per-second buckets). A background goroutine evaluates thresholds every second and updates the circuit state in an atomic.Value.',
       },
       keyPoints: [
-        'Hedge at the primary\'s p50 + small buffer; backup fires only if primary misses the hedge delay.',
+        "Hedge at the primary's p50 + small buffer; backup fires only if primary misses the hedge delay.",
         'Effective p99 ≈ hedge_delay + backup_p50 (much better than raw primary p99).',
         'Use sync.Once so only the first goroutine to finish writes to the result channel.',
         'Buffer the result channel = 2 to prevent goroutine leaks (winner + loser can both send).',
@@ -348,7 +364,8 @@ func main() {
       title: 'First/Second-Price Auction Logic',
       difficulty: 'Medium',
       tags: ['auction', 'first-price', 'second-price', 'winner', 'clearing-price', 'floor'],
-      summary: 'Implement exchange-side auction: collect bids, enforce floor, select winner, compute clearing price.',
+      summary:
+        'Implement exchange-side auction: collect bids, enforce floor, select winner, compute clearing price.',
       pattern: 'Auction engine',
       visual:
         'Sort bids descending by price. First-price: winner.ClearingPrice = winner.Bid. Second-price: winner.ClearingPrice = max(floor, second.Bid). Reject bids < floor.',
@@ -459,9 +476,13 @@ func main() {
       quiz: [
         {
           id: 'ortb-auction-tie',
-          prompt: 'Two DSPs submit identical bid prices in a first-price auction. How should the exchange resolve the tie?',
+          prompt:
+            'Two DSPs submit identical bid prices in a first-price auction. How should the exchange resolve the tie?',
           choices: [
-            { label: 'Random selection among tied bids — ensures fairness and prevents gaming', correct: true },
+            {
+              label: 'Random selection among tied bids — ensures fairness and prevents gaming',
+              correct: true,
+            },
             { label: 'First bid received wins — simpler implementation' },
             { label: 'Largest seat ID claim — seat ID ordering is not standard tie-breaking' },
             { label: 'Both bids win — exchange serves two ads simultaneously' },
@@ -473,8 +494,11 @@ func main() {
           id: 'ortb-auction-floor-enforcement',
           prompt: 'A DSP bids $1.20 CPM and the Imp.bidfloor is $1.50 CPM. The exchange should:',
           choices: [
-            { label: 'Reject below-floor — invalid bid; floor enforcement is independent', correct: true },
-            { label: 'Bump clearing claim — exchange never bumps below-floor bids\' price' },
+            {
+              label: 'Reject below-floor — invalid bid; floor enforcement is independent',
+              correct: true,
+            },
+            { label: "Bump clearing claim — exchange never bumps below-floor bids' price" },
             { label: 'Conditional accept claim — below-floor bids are always rejected' },
             { label: 'Publisher forward claim — exchange enforces floor independently' },
           ],
@@ -483,9 +507,13 @@ func main() {
         },
         {
           id: 'ortb-auction-deal-priority',
-          prompt: 'In an auction where both a PMP deal bid ($3.00 CPM) and an open auction bid ($5.00 CPM) compete, which wins?',
+          prompt:
+            'In an auction where both a PMP deal bid ($3.00 CPM) and an open auction bid ($5.00 CPM) compete, which wins?',
           choices: [
-            { label: 'Deal type determines priority — PG/preferred win outright; PMP competes', correct: true },
+            {
+              label: 'Deal type determines priority — PG/preferred win outright; PMP competes',
+              correct: true,
+            },
             { label: 'The open auction bid always wins — highest price wins' },
             { label: 'The deal bid always wins — deals have guaranteed priority' },
             { label: 'Separate auctions claim — exchange runs a unified deal-priority auction' },
@@ -498,11 +526,11 @@ func main() {
         prompt:
           'Your exchange processes 1 million auctions per second. Describe the data path from receiving a BidRequest to returning the winning markup to the SSP, including how you handle auction results for billing reconciliation.',
         answer:
-          '1. Receive BidRequest from SSP via HTTP POST; validate and enrich (5 ms).\n2. DSP selection: score 50 registered DSPs, select top 5–10 for this impression (O(N) from in-process cache).\n3. Fan-out: POST BidRequest to selected DSPs with per-DSP deadline (tmax - 10ms).\n4. Collect bids in buffered channel; at deadline, close collection.\n5. Auction: filter eligible bids (price ≥ floor), sort, select winner, compute clearing price (O(N log N), N ≈ 10).\n6. Return winning markup (adm) to SSP in JSON BidResponse.\n7. In background goroutine: call winner\'s nurl with \${AUCTION_PRICE}; call losers\' lurl (optional).\n8. Write result to ring buffer; background worker batches to Kafka (win + bids + clearing price) for billing reconciliation.\n9. Billing: on burl call from exchange renderer, record spend event; reconcile daily with DSP-side counts.',
+          "1. Receive BidRequest from SSP via HTTP POST; validate and enrich (5 ms).\n2. DSP selection: score 50 registered DSPs, select top 5–10 for this impression (O(N) from in-process cache).\n3. Fan-out: POST BidRequest to selected DSPs with per-DSP deadline (tmax - 10ms).\n4. Collect bids in buffered channel; at deadline, close collection.\n5. Auction: filter eligible bids (price ≥ floor), sort, select winner, compute clearing price (O(N log N), N ≈ 10).\n6. Return winning markup (adm) to SSP in JSON BidResponse.\n7. In background goroutine: call winner's nurl with \${AUCTION_PRICE}; call losers' lurl (optional).\n8. Write result to ring buffer; background worker batches to Kafka (win + bids + clearing price) for billing reconciliation.\n9. Billing: on burl call from exchange renderer, record spend event; reconcile daily with DSP-side counts.",
       },
       keyPoints: [
         'Filter bids below floor before sorting — floor enforcement is a hard constraint.',
-        'First-price: clearing = winner\'s bid. Second-price: clearing = max(floor, second-highest bid).',
+        "First-price: clearing = winner's bid. Second-price: clearing = max(floor, second-highest bid).",
         'Tie-breaking should be random to prevent gaming.',
         'Deal priority: Programmatic Guaranteed > Preferred Deal > PMP > Open Auction.',
         'Fire nurl (win) and lurl (loss) in background goroutines — never block the SSP response on these.',
@@ -520,7 +548,7 @@ func main() {
       memorize:
         'Open floor = Imp.bidfloor. Deal floor = deal.bidfloor (usually higher). Deal types: PG=pre-sold, PD=first-look, PMP=compete. DealID in Bid flags the winning deal. private_auction=1 blocks open bids.',
       scene:
-        'A venue\'s ticket pricing: floor is the minimum ticket price. Deals are corporate packages: PG = season pass (you got it before the show); preferred deal = early-access invite before box office opens; PMP = you bid at a special section with higher reserve, but others can bid too.',
+        "A venue's ticket pricing: floor is the minimum ticket price. Deals are corporate packages: PG = season pass (you got it before the show); preferred deal = early-access invite before box office opens; PMP = you bid at a special section with higher reserve, but others can bid too.",
       time: '—',
       space: '—',
       code: `package main
@@ -638,9 +666,13 @@ func main() {
       quiz: [
         {
           id: 'ortb-floor-bidfloorcur',
-          prompt: 'The Imp.bidfloorcur field is set to "EUR" and bidfloor is 2.00. A DSP bids 2.50 in USD. What should the exchange do?',
+          prompt:
+            'The Imp.bidfloorcur field is set to "EUR" and bidfloor is 2.00. A DSP bids 2.50 in USD. What should the exchange do?',
           choices: [
-            { label: 'FX conversion — convert DSP bid to floor currency before comparison', correct: true },
+            {
+              label: 'FX conversion — convert DSP bid to floor currency before comparison',
+              correct: true,
+            },
             { label: 'Accept the bid — 2.50 > 2.00 regardless of currency' },
             { label: 'Reject the bid — currency mismatch is always a hard rejection' },
             { label: 'Static rate claim — real-time FX rates should be used, not static' },
@@ -650,21 +682,29 @@ func main() {
         },
         {
           id: 'ortb-pmp-dealid-bid',
-          prompt: 'A DSP\'s Bid includes a dealid that does not match any deal in Imp.pmp.deals. The exchange should:',
+          prompt:
+            "A DSP's Bid includes a dealid that does not match any deal in Imp.pmp.deals. The exchange should:",
           choices: [
-            { label: 'Reject invalid deal — dealid must match a valid BidRequest deal', correct: true },
+            {
+              label: 'Reject invalid deal — dealid must match a valid BidRequest deal',
+              correct: true,
+            },
             { label: 'Accept DSP price claim — exchange validates dealid against BidRequest' },
             { label: 'Open auction claim — unknown dealid bids must be rejected or demoted' },
-            { label: 'Dynamic deal claim — exchanges don\'t create deals on the fly' },
+            { label: "Dynamic deal claim — exchanges don't create deals on the fly" },
           ],
           explain:
-            'A dealid in a Bid must reference an existing deal in the corresponding Imp.pmp.deals array. A dealid that doesn\'t match is likely a DSP bug (stale deal ID, wrong impression). Exchanges should reject or flag such bids to protect deal integrity. Treating it as an open auction bid would violate the deal contract with the publisher.',
+            "A dealid in a Bid must reference an existing deal in the corresponding Imp.pmp.deals array. A dealid that doesn't match is likely a DSP bug (stale deal ID, wrong impression). Exchanges should reject or flag such bids to protect deal integrity. Treating it as an open auction bid would violate the deal contract with the publisher.",
         },
         {
           id: 'ortb-floor-dynamic',
-          prompt: 'Dynamic floors set by SSPs per-auction (different from static publisher floors) primarily benefit:',
+          prompt:
+            'Dynamic floors set by SSPs per-auction (different from static publisher floors) primarily benefit:',
           choices: [
-            { label: 'Publishers benefit — floors adjust to demand, capturing higher revenue', correct: true },
+            {
+              label: 'Publishers benefit — floors adjust to demand, capturing higher revenue',
+              correct: true,
+            },
             { label: 'DSPs — dynamic floors give predictable CPMs for campaign planning' },
             { label: 'Exchanges — dynamic floors reduce the number of invalid bids to process' },
             { label: 'Advertisers — dynamic floors ensure creatives always pass brand safety' },

@@ -1,8 +1,21 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { VizStage, RailGroup, RailStat, RailResult, InspectorRow, VarGrid, VizEmpty } from '../../../_shared/vizKit';
+import {
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailResult,
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+} from '../../../_shared/vizKit';
 
 interface AndInput {
   nums: number[];
@@ -55,20 +68,28 @@ function record({ nums, numSlots }: AndInput): Frame<AndState>[] {
   }
 
   // Collapse to just the reachable masks for a compact, faithful row.
-  const masks = dpFull.map((v, i) => ({ v, i })).filter((o) => o.v !== NEG).map((o) => o.i);
+  const masks = dpFull
+    .map((v, i) => ({ v, i }))
+    .filter((o) => o.v !== NEG)
+    .map((o) => o.i);
   const maskValue = new Map(masks.map((m) => [m, dpFull[m]]));
   const visible = new Array<number>(masks.length).fill(NEG);
   const { emit, frames } = createRecorder<AndState>(() => ({
-        nums: nums,
-        numSlots: numSlots,
-        masks: masks.slice(),
-        dp: visible.slice(),
-        cur: null,
-        answer: null,
-        done: false
-      }));
+    nums: nums,
+    numSlots: numSlots,
+    masks: masks.slice(),
+    dp: visible.slice(),
+    cur: null,
+    answer: null,
+    done: false,
+  }));
 
-  emit('INIT', `${nums.length} nums, ${numSlots} slots`, `Maximum AND Sum: assign every number in [${nums.join(', ')}] to one of ${numSlots} slots (each slot holds at most 2) to maximise Σ (num AND slotIndex). State = a base-2-per-slot mask of slot occupancy; dp[mask] = the best AND-sum once that many numbers are placed. Only reachable masks are shown; the index label is the slot-occupancy triple (slot1·slot2·…).`, { cur: null, answer: null });
+  emit(
+    'INIT',
+    `${nums.length} nums, ${numSlots} slots`,
+    `Maximum AND Sum: assign every number in [${nums.join(', ')}] to one of ${numSlots} slots (each slot holds at most 2) to maximise Σ (num AND slotIndex). State = a base-2-per-slot mask of slot occupancy; dp[mask] = the best AND-sum once that many numbers are placed. Only reachable masks are shown; the index label is the slot-occupancy triple (slot1·slot2·…).`,
+    { cur: null, answer: null },
+  );
 
   // Reveal each reachable mask in order. mask 0 (nothing placed) is the base.
   for (let k = 0; k < masks.length; k++) {
@@ -76,9 +97,19 @@ function record({ nums, numSlots }: AndInput): Frame<AndState>[] {
     visible[k] = dpFull[mask];
     const cnt = assignedCount(mask, numSlots);
     if (mask === 0) {
-      emit('BASE', `dp[0]=0`, `Base case: no number assigned yet (occupancy ${occString(mask, numSlots)}), so dp = 0.`, { cur: k, answer: null });
+      emit(
+        'BASE',
+        `dp[0]=0`,
+        `Base case: no number assigned yet (occupancy ${occString(mask, numSlots)}), so dp = 0.`,
+        { cur: k, answer: null },
+      );
     } else {
-      emit('FILL', `dp[${mask}]=${dpFull[mask]}`, `Mask ${mask} (occupancy ${occString(mask, numSlots)}) means ${cnt} number${cnt === 1 ? '' : 's'} placed. The best AND-sum to reach this arrangement is dp = ${dpFull[mask]}.`, { cur: k, answer: null });
+      emit(
+        'FILL',
+        `dp[${mask}]=${dpFull[mask]}`,
+        `Mask ${mask} (occupancy ${occString(mask, numSlots)}) means ${cnt} number${cnt === 1 ? '' : 's'} placed. The best AND-sum to reach this arrangement is dp = ${dpFull[mask]}.`,
+        { cur: k, answer: null },
+      );
     }
   }
 
@@ -90,7 +121,13 @@ function record({ nums, numSlots }: AndInput): Frame<AndState>[] {
       bestK = k;
     }
   });
-  emit('DONE', `${best}`, `Among masks that place all ${nums.length} numbers, the largest dp is ${best}. So the maximum AND sum is ${best}.`, { cur: bestK, answer: best , done: true }, 'good');
+  emit(
+    'DONE',
+    `${best}`,
+    `Among masks that place all ${nums.length} numbers, the largest dp is ${best}. So the maximum AND sum is ${best}.`,
+    { cur: bestK, answer: best, done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -98,7 +135,8 @@ function View({ frame }: PluginViewProps<AndState>) {
   const s = frame.state;
   const cells = s.dp.map((v) => (v === NEG ? '·' : v));
   const pointers: ArrayPointer[] = [];
-  if (s.cur !== null) pointers.push({ i: s.cur, label: `mask ${s.masks[s.cur]}`, tone: 'accent', place: 'above' });
+  if (s.cur !== null)
+    pointers.push({ i: s.cur, label: `mask ${s.masks[s.cur]}`, tone: 'accent', place: 'above' });
   const tone = (i: number) => {
     if (s.cur === i) return 'found';
     return s.dp[i] !== NEG ? 'match' : '';
@@ -106,17 +144,29 @@ function View({ frame }: PluginViewProps<AndState>) {
   const mask = s.cur !== null ? s.masks[s.cur] : null;
   const dpVal = s.cur !== null && s.dp[s.cur] !== NEG ? s.dp[s.cur] : null;
   return (
-    <VizStage rail={<>
-      <RailGroup label="current">
-        <RailStat k="mask" v={mask ?? '—'} tone={mask !== null ? 'accent' : undefined} />
-        <RailStat k="occ" v={mask !== null ? occString(mask, s.numSlots) : '—'} />
-        <RailStat k="dp" v={dpVal ?? '—'} />
-      </RailGroup>
-      {s.answer !== null
-        ? <RailResult label="answer" value={s.answer} tone="good" />
-        : <RailResult label="answer" value="…" tone="accent" />}
-    </>}>
-      <ArrayRow values={cells} cellTone={tone} pointers={pointers} windowRange={null} label={(i) => occString(s.masks[i], s.numSlots)} />
+    <VizStage
+      rail={
+        <>
+          <RailGroup label="current">
+            <RailStat k="mask" v={mask ?? '—'} tone={mask !== null ? 'accent' : undefined} />
+            <RailStat k="occ" v={mask !== null ? occString(mask, s.numSlots) : '—'} />
+            <RailStat k="dp" v={dpVal ?? '—'} />
+          </RailGroup>
+          {s.answer !== null ? (
+            <RailResult label="answer" value={s.answer} tone="good" />
+          ) : (
+            <RailResult label="answer" value="…" tone="accent" />
+          )}
+        </>
+      }
+    >
+      <ArrayRow
+        values={cells}
+        cellTone={tone}
+        pointers={pointers}
+        windowRange={null}
+        label={(i) => occString(s.masks[i], s.numSlots)}
+      />
     </VizStage>
   );
 }
@@ -142,7 +192,11 @@ export const title = 'Maximum AND Sum of Array';
 
 export const simulator: ProblemSimulator = {
   inputs: [
-    { id: 'n6s3', label: 'nums [1..6], 3 slots (answer 9)', value: { nums: [1, 2, 3, 4, 5, 6], numSlots: 3 } },
+    {
+      id: 'n6s3',
+      label: 'nums [1..6], 3 slots (answer 9)',
+      value: { nums: [1, 2, 3, 4, 5, 6], numSlots: 3 },
+    },
   ] satisfies SampleInput<AndInput>[],
   record,
   View,

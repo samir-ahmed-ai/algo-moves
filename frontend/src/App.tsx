@@ -5,10 +5,11 @@ import { Workspace } from './shell/Workspace';
 import { LandingPage } from './shell/home/LandingPage';
 import { MobileApp } from './shell/mobile/MobileApp';
 import { VimDojoPage } from './shell/vim/VimDojoPage';
-import { GamesPage } from './shell/games/GamesPage';
+import { GamesPage } from '@/shell/games';
 import { ErrorBoundary } from './shell/ErrorBoundary';
 import { PlanProvider } from './shell/plans/PlanContext';
 import { PlansPage } from './shell/plans/PlansPage';
+import { ResumesPage } from './shell/resumes/ResumesPage';
 
 function Shell() {
   const { route } = useWorkspace();
@@ -16,6 +17,7 @@ function Shell() {
   if (route === 'vim') return <VimDojoPage />;
   if (route === 'games') return <GamesPage />;
   if (route === 'plans') return <PlansPage />;
+  if (route === 'resumes') return <ResumesPage />;
   return route === 'home' ? <LandingPage /> : <Workspace />;
 }
 

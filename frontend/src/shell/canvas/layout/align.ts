@@ -55,7 +55,8 @@ export function applyAlign(nodes: PanelFlowNode[], kind: AlignKind): PanelFlowNo
 export function applyDistribute(nodes: PanelFlowNode[], dir: 'h' | 'v'): PanelFlowNode[] {
   const sel = nodes.filter((n) => n.selected);
   if (sel.length < 3) return nodes;
-  const centerOf = (n: PanelFlowNode) => (dir === 'h' ? n.position.x + W(n) / 2 : n.position.y + H(n) / 2);
+  const centerOf = (n: PanelFlowNode) =>
+    dir === 'h' ? n.position.x + W(n) / 2 : n.position.y + H(n) / 2;
   const ordered = [...sel].sort((a, b) => centerOf(a) - centerOf(b));
   const first = centerOf(ordered[0]);
   const last = centerOf(ordered[ordered.length - 1]);

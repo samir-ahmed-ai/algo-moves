@@ -36,7 +36,9 @@ export const NAMED_LAYOUT_PRESETS: Record<NamedLayoutPreset, LayoutPreset> = {
 export function resolveNamedLayoutPreset(value: string): LayoutPreset | null {
   const lower = value.toLowerCase();
   if (lower in NAMED_LAYOUT_PRESETS) return NAMED_LAYOUT_PRESETS[lower as NamedLayoutPreset];
-  if ((['Full', 'TraceFocus', 'Minimal', 'Theater', 'Demo'] as const).includes(value as LayoutPreset)) {
+  if (
+    (['Full', 'TraceFocus', 'Minimal', 'Theater', 'Demo'] as const).includes(value as LayoutPreset)
+  ) {
     return value as LayoutPreset;
   }
   return null;
@@ -110,7 +112,11 @@ const PRESET_KEEP: Record<LayoutPreset, Partial<Record<CanvasMode, string[]>>> =
 };
 
 /** Ids to mark removed for a preset (so buildFor hides them). Empty = show everything. */
-export function presetRemoved(plugin: ProblemPlugin<any, any>, mode: CanvasMode, preset: LayoutPreset): string[] {
+export function presetRemoved(
+  plugin: ProblemPlugin<any, any>,
+  mode: CanvasMode,
+  preset: LayoutPreset,
+): string[] {
   const keep = PRESET_KEEP[preset]?.[mode];
   if (!keep) return [];
   return modeNodeIds(plugin, mode).filter((id) => !keep.includes(id));
@@ -139,7 +145,13 @@ function isSideTab(tab: { mode?: string; side?: boolean }): boolean {
 }
 
 /** Optional panels that work on the standalone canvas without a loaded problem plugin. */
-export const STANDALONE_ADDABLE_PANELS = ['notes', 'bookmarks', 'projects', 'whiteboard', 'collab-code'] as const;
+export const STANDALONE_ADDABLE_PANELS = [
+  'notes',
+  'bookmarks',
+  'projects',
+  'whiteboard',
+  'collab-code',
+] as const;
 
 export function standaloneNodeIds(): string[] {
   return [...STANDALONE_ADDABLE_PANELS];

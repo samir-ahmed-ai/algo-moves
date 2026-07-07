@@ -16,7 +16,9 @@ describe('studioFit', () => {
   });
 
   it('uses full viewport width below the desktop breakpoint', () => {
-    expect(studioMiddleColumnWidth(STUDIO_DESKTOP_BREAKPOINT - 1)).toBe(STUDIO_DESKTOP_BREAKPOINT - 1);
+    expect(studioMiddleColumnWidth(STUDIO_DESKTOP_BREAKPOINT - 1)).toBe(
+      STUDIO_DESKTOP_BREAKPOINT - 1,
+    );
   });
 
   it('derives default flow canvas width from the reference viewport', () => {

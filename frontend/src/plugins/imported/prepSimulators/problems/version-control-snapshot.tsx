@@ -1,12 +1,17 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
 
 type VcOp =
-  | { kind: 'set'; key: string; value: number }
-  | { kind: 'get'; key: string; version: number };
+  { kind: 'set'; key: string; value: number } | { kind: 'get'; key: string; version: number };
 
 interface VcInput {
   ops: VcOp[];
@@ -21,16 +26,17 @@ interface VcState {
   done: boolean;
 }
 
-function record({ ops }: VcInput): Frame<VcState>[] {  const history: Record<string, number>[] = [{}];
+function record({ ops }: VcInput): Frame<VcState>[] {
+  const history: Record<string, number>[] = [{}];
 
   const { emit, frames } = createRecorder<VcState>(() => ({
-        history: history.map((h) => ({ ...h })),
-        version: history.length - 1,
-        op: '',
-        result: null,
-        found: null,
-        done: false
-      }));
+    history: history.map((h) => ({ ...h })),
+    version: history.length - 1,
+    op: '',
+    result: null,
+    found: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -48,7 +54,11 @@ function record({ ops }: VcInput): Frame<VcState>[] {  const history: Record<str
         'SET',
         `${o.key}=${o.value}`,
         `set("${o.key}", ${o.value}): copy-on-write → version ${history.length - 1}.`,
-        { op: `set ${o.key}=${o.value}`, version: history.length - 1, history: history.map((h) => ({ ...h })) },
+        {
+          op: `set ${o.key}=${o.value}`,
+          version: history.length - 1,
+          history: history.map((h) => ({ ...h })),
+        },
       );
     } else {
       const ok = o.version >= 0 && o.version < history.length;
@@ -88,16 +98,25 @@ function View({ frame }: PluginViewProps<VcState>) {
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
         {s.op || '—'}
-        {s.found && s.result !== null && <span className="ml-2 font-mono text-good">{s.result}</span>}
+        {s.found && s.result !== null && (
+          <span className="ml-2 font-mono text-good">{s.result}</span>
+        )}
       </div>
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>version {ver} · {s.history.length} snapshot(s)</div>
+      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>
+        version {ver} · {s.history.length} snapshot(s)
+      </div>
       <div className="mt-1 space-y-1">
         {Object.entries(cur).map(([k, v]) => (
-          <div key={k} className={cn('rounded border border-edge px-2 py-0.5 font-mono', vizText.sm)}>
+          <div
+            key={k}
+            className={cn('rounded border border-edge px-2 py-0.5 font-mono', vizText.sm)}
+          >
             {k} = {v}
           </div>
         ))}
-        {Object.keys(cur).length === 0 && <span className={cn(vizText.sm, 'text-ink3')}>empty</span>}
+        {Object.keys(cur).length === 0 && (
+          <span className={cn(vizText.sm, 'text-ink3')}>empty</span>
+        )}
       </div>
       <div className={cn('mt-2', vizText.sm, 'text-ink3')}>history timeline</div>
       <div className="mt-1 flex gap-1">
@@ -134,112 +153,109 @@ function Inspector({ frame }: InspectorProps<VcState>) {
 export const manifestId = 'prep-design-version-control-snapshot';
 export const title = 'Version control snapshot';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Version control snapshot\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Version control snapshot"?',
     choices: [
       {
-        label: "Copy-on-write version snapshots — fits this problem",
-        correct: true
+        label: 'Copy-on-write version snapshots — fits this problem',
+        correct: true,
       },
       {
-        label: "Stack — different approach"
+        label: 'Stack — different approach',
       },
       {
-        label: "Two Heaps — different approach"
+        label: 'Two Heaps — different approach',
       },
       {
-        label: "Jump Array — different approach"
-      }
+        label: 'Jump Array — different approach',
+      },
     ],
-    explain: "Stack of maps; each set pushes a fresh copied snapshot layer"
+    explain: 'Stack of maps; each set pushes a fresh copied snapshot layer',
   },
   {
-    id: "key-step",
-    prompt: "On the \"SET\" step (=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "SET" step (=), what happens?',
     choices: [
       {
-        label: "set(\"\", ): copy-on-write → version . — this move caption",
-        correct: true
+        label: 'set("", ): copy-on-write → version . — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "set(\"\", ): copy-on-write → version ."
+    explain: 'set("", ): copy-on-write → version .',
   },
   {
-    id: "state",
-    prompt: "What does the `history` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `history` field track in the visualization state?',
     choices: [
       {
-        label: "Field history in state — updated each frame",
-        correct: true
+        label: 'Field history in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `history` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `history` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Version control snapshot\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Version control snapshot"?',
     choices: [
       {
-        label: "O(versions) get time, O(changes) space — standard bounds here",
-        correct: true
+        label: 'O(versions) get time, O(changes) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
+        label: 'O(1) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
+        label: 'O(n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(versions) get. O(changes). copy latest, set key, append; get reads history[version]"
+    explain:
+      'O(versions) get. O(changes). copy latest, set key, append; get reads history[version]',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Done. Current version = . — final DONE caption",
-        correct: true
+        label: 'Done. Current version = . — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Done. Current version = ."
-  }
+    explain: 'Done. Current version = .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

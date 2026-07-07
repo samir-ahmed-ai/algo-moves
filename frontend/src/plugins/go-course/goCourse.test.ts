@@ -19,7 +19,9 @@ describe('go-course content integrity', () => {
 
   it('every concept ships a Go program starting with package main', () => {
     for (const c of concepts) {
-      expect(c.code.trim().startsWith('package main'), `${c.id} code must be package main`).toBe(true);
+      expect(c.code.trim().startsWith('package main'), `${c.id} code must be package main`).toBe(
+        true,
+      );
     }
   });
 

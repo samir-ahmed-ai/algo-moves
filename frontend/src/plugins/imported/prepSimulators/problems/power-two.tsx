@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -38,18 +44,19 @@ function lowestSetColumn(value: number, width: number): number | null {
   return null;
 }
 
-function record({ n }: PowerTwoInput): Frame<PowerTwoState>[] {  const width = WIDTH;
+function record({ n }: PowerTwoInput): Frame<PowerTwoState>[] {
+  const width = WIDTH;
   const rows: Row[] = [];
 
   const { emit, frames } = createRecorder<PowerTwoState>(() => ({
-        n,
-        width,
-        rows: rows.map((r) => ({ label: r.label, bits: r.bits.slice() })),
-        focusCol: null,
-        lowestSet: null,
-        result: null,
-        done: false
-      }));
+    n,
+    width,
+    rows: rows.map((r) => ({ label: r.label, bits: r.bits.slice() })),
+    focusCol: null,
+    lowestSet: null,
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -170,8 +177,15 @@ function View({ frame }: PluginViewProps<PowerTwoState>) {
 function Inspector({ frame }: InspectorProps<PowerTwoState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const bitStr = (label: string) => s.rows.find((r) => r.label.startsWith(label))?.bits.join('') ?? '—';
-  const setBits = s.n > 0 ? s.n.toString(2).split('').filter((c) => c === '1').length : 0;
+  const bitStr = (label: string) =>
+    s.rows.find((r) => r.label.startsWith(label))?.bits.join('') ?? '—';
+  const setBits =
+    s.n > 0
+      ? s.n
+          .toString(2)
+          .split('')
+          .filter((c) => c === '1').length
+      : 0;
   return (
     <VarGrid>
       <InspectorRow k="n" v={s.n} />
@@ -187,132 +201,130 @@ function Inspector({ frame }: InspectorProps<PowerTwoState>) {
 export const manifestId = 'prep-math-power-two';
 export const title = 'Power two';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Power two\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Power two"?',
     choices: [
       {
-        label: "Bit trick power of two — fits this problem",
-        correct: true
+        label: 'Bit trick power of two — fits this problem',
+        correct: true,
       },
       {
-        label: "Math (sum - n*min) — different approach"
+        label: 'Math (sum - n*min) — different approach',
       },
       {
-        label: "Base conversion repeated divmod — different approach"
+        label: 'Base conversion repeated divmod — different approach',
       },
       {
-        label: "Palindrome number — different approach"
-      }
+        label: 'Palindrome number — different approach',
+      },
     ],
-    explain: "n & (n-1) clears the lowest set bit, leaving zero"
+    explain: 'n & (n-1) clears the lowest set bit, leaving zero',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Power two), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Power two), what strategy is established?',
     choices: [
       {
-        label: "n & (n-1) clears the lowest — described in INIT caption",
-        correct: true
+        label: 'n & (n-1) clears the lowest — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Power of Two: a number is a power of two when its binary form has exactly one set bit (like 1, 10, 100…). The trick n > 0 && (n & (n-1)) == 0 tests that in O(1). Start with n = ."
+    explain:
+      'Power of Two: a number is a power of two when its binary form has exactly one set bit (like 1, 10, 100…). The trick n > 0 && (n & (n-1)) == 0 tests that in O(1). Start with n = .',
   },
   {
-    id: "key-step",
-    prompt: "On the \"SHOW_M\" step (n-1=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "SHOW_M" step (n-1=), what happens?',
     choices: [
       {
-        label: "n - 1 = . Compared — this move caption",
-        correct: true
+        label: 'n - 1 = . Compared — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "n - 1 = . Compared to n, the lowest set bit turned to 0 and all the zeros to its right turned to 1. So n and n-1 differ exactly at and below that lowest bit."
+    explain:
+      'n - 1 = . Compared to n, the lowest set bit turned to 0 and all the zeros to its right turned to 1. So n and n-1 differ exactly at and below that lowest bit.',
   },
   {
-    id: "state",
-    prompt: "What does the `width` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `width` field track in the visualization state?',
     choices: [
       {
-        label: "number of bit columns rendered — updated each frame",
-        correct: true
+        label: 'number of bit columns rendered — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `width` in sync: number of bit columns rendered"
+    explain: 'The recorder keeps `width` in sync: number of bit columns rendered',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Power two\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Power two"?',
     choices: [
       {
-        label: "O(1) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(1) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
+        label: 'O(n²) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(m·n) time, O(m+n) space — wrong order of growth"
+        label: 'O(m·n) time, O(m+n) space — wrong order of growth',
       },
       {
-        label: "O(reservations) time, O(reserved rows) — wrong order of growth"
-      }
+        label: 'O(reservations) time, O(reserved rows) — wrong order of growth',
+      },
     ],
-    explain: "O(1). O(1). n>0 && n&(n-1)==0"
+    explain: 'O(1). O(1). n>0 && n&(n-1)==0',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Bitwise AND keeps a 1 — final DONE caption",
-        correct: true
+        label: 'Bitwise AND keeps a 1 — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Bitwise AND keeps a 1 only where BOTH numbers have a 1. Since n and n-1 disagree on every bit from the lowest set bit down, the AND clears that whole tail. Result = ."
-  }
+    explain:
+      'Bitwise AND keeps a 1 only where BOTH numbers have a 1. Since n and n-1 disagree on every bit from the lowest set bit down, the AND clears that whole tail. Result = .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

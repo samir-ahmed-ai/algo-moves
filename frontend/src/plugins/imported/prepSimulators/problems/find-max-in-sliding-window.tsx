@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -23,21 +29,22 @@ interface MaxWindowState {
   done: boolean;
 }
 
-function record({ nums, k }: MaxWindowInput): Frame<MaxWindowState>[] {  const dq: number[] = [];
+function record({ nums, k }: MaxWindowInput): Frame<MaxWindowState>[] {
+  const dq: number[] = [];
   const res: number[] = [];
 
   const { emit, frames } = createRecorder<MaxWindowState>(() => ({
-        nums,
-        k,
-        i: null,
-        dq: dq.slice(),
-        res: res.slice(),
-        windowLo: null,
-        popped: null,
-        dropped: null,
-        recorded: null,
-        done: false
-      }));
+    nums,
+    k,
+    i: null,
+    dq: dq.slice(),
+    res: res.slice(),
+    windowLo: null,
+    popped: null,
+    dropped: null,
+    recorded: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -47,7 +54,13 @@ function record({ nums, k }: MaxWindowInput): Frame<MaxWindowState>[] {  const d
   );
 
   if (k === 0 || nums.length === 0) {
-    emit('DONE', 'empty', `k is 0 or the array is empty, so there are no windows. Return [].`, { done: true }, 'bad');
+    emit(
+      'DONE',
+      'empty',
+      `k is 0 or the array is empty, so there are no windows. Return [].`,
+      { done: true },
+      'bad',
+    );
     return frames;
   }
 
@@ -120,7 +133,8 @@ function View({ frame }: PluginViewProps<MaxWindowState>) {
   const front = s.dq.length > 0 ? s.dq[0] : null;
 
   const pointers: ArrayPointer[] = [];
-  if (s.i !== null && !s.done) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
+  if (s.i !== null && !s.done)
+    pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
   if (front !== null) pointers.push({ i: front, label: 'max', tone: 'good', place: 'below' });
 
   const windowRange: [number, number] | null =
@@ -168,9 +182,7 @@ function View({ frame }: PluginViewProps<MaxWindowState>) {
         )}
       </div>
 
-      <div className={cn('mt-1 font-mono text-good', vizText.base)}>
-        → [{s.res.join(', ')}]
-      </div>
+      <div className={cn('mt-1 font-mono text-good', vizText.base)}>→ [{s.res.join(', ')}]</div>
     </div>
   );
 }
@@ -194,132 +206,129 @@ function Inspector({ frame }: InspectorProps<MaxWindowState>) {
 export const manifestId = 'prep-stacks-queues-find-max-in-sliding-window';
 export const title = 'Find max in sliding window';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Find max in sliding window\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Find max in sliding window"?',
     choices: [
       {
-        label: "Monotonic decreasing deque — fits this problem",
-        correct: true
+        label: 'Monotonic decreasing deque — fits this problem',
+        correct: true,
       },
       {
-        label: "Two Pointers — different approach"
+        label: 'Two Pointers — different approach',
       },
       {
-        label: "Postfix evaluation stack — different approach"
+        label: 'Postfix evaluation stack — different approach',
       },
       {
-        label: "Shunting-yard (no parens) — different approach"
-      }
+        label: 'Shunting-yard (no parens) — different approach',
+      },
     ],
-    explain: "Decreasing deque of indices; the front holds the window max"
+    explain: 'Decreasing deque of indices; the front holds the window max',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Find max in sliding window), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Find max in sliding window), what strategy is established?',
     choices: [
       {
-        label: "Decreasing deque of indices; the front — described in INIT caption",
-        correct: true
+        label: 'Decreasing deque of indices; the front — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Find the max of every window of size . We keep a deque of indices whose values are strictly decreasing front-to-back, so the front index always holds the current window's maximum. Time O(n), Space O()."
+    explain:
+      "Find the max of every window of size . We keep a deque of indices whose values are strictly decreasing front-to-back, so the front index always holds the current window's maximum. Time O(n), Space O().",
   },
   {
-    id: "key-step",
-    prompt: "On the \"PUSH\" step (push ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "PUSH" step (push ), what happens?',
     choices: [
       {
-        label: "Push index onto the tail. — this move caption",
-        correct: true
+        label: 'Push index onto the tail. — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Push index  onto the tail. The deque values stay decreasing front-to-back, so the front still names the window's max candidate."
+    explain:
+      "Push index  onto the tail. The deque values stay decreasing front-to-back, so the front still names the window's max candidate.",
   },
   {
-    id: "state",
-    prompt: "What does the `i` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `i` field track in the visualization state?',
     choices: [
       {
-        label: "index currently being processed — updated each frame",
-        correct: true
+        label: 'index currently being processed — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `i` in sync: index currently being processed"
+    explain: 'The recorder keeps `i` in sync: index currently being processed',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Find max in sliding window\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Find max in sliding window"?',
     choices: [
       {
-        label: "O(n) time, O(k) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(k) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(1) per op time, O(n) space — wrong order of growth"
+        label: 'O(1) per op time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
+        label: 'O(n²) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n·maxK) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n·maxK) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(k). pop smaller tail; drop front if out of window; record at i>=k-1"
+    explain: 'O(n). O(k). pop smaller tail; drop front if out of window; record at i>=k-1',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Every window has been processed. — final DONE caption",
-        correct: true
+        label: 'Every window has been processed. — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Every window has been processed. The list of window maxima is []."
-  }
+    explain: 'Every window has been processed. The list of window maxima is [].',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

@@ -43,7 +43,10 @@ describe('slotRect', () => {
 
 describe('assignNodeToSlot', () => {
   it('parents child into host slot with relative position', () => {
-    const nodes = [node('host', { width: 720, height: 480 }), node('child', { position: { x: 50, y: 50 } })];
+    const nodes = [
+      node('host', { width: 720, height: 480 }),
+      node('child', { position: { x: 50, y: 50 } }),
+    ];
     const next = assignNodeToSlot(nodes, 'host', 0, 'child');
     const host = next.find((n) => n.id === 'host')!;
     const child = next.find((n) => n.id === 'child')!;
@@ -65,7 +68,11 @@ describe('assignNodeToSlot', () => {
 
   it('replaces prior occupant by unparenting them', () => {
     const nodes = [
-      node('host', { width: 720, height: 480, data: { kind: 'host', title: 'host', layoutSlots: emptyLayoutSlots() } }),
+      node('host', {
+        width: 720,
+        height: 480,
+        data: { kind: 'host', title: 'host', layoutSlots: emptyLayoutSlots() },
+      }),
       node('a'),
       node('b'),
     ];

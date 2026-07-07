@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { TreeBoard } from '../../../../components/board/TreeBoard';
 import type { ProblemSimulator } from '../types';
@@ -35,20 +41,21 @@ function childrenOf(tree: (number | null)[], i: number): number[] {
   return out;
 }
 
-function record({ tree, a, b }: LcaInput): Frame<LcaState>[] {  const visited: number[] = [];
+function record({ tree, a, b }: LcaInput): Frame<LcaState>[] {
+  const visited: number[] = [];
   const stack: number[] = [];
 
   const { emit, frames } = createRecorder<LcaState>(() => ({
-        tree,
-        a,
-        b,
-        active: null,
-        visited: [...visited],
-        onPath: [...stack],
-        count: null,
-        result: null,
-        done: false
-      }));
+    tree,
+    a,
+    b,
+    active: null,
+    visited: [...visited],
+    onPath: [...stack],
+    count: null,
+    result: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -142,7 +149,13 @@ function record({ tree, a, b }: LcaInput): Frame<LcaState>[] {  const visited: n
       'good',
     );
   } else if (answer === -1) {
-    emit('NONE', 'no LCA', `Neither ${a} nor ${b} was found in the tree, so there is no common ancestor.`, { done: true }, 'bad');
+    emit(
+      'NONE',
+      'no LCA',
+      `Neither ${a} nor ${b} was found in the tree, so there is no common ancestor.`,
+      { done: true },
+      'bad',
+    );
   }
 
   return frames;
@@ -179,7 +192,9 @@ function View({ frame }: PluginViewProps<LcaState>) {
         {bIdx === -1 ? ' (missing)' : ''}
       </div>
       {s.result !== null && (
-        <div className={cn('mt-1 font-mono text-good', vizText.base)}>→ LCA = {s.tree[s.result]}</div>
+        <div className={cn('mt-1 font-mono text-good', vizText.base)}>
+          → LCA = {s.tree[s.result]}
+        </div>
       )}
     </div>
   );
@@ -195,7 +210,10 @@ function Inspector({ frame }: InspectorProps<LcaState>) {
       <InspectorRow k="child hits" v={s.count ?? '—'} />
       <InspectorRow k="stack depth" v={s.onPath.length} />
       <InspectorRow k="visited" v={s.visited.length} />
-      <InspectorRow k="LCA" v={s.result !== null ? (s.tree[s.result] ?? '—') : s.done ? 'none' : '…'} />
+      <InspectorRow
+        k="LCA"
+        v={s.result !== null ? (s.tree[s.result] ?? '—') : s.done ? 'none' : '…'}
+      />
     </VarGrid>
   );
 }
@@ -234,132 +252,129 @@ function computeLca(tree: (number | null)[], a: number, b: number): number | nul
   return idx === -1 ? null : (tree[idx] as number);
 }
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Find lowest common ancestor\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Find lowest common ancestor"?',
     choices: [
       {
-        label: "N-ary tree LCA post-order — fits this problem",
-        correct: true
+        label: 'N-ary tree LCA post-order — fits this problem',
+        correct: true,
       },
       {
-        label: "BFS serialize — different approach"
+        label: 'BFS serialize — different approach',
       },
       {
-        label: "N-ary tree DFS height — different approach"
+        label: 'N-ary tree DFS height — different approach',
       },
       {
-        label: "N-ary iterative pre/post-order with stack — different approach"
-      }
+        label: 'N-ary iterative pre/post-order with stack — different approach',
+      },
     ],
-    explain: "The node where two different children each return a hit is the LCA"
+    explain: 'The node where two different children each return a hit is the LCA',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Find lowest common ancestor), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Find lowest common ancestor), what strategy is established?',
     choices: [
       {
-        label: "The node where two different children — described in INIT caption",
-        correct: true
+        label: 'The node where two different children — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Lowest Common Ancestor of  and : recurse post-order. Each node reports whether it (or its subtree) contained a target. The deepest node where two different children each report a hit is the LCA."
+    explain:
+      'Lowest Common Ancestor of  and : recurse post-order. Each node reports whether it (or its subtree) contained a target. The deepest node where two different children each report a hit is the LCA.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"MISS\" step (child of  empty), what happens?",
+    id: 'key-step',
+    prompt: 'On the "MISS" step (child of  empty), what happens?',
     choices: [
       {
-        label: "That child subtree of node held — this move caption",
-        correct: true
+        label: 'That child subtree of node held — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "That child subtree of node  held neither target — nothing to propagate. Keep the hit count at ."
+    explain:
+      'That child subtree of node  held neither target — nothing to propagate. Keep the hit count at .',
   },
   {
-    id: "state",
-    prompt: "What does the `active` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `active` field track in the visualization state?',
     choices: [
       {
-        label: "node index currently being visited — updated each frame",
-        correct: true
+        label: 'node index currently being visited — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `active` in sync: node index currently being visited"
+    explain: 'The recorder keeps `active` in sync: node index currently being visited',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Find lowest common ancestor\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Find lowest common ancestor"?',
     choices: [
       {
-        label: "O(n) time, O(h) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(h) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(m·n) time, O(n) space — wrong order of growth"
+        label: 'O(m·n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(1) space — wrong order of growth"
+        label: 'O(n) time, O(1) space — wrong order of growth',
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(n²) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(h). count child hits; >=2 -> root; ==1 -> propagate found"
+    explain: 'O(n). O(h). count child hits; >=2 -> root; ==1 -> propagate found',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "The recursion settled on node — final DONE caption",
-        correct: true
+        label: 'The recursion settled on node — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "The recursion settled on node  as the lowest common ancestor of  and ."
-  }
+    explain: 'The recursion settled on node  as the lowest common ancestor of  and .',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

@@ -44,7 +44,13 @@ export function CollapsibleDetails({
   return (
     <details className="mt-2 rounded-md border border-edge bg-panel2/40 px-2 py-1.5">
       <summary className={cn('cursor-pointer text-ink3', t)}>{title}</summary>
-      <pre className={cn('nodrag mt-1.5 overflow-auto whitespace-pre-wrap font-mono leading-relaxed text-ink2', maxHeightClass, t)}>
+      <pre
+        className={cn(
+          'nodrag mt-1.5 overflow-auto whitespace-pre-wrap font-mono leading-relaxed text-ink2',
+          maxHeightClass,
+          t,
+        )}
+      >
         {body}
       </pre>
     </details>
@@ -63,9 +69,7 @@ export function VizCaption({ children, className }: { children: ReactNode; class
 
 /** Inspector empty state. */
 export function VizEmpty({ message = 'No frame.' }: { message?: string }) {
-  return (
-    <div className={cn('py-2', vizPad, vizText.sm, 'text-ink3')}>{message}</div>
-  );
+  return <div className={cn('py-2', vizPad, vizText.sm, 'text-ink3')}>{message}</div>;
 }
 
 /** Padded inspector wrapper — symmetric with canvas node inset. */
@@ -194,7 +198,9 @@ export function DpCell({
 /** Large expression / operator token row. */
 export function ExprToken({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cn('my-3 flex items-center gap-2 font-mono', vizText.expr, 'text-ink', className)}>
+    <div
+      className={cn('my-3 flex items-center gap-2 font-mono', vizText.expr, 'text-ink', className)}
+    >
       {children}
     </div>
   );
@@ -238,8 +244,10 @@ export function VizStage({
   className?: string;
 }) {
   const vars: Record<string, string> = {};
-  if (railWidth != null) vars['--viz-rail-w'] = typeof railWidth === 'number' ? `${railWidth}px` : railWidth;
-  if (minHeight != null) vars['--viz-stage-minh'] = typeof minHeight === 'number' ? `${minHeight}px` : minHeight;
+  if (railWidth != null)
+    vars['--viz-rail-w'] = typeof railWidth === 'number' ? `${railWidth}px` : railWidth;
+  if (minHeight != null)
+    vars['--viz-stage-minh'] = typeof minHeight === 'number' ? `${minHeight}px` : minHeight;
   return (
     <div
       className={cn('board-area viz-stage', className)}
@@ -322,11 +330,15 @@ function TreeRows({ nodes, depth }: { nodes: readonly TreeNode[]; depth: number 
             style={{ '--vt-depth': depth } as CSSProperties}
           >
             <span className={cn('viz-tree-k', vizText['2xs'])}>{node.k}</span>
-            <span className={cn('viz-tree-v', vizText.xs, node.tone && `viz-rail-stat-v--${node.tone}`)}>
+            <span
+              className={cn('viz-tree-v', vizText.xs, node.tone && `viz-rail-stat-v--${node.tone}`)}
+            >
               <VizValue value={node.v} />
             </span>
           </div>
-          {node.children && node.children.length > 0 && <TreeRows nodes={node.children} depth={depth + 1} />}
+          {node.children && node.children.length > 0 && (
+            <TreeRows nodes={node.children} depth={depth + 1} />
+          )}
         </Fragment>
       ))}
     </>
@@ -347,7 +359,8 @@ export function VizTree({ nodes, className }: { nodes: readonly TreeNode[]; clas
   );
 }
 
-export type RailStackItem = string | number | { label: ReactNode; tone?: 'accent' | 'good' | 'bad' | 'warn' };
+export type RailStackItem =
+  string | number | { label: ReactNode; tone?: 'accent' | 'good' | 'bad' | 'warn' };
 
 /**
  * Animated vertical stack / queue column — the "column that keeps changing".
@@ -388,7 +401,8 @@ export function RailStack({
           ordered.map((raw, idx) => {
             const isTop = idx === 0;
             const isBottom = idx === ordered.length - 1;
-            const live = (highlightEnd === 'top' && isTop) || (highlightEnd === 'bottom' && isBottom);
+            const live =
+              (highlightEnd === 'top' && isTop) || (highlightEnd === 'bottom' && isBottom);
             const item = typeof raw === 'object' ? raw : { label: raw, tone: undefined };
             const tone = item.tone ?? (live ? 'accent' : undefined);
             // Stable key from the base so pushing a new top only mounts the new chip.
@@ -396,7 +410,11 @@ export function RailStack({
             return (
               <div
                 key={key}
-                className={cn('viz-rail-chip font-mono', vizText.xs, tone && `viz-rail-chip--${tone}`)}
+                className={cn(
+                  'viz-rail-chip font-mono',
+                  vizText.xs,
+                  tone && `viz-rail-chip--${tone}`,
+                )}
               >
                 {item.label}
               </div>
@@ -405,7 +423,9 @@ export function RailStack({
         )}
       </div>
       {bottomLabel != null && items.length > 0 && (
-        <div className={cn('viz-rail-edge viz-rail-edge--bottom', vizText['2xs'])}>{bottomLabel}</div>
+        <div className={cn('viz-rail-edge viz-rail-edge--bottom', vizText['2xs'])}>
+          {bottomLabel}
+        </div>
       )}
     </RailSection>
   );
@@ -454,11 +474,21 @@ export function RailSteps({
       <div className="viz-rail-steps">
         {steps.map((step, idx) => {
           const state: RailStepState =
-            activeIdx < 0 ? 'pending' : idx < activeIdx ? 'done' : idx === activeIdx ? 'current' : 'pending';
+            activeIdx < 0
+              ? 'pending'
+              : idx < activeIdx
+                ? 'done'
+                : idx === activeIdx
+                  ? 'current'
+                  : 'pending';
           return (
             <div
               key={step.id}
-              className={cn('viz-rail-step', vizText.xs, state !== 'pending' && `viz-rail-step--${state}`)}
+              className={cn(
+                'viz-rail-step',
+                vizText.xs,
+                state !== 'pending' && `viz-rail-step--${state}`,
+              )}
               title={typeof step.label === 'string' ? step.label : undefined}
             >
               <RailStepMarker state={state} />
@@ -496,10 +526,14 @@ function StatKV({ k, v, icon, tone, reserve }: StatKVProps) {
   return (
     <>
       <span className={cn('viz-rail-stat-k', vizText['2xs'])}>
-        {icon != null && <span className={cn('viz-stat-icon', tone && `viz-rail-stat-v--${tone}`)}>{icon}</span>}
+        {icon != null && (
+          <span className={cn('viz-stat-icon', tone && `viz-rail-stat-v--${tone}`)}>{icon}</span>
+        )}
         {k}
       </span>
-      <span className={cn('viz-rail-stat-v font-mono', vizText.sm, tone && `viz-rail-stat-v--${tone}`)}>
+      <span
+        className={cn('viz-rail-stat-v font-mono', vizText.sm, tone && `viz-rail-stat-v--${tone}`)}
+      >
         <VizValue value={v} />
       </span>
       {reserve != null && (

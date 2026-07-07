@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -22,20 +28,21 @@ interface PickIdxState {
   done: boolean;
 }
 
-function record({ nums, target, draws = [] }: PickIdxInput): Frame<PickIdxState>[] {  let cnt = 0;
+function record({ nums, target, draws = [] }: PickIdxInput): Frame<PickIdxState>[] {
+  let cnt = 0;
   let res = 0;
   let drawIdx = 0;
 
   const { emit, frames } = createRecorder<PickIdxState>(() => ({
-        nums: [...nums],
-        target,
-        i: 0,
-        cnt,
-        res,
-        op: '',
-        picked: null,
-        done: false
-      }));
+    nums: [...nums],
+    target,
+    i: 0,
+    cnt,
+    res,
+    op: '',
+    picked: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -85,7 +92,11 @@ function View({ frame }: PluginViewProps<PickIdxState>) {
             className={cn(
               'rounded border px-2 py-0.5 font-mono',
               vizText.sm,
-              v === s.target ? (i === s.res ? 'border-accent bg-accentbg text-accent' : 'border-good text-good') : 'border-edge text-ink2',
+              v === s.target
+                ? i === s.res
+                  ? 'border-accent bg-accentbg text-accent'
+                  : 'border-good text-good'
+                : 'border-edge text-ink2',
             )}
           >
             {v}
@@ -115,112 +126,109 @@ function Inspector({ frame }: InspectorProps<PickIdxState>) {
 export const manifestId = 'prep-design-random-pick-index';
 export const title = 'Random Pick Index';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Random Pick Index\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Random Pick Index"?',
     choices: [
       {
-        label: "Design — fits this problem",
-        correct: true
+        label: 'Design — fits this problem',
+        correct: true,
       },
       {
-        label: "Bijective tiny URL encode/decode — different approach"
+        label: 'Bijective tiny URL encode/decode — different approach',
       },
       {
-        label: "Trie dictionary + spell suggest — different approach"
+        label: 'Trie dictionary + spell suggest — different approach',
       },
       {
-        label: "Hash map + doubly linked list LRU — different approach"
-      }
+        label: 'Hash map + doubly linked list LRU — different approach',
+      },
     ],
-    explain: "See Random Pick Index pattern"
+    explain: 'See Random Pick Index pattern',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Random Pick Index), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Random Pick Index), what strategy is established?',
     choices: [
       {
-        label: "See Random Pick Index pattern — described in INIT caption",
-        correct: true
+        label: 'See Random Pick Index pattern — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Random Pick Index: reservoir sampling — for each nums[i]==target, cnt++; with prob 1/cnt replace res with i."
+    explain:
+      'Random Pick Index: reservoir sampling — for each nums[i]==target, cnt++; with prob 1/cnt replace res with i.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"HIT\" step (i= cnt=), what happens?",
+    id: 'key-step',
+    prompt: 'On the "HIT" step (i= cnt=), what happens?',
     choices: [
       {
-        label: "nums[]=: cnt→. ${replace ? — this move caption",
-        correct: true
+        label: 'nums[]=: cnt→. ${replace ? — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "nums[]=: cnt→. ${replace ? "
+    explain: 'nums[]=: cnt→. ${replace ? ',
   },
   {
-    id: "state",
-    prompt: "What does the `nums` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `nums` field track in the visualization state?',
     choices: [
       {
-        label: "Field nums in state — updated each frame",
-        correct: true
+        label: 'Field nums in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `nums` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `nums` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Pick() → index (uniform over — final DONE caption",
-        correct: true
+        label: 'Pick() → index (uniform over — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Pick() → index  (uniform over  occurrence(s))."
-  }
+    explain: 'Pick() → index  (uniform over  occurrence(s)).',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

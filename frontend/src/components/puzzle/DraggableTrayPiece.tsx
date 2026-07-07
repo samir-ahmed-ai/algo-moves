@@ -19,7 +19,13 @@ export function DraggableTrayPiece({
   };
 
   return (
-    <div ref={setNodeRef} style={style} className={cn(className, isDragging && 'tray-piece-dragging')} {...listeners} {...attributes}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(className, isDragging && 'tray-piece-dragging')}
+      {...listeners}
+      {...attributes}
+    >
       {children}
     </div>
   );

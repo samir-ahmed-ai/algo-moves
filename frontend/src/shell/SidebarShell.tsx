@@ -61,7 +61,9 @@ export function MobileDrawer({
       <div
         className={cn(
           'relative flex h-full max-w-[92vw] flex-col overflow-hidden bg-panel text-ink shadow-[var(--shadow-xl)]',
-          side === 'left' ? 'mr-auto border-r border-edge mobile-drawer-left' : 'ml-auto border-l border-edge mobile-drawer-right',
+          side === 'left'
+            ? 'mr-auto border-r border-edge mobile-drawer-left'
+            : 'ml-auto border-l border-edge mobile-drawer-right',
         )}
         style={{ width: width ?? 'min(86vw, 300px)' }}
       >
@@ -112,10 +114,17 @@ export function SidebarSection({
         )}
       >
         <span className="grid h-3 w-3 shrink-0 place-items-center text-ink3">{icon}</span>
-        <ChromeLabel className={cn('min-w-0 flex-1 truncate normal-case', chromeText.xs)}>{title}</ChromeLabel>
+        <ChromeLabel className={cn('min-w-0 flex-1 truncate normal-case', chromeText.xs)}>
+          {title}
+        </ChromeLabel>
         {badge != null &&
           (typeof badge === 'string' || typeof badge === 'number' ? (
-            <span className={cn('shrink-0 rounded-full bg-panel2 px-1 py-px font-mono tabular-nums text-ink3', chromeText.xs)}>
+            <span
+              className={cn(
+                'shrink-0 rounded-full bg-panel2 px-1 py-px font-mono tabular-nums text-ink3',
+                chromeText.xs,
+              )}
+            >
               {badge}
             </span>
           ) : (
@@ -162,7 +171,9 @@ export function SidebarTabBar<T extends string>({
           )}
         >
           {t.icon}
-          <ChromeLabel className={cn('truncate normal-case', active === t.id && 'text-accent')}>{t.label}</ChromeLabel>
+          <ChromeLabel className={cn('truncate normal-case', active === t.id && 'text-accent')}>
+            {t.label}
+          </ChromeLabel>
         </button>
       ))}
     </div>

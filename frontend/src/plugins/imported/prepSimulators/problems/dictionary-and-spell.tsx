@@ -1,12 +1,16 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
 
-type DictOp =
-  | { kind: 'search'; word: string }
-  | { kind: 'suggest'; prefix: string; limit: number };
+type DictOp = { kind: 'search'; word: string } | { kind: 'suggest'; prefix: string; limit: number };
 
 interface DictInput {
   words: string[];
@@ -65,16 +69,17 @@ function suggest(root: TrieNode, prefix: string, limit: number): string[] {
   return out;
 }
 
-function record({ words, ops }: DictInput): Frame<DictState>[] {  const root = buildTrie(words);
+function record({ words, ops }: DictInput): Frame<DictState>[] {
+  const root = buildTrie(words);
 
   const { emit, frames } = createRecorder<DictState>(() => ({
-        words: [...words],
-        op: '',
-        result: '',
-        found: null,
-        suggestions: [],
-        done: false
-      }));
+    words: [...words],
+    op: '',
+    result: '',
+    found: null,
+    suggestions: [],
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -116,19 +121,26 @@ function View({ frame }: PluginViewProps<DictState>) {
       <div className={cn(vizText.sm, 'text-ink3')}>
         {s.op || '—'}
         {s.found !== null && (
-          <span className={cn('ml-2 font-mono', s.found ? 'text-good' : 'text-bad')}>{s.result}</span>
+          <span className={cn('ml-2 font-mono', s.found ? 'text-good' : 'text-bad')}>
+            {s.result}
+          </span>
         )}
       </div>
       <div className={cn('mt-2', vizText.sm, 'text-ink3')}>dictionary ({s.words.length} words)</div>
       <div className="mt-1 flex flex-wrap gap-1">
         {s.words.map((w) => (
-          <span key={w} className={cn('rounded border border-edge px-2 py-0.5 font-mono', vizText.sm)}>
+          <span
+            key={w}
+            className={cn('rounded border border-edge px-2 py-0.5 font-mono', vizText.sm)}
+          >
             {w}
           </span>
         ))}
       </div>
       {s.suggestions.length > 0 && (
-        <div className={cn('mt-2', vizText.sm, 'text-good')}>suggestions: {s.suggestions.join(', ')}</div>
+        <div className={cn('mt-2', vizText.sm, 'text-good')}>
+          suggestions: {s.suggestions.join(', ')}
+        </div>
       )}
     </div>
   );
@@ -149,112 +161,111 @@ function Inspector({ frame }: InspectorProps<DictState>) {
 export const manifestId = 'prep-design-dictionary-and-spell';
 export const title = 'Dictionary and Spell';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Dictionary and spell\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Dictionary and spell"?',
     choices: [
       {
-        label: "Trie dictionary + spell suggest — fits this problem",
-        correct: true
+        label: 'Trie dictionary + spell suggest — fits this problem',
+        correct: true,
       },
       {
-        label: "Design — different approach"
+        label: 'Design — different approach',
       },
       {
-        label: "Hash map + doubly linked list LRU — different approach"
+        label: 'Hash map + doubly linked list LRU — different approach',
       },
       {
-        label: "Heap + Sorted Available Set — different approach"
-      }
+        label: 'Heap + Sorted Available Set — different approach',
+      },
     ],
-    explain: "Prefix tree of words; DFS from the prefix node to collect suggestions"
+    explain: 'Prefix tree of words; DFS from the prefix node to collect suggestions',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Dictionary and spell), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Dictionary and spell), what strategy is established?',
     choices: [
       {
-        label: "Prefix tree of words; DFS — described in INIT caption",
-        correct: true
+        label: 'Prefix tree of words; DFS — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Dictionary & Spell: trie stores words. search() walks prefix; suggest(prefix, limit) DFS-collects words under prefix."
+    explain:
+      'Dictionary & Spell: trie stores words. search() walks prefix; suggest(prefix, limit) DFS-collects words under prefix.',
   },
   {
-    id: "state",
-    prompt: "What does the `words` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `words` field track in the visualization state?',
     choices: [
       {
-        label: "Field words in state — updated each frame",
-        correct: true
+        label: 'Field words in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `words` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `words` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Dictionary and spell\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Dictionary and spell"?',
     choices: [
       {
-        label: "O(word len) insert/lookup time, O(total — standard bounds here",
-        correct: true
+        label: 'O(word len) insert/lookup time, O(total — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n²) time, O(n) space — wrong order of growth"
+        label: 'O(n²) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(1) get/put time, O(capacity) space — wrong order of growth"
+        label: 'O(1) get/put time, O(capacity) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(1) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(word len) insert/lookup. O(total chars). addWord char-by-char; suggest = DFS collecting words under prefix"
+    explain:
+      'O(word len) insert/lookup. O(total chars). addWord char-by-char; suggest = DFS collecting words under prefix',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Dictionary & Spell: trie stores words. — final DONE caption",
-        correct: true
+        label: 'Dictionary & Spell: trie stores words. — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Dictionary & Spell: trie stores words. search() walks prefix; suggest(prefix, limit) DFS-collects words under prefix."
-  }
+    explain:
+      'Dictionary & Spell: trie stores words. search() walks prefix; suggest(prefix, limit) DFS-collects words under prefix.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

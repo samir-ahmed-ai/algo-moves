@@ -41,7 +41,9 @@ export function StudioAssembleStageBody({
         />
       }
       problem={
-        <ProblemStatementColumn className={cn(isMobile && 'max-h-[40vh] shrink-0 border-b border-edge')}>
+        <ProblemStatementColumn
+          className={cn(isMobile && 'max-h-[40vh] shrink-0 border-b border-edge')}
+        >
           <ProblemPanelBody />
         </ProblemStatementColumn>
       }

@@ -13,9 +13,5 @@ export function BrandLogo({
   size?: keyof typeof SIZE;
   className?: string;
 }) {
-  return (
-    <EagleMark
-      className={cn('shrink-0 rounded-[22%] shadow-sm', SIZE[size], className)}
-    />
-  );
+  return <EagleMark className={cn('shrink-0 rounded-[22%] shadow-sm', SIZE[size], className)} />;
 }

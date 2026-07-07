@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -25,7 +31,8 @@ interface ContactsState {
   done: boolean;
 }
 
-function record({ contacts }: ContactsInput): Frame<ContactsState>[] {  const ids = contacts.map((c) => c.id);
+function record({ contacts }: ContactsInput): Frame<ContactsState>[] {
+  const ids = contacts.map((c) => c.id);
   const idxOf = (id: number) => ids.indexOf(id);
 
   const parent = new Map<number, number>();
@@ -48,15 +55,15 @@ function record({ contacts }: ContactsInput): Frame<ContactsState>[] {  const id
   const byId = new Map<number, Contact>();
 
   const { emit, frames } = createRecorder<ContactsState>(() => ({
-        ids,
-        parent: [...parent.entries()],
-        emailOwner: [...emailOwner.entries()],
-        i: null,
-        owner: null,
-        email: null,
-        roots: [],
-        done: false
-      }));
+    ids,
+    parent: [...parent.entries()],
+    emailOwner: [...emailOwner.entries()],
+    i: null,
+    owner: null,
+    email: null,
+    roots: [],
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -141,7 +148,8 @@ function View({ frame }: PluginViewProps<ContactsState>) {
   const s = frame.state;
   const pointers: ArrayPointer[] = [];
   if (s.i !== null) pointers.push({ i: s.i, label: 'i', tone: 'accent', place: 'above' });
-  if (s.owner !== null && s.owner >= 0) pointers.push({ i: s.owner, label: 'root', tone: 'good', place: 'below' });
+  if (s.owner !== null && s.owner >= 0)
+    pointers.push({ i: s.owner, label: 'root', tone: 'good', place: 'below' });
   const rootSet = new Set(s.roots);
   const tone = (i: number) => {
     const id = s.ids[i];
@@ -152,12 +160,10 @@ function View({ frame }: PluginViewProps<ContactsState>) {
   return (
     <div className="board-area">
       <div className={cn(vizText.sm, 'text-ink3')}>
-        contacts ={' '}
-        <span className="font-mono text-ink">{s.ids.length}</span>
+        contacts = <span className="font-mono text-ink">{s.ids.length}</span>
         {s.email !== null && (
           <>
-            {' · '}email ={' '}
-            <span className="font-mono text-ink">{s.email}</span>
+            {' · '}email = <span className="font-mono text-ink">{s.email}</span>
           </>
         )}
       </div>
@@ -199,132 +205,128 @@ function Inspector({ frame }: InspectorProps<ContactsState>) {
 export const manifestId = 'prep-hash-maps-remove-duplicate-contacts';
 export const title = 'Remove duplicate contacts';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Remove duplicate contacts\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Remove duplicate contacts"?',
     choices: [
       {
-        label: "Union-find via email index — fits this problem",
-        correct: true
+        label: 'Union-find via email index — fits this problem',
+        correct: true,
       },
       {
-        label: "Sliding window + frequency map — different approach"
+        label: 'Sliding window + frequency map — different approach',
       },
       {
-        label: "Hash map chain reconstruction — different approach"
+        label: 'Hash map chain reconstruction — different approach',
       },
       {
-        label: "Quickselect / partition — different approach"
-      }
+        label: 'Quickselect / partition — different approach',
+      },
     ],
-    explain: "Any shared email unions two contacts into one group"
+    explain: 'Any shared email unions two contacts into one group',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Remove duplicate contacts), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Remove duplicate contacts), what strategy is established?',
     choices: [
       {
-        label: "Any shared email unions two contacts — described in INIT caption",
-        correct: true
+        label: 'Any shared email unions two contacts — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Remove duplicate contacts: two contacts are the same person if they share any email. We use union-find — each contact starts as its own group, and any shared email unions two groups into one."
+    explain:
+      'Remove duplicate contacts: two contacts are the same person if they share any email. We use union-find — each contact starts as its own group, and any shared email unions two groups into one.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"OWN_EMAIL\" step ( → id ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "OWN_EMAIL" step ( → id ), what happens?',
     choices: [
       {
-        label: "Email \"\" is new, so contact — this move caption",
-        correct: true
+        label: 'Email "" is new, so contact — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Email \"\" is new, so contact # claims it: emailOwner[\"\"] = ."
+    explain: 'Email "" is new, so contact # claims it: emailOwner[""] = .',
   },
   {
-    id: "state",
-    prompt: "What does the `ids` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `ids` field track in the visualization state?',
     choices: [
       {
-        label: "contact ids in input order — updated each frame",
-        correct: true
+        label: 'contact ids in input order — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `ids` in sync: contact ids in input order (the ArrayRow cells)"
+    explain: 'The recorder keeps `ids` in sync: contact ids in input order (the ArrayRow cells)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Remove duplicate contacts\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Remove duplicate contacts"?',
     choices: [
       {
-        label: "O(n·e·α(n)) time, O(n·e) space — standard bounds here",
-        correct: true
+        label: 'O(n·e·α(n)) time, O(n·e) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(2ⁿ) time, O(n) space — wrong order of growth"
+        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n) time, O(n) space — wrong order of growth"
+        label: 'O(n) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(log n) time, O(n) space — wrong order of growth"
-      }
+        label: 'O(log n) time, O(n) space — wrong order of growth',
+      },
     ],
-    explain: "O(n·e·α(n)). O(n·e). emailOwner seen -> union; else claim; emit one per root"
+    explain: 'O(n·e·α(n)). O(n·e). emailOwner seen -> union; else claim; emit one per root',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Done. input contacts collapse to unique — final DONE caption",
-        correct: true
+        label: 'Done. input contacts collapse to unique — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Done.  input contacts collapse to  unique : ${roots.map((r) => "
-  }
+    explain: 'Done.  input contacts collapse to  unique : ${roots.map((r) => ',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

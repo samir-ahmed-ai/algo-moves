@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
@@ -17,16 +23,17 @@ interface CalState {
   done: boolean;
 }
 
-function record({ books }: CalInput): Frame<CalState>[] {  const events: [number, number][] = [];
+function record({ books }: CalInput): Frame<CalState>[] {
+  const events: [number, number][] = [];
 
   const { emit, frames } = createRecorder<CalState>(() => ({
-        events: events.map((e) => [...e] as [number, number]),
-        op: '',
-        start: null,
-        end: null,
-        allowed: null,
-        done: false
-      }));
+    events: events.map((e) => [...e] as [number, number]),
+    op: '',
+    start: null,
+    end: null,
+    allowed: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -44,7 +51,13 @@ function record({ books }: CalInput): Frame<CalState>[] {  const events: [number
           'REJECT',
           `clash [${e[0]},${e[1]})`,
           `Book(${start},${end}): overlaps existing [${e[0]},${e[1]}) → return false.`,
-          { op: `book [${start},${end})`, start, end, allowed: false, events: events.map((x) => [...x] as [number, number]) },
+          {
+            op: `book [${start},${end})`,
+            start,
+            end,
+            allowed: false,
+            events: events.map((x) => [...x] as [number, number]),
+          },
           'bad',
         );
         break;
@@ -56,13 +69,25 @@ function record({ books }: CalInput): Frame<CalState>[] {  const events: [number
         'BOOK',
         `ok [${start},${end})`,
         `Book(${start},${end}): no overlap → append event. Calendar has ${events.length} booking(s).`,
-        { op: `book [${start},${end})`, start, end, allowed: true, events: events.map((x) => [...x] as [number, number]) },
+        {
+          op: `book [${start},${end})`,
+          start,
+          end,
+          allowed: true,
+          events: events.map((x) => [...x] as [number, number]),
+        },
         'good',
       );
     }
   }
 
-  emit('DONE', `${events.length} events`, `Done. ${events.length} booking(s) on calendar.`, { op: 'done', done: true }, 'good');
+  emit(
+    'DONE',
+    `${events.length} events`,
+    `Done. ${events.length} booking(s) on calendar.`,
+    { op: 'done', done: true },
+    'good',
+  );
   return frames;
 }
 
@@ -119,92 +144,88 @@ function Inspector({ frame }: InspectorProps<CalState>) {
 export const manifestId = 'prep-design-my-calendar-i';
 export const title = 'My Calendar I';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"My Calendar I\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "My Calendar I"?',
     choices: [
       {
-        label: "Design — fits this problem",
-        correct: true
+        label: 'Design — fits this problem',
+        correct: true,
       },
       {
-        label: "Trie phone directory autocomplete — different approach"
+        label: 'Trie phone directory autocomplete — different approach',
       },
       {
-        label: "Jump Array — different approach"
+        label: 'Jump Array — different approach',
       },
       {
-        label: "Log parsing aggregation — different approach"
-      }
+        label: 'Log parsing aggregation — different approach',
+      },
     ],
-    explain: "See My Calendar I pattern"
+    explain: 'See My Calendar I pattern',
   },
   {
-    id: "key-step",
-    prompt: "On the \"BOOK\" step (ok [,)), what happens?",
+    id: 'key-step',
+    prompt: 'On the "BOOK" step (ok [,)), what happens?',
     choices: [
       {
-        label: "Book(,): no overlap → append event. — this move caption",
-        correct: true
+        label: 'Book(,): no overlap → append event. — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Book(,): no overlap → append event. Calendar has  booking(s)."
+    explain: 'Book(,): no overlap → append event. Calendar has  booking(s).',
   },
   {
-    id: "state",
-    prompt: "What does the `events` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `events` field track in the visualization state?',
     choices: [
       {
-        label: "Field events in state — updated each frame",
-        correct: true
+        label: 'Field events in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `events` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `events` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Done. booking(s) on calendar. — final DONE caption",
-        correct: true
+        label: 'Done. booking(s) on calendar. — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Done.  booking(s) on calendar."
-  }
+    explain: 'Done.  booking(s) on calendar.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -212,7 +233,13 @@ export const simulator: ProblemSimulator = {
     {
       id: 'cal1',
       label: '10–20, 15–25 reject, 20–30 ok',
-      value: { books: [[10, 20], [15, 25], [20, 30]] },
+      value: {
+        books: [
+          [10, 20],
+          [15, 25],
+          [20, 30],
+        ],
+      },
     },
   ] satisfies SampleInput<CalInput>[],
   record,
@@ -220,6 +247,8 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as CalState | undefined;
-    return s?.done ? { ok: true, label: `${s.events.length} booked` } : { ok: false, label: 'incomplete' };
+    return s?.done
+      ? { ok: true, label: `${s.events.length} booked` }
+      : { ok: false, label: 'incomplete' };
   },
 };

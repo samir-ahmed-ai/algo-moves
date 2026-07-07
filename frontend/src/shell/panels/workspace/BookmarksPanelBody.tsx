@@ -1,6 +1,15 @@
 import { Bookmark, BookmarkPlus, Trash2 } from 'lucide-react';
 
-import { useCanvasFrame, Btn, EmptyState, nodeIconGlyph, Pill, Row, Section, TextInput } from '@/shell/canvas';
+import {
+  useCanvasFrame,
+  Btn,
+  EmptyState,
+  nodeIconGlyph,
+  Pill,
+  Row,
+  Section,
+  TextInput,
+} from '@/shell/canvas';
 /** #41 Bookmarks: annotate any frame and jump back to it. */
 export function BookmarksPanelBody() {
   const { player, frames } = useCanvasFrame();
@@ -18,13 +27,24 @@ export function BookmarksPanelBody() {
         {marked ? `Step ${player.index + 1} marked` : `Mark step ${player.index + 1}`}
       </Btn>
       {entries.length === 0 ? (
-        <EmptyState icon={<Bookmark />} title="No bookmarks" hint="Mark a frame to annotate it and jump back." />
+        <EmptyState
+          icon={<Bookmark />}
+          title="No bookmarks"
+          hint="Mark a frame to annotate it and jump back."
+        />
       ) : (
         <Section title="Bookmarks" bordered={false} right={<Pill>{entries.length}</Pill>}>
           <div className="flex flex-col">
             {entries.map(([i, note]) => (
-              <Row key={i} className="items-center gap-1.5 border-t border-edge border-l-transparent py-1.5 first:border-t-0">
-                <Pill active={i === player.index} onClick={() => player.goTo(i)} title="jump to frame">
+              <Row
+                key={i}
+                className="items-center gap-1.5 border-t border-edge border-l-transparent py-1.5 first:border-t-0"
+              >
+                <Pill
+                  active={i === player.index}
+                  onClick={() => player.goTo(i)}
+                  title="jump to frame"
+                >
                   #{i + 1}
                 </Pill>
                 <TextInput

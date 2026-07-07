@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow, type ArrayPointer } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -26,19 +32,20 @@ interface ReverseWordsState {
 const SP = '·';
 const show = (c: string) => (c === ' ' ? SP : c);
 
-function record({ s }: ReverseWordsInput): Frame<ReverseWordsState>[] {  // Work on a mutable char array, mirroring Go's []byte(s).
+function record({ s }: ReverseWordsInput): Frame<ReverseWordsState>[] {
+  // Work on a mutable char array, mirroring Go's []byte(s).
   let b = s.split('');
 
   const { emit, frames } = createRecorder<ReverseWordsState>(() => ({
-        chars: b.map(show),
-        phase: 'init',
-        l: null,
-        r: null,
-        wordStart: null,
-        wordEnd: null,
-        done: false,
-        result: null
-      }));
+    chars: b.map(show),
+    phase: 'init',
+    l: null,
+    r: null,
+    wordStart: null,
+    wordEnd: null,
+    done: false,
+    result: null,
+  }));
 
   emit(
     'INIT',
@@ -76,12 +83,7 @@ function record({ s }: ReverseWordsInput): Frame<ReverseWordsState>[] {  // Work
     let r = hi;
     while (l < r) {
       [b[l], b[r]] = [b[r], b[l]];
-      emit(
-        'SWAP',
-        `swap ${l}↔${r}`,
-        label(l, r),
-        { phase, l, r, wordStart, wordEnd },
-      );
+      emit('SWAP', `swap ${l}↔${r}`, label(l, r), { phase, l, r, wordStart, wordEnd });
       l++;
       r--;
     }
@@ -154,7 +156,8 @@ function View({ frame }: PluginViewProps<ReverseWordsState>) {
   const tone = (i: number) => {
     if (s.done) return 'found';
     if (s.l === i || s.r === i) return 'match';
-    if (s.wordStart !== null && s.wordEnd !== null && i >= s.wordStart && i <= s.wordEnd) return 'in-window';
+    if (s.wordStart !== null && s.wordEnd !== null && i >= s.wordStart && i <= s.wordEnd)
+      return 'in-window';
     return '';
   };
 
@@ -179,8 +182,7 @@ function View({ frame }: PluginViewProps<ReverseWordsState>) {
 function Inspector({ frame }: InspectorProps<ReverseWordsState>) {
   if (!frame) return <VizEmpty />;
   const s = frame.state;
-  const span =
-    s.wordStart !== null && s.wordEnd !== null ? `[${s.wordStart}, ${s.wordEnd}]` : '—';
+  const span = s.wordStart !== null && s.wordEnd !== null ? `[${s.wordStart}, ${s.wordEnd}]` : '—';
   return (
     <VarGrid>
       <InspectorRow k="phase" v={s.phase} />
@@ -201,131 +203,130 @@ export const title = 'Reverse words';
 // avoid double spaces to keep the board readable. The verdict reads the real
 // computed result straight off the last emitted frame.
 
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Reverse words\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Reverse words"?',
     choices: [
       {
-        label: "Reverse in place — fits this problem",
-        correct: true
+        label: 'Reverse in place — fits this problem',
+        correct: true,
       },
       {
-        label: "Expand center — different approach"
+        label: 'Expand center — different approach',
       },
       {
-        label: "Two Pointers Greedy — different approach"
+        label: 'Two Pointers Greedy — different approach',
       },
       {
-        label: "Hash set substrings — different approach"
-      }
+        label: 'Hash set substrings — different approach',
+      },
     ],
-    explain: "Reverse the whole string, then reverse each word back"
+    explain: 'Reverse the whole string, then reverse each word back',
   },
   {
-    id: "init",
-    prompt: "At the start of a run (Reverse words), what strategy is established?",
+    id: 'init',
+    prompt: 'At the start of a run (Reverse words), what strategy is established?',
     choices: [
       {
-        label: "Reverse the whole string, then reverse — described in INIT caption",
-        correct: true
+        label: 'Reverse the whole string, then reverse — described in INIT caption',
+        correct: true,
       },
       {
-        label: "Precomputed final answer — before scanning input"
+        label: 'Precomputed final answer — before scanning input',
       },
       {
-        label: "Descending sort required — as mandatory first step"
+        label: 'Descending sort required — as mandatory first step',
       },
       {
-        label: "Every element visited upfront — marked from the start"
-      }
+        label: 'Every element visited upfront — marked from the start',
+      },
     ],
-    explain: "Reverse Words: reverse the order of the words in \"\" while keeping each word's letters intact. Trick: reverse the whole string, then reverse every word back — all in place, O(1) extra space."
+    explain:
+      'Reverse Words: reverse the order of the words in "" while keeping each word\'s letters intact. Trick: reverse the whole string, then reverse every word back — all in place, O(1) extra space.',
   },
   {
-    id: "key-step",
-    prompt: "On the \"WORD\" step (span [..]), what happens?",
+    id: 'key-step',
+    prompt: 'On the "WORD" step (span [..]), what happens?',
     choices: [
       {
-        label: "The span [..] is a single — this move caption",
-        correct: true
+        label: 'The span [..] is a single — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "The span [..] is a single character (or empty), so there is nothing to flip — it already reads correctly."
+    explain:
+      'The span [..] is a single character (or empty), so there is nothing to flip — it already reads correctly.',
   },
   {
-    id: "state",
-    prompt: "What does the `chars` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `chars` field track in the visualization state?',
     choices: [
       {
-        label: "current byte array (post-trim shrink — updated each frame",
-        correct: true
+        label: 'current byte array (post-trim shrink — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder keeps `chars` in sync: current byte array (post-trim shrink applied)"
+    explain: 'The recorder keeps `chars` in sync: current byte array (post-trim shrink applied)',
   },
   {
-    id: "complexity",
-    prompt: "What are the time and space complexities for \"Reverse words\"?",
+    id: 'complexity',
+    prompt: 'What are the time and space complexities for "Reverse words"?',
     choices: [
       {
-        label: "O(n) time, O(1) space — standard bounds here",
-        correct: true
+        label: 'O(n) time, O(1) space — standard bounds here',
+        correct: true,
       },
       {
-        label: "O(n^2) time, O(n^2) space — wrong order of growth"
+        label: 'O(n^2) time, O(n^2) space — wrong order of growth',
       },
       {
-        label: "O(1) time, O(n) space — wrong order of growth"
+        label: 'O(1) time, O(n) space — wrong order of growth',
       },
       {
-        label: "O(n*m) time, O(1) space — wrong order of growth"
-      }
+        label: 'O(n*m) time, O(1) space — wrong order of growth',
+      },
     ],
-    explain: "O(n). O(1). trim; rev(all); rev(each word span)"
+    explain: 'O(n). O(1). trim; rev(all); rev(each word span)',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Every word span has been flipped — final DONE caption",
-        correct: true
+        label: 'Every word span has been flipped — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Every word span has been flipped back, so the answer is \"\" — the words in reverse order with their letters intact."
-  }
+    explain:
+      'Every word span has been flipped back, so the answer is "" — the words in reverse order with their letters intact.',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },

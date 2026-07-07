@@ -5,7 +5,11 @@ import type { Item } from '@/content';
 import { CategoryBoard, TrackCategoryBoard } from '../CategoryBoard';
 import { LearnStudio } from '@/shell/study';
 import { ProblemPage } from '@/shell/study';
-import { resolveWorkspaceFallbackTarget, resolveWorkspaceSurface, type ModeRouterInput } from './surface';
+import {
+  resolveWorkspaceFallbackTarget,
+  resolveWorkspaceSurface,
+  type ModeRouterInput,
+} from './surface';
 
 import { CanvasStage, Btn, EmptyState } from '@/shell/canvas';
 export interface ModeRouterProps extends Omit<ModeRouterInput, 'ready' | 'runtimeError'> {
@@ -39,13 +43,19 @@ export function resolveRuntimeErrorRecovery(input: {
 
 export function ModeRouter(props: ModeRouterProps) {
   const problemReady = !!props.plugin && !!props.frame;
-  const surface = resolveWorkspaceSurface({ ...props, ready: problemReady, runtimeError: !!props.runtimeError });
+  const surface = resolveWorkspaceSurface({
+    ...props,
+    ready: problemReady,
+    runtimeError: !!props.runtimeError,
+  });
 
   switch (surface) {
     case 'track-board':
       return props.activeTrackId ? <TrackCategoryBoard trackId={props.activeTrackId} /> : null;
     case 'category-board':
-      return props.activeCategoryId ? <CategoryBoard categoryId={props.activeCategoryId} trackId={props.activeTrackId} /> : null;
+      return props.activeCategoryId ? (
+        <CategoryBoard categoryId={props.activeCategoryId} trackId={props.activeTrackId} />
+      ) : null;
     case 'canvas':
       return props.problemFocused && problemReady && props.plugin ? (
         <CanvasStage
@@ -117,7 +127,13 @@ export function ModeRouter(props: ModeRouterProps) {
           title="Preview unavailable"
           hint={`${props.item.title} is not bound to an interactive preview yet.`}
           actionLabel={returnsToCatalog ? 'Back to catalog' : 'Go home'}
-          actionIcon={returnsToCatalog ? <ArrowLeft className="h-3.5 w-3.5" /> : <Home className="h-3.5 w-3.5" />}
+          actionIcon={
+            returnsToCatalog ? (
+              <ArrowLeft className="h-3.5 w-3.5" />
+            ) : (
+              <Home className="h-3.5 w-3.5" />
+            )
+          }
           onAction={returnsToCatalog ? props.backToBrowse : props.goHome}
         />
       );
@@ -196,9 +212,21 @@ type WorkspaceFallbackProps = {
     }
 );
 
-function WorkspaceFallback({ icon, title, hint, role, actionLabel, actionIcon, onAction }: WorkspaceFallbackProps) {
+function WorkspaceFallback({
+  icon,
+  title,
+  hint,
+  role,
+  actionLabel,
+  actionIcon,
+  onAction,
+}: WorkspaceFallbackProps) {
   return (
-    <div className="grid h-full w-full place-items-center bg-bg p-6" role={role} aria-live={role ? 'polite' : undefined}>
+    <div
+      className="grid h-full w-full place-items-center bg-bg p-6"
+      role={role}
+      aria-live={role ? 'polite' : undefined}
+    >
       <div className="flex flex-col items-center gap-1">
         <EmptyState icon={icon} title={title} hint={hint} />
         {actionLabel && (

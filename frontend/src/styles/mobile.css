@@ -36,7 +36,12 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 15%, transparent), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--accent) 15%, transparent),
+    transparent
+  );
   opacity: 0;
   transform: translateX(-100%);
 }
@@ -47,7 +52,12 @@
 }
 
 .mobile-progress-step-wrap--quiz::after {
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--good) 18%, transparent), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--good) 18%, transparent),
+    transparent
+  );
 }
 
 .mobile-progress-step--quiz {
@@ -147,7 +157,11 @@
   inset: 0;
   pointer-events: none;
   opacity: 0;
-  background: radial-gradient(circle at center, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%);
+  background: radial-gradient(
+    circle at center,
+    color-mix(in srgb, var(--accent) 16%, transparent),
+    transparent 70%
+  );
   transition: opacity 0.2s ease;
 }
 
@@ -340,7 +354,9 @@
   overflow: visible;
   padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
 }
-.mobile-reassemble .code-studio-reassemble:has(.code-blueprint-panel--inline) .reassemble-tray-wrap {
+.mobile-reassemble
+  .code-studio-reassemble:has(.code-blueprint-panel--inline)
+  .reassemble-tray-wrap {
   flex: 0 0 auto;
   min-height: 0;
 }
@@ -653,14 +669,31 @@
 .piece-drag-ghost .piece-code {
   color: var(--vscode-hl-text);
 }
-.piece-drag-ghost .hl-keyword { color: var(--vscode-hl-keyword); }
-.piece-drag-ghost .hl-string { color: var(--vscode-hl-string); }
-.piece-drag-ghost .hl-comment { color: var(--vscode-hl-comment); font-style: italic; }
-.piece-drag-ghost .hl-number { color: var(--vscode-hl-number); }
-.piece-drag-ghost .hl-punct { color: var(--vscode-hl-punct); }
-.piece-drag-ghost .hl-sig-kw { color: var(--vscode-hl-keyword); }
-.piece-drag-ghost .hl-sig-name { color: var(--vscode-hl-entry); }
-.piece-drag-ghost .hl-sig-name-func { color: var(--vscode-hl-func); }
+.piece-drag-ghost .hl-keyword {
+  color: var(--vscode-hl-keyword);
+}
+.piece-drag-ghost .hl-string {
+  color: var(--vscode-hl-string);
+}
+.piece-drag-ghost .hl-comment {
+  color: var(--vscode-hl-comment);
+  font-style: italic;
+}
+.piece-drag-ghost .hl-number {
+  color: var(--vscode-hl-number);
+}
+.piece-drag-ghost .hl-punct {
+  color: var(--vscode-hl-punct);
+}
+.piece-drag-ghost .hl-sig-kw {
+  color: var(--vscode-hl-keyword);
+}
+.piece-drag-ghost .hl-sig-name {
+  color: var(--vscode-hl-entry);
+}
+.piece-drag-ghost .hl-sig-name-func {
+  color: var(--vscode-hl-func);
+}
 
 /* problem context strip (gist + quiz + reassemble cards) */
 .mobile-problem-context {
@@ -716,7 +749,10 @@
   font-family: var(--mono);
   font-size: 11px;
   line-height: 1;
-  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .mobile-viz-transport button:focus-visible {

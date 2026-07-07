@@ -21,9 +21,7 @@ function isIos(): boolean {
 }
 
 export type PwaInstallState =
-  | { kind: 'hidden' }
-  | { kind: 'android'; prompt: () => void }
-  | { kind: 'ios' };
+  { kind: 'hidden' } | { kind: 'android'; prompt: () => void } | { kind: 'ios' };
 
 /**
  * Tracks PWA installability and exposes a stable state value for the banner.

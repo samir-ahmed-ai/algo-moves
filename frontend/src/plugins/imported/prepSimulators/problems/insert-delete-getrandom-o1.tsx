@@ -1,4 +1,10 @@
-import { type Frame, type InspectorProps, type PluginViewProps, type SampleInput, type QuizQuestion } from '../../../../core/types';
+import {
+  type Frame,
+  type InspectorProps,
+  type PluginViewProps,
+  type SampleInput,
+  type QuizQuestion,
+} from '../../../../core/types';
 import { createRecorder } from '../../../_shared/createRecorder';
 import { ArrayRow } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
@@ -6,9 +12,7 @@ import { cn } from '@/lib/utils/cn';
 import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
 
 type RsOp =
-  | { kind: 'insert'; val: number }
-  | { kind: 'remove'; val: number }
-  | { kind: 'getRandom' };
+  { kind: 'insert'; val: number } | { kind: 'remove'; val: number } | { kind: 'getRandom' };
 
 interface RsInput {
   ops: RsOp[];
@@ -26,18 +30,19 @@ interface RsState {
   done: boolean;
 }
 
-function record({ ops, randomIdx = 0 }: RsInput): Frame<RsState>[] {  const nums: number[] = [];
+function record({ ops, randomIdx = 0 }: RsInput): Frame<RsState>[] {
+  const nums: number[] = [];
   const idx = new Map<number, number>();
 
   const { emit, frames } = createRecorder<RsState>(() => ({
-        nums: nums.slice(),
-        op: '',
-        out: null,
-        swapFrom: null,
-        swapTo: null,
-        active: null,
-        done: false
-      }));
+    nums: nums.slice(),
+    op: '',
+    out: null,
+    swapFrom: null,
+    swapTo: null,
+    active: null,
+    done: false,
+  }));
 
   emit(
     'INIT',
@@ -100,7 +105,13 @@ function record({ ops, randomIdx = 0 }: RsInput): Frame<RsState>[] {  const nums
       );
     } else {
       if (nums.length === 0) {
-        emit('RANDOM', 'empty', `GetRandom on empty set — undefined in Go; demo skips.`, { op: 'getRandom' }, 'bad');
+        emit(
+          'RANDOM',
+          'empty',
+          `GetRandom on empty set — undefined in Go; demo skips.`,
+          { op: 'getRandom' },
+          'bad',
+        );
         continue;
       }
       const pick = randomIdx % nums.length;
@@ -138,11 +149,11 @@ function View({ frame }: PluginViewProps<RsState>) {
       </div>
       <ArrayRow
         values={s.nums.length ? s.nums.map(String) : ['—']}
-        cellTone={(i) => (i === s.active ? 'match' : i === s.swapFrom || i === s.swapTo ? 'window' : '')}
+        cellTone={(i) =>
+          i === s.active ? 'match' : i === s.swapFrom || i === s.swapTo ? 'window' : ''
+        }
         pointers={
-          s.active !== null
-            ? [{ i: s.active, label: 'idx', tone: 'accent', place: 'above' }]
-            : []
+          s.active !== null ? [{ i: s.active, label: 'idx', tone: 'accent', place: 'above' }] : []
         }
         windowRange={null}
         label={(i) => String(i)}
@@ -167,92 +178,88 @@ function Inspector({ frame }: InspectorProps<RsState>) {
 export const manifestId = 'prep-design-insert-delete-getrandom-o1';
 export const title = 'Insert Delete GetRandom O(1)';
 
-
-
-
-
-
 const practiceQuiz: QuizQuestion[] = [
   {
-    id: "pattern",
-    prompt: "Which approach fits \"Insert Delete GetRandom O(1)\"?",
+    id: 'pattern',
+    prompt: 'Which approach fits "Insert Delete GetRandom O(1)"?',
     choices: [
       {
-        label: "Design — fits this problem",
-        correct: true
+        label: 'Design — fits this problem',
+        correct: true,
       },
       {
-        label: "Bijective tiny URL encode/decode — different approach"
+        label: 'Bijective tiny URL encode/decode — different approach',
       },
       {
-        label: "Trie dictionary + spell suggest — different approach"
+        label: 'Trie dictionary + spell suggest — different approach',
       },
       {
-        label: "Hash map + doubly linked list LRU — different approach"
-      }
+        label: 'Hash map + doubly linked list LRU — different approach',
+      },
     ],
-    explain: "See Insert Delete Getrandom O1 pattern"
+    explain: 'See Insert Delete Getrandom O1 pattern',
   },
   {
-    id: "key-step",
-    prompt: "On the \"REMOVE\" step (swap ), what happens?",
+    id: 'key-step',
+    prompt: 'On the "REMOVE" step (swap ), what happens?',
     choices: [
       {
-        label: "Remove() at index : swap — this move caption",
-        correct: true
+        label: 'Remove() at index : swap — this move caption',
+        correct: true,
       },
       {
-        label: "Run terminates immediately — no further frames"
+        label: 'Run terminates immediately — no further frames',
       },
       {
-        label: "Pointers reset to zero — restart scan"
+        label: 'Pointers reset to zero — restart scan',
       },
       {
-        label: "Remaining input skipped — early return path"
-      }
+        label: 'Remaining input skipped — early return path',
+      },
     ],
-    explain: "Remove() at index : swap with last element  at index  so deletion is O(1)."
+    explain: 'Remove() at index : swap with last element  at index  so deletion is O(1).',
   },
   {
-    id: "state",
-    prompt: "What does the `nums` field track in the visualization state?",
+    id: 'state',
+    prompt: 'What does the `nums` field track in the visualization state?',
     choices: [
       {
-        label: "Field nums in state — updated each frame",
-        correct: true
+        label: 'Field nums in state — updated each frame',
+        correct: true,
       },
       {
-        label: "Fixed display label — unchanged each frame"
+        label: 'Fixed display label — unchanged each frame',
       },
       {
-        label: "Shuffle seed value — for random ordering"
+        label: 'Shuffle seed value — for random ordering',
       },
       {
-        label: "Failure error code — set once at end"
-      }
+        label: 'Failure error code — set once at end',
+      },
     ],
-    explain: "The recorder snapshots `nums` on every emit so each frame shows the algorithm mid-step."
+    explain:
+      'The recorder snapshots `nums` on every emit so each frame shows the algorithm mid-step.',
   },
   {
-    id: "outcome",
-    prompt: "When the run completes, what does the final step convey?",
+    id: 'outcome',
+    prompt: 'When the run completes, what does the final step convey?',
     choices: [
       {
-        label: "Done. Set holds {} with element(s). — final DONE caption",
-        correct: true
+        label: 'Done. Set holds {} with element(s). — final DONE caption',
+        correct: true,
       },
       {
-        label: "Incomplete partial result — more steps needed"
+        label: 'Incomplete partial result — more steps needed',
       },
       {
-        label: "Input left unchanged — no mutations applied"
+        label: 'Input left unchanged — no mutations applied',
       },
       {
-        label: "Aborted run on failure — infinite loop detected"
-      }
+        label: 'Aborted run on failure — infinite loop detected',
+      },
     ],
-    explain: "Done. Set holds {} with  element(s)."
-  }
+    explain: 'Done. Set holds {} with  element(s).',
+  },
 ];
 export const simulator: ProblemSimulator = {
   practice: { quiz: practiceQuiz },
@@ -277,6 +284,8 @@ export const simulator: ProblemSimulator = {
   Inspector,
   verdict: (frames) => {
     const s = frames[frames.length - 1]?.state as RsState | undefined;
-    return s?.done ? { ok: true, label: `size ${s.nums.length}` } : { ok: false, label: 'incomplete' };
+    return s?.done
+      ? { ok: true, label: `size ${s.nums.length}` }
+      : { ok: false, label: 'incomplete' };
   },
 };
