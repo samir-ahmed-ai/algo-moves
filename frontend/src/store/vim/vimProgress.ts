@@ -17,8 +17,49 @@ function emptyProgress(): VimProgress {
   return { levels: {} };
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function normalizeLevelId(levelId: string): string | null {
+  const id = levelId.trim();
+  return id ? id : null;
+}
+
+function normalizeBestMoves(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0
+    ? Math.trunc(value)
+    : null;
+}
+
+function normalizeProgress(value: unknown): VimProgress {
+  if (!isRecord(value) || !isRecord(value.levels)) return emptyProgress();
+  const levels: Record<string, LevelProgress> = {};
+  for (const [rawId, rawProgress] of Object.entries(value.levels)) {
+    const levelId = normalizeLevelId(rawId);
+    if (!levelId || !isRecord(rawProgress)) continue;
+    levels[levelId] = {
+      completed: rawProgress.completed === true,
+      bestMoves: normalizeBestMoves(rawProgress.bestMoves),
+    };
+  }
+  return { levels };
+}
+
+function normalizeLevelIds(levelIds: string[]): string[] {
+  const seen = new Set<string>();
+  const ids: string[] = [];
+  for (const rawId of levelIds) {
+    const id = normalizeLevelId(rawId);
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    ids.push(id);
+  }
+  return ids;
+}
+
 function load(): VimProgress {
-  return readStorageJson(KEY, emptyProgress());
+  return normalizeProgress(readStorageJson(KEY, emptyProgress()));
 }
 
 const store = createSyncStore<VimProgress>(KEY, load);
@@ -28,7 +69,7 @@ export function readVimProgress(): VimProgress {
 }
 
 export function writeVimProgress(progress: VimProgress) {
-  store.set(progress);
+  store.set(normalizeProgress(progress));
 }
 
 export function useVimProgress(): VimProgress {
@@ -36,14 +77,17 @@ export function useVimProgress(): VimProgress {
 }
 
 export function markLevelComplete(levelId: string, moves: number): VimProgress {
+  const id = normalizeLevelId(levelId);
+  const moveCount = normalizeBestMoves(moves);
+  if (!id || moveCount === null) return store.get();
   let next!: VimProgress;
   store.update((progress) => {
-    const prev = progress.levels[levelId];
-    const bestMoves = prev?.bestMoves != null ? Math.min(prev.bestMoves, moves) : moves;
+    const prev = progress.levels[id];
+    const bestMoves = prev?.bestMoves != null ? Math.min(prev.bestMoves, moveCount) : moveCount;
     next = {
       levels: {
         ...progress.levels,
-        [levelId]: { completed: true, bestMoves },
+        [id]: { completed: true, bestMoves },
       },
     };
     return next;
@@ -52,14 +96,18 @@ export function markLevelComplete(levelId: string, moves: number): VimProgress {
 }
 
 export function isLevelUnlocked(levelIds: string[], index: number, progress: VimProgress): boolean {
-  if (index === 0) return true;
-  const prevId = levelIds[index - 1];
-  return prevId ? progress.levels[prevId]?.completed === true : true;
+  const ids = normalizeLevelIds(levelIds);
+  const currentIndex = Number.isInteger(index) ? index : 0;
+  if (currentIndex <= 0) return true;
+  const prevId = ids[currentIndex - 1];
+  return prevId ? normalizeProgress(progress).levels[prevId]?.completed === true : true;
 }
 
 export function firstIncompleteLevelId(levelIds: string[], progress: VimProgress): string | null {
-  for (const id of levelIds) {
-    if (!progress.levels[id]?.completed) return id;
+  const ids = normalizeLevelIds(levelIds);
+  const normalized = normalizeProgress(progress);
+  for (const id of ids) {
+    if (!normalized.levels[id]?.completed) return id;
   }
-  return levelIds[0] ?? null;
+  return ids[0] ?? null;
 }

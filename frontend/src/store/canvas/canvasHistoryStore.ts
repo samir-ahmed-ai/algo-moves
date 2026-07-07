@@ -16,6 +16,18 @@ function emptyStack(): KeyStack {
   return { history: [], index: -1, lastSig: '' };
 }
 
+function normalizeHistoryKey(key: string): string | null {
+  const next = key.trim();
+  return next ? next : null;
+}
+
+function cloneSnapshot(snapshot: CanvasHistorySnapshot): CanvasHistorySnapshot {
+  return {
+    nodes: snapshot.nodes.map((node) => ({ ...node })),
+    edges: snapshot.edges.map((edge) => ({ ...edge })),
+  };
+}
+
 interface CanvasHistoryState {
   stacks: Record<string, KeyStack>;
   record: (key: string, sig: string, nodes: PanelFlowNode[], edges: Edge[]) => boolean;
@@ -32,66 +44,75 @@ export const useCanvasHistoryStore = create<CanvasHistoryState>((set, get) => ({
   stacks: {},
 
   record(key, sig, nodes, edges) {
+    const normalizedKey = normalizeHistoryKey(key);
+    if (!normalizedKey) return false;
     const stacks = { ...get().stacks };
-    const stack = stacks[key] ?? emptyStack();
+    const stack = stacks[normalizedKey] ?? emptyStack();
     if (sig === stack.lastSig) return false;
-    const snap: CanvasHistorySnapshot = {
-      nodes: nodes.map((n) => ({ ...n })),
-      edges: edges.map((e) => ({ ...e })),
-    };
+    const snap = cloneSnapshot({ nodes, edges });
     const trimmed = stack.history.slice(0, stack.index + 1);
     trimmed.push(snap);
     if (trimmed.length > MAX_ENTRIES) trimmed.shift();
-    stacks[key] = { history: trimmed, index: trimmed.length - 1, lastSig: sig };
+    stacks[normalizedKey] = { history: trimmed, index: trimmed.length - 1, lastSig: sig };
     set({ stacks });
     return true;
   },
 
   undo(key) {
-    const stack = get().stacks[key];
+    const normalizedKey = normalizeHistoryKey(key);
+    if (!normalizedKey) return null;
+    const stack = get().stacks[normalizedKey];
     if (!stack || stack.index <= 0) return null;
     const nextIdx = stack.index - 1;
     const snap = stack.history[nextIdx];
     if (!snap) return null;
     const stacks = { ...get().stacks };
-    stacks[key] = { ...stack, index: nextIdx, lastSig: '' };
+    stacks[normalizedKey] = { ...stack, index: nextIdx, lastSig: '' };
     set({ stacks });
-    return { nodes: snap.nodes.map((n) => ({ ...n })), edges: snap.edges.map((e) => ({ ...e })) };
+    return cloneSnapshot(snap);
   },
 
   redo(key) {
-    const stack = get().stacks[key];
+    const normalizedKey = normalizeHistoryKey(key);
+    if (!normalizedKey) return null;
+    const stack = get().stacks[normalizedKey];
     if (!stack || stack.index >= stack.history.length - 1) return null;
     const nextIdx = stack.index + 1;
     const snap = stack.history[nextIdx];
     if (!snap) return null;
     const stacks = { ...get().stacks };
-    stacks[key] = { ...stack, index: nextIdx, lastSig: '' };
+    stacks[normalizedKey] = { ...stack, index: nextIdx, lastSig: '' };
     set({ stacks });
-    return { nodes: snap.nodes.map((n) => ({ ...n })), edges: snap.edges.map((e) => ({ ...e })) };
+    return cloneSnapshot(snap);
   },
 
   reset(key: string, lastSig = '') {
+    const normalizedKey = normalizeHistoryKey(key);
+    if (!normalizedKey) return;
     const stacks = { ...get().stacks };
-    stacks[key] = { history: [], index: -1, lastSig };
+    stacks[normalizedKey] = { history: [], index: -1, lastSig };
     set({ stacks });
   },
 
   canUndo(key) {
-    const stack = get().stacks[key];
+    const normalizedKey = normalizeHistoryKey(key);
+    const stack = normalizedKey ? get().stacks[normalizedKey] : null;
     return !!stack && stack.index > 0;
   },
 
   canRedo(key) {
-    const stack = get().stacks[key];
+    const normalizedKey = normalizeHistoryKey(key);
+    const stack = normalizedKey ? get().stacks[normalizedKey] : null;
     return !!stack && stack.index >= 0 && stack.index < stack.history.length - 1;
   },
 
   indexOf(key) {
-    return get().stacks[key]?.index ?? -1;
+    const normalizedKey = normalizeHistoryKey(key);
+    return normalizedKey ? (get().stacks[normalizedKey]?.index ?? -1) : -1;
   },
 
   historyLength(key) {
-    return get().stacks[key]?.history.length ?? 0;
+    const normalizedKey = normalizeHistoryKey(key);
+    return normalizedKey ? (get().stacks[normalizedKey]?.history.length ?? 0) : 0;
   },
 }));

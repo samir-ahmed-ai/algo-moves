@@ -23,11 +23,16 @@ const DEFAULTS: OverviewLayoutPrefs = {
 function clampPrefs(data: Partial<OverviewLayoutPrefs>): OverviewLayoutPrefs {
   return {
     problemPct: clampSplitPct(
-      typeof data.problemPct === 'number' ? data.problemPct : DEFAULTS.problemPct,
+      typeof data.problemPct === 'number' && Number.isFinite(data.problemPct)
+        ? data.problemPct
+        : DEFAULTS.problemPct,
       OVERVIEW_PROBLEM_MIN,
       OVERVIEW_PROBLEM_MAX,
     ),
-    problemCollapsed: data.problemCollapsed === true,
+    problemCollapsed:
+      data.problemCollapsed === undefined
+        ? DEFAULTS.problemCollapsed
+        : data.problemCollapsed === true,
   };
 }
 

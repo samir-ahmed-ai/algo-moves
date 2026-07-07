@@ -7,12 +7,17 @@ export interface AssembleGameStatsStore {
 }
 
 function parseAssembleBestSeconds(value: string | null): number | null {
-  const n = Number(value);
+  if (value === null) return null;
+  const n = Number(value.trim());
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
 function isBetterAssembleTime(seconds: number, best: number | null): boolean {
   return Number.isFinite(seconds) && seconds > 0 && (best === null || seconds < best);
+}
+
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
 /** Persisted assemble-game bests — one JSON blob per game per scope. */
@@ -22,12 +27,14 @@ export function assembleGameStatsStore(scope: string): AssembleGameStatsStore {
       const raw = readStorageText(STORAGE_KEYS.ASSEMBLE_GAME_BEST(gameId, scope), null);
       if (!raw) return fallback;
       try {
-        return { ...fallback, ...(JSON.parse(raw) as Partial<T>) };
+        const parsed = JSON.parse(raw);
+        return isPlainRecord(parsed) ? { ...fallback, ...(parsed as Partial<T>) } : fallback;
       } catch {
         return fallback;
       }
     },
     write(gameId: string, value: object) {
+      if (!isPlainRecord(value)) return;
       writeStorageText(STORAGE_KEYS.ASSEMBLE_GAME_BEST(gameId, scope), JSON.stringify(value));
     },
   };
@@ -40,6 +47,7 @@ export function readRushBestSeconds(itemId: string, variant: string | number): n
 }
 
 export function writeRushBestSeconds(itemId: string, variant: string | number, seconds: number) {
+  if (!Number.isFinite(seconds) || seconds <= 0) return;
   const scope = `${itemId}:${variant}`;
   writeStorageText(STORAGE_KEYS.ASSEMBLE_GAME_BEST('rush', scope), String(seconds));
 }

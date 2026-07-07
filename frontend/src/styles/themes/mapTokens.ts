@@ -133,9 +133,13 @@ export function mergeTokens(colors: ColorTokens, chrome: ChromeTokens): AlgoToke
   return { ...colors, ...chrome };
 }
 
+export function normalizeCssTokenValue(value: string): string {
+  return value.trim().replace(/,+$/, '');
+}
+
 export function tokensToCssVars(tokens: AlgoTokens): string {
   return Object.entries(tokens)
-    .map(([k, v]) => `  --${k}: ${v};`)
+    .map(([k, v]) => `  --${k}: ${normalizeCssTokenValue(v)};`)
     .join('\n');
 }
 
@@ -144,13 +148,14 @@ export function parseThemeCss(css: string): { light: SourceTokens; dark: SourceT
   const light: SourceTokens = {};
   const dark: SourceTokens = {};
 
-  const rootMatch = css.match(/:root\s*\{([^}]*)\}/s);
-  const darkMatch = css.match(/\.dark\s*\{([^}]*)\}/s);
+  const rootMatch = css.match(/:root(?:\[[^\]]+\])?\s*\{([^}]*)\}/s);
+  const darkMatch =
+    css.match(/:root\.dark(?:\[[^\]]+\])?\s*\{([^}]*)\}/s) ?? css.match(/\.dark\s*\{([^}]*)\}/s);
 
   const parseBlock = (block: string, out: SourceTokens) => {
     for (const line of block.split('\n')) {
       const m = line.match(/^\s*(--[\w-]+)\s*:\s*(.+?)\s*;?\s*$/);
-      if (m) out[m[1]] = m[2];
+      if (m) out[m[1]] = normalizeCssTokenValue(m[2]);
     }
   };
 

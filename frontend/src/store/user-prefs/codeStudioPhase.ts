@@ -1,9 +1,4 @@
-import {
-  readStorageJson,
-  readStorageText,
-  removeStorageValue,
-  writeStorageJson,
-} from '@/store/persistence/storage';
+import { readStorageJson, removeStorageValue, writeStorageJson } from '@/store/persistence/storage';
 import { STORAGE_KEYS } from '@/store/storageKeys';
 export type CodeStudioPhase = 'quiz' | 'reassemble' | 'recall';
 
@@ -16,8 +11,8 @@ export interface PhaseAvailability {
 /** Ordered list of phases that actually exist, always ending in `recall`. */
 export function phaseSequence({ hasQuiz, hasPieces }: PhaseAvailability): CodeStudioPhase[] {
   const seq: CodeStudioPhase[] = [];
-  if (hasQuiz) seq.push('quiz');
-  if (hasPieces) seq.push('reassemble');
+  if (hasQuiz === true) seq.push('quiz');
+  if (hasPieces === true) seq.push('reassemble');
   seq.push('recall');
   return seq;
 }
@@ -64,35 +59,66 @@ function isPhase(value: unknown): value is CodeStudioPhase {
   return value === 'quiz' || value === 'reassemble' || value === 'recall';
 }
 
-function isReassembleProgress(value: unknown): value is ReassembleProgress {
-  const candidate = value as Partial<ReassembleProgress>;
-  return (
-    candidate &&
-    typeof candidate === 'object' &&
-    Array.isArray(candidate.placedIds) &&
-    Array.isArray(candidate.trayIds) &&
-    typeof candidate.mistakes === 'number'
-  );
+function isObject(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object';
 }
 
-function isQuizProgress(value: unknown): value is QuizProgress {
+function isReassembleProgress(value: unknown): value is Partial<ReassembleProgress> {
+  const candidate = value as Partial<ReassembleProgress>;
+  return isObject(value) && Array.isArray(candidate.placedIds) && Array.isArray(candidate.trayIds);
+}
+
+function isQuizProgress(value: unknown): value is Partial<QuizProgress> {
   const candidate = value as Partial<QuizProgress>;
   return (
-    !!candidate &&
-    typeof candidate === 'object' &&
-    typeof candidate.index === 'number' &&
-    typeof candidate.score === 'number' &&
-    typeof candidate.done === 'boolean' &&
+    isObject(value) &&
     (candidate.answered === undefined ||
       candidate.answered === null ||
       typeof candidate.answered === 'number')
   );
 }
 
+function compactStringIds(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set<string>();
+  const ids: string[] = [];
+  for (const entry of value) {
+    if (typeof entry !== 'string') continue;
+    const id = entry.trim();
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    ids.push(id);
+  }
+  return ids;
+}
+
+function nonNegativeInt(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) ? Math.max(0, Math.trunc(value)) : 0;
+}
+
+function normalizeReassembleProgress(progress: Partial<ReassembleProgress>): ReassembleProgress {
+  return {
+    placedIds: compactStringIds(progress.placedIds),
+    trayIds: compactStringIds(progress.trayIds),
+    mistakes: nonNegativeInt(progress.mistakes),
+  };
+}
+
+function normalizeQuizProgress(progress: Partial<QuizProgress>): QuizProgress {
+  const next: QuizProgress = {
+    index: nonNegativeInt(progress.index),
+    score: nonNegativeInt(progress.score),
+    done: progress.done === true,
+  };
+  if (progress.answered === null) next.answered = null;
+  if (typeof progress.answered === 'number') next.answered = nonNegativeInt(progress.answered);
+  return next;
+}
+
 /** Resume the saved phase if it still exists for this problem, else the first phase. */
 export function loadPhase(itemId: string, langIdx: number, av: PhaseAvailability): CodeStudioPhase {
   const seq = phaseSequence(av);
-  const raw = readStorageText(phaseKey(itemId, langIdx));
+  const raw = readStorageJson(phaseKey(itemId, langIdx), null as CodeStudioPhase | null, isPhase);
   if (raw && isPhase(raw) && seq.includes(raw)) return raw;
   return seq[0];
 }
@@ -102,7 +128,8 @@ export function savePhase(itemId: string, langIdx: number, phase: CodeStudioPhas
 }
 
 export function loadReassembleProgress(itemId: string, langIdx: number): ReassembleProgress | null {
-  return readStorageJson(progressKey(itemId, langIdx), null, isReassembleProgress);
+  const progress = readStorageJson(progressKey(itemId, langIdx), null, isReassembleProgress);
+  return progress ? normalizeReassembleProgress(progress) : null;
 }
 
 export function saveReassembleProgress(
@@ -110,7 +137,7 @@ export function saveReassembleProgress(
   langIdx: number,
   progress: ReassembleProgress,
 ) {
-  writeStorageJson(progressKey(itemId, langIdx), progress);
+  writeStorageJson(progressKey(itemId, langIdx), normalizeReassembleProgress(progress));
 }
 
 export function clearReassembleProgress(itemId: string, langIdx: number) {
@@ -118,11 +145,12 @@ export function clearReassembleProgress(itemId: string, langIdx: number) {
 }
 
 export function loadQuizProgress(itemId: string, langIdx: number): QuizProgress | null {
-  return readStorageJson(quizKey(itemId, langIdx), null, isQuizProgress);
+  const progress = readStorageJson(quizKey(itemId, langIdx), null, isQuizProgress);
+  return progress ? normalizeQuizProgress(progress) : null;
 }
 
 export function saveQuizProgress(itemId: string, langIdx: number, progress: QuizProgress) {
-  writeStorageJson(quizKey(itemId, langIdx), progress);
+  writeStorageJson(quizKey(itemId, langIdx), normalizeQuizProgress(progress));
 }
 
 export function clearQuizProgress(itemId: string, langIdx: number) {

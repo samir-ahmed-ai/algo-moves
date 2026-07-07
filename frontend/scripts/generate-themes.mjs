@@ -54,6 +54,10 @@ const LABELS = {
   'pop-play': 'Pop Play',
 };
 
+function normalizeCssTokenValue(value) {
+  return String(value).trim().replace(/,+$/, '');
+}
+
 function parseBlock(css, selector) {
   const re = new RegExp(`${selector.replace('.', '\\.')}\\s*\\{([^}]*)\\}`, 's');
   const m = css.match(re);
@@ -61,17 +65,18 @@ function parseBlock(css, selector) {
   if (!m) return out;
   for (const line of m[1].split('\n')) {
     const lm = line.match(/^\s*(--[\w-]+)\s*:\s*(.+?)\s*;?\s*$/);
-    if (lm) out[lm[1]] = lm[2];
+    if (lm) out[lm[1]] = normalizeCssTokenValue(lm[2]);
   }
   return out;
 }
 
 function pick(src, key, fallback = '') {
-  return src[key]?.trim() ?? fallback;
+  return src[key] != null ? normalizeCssTokenValue(src[key]) : fallback;
 }
 
 function mixBg(color, pct = 16) {
-  return `color-mix(in srgb, ${color} ${pct}%, transparent)`;
+  const normalized = normalizeCssTokenValue(color);
+  return normalized ? `color-mix(in srgb, ${normalized} ${pct}%, transparent)` : 'transparent';
 }
 
 function mapSourceToAlgo(src) {
@@ -180,7 +185,7 @@ function mergeTokens(colors, chrome) {
 
 function tokensToCssVars(tokens) {
   return Object.entries(tokens)
-    .map(([k, v]) => `  --${k}: ${v};`)
+    .map(([k, v]) => `  --${k}: ${normalizeCssTokenValue(v)};`)
     .join('\n');
 }
 

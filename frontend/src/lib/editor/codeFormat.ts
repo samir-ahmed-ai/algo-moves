@@ -32,7 +32,7 @@ function leadingIndentChanged(before: string, after: string): boolean {
 
 export { applySpacingOnly, braceFormat, formatCompleteSource } from './styleFormat';
 
-function inferLangFromState(state: EditorState): string | undefined {
+function inferLangFromState(state: EditorState): string {
   return state.facet(indentUnit)[0] === '\t' ? 'go' : 'javascript';
 }
 

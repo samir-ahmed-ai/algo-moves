@@ -12,17 +12,26 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const MAX_CYCLES = 17;
 
 let out = '';
+let commandFailed = false;
 try {
-  execSync('npx madge --circular --extensions ts,tsx src', {
+  out = execSync('npx madge --circular --extensions ts,tsx src', {
     cwd: ROOT,
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
   });
 } catch (e) {
+  commandFailed = true;
   out = `${e.stdout ?? ''}${e.stderr ?? ''}`;
 }
 
-const match = out.match(/Found (\d+) circular dependencies!/);
+const match = out.match(/Found\s+(\d+)\s+circular dependencies!/i);
+const foundNone = /No circular dependency found/i.test(out);
+
+if (commandFailed && !match && !foundNone) {
+  console.error(out.trim() || 'madge failed before reporting circular dependency count');
+  process.exit(1);
+}
+
 const count = match ? Number(match[1]) : 0;
 
 if (count > MAX_CYCLES) {

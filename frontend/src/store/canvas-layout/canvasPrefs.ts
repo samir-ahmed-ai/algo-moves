@@ -20,6 +20,35 @@ interface StoredCanvasPrefs {
   bg?: BgVariant;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function normalizeEdgeOpts(value: unknown): EdgeOpts {
+  if (!isRecord(value)) return DEFAULTS.edgeOpts;
+  const next = { ...DEFAULTS.edgeOpts };
+  for (const key of Object.keys(DEFAULTS.edgeOpts) as (keyof EdgeOpts)[]) {
+    const fallback = DEFAULTS.edgeOpts[key];
+    const candidate = value[String(key)];
+    if (typeof candidate === typeof fallback) {
+      (next as Record<string, unknown>)[String(key)] = candidate;
+    }
+  }
+  return next;
+}
+
+function normalizeBg(value: unknown): BgVariant {
+  return typeof value === 'string' && value.trim() ? (value.trim() as BgVariant) : DEFAULTS.bg;
+}
+
+function normalizePrefs(value: StoredCanvasPrefs | CanvasPrefs | null): CanvasPrefs {
+  if (!value) return DEFAULTS;
+  return {
+    edgeOpts: normalizeEdgeOpts(value.edgeOpts),
+    bg: normalizeBg(value.bg),
+  };
+}
+
 function load(): CanvasPrefs {
   const raw = readStorageJson<StoredCanvasPrefs | CanvasPrefs | null>(
     KEY,
@@ -32,11 +61,7 @@ function load(): CanvasPrefs {
       );
     },
   );
-  if (!raw) return DEFAULTS;
-  return {
-    edgeOpts: { ...DEFAULTS.edgeOpts, ...(raw.edgeOpts ?? {}) },
-    bg: raw.bg ?? DEFAULTS.bg,
-  };
+  return normalizePrefs(raw);
 }
 
 const store = createSyncStore<CanvasPrefs>(KEY, load);
@@ -46,7 +71,7 @@ export function loadCanvasPrefs(): CanvasPrefs {
 }
 
 export function saveCanvasPrefs(p: CanvasPrefs) {
-  store.set(p);
+  store.set(normalizePrefs(p));
 }
 
 export function useCanvasPrefs(): CanvasPrefs {

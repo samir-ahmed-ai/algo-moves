@@ -6,7 +6,7 @@ function uniqueIds(ids: string[]): string[] {
 }
 
 function normalizeEstimatedMinutes(minutes: number | undefined): number | undefined {
-  if (!Number.isFinite(minutes)) return undefined;
+  if (minutes == null || !Number.isFinite(minutes)) return undefined;
   return Math.max(1, Math.round(minutes));
 }
 

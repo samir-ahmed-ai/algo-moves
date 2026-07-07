@@ -15,6 +15,8 @@ export const EDGE_CASE_LABELS = [
 
 export type EdgeCaseLabel = (typeof EDGE_CASE_LABELS)[number];
 
+const EDGE_CASE_SET = new Set<string>(EDGE_CASE_LABELS);
+
 function isEdgeCaseMap(value: unknown): value is Record<string, boolean> {
   return (
     typeof value === 'object' &&
@@ -24,12 +26,25 @@ function isEdgeCaseMap(value: unknown): value is Record<string, boolean> {
   );
 }
 
+function normalizeEdgeCaseLabel(label: string): EdgeCaseLabel | null {
+  const normalized = label.trim();
+  return EDGE_CASE_SET.has(normalized) ? (normalized as EdgeCaseLabel) : null;
+}
+
+function normalizeEdgeCases(value: Record<string, boolean>): Record<string, boolean> {
+  const next: Record<string, boolean> = {};
+  for (const label of EDGE_CASE_LABELS) {
+    if (value[label] === true) next[label] = true;
+  }
+  return next;
+}
+
 function keyFor(itemId: string) {
   return STORAGE_KEYS.EDGE_CASES(itemId);
 }
 
 function load(itemId: string): Record<string, boolean> {
-  return readStorageJson(keyFor(itemId), {}, isEdgeCaseMap);
+  return normalizeEdgeCases(readStorageJson(keyFor(itemId), {}, isEdgeCaseMap));
 }
 
 const listeners = new Set<() => void>();
@@ -50,13 +65,15 @@ export function getEdgeCases(itemId: string): Record<string, boolean> {
 }
 
 export function setEdgeCases(itemId: string, next: Record<string, boolean>) {
-  writeStorageJson(keyFor(itemId), next);
+  writeStorageJson(keyFor(itemId), normalizeEdgeCases(next));
   notify();
 }
 
 export function toggleEdgeCase(itemId: string, label: string): Record<string, boolean> {
+  const edgeCaseLabel = normalizeEdgeCaseLabel(label);
   const prev = load(itemId);
-  const next = { ...prev, [label]: !prev[label] };
+  if (!edgeCaseLabel) return prev;
+  const next = { ...prev, [edgeCaseLabel]: !prev[edgeCaseLabel] };
   setEdgeCases(itemId, next);
   return next;
 }

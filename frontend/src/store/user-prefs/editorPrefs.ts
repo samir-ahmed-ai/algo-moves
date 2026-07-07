@@ -44,6 +44,30 @@ const DEFAULTS: EditorPrefs = {
   highlightChanges: true,
 };
 
+function booleanPref(value: unknown, fallback: boolean): boolean {
+  return value === undefined ? fallback : value === true;
+}
+
+function numberPref(value: unknown, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+}
+
+function normalizePrefs(data: Partial<EditorPrefs> | null | undefined): EditorPrefs {
+  if (!data) return DEFAULTS;
+  return {
+    vim: booleanPref(data.vim, DEFAULTS.vim),
+    wrap: booleanPref(data.wrap, DEFAULTS.wrap),
+    splitPct: clampCodeSplitPct(numberPref(data.splitPct, DEFAULTS.splitPct)),
+    recallCompact: booleanPref(data.recallCompact, DEFAULTS.recallCompact),
+    mergeGutter: booleanPref(data.mergeGutter, DEFAULTS.mergeGutter),
+    mergeCollapse: booleanPref(data.mergeCollapse, DEFAULTS.mergeCollapse),
+    fontSize: clampRecallFontSize(numberPref(data.fontSize, DEFAULTS.fontSize)),
+    lineHeight: isRecallLineHeight(data.lineHeight) ? data.lineHeight : DEFAULTS.lineHeight,
+    showLineNumbers: booleanPref(data.showLineNumbers, DEFAULTS.showLineNumbers),
+    highlightChanges: booleanPref(data.highlightChanges, DEFAULTS.highlightChanges),
+  };
+}
+
 function load(): EditorPrefs {
   const data = readStorageJson(
     KEY,
@@ -52,29 +76,7 @@ function load(): EditorPrefs {
       return value !== null && typeof value === 'object';
     },
   );
-  if (!data) return DEFAULTS;
-  return {
-    vim: Boolean(data.vim),
-    wrap: Boolean(data.wrap),
-    splitPct: clampCodeSplitPct(
-      typeof data.splitPct === 'number' ? data.splitPct : DEFAULTS.splitPct,
-    ),
-    recallCompact:
-      data.recallCompact !== undefined ? Boolean(data.recallCompact) : DEFAULTS.recallCompact,
-    mergeGutter: data.mergeGutter !== undefined ? Boolean(data.mergeGutter) : DEFAULTS.mergeGutter,
-    mergeCollapse:
-      data.mergeCollapse !== undefined ? Boolean(data.mergeCollapse) : DEFAULTS.mergeCollapse,
-    fontSize: clampRecallFontSize(
-      typeof data.fontSize === 'number' ? data.fontSize : DEFAULTS.fontSize,
-    ),
-    lineHeight: isRecallLineHeight(data.lineHeight) ? data.lineHeight : DEFAULTS.lineHeight,
-    showLineNumbers:
-      data.showLineNumbers !== undefined ? Boolean(data.showLineNumbers) : DEFAULTS.showLineNumbers,
-    highlightChanges:
-      data.highlightChanges !== undefined
-        ? Boolean(data.highlightChanges)
-        : DEFAULTS.highlightChanges,
-  };
+  return normalizePrefs(data);
 }
 
 const store = createSyncStore<EditorPrefs>(KEY, load);
@@ -84,16 +86,13 @@ export function loadEditorPrefs(): EditorPrefs {
 }
 
 export function saveEditorPrefs(next: EditorPrefs) {
-  store.set(next);
+  store.set(normalizePrefs(next));
 }
 
 export function useEditorPrefs(): [EditorPrefs, (patch: Partial<EditorPrefs>) => void] {
   const current = store.use();
   const set = useCallback((patch: Partial<EditorPrefs>) => {
-    const next = { ...store.get(), ...patch };
-    if (patch.splitPct !== undefined) next.splitPct = clampCodeSplitPct(patch.splitPct);
-    if (patch.fontSize !== undefined) next.fontSize = clampRecallFontSize(patch.fontSize);
-    store.set(next);
+    store.set(normalizePrefs({ ...store.get(), ...patch }));
   }, []);
   return [current, set];
 }

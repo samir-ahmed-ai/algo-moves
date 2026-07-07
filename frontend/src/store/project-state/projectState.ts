@@ -19,6 +19,10 @@ function isShareState(value: unknown): value is ShareState {
   return value != null && typeof value === 'object';
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
 function isProjectState(value: unknown): value is ProjectState {
   const candidate = value as Partial<ProjectState>;
   return (
@@ -30,6 +34,81 @@ function isProjectState(value: unknown): value is ProjectState {
   );
 }
 
+function normalizeStringId(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const id = value.trim();
+  return id ? id : null;
+}
+
+function compactStringList(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const seen = new Set<string>();
+  const ids: string[] = [];
+  for (const entry of value) {
+    const id = normalizeStringId(entry);
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    ids.push(id);
+  }
+  return ids.length ? ids : undefined;
+}
+
+function normalizeSpeed(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : undefined;
+}
+
+function normalizeNode(node: Node): Node | null {
+  const id = normalizeStringId(node.id);
+  if (!id) return null;
+  return { ...node, id };
+}
+
+function normalizeNodes(nodes: Node[]): Node[] {
+  const seen = new Set<string>();
+  const next: Node[] = [];
+  for (const node of sanitizeLoadedNodes(nodes)) {
+    const normalized = normalizeNode(node);
+    if (!normalized || seen.has(normalized.id)) continue;
+    seen.add(normalized.id);
+    next.push(normalized);
+  }
+  return next;
+}
+
+function normalizeEdges(edges: Edge[], nodes: Node[]): Edge[] {
+  const nodeIds = new Set(nodes.map((node) => node.id));
+  const seen = new Set<string>();
+  const next: Edge[] = [];
+  for (const edge of edges) {
+    const id = normalizeStringId(edge.id);
+    const source = normalizeStringId(edge.source);
+    const target = normalizeStringId(edge.target);
+    if (!id || !source || !target || seen.has(id)) continue;
+    if (!nodeIds.has(source) || !nodeIds.has(target)) continue;
+    seen.add(id);
+    next.push({ ...edge, id, source, target });
+  }
+  return next;
+}
+
+function normalizeProjectState(value: unknown): ProjectState | null {
+  if (!isProjectState(value) || !isRecord(value.share)) return null;
+  const nodes = normalizeNodes(value.nodes);
+  return {
+    version: 1,
+    share: value.share,
+    nodes,
+    edges: normalizeEdges(value.edges, nodes),
+    ...(compactStringList(value.removedPanels)
+      ? { removedPanels: compactStringList(value.removedPanels) }
+      : {}),
+    ...(compactStringList(value.removedEdges)
+      ? { removedEdges: compactStringList(value.removedEdges) }
+      : {}),
+    ...(normalizeSpeed(value.speed) ? { speed: normalizeSpeed(value.speed) } : {}),
+  };
+}
+
 export function encodeProjectState(state: ProjectState): string {
   return compressToBase64(JSON.stringify(state));
 }
@@ -39,7 +118,7 @@ export function decodeProjectState(encoded: string): ProjectState | null {
     const json = decompressFromBase64(encoded);
     if (!json) return null;
     const parsed = JSON.parse(json);
-    return isProjectState(parsed) ? parsed : null;
+    return normalizeProjectState(parsed);
   } catch {
     return null;
   }
@@ -95,7 +174,7 @@ export function projectStateToJson(state: ProjectState): string {
 export function projectStateFromJson(json: string): ProjectState | null {
   try {
     const parsed = JSON.parse(json);
-    return isProjectState(parsed) ? parsed : null;
+    return normalizeProjectState(parsed);
   } catch {
     return null;
   }
@@ -123,11 +202,16 @@ export function buildMinimalProjectState(
   edges: Edge[],
   extras?: Partial<Pick<ProjectState, 'removedPanels' | 'removedEdges' | 'speed'>>,
 ): ProjectState {
+  const removedPanels = compactStringList(extras?.removedPanels);
+  const removedEdges = compactStringList(extras?.removedEdges);
+  const speed = normalizeSpeed(extras?.speed);
   return {
     version: 1,
     share,
     nodes,
     edges,
-    ...extras,
+    ...(removedPanels ? { removedPanels } : {}),
+    ...(removedEdges ? { removedEdges } : {}),
+    ...(speed ? { speed } : {}),
   };
 }

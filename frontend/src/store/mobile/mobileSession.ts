@@ -14,20 +14,44 @@ export interface MobileSession {
   updatedAt: number;
 }
 
-function isMobileSession(value: unknown): value is MobileSession {
+function normalizeId(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const id = value.trim();
+  return id ? id : null;
+}
+
+function normalizeIndex(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) ? Math.max(0, Math.trunc(value)) : 0;
+}
+
+function normalizeUpdatedAt(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : null;
+}
+
+function normalizeMobileSession(value: unknown): MobileSession | null {
   const candidate = value as Partial<MobileSession>;
-  if (!candidate || typeof candidate !== 'object') return false;
-  return (
-    typeof candidate.topicId === 'string' &&
-    typeof candidate.pIdx === 'number' &&
-    typeof candidate.cIdx === 'number' &&
-    typeof candidate.updatedAt === 'number' &&
-    Number.isFinite(candidate.updatedAt)
-  );
+  if (!candidate || typeof candidate !== 'object') return null;
+  const topicId = normalizeId(candidate.topicId);
+  const updatedAt = normalizeUpdatedAt(candidate.updatedAt);
+  if (!topicId || updatedAt === null) return null;
+  const itemId = normalizeId(candidate.itemId);
+  return {
+    topicId,
+    ...(itemId ? { itemId } : {}),
+    pIdx: normalizeIndex(candidate.pIdx),
+    cIdx: normalizeIndex(candidate.cIdx),
+    updatedAt,
+  };
+}
+
+function isMobileSession(value: unknown): value is MobileSession {
+  return normalizeMobileSession(value) !== null;
 }
 
 function readFresh(): MobileSession | null {
-  const session = readStorageJson<MobileSession | null>(KEY, null, isMobileSession);
+  const session = normalizeMobileSession(
+    readStorageJson<MobileSession | null>(KEY, null, isMobileSession),
+  );
   if (!session) return null;
   if (Date.now() - session.updatedAt > TTL_MS) {
     removeStorageValue(KEY);
@@ -51,7 +75,8 @@ export function loadMobileSession(): MobileSession | null {
 }
 
 export function saveMobileSession(session: Omit<MobileSession, 'updatedAt'>) {
-  store.set({ ...session, updatedAt: Date.now() });
+  const normalized = normalizeMobileSession({ ...session, updatedAt: Date.now() });
+  if (normalized) store.set(normalized);
 }
 
 export function clearMobileSession() {

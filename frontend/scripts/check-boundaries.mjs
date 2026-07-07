@@ -23,9 +23,10 @@
  *
  * Zero dependencies; wired into `npm run check:all`.
  */
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { walkFiles } from './lib/walkFiles.mjs';
 
 const SRC = resolve(dirname(fileURLToPath(import.meta.url)), '../src');
 
@@ -79,20 +80,6 @@ const IMPORT_RE =
   /(?:import|export)\b[^;'"]*?\bfrom\s*['"]([^'"]+)['"]|\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)|\bimport\s*['"]([^'"]+)['"]/g;
 const IS_TEST = /(?:\.test\.|\.spec\.|(?:^|\/)__tests__\/)/;
 
-function walk(dir, out = []) {
-  for (const name of readdirSync(dir)) {
-    const p = join(dir, name);
-    const s = statSync(p);
-    if (s.isDirectory()) {
-      if (name === 'node_modules' || name === '_generated') continue;
-      walk(p, out);
-    } else if (/\.(ts|tsx)$/.test(name) && !name.endsWith('.d.ts')) {
-      out.push(p);
-    }
-  }
-  return out;
-}
-
 const layerOf = (srcRel) => srcRel.split('/')[0];
 
 /** Resolve an import specifier to a src-relative path, or null if external. */
@@ -109,7 +96,13 @@ function resolveTarget(spec, fileDir) {
 const violations = [];
 const used = new Set();
 
-for (const file of walk(SRC)) {
+for (const file of walkFiles(
+  SRC,
+  (_path, name) => /\.(ts|tsx)$/.test(name) && !name.endsWith('.d.ts'),
+  {
+    skipDirs: ['node_modules', '_generated'],
+  },
+)) {
   const srcRel = relative(SRC, file).replace(/\\/g, '/');
   if (IS_TEST.test(srcRel)) continue;
   const srcLayer = layerOf(srcRel);
@@ -143,7 +136,10 @@ if (violations.length) {
   console.error(
     `\n✗ ${violations.length} module-boundary violation(s) — imports must flow downward (see docs/architecture.md):\n`,
   );
-  for (const v of violations.sort((a, b) => a.srcRel.localeCompare(b.srcRel))) {
+  for (const v of violations.sort((a, b) => {
+    const byFile = a.srcRel.localeCompare(b.srcRel);
+    return byFile || a.spec.localeCompare(b.spec);
+  })) {
     console.error(`  ${v.srcLayer} ⇏ ${v.targetLayer}   ${v.srcRel}`);
     console.error(`      imports '${v.spec}'`);
   }

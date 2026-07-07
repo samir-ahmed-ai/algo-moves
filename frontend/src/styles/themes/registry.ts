@@ -33,12 +33,17 @@ export type ThemePreset = BaseThemeId | HybridThemeId;
 export const THEME_PRESETS: ThemePreset[] = [...BASE_THEME_IDS, ...HYBRID_THEME_IDS];
 
 export const DEFAULT_THEME_PRESET: ThemePreset = 'mint-saas';
+const THEME_PRESET_SET = new Set<string>(THEME_PRESETS);
 
 export type ThemeMeta = {
   id: ThemePreset;
   label: string;
   swatch: string;
   kind: 'base' | 'hybrid';
+};
+
+export type ThemePresetOption = ThemeMeta & {
+  sourceAvailable: boolean;
 };
 
 const BASE_LABELS: Record<BaseThemeId, string> = {
@@ -77,6 +82,28 @@ export const THEME_META: ThemeMeta[] = THEME_PRESETS.map((id) => ({
   kind: BASE_THEME_IDS.includes(id as BaseThemeId) ? 'base' : 'hybrid',
 }));
 
+export const THEME_META_BY_ID: Record<ThemePreset, ThemeMeta> = THEME_META.reduce(
+  (acc, meta) => {
+    acc[meta.id] = meta;
+    return acc;
+  },
+  {} as Record<ThemePreset, ThemeMeta>,
+);
+
+export const THEME_PRESET_OPTIONS: ThemePresetOption[] = THEME_META.map((meta) => ({
+  ...meta,
+  sourceAvailable: themeSources[meta.id] != null,
+}));
+
+export function getThemeMeta(value: unknown): ThemeMeta {
+  return THEME_META_BY_ID[normalizeThemePreset(value)];
+}
+
+export function getThemeSource(value: unknown) {
+  const preset = normalizeThemePreset(value);
+  return themeSources[preset] ?? themeSources[DEFAULT_THEME_PRESET];
+}
+
 /** Map legacy preset ids from share URLs to the nearest new preset. */
 const LEGACY_PRESET_MAP: Record<string, ThemePreset> = {
   classic: 'mint-saas',
@@ -86,15 +113,17 @@ const LEGACY_PRESET_MAP: Record<string, ThemePreset> = {
 };
 
 export function normalizeThemePreset(value: unknown): ThemePreset {
-  if (typeof value === 'string' && THEME_PRESETS.includes(value as ThemePreset)) {
-    return value as ThemePreset;
+  if (typeof value !== 'string') return DEFAULT_THEME_PRESET;
+  const id = value.trim().toLowerCase();
+  if (THEME_PRESET_SET.has(id)) {
+    return id as ThemePreset;
   }
-  if (typeof value === 'string' && value in LEGACY_PRESET_MAP) {
-    return LEGACY_PRESET_MAP[value];
+  if (id in LEGACY_PRESET_MAP) {
+    return LEGACY_PRESET_MAP[id];
   }
   return DEFAULT_THEME_PRESET;
 }
 
 export function isThemePreset(value: unknown): value is ThemePreset {
-  return typeof value === 'string' && THEME_PRESETS.includes(value as ThemePreset);
+  return typeof value === 'string' && THEME_PRESET_SET.has(value);
 }

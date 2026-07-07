@@ -9,17 +9,24 @@ export interface StudySessionResume {
   lastTab: string | null;
 }
 
+function normalizeId(value: string | null | undefined): string | null {
+  const id = value?.trim() ?? '';
+  return id ? id : null;
+}
+
 export function loadStudySession(): StudySessionResume {
   return {
-    lastItemId: readStorageText(LAST_ITEM_KEY) || null,
-    lastTab: readStorageText(TAB_KEY) || null,
+    lastItemId: normalizeId(readStorageText(LAST_ITEM_KEY)),
+    lastTab: normalizeId(readStorageText(TAB_KEY)),
   };
 }
 
 export function saveStudyTab(tabId: string): void {
-  writeStorageText(TAB_KEY, tabId);
+  const nextTabId = normalizeId(tabId);
+  if (nextTabId) writeStorageText(TAB_KEY, nextTabId);
 }
 
 export function saveStudyResume(itemId: string): void {
-  writeStorageText(LAST_ITEM_KEY, itemId);
+  const nextItemId = normalizeId(itemId);
+  if (nextItemId) writeStorageText(LAST_ITEM_KEY, nextItemId);
 }

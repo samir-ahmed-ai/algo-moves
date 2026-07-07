@@ -2,7 +2,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { normalizeThemePreset, type ThemePreset } from '@/styles/themes/registry';
 import type { ShareState } from '@/store/navigation/shareState';
 import { normalizeLayoutPreset, type LayoutPreset } from '@/lib/canvas/layoutPrefs';
-import type { Density, Palette, Theme, Tweaks, WorkspaceDefaults } from './workspace';
+import {
+  normalizeDensity,
+  type Density,
+  type Palette,
+  type Theme,
+  type Tweaks,
+  type WorkspaceDefaults,
+} from './workspace';
 
 /** Theme, palette, density and display tweaks, plus the document-element sync effects. */
 export function useAppearanceState(
@@ -10,7 +17,7 @@ export function useAppearanceState(
   savedDefaults: Partial<WorkspaceDefaults>,
 ) {
   const [theme, setTheme] = useState<Theme>(shared?.theme === 'light' ? 'light' : 'dark');
-  const [density, setDensity] = useState<Density>(savedDefaults.density ?? 'compact');
+  const [density, setDensity] = useState<Density>(normalizeDensity(savedDefaults.density));
   const [palette, setPalette] = useState<Palette>(shared?.palette === 'cb' ? 'cb' : 'default');
   const [themePreset, setThemePreset] = useState<ThemePreset>(
     normalizeThemePreset(savedDefaults.themePreset ?? shared?.themePreset),

@@ -11,7 +11,7 @@ import { join } from 'node:path';
  * @returns {string[]}
  */
 export function walkFiles(dir, match, { skipDirs = ['node_modules'] } = {}, out = []) {
-  for (const name of readdirSync(dir)) {
+  for (const name of readdirSync(dir).sort()) {
     const p = join(dir, name);
     if (statSync(p).isDirectory()) {
       if (skipDirs.includes(name)) continue;

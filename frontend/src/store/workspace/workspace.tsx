@@ -14,6 +14,7 @@ import type {
   EdgeOpts,
   LayoutPreset,
 } from '@/lib/canvas/layoutPrefs';
+import { normalizeLayoutPreset } from '@/lib/canvas/layoutPrefs';
 import { DEFAULTS_KEY, LAST_ITEM_KEY } from './workspaceConstants';
 import { readStorageText, writeStorageJson } from '@/store/persistence/storage';
 
@@ -48,12 +49,31 @@ export interface WorkspaceDefaults {
 
 export { DEFAULTS_KEY, LAST_ITEM_KEY } from './workspaceConstants';
 
+const DEFAULT_LAYOUT_PRESET: LayoutPreset = 'TraceFocus';
+
+export function normalizeDensity(value: unknown): Density {
+  return value === 'ultra' || value === 'spacious' ? value : 'compact';
+}
+
+export function normalizeWorkspaceDefaults(
+  defaults: Partial<WorkspaceDefaults>,
+): WorkspaceDefaults {
+  return {
+    density: normalizeDensity(defaults.density),
+    themePreset: normalizeThemePreset(defaults.themePreset),
+    layoutPreset: normalizeLayoutPreset(defaults.layoutPreset ?? DEFAULT_LAYOUT_PRESET),
+    autoplay: defaults.autoplay === true,
+    snap: defaults.snap === true,
+  };
+}
+
 export function saveDefaults(d: WorkspaceDefaults) {
-  writeStorageJson(DEFAULTS_KEY, d);
+  writeStorageJson(DEFAULTS_KEY, normalizeWorkspaceDefaults(d));
 }
 
 export function readLastItemId(): string | null {
-  return readStorageText(LAST_ITEM_KEY, null);
+  const itemId = readStorageText(LAST_ITEM_KEY, null)?.trim() ?? '';
+  return itemId || null;
 }
 
 export type LayoutDir = 'TB' | 'LR';
