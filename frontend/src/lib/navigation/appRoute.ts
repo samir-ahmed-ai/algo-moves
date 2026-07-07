@@ -76,7 +76,7 @@ export function normalizeLegacyUrl() {
     return;
   }
 
-  for (const page of ['mobile', 'vim', 'games'] as const) {
+  for (const page of ['mobile', 'vim', 'games', 'plans'] as const) {
     if (body === page || body.startsWith(`${page}/`)) {
       const hashBody = body === page ? '' : body.slice(page.length + 1);
       history.replaceState(null, '', buildAppUrl(page, hashBody, location.search));

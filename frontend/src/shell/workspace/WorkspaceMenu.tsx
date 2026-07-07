@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import {
+  BookMarked,
   FileText,
   HelpCircle,
   Home,
@@ -63,7 +64,7 @@ export interface WorkspaceMenuDropdownProps extends WorkspaceMenuProps {
 }
 
 export function WorkspaceMenuDropdown({ onOpenPalette, onOpenHelp, compact }: WorkspaceMenuDropdownProps) {
-  const { menuOpen, setMenuOpen, goHome, canvasAdd, setSettingsOpen, activeItemId, focusCanvas } = useWorkspace();
+  const { menuOpen, setMenuOpen, goHome, enterPlans, canvasAdd, setSettingsOpen, activeItemId, focusCanvas } = useWorkspace();
   const rootRef = useRef<HTMLDivElement>(null);
   const [explorerOpen, setExplorerOpen] = useState(false);
   const [explorerFocus, setExplorerFocus] = useState<ExplorerFocus>(null);
@@ -133,6 +134,11 @@ export function WorkspaceMenuDropdown({ onOpenPalette, onOpenHelp, compact }: Wo
           )}
         >
           <MenuRow icon={<Home className="h-4 w-4" />} label="Home" onClick={() => pick(goHome)} />
+          <MenuRow
+            icon={<BookMarked className="h-4 w-4" />}
+            label="Interview plans"
+            onClick={() => pick(enterPlans)}
+          />
           <MenuRow
             icon={<Zap className="h-4 w-4" />}
             label="Command palette"

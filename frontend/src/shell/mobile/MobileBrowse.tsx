@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Check, Play, Search } from 'lucide-react';
+import { BookmarkPlus, Check, CheckCircle2, Play, Search } from 'lucide-react';
 import {
   catalog,
   getCategoryById,
@@ -20,6 +20,8 @@ import { BrowseBreadcrumb } from '../browse/BrowseBreadcrumb';
 import { ProblemGlyph } from './scenes/ProblemGlyph';
 import { loadMobileSession } from './mobileSession';
 import { writeMobileHash } from '@/lib/navigation';
+import { usePlan } from '@/shell/plans/PlanContext';
+import { cn } from '@/lib/utils/cn';
 
 export function MobileBrowse({
   onPick,
@@ -27,6 +29,7 @@ export function MobileBrowse({
   onPick: (topic: Topic, startItemId?: string, initialPIdx?: number, initialCIdx?: number) => void;
 }) {
   const progress = useProgress();
+  const { isBuilding, hasItem, addItem, removeItem } = usePlan();
   const { activeTrackId, setActiveTrackId, activeCategoryId, setActiveCategoryId } = useWorkspace();
   const [query, setQuery] = useState('');
 
@@ -80,13 +83,37 @@ export function MobileBrowse({
 
   const renderProblemRow = (it: Item, categoryId: string) => {
     const done = statFor(progress, it.id).mastered;
+    const inPlan = isBuilding && hasItem(it.id);
+    const handlePlanToggle = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (inPlan) removeItem(it.id);
+      else addItem(it.id);
+    };
     return (
       <li key={it.id}>
         <button
           type="button"
           onClick={() => startDeck(categoryId, it.id)}
-          className="flex w-full items-start gap-3 border-b border-edge px-3 py-2.5 text-left last:border-b-0 transition-colors active:bg-panel2"
+          className={cn(
+            'relative flex w-full items-start gap-3 border-b border-edge px-3 py-2.5 text-left last:border-b-0 transition-colors active:bg-panel2',
+            isBuilding && inPlan && 'bg-accentbg/30',
+          )}
         >
+          {isBuilding && (
+            <button
+              type="button"
+              onClick={handlePlanToggle}
+              aria-label={inPlan ? `Remove ${it.title} from plan` : `Add ${it.title} to plan`}
+              className={cn(
+                'absolute right-2 top-2 z-10 grid h-7 w-7 place-items-center rounded-lg border transition-colors',
+                inPlan
+                  ? 'border-accent/60 bg-accent text-white'
+                  : 'border-edge bg-panel text-ink3 active:bg-panel2',
+              )}
+            >
+              {inPlan ? <CheckCircle2 className="h-3.5 w-3.5" /> : <BookmarkPlus className="h-3.5 w-3.5" />}
+            </button>
+          )}
           <ProblemGlyph item={it} className="mt-0.5 h-7 w-7 shrink-0 text-ink2" />
           <span className="min-w-0 flex-1">
             <span className="block truncate text-[14px] font-medium text-ink">{it.title}</span>
