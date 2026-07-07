@@ -14,6 +14,8 @@ export interface WorkspaceKeyboardOptions {
   setPaletteOpen: (v: boolean | ((p: boolean) => boolean)) => void;
   toggleFocusCanvas: () => void;
   hasSiblingNav?: boolean;
+  hasPrevProblemNav?: boolean;
+  hasNextProblemNav?: boolean;
   onPrevProblem?: () => void;
   onNextProblem?: () => void;
 }
@@ -45,6 +47,8 @@ export interface WorkspaceKeyboardSnapshot {
   helpOpen: boolean;
   paletteOpen: boolean;
   hasSiblingNav?: boolean;
+  hasPrevProblemNav?: boolean;
+  hasNextProblemNav?: boolean;
 }
 
 export function resolveWorkspaceKeyboardAction(input: WorkspaceKeyboardSnapshot): WorkspaceKeyboardAction {
@@ -82,9 +86,9 @@ export function resolveWorkspaceKeyboardAction(input: WorkspaceKeyboardSnapshot)
     case '?':
       return 'toggle-help';
     case '[':
-      return input.hasSiblingNav ? 'prev-problem' : 'none';
+      return (input.hasPrevProblemNav ?? input.hasSiblingNav) ? 'prev-problem' : 'none';
     case ']':
-      return input.hasSiblingNav ? 'next-problem' : 'none';
+      return (input.hasNextProblemNav ?? input.hasSiblingNav) ? 'next-problem' : 'none';
     default:
       return 'none';
   }
@@ -102,6 +106,8 @@ export function useWorkspaceKeyboard({
   setPaletteOpen,
   toggleFocusCanvas,
   hasSiblingNav,
+  hasPrevProblemNav,
+  hasNextProblemNav,
   onPrevProblem,
   onNextProblem,
 }: WorkspaceKeyboardOptions): void {
@@ -117,6 +123,8 @@ export function useWorkspaceKeyboard({
         helpOpen,
         paletteOpen,
         hasSiblingNav,
+        hasPrevProblemNav,
+        hasNextProblemNav,
       });
       if (action === 'none') return;
       e.preventDefault();
@@ -185,6 +193,8 @@ export function useWorkspaceKeyboard({
     setPaletteOpen,
     toggleFocusCanvas,
     hasSiblingNav,
+    hasPrevProblemNav,
+    hasNextProblemNav,
     onPrevProblem,
     onNextProblem,
   ]);

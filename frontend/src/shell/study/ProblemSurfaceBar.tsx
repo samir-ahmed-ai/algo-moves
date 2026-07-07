@@ -9,6 +9,8 @@ import { useCanvasStatic, Chip, difficultyTone } from '@/shell/canvas';
 import { WorkspaceMenuDropdown } from '@/shell/workspace/WorkspaceMenu';
 import { AuthButton } from '@/shell/auth';
 import { FeatureSelectorPopover, ToolbarSegment } from '@/components/shared';
+import { SURFACE_THEME_GROUPS, SURFACE_VIEW_GROUPS } from './surfaceBarFeatureGroups';
+import { usePlan } from '@/shell/plans/PlanContext';
 
 export function IconBtn({
   title,
@@ -63,15 +65,24 @@ export function ProblemSurfaceBar({
   const { item } = useCanvasStatic();
   const isMobile = useIsMobile();
   const { theme, setTheme, present, setPresent, activeItemId, openProblem } = useWorkspace();
+  const { isRunning, itemIds, runnerIndex, prevItem, nextItem } = usePlan();
   const browseCrumb = browseBreadcrumbForItem(item.id, catalog);
 
-  const list = useMemo(() => getSiblingItems(activeItemId, catalog), [activeItemId]);
-  const idx = list.findIndex((i) => i.id === activeItemId);
-  const showNav = list.length >= 2 && idx >= 0;
+  const siblings = useMemo(() => getSiblingItems(activeItemId, catalog), [activeItemId]);
+  const siblingIdx = siblings.findIndex((i) => i.id === activeItemId);
 
-  const goSibling = (delta: number) => {
-    const n = (idx + delta + list.length) % list.length;
-    openProblem(list[n].id);
+  const navList = isRunning ? itemIds : siblings.map((i) => i.id);
+  const navIdx = isRunning ? runnerIndex : siblingIdx;
+  const showNav = navList.length >= 2 && navIdx >= 0 && navIdx < navList.length;
+
+  const goNav = (delta: number) => {
+    if (isRunning) {
+      if (delta < 0) prevItem();
+      else nextItem();
+      return;
+    }
+    const n = (siblingIdx + delta + siblings.length) % siblings.length;
+    openProblem(siblings[n].id);
   };
 
   return (
@@ -105,22 +116,25 @@ export function ProblemSurfaceBar({
         <div className="flex shrink-0 items-center gap-0.5 rounded-full border border-edge bg-panel2/60 px-0.5 py-0.5">
           <button
             type="button"
-            onClick={() => goSibling(-1)}
-            title="Previous problem ([)"
-            aria-label="Previous problem"
-            className="grid h-6 w-6 place-items-center rounded-full text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
+            onClick={() => goNav(-1)}
+            title={isRunning ? 'Previous in plan (p)' : 'Previous problem ([)'}
+            aria-label={isRunning ? 'Previous in plan' : 'Previous problem'}
+            disabled={isRunning && navIdx <= 0}
+            className="grid h-6 w-6 place-items-center rounded-full text-ink3 transition-colors hover:bg-panel2 hover:text-ink disabled:opacity-40"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
           <span className={cn('hidden px-1 font-mono tabular-nums text-ink3 sm:inline', chromeText.xs)}>
-            {idx + 1}/{list.length}
+            {navIdx + 1}/{navList.length}
+            {isRunning ? ' plan' : ''}
           </span>
           <button
             type="button"
-            onClick={() => goSibling(1)}
-            title="Next problem (])"
-            aria-label="Next problem"
-            className="grid h-6 w-6 place-items-center rounded-full text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
+            onClick={() => goNav(1)}
+            title={isRunning ? 'Next in plan (n)' : 'Next problem (])'}
+            aria-label={isRunning ? 'Next in plan' : 'Next problem'}
+            disabled={isRunning && navIdx >= navList.length - 1}
+            className="grid h-6 w-6 place-items-center rounded-full text-ink3 transition-colors hover:bg-panel2 hover:text-ink disabled:opacity-40"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
@@ -129,62 +143,22 @@ export function ProblemSurfaceBar({
 
       <ToolbarSegment className="hidden md:flex">
         <FeatureSelectorPopover
-          groups={[
-            {
-              options: [
-                {
-                  id: 'light',
-                  icon: <Sun />,
-                  title: 'Light',
-                  subtitle: 'Light background',
-                  detailTitle: 'Light Theme',
-                  detailDescription: 'Light background with dark text.',
-                },
-                {
-                  id: 'dark',
-                  icon: <Moon />,
-                  title: 'Dark',
-                  subtitle: 'Dark background',
-                  detailTitle: 'Dark Theme',
-                  detailDescription: 'Dark background with light text — easier on the eyes at night.',
-                },
-              ],
-            },
-          ]}
+          groups={SURFACE_THEME_GROUPS}
           value={theme}
           onChange={(v) => setTheme(v as 'light' | 'dark')}
           panelTitle="Theme"
           triggerIcon={theme === 'dark' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+          triggerAriaLabel="Theme"
           compact
           align="right"
         />
         <FeatureSelectorPopover
-          groups={[
-            {
-              options: [
-                {
-                  id: 'off',
-                  icon: <Maximize2 />,
-                  title: 'Normal',
-                  subtitle: 'Full chrome',
-                  detailTitle: 'Normal view',
-                  detailDescription: 'All UI chrome visible — toolbar, sidebar, and navigation.',
-                },
-                {
-                  id: 'on',
-                  icon: <Maximize2 />,
-                  title: 'Present',
-                  subtitle: 'Focus mode',
-                  detailTitle: 'Presentation mode',
-                  detailDescription: 'Hides chrome and maximises the problem surface for presenting or focusing.',
-                },
-              ],
-            },
-          ]}
+          groups={SURFACE_VIEW_GROUPS}
           value={present ? 'on' : 'off'}
           onChange={(v) => setPresent(v === 'on')}
           panelTitle="View"
           triggerIcon={<Maximize2 className="h-3.5 w-3.5" />}
+          triggerAriaLabel="View options"
           compact
           align="right"
         />

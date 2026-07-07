@@ -9,6 +9,7 @@ import { CommandPalette, ModeRouter, PresentationModeHint, ShortcutsOverlay, use
 import { SettingsDialog, MobileTransportSheet } from '@/shell/canvas';
 import { PlanTray } from './plans/PlanTray';
 import { PlanRunner } from './plans/PlanRunner';
+import { usePlan } from './plans/PlanContext';
 export function Workspace() {
   const {
     density,
@@ -33,15 +34,32 @@ export function Workspace() {
   const { item, plugin, pluginLoading, inputId, customInput, setCustomInput, selectInput, frames, runtimeError, player, frame } =
     useWorkspaceRuntime(activeItemId);
 
+  const { isRunning, itemIds, runnerIndex, prevItem, nextItem } = usePlan();
+
   const siblings = useMemo(() => getSiblingItems(activeItemId, catalog), [activeItemId]);
   const siblingIdx = siblings.findIndex((i) => i.id === activeItemId);
-  const hasSiblingNav =
-    problemFocused && (mode === 'learn' || mode === 'play') && siblings.length >= 2 && siblingIdx >= 0;
 
-  const goSibling = (delta: number) => {
+  const navList = isRunning ? itemIds : siblings.map((i) => i.id);
+  const navIdx = isRunning ? runnerIndex : siblingIdx;
+  const hasSiblingNav =
+    problemFocused &&
+    (mode === 'learn' || mode === 'play') &&
+    navList.length >= 2 &&
+    navIdx >= 0 &&
+    navIdx < navList.length;
+
+  const goNav = (delta: number) => {
+    if (isRunning) {
+      if (delta < 0) prevItem();
+      else nextItem();
+      return;
+    }
     const n = (siblingIdx + delta + siblings.length) % siblings.length;
     openProblem(siblings[n].id);
   };
+
+  const canPrevNav = hasSiblingNav && (!isRunning || navIdx > 0);
+  const canNextNav = hasSiblingNav && (!isRunning || navIdx < navList.length - 1);
 
   useWorkspaceKeyboard({
     mode,
@@ -54,8 +72,10 @@ export function Workspace() {
     setPaletteOpen,
     toggleFocusCanvas,
     hasSiblingNav,
-    onPrevProblem: hasSiblingNav ? () => goSibling(-1) : undefined,
-    onNextProblem: hasSiblingNav ? () => goSibling(1) : undefined,
+    hasPrevProblemNav: canPrevNav,
+    hasNextProblemNav: canNextNav,
+    onPrevProblem: canPrevNav ? () => goNav(-1) : undefined,
+    onNextProblem: canNextNav ? () => goNav(1) : undefined,
   });
 
   // Text-to-speech narration + per-step sound cues.
