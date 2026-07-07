@@ -17,6 +17,7 @@ describe('content/taxonomy', () => {
       'algorithms',
       'design',
       'go',
+      'openrtb',
       'interview-prep',
     ]);
   });
