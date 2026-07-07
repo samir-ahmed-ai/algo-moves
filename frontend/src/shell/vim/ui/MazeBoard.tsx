@@ -55,7 +55,7 @@ export function MazeBoard({
             const wasVisited = visited.has(cellKey(r, c));
 
             let tone = 'land';
-            if (isWall) tone = 'water';
+            if (isWall) tone = 'blocked';
             else if (wasVisited && !isCursor) tone = 'visited';
             if (isGoal && !isCursor) tone = 'path';
 

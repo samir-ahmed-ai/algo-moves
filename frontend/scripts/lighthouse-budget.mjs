@@ -86,6 +86,13 @@ requireMatch(
   /@shikijs\/langs\//,
 );
 
+// --- Hocuspocus provider is lazy-loaded (collab sessions only) ---
+requireMatch(
+  'src/shell/canvas/collab/yjs/useYjsCanvasCollab.ts',
+  'Hocuspocus must use dynamic import for bundle budget',
+  /import\(\s*['"]@hocuspocus\/provider['"]\s*\)/,
+);
+
 const LIGHTHOUSE_BUDGET = {
   performance: 0.75,
   accessibility: 0.9,

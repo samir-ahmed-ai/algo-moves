@@ -1,0 +1,12 @@
+# Optional local stack — Hocuspocus with Postgres persistence.
+# Usage: DATABASE_URL=postgres://… docker compose up hocuspocus
+services:
+  hocuspocus:
+    build: ./services/hocuspocus
+    ports:
+      - '${HOCUSPOCUS_PORT:-1234}:1234'
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-}
+      HOCUSPOCUS_PORT: 1234
+      HOCUSPOCUS_ALLOWED_ORIGINS: ${HOCUSPOCUS_ALLOWED_ORIGINS:-http://localhost:4321,http://127.0.0.1:4321}
+    restart: unless-stopped

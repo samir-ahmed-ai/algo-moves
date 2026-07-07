@@ -1,20 +1,16 @@
-# Railway config for the game server. Set ALLOWED_ORIGINS and DATABASE_URL in
-# the dashboard. Service root directory in Railway: /backend
-# Deploys on push to main when files under backend/ change.
-# Watch patterns are repo-root-relative (see Railway monorepo docs), not relative
-# to this service's root directory.
+# Railway — Go game server (service root: backend)
+# Config file path in dashboard: /backend/railway.toml
 #
-# Required service variables (Railway dashboard → backend → Variables):
-#   DATABASE_URL       — Postgres reference
-#   ALLOWED_ORIGINS    — frontend public URL
-#   RUN_MIGRATIONS     — true/1 to apply schema on startup; false to skip
-#   RUN_CONTENT_SEED   — true/1 to reload learning catalog on startup; false to skip
-#   PLATFORM_ADMIN_EMAIL / PLATFORM_ADMIN_PASSWORD — bootstrap platform admin on startup
+# Variables:
+#   DATABASE_URL       — ${{Postgres.DATABASE_URL}}
+#   ALLOWED_ORIGINS    — https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}
+#   RUN_MIGRATIONS     — true
+#   RUN_CONTENT_SEED   — true
 
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
-watchPatterns = ["backend/**"]
+watchPatterns = ["**", "../db/migrations/**"]
 
 [deploy]
 healthcheckPath = "/healthz"

@@ -1,11 +1,8 @@
 /**
- * Yjs document layout for canvas collaboration spike.
+ * Yjs document layout for canvas collaboration.
  *
- * Maps the host-authoritative {@link CanvasDoc} shape onto CRDT structures:
- * - `nodes` / `edges` / `comments` as Y.Map entries keyed by id
- * - `meta` Y.Map for rev + tombstone id lists
- *
- * Not wired into production transport yet — see docs/yjs-hocuspocus-spike.md.
+ * Maps the host-authoritative {@link CanvasDoc} shape onto CRDT structures.
+ * Used by shadow dual-write and Hocuspocus transport — see docs/yjs-hocuspocus-spike.md.
  */
 import * as Y from 'yjs';
 import type { Edge } from '@xyflow/react';

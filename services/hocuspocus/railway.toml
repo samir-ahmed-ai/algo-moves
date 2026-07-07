@@ -1,0 +1,19 @@
+# Railway — Hocuspocus Yjs relay (service root: services/hocuspocus)
+# Config file path in dashboard: /services/hocuspocus/railway.toml
+#
+# Variables (use Add Reference where noted):
+#   DATABASE_URL               — ${{Postgres.DATABASE_URL}}
+#   HOCUSPOCUS_ALLOWED_ORIGINS — https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}
+#
+# Frontend must set:
+#   VITE_HOCUSPOCUS_URL        — wss://${{hocuspocus.RAILWAY_PUBLIC_DOMAIN}}
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+watchPatterns = ["**"]
+
+[deploy]
+healthcheckPath = "/healthz"
+healthcheckTimeout = 120
+restartPolicyType = "ON_FAILURE"

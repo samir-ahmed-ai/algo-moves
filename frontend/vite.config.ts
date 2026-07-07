@@ -65,6 +65,7 @@ export default defineConfig({
           if (has('node_modules')) {
             if (has('/react') || has('/react-dom')) return 'react';
             if (has('@xyflow')) return 'xyflow';
+            if (has('yjs') || has('hocuspocus') || has('lib0')) return 'yjs-collab';
             return;
           }
           const importedSim = normalized.match(/\/plugins\/imported\/simulators\/problems\/([^/]+)\.tsx$/);

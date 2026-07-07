@@ -28,7 +28,7 @@ export function VimHeroPreview() {
                 <div
                   key={`${r}-${c}`}
                   className={`grid h-5 w-5 place-items-center rounded-sm ${
-                    cell === '#' ? 'bg-panel2' : 'bg-accentbg/40'
+                    cell === '#' ? 'grid-cell blocked vim-maze-cell' : 'bg-accentbg/40'
                   } ${isCursor ? 'vim-hero-preview-cursor text-accent' : 'text-ink'}`}
                 >
                   {isCursor ? '█' : isGoal ? '★' : ''}

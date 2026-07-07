@@ -8,7 +8,9 @@ COPY . .
 
 # Injected at build time from Railway service variables (never commit real values).
 ARG VITE_GAMES_SERVER_URL
+ARG VITE_HOCUSPOCUS_URL
 ENV VITE_GAMES_SERVER_URL=$VITE_GAMES_SERVER_URL
+ENV VITE_HOCUSPOCUS_URL=$VITE_HOCUSPOCUS_URL
 
 RUN npm run build
 

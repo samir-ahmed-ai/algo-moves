@@ -8,6 +8,7 @@ GO := go
 BACKEND_DIR := backend
 FRONTEND_PORT := 4321
 BACKEND_PORT := 8080
+HOCUSPOCUS_PORT := 1234
 
 # ANSI (no-op when stdout is not a TTY)
 ifeq ($(shell test -t 1 && echo yes),yes)
@@ -34,7 +35,7 @@ help: ## Show all available commands (default)
 	@awk 'BEGIN {FS = ":.*?## "} \
 		/^##@/ { printf "\n$(BOLD)%s$(RESET)\n", substr($$0, 5); next } \
 		/^[a-zA-Z0-9_.-]+:.*## / { printf "  $(CYAN)%-20s$(RESET) %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
-	@printf '\n$(DIM)Quick start:$(RESET) $(CYAN)make install$(RESET) → $(CYAN)make start$(RESET)  $(DIM)(frontend :$(FRONTEND_PORT) + backend :$(BACKEND_PORT))$(RESET)\n\n'
+	@printf '\n$(DIM)Quick start:$(RESET) $(CYAN)make install$(RESET) → $(CYAN)make start$(RESET)  $(DIM)(frontend :$(FRONTEND_PORT) + backend :$(BACKEND_PORT) + Hocuspocus :$(HOCUSPOCUS_PORT))$(RESET)\n\n'
 
 ##@ Setup
 
@@ -43,17 +44,35 @@ install: _require-node ## Install frontend npm dependencies
 
 ##@ Development
 
-start: dev-all ## Run frontend + backend together (recommended for games)
+start: dev-collab ## Run frontend + backend + Hocuspocus (recommended for games + canvas collab)
 
-dev-all: _require-node _require-go _require-frontend-deps _free-dev-ports ## Frontend (:4321) + backend (:8080); reclaims ports; Ctrl+C stops both
+dev-all: _require-node _require-go _require-frontend-deps _free-dev-ports ## Frontend (:4321) + backend (:8080) without Hocuspocus
 	@printf '\n$(BOLD)Starting full stack$(RESET)\n'
 	@printf '  $(GREEN)Frontend$(RESET)  http://localhost:$(FRONTEND_PORT)  $(DIM)(Vite prints LAN URL for phones)$(RESET)\n'
 	@printf '  $(GREEN)Backend$(RESET)   http://localhost:$(BACKEND_PORT)  $(DIM)(WebSocket games + optional arcade API)$(RESET)\n'
+	@printf '  $(DIM)For canvas Yjs collab use $(CYAN)make dev-collab$(RESET)$(DIM).$(RESET)\n'
 	@printf '  $(DIM)Press Ctrl+C to stop both services.$(RESET)\n\n'
 	@trap 'printf "\n$(YELLOW)Stopping…$(RESET)\n"; kill 0 2>/dev/null || true' INT TERM; \
 	$(MAKE) --no-print-directory backend-dev & \
 	$(MAKE) --no-print-directory frontend-dev & \
 	wait
+
+dev-collab: _require-node _require-go _require-frontend-deps _free-dev-ports ## Frontend + backend + Hocuspocus (:1234) with Yjs transport
+	@printf '\n$(BOLD)Starting collab stack$(RESET)\n'
+	@printf '  $(GREEN)Frontend$(RESET)    http://localhost:$(FRONTEND_PORT)  $(DIM)(VITE_HOCUSPOCUS_URL=ws://localhost:$(HOCUSPOCUS_PORT))$(RESET)\n'
+	@printf '  $(GREEN)Backend$(RESET)     http://localhost:$(BACKEND_PORT)\n'
+	@printf '  $(GREEN)Hocuspocus$(RESET)  ws://localhost:$(HOCUSPOCUS_PORT)\n'
+	@printf '  $(DIM)Press Ctrl+C to stop all services.$(RESET)\n\n'
+	@trap 'printf "\n$(YELLOW)Stopping…$(RESET)\n"; kill 0 2>/dev/null || true' INT TERM; \
+	$(MAKE) --no-print-directory backend-dev & \
+	$(MAKE) --no-print-directory hocuspocus-dev & \
+	VITE_HOCUSPOCUS_URL=ws://localhost:$(HOCUSPOCUS_PORT) $(NPM) run dev & \
+	wait
+
+hocuspocus-dev: _require-node _require-frontend-deps ## Dev Hocuspocus relay on :1234 (no Postgres)
+	@$(MAKE) --no-print-directory _free-port PORT=$(HOCUSPOCUS_PORT) NAME=Hocuspocus
+	@printf '$(BOLD)Hocuspocus$(RESET) → ws://localhost:$(HOCUSPOCUS_PORT)\n'
+	HOCUSPOCUS_PORT=$(HOCUSPOCUS_PORT) $(NPM) run hocuspocus
 
 frontend: frontend-dev ## Alias — start the Vite dev server
 
@@ -108,6 +127,16 @@ content-seed: _require-node ## Regenerate db/content_seed.sql and apply to DATAB
 	$(NPM) run export-content-sql
 	SEED_CONTENT=1 ./scripts/migrate-db.sh
 
+##@ Deploy
+
+railway-deploy: ## Set Railway env vars and deploy backend + hocuspocus + frontend
+	chmod +x scripts/railway-deploy.sh
+	./scripts/railway-deploy.sh
+
+railway-vars: ## Update Railway service variables only
+	chmod +x scripts/railway-deploy.sh
+	./scripts/railway-deploy.sh --vars
+
 ##@ Cleanup
 
 clean: backend-clean ## Remove build artifacts and caches (frontend + backend)
@@ -139,6 +168,7 @@ _require-frontend-deps:
 _free-dev-ports:
 	@$(MAKE) --no-print-directory _free-port PORT=$(FRONTEND_PORT) NAME=Frontend
 	@$(MAKE) --no-print-directory _free-port PORT=$(BACKEND_PORT) NAME=Backend
+	@$(MAKE) --no-print-directory _free-port PORT=$(HOCUSPOCUS_PORT) NAME=Hocuspocus
 
 _free-port:
 	@port='$(PORT)'; \
@@ -155,7 +185,8 @@ _free-port:
 	printf '$(YELLOW)%s :%s still busy (PID %s) — force stopping…$(RESET)\n' "$$label" "$$port" "$$remaining"; \
 	kill -9 $$remaining 2>/dev/null || true
 
-.PHONY: help install start dev-all frontend frontend-dev dev backend backend-dev \
+.PHONY: help install start dev-all dev-collab hocuspocus-dev frontend frontend-dev dev backend backend-dev \
         preview build typecheck test check backend-build backend-test \
-        db-migrate content-seed clean backend-clean \
+        db-migrate content-seed railway-deploy railway-vars \
+        clean backend-clean \
         _require-node _require-go _require-frontend-deps _free-dev-ports _free-port

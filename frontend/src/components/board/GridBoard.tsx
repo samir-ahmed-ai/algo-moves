@@ -1,6 +1,6 @@
 export interface GridBoardProps {
   grid: (number | string)[][];
-  /** Per-cell class suffix → `.grid-cell.<tone>` (water | land | active | visited | path). */
+  /** Per-cell class suffix → `.grid-cell.<tone>` (water | land | blocked | active | visited | path). */
   cellTone?: (r: number, c: number) => string;
   label?: (r: number, c: number) => string | number;
   /** Cell the algorithm is currently looking at (ring highlight). */

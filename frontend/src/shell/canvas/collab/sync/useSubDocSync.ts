@@ -12,6 +12,13 @@ import {
 } from '../protocol/subdocProtocol';
 import { diffWhiteboardElements, snapshotFromPayload } from '../protocol/subdocMerge';
 import { canEditSubDoc } from '../protocol/subdocPermissions';
+import { useYjsCollab } from '../yjs/YjsCollabContext';
+import { useYjsForSubdocs } from '../yjs/yjsConfig';
+import {
+  observeSubdocPanel,
+  writeEditorSubdoc,
+  writeWhiteboardSubdoc,
+} from '../yjs/yjsSubdocBinding';
 
 function defaultPayload(kind: SubDocKind): WhiteboardPayload | EditorPayload {
   return kind === 'whiteboard' ? emptyWhiteboardPayload() : emptyEditorPayload();
@@ -45,6 +52,8 @@ export function useSubDocSync(kind: SubDocKind): SubDocSyncResult {
   } = useCanvasCollab();
   const { theme } = useWorkspace();
   const { getNode, setNodes } = useReactFlow();
+  const { doc: yjsDoc } = useYjsCollab();
+  const yjsSubdoc = useYjsForSubdocs();
 
   const canEdit = canEditSubDoc({ role, session, isCollaborating }, kind);
   const nodeData = getNode(nodeId)?.data as { subDoc?: { kind: string; rev: number; payload: unknown } } | undefined;
@@ -70,6 +79,7 @@ export function useSubDocSync(kind: SubDocKind): SubDocSyncResult {
   useEffect(() => {
     if (!remotePayload) return;
     const nextRev = remote?.rev ?? 0;
+    if (yjsSubdoc) return;
     // Only apply remote if it has a newer revision (host-authoritative)
     if (nextRev <= revRef.current && isHost) return;
     applyingRemote.current = true;
@@ -80,7 +90,23 @@ export function useSubDocSync(kind: SubDocKind): SubDocSyncResult {
       setLockedState(!!(remotePayload as EditorPayload).locked);
     }
     applyingRemote.current = false;
-  }, [remotePayload, remote?.rev, isHost]);
+  }, [remotePayload, remote?.rev, isHost, yjsSubdoc]);
+
+  // Phase B.4: reconcile panel state from Yjs subdoc
+  useEffect(() => {
+    if (!yjsSubdoc || !yjsDoc || !isCollaborating) return;
+    return observeSubdocPanel(yjsDoc, nodeId, (snap) => {
+      if (!snap || snap.kind !== kind) return;
+      applyingRemote.current = true;
+      setLocal(snap.payload);
+      revRef.current = snap.rev;
+      setRevState(snap.rev);
+      if ((snap.payload as EditorPayload).locked != null) {
+        setLockedState(!!(snap.payload as EditorPayload).locked);
+      }
+      applyingRemote.current = false;
+    });
+  }, [yjsSubdoc, yjsDoc, isCollaborating, nodeId, kind]);
 
   useEffect(() => {
     if (isCollaborating || !persisted) return;
@@ -121,11 +147,27 @@ export function useSubDocSync(kind: SubDocKind): SubDocSyncResult {
 
       if (isHost) {
         publishLocal(next);
+        if (yjsSubdoc && yjsDoc) {
+          if (kind === 'whiteboard') {
+            writeWhiteboardSubdoc(yjsDoc, nodeId, next as WhiteboardPayload, revRef.current);
+          } else {
+            writeEditorSubdoc(yjsDoc, nodeId, next as EditorPayload, revRef.current);
+          }
+        }
         return;
       }
 
       revRef.current += 1;
       persistToNode(next, revRef.current);
+
+      if (yjsSubdoc && yjsDoc) {
+        if (kind === 'whiteboard') {
+          writeWhiteboardSubdoc(yjsDoc, nodeId, next as WhiteboardPayload, revRef.current);
+        } else {
+          writeEditorSubdoc(yjsDoc, nodeId, next as EditorPayload, revRef.current);
+        }
+        return;
+      }
 
       if (kind === 'whiteboard') {
         const prev = (remotePayload as WhiteboardPayload | undefined) ?? emptyWhiteboardPayload();
@@ -161,6 +203,8 @@ export function useSubDocSync(kind: SubDocKind): SubDocSyncResult {
       persistToNode,
       publishLocal,
       remotePayload,
+      yjsSubdoc,
+      yjsDoc,
     ],
   );
 
@@ -172,8 +216,11 @@ export function useSubDocSync(kind: SubDocKind): SubDocSyncResult {
       const next = { ...(local as EditorPayload), locked: value };
       publishLocal(next);
       setLocal(next);
+      if (yjsSubdoc && yjsDoc) {
+        writeEditorSubdoc(yjsDoc, nodeId, next, revRef.current);
+      }
     },
-    [isHost, kind, local, publishLocal],
+    [isHost, kind, local, publishLocal, yjsSubdoc, yjsDoc, nodeId],
   );
 
   const onPointerUpdate = useCallback(

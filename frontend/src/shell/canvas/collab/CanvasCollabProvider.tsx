@@ -64,6 +64,10 @@ import {
 } from './protocol/subdocMerge';
 import { extractSubDocs } from '@/shell/realtime/roomState';
 import { isQuizOp, toHostQuizEntry, type HostQuizEntry } from './protocol/quizProtocol';
+import { CollabTransportBanner } from './CollabTransportBanner';
+import { useYjsForCanvasGraph, useYjsForSubdocs, hocuspocusUrl } from './yjs/yjsConfig';
+import { YjsCollabProvider } from './yjs/YjsCollabContext';
+import { useYjsCanvasCollab } from './yjs/useYjsCanvasCollab';
 import { SoloFallbackBanner } from './SoloFallbackBanner';
 
 /** Live, ephemeral state for one remote collaborator. */
@@ -188,7 +192,7 @@ function CollabState({ children }: { children: ReactNode }) {
     if (isHost || !isCollaborating) return;
     setSessionMeta(extractSessionMeta(sharedState));
     const remoteSubDocs = extractSubDocs(sharedState);
-    if (Object.keys(remoteSubDocs).length > 0) {
+    if (!useYjsForSubdocs() && Object.keys(remoteSubDocs).length > 0) {
       setSubDocs((prev) => ({ ...prev, ...remoteSubDocs }));
     }
   }, [sharedState, isHost, isCollaborating]);
@@ -232,6 +236,7 @@ function CollabState({ children }: { children: ReactNode }) {
             return;
           }
           if (!isHost || !isSubDocEditOp(op)) return;
+          if (useYjsForSubdocs()) return;
           // Gate: reject guest patches when interview settings deny edit
           const senderRole = players.find((p) => p.id === fromId)?.role ?? 'guest';
           const patchKind = op[SUBDOC_TAG] === 'patch-editor' ? 'collab-code' as const : 'whiteboard' as const;
@@ -605,7 +610,13 @@ function CollabState({ children }: { children: ReactNode }) {
   );
 
   // ---- comment actions (optimistic locally; folded by the host doc) ----
-  const emitEdit = useCallback((op: EditOp) => emit(op), [emit]);
+  const emitEdit = useCallback(
+    (op: EditOp) => {
+      if (useYjsForCanvasGraph()) return;
+      emit(op);
+    },
+    [emit],
+  );
 
   const addComment = useCallback((x: number, y: number, text: string) => {
     const body = text.trim();
@@ -675,16 +686,33 @@ function CollabState({ children }: { children: ReactNode }) {
   );
 
   return (
-    <CanvasCollabContext.Provider value={value}>
-      {children}
-      {backendDegraded && !bannerDismissed && sessionMeta.kind === 'interview' ? (
-        <SoloFallbackBanner
-          message="Interview is running without cloud persistence — durable guest invite links and session history are unavailable. LAN relay still works."
-          onDismiss={dismissBackendBanner}
-        />
-      ) : null}
-    </CanvasCollabContext.Provider>
+    <YjsCollabBridge isCollaborating={isCollaborating} isHost={isHost}>
+      <CanvasCollabContext.Provider value={value}>
+        {children}
+        <CollabTransportBanner active={isCollaborating && !hocuspocusUrl()} />
+        {backendDegraded && !bannerDismissed && sessionMeta.kind === 'interview' ? (
+          <SoloFallbackBanner
+            message="Interview is running without cloud persistence — durable guest invite links and session history are unavailable. LAN relay still works."
+            onDismiss={dismissBackendBanner}
+          />
+        ) : null}
+      </CanvasCollabContext.Provider>
+    </YjsCollabBridge>
   );
+}
+
+function YjsCollabBridge({
+  children,
+  isCollaborating,
+  isHost,
+}: {
+  children: ReactNode;
+  isCollaborating: boolean;
+  isHost: boolean;
+}) {
+  const { room } = useGameRoom();
+  const yjs = useYjsCanvasCollab({ roomId: room, isCollaborating, isHost });
+  return <YjsCollabProvider value={yjs}>{children}</YjsCollabProvider>;
 }
 
 function patchPeer(

@@ -153,31 +153,41 @@ make backend-test    # framing + hub + a real two-client socket relay test
 
 Deploy the **frontend** and **game server** on [Railway](https://railway.com). Pushes to **`main`** auto-deploy via Railway's GitHub integration — no GitHub Actions deploy workflow and no Railway tokens in GitHub secrets. CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) still runs tests on push/PR.
 
-1. Create a Railway project with three services: **frontend**, **backend**, and **Postgres** (database plugin).
+1. Create a Railway project with four resources: **frontend**, **backend**, **hocuspocus**, and **Postgres**.
 2. **Connect GitHub** for each app service (Settings → Source):
    - Link your GitHub repo
-   - **Root Directory:** `backend` or `frontend` (required for this monorepo)
-   - **Config file path:** `/backend/railway.toml` or `/frontend/railway.toml` (repo-root absolute path)
+   - **Root Directory:** `backend`, `frontend`, or `services/hocuspocus`
+   - **Config file path:** `/backend/railway.toml`, `/frontend/railway.toml`, or `/services/hocuspocus/railway.toml`
    - **Branch:** `main`
    - Enable **Deploy on push**
-   - **Watch paths:** leave empty in the dashboard — `watchPatterns` in each service's `railway.toml` already scopes deploys (`frontend/**` / `backend/**`). Patterns are repo-root-relative; do not use `**` or `src/**` here.
-3. Generate a public domain for frontend and backend (Settings → Networking).
-4. Set **service variables** in the Railway dashboard:
+3. Generate a public domain for frontend, backend, and hocuspocus (Settings → Networking).
+4. Set **service variables** (or run `./scripts/railway-deploy.sh --vars`):
 
-   | Service | Variable | Example value |
-   |---------|----------|---------------|
+   | Service | Variable | Value |
+   |---------|----------|-------|
    | **backend** | `ALLOWED_ORIGINS` | `https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}` |
-   | **backend** | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` (use **Add Reference**) |
-   | **backend** | `RUN_MIGRATIONS` | `true` — apply schema + achievement seed on every deploy; set `false` to skip |
-   | **backend** | `RUN_CONTENT_SEED` | `true` — reload learning catalog on every deploy; set `false` to skip |
+   | **backend** | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` |
+   | **backend** | `RUN_MIGRATIONS` | `true` |
+   | **backend** | `RUN_CONTENT_SEED` | `true` |
+   | **hocuspocus** | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` |
+   | **hocuspocus** | `HOCUSPOCUS_ALLOWED_ORIGINS` | `https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}` |
    | **frontend** | `VITE_GAMES_SERVER_URL` | `https://${{backend.RAILWAY_PUBLIC_DOMAIN}}` |
+   | **frontend** | `VITE_HOCUSPOCUS_URL` | `wss://${{hocuspocus.RAILWAY_PUBLIC_DOMAIN}}` |
 
-   Use your exact Railway service names in the `${{…}}` references.
+   Service names in `${{…}}` must match your Railway service names exactly (`frontend`, `backend`, `hocuspocus`, `Postgres`).
 
-5. **Manual deploy fallback** (emergency only, from repo root with Railway CLI):
+5. **One-shot deploy** (from repo root, Railway CLI logged in):
+
+   ```bash
+   chmod +x scripts/railway-deploy.sh
+   ./scripts/railway-deploy.sh
+   ```
+
+   Or deploy individually:
 
    ```bash
    railway up backend --path-as-root --service backend --detach
+   railway up services/hocuspocus --path-as-root --service hocuspocus --detach
    railway up frontend --path-as-root --service frontend --detach
    ```
 

@@ -1,14 +1,14 @@
-# Railway config for the static frontend (no secrets - set VITE_GAMES_SERVER_URL
-# in the dashboard). Arcade persistence is handled by the backend + Postgres.
-# Service root directory in Railway: frontend
-# Deploys on push to main when files under frontend/ change.
-# Watch patterns are repo-root-relative (see Railway monorepo docs), not relative
-# to this service's root directory.
+# Railway — static frontend (service root: frontend)
+# Config file path in dashboard: /frontend/railway.toml
+#
+# Build-time variables (Dockerfile ARG):
+#   VITE_GAMES_SERVER_URL  — https://${{backend.RAILWAY_PUBLIC_DOMAIN}}
+#   VITE_HOCUSPOCUS_URL    — wss://${{hocuspocus.RAILWAY_PUBLIC_DOMAIN}}
 
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
-watchPatterns = ["frontend/**"]
+watchPatterns = ["**"]
 
 [deploy]
 healthcheckPath = "/"

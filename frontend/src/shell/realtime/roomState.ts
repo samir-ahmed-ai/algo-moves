@@ -63,3 +63,8 @@ export function buildCanvasRoomState(
   if (subDocs && Object.keys(subDocs).length > 0) env.subDocs = subDocs;
   return env;
 }
+
+/** Session + interview metadata only — canvas/subDocs live in Yjs when transport is on. */
+export function buildSessionRoomState(session: SessionMeta): RoomSharedEnvelope {
+  return { v: ROOM_STATE_V, session };
+}

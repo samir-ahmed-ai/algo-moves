@@ -9,12 +9,12 @@ import { Server } from '@hocuspocus/server';
 
 const port = Number(process.env.HOCUSPOCUS_PORT ?? 1234);
 
-const server = Server.configure({
+const server = new Server({
   port,
   async onConnect() {
     return true;
   },
 });
 
-server.listen();
+await server.listen();
 console.log(`[hocuspocus] listening on ws://localhost:${port}`);
