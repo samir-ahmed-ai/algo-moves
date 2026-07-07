@@ -12,7 +12,7 @@ import {
   computeResponsiveStudioMetrics,
   defaultResponsiveStudioMetrics,
 } from '../layout/studioLayout';
-import { HUD_NODE_ID, HUD_SLOT } from '../layout/orbitSlots';
+import { HUD_NODE_ID, HUD_SLOT, MAZE_NODE_ID } from '../layout/orbitSlots';
 import { STUDIO_REFERENCE_VIEWPORT_W, resolveStudioChrome } from '../layout/studioFit';
 import {
   computeMazeFillCellSize,
@@ -41,28 +41,23 @@ function readViewportWidth(): number {
   return typeof window !== 'undefined' ? window.innerWidth : STUDIO_REFERENCE_VIEWPORT_W;
 }
 
+function buildInitialLayout() {
+  const metrics = defaultResponsiveStudioMetrics();
+  return buildStudioLayout({
+    mazeW: metrics.mazeW,
+    mazeH: metrics.mazeH,
+    hudW: metrics.hudW,
+    hudH: HUD_SLOT.height,
+  });
+}
+
 export function useStudioLayout(grid: MazeGrid, containerRef: React.RefObject<HTMLElement | null>) {
   const [containerSize, setContainerSize] = useState(() => readContainerSize(containerRef.current));
   const [viewportWidth, setViewportWidth] = useState(readViewportWidth);
-  const [hudHeight, setHudHeight] = useState(HUD_SLOT.height);
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node>(() => {
-    const metrics = defaultResponsiveStudioMetrics();
-    return buildStudioLayout({
-      mazeW: metrics.mazeW,
-      mazeH: metrics.mazeH,
-      hudW: metrics.hudW,
-      hudH: HUD_SLOT.height,
-    }).nodes;
-  });
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(() => {
-    const metrics = defaultResponsiveStudioMetrics();
-    return buildStudioLayout({
-      mazeW: metrics.mazeW,
-      mazeH: metrics.mazeH,
-      hudW: metrics.hudW,
-      hudH: HUD_SLOT.height,
-    }).edges;
-  });
+  const [hudHeight, setHudHeight] = useState<number>(HUD_SLOT.height);
+  const initialLayout = useMemo(() => buildInitialLayout(), []);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>(initialLayout.nodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initialLayout.edges);
   const { setViewport } = useReactFlow();
   const nodesInitialized = useNodesInitialized();
 

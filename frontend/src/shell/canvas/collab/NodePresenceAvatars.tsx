@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils/cn';
-import type { PeerPresence } from '../CanvasCollabProvider';
+import type { PeerPresence } from './CanvasCollabProvider';
 import { chromeText } from '../../chromeUi';
 
 const MAX = 3;

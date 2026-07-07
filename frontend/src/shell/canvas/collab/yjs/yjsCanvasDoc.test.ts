@@ -76,7 +76,7 @@ describe('yjsCanvasBinding', () => {
     });
     stop();
 
-    expect(seen.at(-1)).toBe('n1,n2');
+    expect(seen[seen.length - 1]).toBe('n1,n2');
     expect(readCanvasGraph(doc).edges).toHaveLength(1);
   });
 });

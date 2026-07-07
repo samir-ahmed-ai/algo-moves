@@ -2,8 +2,8 @@ import { useCallback, useRef } from 'react';
 import { loadLayouts, saveLayouts, type LayoutEntry, type SavedNode } from '@/store/canvas-layout';
 import { migrateLayouts } from '../layout/layoutMigration';
 
-/** Persisted node positions/resizes per `${pluginId}:${mode}` key. */
-export type Saved = SavedNode;
+/** Persisted node map for one plugin+mode canvas key. */
+export type Saved = Record<string, SavedNode>;
 
 /**
  * Per-(plugin, mode) canvas persistence, extracted from CanvasStage: dragged

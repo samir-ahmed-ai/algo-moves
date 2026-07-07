@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { nodeText, nodeTextWrap, nodeIconGlyph } from '@/design/typography';

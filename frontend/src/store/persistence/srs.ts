@@ -76,10 +76,14 @@ export function scheduleReview(problemId: string, correct: boolean): SrsCard {
   let next!: SrsCard;
   store.update((data) => {
     const prev = data.cards[problemId];
-    const fsrsCard = prev?.fsrs ?? createEmptyCard();
+    const fsrsCard: Card = prev?.fsrs ?? createEmptyCard();
     const grade = correct ? Rating.Good : Rating.Again;
-    const preview = scheduler.repeat(fsrsCard, new Date());
+    const preview = scheduler.repeat(fsrsCard, new Date()) as Partial<Record<Rating, { card: Card }>>;
     const item = preview[grade];
+    if (!item?.card) {
+      next = toSrsCard(problemId, fsrsCard);
+      return { cards: { ...data.cards, [problemId]: next } };
+    }
     next = toSrsCard(problemId, item.card);
     return { cards: { ...data.cards, [problemId]: next } };
   });

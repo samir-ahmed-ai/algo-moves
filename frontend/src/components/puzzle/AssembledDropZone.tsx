@@ -20,7 +20,7 @@ export function AssembledDropZone({
     <div
       ref={(node) => {
         setNodeRef(node);
-        if (innerRef) innerRef.current = node;
+        if (innerRef) (innerRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
       }}
       role="region"
       aria-label="Assembled code"

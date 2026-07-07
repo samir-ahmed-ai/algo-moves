@@ -13,7 +13,7 @@ export function encodeSingleFrameGif(
 ): Uint8Array {
   const palette = quantize(rgba, 256);
   const index = applyPalette(rgba, palette);
-  const gif = GIFEncoder();
+  const gif = new GIFEncoder();
   gif.writeFrame(index, width, height, { palette });
   gif.finish();
   return gif.bytes();
@@ -31,5 +31,5 @@ export async function pngBlobToGifBlob(png: Blob): Promise<Blob> {
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const gif = encodeSingleFrameGif(imageData.data, canvas.width, canvas.height);
   bitmap.close();
-  return new Blob([gif], { type: 'image/gif' });
+  return new Blob([new Uint8Array(gif)], { type: 'image/gif' });
 }

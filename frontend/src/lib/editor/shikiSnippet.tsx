@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { BundledLanguage, Highlighter } from 'shiki';
+import type { BundledLanguage } from 'shiki';
 import { ENTRY_SIG, funcLineTone, type FuncLineTone } from './snippetMeta';
 
 type ShikiToken = {
@@ -67,21 +67,25 @@ function tokensToSpans(tokens: ShikiToken[]): ReactNode {
   });
 }
 
-let highlighterPromise: Promise<Highlighter> | null = null;
+let highlighterPromise: ReturnType<typeof createHighlighterLazy> | null = null;
 const loadedLangs = new Set<BundledLanguage>();
 
-async function getHighlighter(): Promise<Highlighter> {
+async function createHighlighterLazy() {
+  const { createHighlighter } = await import('shiki/bundle/web');
+  return createHighlighter({
+    themes: ['github-dark'],
+    langs: [],
+  });
+}
+
+async function getHighlighter() {
   if (!highlighterPromise) {
-    const { createHighlighter } = await import('shiki/bundle/web');
-    highlighterPromise = createHighlighter({
-      themes: ['github-dark'],
-      langs: [],
-    });
+    highlighterPromise = createHighlighterLazy();
   }
   return highlighterPromise;
 }
 
-async function ensureLang(lang: BundledLanguage): Promise<Highlighter> {
+async function ensureLang(lang: BundledLanguage) {
   const highlighter = await getHighlighter();
   if (!loadedLangs.has(lang)) {
     const loader = LANG_IMPORTS[lang];
@@ -165,7 +169,7 @@ export async function highlightSnippetShiki(
       body = plainLine('');
     } else {
       const result = highlighter.codeToTokens(line, {
-        lang: shikiLang,
+        lang: shikiLang as never,
         theme,
         includeExplanation: 'scopeName',
       });

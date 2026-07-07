@@ -163,7 +163,7 @@ The **frontend** service uses root directory `frontend`, the same GitHub repo/br
 Pushes to `main` deploy both services automatically via Railway's GitHub integration. For a manual fallback:
 
 ```bash
-railway up backend --path-as-root --service backend --detach
+railway up . --service backend --detach
 ```
 
 ### Environment

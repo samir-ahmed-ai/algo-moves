@@ -1,5 +1,3 @@
-import type { ReactNode } from 'react';
-
 export type FuncLineTone = 'hl-line-entry' | 'hl-line-func';
 
 /** Classify a line as main entry signature vs nested/helper func signature. */
