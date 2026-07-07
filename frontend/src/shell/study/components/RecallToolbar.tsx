@@ -1,4 +1,5 @@
-import { useRef, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
+import { useCallback, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Eye,
   EyeOff,
@@ -14,7 +15,7 @@ import { chromeText, ChromeLabel } from '@/shell/chromeUi';
 import type { EditorPrefs } from '@/store/user-prefs';
 import { recallEditorMenuItems } from './recallEditorControls';
 import { ToolbarGroup, ToolbarGroupBtn } from './ToolbarGroup';
-import { usePopoverDismiss } from '@/shell/ui/usePopoverDismiss';
+import { useAnchoredPopover } from '@/shell/ui/useAnchoredPopover';
 
 /** Compact popover combining Session controls + Editor settings under one trigger. */
 function RecallSettingsPopover({
@@ -35,8 +36,8 @@ function RecallSettingsPopover({
   compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-  usePopoverDismiss(rootRef, open, () => setOpen(false));
+  const close = useCallback(() => setOpen(false), []);
+  const { anchorRef, panelRef, pos, panelStyle } = useAnchoredPopover(open, close, 'right', 300);
 
   const editorItems = recallEditorMenuItems(editorPrefs, setEditorPrefs);
 
@@ -60,8 +61,9 @@ function RecallSettingsPopover({
   ];
 
   return (
-    <div ref={rootRef} className="relative shrink-0">
+    <div className="relative shrink-0">
       <button
+        ref={anchorRef}
         type="button"
         title="Recall settings"
         aria-haspopup="dialog"
@@ -76,13 +78,17 @@ function RecallSettingsPopover({
         <Settings2 className="h-3.5 w-3.5 text-ink3" />
       </button>
 
-      {open && (
-        <div
-          role="dialog"
-          aria-label="Recall settings"
-          className="absolute right-0 top-[calc(100%+4px)] z-50 w-[min(300px,calc(100vw-24px))] rounded-lg border border-edge bg-panel shadow-[var(--shadow-xl)]"
-          onKeyDown={(e) => { if (e.key === 'Escape') setOpen(false); }}
-        >
+      {open &&
+        pos &&
+        panelStyle &&
+        createPortal(
+          <div
+            ref={panelRef}
+            role="dialog"
+            aria-label="Recall settings"
+            style={panelStyle}
+            className="fixed z-[200] rounded-lg border border-edge bg-panel shadow-[var(--shadow-xl)]"
+          >
           {/* Session */}
           <div className="p-2">
             <ChromeLabel className="mb-1.5 px-1">Session</ChromeLabel>
@@ -148,8 +154,9 @@ function RecallSettingsPopover({
               ))}
             </div>
           </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

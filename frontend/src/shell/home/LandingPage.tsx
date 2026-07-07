@@ -1,27 +1,28 @@
 import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import {
   ArrowRight,
-  BookMarked,
   BookOpen,
   Code2,
   Contrast,
   Eye,
   Flame,
-  Gamepad2,
   GraduationCap,
-  Keyboard,
   LayoutGrid,
-  Megaphone,
   Moon,
   MoreHorizontal,
-  Palette,
   Play,
-  Smartphone,
   Sun,
   Target,
   Trophy,
 } from 'lucide-react';
 import { FeatureSelectorPopover, ToolbarSegment } from '@/components/shared';
+import {
+  EXPLORE_GROUPS,
+  MORE_MODES_GROUPS,
+  PALETTE_GROUPS,
+  THEME_GROUPS,
+  trackGroups,
+} from './landingFeatureGroups';
 import {
   catalog,
   getAllCategories,
@@ -74,36 +75,14 @@ function RailStat({ icon, value, label }: { icon: ReactNode; value: ReactNode; l
   );
 }
 
-const MORE_MODES_GROUPS = [
-  {
-    options: [
-      {
-        id: 'swipe',
-        icon: <Smartphone />,
-        title: 'Swipe',
-        subtitle: 'Mobile deck',
-        detailTitle: 'Swipe Mode',
-        detailDescription: 'A swipeable card deck optimised for phone practice — flip through problems one-handed.',
-      },
-      {
-        id: 'vim',
-        icon: <Keyboard />,
-        title: 'Vim Dojo',
-        subtitle: 'Keyboard drills',
-        detailTitle: 'Vim Dojo',
-        detailDescription: 'Timed keyboard-mastery drills to build muscle memory for Vim motions and shortcuts.',
-      },
-      {
-        id: 'games',
-        icon: <Gamepad2 />,
-        title: 'Games',
-        subtitle: 'Two-player rooms',
-        detailTitle: 'Games',
-        detailDescription: 'Create or join a room and race a friend through head-to-head algorithm rounds.',
-      },
-    ],
-  },
-];
+const MODE_PILL =
+  'inline-flex shrink-0 items-center gap-1.5 rounded-md border border-edge bg-panel/60 px-3 py-2 text-sm text-ink2 transition-colors hover:border-accent/50 hover:text-ink';
+
+const HEADER_BTN =
+  'inline-flex shrink-0 items-center gap-1 rounded-md border border-edge bg-panel/60 px-2 py-1.5 text-xs font-medium text-ink2 transition-colors hover:border-accent/50 hover:text-ink sm:gap-1.5 sm:px-2.5 sm:text-sm';
+
+const HEADER_BTN_PRIMARY =
+  'inline-flex shrink-0 items-center gap-1 rounded-md bg-accent px-2 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 sm:gap-1.5 sm:px-2.5 sm:text-sm';
 
 function ModeStrip({
   onPlay,
@@ -136,29 +115,29 @@ function ModeStrip({
   };
 
   return (
-    <div className="-mx-1 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      <div className="flex min-w-min gap-2 px-1">
-        {primaryPills.map(({ icon: Icon, label, onClick }) => (
-          <button
-            key={label}
-            type="button"
-            onClick={onClick}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-edge bg-panel/60 px-3 py-2 text-sm text-ink2 transition-colors hover:border-accent/50 hover:text-ink"
-          >
-            <Icon className="h-3.5 w-3.5" />
-            {label}
-          </button>
-        ))}
-        <FeatureSelectorPopover
-          groups={MORE_MODES_GROUPS}
-          value={moreMode}
-          onChange={handleMoreMode}
-          panelTitle="More modes"
-          panelHint="Alternative ways to practice on this platform."
-          triggerIcon={<MoreHorizontal className="h-3.5 w-3.5" />}
-          align="left"
-        />
+    <div className="flex items-center gap-2">
+      <div className="-mx-1 min-w-0 flex-1 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex min-w-min gap-2 px-1">
+          {primaryPills.map(({ icon: Icon, label, onClick }) => (
+            <button key={label} type="button" onClick={onClick} className={MODE_PILL}>
+              <Icon className="h-3.5 w-3.5" />
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
+      <FeatureSelectorPopover
+        groups={MORE_MODES_GROUPS}
+        value={moreMode}
+        onChange={handleMoreMode}
+        panelTitle="More modes"
+        panelHint="Swipe, Vim, games"
+        triggerLabel="More"
+        triggerIcon={<MoreHorizontal className="h-3.5 w-3.5" />}
+        triggerClassName={MODE_PILL}
+        menu
+        align="right"
+      />
     </div>
   );
 }
@@ -276,6 +255,7 @@ export function LandingPage() {
   const firstProblem = problems[0];
 
   const [exploreId, setExploreId] = useState('');
+  const [headerMoreMode, setHeaderMoreMode] = useState('');
   const [lastTrackId, setLastTrackId] = useState<TrackId>('go');
 
   const handleExplore = (id: string) => {
@@ -285,83 +265,10 @@ export function LandingPage() {
     else if (id === 'plans') enterPlans();
   };
 
-  const exploreGroups = [
-    {
-      options: [
-        {
-          id: 'swipe',
-          icon: <Smartphone />,
-          title: 'Swipe',
-          subtitle: 'Mobile deck',
-          detailTitle: 'Swipe Mode',
-          detailDescription: 'A swipeable card deck built for phone practice — flip through problems one-handed.',
-        },
-        {
-          id: 'games',
-          icon: <Gamepad2 />,
-          title: 'Games',
-          subtitle: 'Two-player rooms',
-          detailTitle: 'Games',
-          detailDescription: 'Race a friend through head-to-head algorithm rounds in a shared room.',
-        },
-        {
-          id: 'plans',
-          icon: <BookMarked />,
-          title: 'Plans',
-          subtitle: 'Interview prep',
-          detailTitle: 'Interview Plans',
-          detailDescription: 'Structured day-by-day prep plans tailored to your interview timeline.',
-        },
-      ],
-    },
-  ];
-
-  const themeGroups = [
-    {
-      options: [
-        {
-          id: 'light',
-          icon: <Sun />,
-          title: 'Light',
-          subtitle: 'Light background',
-          detailTitle: 'Light Theme',
-          detailDescription: 'Light background with dark text, ideal for bright environments.',
-        },
-        {
-          id: 'dark',
-          icon: <Moon />,
-          title: 'Dark',
-          subtitle: 'Dark background',
-          detailTitle: 'Dark Theme',
-          detailDescription: 'Dark background with light text, easy on the eyes in low light.',
-        },
-      ],
-    },
-  ];
-
-  const paletteGroups = [
-    {
-      options: [
-        {
-          id: 'default',
-          icon: <Palette />,
-          title: 'Default',
-          subtitle: 'Standard',
-          detailTitle: 'Default Palette',
-          detailDescription: 'Standard accent colours used throughout the interface.',
-        },
-        {
-          id: 'cb',
-          icon: <Contrast />,
-          title: 'CB-safe',
-          subtitle: 'Accessible',
-          detailTitle: 'Colour-blind Palette',
-          detailBadge: 'A11Y',
-          detailDescription: 'Optimised for deuteranopia and protanopia — distinguishable without relying on red or green.',
-        },
-      ],
-    },
-  ];
+  const specializedTrackGroups = useMemo(
+    () => trackGroups(goConceptCount, openrtbConceptCount, prepProblemCount),
+    [goConceptCount, openrtbConceptCount, prepProblemCount],
+  );
 
   const openInNewTab = (url: string) => window.open(url, '_blank', 'noopener,noreferrer');
   const wsUrl = useMemo(
@@ -385,27 +292,121 @@ export function LandingPage() {
 
   const lastBrowseCrumb = lastItem ? browseBreadcrumbForItem(lastItem.id, catalog) : undefined;
 
+  const scrollToRoadmap = () =>
+    document.getElementById('roadmap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  const handleHeaderMoreMode = (id: string) => {
+    setHeaderMoreMode(id);
+    if (id === 'swipe') enterMobile();
+    else if (id === 'vim') enterVim();
+    else if (id === 'games') enterGames();
+  };
+
+  const headerModePills = [
+    { icon: Play, label: 'Play', title: 'Play mode', onClick: () => startIn('play') },
+    { icon: Eye, label: 'Visualize', title: 'Visualize mode', onClick: () => startIn('visualize') },
+    { icon: GraduationCap, label: 'Learn', title: 'Learn mode', onClick: () => startIn('learn') },
+  ] as const;
+
   return (
     <div
       data-density={density}
       className="ws-scroll h-full w-full overflow-y-auto bg-bg text-ink"
     >
-      {/* mobile sticky header */}
-      <header className="sticky top-0 z-30 border-b border-edge bg-bg/90 pt-[env(safe-area-inset-top,0px)] backdrop-blur lg:hidden">
-        <div className="flex items-center gap-2 px-4 py-2.5">
-          <EagleMark className="h-8 w-8 shrink-0 rounded-lg shadow-[var(--shadow-md)]" />
-          <span className="min-w-0 truncate font-semibold tracking-tight">Algo Moves</span>
-          <div className="ml-auto flex shrink-0 items-center gap-1.5">
-            <FeatureSelectorPopover
-              groups={exploreGroups}
-              value={exploreId}
-              onChange={handleExplore}
-              panelTitle="Explore modes"
-              panelHint="Alternative practice surfaces."
-              triggerIcon={<MoreHorizontal className="h-3.5 w-3.5" />}
-              compact
-              align="right"
-            />
+      {/* sticky header — all breakpoints */}
+      <header className="sticky top-0 z-30 border-b border-edge bg-bg/90 pt-[env(safe-area-inset-top,0px)] backdrop-blur">
+        <div className="flex items-center gap-2 px-4 py-2.5 sm:px-6">
+          <EagleMark className="h-8 w-8 shrink-0 rounded-lg shadow-[var(--shadow-md)] lg:h-9 lg:w-9 lg:rounded-xl" />
+          <span className="shrink-0 font-semibold tracking-tight">Algo Moves</span>
+          <div className="-mx-1 flex min-w-0 flex-1 items-center overflow-x-auto pb-0.5 [scrollbar-width:none] lg:hidden [&::-webkit-scrollbar]:hidden">
+            <div className="flex min-w-min items-center gap-1 px-1 sm:gap-1.5">
+              <button
+                type="button"
+                onClick={() => openItem((lastItem ?? firstProblem)?.id ?? catalog.firstItemId)}
+                className={HEADER_BTN_PRIMARY}
+                title={lastItem ? 'Resume learning' : 'Start learning'}
+              >
+                <Play className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{lastItem ? 'Resume' : 'Start'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => browseTrack('interview-prep')}
+                className={HEADER_BTN}
+                title="Browse tracks"
+              >
+                <BookOpen className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Browse</span>
+              </button>
+              {headerModePills.map(({ icon: Icon, label, title, onClick }) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={onClick}
+                  className={HEADER_BTN}
+                  title={title}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  <span className="hidden md:inline">{label}</span>
+                </button>
+              ))}
+              <FeatureSelectorPopover
+                groups={MORE_MODES_GROUPS}
+                value={headerMoreMode}
+                onChange={handleHeaderMoreMode}
+                panelTitle="More modes"
+                panelHint="Swipe, Vim, games"
+                triggerIcon={<MoreHorizontal className="h-3.5 w-3.5" />}
+                triggerAriaLabel="More modes"
+                triggerClassName={HEADER_BTN}
+                menu
+                align="right"
+              />
+              <button
+                type="button"
+                onClick={scrollToRoadmap}
+                className={cn(HEADER_BTN, 'border-dashed border-accent/40 bg-accentbg/40 text-accent hover:border-accent/60')}
+                title="Explore roadmap"
+              >
+                <Target className="h-3.5 w-3.5" />
+                <span className="hidden md:inline">Roadmap</span>
+              </button>
+            </div>
+          </div>
+          <div className="ml-auto flex shrink-0 items-center gap-2">
+            <ToolbarSegment>
+              <FeatureSelectorPopover
+                groups={EXPLORE_GROUPS}
+                value={exploreId}
+                onChange={handleExplore}
+                panelTitle="Explore modes"
+                panelHint="Swipe, games, plans"
+                triggerIcon={<MoreHorizontal className="h-3.5 w-3.5" />}
+                triggerAriaLabel="Explore modes"
+                compact
+                align="right"
+              />
+              <FeatureSelectorPopover
+                groups={THEME_GROUPS}
+                value={theme}
+                onChange={(v) => setTheme(v as 'light' | 'dark')}
+                panelTitle="Theme"
+                triggerIcon={theme === 'dark' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+                triggerAriaLabel="Theme"
+                compact
+                align="right"
+              />
+              <FeatureSelectorPopover
+                groups={PALETTE_GROUPS}
+                value={palette}
+                onChange={(v) => setPalette(v as 'default' | 'cb')}
+                panelTitle="Colour palette"
+                triggerIcon={<Contrast className="h-3.5 w-3.5" />}
+                triggerAriaLabel="Colour palette"
+                compact
+                align="right"
+              />
+            </ToolbarSegment>
             <AuthButton />
           </div>
         </div>
@@ -416,45 +417,6 @@ export function LandingPage() {
         <aside className="relative border-b border-edge lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r lg:[scrollbar-gutter:stable]">
           <div aria-hidden className="landing-hero-glow pointer-events-none absolute inset-0 opacity-60" />
           <div className="relative flex min-h-full flex-col gap-4 px-4 py-5 sm:gap-5 sm:px-6 sm:py-6">
-            {/* brand + controls — desktop only */}
-            <div className="hidden items-center gap-2 lg:flex">
-              <EagleMark className="h-9 w-9 rounded-xl shadow-[var(--shadow-md)]" />
-              <span className="font-semibold tracking-tight">Algo Moves</span>
-              <div className="ml-auto flex shrink-0 items-center gap-2">
-                <ToolbarSegment>
-                  <FeatureSelectorPopover
-                    groups={exploreGroups}
-                    value={exploreId}
-                    onChange={handleExplore}
-                    panelTitle="Explore modes"
-                    panelHint="Alternative practice surfaces."
-                    triggerIcon={<MoreHorizontal className="h-3.5 w-3.5" />}
-                    compact
-                    align="right"
-                  />
-                  <FeatureSelectorPopover
-                    groups={themeGroups}
-                    value={theme}
-                    onChange={(v) => setTheme(v as 'light' | 'dark')}
-                    panelTitle="Theme"
-                    triggerIcon={theme === 'dark' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
-                    compact
-                    align="right"
-                  />
-                  <FeatureSelectorPopover
-                    groups={paletteGroups}
-                    value={palette}
-                    onChange={(v) => setPalette(v as 'default' | 'cb')}
-                    panelTitle="Colour palette"
-                    triggerIcon={<Contrast className="h-3.5 w-3.5" />}
-                    compact
-                    align="right"
-                  />
-                </ToolbarSegment>
-                <AuthButton />
-              </div>
-            </div>
-
             {/* hero copy */}
             <div className="@container">
               <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
@@ -491,9 +453,7 @@ export function LandingPage() {
               </button>
               <button
                 type="button"
-                onClick={() =>
-                  document.getElementById('roadmap')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                }
+                onClick={scrollToRoadmap}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-accent/40 bg-accentbg/40 px-4 py-2.5 text-sm font-medium text-accent transition-colors hover:border-accent/60 lg:hidden"
               >
                 <Target className="h-4 w-4" />
@@ -501,39 +461,17 @@ export function LandingPage() {
               </button>
             </div>
 
-            {/* appearance controls — mobile only */}
-            <div className="flex items-center gap-1.5 lg:hidden">
-              <ToolbarSegment>
-                <FeatureSelectorPopover
-                  groups={themeGroups}
-                  value={theme}
-                  onChange={(v) => setTheme(v as 'light' | 'dark')}
-                  panelTitle="Theme"
-                  triggerLabel="Theme"
-                  triggerIcon={theme === 'dark' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
-                  align="left"
-                />
-                <FeatureSelectorPopover
-                  groups={paletteGroups}
-                  value={palette}
-                  onChange={(v) => setPalette(v as 'default' | 'cb')}
-                  panelTitle="Colour palette"
-                  triggerLabel="Palette"
-                  triggerIcon={<Contrast className="h-3.5 w-3.5" />}
-                  align="left"
-                />
-              </ToolbarSegment>
+            {/* mode pills — desktop left rail only; sticky header covers sub-lg */}
+            <div className="hidden lg:block">
+              <ModeStrip
+                onPlay={() => startIn('play')}
+                onVisualize={() => startIn('visualize')}
+                onLearn={() => startIn('learn')}
+                onSwipe={() => enterMobile()}
+                onVim={() => enterVim()}
+                onGames={() => enterGames()}
+              />
             </div>
-
-            {/* mode pills */}
-            <ModeStrip
-              onPlay={() => startIn('play')}
-              onVisualize={() => startIn('visualize')}
-              onLearn={() => startIn('learn')}
-              onSwipe={() => enterMobile()}
-              onVim={() => enterVim()}
-              onGames={() => enterGames()}
-            />
 
             {/* continue where you left off */}
             {lastItem ? (
@@ -602,43 +540,14 @@ export function LandingPage() {
                 Specialized tracks
               </p>
               <FeatureSelectorPopover
-                groups={[
-                  {
-                    options: [
-                      {
-                        id: 'go',
-                        icon: <Code2 />,
-                        title: 'Go',
-                        subtitle: 'Senior Developer',
-                        detailTitle: 'Go — Senior Developer',
-                        detailDescription: `${goConceptCount} concepts covering concurrency, memory management, and generics.`,
-                      },
-                      {
-                        id: 'openrtb',
-                        icon: <Megaphone />,
-                        title: 'OpenRTB',
-                        subtitle: 'Ad Platforms',
-                        detailTitle: 'OpenRTB & Ad Platforms',
-                        detailDescription: `${openrtbConceptCount} concepts spanning bidder architecture, exchange protocols, and privacy.`,
-                      },
-                      {
-                        id: 'interview-prep',
-                        icon: <Target />,
-                        title: 'Interview Prep',
-                        subtitle: 'Hand-authored',
-                        detailTitle: 'Interview Preparation',
-                        detailDescription: `${prepProblemCount} hand-authored problems designed to simulate real interview conditions.`,
-                      },
-                    ],
-                  },
-                ]}
+                groups={specializedTrackGroups}
                 value={lastTrackId}
                 onChange={(id) => {
                   setLastTrackId(id as TrackId);
                   browseTrack(id as TrackId);
                 }}
                 panelTitle="Browse a specialized track"
-                panelHint="Opens in a new tab."
+                panelHint="Opens new tab"
                 triggerLabel="Track"
                 align="left"
                 className="w-full"

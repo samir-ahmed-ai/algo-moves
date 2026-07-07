@@ -1,5 +1,5 @@
 import { Contrast, Home, Keyboard, Moon, Sun } from 'lucide-react';
-import { cn } from '@/lib/utils/cn';
+import { FeatureSelectorPopover, ToolbarSegment } from '@/components/shared';
 import { useWorkspace } from '@/store/workspace';
 import { VIM_LEVEL_IDS } from './engine';
 import { VimLevelSidebar } from './ui/VimLevelSidebar';
@@ -33,25 +33,68 @@ function FloatingChrome() {
           </p>
         </div>
       </div>
-      <button
-        type="button"
-        title={theme === 'dark' ? 'Light theme' : 'Dark theme'}
-        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-        className="pointer-events-auto grid h-8 w-8 place-items-center rounded-md border border-edge bg-panel/90 text-ink3 shadow-sm backdrop-blur hover:bg-panel2"
-      >
-        {theme === 'dark' ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
-      </button>
-      <button
-        type="button"
-        title="Colour-blind palette"
-        onClick={() => setPalette(palette === 'cb' ? 'default' : 'cb')}
-        className={cn(
-          'pointer-events-auto grid h-8 w-8 place-items-center rounded-md border border-edge bg-panel/90 shadow-sm backdrop-blur',
-          palette === 'cb' ? 'border-accent text-accent' : 'text-ink3 hover:bg-panel2',
-        )}
-      >
-        <Contrast className="h-3.5 w-3.5" />
-      </button>
+      <ToolbarSegment className="pointer-events-auto">
+        <FeatureSelectorPopover
+          groups={[
+            {
+              options: [
+                {
+                  id: 'light',
+                  icon: <Sun />,
+                  title: 'Light',
+                  subtitle: 'Light background',
+                  detailTitle: 'Light Theme',
+                  detailDescription: 'Light background with dark text.',
+                },
+                {
+                  id: 'dark',
+                  icon: <Moon />,
+                  title: 'Dark',
+                  subtitle: 'Dark background',
+                  detailTitle: 'Dark Theme',
+                  detailDescription: 'Dark background with light text.',
+                },
+              ],
+            },
+          ]}
+          value={theme}
+          onChange={(id) => setTheme(id as 'light' | 'dark')}
+          panelTitle="Theme"
+          triggerIcon={theme === 'dark' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+          compact
+          align="left"
+        />
+        <FeatureSelectorPopover
+          groups={[
+            {
+              options: [
+                {
+                  id: 'default',
+                  icon: <Keyboard />,
+                  title: 'Default',
+                  subtitle: 'Standard colours',
+                  detailTitle: 'Default palette',
+                  detailDescription: 'Standard accent and state colours.',
+                },
+                {
+                  id: 'cb',
+                  icon: <Contrast />,
+                  title: 'Colour-blind',
+                  subtitle: 'High-contrast palette',
+                  detailTitle: 'Colour-blind palette',
+                  detailDescription: 'Adjusts accent and state colours for colour-blind accessibility.',
+                },
+              ],
+            },
+          ]}
+          value={palette}
+          onChange={(id) => setPalette(id === 'cb' ? 'cb' : 'default')}
+          panelTitle="Palette"
+          triggerIcon={<Contrast className="h-3.5 w-3.5" />}
+          compact
+          align="left"
+        />
+      </ToolbarSegment>
     </div>
   );
 }

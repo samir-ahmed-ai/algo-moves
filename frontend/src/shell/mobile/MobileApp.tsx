@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Home, Moon, Sun } from 'lucide-react';
+import { FeatureSelectorPopover } from '@/components/shared';
 import { BrandLogo } from '@/shell/BrandLogo';
 import { AuthButton } from '@/shell/auth';
 import { InstallAppBanner } from './install/InstallAppBanner';
@@ -157,14 +158,37 @@ export function MobileApp() {
   };
 
   const ThemeBtn = (
-    <button
-      type="button"
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="grid h-8 w-8 place-items-center rounded-full text-ink3 hover:bg-panel2 hover:text-ink"
-      title="Toggle theme"
-    >
-      {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-    </button>
+    <FeatureSelectorPopover
+      groups={[
+        {
+          options: [
+            {
+              id: 'light',
+              icon: <Sun />,
+              title: 'Light',
+              subtitle: 'Light background',
+              detailTitle: 'Light Theme',
+              detailDescription: 'Light background with dark text.',
+            },
+            {
+              id: 'dark',
+              icon: <Moon />,
+              title: 'Dark',
+              subtitle: 'Dark background',
+              detailTitle: 'Dark Theme',
+              detailDescription: 'Dark background with light text.',
+            },
+          ],
+        },
+      ]}
+      value={theme}
+      onChange={(v) => setTheme(v as 'light' | 'dark')}
+      panelTitle="Theme"
+      triggerIcon={theme === 'dark' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+      triggerAriaLabel="Theme"
+      compact
+      align="right"
+    />
   );
 
   return (

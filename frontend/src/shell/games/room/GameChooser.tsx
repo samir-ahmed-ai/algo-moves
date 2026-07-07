@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Info } from 'lucide-react';
+import { Filter, Info, Heart, PartyPopper, Users } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { FeatureSelectorPopover } from '@/components/shared';
 import { playCue } from '@/lib/utils/audio';
 import { useArcadeStrings, useGamesLocale } from '../locale';
 import { useGameRoom } from '../net/useGameRoom';
@@ -47,22 +48,38 @@ export function GameChooser() {
       <h2 className="mb-1 text-center text-xl font-extrabold tracking-tight text-ink">{t.room.chooseGame}</h2>
       <p className="mb-4 text-center text-sm text-ink3">{t.room.playersHere(playerCount, capacity)}</p>
 
-      <div className="mb-4 flex items-center justify-center gap-2">
-        {FILTER_TABS.map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            onClick={() => setFilter(tab)}
-            className={cn(
-              'rounded-full px-4 py-1.5 text-xs font-bold transition-all touch-manipulation',
-              filter === tab
-                ? 'bg-accent text-white shadow-sm'
-                : 'bg-panel2 text-ink3 hover:text-ink border border-edge',
-            )}
-          >
-            {t.picker[FILTER_LABEL_KEY[tab]]}
-          </button>
-        ))}
+      <div className="mb-4 flex items-center justify-center">
+        <FeatureSelectorPopover
+          groups={[
+            {
+              options: FILTER_TABS.map((tab) => ({
+                id: tab,
+                icon: tab === 'all' ? <Filter /> : tab === 'couple' ? <Heart /> : <PartyPopper />,
+                title: t.picker[FILTER_LABEL_KEY[tab]],
+                subtitle:
+                  tab === 'all'
+                    ? t.picker.filterAll
+                    : tab === 'couple'
+                      ? 'Two-player games'
+                      : 'Group games',
+                detailTitle: t.picker[FILTER_LABEL_KEY[tab]],
+                detailDescription:
+                  tab === 'all'
+                    ? 'Show every game in the room.'
+                    : tab === 'couple'
+                      ? 'Games designed for pairs.'
+                      : 'Games that work best with a party.',
+              })),
+            },
+          ]}
+          value={filter}
+          onChange={(id) => setFilter(id as FilterTab)}
+          panelTitle={t.room.chooseGame}
+          panelHint={t.room.playersHere(playerCount, capacity)}
+          triggerLabel={t.picker[FILTER_LABEL_KEY[filter]]}
+          triggerIcon={<Users className="h-3.5 w-3.5" />}
+          align="right"
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
