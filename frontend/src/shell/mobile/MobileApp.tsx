@@ -220,8 +220,8 @@ export function MobileApp() {
                 <BrandLogo size="sm" />
                 <span className="text-[14px] font-semibold tracking-tight">Algo Moves</span>
               </div>
-              <AuthButton compact />
               {ThemeBtn}
+              <AuthButton compact />
             </header>
             {!installDismissed && (
               <InstallAppBanner state={installState} onDismiss={() => setInstallDismissed(true)} />

@@ -1,15 +1,20 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type MutableRefObject } from 'react';
 import { MergeView } from '@codemirror/merge';
-import { Compartment, EditorState } from '@codemirror/state';
+import { Compartment } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { nodeText } from '@/design/typography';
 import { useResizeSplit } from '@/hooks/useResizeSplit';
 import {
   buildEditorTheme,
   buildRecallFontTheme,
+  collapseMergeSections,
   coreEditorExtensions,
+  expandMergeSections,
+  formatMergeViews,
   languageExtension,
   lineNumberExtensions,
+  mergeFormatKeymap,
+  mergeReferenceReadOnly,
   vimExtensions,
   wrapExtensions,
 } from '@/lib/editor';
@@ -42,6 +47,15 @@ export interface SplitCodeEditorProps {
   lineHeight?: import('@/lib/editor/recallEditorTheme').RecallLineHeight;
   showLineNumbers?: boolean;
   highlightChanges?: boolean;
+  /** Receives the editable draft editor view for toolbar format/align actions. */
+  draftViewRef?: MutableRefObject<EditorView | null>;
+  /** Formats both reference + draft panes with matching spacing. */
+  formatBothRef?: MutableRefObject<(() => void) | null>;
+  /** Collapse / expand top-level sections in both panes. */
+  foldBothRef?: MutableRefObject<{
+    collapse: () => void;
+    expand: () => void;
+  } | null>;
 }
 
 function sideWrap(view: EditorView): HTMLElement | null {
@@ -87,10 +101,16 @@ export function SplitCodeEditor({
   lineHeight = 'normal',
   showLineNumbers = true,
   highlightChanges = true,
+  draftViewRef,
+  formatBothRef,
+  foldBothRef,
 }: SplitCodeEditorProps) {
   const showLeft = !hideLeft || Boolean(peekLeft);
   const hostRef = useRef<HTMLDivElement>(null);
   const mergeViewRef = useRef<MergeView | null>(null);
+  const readOnlyCompA = useRef(new Compartment());
+  const formatBothFnRef = useRef<(() => void) | null>(null);
+  const skipDraftSyncRef = useRef(false);
   const vimComp = useRef(new Compartment());
   const wrapComp = useRef(new Compartment());
   const themeCompA = useRef(new Compartment());
@@ -114,6 +134,8 @@ export function SplitCodeEditor({
   fontSizeRef.current = fontSize;
   const lineHeightRef = useRef(lineHeight);
   lineHeightRef.current = lineHeight;
+  const langRef = useRef(lang);
+  langRef.current = lang;
 
   const { containerRef, splitPct, handleProps } = useResizeSplit({
     direction: 'horizontal',
@@ -142,9 +164,8 @@ export function SplitCodeEditor({
       a: {
         doc: reference,
         extensions: [
-          EditorView.editable.of(false),
-          EditorState.readOnly.of(true),
-          ...coreEditorExtensions(langExt, { lineNumbers: false }),
+          readOnlyCompA.current.of(mergeReferenceReadOnly),
+          ...coreEditorExtensions(langExt, { lineNumbers: false, lang }),
           lineNumCompA.current.of(lineNumberExtensions(showLineNumbersRef.current)),
           themeCompA.current.of(buildEditorTheme(isDark)),
           fontCompA.current.of(buildRecallFontTheme(fontSizeRef.current, lineHeightRef.current)),
@@ -155,24 +176,53 @@ export function SplitCodeEditor({
         doc: draft,
         extensions: [
           vimComp.current.of(vimExtensions(vim ?? false)),
-          ...coreEditorExtensions(langExt, { lineNumbers: false }),
+          ...coreEditorExtensions(langExt, { lineNumbers: false, lang }),
           lineNumCompB.current.of(lineNumberExtensions(showLineNumbersRef.current)),
           wrapComp.current.of(wrapExtensions(wrap ?? false)),
           themeCompB.current.of(buildEditorTheme(isDark)),
           fontCompB.current.of(buildRecallFontTheme(fontSizeRef.current, lineHeightRef.current)),
           mergeEditorChrome,
+          mergeFormatKeymap(() => formatBothFnRef.current?.()),
           EditorView.updateListener.of((u) => {
-            if (u.docChanged) onDraftChangeRef.current(u.state.doc.toString());
+            if (u.docChanged) {
+              onDraftChangeRef.current(u.state.doc.toString());
+              if (!skipDraftSyncRef.current) {
+                queueMicrotask(() => mergeViewRef.current?.reconfigure({}));
+              }
+            }
           }),
         ],
       },
     });
 
     mergeViewRef.current = view;
+    if (draftViewRef) draftViewRef.current = view.b;
+    formatBothFnRef.current = () => {
+      skipDraftSyncRef.current = true;
+      formatMergeViews(view, {
+        lang: langRef.current,
+        readOnlyCompA: readOnlyCompA.current,
+        onDraftChange: onDraftChangeRef.current,
+      });
+      queueMicrotask(() => {
+        skipDraftSyncRef.current = false;
+        view.reconfigure({});
+      });
+    };
+    if (formatBothRef) formatBothRef.current = formatBothFnRef.current;
+    const foldBoth = {
+      collapse: () => collapseMergeSections(view, langRef.current),
+      expand: () => expandMergeSections(view),
+    };
+    if (foldBothRef) foldBothRef.current = foldBoth;
     applySplitLayout(view, splitPctRef.current, showLeftRef.current);
 
     return () => {
       mergeViewRef.current = null;
+      formatBothFnRef.current = null;
+      if (draftViewRef) draftViewRef.current = null;
+      if (formatBothRef) formatBothRef.current = null;
+      if (foldBothRef) foldBothRef.current = null;
       view.destroy();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -188,7 +238,7 @@ export function SplitCodeEditor({
 
   useEffect(() => {
     const view = mergeViewRef.current?.b;
-    if (!view) return;
+    if (!view || skipDraftSyncRef.current) return;
     const editorDraft = view.state.doc.toString();
     if (draft === editorDraft) return;
     view.dispatch({ changes: { from: 0, to: editorDraft.length, insert: draft } });

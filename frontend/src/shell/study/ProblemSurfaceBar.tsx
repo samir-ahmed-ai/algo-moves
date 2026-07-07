@@ -87,7 +87,6 @@ export function ProblemSurfaceBar({
 
   return (
     <header className="nodrag sticky top-0 z-20 flex h-10 shrink-0 items-center gap-1.5 border-b border-edge bg-panel px-2 py-0.5 shadow-sm sm:gap-2">
-      <AuthButton compact />
       {onOpenPalette && onOpenHelp ? (
         <WorkspaceMenuDropdown compact onOpenPalette={onOpenPalette} onOpenHelp={onOpenHelp} />
       ) : null}
@@ -163,6 +162,7 @@ export function ProblemSurfaceBar({
           align="right"
         />
       </ToolbarSegment>
+      <AuthButton compact />
     </header>
   );
 }

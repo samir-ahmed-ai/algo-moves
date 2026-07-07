@@ -1,4 +1,6 @@
 import { ScanEye } from 'lucide-react';
+import { useRef } from 'react';
+import type { EditorView } from '@codemirror/view';
 import { cn } from '@/lib/utils/cn';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { useWorkspace } from '@/store/workspace';
@@ -39,6 +41,9 @@ export function RecallPane({ className, showTitle }: { className?: string; showT
   }
 
   const compact = editorPrefs.recallCompact !== false || isMobile;
+  const draftViewRef = useRef<EditorView | null>(null);
+  const formatBothRef = useRef<(() => void) | null>(null);
+  const foldBothRef = useRef<{ collapse: () => void; expand: () => void } | null>(null);
 
   return (
     <div className={cn('flex min-h-0 flex-1 flex-col overflow-hidden', className)}>
@@ -57,6 +62,10 @@ export function RecallPane({ className, showTitle }: { className?: string; showT
         setEditorPrefs={setEditorPrefs}
         compact={compact}
         scorePct={Math.round(score)}
+        draftViewRef={draftViewRef}
+        formatBothRef={formatBothRef}
+        foldBothRef={foldBothRef}
+        lang={code?.lang}
       />
       <RecallEditorShell
         reference={reference}
@@ -70,6 +79,9 @@ export function RecallPane({ className, showTitle }: { className?: string; showT
         peek={peek}
         onDraftChange={persistDraft}
         compact={compact}
+        draftViewRef={draftViewRef}
+        formatBothRef={formatBothRef}
+        foldBothRef={foldBothRef}
       />
     </div>
   );

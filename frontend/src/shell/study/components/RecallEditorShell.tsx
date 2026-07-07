@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { SplitCodeEditor } from '@/components/code/SplitCodeEditor';
 import type { EditorPrefs } from '@/store/user-prefs';
 import { RecallEditorFooter } from './RecallEditorFooter';
@@ -15,6 +16,9 @@ export function RecallEditorShell({
   peek,
   onDraftChange,
   compact,
+  draftViewRef,
+  formatBothRef,
+  foldBothRef,
 }: {
   reference: string;
   draft: string;
@@ -27,7 +31,17 @@ export function RecallEditorShell({
   peek: boolean;
   onDraftChange: (value: string) => void;
   compact?: boolean;
+  draftViewRef?: React.MutableRefObject<import('@codemirror/view').EditorView | null>;
+  formatBothRef?: React.MutableRefObject<(() => void) | null>;
+  foldBothRef?: React.MutableRefObject<{ collapse: () => void; expand: () => void } | null>;
 }) {
+  const localDraftRef = useRef<import('@codemirror/view').EditorView | null>(null);
+  const localFormatBothRef = useRef<(() => void) | null>(null);
+  const localFoldBothRef = useRef<{ collapse: () => void; expand: () => void } | null>(null);
+  const viewRef = draftViewRef ?? localDraftRef;
+  const formatRef = formatBothRef ?? localFormatBothRef;
+  const foldRef = foldBothRef ?? localFoldBothRef;
+
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <SplitCodeEditor
@@ -50,6 +64,9 @@ export function RecallEditorShell({
         fontSize={editorPrefs.fontSize}
         lineHeight={editorPrefs.lineHeight}
         compact={compact}
+        draftViewRef={viewRef}
+        formatBothRef={formatRef}
+        foldBothRef={foldRef}
       />
       <RecallEditorFooter editorPrefs={editorPrefs} setEditorPrefs={setEditorPrefs} compact={compact} />
     </div>

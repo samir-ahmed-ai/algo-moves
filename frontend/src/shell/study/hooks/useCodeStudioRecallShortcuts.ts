@@ -2,10 +2,18 @@ import { useEffect, type Dispatch, type SetStateAction } from 'react';
 import type { CodeStudioPhase, EditorPrefs } from '@/store/user-prefs';
 
 /**
- * Recall-phase keyboard shortcuts:
+ * Recall-phase keyboard shortcuts (window-level; editor shortcuts are in CodeMirror):
  *   ⌘/Ctrl + \              toggle blind mode
  *   ⌘/Ctrl + Shift + R      clear the draft editor
  *   ⌘/Ctrl + Shift + -/+    decrease/increase font size
+ *
+ * CodeMirror (draft pane):
+ *   ⌘/Ctrl + Shift + F      format both panes
+ *   ⌘/Ctrl + Shift + I      auto-select block and indent
+ *   ⌘/Ctrl + Alt + A        align selection on =
+ *   ⌘/Ctrl + Alt + [        collapse sections (both panes)
+ *   ⌘/Ctrl + Alt + ]        expand all sections
+ *   Ctrl + Shift + [        fold line at cursor
  */
 export function useCodeStudioRecallShortcuts({
   phase,

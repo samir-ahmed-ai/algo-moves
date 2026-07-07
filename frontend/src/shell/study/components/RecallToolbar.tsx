@@ -1,5 +1,6 @@
-import { useCallback, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
+import { useCallback, useState, type Dispatch, type MutableRefObject, type ReactNode, type SetStateAction } from 'react';
 import { createPortal } from 'react-dom';
+import type { EditorView } from '@codemirror/view';
 import {
   Eye,
   EyeOff,
@@ -7,8 +8,13 @@ import {
   RotateCcw,
   ScanEye,
   Settings2,
+  TextQuote,
   Timer,
+  AlignVerticalSpaceAround,
+  ChevronsDownUp,
+  ChevronsUpDown,
 } from 'lucide-react';
+import { autoSelectAndIndent } from '@/lib/editor/codeFormat';
 import { Chip } from '@/shell/canvas';
 import { cn } from '@/lib/utils/cn';
 import { chromeText, ChromeLabel } from '@/shell/chromeUi';
@@ -26,6 +32,10 @@ function RecallSettingsPopover({
   editorPrefs,
   setEditorPrefs,
   compact,
+  draftViewRef,
+  formatBothRef,
+  foldBothRef,
+  lang,
 }: {
   timerRunning: boolean;
   setTimerRunning: Dispatch<SetStateAction<boolean>>;
@@ -34,12 +44,23 @@ function RecallSettingsPopover({
   editorPrefs: EditorPrefs;
   setEditorPrefs: (patch: Partial<EditorPrefs>) => void;
   compact?: boolean;
+  draftViewRef?: MutableRefObject<EditorView | null>;
+  formatBothRef?: MutableRefObject<(() => void) | null>;
+  foldBothRef?: MutableRefObject<{ collapse: () => void; expand: () => void } | null>;
+  lang?: string;
 }) {
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
   const { anchorRef, panelRef, pos, panelStyle } = useAnchoredPopover(open, close, 'right', 300);
 
-  const editorItems = recallEditorMenuItems(editorPrefs, setEditorPrefs);
+  const editorItems = recallEditorMenuItems(
+    editorPrefs,
+    setEditorPrefs,
+    draftViewRef?.current,
+    formatBothRef?.current,
+    foldBothRef?.current,
+    lang,
+  );
 
   const sessionCards = [
     {
@@ -178,6 +199,10 @@ export function RecallToolbar({
   scorePct,
   className,
   trailing,
+  draftViewRef,
+  formatBothRef,
+  foldBothRef,
+  lang,
 }: {
   blind: boolean;
   setBlind: Dispatch<SetStateAction<boolean>>;
@@ -194,6 +219,10 @@ export function RecallToolbar({
   scorePct?: number;
   className?: string;
   trailing?: ReactNode;
+  draftViewRef?: MutableRefObject<EditorView | null>;
+  formatBothRef?: MutableRefObject<(() => void) | null>;
+  foldBothRef?: MutableRefObject<{ collapse: () => void; expand: () => void } | null>;
+  lang?: string;
 }) {
   return (
     <div
@@ -231,6 +260,36 @@ export function RecallToolbar({
         </ToolbarGroupBtn>
       </ToolbarGroup>
 
+      <ToolbarGroup title="Format">
+        <ToolbarGroupBtn
+          title="Format both panes — spacing, braces, indent (⌘⇧F)"
+          onClick={() => formatBothRef?.current?.()}
+        >
+          <TextQuote className="h-3 w-3" />
+        </ToolbarGroupBtn>
+        <ToolbarGroupBtn
+          title="Auto-select block and indent (⌘⇧I)"
+          onClick={() => {
+            const view = draftViewRef?.current;
+            if (view) autoSelectAndIndent(view);
+          }}
+        >
+          <AlignVerticalSpaceAround className="h-3 w-3" />
+        </ToolbarGroupBtn>
+        <ToolbarGroupBtn
+          title="Collapse sections — funcs, types (⌘⌥[)"
+          onClick={() => foldBothRef?.current?.collapse()}
+        >
+          <ChevronsDownUp className="h-3 w-3" />
+        </ToolbarGroupBtn>
+        <ToolbarGroupBtn
+          title="Expand all sections (⌘⌥])"
+          onClick={() => foldBothRef?.current?.expand()}
+        >
+          <ChevronsUpDown className="h-3 w-3" />
+        </ToolbarGroupBtn>
+      </ToolbarGroup>
+
       {/* Session + editor settings combined into one popover */}
       <RecallSettingsPopover
         timerRunning={timerRunning}
@@ -240,6 +299,10 @@ export function RecallToolbar({
         editorPrefs={editorPrefs}
         setEditorPrefs={setEditorPrefs}
         compact={compact}
+        draftViewRef={draftViewRef}
+        formatBothRef={formatBothRef}
+        foldBothRef={foldBothRef}
+        lang={lang}
       />
 
       <div className="flex-1" />

@@ -66,10 +66,10 @@ dev: frontend-dev ## Alias — start the Vite dev server
 
 backend: backend-dev ## Alias — start the Go game server
 
-backend-dev: _require-go ## Go game server on :8080 (override with PORT=…)
+backend-dev: _require-go ## Go game server on :8080 (override with PORT=…; loads backend/.env if present)
 	@$(MAKE) --no-print-directory _free-port PORT=$(BACKEND_PORT) NAME=Backend
 	@printf '$(BOLD)Backend$(RESET)  → http://localhost:$(BACKEND_PORT)\n'
-	cd $(BACKEND_DIR) && PORT=$(BACKEND_PORT) $(GO) run ./cmd/gameserver
+	cd $(BACKEND_DIR) && set -a && [ -f .env ] && . ./.env; set +a; PORT=$(BACKEND_PORT) $(GO) run ./cmd/gameserver
 
 preview: build ## Serve the production frontend build locally
 	$(NPM) run preview

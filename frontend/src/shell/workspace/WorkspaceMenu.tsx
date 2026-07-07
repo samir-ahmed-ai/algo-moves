@@ -194,8 +194,8 @@ export function WorkspaceMenuDropdown({ onOpenPalette, onOpenHelp, compact }: Wo
 export function WorkspaceMenu({ onOpenPalette, onOpenHelp }: WorkspaceMenuProps) {
   return (
     <header className="nodrag sticky top-0 z-20 flex shrink-0 items-center gap-2 border-b border-edge bg-bg/90 px-3 py-2 backdrop-blur-sm">
-      <AuthButton compact />
       <WorkspaceMenuDropdown onOpenPalette={onOpenPalette} onOpenHelp={onOpenHelp} />
+      <AuthButton compact />
     </header>
   );
 }

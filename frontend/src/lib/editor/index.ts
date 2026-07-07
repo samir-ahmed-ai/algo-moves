@@ -1,3 +1,6 @@
+export * from './codeFold';
+export * from './styleFormat';
+export * from './codeFormat';
 export * from './editorSetup';
 export * from './editorTheme';
 export * from './languageExtension';

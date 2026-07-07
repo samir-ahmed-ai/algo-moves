@@ -1,4 +1,5 @@
-import { createContext } from 'react';
+import { createContext, type MutableRefObject } from 'react';
+import type { EditorView } from '@codemirror/view';
 import type { QuizQuestion } from '@/core/types';
 import type { CodePiece } from '@/lib/code';
 import type {
@@ -69,6 +70,9 @@ export interface CodeStudioEditorContextValue {
   setEditorPrefs: (patch: Partial<EditorPrefs>) => void;
   copied: boolean;
   copyRef: () => Promise<void>;
+  draftViewRef: MutableRefObject<EditorView | null>;
+  formatBothRef: MutableRefObject<(() => void) | null>;
+  foldBothRef: MutableRefObject<{ collapse: () => void; expand: () => void } | null>;
 }
 
 export type CodeStudioContextValue = CodeStudioContentContextValue &

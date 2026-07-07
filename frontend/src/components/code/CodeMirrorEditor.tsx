@@ -40,6 +40,14 @@ export const baseTheme = EditorView.theme({
   '&': { fontSize: 'var(--fs-xs, 12px)', borderRadius: 'var(--radius)', overflow: 'hidden', height: '100%' },
   '.cm-scroller': { fontFamily: 'var(--mono)', lineHeight: '1.5' },
   '.cm-gutters': { borderRight: '0.5px solid var(--border)' },
+  '.cm-foldGutter span': { cursor: 'pointer', padding: '0 2px', fontSize: '10px', color: 'var(--text-3)' },
+  '.cm-foldPlaceholder': {
+    color: 'var(--text-3)',
+    fontStyle: 'italic',
+    padding: '0 4px',
+    borderRadius: '3px',
+    backgroundColor: 'color-mix(in srgb, var(--accent) 8%, transparent)',
+  },
   '&.cm-focused': { outline: 'none' },
   '.cm-diff-changed': { backgroundColor: 'color-mix(in srgb, var(--good) 12%, transparent)' },
   '.cm-diff-missing': { backgroundColor: 'color-mix(in srgb, var(--ring) 10%, transparent)' },
@@ -57,6 +65,14 @@ export const mergeEditorChrome = EditorView.theme({
   '&': { fontSize: 'var(--fs-xs, 12px)', borderRadius: 'var(--radius)' },
   '.cm-scroller': { fontFamily: 'var(--mono)', lineHeight: '1.5' },
   '.cm-gutters': { borderRight: '0.5px solid var(--border)' },
+  '.cm-foldGutter span': { cursor: 'pointer', padding: '0 2px', fontSize: '10px', color: 'var(--text-3)' },
+  '.cm-foldPlaceholder': {
+    color: 'var(--text-3)',
+    fontStyle: 'italic',
+    padding: '0 4px',
+    borderRadius: '3px',
+    backgroundColor: 'color-mix(in srgb, var(--accent) 8%, transparent)',
+  },
   '&.cm-focused': { outline: 'none' },
   '.cm-vimMode': {
     fontFamily: 'var(--mono)',
@@ -114,7 +130,7 @@ export function CodeMirrorEditor({
         doc: value,
         extensions: [
           vimComp.current.of(vimExtensions(vimRef.current)),
-          ...coreEditorExtensions(langExt),
+          ...coreEditorExtensions(langExt, { lang }),
           wrapComp.current.of(wrapExtensions(wrapRef.current)),
           editComp.current.of([EditorView.editable.of(!readOnly), EditorState.readOnly.of(readOnly)]),
           decoComp.current.of(

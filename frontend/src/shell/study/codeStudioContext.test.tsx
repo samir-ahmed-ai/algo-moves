@@ -120,6 +120,9 @@ describe('CodeStudio context slices', () => {
     const { result } = renderHook(() => useCodeStudioEditor(), { wrapper });
     expect(typeof result.current.editorPrefs.vim).toBe('boolean');
     expect(typeof result.current.copyRef).toBe('function');
+    expect(result.current.draftViewRef.current).toBeNull();
+    expect(result.current.formatBothRef.current).toBeNull();
+    expect(result.current.foldBothRef.current).toBeNull();
   });
 
   it('useCodeStudio compat merges all slices', () => {

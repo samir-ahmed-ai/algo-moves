@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { catalog, getTrackById, type TrackId } from '@/content';
+import { browseBreadcrumbForItem, catalog, getTrackById, type TrackId } from '@/content';
 import { normalizeCanvasMode, type CanvasMode } from '@/core';
 import { normalizeLegacyUrl, parsePageFromPathname, writeAppUrl } from '@/lib/navigation/appRoute';
 import {
@@ -21,6 +21,30 @@ function isCanvasFocus(shared: ShareState | null): boolean {
   if (shared.focus === 'canvas') return true;
   // Legacy share links: mode=visualize without an item meant canvas-only.
   return shared.mode === 'visualize' && !shared.item;
+}
+
+/** Where Back should land when leaving a focused problem view. */
+export function resolveBackToBrowseTarget(
+  activeItemId: string,
+  activeTrackId: TrackId | null,
+  activeCategoryId: string | null,
+): { trackId: TrackId | null; categoryId: string | null; fallback: 'home' | null } {
+  if (activeCategoryId || activeTrackId) {
+    return { trackId: activeTrackId, categoryId: activeCategoryId, fallback: null };
+  }
+
+  const crumb = browseBreadcrumbForItem(activeItemId, catalog);
+  if (crumb.category?.id) {
+    return {
+      trackId: crumb.track?.id ? (crumb.track.id as TrackId) : null,
+      categoryId: crumb.category.id,
+      fallback: null,
+    };
+  }
+  if (crumb.track?.id) {
+    return { trackId: crumb.track.id as TrackId, categoryId: null, fallback: null };
+  }
+  return { trackId: null, categoryId: null, fallback: 'home' };
 }
 
 /** App route + active problem/browse selection + the enter-X navigators. */
@@ -94,8 +118,15 @@ export function useAppNavigation(shared: ShareState | null) {
   const enterCollabCanvas = enterCanvas;
 
   const backToBrowse = useCallback(() => {
+    const target = resolveBackToBrowseTarget(activeItemId, activeTrackId, activeCategoryId);
+    if (target.fallback === 'home') {
+      goHome();
+      return;
+    }
+    if (target.categoryId !== activeCategoryId) setActiveCategoryId(target.categoryId);
+    if (target.trackId !== activeTrackId) setActiveTrackId(target.trackId);
     setProblemFocused(false);
-  }, []);
+  }, [activeItemId, activeTrackId, activeCategoryId, goHome]);
 
   const enterWorkspace = useCallback(
     (itemId?: string) => {

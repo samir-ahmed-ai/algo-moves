@@ -1,4 +1,5 @@
-import { Fragment, useCallback, useMemo, useState, type ReactNode } from 'react';
+import { Fragment, useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
+import type { EditorView } from '@codemirror/view';
 import {
   Check,
   Copy,
@@ -132,6 +133,9 @@ export function CodeStudioProvider({
   const [peek, setPeek] = useState(false);
   const [copied, setCopied] = useState(false);
   const [editorPrefs, setEditorPrefs] = useEditorPrefs();
+  const draftViewRef = useRef<EditorView | null>(null);
+  const formatBothRef = useRef<(() => void) | null>(null);
+  const foldBothRef = useRef<{ collapse: () => void; expand: () => void } | null>(null);
   const { timerRunning, setTimerRunning, setTimerSec, timerLabel } = useCodeStudioTimer(item.id);
 
   const code = variants[Math.min(active, Math.max(variants.length - 1, 0))];
@@ -280,6 +284,9 @@ export function CodeStudioProvider({
       setEditorPrefs,
       copied,
       copyRef,
+      draftViewRef,
+      formatBothRef,
+      foldBothRef,
     }),
     [editorPrefs, setEditorPrefs, copied, copyRef],
   );
@@ -347,10 +354,10 @@ function recallExtrasOverflow({
 
 /** Inline header controls — icon-only with tooltips. */
 export function CodeStudioToolbar() {
-  const { variants, active, setActive } = useCodeStudioContent();
+  const { variants, active, setActive, code } = useCodeStudioContent();
   const { blind, setBlind, peek, setPeek, persistDraft, timerRunning, setTimerRunning, timerLabel } =
     useCodeStudioDraft();
-  const { copied, copyRef, editorPrefs, setEditorPrefs } = useCodeStudioEditor();
+  const { copied, copyRef, editorPrefs, setEditorPrefs, draftViewRef, formatBothRef, foldBothRef } = useCodeStudioEditor();
   const {
     phase,
     phaseSeq,
@@ -383,6 +390,10 @@ export function CodeStudioToolbar() {
               editorPrefs={editorPrefs}
               setEditorPrefs={setEditorPrefs}
               compact={editorPrefs.recallCompact}
+              draftViewRef={draftViewRef}
+              formatBothRef={formatBothRef}
+              foldBothRef={foldBothRef}
+              lang={code?.lang}
               trailing={extras.length > 0 ? <PanelHeaderMenu title="More actions" items={extras} /> : undefined}
             />
           </>
@@ -446,6 +457,10 @@ export function CodeStudioToolbar() {
             editorPrefs={editorPrefs}
             setEditorPrefs={setEditorPrefs}
             compact={editorPrefs.recallCompact}
+            draftViewRef={draftViewRef}
+            formatBothRef={formatBothRef}
+            foldBothRef={foldBothRef}
+            lang={code?.lang}
             trailing={extras.length > 0 ? <PanelHeaderMenu title="More actions" items={extras} /> : undefined}
           />
         </>
@@ -475,7 +490,7 @@ export function CodeStudioToolbar() {
 export function CodeStudioBody() {
   const { reference, code, theme, active } = useCodeStudioContent();
   const { draft, blind, peek, persistDraft } = useCodeStudioDraft();
-  const { editorPrefs, setEditorPrefs } = useCodeStudioEditor();
+  const { editorPrefs, setEditorPrefs, draftViewRef, formatBothRef, foldBothRef } = useCodeStudioEditor();
   const {
     phase,
     phaseTransition,
@@ -542,6 +557,9 @@ export function CodeStudioBody() {
             peek={peek}
             onDraftChange={persistDraft}
             compact={editorPrefs.recallCompact}
+            draftViewRef={draftViewRef}
+            formatBothRef={formatBothRef}
+            foldBothRef={foldBothRef}
           />
         )}
       </div>

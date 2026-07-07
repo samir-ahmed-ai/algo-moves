@@ -80,8 +80,6 @@ function Arcade() {
               />
             ) : null}
 
-            <AuthButton compact onOpenProfile={() => setShowProgress(true)} />
-
             <IconButton
               title={muted ? t.room.soundOff : t.room.soundOn}
               onClick={toggleMuted}
@@ -103,6 +101,8 @@ function Arcade() {
                 <LogOut className="h-4 w-4" />
               </IconButton>
             ) : null}
+
+            <AuthButton compact onOpenProfile={() => setShowProgress(true)} />
           </div>
         </div>
       </header>

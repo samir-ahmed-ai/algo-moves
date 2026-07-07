@@ -1,14 +1,20 @@
 import type { ReactNode } from 'react';
+import type { EditorView } from '@codemirror/view';
 import {
+  AlignCenterHorizontal,
   AlignVerticalSpaceAround,
   ChevronsDownUp,
+  ChevronsUpDown,
   Columns2,
   Hash,
   Highlighter,
   Minimize2,
   SplitSquareHorizontal,
+  TextQuote,
   WrapText,
 } from 'lucide-react';
+import { alignSelection, autoSelectAndIndent, formatDocument } from '@/lib/editor/codeFormat';
+import { collapseSections, expandSections } from '@/lib/editor/codeFold';
 import { recallLineHeightLabel } from '@/lib/editor/recallEditorTheme';
 import type { PanelHeaderMenuItem } from '@/shell/canvas';
 import type { EditorPrefs } from '@/store/user-prefs';
@@ -19,8 +25,50 @@ export type RecallEditorMenuItem = PanelHeaderMenuItem & { active?: boolean };
 export function recallEditorMenuItems(
   editorPrefs: EditorPrefs,
   setEditorPrefs: (patch: Partial<EditorPrefs>) => void,
+  draftView?: EditorView | null,
+  formatBoth?: (() => void) | null,
+  foldBoth?: { collapse: () => void; expand: () => void } | null,
+  lang?: string,
 ): RecallEditorMenuItem[] {
   return [
+    {
+      label: 'Format both panes (spacing + braces)',
+      icon: <TextQuote className="h-3.5 w-3.5" />,
+      onClick: () => {
+        if (formatBoth) formatBoth();
+        else if (draftView) formatDocument(draftView);
+      },
+    },
+    {
+      label: 'Collapse sections',
+      icon: <ChevronsDownUp className="h-3.5 w-3.5" />,
+      onClick: () => {
+        if (foldBoth) foldBoth.collapse();
+        else if (draftView) collapseSections(draftView, lang);
+      },
+    },
+    {
+      label: 'Expand all sections',
+      icon: <ChevronsUpDown className="h-3.5 w-3.5" />,
+      onClick: () => {
+        if (foldBoth) foldBoth.expand();
+        else if (draftView) expandSections(draftView);
+      },
+    },
+    {
+      label: 'Auto-select and indent',
+      icon: <AlignVerticalSpaceAround className="h-3.5 w-3.5" />,
+      onClick: () => {
+        if (draftView) autoSelectAndIndent(draftView);
+      },
+    },
+    {
+      label: 'Align selection on =',
+      icon: <AlignCenterHorizontal className="h-3.5 w-3.5" />,
+      onClick: () => {
+        if (draftView) alignSelection(draftView);
+      },
+    },
     {
       label: editorPrefs.wrap ? 'Disable soft-wrap' : 'Enable soft-wrap',
       icon: <WrapText className="h-3.5 w-3.5" />,

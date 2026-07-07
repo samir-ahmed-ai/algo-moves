@@ -372,7 +372,7 @@ export function LandingPage() {
             <div className="hidden lg:block">
               <SwipeModeQrPromo onOpenDevice={enterMobile} />
             </div>
-            <AuthButton />
+            <AuthButton variant="header" />
           </div>
         </div>
       </header>
@@ -382,44 +382,44 @@ export function LandingPage() {
         <aside className="relative border-b border-edge lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r lg:[scrollbar-gutter:stable]">
           <div aria-hidden className="landing-hero-glow pointer-events-none absolute inset-0 opacity-60" />
           <div className="relative flex min-h-full flex-col gap-4 px-4 py-5 sm:gap-5 sm:px-6 sm:py-6">
-            {/* hero copy */}
-            <div className="@container">
-              <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
-                Interview prep
-              </p>
-              <h1 className="hero-headline font-semibold leading-[1.1] tracking-tight text-ink">
-                Algorithms <MoveByMoveAnimated className="text-[0.72em] font-semibold" />
-              </h1>
-              <p className="mt-2 text-sm leading-relaxed text-ink2 sm:mt-3">
+            {/* hero copy — two columns on desktop */}
+            <div className="@container lg:grid lg:grid-cols-2 lg:items-end lg:gap-x-4">
+              <div>
+                <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+                  Interview prep
+                </p>
+                <h1 className="hero-headline font-semibold leading-[1.1] tracking-tight text-ink">
+                  Algorithms <MoveByMoveAnimated className="text-[0.72em] font-semibold" />
+                </h1>
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-ink2 sm:mt-3 lg:mt-0 lg:pb-0.5">
                 {problems.length}+ interview problems as step-by-step replays — visualize, learn, and
                 drill until they stick.
               </p>
             </div>
 
-            {/* primary CTAs — desktop left rail; sticky header covers sub-lg */}
-            <div className="hidden flex-col gap-2 lg:flex lg:flex-row lg:flex-wrap lg:items-center lg:gap-2.5">
-              <button
-                type="button"
-                onClick={() => openItem((lastItem ?? firstProblem)?.id ?? catalog.firstItemId)}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 font-medium text-white transition-opacity hover:opacity-90 sm:w-auto sm:py-2.5"
-              >
-                <Play className="h-4 w-4" />
-                {lastItem
-                  ? compactLabel('Resume learning', 'Resume', isMobile)
-                  : compactLabel('Start learning', 'Start', isMobile)}
-              </button>
-              <button
-                type="button"
-                onClick={() => browseTrack('interview-prep')}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-edge bg-panel/60 px-4 py-3 font-medium text-ink2 transition-colors hover:border-accent/50 hover:text-ink sm:w-auto sm:py-2.5"
-              >
-                <BookOpen className="h-4 w-4" />
-                {compactLabel('Browse tracks', 'Browse', isMobile)}
-              </button>
-            </div>
-
-            {/* mode pills — desktop left rail only; sticky header covers sub-lg */}
-            <div className="hidden lg:block">
+            {/* primary CTAs + mode pills — two columns on desktop */}
+            <div className="hidden lg:grid lg:grid-cols-2 lg:items-start lg:gap-3">
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => openItem((lastItem ?? firstProblem)?.id ?? catalog.firstItemId)}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 font-medium text-white transition-opacity hover:opacity-90"
+                >
+                  <Play className="h-4 w-4" />
+                  {lastItem
+                    ? compactLabel('Resume learning', 'Resume', isMobile)
+                    : compactLabel('Start learning', 'Start', isMobile)}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => browseTrack('interview-prep')}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-edge bg-panel/60 px-4 py-2.5 font-medium text-ink2 transition-colors hover:border-accent/50 hover:text-ink"
+                >
+                  <BookOpen className="h-4 w-4" />
+                  {compactLabel('Browse tracks', 'Browse', isMobile)}
+                </button>
+              </div>
               <ModeStrip
                 onPlay={() => startIn('play')}
                 onVisualize={() => startIn('visualize')}
@@ -430,32 +430,19 @@ export function LandingPage() {
               />
             </div>
 
-            {/* Vim Dojo promo — desktop left rail */}
-            <div className="hidden items-center gap-3 rounded-xl border border-edge bg-panel/60 p-3 lg:flex">
-              <VimHeroPreview />
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-ink">Vim Dojo</p>
-                <p className="mt-0.5 text-xs leading-relaxed text-ink3">
-                  Timed keyboard drills for motions, editing, and muscle memory.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => enterVim()}
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-edge bg-panel2 px-3 py-2 text-xs font-medium text-ink2 transition-colors hover:border-accent/50 hover:text-accent"
-              >
-                Open dojo
-                <ArrowRight className="h-3.5 w-3.5" />
-              </button>
-            </div>
-
-            {/* continue where you left off */}
-            {lastItem ? (
-              <button
-                type="button"
-                onClick={() => openItem(lastItem.id)}
-                className="group flex w-full items-center gap-3 rounded-xl border border-edge bg-panel/60 p-3 text-left transition-all hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-md)]"
-              >
+            {/* continue + Vim Dojo — two columns on desktop */}
+            <div
+              className={cn(
+                'lg:grid lg:gap-3',
+                lastItem ? 'lg:grid-cols-2' : 'lg:grid-cols-1',
+              )}
+            >
+              {lastItem ? (
+                <button
+                  type="button"
+                  onClick={() => openItem(lastItem.id)}
+                  className="group flex w-full items-center gap-3 rounded-xl border border-edge bg-panel/60 p-3 text-left transition-all hover:border-accent/50 hover:bg-panel hover:shadow-[var(--shadow-md)]"
+                >
                 <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-edge bg-panel2 text-ink2">
                   {glyphFor(lastItem) ? (
                     <Glyph
@@ -492,15 +479,38 @@ export function LandingPage() {
                   </span>
                 </span>
                 <ArrowRight className="h-4 w-4 shrink-0 text-accent transition-transform group-hover:translate-x-0.5" />
-              </button>
-            ) : null}
+                </button>
+              ) : null}
+              <div
+                className={cn(
+                  'hidden items-center gap-3 rounded-xl border border-edge bg-panel/60 p-3 lg:flex',
+                  !lastItem && 'lg:col-span-1',
+                )}
+              >
+                <VimHeroPreview />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-ink">Vim Dojo</p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-ink3">
+                    Timed keyboard drills for motions, editing, and muscle memory.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => enterVim()}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-edge bg-panel2 px-3 py-2 text-xs font-medium text-ink2 transition-colors hover:border-accent/50 hover:text-accent"
+                >
+                  Open dojo
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
 
             {/* stats */}
             <RailDetails title="Your library" forceOpen={isDesktop}>
               <p className="mb-2 hidden text-xs font-semibold uppercase tracking-[0.14em] text-ink3 lg:block">
                 Your library
               </p>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-2">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-3">
                 <RailStat icon={<BookOpen />} value={getTracks().length} label="Tracks" />
                 <RailStat icon={<LayoutGrid />} value={getAllCategories().length} label="Categories" />
                 <RailStat icon={<Code2 />} value={problems.length} label="Problems" />
@@ -510,54 +520,55 @@ export function LandingPage() {
               </div>
             </RailDetails>
 
-            {/* spotlight tracks */}
-            <RailDetails title="Specialized tracks" forceOpen={isDesktop}>
-              <p className="mb-2 hidden text-xs font-semibold uppercase tracking-[0.14em] text-ink3 lg:block">
-                Specialized tracks
-              </p>
-              <FeatureSelectorPopover
-                groups={specializedTrackGroups}
-                value={lastTrackId}
-                onChange={(id) => {
-                  setLastTrackId(id as TrackId);
-                  browseTrack(id as TrackId);
-                }}
-                panelTitle="Browse a specialized track"
-                panelHint="Opens new tab"
-                triggerLabel="Track"
-                align="left"
-                className="w-full"
-              />
-            </RailDetails>
+            {/* spotlight tracks + maker — two columns on desktop */}
+            <div className="mt-auto lg:grid lg:grid-cols-2 lg:items-end lg:gap-3 lg:pt-2">
+              <RailDetails title="Specialized tracks" forceOpen={isDesktop}>
+                <p className="mb-2 hidden text-xs font-semibold uppercase tracking-[0.14em] text-ink3 lg:block">
+                  Specialized tracks
+                </p>
+                <FeatureSelectorPopover
+                  groups={specializedTrackGroups}
+                  value={lastTrackId}
+                  onChange={(id) => {
+                    setLastTrackId(id as TrackId);
+                    browseTrack(id as TrackId);
+                  }}
+                  panelTitle="Browse a specialized track"
+                  panelHint="Opens new tab"
+                  triggerLabel="Track"
+                  align="left"
+                  className="w-full"
+                />
+              </RailDetails>
 
-            {/* maker + footer — desktop only */}
-            <div className="mt-auto hidden space-y-4 pt-2 lg:block">
-              <div className="flex items-center gap-3 rounded-xl border border-edge bg-panel/60 p-3">
-                {MAKER.photo ? (
-                  <img
-                    src={MAKER.photo}
-                    alt={MAKER.name}
-                    className="h-12 w-12 shrink-0 rounded-xl border border-edge object-cover object-top"
-                  />
-                ) : null}
-                <div className="min-w-0">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-accent">
-                    {MAKER.role}
-                  </p>
-                  <p className="truncate text-sm font-semibold text-ink">{MAKER.name}</p>
-                  {MAKER.email ? (
-                    <a
-                      href={`mailto:${MAKER.email}`}
-                      className="inline-flex items-center gap-1 text-xs font-medium text-accent transition-opacity hover:opacity-70"
-                    >
-                      {MAKER.email}
-                    </a>
+              <div className="hidden space-y-4 lg:block">
+                <div className="flex items-center gap-3 rounded-xl border border-edge bg-panel/60 p-3">
+                  {MAKER.photo ? (
+                    <img
+                      src={MAKER.photo}
+                      alt={MAKER.name}
+                      className="h-12 w-12 shrink-0 rounded-xl border border-edge object-cover object-top"
+                    />
                   ) : null}
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-accent">
+                      {MAKER.role}
+                    </p>
+                    <p className="truncate text-sm font-semibold text-ink">{MAKER.name}</p>
+                    {MAKER.email ? (
+                      <a
+                        href={`mailto:${MAKER.email}`}
+                        className="inline-flex items-center gap-1 text-xs font-medium text-accent transition-opacity hover:opacity-70"
+                      >
+                        {MAKER.email}
+                      </a>
+                    ) : null}
+                  </div>
                 </div>
+                <p className="text-xs text-ink3">
+                  Algo Moves — step through interview algorithms until they stick.
+                </p>
               </div>
-              <p className="text-xs text-ink3">
-                Algo Moves — step through interview algorithms until they stick.
-              </p>
             </div>
           </div>
         </aside>
