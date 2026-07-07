@@ -1,8 +1,9 @@
-# Yjs + Hocuspocus Canvas Collab Spike
+# Yjs + Hocuspocus Canvas Collab
 
-Evaluation spike for replacing the custom host-authoritative edit-op protocol
-(`canvasDoc.ts`, `CanvasCollabProvider.tsx`, `subdocProtocol.ts`) with CRDT-based
-sync. **Not enabled in production** — code lives under `src/shell/canvas/collab/yjs/`.
+Evaluation and **Phase A shadow mode** for replacing the custom host-authoritative
+edit-op protocol (`canvasDoc.ts`, `CanvasCollabProvider.tsx`, `subdocProtocol.ts`)
+with CRDT-based sync. Production transport remains host-authoritative relay;
+Yjs mirrors host snapshots when enabled.
 
 ## What was built
 
@@ -10,8 +11,24 @@ sync. **Not enabled in production** — code lives under `src/shell/canvas/colla
 |--------|---------|
 | `yjsCanvasDoc.ts` | Maps `CanvasDoc` → `Y.Map` nodes/edges/comments + binary encode/decode for Postgres |
 | `yjsCanvasBinding.ts` | React Flow graph read/write + `observeDeep` subscription |
-| `useYjsCanvasSpike.ts` | Opt-in `@hocuspocus/provider` hook (`enabled: false` by default) |
+| `useYjsCanvasSpike.ts` | Opt-in standalone `@hocuspocus/provider` hook (`enabled: false` by default) |
+| `useYjsCanvasShadow.ts` | **Phase A** — host dual-write into shadow `Y.Doc` via `useCanvasDocSync` |
+| `scripts/hocuspocus-server.mjs` | Local Hocuspocus server (`npm run hocuspocus`) |
 | `yjsCanvasDoc.test.ts` | Round-trip and observer tests |
+
+## Enabling shadow mode (Phase A)
+
+```bash
+# Terminal 1 — optional relay for multi-client shadow comparison
+npm run hocuspocus
+
+# Terminal 2 — frontend
+VITE_YJS_SHADOW=true VITE_HOCUSPOCUS_URL=ws://localhost:1234 npm run dev
+```
+
+When `VITE_YJS_SHADOW=true`, the canvas host mirrors every settled publish into
+a local `Y.Doc` (`seedYjsCanvasDoc`). If `VITE_HOCUSPOCUS_URL` is set, the shadow
+doc syncs to Hocuspocus under the live room code. Custom edit-ops remain authoritative.
 
 ## Self-hosted deployment sketch
 
@@ -27,7 +44,7 @@ use the official Postgres persistence extension.
 
 ## Migration path (if adopted after Phase 2)
 
-1. **Phase A** — Dual-write: host still publishes edit-ops; spike hook mirrors into Y.Doc for shadow comparison.
+1. **Phase A** — Dual-write (implemented): host still publishes edit-ops; `useYjsCanvasShadow` mirrors into Y.Doc when `VITE_YJS_SHADOW=true`.
 2. **Phase B** — Subdocuments per panel (`doc.getSubdoc(guid)`) for whiteboard + collab-code instead of `subdocProtocol.ts` patch ops.
 3. **Phase C** — Interview mode frame-follow + lock stays a thin layer on top (custom presence, not CRDT).
 4. **Phase D** — Retire `diffNodes` / `applyEditOp` once all clients speak Yjs.

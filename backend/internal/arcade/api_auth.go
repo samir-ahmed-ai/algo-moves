@@ -166,6 +166,17 @@ func (s *Service) handleGuest(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, sess)
 }
 
+func (s *Service) handleLogout(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeErr(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	if s.sessions != nil {
+		_ = s.sessions.Destroy(r.Context())
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func (s *Service) handleMe(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		writeErr(w, http.StatusMethodNotAllowed, "method not allowed")

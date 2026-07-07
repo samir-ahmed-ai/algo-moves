@@ -64,14 +64,28 @@ func TestOriginAllowed(t *testing.T) {
 }
 
 func TestSetCORS(t *testing.T) {
-	t.Run("no allowlist sets wildcard", func(t *testing.T) {
+	t.Run("no allowlist reflects origin for credentialed requests", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		setCORS(w, "https://anything.example", nil)
+		if got := w.Header().Get("Access-Control-Allow-Origin"); got != "https://anything.example" {
+			t.Fatalf("Access-Control-Allow-Origin = %q, want https://anything.example", got)
+		}
+		if got := w.Header().Get("Access-Control-Allow-Credentials"); got != "true" {
+			t.Fatalf("Access-Control-Allow-Credentials = %q, want true", got)
+		}
+		if got := w.Header().Get("Vary"); got != "Origin" {
+			t.Fatalf("Vary = %q, want Origin", got)
+		}
+	})
+
+	t.Run("no allowlist and no origin sets wildcard", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		setCORS(w, "", nil)
 		if got := w.Header().Get("Access-Control-Allow-Origin"); got != "*" {
 			t.Fatalf("Access-Control-Allow-Origin = %q, want *", got)
 		}
-		if got := w.Header().Get("Vary"); got != "" {
-			t.Fatalf("Vary = %q, want empty when wildcard is used", got)
+		if got := w.Header().Get("Access-Control-Allow-Credentials"); got != "" {
+			t.Fatalf("Access-Control-Allow-Credentials = %q, want empty when wildcard is used", got)
 		}
 	})
 
@@ -84,6 +98,9 @@ func TestSetCORS(t *testing.T) {
 		}
 		if got := w.Header().Get("Vary"); got != "Origin" {
 			t.Fatalf("Vary = %q, want Origin", got)
+		}
+		if got := w.Header().Get("Access-Control-Allow-Credentials"); got != "true" {
+			t.Fatalf("Access-Control-Allow-Credentials = %q, want true", got)
 		}
 	})
 

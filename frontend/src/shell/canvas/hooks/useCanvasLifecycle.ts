@@ -4,7 +4,7 @@ import type { CanvasMode, Frame, Player, ProblemPlugin } from '@/core';
 import type { PanelFlowNode } from '@/core/panelFlowTypes';
 import { saveCanvasPrefs } from '@/store/canvas-layout';
 import { buildEdges, edgeConnectionLabel, modeNodeIds, REQUIRED_VISUALIZE_EDGES, standaloneNodeIds, styleEdges, type BgVariant, type EdgeOpts, type LayoutDir, type LayoutVisualizeOptions } from '../layout';
-import { buildCanvasFrame, organizeCurrentCanvasFrame } from '../frame';
+import { buildCanvasFrame, organizeCurrentCanvasFrameAsync } from '../frame';
 import { sanitizeVisualizeEdges } from '../edges';
 import { snapNodeLayout } from '../nodes/nodeSnapshot';
 import { useCanvasHistory } from './useCanvasHistory';
@@ -270,10 +270,12 @@ export function useCanvasLifecycle({
     removedRef.current[key] = new Set(nodeIds.filter((id) => !presentIds.has(id)));
     removedEdgesRef.current[key] = new Set();
     delete layoutRef.current[key];
-    const tidy = organizeCurrentCanvasFrame(plugin, mode, present, { layoutOpts: layoutOpts(), dir, edgeOpts });
-    setNodes(tidy.nodes);
-    setEdges(tidy.edges);
-    requestAnimationFrame(() => fitCanvas());
+    const layoutInput = { layoutOpts: layoutOpts(), dir, edgeOpts };
+    void organizeCurrentCanvasFrameAsync(plugin, mode, present, layoutInput).then((tidy) => {
+      setNodes(tidy.nodes);
+      setEdges(tidy.edges);
+      requestAnimationFrame(() => fitCanvas());
+    });
   }, [plugin, mode, key, edgeOpts, dir, setNodes, setEdges, fitCanvas, layoutOpts, standalone, layoutRef, removedRef, removedEdgesRef]);
 
   useEffect(() => {

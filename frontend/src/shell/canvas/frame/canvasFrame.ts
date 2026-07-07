@@ -8,6 +8,7 @@ import {
   layoutVisualizeCanvas,
   layoutLearnCanvas,
   layoutGraph,
+  layoutGraphAsync,
   nodeForKind,
   styleEdges,
   type LayoutDir,
@@ -139,5 +140,25 @@ export function organizeCurrentCanvasFrame(
       : mode === 'learn'
         ? layoutLearnCanvas(kept, raw)
         : layoutGraph(kept, raw, input.dir);
+  return { nodes: kept, edges: styleEdges(raw, input.edgeOpts) };
+}
+
+/** Async organize — uses ELK when {@link resolveLayoutEngine} selects it. */
+export async function organizeCurrentCanvasFrameAsync(
+  plugin: ProblemPlugin<any, any>,
+  mode: CanvasMode,
+  nodes: PanelFlowNode[],
+  input: Pick<CanvasFrameInput, 'layoutOpts' | 'dir' | 'edgeOpts'>,
+): Promise<{ nodes: PanelFlowNode[]; edges: Edge[] }> {
+  const present = new Set(nodes.map((n) => n.id));
+  const raw = buildEdges(plugin, mode).filter((e) => present.has(e.source) && present.has(e.target));
+  let kept: PanelFlowNode[] = nodes.map((n) => ({ ...n, position: { x: 0, y: 0 }, selected: false }));
+  if (mode === 'visualize') {
+    kept = layoutVisualizeCanvas(kept, input.layoutOpts);
+  } else if (mode === 'learn') {
+    kept = layoutLearnCanvas(kept, raw);
+  } else {
+    kept = await layoutGraphAsync(kept, raw, input.dir);
+  }
   return { nodes: kept, edges: styleEdges(raw, input.edgeOpts) };
 }

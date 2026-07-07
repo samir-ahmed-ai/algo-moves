@@ -1,4 +1,5 @@
 import dagre from '@dagrejs/dagre';
+import ELK from 'elkjs/lib/elk.bundled.js';
 import { Position, type Edge } from '@xyflow/react';
 import type { PanelFlowNode } from '@/core/panelFlowTypes';
 import type { LayoutVisualizeOptions } from '@/lib/canvas/layoutPrefs';
@@ -12,6 +13,28 @@ import {
 } from '../tokens';
 
 export type LayoutDir = 'TB' | 'LR';
+export type LayoutEngine = 'dagre' | 'elk';
+
+const elk = new ELK();
+const ELK_NODE_THRESHOLD = 20;
+
+/** Pick layout engine from env or graph size (large graphs benefit from ELK layered). */
+export function resolveLayoutEngine(nodeCount: number): LayoutEngine {
+  const pref = import.meta.env.VITE_LAYOUT_ENGINE;
+  if (pref === 'elk') return 'elk';
+  if (pref === 'dagre') return 'dagre';
+  return nodeCount >= ELK_NODE_THRESHOLD ? 'elk' : 'dagre';
+}
+
+function elkDirection(rankdir: LayoutDir): string {
+  return rankdir === 'LR' ? 'RIGHT' : 'DOWN';
+}
+
+function handlesForDir(rankdir: LayoutDir) {
+  return rankdir === 'LR'
+    ? { sourcePosition: Position.Right, targetPosition: Position.Left }
+    : { sourcePosition: Position.Bottom, targetPosition: Position.Top };
+}
 
 const LEARN_NODE_SEP = CANVAS_NODE_SEP;
 const LEARN_RANK_SEP = 40;
@@ -193,4 +216,60 @@ export function layoutGraph(nodes: PanelFlowNode[], edges: Edge[], rankdir: Layo
     const h = n.height ?? est.estH;
     return { ...n, position: { x: p.x - w / 2, y: p.y - h / 2 } };
   });
+}
+
+/** ELK layered layout — better for dense graphs; async because elkjs returns a Promise. */
+export async function layoutGraphElk(
+  nodes: PanelFlowNode[],
+  edges: Edge[],
+  rankdir: LayoutDir = 'TB',
+): Promise<PanelFlowNode[]> {
+  if (nodes.length === 0) return nodes;
+  const graph = {
+    id: 'root',
+    layoutOptions: {
+      'elk.algorithm': 'layered',
+      'elk.direction': elkDirection(rankdir),
+      'elk.spacing.nodeNode': '40',
+      'elk.layered.spacing.nodeNodeBetweenLayers': '52',
+    },
+    children: nodes.map((n) => {
+      const est = layoutEstimate(n.data.kind ?? n.id);
+      return {
+        id: n.id,
+        width: n.width ?? est.w,
+        height: n.height ?? est.estH,
+      };
+    }),
+    edges: edges.map((e) => ({
+      id: e.id,
+      sources: [e.source],
+      targets: [e.target],
+    })),
+  };
+  const layouted = await elk.layout(graph);
+  const positions = new Map<string, { x: number; y: number }>();
+  for (const child of layouted.children ?? []) {
+    if (child.id && child.x != null && child.y != null) {
+      positions.set(child.id, { x: child.x, y: child.y });
+    }
+  }
+  const handles = handlesForDir(rankdir);
+  return nodes.map((n) => {
+    const pos = positions.get(n.id);
+    if (!pos) return n;
+    return { ...n, ...handles, position: { x: pos.x, y: pos.y } };
+  });
+}
+
+/** Resolve engine preference and run the matching layout (ELK when selected). */
+export async function layoutGraphAsync(
+  nodes: PanelFlowNode[],
+  edges: Edge[],
+  rankdir: LayoutDir = 'TB',
+  engine?: LayoutEngine,
+): Promise<PanelFlowNode[]> {
+  const pick = engine ?? resolveLayoutEngine(nodes.length);
+  if (pick === 'elk') return layoutGraphElk(nodes, edges, rankdir);
+  return layoutGraph(nodes, edges, rankdir);
 }

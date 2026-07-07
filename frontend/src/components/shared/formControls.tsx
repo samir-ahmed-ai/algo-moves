@@ -6,6 +6,7 @@
  */
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils/cn';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { nodeText, RADIUS_CTRL } from '@/design/typography';
 
 /** Uppercase field/section label. */
@@ -21,17 +22,17 @@ export function Hint({ children, className }: { children: ReactNode; className?:
 type BtnVariant = 'primary' | 'good' | 'ghost' | 'quiet' | 'danger';
 type BtnSize = 'xs' | 'sm';
 
-const BTN_VARIANT: Record<BtnVariant, string> = {
-  primary: 'bg-accent text-white hover:opacity-90',
-  good: 'bg-good text-white hover:opacity-90',
-  ghost: 'bg-panel2/50 text-ink2 hover:bg-panel2 hover:text-ink',
-  quiet: 'text-ink3 hover:bg-panel2 hover:text-ink',
-  danger: 'text-bad hover:bg-badbg',
+const BTN_VARIANT: Record<BtnVariant, NonNullable<Parameters<typeof buttonVariants>[0]>['variant']> = {
+  primary: 'primary',
+  good: 'good',
+  ghost: 'ghost',
+  quiet: 'quiet',
+  danger: 'danger',
 };
 
-const BTN_SIZE: Record<BtnSize, string> = {
-  xs: cn('px-2 py-1', nodeText.xs),
-  sm: cn('px-2.5 py-1.5', nodeText.sm),
+const BTN_SIZE: Record<BtnSize, NonNullable<Parameters<typeof buttonVariants>[0]>['size']> = {
+  xs: 'xs',
+  sm: 'sm',
 };
 
 /** The single button vocabulary — every node button is one of these. */
@@ -48,20 +49,10 @@ export function Btn({
   icon?: ReactNode;
 } & ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
-    <button
-      type="button"
-      className={cn(
-        'nodrag inline-flex items-center justify-center gap-1.5 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40',
-        RADIUS_CTRL,
-        BTN_VARIANT[variant],
-        BTN_SIZE[size],
-        className,
-      )}
-      {...rest}
-    >
+    <Button variant={BTN_VARIANT[variant]} size={BTN_SIZE[size]} className={className} {...rest}>
       {icon}
       {children}
-    </button>
+    </Button>
   );
 }
 

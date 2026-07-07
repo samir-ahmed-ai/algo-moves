@@ -82,17 +82,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
         return;
       }
-      if (getSessionToken()) {
-        const me = await arcadeFetch<Profile>('/api/auth/me');
-        if (!alive) return;
-        if (me) {
-          setUserId(me.id);
-          setIsAnonymous(me.is_anonymous);
-          setProfile(me);
-          syncPersonalRoom(me);
-        } else {
-          clearSessionToken();
-        }
+      const me = await arcadeFetch<Profile>('/api/auth/me');
+      if (!alive) return;
+      if (me) {
+        setUserId(me.id);
+        setIsAnonymous(me.is_anonymous);
+        setProfile(me);
+        syncPersonalRoom(me);
+      } else if (getSessionToken()) {
+        clearSessionToken();
       }
       setLoading(false);
     })();
@@ -170,6 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const signOut = useCallback(async () => {
+    await arcadeFetch('/api/auth/logout', { method: 'POST' });
     clearSessionToken();
     setUserId(null);
     setProfile(null);

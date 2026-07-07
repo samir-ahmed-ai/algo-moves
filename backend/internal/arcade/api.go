@@ -86,6 +86,7 @@ func (s *Service) Register(mux *http.ServeMux) {
 	mux.HandleFunc("/api/auth/guest", s.handleGuest)
 	mux.HandleFunc("/api/auth/signup", s.handleSignup)
 	mux.HandleFunc("/api/auth/login", s.handleLogin)
+	mux.HandleFunc("/api/auth/logout", s.handleLogout)
 	mux.HandleFunc("/api/auth/me", s.handleMe)
 	mux.HandleFunc("/api/profiles/", s.handleProfiles)
 	mux.HandleFunc("/api/stats/me", s.handleStatsMe)

@@ -6,6 +6,7 @@ import { buildCanvasRoomState, extractCanvasDoc } from '@/shell/realtime/roomSta
 import { useCanvasCollab } from '../CanvasCollabProvider';
 import type { PanelFlowNode } from '@/core/panelFlowTypes';
 import { isCanvasOp, isEditOp, type CanvasDoc, type CanvasOp } from '../protocol/collabProtocol';
+import { isYjsShadowEnabled, useYjsCanvasShadow } from '../yjs/useYjsCanvasShadow';
 import {
   applyEditToComments,
   applyEditToEdges,
@@ -43,9 +44,13 @@ interface DocSyncArgs {
  */
 export function useCanvasDocSync({ nodes, edges, setNodes, setEdges }: DocSyncArgs): void {
   const { role, isCollaborating, session, comments, setComments, emit, broadcastDrag, broadcastSelection, subDocs, setSubDocs } = useCanvasCollab();
-  const { publishState, subscribe, sharedState } = useGameRoom();
+  const { publishState, subscribe, sharedState, room } = useGameRoom();
 
   const isHost = role === 'host';
+  const { mirrorShadow } = useYjsCanvasShadow({
+    roomId: room,
+    enabled: isHost && isCollaborating && isYjsShadowEnabled(),
+  });
   const prevNodes = useRef<PanelFlowNode[]>(nodes);
   const prevEdges = useRef<Edge[]>(edges);
   const revRef = useRef(0);
@@ -108,6 +113,7 @@ export function useCanvasDocSync({ nodes, edges, setNodes, setEdges }: DocSyncAr
         removedEdges: [],
         comments: commentsRef.current,
       };
+      mirrorShadow(doc);
       publishState(buildCanvasRoomState(session, doc, subDocsRef.current));
     },
   );

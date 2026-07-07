@@ -1,24 +1,25 @@
-import { StreamLanguage, type LanguageSupport } from '@codemirror/language';
-import { java } from '@codemirror/legacy-modes/mode/clike';
-import { go } from '@codemirror/legacy-modes/mode/go';
-import { javascript } from '@codemirror/legacy-modes/mode/javascript';
-import { python } from '@codemirror/legacy-modes/mode/python';
+import { type LanguageSupport } from '@codemirror/language';
+import { java } from '@codemirror/lang-java';
+import { go } from '@codemirror/lang-go';
+import { javascript } from '@codemirror/lang-javascript';
+import { python } from '@codemirror/lang-python';
 
 /** Map a plugin's language id to a CodeMirror language extension (extend as plugins need). */
-export function languageExtension(lang?: string): StreamLanguage<unknown> | LanguageSupport | null {
+export function languageExtension(lang?: string): LanguageSupport | null {
   switch ((lang ?? '').toLowerCase()) {
     case 'go':
-      return StreamLanguage.define(go);
+      return go();
     case 'js':
     case 'javascript':
+      return javascript();
     case 'ts':
     case 'typescript':
-      return StreamLanguage.define(javascript);
+      return javascript({ typescript: true });
     case 'py':
     case 'python':
-      return StreamLanguage.define(python);
+      return python();
     case 'java':
-      return StreamLanguage.define(java);
+      return java();
     default:
       return null;
   }

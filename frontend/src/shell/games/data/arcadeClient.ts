@@ -94,7 +94,11 @@ export async function arcadeFetch<T>(
     if (token) headers.set('Authorization', `Bearer ${token}`);
   }
   try {
-    const res = await fetch(`${gameServerHttpBase()}${path}`, { ...init, headers });
+    const res = await fetch(`${gameServerHttpBase()}${path}`, {
+      ...init,
+      headers,
+      credentials: init.credentials ?? 'include',
+    });
     if (!res.ok) return null;
     if (res.status === 204) return null;
     return (await res.json()) as T;
@@ -113,7 +117,11 @@ export async function arcadeAuthRequest<T>(
     headers.set('Content-Type', 'application/json');
   }
   try {
-    const res = await fetch(`${gameServerHttpBase()}${path}`, { ...init, headers });
+    const res = await fetch(`${gameServerHttpBase()}${path}`, {
+      ...init,
+      headers,
+      credentials: init.credentials ?? 'include',
+    });
     const body = (await res.json().catch(() => ({}))) as T & { error?: string };
     if (!res.ok) {
       return { ok: false, error: body.error ?? `Request failed (${res.status})` };
