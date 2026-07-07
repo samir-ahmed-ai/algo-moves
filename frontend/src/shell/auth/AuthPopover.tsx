@@ -26,6 +26,7 @@ import { cn } from '@/lib/utils/cn';
 import { BrandLogo } from '@/shell/BrandLogo';
 import { useWorkspaceNavigation } from '@/store/workspace';
 import { InterviewToolkitGrid } from '@/shell/interview/InterviewToolkitGrid';
+import { useInterviewToolkitNavigation } from '@/shell/interview/useInterviewToolkitNavigation';
 import { formatAuthError } from './formatAuthError';
 import { authStrings as s } from './strings';
 import { useAuth } from './AuthProvider';
@@ -611,8 +612,9 @@ export function AuthUserMenu({
   anchorRef: RefObject<HTMLElement | null>;
   onOpenProfile?: () => void;
 }) {
-  const { profile, signOut } = useAuth();
-  const { enterProfile, enterCollabCanvas, enterPlans, enterResumes } = useWorkspaceNavigation();
+  const { profile, signOut, isAnonymous } = useAuth();
+  const { enterProfile } = useWorkspaceNavigation();
+  const openTool = useInterviewToolkitNavigation();
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -638,10 +640,10 @@ export function AuthUserMenu({
 
   if (!open || !profile) return null;
 
-  const openTool = (id: 'interview-canvas' | 'plans' | 'resumes') => {
-    if (id === 'interview-canvas') enterCollabCanvas();
-    else if (id === 'plans') enterPlans();
-    else enterResumes();
+  const signedIn = !isAnonymous;
+
+  const handleTool = (id: Parameters<typeof openTool>[0]) => {
+    openTool(id);
     onClose();
   };
 
@@ -666,9 +668,11 @@ export function AuthUserMenu({
         ) : null}
       </div>
 
-      <div className="border-b border-edge px-2 py-2.5">
-        <InterviewToolkitGrid onSelect={openTool} compact />
-      </div>
+      {signedIn ? (
+        <div className="border-b border-edge px-2 py-2.5" role="group" aria-label="Interview tools">
+          <InterviewToolkitGrid onSelect={handleTool} compact />
+        </div>
+      ) : null}
 
       <MenuRow
         icon={<User className="h-3.5 w-3.5" />}

@@ -1,28 +1,9 @@
-import {
-  Contrast,
-  Gamepad2,
-  Keyboard,
-  LayoutTemplate,
-  Moon,
-  Palette,
-  Smartphone,
-  Sun,
-} from 'lucide-react';
+import { Contrast, Gamepad2, Keyboard, Moon, Palette, Smartphone, Sun } from 'lucide-react';
 import type { FeatureGroup } from '@/components/shared';
 
 export const EXPLORE_GROUPS: FeatureGroup[] = [
   {
     options: [
-      {
-        id: 'interview-canvas',
-        icon: <LayoutTemplate />,
-        title: 'Interview',
-        subtitle: 'Canvas + code',
-        tone: 'accent',
-        detailTitle: 'Interview Canvas',
-        detailDescription:
-          'A collaborative whiteboard with an integrated code studio for mock interviews.',
-      },
       {
         id: 'swipe',
         icon: <Smartphone />,

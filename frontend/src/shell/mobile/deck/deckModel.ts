@@ -99,10 +99,10 @@ async function blockFor(item: Item): Promise<ProblemBlock | null> {
   const pieces = code?.text ? resolveCodePieces(code.text, plugin.codePieces) : null;
   const tags = item.tags ?? [];
 
-  const cards: MobileCard[] = [
-    { kind: 'gist', key: `${item.id}:gist`, gist: gistFor(item) },
-    { kind: 'animate', key: `${item.id}:anim` },
-  ];
+  const cards: MobileCard[] = [{ kind: 'gist', key: `${item.id}:gist`, gist: gistFor(item) }];
+  if (!plugin.meta.static) {
+    cards.push({ kind: 'animate', key: `${item.id}:anim` });
+  }
 
   quiz.forEach((question, i) => {
     cards.push({

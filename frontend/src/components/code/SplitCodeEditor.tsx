@@ -16,9 +16,12 @@ import {
   lineNumberExtensions,
   mergeFormatKeymap,
   mergeReferenceReadOnly,
-  refreshRecallMergeView,
   vimExtensions,
   wrapExtensions,
+  createRecallMergeRefreshScheduler,
+  remeasureMergeViews,
+  refreshRecallMergeView,
+  syncDraftToEditorView,
 } from '@/lib/editor';
 import { CODE_SPLIT_MAX, CODE_SPLIT_MIN } from '@/lib/editor/resizeSplit';
 import { buildRecallMergeReconfigure } from '@/lib/code/recallMergeDiff';
@@ -114,6 +117,11 @@ export function SplitCodeEditor({
   const readOnlyCompA = useRef(new Compartment());
   const formatBothFnRef = useRef<(() => void) | null>(null);
   const skipDraftSyncRef = useRef(false);
+  const isLocalEditRef = useRef(false);
+  const prevDraftLenRef = useRef(draft.length);
+  const mergeSchedulerRef = useRef<ReturnType<typeof createRecallMergeRefreshScheduler> | null>(
+    null,
+  );
   const vimComp = useRef(new Compartment());
   const wrapComp = useRef(new Compartment());
   const themeCompA = useRef(new Compartment());
@@ -147,7 +155,26 @@ export function SplitCodeEditor({
   });
   mergeOptionsRef.current = { highlightChanges, mergeGutter, mergeCollapse };
 
-  const refreshMerge = () => refreshRecallMergeView(mergeViewRef.current, mergeOptionsRef.current);
+  const afterMergeRefreshRef = useRef<(view: MergeView) => void>(() => {});
+  afterMergeRefreshRef.current = (view: MergeView) => {
+    const bLen = view.b.state.doc.length;
+    const prevLen = prevDraftLenRef.current;
+    const lenChanged = prevLen !== bLen;
+    prevDraftLenRef.current = bLen;
+
+    if (mergeCollapseRef.current && prevLen - bLen > 80) {
+      queueMicrotask(() => mergeSchedulerRef.current?.flush());
+      return;
+    }
+
+    // Re-sync spacers when line count shifts — stale spacers look like extra-tall blank lines.
+    if (lenChanged) {
+      requestAnimationFrame(() => {
+        remeasureMergeViews(view);
+        refreshRecallMergeView(view, mergeOptionsRef.current);
+      });
+    }
+  };
 
   const resizeSplitOptions: UseResizeSplitOptions = {
     direction: 'horizontal',
@@ -169,6 +196,12 @@ export function SplitCodeEditor({
     const langExt = languageExtension(lang);
     const coreOptions = lang ? { lineNumbers: false, lang } : { lineNumbers: false };
 
+    mergeSchedulerRef.current = createRecallMergeRefreshScheduler(
+      () => mergeViewRef.current,
+      () => mergeOptionsRef.current,
+      (view) => afterMergeRefreshRef.current(view),
+    );
+
     const view = new MergeView({
       parent: hostRef.current,
       orientation: 'a-b',
@@ -183,9 +216,9 @@ export function SplitCodeEditor({
           readOnlyCompA.current.of(mergeReferenceReadOnly),
           ...coreEditorExtensions(langExt, coreOptions),
           lineNumCompA.current.of(lineNumberExtensions(showLineNumbersRef.current)),
+          mergeEditorChrome,
           themeCompA.current.of(buildEditorTheme(isDark)),
           fontCompA.current.of(buildRecallFontTheme(fontSizeRef.current, lineHeightRef.current)),
-          mergeEditorChrome,
         ],
       },
       b: {
@@ -195,15 +228,16 @@ export function SplitCodeEditor({
           ...coreEditorExtensions(langExt, coreOptions),
           lineNumCompB.current.of(lineNumberExtensions(showLineNumbersRef.current)),
           wrapComp.current.of(wrapExtensions(wrap ?? false)),
+          mergeEditorChrome,
           themeCompB.current.of(buildEditorTheme(isDark)),
           fontCompB.current.of(buildRecallFontTheme(fontSizeRef.current, lineHeightRef.current)),
-          mergeEditorChrome,
           mergeFormatKeymap(() => formatBothFnRef.current?.()),
           EditorView.updateListener.of((u) => {
             if (u.docChanged) {
+              isLocalEditRef.current = true;
               onDraftChangeRef.current(u.state.doc.toString());
               if (!skipDraftSyncRef.current) {
-                queueMicrotask(refreshMerge);
+                mergeSchedulerRef.current?.schedule();
               }
             }
           }),
@@ -215,15 +249,18 @@ export function SplitCodeEditor({
     if (draftViewRef) draftViewRef.current = view.b;
     formatBothFnRef.current = () => {
       skipDraftSyncRef.current = true;
-      formatMergeViews(view, {
-        readOnlyCompA: readOnlyCompA.current,
-        onDraftChange: onDraftChangeRef.current,
-        ...(langRef.current ? { lang: langRef.current } : {}),
-      });
-      queueMicrotask(() => {
-        skipDraftSyncRef.current = false;
-        refreshMerge();
-      });
+      try {
+        formatMergeViews(view, {
+          readOnlyCompA: readOnlyCompA.current,
+          onDraftChange: onDraftChangeRef.current,
+          ...(langRef.current ? { lang: langRef.current } : {}),
+        });
+      } finally {
+        queueMicrotask(() => {
+          skipDraftSyncRef.current = false;
+          mergeSchedulerRef.current?.flush();
+        });
+      }
     };
     if (formatBothRef) formatBothRef.current = formatBothFnRef.current;
     const foldBoth = {
@@ -234,6 +271,8 @@ export function SplitCodeEditor({
     applySplitLayout(view, splitPctRef.current, showLeftRef.current);
 
     return () => {
+      mergeSchedulerRef.current?.dispose();
+      mergeSchedulerRef.current = null;
       mergeViewRef.current = null;
       formatBothFnRef.current = null;
       if (draftViewRef) draftViewRef.current = null;
@@ -248,17 +287,20 @@ export function SplitCodeEditor({
     if (!view) return;
     if (reference !== view.state.doc.toString()) {
       view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: reference } });
-      queueMicrotask(refreshMerge);
+      mergeSchedulerRef.current?.flush();
     }
   }, [reference]);
 
   useEffect(() => {
     const view = mergeViewRef.current?.b;
     if (!view || skipDraftSyncRef.current) return;
-    const editorDraft = view.state.doc.toString();
-    if (draft === editorDraft) return;
-    view.dispatch({ changes: { from: 0, to: editorDraft.length, insert: draft } });
-    queueMicrotask(refreshMerge);
+    if (isLocalEditRef.current) {
+      isLocalEditRef.current = false;
+      return;
+    }
+    if (syncDraftToEditorView(view, draft)) {
+      mergeSchedulerRef.current?.flush();
+    }
   }, [draft]);
 
   useEffect(() => {
@@ -286,12 +328,12 @@ export function SplitCodeEditor({
     const view = mergeViewRef.current;
     if (!view) return;
     applySplitLayout(view, splitPct, showLeft);
-    const t = window.setTimeout(refreshMerge, 0);
+    const t = window.setTimeout(() => mergeSchedulerRef.current?.flush(), 0);
     return () => window.clearTimeout(t);
   }, [splitPct, showLeft]);
 
   useEffect(() => {
-    refreshMerge();
+    mergeSchedulerRef.current?.flush();
   }, [mergeGutter, mergeCollapse, highlightChanges]);
 
   useEffect(() => {

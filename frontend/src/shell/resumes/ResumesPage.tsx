@@ -1,18 +1,9 @@
 import { type DragEvent, useCallback, useEffect, useRef, useState } from 'react';
-import {
-  ArrowLeft,
-  FileText,
-  KeyRound,
-  Loader2,
-  Pencil,
-  Sparkles,
-  Trash2,
-  Upload,
-  Users,
-} from 'lucide-react';
+import { FileText, KeyRound, Loader2, Pencil, Sparkles, Trash2, Upload, Users } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useAuth } from '@/shell/auth/AuthProvider';
 import { ProductAuthGate } from '@/shell/auth/ProductAuthGate';
+import { PageHeader } from '@/shell/chrome/PageHeader';
 import { chromeText } from '@/shell/chromeUi';
 import { getProfileIntegrations } from '@/platform/api/profileIntegrationsApi';
 import { useWorkspace } from '@/store/workspace';
@@ -297,42 +288,29 @@ export function ResumesPage() {
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_0%,color-mix(in_srgb,var(--accent)_24%,transparent),transparent_28rem),radial-gradient(circle_at_88%_18%,rgba(248,214,121,0.12),transparent_24rem)]"
       />
-      <header className="flex h-14 shrink-0 items-center gap-3 border-b border-edge bg-[var(--surface-glass)] px-4 shadow-[0_1px_0_color-mix(in_srgb,var(--border)_55%,transparent)] backdrop-blur-xl">
-        <button
-          type="button"
-          onClick={() => {
-            if (view !== 'hub') {
-              setView('hub');
-              setActiveResume(null);
-            } else goHome();
-          }}
-          className="grid h-8 w-8 place-items-center rounded-xl border border-edge text-ink3 transition hover:bg-panel2 hover:text-ink"
-          aria-label="Back"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </button>
-        <div className="flex items-center gap-2">
-          <span className="grid h-9 w-9 place-items-center rounded-2xl bg-accent text-[var(--accent-contrast)] shadow-theme-sm">
-            <FileText className="h-4 w-4" />
-          </span>
-          <span>
-            <span className="block font-semibold leading-tight text-ink">{headerTitle}</span>
-            <span className="block text-[length:var(--fs-2xs)] font-medium uppercase tracking-[0.14em] text-ink3">
-              targeted resume studio
-            </span>
-          </span>
-        </div>
-        {view === 'hub' && !needsAuth && !loading && (
-          <button
-            type="button"
-            onClick={() => setView('directory')}
-            className="ml-auto inline-flex items-center gap-1.5 rounded-lg border border-edge bg-panel2 px-3 py-1.5 text-xs font-medium text-ink2 hover:border-accent/40 transition"
-          >
-            <Users className="h-3.5 w-3.5" />
-            Browse all resumes
-          </button>
-        )}
-      </header>
+      <PageHeader
+        onBack={() => {
+          if (view !== 'hub') {
+            setView('hub');
+            setActiveResume(null);
+          } else goHome();
+        }}
+        icon={<FileText />}
+        eyebrow="targeted resume studio"
+        title={headerTitle}
+        actions={
+          view === 'hub' && !needsAuth && !loading ? (
+            <button
+              type="button"
+              onClick={() => setView('directory')}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-edge bg-panel2 px-3 py-1.5 text-xs font-medium text-ink2 transition hover:border-accent/40"
+            >
+              <Users className="h-3.5 w-3.5" />
+              Browse all resumes
+            </button>
+          ) : null
+        }
+      />
 
       {loading ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">

@@ -1,14 +1,22 @@
-import type { CSSProperties, ReactElement } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
+import type { ReactElement } from 'react';
 import { cn } from '@/lib/utils/cn';
 import { vizText } from '@/plugins/_shared/vizKit';
-import type { DesignDiagramSpec, DiagramNode, DiagramNodeKind } from './types';
+import type { DesignDiagramSpec, DiagramNode, DiagramNodeKind, DiagramPage } from './types';
 
-const COL_W = 188;
-const ROW_H = 112;
 const PAD = 24;
-const GAP_X = 30;
-const GAP_Y = 34;
-const LINE_H = 15;
+const GAP_X = 44;
+const GAP_Y = 40;
+const LINE_H = 16;
+/* Clamp cell size so few-box diagrams don't balloon into blurry giants; the grid
+   is centered in any leftover space so it still reads as "filling" the area. */
+const MAX_COL_W = 340;
+const MAX_ROW_H = 240;
+const MIN_COL_W = 150;
+const MIN_ROW_H = 92;
+/* Fallback area when the container hasn't been measured yet (jsdom / first paint). */
+const FALLBACK_W = 680;
+const FALLBACK_H = 380;
 
 interface Rect {
   x: number;
@@ -19,13 +27,38 @@ interface Rect {
   cy: number;
 }
 
-function nodeRect(n: DiagramNode): Rect {
+interface Grid {
+  colUnit: number;
+  rowUnit: number;
+  offsetX: number;
+  offsetY: number;
+}
+
+/** Distribute the node grid across the measured area, clamped and centered. */
+function computeGrid(page: DiagramPage, W: number, H: number): Grid {
+  let cols = 1;
+  let rows = 1;
+  for (const n of page.nodes) {
+    cols = Math.max(cols, n.col + (n.w ?? 1));
+    rows = Math.max(rows, n.row + 1);
+  }
+  const availW = Math.max(1, W - PAD * 2);
+  const availH = Math.max(1, H - PAD * 2);
+  const colUnit = Math.min(MAX_COL_W, Math.max(MIN_COL_W, availW / cols));
+  const rowUnit = Math.min(MAX_ROW_H, Math.max(MIN_ROW_H, availH / rows));
+  const gridW = colUnit * cols;
+  const gridH = rowUnit * rows;
+  const offsetX = Math.max(0, (W - gridW) / 2);
+  const offsetY = Math.max(0, (H - gridH) / 2);
+  return { colUnit, rowUnit, offsetX, offsetY };
+}
+
+function nodeRect(n: DiagramNode, g: Grid): Rect {
   const span = n.w ?? 1;
-  const x = PAD + n.col * COL_W;
-  const y = PAD + n.row * ROW_H;
-  const w = span * COL_W - GAP_X;
-  const lineCount = n.lines?.length ?? 0;
-  const h = Math.min(ROW_H - 16, Math.max(ROW_H - GAP_Y, 40 + (1 + lineCount) * LINE_H));
+  const x = g.offsetX + n.col * g.colUnit + GAP_X / 2;
+  const y = g.offsetY + n.row * g.rowUnit + GAP_Y / 2;
+  const w = span * g.colUnit - GAP_X;
+  const h = g.rowUnit - GAP_Y;
   return { x, y, w, h, cx: x + w / 2, cy: y + h / 2 };
 }
 
@@ -49,27 +82,19 @@ const KIND_STYLE: Record<DiagramNodeKind, { fill: string; stroke: string; dashed
   note: { fill: 'transparent', stroke: 'var(--edge)', dashed: true },
 };
 
-export function DesignFlow({ spec }: { spec: DesignDiagramSpec }) {
+function PageSvg({ page, W, H }: { page: DiagramPage; W: number; H: number }) {
+  const grid = computeGrid(page, W, H);
   const rects = new Map<string, Rect>();
-  for (const n of spec.nodes) rects.set(n.id, nodeRect(n));
-
-  let maxRight = 0;
-  let maxBottom = 0;
-  for (const r of rects.values()) {
-    maxRight = Math.max(maxRight, r.x + r.w);
-    maxBottom = Math.max(maxBottom, r.y + r.h);
-  }
-  const width = maxRight + PAD;
-  const height = maxBottom + PAD;
+  for (const n of page.nodes) rects.set(n.id, nodeRect(n, grid));
 
   const edgeEls: ReactElement[] = [];
-  spec.edges.forEach((e, i) => {
+  const labelEls: ReactElement[] = [];
+  page.edges.forEach((e, i) => {
     const a = rects.get(e.from);
     const b = rects.get(e.to);
     if (!a || !b) return;
     const [x1, y1] = borderPoint(a, b.cx, b.cy);
     const [x2raw, y2raw] = borderPoint(b, a.cx, a.cy);
-    // Trim the target end so the arrowhead sits just off the box edge.
     const dx = x2raw - x1;
     const dy = y2raw - y1;
     const len = Math.hypot(dx, dy) || 1;
@@ -79,6 +104,7 @@ export function DesignFlow({ spec }: { spec: DesignDiagramSpec }) {
     const y2 = y2raw - uy * 7;
     const sx = e.bidir ? x1 + ux * 7 : x1;
     const sy = e.bidir ? y1 + uy * 7 : y1;
+
     edgeEls.push(
       <line
         key={`e${i}`}
@@ -88,24 +114,25 @@ export function DesignFlow({ spec }: { spec: DesignDiagramSpec }) {
         y2={y2}
         stroke="var(--edge)"
         strokeWidth={1.5}
-        strokeLinecap="round"
+        strokeLinecap="square"
         strokeDasharray={e.dashed ? '5 4' : undefined}
         markerEnd="url(#df-arrow)"
         markerStart={e.bidir ? 'url(#df-arrow)' : undefined}
       />,
     );
+
     if (e.label) {
       const mx = (x1 + x2) / 2;
       const my = (y1 + y2) / 2;
-      const w = e.label.length * 6.2 + 10;
-      edgeEls.push(
+      const w = e.label.length * 6.4 + 12;
+      labelEls.push(
         <g key={`el${i}`}>
           <rect
             x={mx - w / 2}
-            y={my - 9}
+            y={my - 10}
             width={w}
-            height={18}
-            rx={4}
+            height={20}
+            rx={5}
             fill="var(--panel)"
             stroke="var(--edge)"
             strokeWidth={1}
@@ -114,7 +141,7 @@ export function DesignFlow({ spec }: { spec: DesignDiagramSpec }) {
             x={mx}
             y={my + 4}
             textAnchor="middle"
-            style={{ fill: 'var(--text-2)', font: '500 10px var(--sans)' }}
+            style={{ fill: 'var(--text-2)', font: '500 11px var(--sans)' }}
           >
             {e.label}
           </text>
@@ -123,10 +150,12 @@ export function DesignFlow({ spec }: { spec: DesignDiagramSpec }) {
     }
   });
 
-  const nodeEls = spec.nodes.map((n) => {
+  const nodeEls = page.nodes.map((n) => {
     const r = rects.get(n.id)!;
     const style = KIND_STYLE[n.kind ?? 'store'];
-    const titleY = n.lines?.length ? r.y + 20 : r.cy + 4;
+    const lineCount = n.lines?.length ?? 0;
+    const blockH = 18 + lineCount * LINE_H;
+    const titleY = lineCount ? r.cy - blockH / 2 + 14 : r.cy + 5;
     return (
       <g key={n.id}>
         <rect
@@ -134,7 +163,7 @@ export function DesignFlow({ spec }: { spec: DesignDiagramSpec }) {
           y={r.y}
           width={r.w}
           height={r.h}
-          rx={10}
+          rx={8}
           fill={style.fill}
           stroke={style.stroke}
           strokeWidth={n.kind === 'op' ? 1.75 : 1.25}
@@ -144,7 +173,7 @@ export function DesignFlow({ spec }: { spec: DesignDiagramSpec }) {
           x={r.cx}
           y={titleY}
           textAnchor="middle"
-          style={{ fill: 'var(--text)', font: '600 12px var(--sans)' }}
+          style={{ fill: 'var(--text)', font: '600 13px var(--sans)' }}
         >
           {n.label}
         </text>
@@ -152,9 +181,9 @@ export function DesignFlow({ spec }: { spec: DesignDiagramSpec }) {
           <text
             key={li}
             x={r.cx}
-            y={r.y + 20 + (li + 1) * LINE_H}
+            y={titleY + (li + 1) * LINE_H}
             textAnchor="middle"
-            style={{ fill: 'var(--text-2)', font: '400 10px var(--mono, ui-monospace)' }}
+            style={{ fill: 'var(--text-2)', font: '400 11px var(--mono, ui-monospace)' }}
           >
             {line}
           </text>
@@ -163,48 +192,120 @@ export function DesignFlow({ spec }: { spec: DesignDiagramSpec }) {
     );
   });
 
-  const svgStyle: CSSProperties = { maxWidth: '100%' };
+  return (
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      role="img"
+      aria-label={page.tab}
+      className="design-flow__svg"
+      preserveAspectRatio="xMidYMid meet"
+    >
+      <defs>
+        <marker
+          id="df-arrow"
+          viewBox="0 0 10 10"
+          refX="8"
+          refY="5"
+          markerWidth="6"
+          markerHeight="6"
+          orient="auto-start-reverse"
+        >
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--edge)" />
+        </marker>
+      </defs>
+      {edgeEls}
+      {nodeEls}
+      {labelEls}
+    </svg>
+  );
+}
+
+export function DesignFlow({ spec }: { spec: DesignDiagramSpec }) {
+  const [pageIdx, setPageIdx] = useState(0);
+  const diagramRef = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState({ w: FALLBACK_W, h: FALLBACK_H });
+  const pages = spec.pages ?? [];
+
+  // Measure the diagram area so the grid can fill both dimensions. A ResizeObserver
+  // keeps it in sync with panel resizes and tab-driven layout changes.
+  useLayoutEffect(() => {
+    const el = diagramRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const measure = () => {
+      const w = el.clientWidth;
+      const h = el.clientHeight;
+      if (w > 0 && h > 0) {
+        setSize((prev) => (prev.w === w && prev.h === h ? prev : { w, h }));
+      }
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  if (pages.length === 0) {
+    return (
+      <div className="board-area design-flow flex flex-col gap-1">
+        {spec.title && <div className={cn(vizText.sm, 'font-semibold text-ink')}>{spec.title}</div>}
+        <div className={cn(vizText.sm, 'text-ink3')}>No diagram pages configured.</div>
+      </div>
+    );
+  }
+  const page = pages[Math.min(pageIdx, pages.length - 1)]!;
+  const multiPage = pages.length > 1;
 
   return (
-    <div className="board-area design-flow">
-      {spec.title && <div className={cn(vizText.sm, 'font-semibold text-ink')}>{spec.title}</div>}
-      {spec.caption && <div className={cn(vizText.sm, 'text-ink3')}>{spec.caption}</div>}
-      <svg
-        viewBox={`0 0 ${width} ${height}`}
-        width={width}
-        height={height}
-        role="img"
-        aria-label={spec.title ? `${spec.title} design diagram` : 'design diagram'}
-        style={svgStyle}
-      >
-        <defs>
-          <marker
-            id="df-arrow"
-            viewBox="0 0 10 10"
-            refX="8"
-            refY="5"
-            markerWidth="6"
-            markerHeight="6"
-            orient="auto-start-reverse"
+    <div className="board-area design-flow" data-design-page={pageIdx}>
+      <div className="design-flow__chrome">
+        {spec.title && <div className={cn(vizText.sm, 'font-semibold text-ink')}>{spec.title}</div>}
+        {page.caption && <div className={cn(vizText.sm, 'text-ink3')}>{page.caption}</div>}
+      </div>
+
+      <div ref={diagramRef} className="design-flow__diagram">
+        <PageSvg key={page.tab} page={page} W={size.w} H={size.h} />
+      </div>
+
+      <div className="design-flow__footer">
+        {page.legend && page.legend.length > 0 && (
+          <div className="design-flow__legend flex flex-wrap gap-1.5">
+            {page.legend.map((l) => (
+              <span
+                key={l}
+                className="border border-edge/70 bg-panel2/60 px-2 py-0.5 text-[length:var(--fs-tight)] text-ink3"
+              >
+                {l}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {multiPage && (
+          <div
+            role="tablist"
+            aria-label="Diagram variants"
+            className="design-flow__tabs flex gap-1 border-t border-edge/60 pt-1.5"
           >
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--edge)" />
-          </marker>
-        </defs>
-        {edgeEls}
-        {nodeEls}
-      </svg>
-      {spec.legend && spec.legend.length > 0 && (
-        <div className="mt-1 flex flex-wrap gap-1.5">
-          {spec.legend.map((l) => (
-            <span
-              key={l}
-              className="rounded-full border border-edge/70 bg-panel2/60 px-2 py-0.5 text-[length:var(--fs-tight)] text-ink3"
-            >
-              {l}
-            </span>
-          ))}
-        </div>
-      )}
+            {pages.map((p, i) => (
+              <button
+                key={p.tab}
+                type="button"
+                role="tab"
+                aria-selected={i === pageIdx}
+                onClick={() => setPageIdx(i)}
+                className={cn(
+                  'design-flow-tab px-3 py-1 text-[length:var(--fs-tight)] font-medium transition-colors',
+                  i === pageIdx
+                    ? 'border border-accent/30 bg-accent/10 text-accent'
+                    : 'border border-transparent text-ink3 hover:border-edge hover:text-ink',
+                )}
+              >
+                {p.tab}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

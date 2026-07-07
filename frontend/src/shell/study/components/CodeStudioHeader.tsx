@@ -218,7 +218,7 @@ export function CodeStudioToolbar() {
 
   const structureOverflow = [
     {
-      label: editorPrefs.vim ? 'Disable Vim (⌘⇧V)' : 'Enable Vim (⌘⇧V)',
+      label: editorPrefs.vim ? 'Disable Vim (⌘⌥V)' : 'Enable Vim (⌘⌥V)',
       icon: <Keyboard className={nodeIconGlyph} />,
       onClick: () => setEditorPrefs({ vim: !editorPrefs.vim }),
     },

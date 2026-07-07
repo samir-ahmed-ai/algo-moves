@@ -38,13 +38,25 @@ export interface DiagramEdge {
   bidir?: boolean;
 }
 
-export interface DesignDiagramSpec {
-  /** Short title shown above the diagram. */
-  title?: string;
-  /** One-line caption under the title explaining the design at a glance. */
+/** One page/variant of a design diagram, selectable via a bottom tab. */
+export interface DiagramPage {
+  /** Short label shown in the bottom tab strip (e.g. "Structure"). */
+  tab: string;
+  /** Caption line shown under the SVG for this page. */
   caption?: string;
   nodes: DiagramNode[];
   edges: DiagramEdge[];
   /** Optional legend chips shown beneath the diagram. */
   legend?: string[];
+}
+
+export interface DesignDiagramSpec {
+  /** Problem title shown above the diagram. */
+  title?: string;
+  /**
+   * One or more diagram pages. Each page has its own nodes/edges and a short
+   * tab label. When there is more than one page a tab strip is rendered at the
+   * bottom so the learner can switch between diagram variants.
+   */
+  pages: DiagramPage[];
 }

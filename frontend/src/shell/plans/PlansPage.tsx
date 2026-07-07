@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  ArrowLeft,
   BookMarked,
   CheckCircle2,
   ChevronRight,
@@ -13,6 +12,7 @@ import { cn } from '@/lib/utils/cn';
 import { useAuth } from '@/shell/auth/AuthProvider';
 import { useWorkspace } from '@/store/workspace';
 import { ProductAuthGate } from '@/shell/auth/ProductAuthGate';
+import { PageHeader } from '@/shell/chrome/PageHeader';
 import { chromeText } from '@/shell/chromeUi';
 import {
   createPrepPlan,
@@ -271,27 +271,13 @@ export function PlansPage() {
         className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_16%_0%,color-mix(in_srgb,var(--accent)_24%,transparent),transparent_28rem),radial-gradient(circle_at_88%_18%,rgba(248,214,121,0.12),transparent_24rem)]"
       />
       {/* Top bar */}
-      <header className="flex h-14 shrink-0 items-center gap-3 border-b border-edge bg-[var(--surface-glass)] px-4 shadow-[0_1px_0_color-mix(in_srgb,var(--border)_55%,transparent)] backdrop-blur-xl">
-        <button
-          type="button"
-          onClick={goHome}
-          className="grid h-8 w-8 place-items-center rounded-xl border border-edge text-ink3 transition hover:bg-panel2 hover:text-ink"
-          aria-label="Back to home"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </button>
-        <div className="flex items-center gap-2">
-          <span className="grid h-9 w-9 place-items-center rounded-2xl bg-accent text-[var(--accent-contrast)] shadow-theme-sm">
-            <BookMarked className="h-4 w-4" />
-          </span>
-          <span>
-            <span className="block font-semibold leading-tight text-ink">Interview Prep Plans</span>
-            <span className="block text-[length:var(--fs-2xs)] font-medium uppercase tracking-[0.14em] text-ink3">
-              focused study queues
-            </span>
-          </span>
-        </div>
-      </header>
+      <PageHeader
+        onBack={goHome}
+        backLabel="Back to home"
+        icon={<BookMarked />}
+        eyebrow="focused study queues"
+        title="Interview Prep Plans"
+      />
 
       {/* Body */}
       <main className="flex flex-1 flex-col overflow-auto">

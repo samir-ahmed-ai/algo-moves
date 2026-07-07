@@ -93,4 +93,80 @@ describe('recallMergeDiff', () => {
     expect(changes[0]!.fromB).toBeLessThanOrEqual(draft.length);
     expect(changes[0]!.toB).toBeLessThanOrEqual(draft.length);
   });
+
+  it('handles bulk insert then delete — ranges stay clamped', () => {
+    const ref = 'base';
+    const bulkLines = Array.from({ length: 100 }, (_, i) => `line${i}`).join('\n');
+    const draftWithBulk = `${ref}\n${bulkLines}`;
+    const insertChanges = recallMergeDiff(ref, draftWithBulk);
+    for (const c of insertChanges) {
+      expect(c.fromB).toBeGreaterThanOrEqual(0);
+      expect(c.toB).toBeLessThanOrEqual(draftWithBulk.length);
+    }
+    const deleteChanges = recallMergeDiff(ref, ref);
+    expect(deleteChanges).toEqual([]);
+  });
+
+  it('does not push a lone trailing `return`/`}` down to a distant reference match', () => {
+    const ref = [
+      'func Constructor() Cache {',
+      '\th, t := &node{}, &node{}',
+      '\th.next, t.prev = t, h',
+      '\treturn Cache{cap: 1}',
+      '}',
+      '',
+      'func (c *Cache) remove(n *node) {',
+      '\tn.prev.next = n.next',
+      '}',
+      '',
+      'func (c *Cache) Put(k, v int) {',
+      '\tif ok {',
+      '\t\tc.moveHead(n)',
+      '\t\treturn',
+      '\t}',
+      '\tx := 1',
+      '}',
+    ].join('\n');
+    const draft = [
+      'func Constructor() Cache {',
+      '\th, t := &node{}, &node{}',
+      '\th.next, t.prev = t, h',
+      '\treturn',
+      '}',
+    ].join('\n');
+
+    const changes = recallMergeDiff(ref, draft);
+
+    // Offset of the draft's bare `return` line (leading tab included).
+    const draftReturnStart = draft.indexOf('\treturn');
+
+    // Bug: a reference-only spacer (pure removed, fromB === toB) anchored at/before the
+    // draft `return` while spanning many reference lines — jammed into the middle and
+    // pushing the typed line down. The big removed block must sit at the end instead.
+    const middleSpacer = changes.find(
+      (c) => c.fromB === c.toB && c.fromB <= draftReturnStart && c.toA - c.fromA > 40,
+    );
+    expect(middleSpacer).toBeUndefined();
+
+    // The large reference span should align to the end of the draft (gap at the bottom).
+    const bigRefChange = changes.find((c) => c.toA - c.fromA > 40);
+    expect(bigRefChange).toBeDefined();
+    expect(bigRefChange!.toB).toBe(draft.length);
+  });
+
+  it('handles rapid insert/delete cycle without out-of-bounds ranges', () => {
+    const ref = 'start\nmiddle\nend';
+    let draft = ref;
+    for (let i = 0; i < 20; i++) {
+      draft = `${draft}\ninserted${i}`;
+      for (const c of recallMergeDiff(ref, draft)) {
+        expect(c.fromA).toBeGreaterThanOrEqual(0);
+        expect(c.toA).toBeLessThanOrEqual(ref.length);
+        expect(c.fromB).toBeGreaterThanOrEqual(0);
+        expect(c.toB).toBeLessThanOrEqual(draft.length);
+      }
+      draft = ref;
+      expect(recallMergeDiff(ref, draft)).toEqual([]);
+    }
+  });
 });

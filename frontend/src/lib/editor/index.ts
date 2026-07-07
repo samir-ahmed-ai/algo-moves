@@ -11,3 +11,5 @@ export * from './styleFormat';
 export * from './codeFormat';
 export * from './highlightSnippet';
 export * from './refreshRecallMergeView';
+export * from './scheduleRecallMergeRefresh';
+export * from './syncDraftToEditorView';

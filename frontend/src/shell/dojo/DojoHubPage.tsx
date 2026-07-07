@@ -6,8 +6,9 @@ import {
   type ComponentType,
   type LazyExoticComponent,
 } from 'react';
-import { Home, Lock, Star, Swords } from 'lucide-react';
+import { Lock, Star, Swords } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { PageHeader } from '@/shell/chrome/PageHeader';
 import { useWorkspace } from '@/store/workspace';
 import {
   DOJO_NAVIGATE_EVENT,
@@ -178,31 +179,18 @@ function DojoHubGrid() {
 
   return (
     <div className="dojo-hub relative flex h-full flex-col overflow-y-auto">
-      <header className="mx-auto w-full max-w-4xl px-4 pb-2 pt-6">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            title="Home"
-            aria-label="Return to landing page"
-            onClick={goHome}
-            className="vim-floating-home grid h-9 w-9 shrink-0 place-items-center rounded-full border border-edge bg-[var(--surface-glass)] text-ink3 shadow-theme-sm backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-panel2 hover:text-ink hover:shadow-theme-md"
-          >
-            <Home className="h-4 w-4" />
-          </button>
-          <span className="grid h-11 w-11 place-items-center rounded-2xl bg-accent text-[var(--accent-contrast)] shadow-theme-sm">
-            <Swords className="h-5 w-5" />
-          </span>
-          <div>
-            <p className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-[0.14em] text-accent">
-              Algorithm arcade
-            </p>
-            <h1 className="text-xl font-semibold tracking-[-0.03em] text-ink">Dojo Hub</h1>
-            <p className="text-[length:var(--fs-xs)] text-ink3">
-              Learn algorithms by playing them — one keyboard game per concept.
-            </p>
-          </div>
-        </div>
-      </header>
+      <PageHeader
+        onBack={goHome}
+        backLabel="Home"
+        icon={<Swords />}
+        eyebrow="Algorithm arcade"
+        title="Dojo Hub"
+      />
+      <div className="mx-auto w-full max-w-4xl px-4 pb-1 pt-5">
+        <p className="text-[length:var(--fs-xs)] text-ink3">
+          Learn algorithms by playing them — one keyboard game per concept.
+        </p>
+      </div>
       <div className="dojo-hub__grid mx-auto grid w-full max-w-4xl gap-3 px-4 pb-8 pt-3">
         {DOJO_GAMES.map((game) => {
           if (game.id === 'vim') {

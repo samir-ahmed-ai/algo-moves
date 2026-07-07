@@ -125,6 +125,7 @@ export function ProblemOverviewBody({
           view={view}
           onView={setView}
           canToggle={canToggle}
+          boardLabel={isStatic ? 'Design' : 'Animate'}
         >
           <ProblemPanelBody />
         </OverviewProblemColumn>

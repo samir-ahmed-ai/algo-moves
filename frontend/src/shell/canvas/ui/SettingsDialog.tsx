@@ -1,10 +1,11 @@
-import { useEffect, useId } from 'react';
-import { X, Settings } from 'lucide-react';
+import { useEffect, useId, useState } from 'react';
+import { X, Settings, Cloud, CloudOff } from 'lucide-react';
 import {
   useWorkspace,
   saveDefaults,
   type WorkspaceDefaults,
   type Density,
+  type Theme,
   type SettingsTab,
 } from '@/store/workspace';
 import { THEME_META, type ThemePreset } from '../../../styles/themes/registry';
@@ -19,6 +20,8 @@ import { Field, RADIUS_CTRL } from './nodeui';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '../../chromeUi';
 import { ProfileIntegrationsSection } from '@/shell/settings/ProfileIntegrationsSection';
+import { useAuth } from '@/shell/auth';
+import { saveUserSettings } from '@/shell/settings/useUserSettingsSync';
 
 function Segmented<T extends string>({
   value,
@@ -64,6 +67,10 @@ export function SettingsDialog() {
     setSettingsOpen,
     settingsTab,
     setSettingsTab,
+    theme,
+    setTheme,
+    palette,
+    setPalette,
     density,
     setDensity,
     themePreset,
@@ -74,6 +81,9 @@ export function SettingsDialog() {
     toggleTweak,
     canvasHud,
   } = ws;
+  const { isAnonymous } = useAuth();
+  const [saving, setSaving] = useState(false);
+  const [savedToCloud, setSavedToCloud] = useState(false);
 
   useEffect(() => {
     if (!settingsOpen) return;
@@ -84,18 +94,40 @@ export function SettingsDialog() {
     return () => window.removeEventListener('keydown', onKey);
   }, [settingsOpen, setSettingsOpen]);
 
+  // Reset feedback state each time dialog opens
+  useEffect(() => {
+    if (settingsOpen) setSavedToCloud(false);
+  }, [settingsOpen]);
+
   if (!settingsOpen) return null;
 
-  const persist = () => {
-    const d: WorkspaceDefaults = {
-      density,
-      themePreset,
-      layoutPreset,
-      autoplay: tweaks.controls,
-      snap: canvasHud?.snap ?? false,
-    };
-    saveDefaults(d);
-    setSettingsOpen(false);
+  const persist = async () => {
+    setSaving(true);
+    try {
+      if (!isAnonymous) {
+        const ok = await saveUserSettings(isAnonymous, {
+          theme,
+          palette,
+          density,
+          themePreset,
+          layoutPreset,
+          tweaks,
+        });
+        if (ok) setSavedToCloud(true);
+      }
+      // Always persist locally too as a fallback
+      const d: WorkspaceDefaults = {
+        density,
+        themePreset,
+        layoutPreset,
+        autoplay: tweaks.controls,
+        snap: canvasHud?.snap ?? false,
+      };
+      saveDefaults(d);
+      if (isAnonymous) setSettingsOpen(false);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -157,6 +189,27 @@ export function SettingsDialog() {
             <ProfileIntegrationsSection />
           ) : (
             <>
+              <div className="settings-dialog__section">
+                <Field label="Theme">
+                  <Segmented<Theme>
+                    value={theme}
+                    onChange={setTheme}
+                    options={[
+                      { v: 'light', label: 'Light' },
+                      { v: 'dark', label: 'Dark' },
+                    ]}
+                  />
+                </Field>
+              </div>
+
+              <div className="settings-dialog__section">
+                <Toggle
+                  label="Color-blind mode"
+                  checked={palette === 'cb'}
+                  onChange={() => setPalette(palette === 'cb' ? 'default' : 'cb')}
+                />
+              </div>
+
               <div className="settings-dialog__section">
                 <Field label="Density">
                   <Segmented<Density>
@@ -269,7 +322,34 @@ export function SettingsDialog() {
         </div>
 
         {settingsTab === 'appearance' && (
-          <footer className="settings-dialog__footer flex justify-end gap-2 border-t border-edge px-3 py-2">
+          <footer className="settings-dialog__footer flex items-center gap-2 border-t border-edge px-3 py-2">
+            {!isAnonymous && (
+              <span
+                className={cn(
+                  'mr-auto flex items-center gap-1 transition-opacity',
+                  chromeText.xs,
+                  savedToCloud ? 'text-accent opacity-100' : 'text-ink3 opacity-70',
+                )}
+              >
+                {savedToCloud ? (
+                  <>
+                    <Cloud className="h-3 w-3" />
+                    Synced to your account
+                  </>
+                ) : (
+                  <>
+                    <Cloud className="h-3 w-3" />
+                    Saves to your account
+                  </>
+                )}
+              </span>
+            )}
+            {isAnonymous && (
+              <span className={cn('mr-auto flex items-center gap-1 text-ink3', chromeText.xs)}>
+                <CloudOff className="h-3 w-3" />
+                Sign in to sync across devices
+              </span>
+            )}
             <button
               type="button"
               onClick={() => setSettingsOpen(false)}
@@ -283,12 +363,13 @@ export function SettingsDialog() {
             <button
               type="button"
               onClick={persist}
+              disabled={saving}
               className={cn(
-                `settings-dialog__save bg-accent px-2.5 py-1 font-medium text-[var(--accent-contrast)] shadow-theme-sm hover:opacity-90 ${RADIUS_CTRL}`,
+                `settings-dialog__save bg-accent px-2.5 py-1 font-medium text-[var(--accent-contrast)] shadow-theme-sm hover:opacity-90 disabled:opacity-60 ${RADIUS_CTRL}`,
                 chromeText.sm,
               )}
             >
-              Save defaults
+              {saving ? 'Saving…' : 'Save'}
             </button>
           </footer>
         )}

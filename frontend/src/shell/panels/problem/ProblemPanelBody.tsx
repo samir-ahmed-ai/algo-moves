@@ -277,17 +277,30 @@ export function ProblemPanelBody() {
   return (
     <div className="problem-panel flex flex-col">
       {!inVisualize && (
-        <div
-          className="problem-panel-hero mb-2 rounded-md border border-edge bg-panel2/35 px-2.5 py-2"
+        <header
+          className="problem-panel-hero flex flex-col gap-1.5 rounded-xl border border-edge bg-panel2/35 px-2.5 py-2"
           style={{ borderLeftColor: item.difficulty ? TONE_BAR[tone] : 'transparent' }}
         >
           <div className="flex flex-wrap items-center gap-[var(--node-gap,6px)]">
-            <span className={cn(nodeText.title, 'text-base font-semibold leading-tight text-ink')}>
+            <h2
+              className={cn(
+                nodeText.title,
+                nodeTextWrap,
+                'min-w-0 flex-1 font-semibold leading-tight text-ink',
+              )}
+            >
               {item.title}
-            </span>
+            </h2>
             {item.difficulty && <Chip tone={tone}>{item.difficulty}</Chip>}
           </div>
-        </div>
+          {item.tags.length > 0 && (
+            <div className="problem-tags flex flex-wrap gap-[var(--node-gap,6px)]">
+              {item.tags.map((t) => (
+                <NodeTagChip key={t} id={t} />
+              ))}
+            </div>
+          )}
+        </header>
       )}
       {inVisualize && hasOverview && (
         <ControlsAccordion title="Overview" defaultOpen={false} className="border-t-0">
@@ -317,13 +330,6 @@ export function ProblemPanelBody() {
           <ProblemBriefBody statements={problemBrief.statements} cases={problemBrief.cases} />
         </ControlsAccordion>
       )}
-      {!inVisualize && item.tags.length > 0 && (
-        <div className="problem-tags mt-1.5 flex flex-wrap gap-[var(--node-gap,6px)]">
-          {item.tags.map((t) => (
-            <NodeTagChip key={t} id={t} />
-          ))}
-        </div>
-      )}
       {referenceCode && (
         <ControlsAccordion title="Reference code" defaultOpen className="mt-1.5">
           <div className="problem-reference-code overflow-hidden rounded-lg border border-edge bg-[var(--surface-2)]">
@@ -337,10 +343,7 @@ export function ProblemPanelBody() {
         </ControlsAccordion>
       )}
       <div
-        className={cn(
-          'problem-examples-shell',
-          showHeaderDivider && 'mt-2 border-t border-edge pt-2',
-        )}
+        className={cn('problem-examples-shell', showHeaderDivider && 'border-t border-edge pt-2')}
       >
         <ExampleInputPicker />
       </div>

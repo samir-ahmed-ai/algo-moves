@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import {
-  ArrowLeft,
   BookMarked,
   Check,
   FileText,
@@ -22,7 +21,9 @@ import { Avatar } from '@/design/components';
 import { useAuth } from '@/shell/auth/AuthProvider';
 import { ProductAuthGate } from '@/shell/auth/ProductAuthGate';
 import { InterviewToolkitGrid } from '@/shell/interview/InterviewToolkitGrid';
+import { useInterviewToolkitNavigation } from '@/shell/interview/useInterviewToolkitNavigation';
 import { ProfileIntegrationsSection } from '@/shell/settings/ProfileIntegrationsSection';
+import { PageHeader } from '@/shell/chrome/PageHeader';
 import { useWorkspace } from '@/store/workspace';
 
 /** Purely cosmetic XP-per-level constant for the profile progress bar. */
@@ -289,7 +290,8 @@ function ProfileSection({
 
 export function ProfilePage() {
   const { configured, isAnonymous, loading, profile, signOut } = useAuth();
-  const { goHome, enterCollabCanvas, enterPlans, enterResumes } = useWorkspace();
+  const { goHome } = useWorkspace();
+  const openTool = useInterviewToolkitNavigation();
   const [signingOut, setSigningOut] = useState(false);
 
   const needsAuth = !configured || isAnonymous;
@@ -297,15 +299,6 @@ export function ProfilePage() {
   useEffect(() => {
     document.title = 'Profile · Algo Moves';
   }, []);
-
-  const openTool = useCallback(
-    (id: 'interview-canvas' | 'plans' | 'resumes') => {
-      if (id === 'interview-canvas') enterCollabCanvas();
-      else if (id === 'plans') enterPlans();
-      else enterResumes();
-    },
-    [enterCollabCanvas, enterPlans, enterResumes],
-  );
 
   const handleSignOut = useCallback(async () => {
     setSigningOut(true);
@@ -325,27 +318,13 @@ export function ProfilePage() {
         className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_16%_0%,color-mix(in_srgb,var(--accent)_24%,transparent),transparent_28rem),radial-gradient(circle_at_88%_18%,rgba(248,214,121,0.12),transparent_24rem)]"
       />
 
-      <header className="flex h-14 shrink-0 items-center gap-3 border-b border-edge bg-[var(--surface-glass)] px-4 shadow-[0_1px_0_color-mix(in_srgb,var(--border)_55%,transparent)] backdrop-blur-xl">
-        <button
-          type="button"
-          onClick={goHome}
-          className="grid h-8 w-8 place-items-center rounded-xl border border-edge text-ink3 transition hover:bg-panel2 hover:text-ink"
-          aria-label="Back to home"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </button>
-        <div className="flex items-center gap-2">
-          <span className="grid h-9 w-9 place-items-center rounded-2xl bg-accent text-[var(--accent-contrast)] shadow-theme-sm">
-            <User className="h-4 w-4" />
-          </span>
-          <span>
-            <span className="block font-semibold leading-tight text-ink">Your Profile</span>
-            <span className="block text-[length:var(--fs-2xs)] font-medium uppercase tracking-[0.14em] text-ink3">
-              account &amp; interview toolkit
-            </span>
-          </span>
-        </div>
-      </header>
+      <PageHeader
+        onBack={goHome}
+        backLabel="Back to home"
+        icon={<User />}
+        eyebrow="account & interview toolkit"
+        title="Your Profile"
+      />
 
       <main className="flex flex-1 flex-col overflow-auto">
         {loading ? (
@@ -362,7 +341,7 @@ export function ProfilePage() {
             <IdentityCard />
 
             <ProfileSection eyebrow="jump back in" title="Interview toolkit" icon={Sparkles}>
-              <InterviewToolkitGrid onSelect={openTool} />
+              <InterviewToolkitGrid onSelect={openTool} showLabel={false} />
             </ProfileSection>
 
             <ProfileSection eyebrow="secure integration" title="Integrations" icon={Zap}>

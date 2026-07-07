@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react';
 import { Check, Code2, Copy } from 'lucide-react';
+import { HighlightedCode } from '@/components/code/HighlightedCode';
 import { COPY_FEEDBACK_MS } from '../../copyFeedback';
 import { codeVariants, LangTabs } from '../shared/codeVariants';
 
-import { useCanvasStatic, Btn, Code, Hint, nodeIconGlyph } from '@/shell/canvas';
+import { useCanvasStatic, Btn, Hint, nodeIconGlyph } from '@/shell/canvas';
 export function CopyPanelBody() {
   const { plugin } = useCanvasStatic();
   const variants = codeVariants({
@@ -15,7 +16,7 @@ export function CopyPanelBody() {
   const code = variant?.text ?? '// no source available';
   const file = variant?.file ?? 'solution';
   const [status, setStatus] = useState<'idle' | 'copied' | 'failed'>('idle');
-  const preRef = useRef<HTMLPreElement>(null);
+  const codeRef = useRef<HTMLDivElement>(null);
 
   const copy = async () => {
     try {
@@ -23,11 +24,11 @@ export function CopyPanelBody() {
       setStatus('copied');
       setTimeout(() => setStatus('idle'), COPY_FEEDBACK_MS);
     } catch {
-      const pre = preRef.current;
+      const block = codeRef.current;
       const sel = window.getSelection();
-      if (pre && sel) {
+      if (block && sel) {
         const range = document.createRange();
-        range.selectNodeContents(pre);
+        range.selectNodeContents(block);
         sel.removeAllRanges();
         sel.addRange(range);
       }
@@ -61,8 +62,16 @@ export function CopyPanelBody() {
         </Btn>
       </div>
       {status === 'failed' && <Hint>Selected — press ⌘/Ctrl+C to copy.</Hint>}
-      <div className="source-code-frame min-h-0 overflow-hidden rounded-lg border border-edge bg-panel shadow-[var(--shadow-sm)]">
-        <Code text={code} file={file} preRef={preRef} />
+      <div
+        ref={codeRef}
+        className="source-code-frame min-h-0 overflow-hidden rounded-lg border border-edge bg-panel shadow-[var(--shadow-sm)]"
+      >
+        <HighlightedCode
+          code={code}
+          lang={variant?.lang ?? 'go'}
+          gutter
+          className="source-panel-code ws-scroll min-h-[12rem] overflow-auto p-3 font-mono sm:p-4"
+        />
       </div>
     </div>
   );

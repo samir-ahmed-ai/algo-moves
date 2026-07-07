@@ -362,6 +362,7 @@ describe('prep simulator quality', () => {
   const bad: string[] = [];
   for (const plugin of plugins) {
     if (!plugin.meta.id.startsWith('prep-')) continue;
+    if (plugin.meta.static) continue;
     for (const input of plugin.inputs) {
       const frames = plugin.record(input.value);
       const tag = `${plugin.meta.id} · "${input.label}"`;

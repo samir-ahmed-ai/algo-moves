@@ -100,10 +100,10 @@ export const baseTheme = EditorView.theme({
   ...vimChromeStyles,
 });
 
-/** MergeView-safe chrome — no fixed height/min-height; @codemirror/merge sizes editors and spacers from content. */
+/** MergeView-safe chrome — line height comes from buildRecallFontTheme (must load after this). */
 export const mergeEditorChrome = EditorView.theme({
-  '&': { fontSize: 'var(--fs-xs, 12px)', borderRadius: 'var(--radius)' },
-  '.cm-scroller': { fontFamily: 'var(--mono)', lineHeight: '1.5' },
+  '&': { borderRadius: 'var(--radius)' },
+  '.cm-scroller': { fontFamily: 'var(--mono)' },
   '.cm-gutters': { borderRight: '0.5px solid var(--border)' },
   '.cm-foldGutter span': {
     cursor: 'pointer',

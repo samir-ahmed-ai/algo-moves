@@ -183,6 +183,36 @@ button {
   max-width: none;
 }
 
+/* Design-flow diagrams: chrome + self-filling SVG + pinned tab strip. The diagram
+   measures its own area and lays out to fill both dimensions, so the SVG stretches
+   to 100% width AND height rather than being aspect-locked. */
+.board-area.design-flow {
+  gap: 6px;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+.design-flow__chrome,
+.design-flow__footer {
+  flex-shrink: 0;
+}
+.design-flow__diagram {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+}
+.board-area.design-flow .design-flow__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+}
+.design-flow__tabs {
+  flex-shrink: 0;
+}
+
 /* ------------------------------------------------------------------ *
  * Staged board — stable main animation + subtle right-hand state rail.
  * The rail holds the values that mutate frame-to-frame so they no longer
@@ -1126,9 +1156,18 @@ button {
    region sizes to its content. `> .flex` reset above must NOT apply here. */
 .viz-board-col--fit .viz-stage {
   width: max-content;
+  height: 100%;
+  min-height: 0;
   flex-direction: row;
   align-items: stretch;
   justify-content: flex-start;
+}
+/* Staged fill: VizFitBox sizes the content to the full panel height, so the
+   flip layer must pass that height through to the stage row — the rail's
+   stretched column then reaches the bottom instead of hugging the animation. */
+.viz-board-col--fit .viz-fit-box__content > .flip-frame {
+  height: 100%;
+  min-height: 0;
 }
 .viz-board-col--fit .viz-stage-main {
   width: max-content;
@@ -1805,6 +1844,45 @@ circle {
 }
 .cm-merge-diff-host .cm-mergeView .cm-content {
   min-height: unset;
+}
+.cm-merge-diff-host .cm-mergeView .cm-scroller {
+  min-height: 0;
+  overflow: auto;
+}
+.cm-merge-diff-host .cm-mergeViewEditor {
+  min-height: 0;
+}
+/* Uniform line rhythm — changed/inserted lines must not grow taller than neighbors. */
+.cm-merge-diff-host .cm-mergeView .cm-scroller,
+.cm-merge-diff-host .cm-mergeView .cm-content,
+.cm-merge-diff-host .cm-mergeView .cm-line {
+  line-height: var(--recall-line-height, 1.5);
+}
+.cm-merge-diff-host .cm-line {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.cm-merge-diff-host .cm-mergeSpacer {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: transparent !important;
+}
+.cm-merge-diff-host ins.cm-insertedLine,
+.cm-merge-diff-host .cm-insertedLine {
+  display: inline;
+  text-decoration: none;
+  line-height: inherit;
+  vertical-align: baseline;
+}
+.cm-merge-diff-host .cm-changedText {
+  display: inline;
+  line-height: inherit;
+  vertical-align: baseline;
+  padding: 0;
 }
 .cm-merge-diff-host .cm-collapsedLines {
   color: var(--text-3);
@@ -8946,6 +9024,88 @@ circle {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
+.highlighted-code.piece-code {
+  font-family: var(--mono);
+  font-size: var(--node-fs, 13px);
+  line-height: 1.5;
+  font-variant-ligatures: none;
+  color: var(--text);
+  white-space: pre;
+}
+
+.highlighted-code .piece-code-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.highlighted-code .piece-code-gutter {
+  flex: none;
+  min-width: 1.5rem;
+  text-align: right;
+  color: var(--text-3);
+  user-select: none;
+}
+
+.highlighted-code .piece-code-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.highlighted-code .hl-keyword {
+  color: var(--accent);
+}
+
+.highlighted-code .hl-string {
+  color: var(--good);
+}
+
+.highlighted-code .hl-comment {
+  color: var(--text-3);
+  font-style: italic;
+}
+
+.highlighted-code .hl-number {
+  color: var(--edge-active);
+}
+
+.highlighted-code .hl-punct {
+  color: var(--text-2);
+}
+
+.highlighted-code .hl-name {
+  color: var(--team1-stroke);
+}
+
+.highlighted-code .piece-code-line.hl-line-entry {
+  border-left: 2px solid var(--team2-stroke);
+  padding-left: 4px;
+  margin-left: -2px;
+}
+
+.highlighted-code .piece-code-line.hl-line-func {
+  border-left: 1px solid var(--team1-stroke);
+  padding-left: 4px;
+  margin-left: -1px;
+}
+
+.highlighted-code .hl-sig-kw {
+  color: var(--text-3);
+  font-weight: 500;
+}
+
+.highlighted-code .hl-sig-name {
+  color: var(--team2-stroke);
+  font-weight: 700;
+}
+
+.highlighted-code .hl-sig-name-func {
+  color: var(--team1-stroke);
+  font-weight: 600;
+}
+
 .json-block {
   border-color: color-mix(in srgb, var(--border) 78%, var(--accent) 22%);
   background:
@@ -10778,6 +10938,13 @@ circle {
     inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
 }
 
+.source-code-frame .highlighted-code {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 /* Workspace panel polish: notes, saved workspaces, and bookmarks. */
 .workspace-panel {
   min-width: 0;
@@ -10938,15 +11105,30 @@ circle {
   padding: var(--space-1) 0;
 }
 
+.problem-panel-hero .problem-tags {
+  padding: 0;
+}
+
 .problem-brief {
   min-width: 0;
 }
 
 .problem-brief-copy {
+  display: grid;
+  gap: var(--space-1);
   padding: var(--space-2);
   border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
   border-radius: 14px;
   background: color-mix(in srgb, var(--surface) 46%, transparent);
+}
+
+.problem-brief-lead {
+  font-weight: 500;
+}
+
+.problem-brief-insight {
+  padding-left: var(--space-2);
+  border-left: 2px solid color-mix(in srgb, var(--accent) 42%, transparent);
 }
 
 .problem-brief-cases {
@@ -10964,6 +11146,37 @@ circle {
 .problem-example-picker .node-section__header > span:last-child {
   border: 1px solid color-mix(in srgb, var(--accent) 34%, var(--border));
   box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.problem-brief-tabs {
+  border-color: color-mix(in srgb, var(--border) 74%, var(--accent) 26%) !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--surface) 58%, transparent) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  scrollbar-width: none;
+}
+
+.problem-brief-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.problem-brief-tab {
+  border-radius: 999px !important;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  transition:
+    background 0.16s ease,
+    color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.problem-brief-tab--active {
+  background: color-mix(in srgb, var(--accent) 88%, var(--surface)) !important;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.problem-brief-tab--idle:hover {
+  background: color-mix(in srgb, var(--accent-bg) 26%, var(--panel)) !important;
 }
 
 .problem-example-pills {
@@ -11309,12 +11522,46 @@ circle {
 }
 
 .assemble-mode-toolbar,
-.studio-recall-toolbar,
-.recall-editor-footer {
+.studio-recall-toolbar {
   border-color: color-mix(in srgb, var(--border) 72%, var(--accent) 28%) !important;
   background: color-mix(in srgb, var(--surface) 64%, transparent) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(12px);
+}
+
+.recall-toolbar-divider {
+  opacity: 0.65;
+}
+
+.recall-toolbar-menu-panel {
+  min-width: 12rem;
+}
+
+.recall-toolbar-menu-panel__group {
+  border-radius: 0.5rem !important;
+}
+
+.recall-toolbar-menu-panel__body .toolbar-group-btn {
+  height: 1.75rem;
+  min-width: 1.75rem;
+}
+
+.recall-toolbar-menu-panel__header {
+  background: color-mix(in srgb, var(--surface-2) 50%, transparent);
+}
+
+.recall-toolbar-menu-item:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  outline-offset: -2px;
+}
+
+.recall-toolbar-menu-trigger:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  outline-offset: -1px;
+}
+
+.recall-toolbar-menu-badge {
+  line-height: 1.1;
 }
 
 .assemble-mode-workspace {
@@ -12474,6 +12721,20 @@ circle {
 .design-chip--mono,
 .design-pill {
   font-variant-numeric: tabular-nums slashed-zero;
+}
+
+.design-chip__glyph {
+  width: calc(var(--node-fs-xs, 0.75rem) * 1.08);
+  height: calc(var(--node-fs-xs, 0.75rem) * 1.08);
+}
+
+/* Accent/good/bad tones inherit their colored text; give neutral tones a colored glyph too. */
+.design-chip--default .design-chip__icon {
+  color: var(--accent);
+}
+
+.design-chip--muted .design-chip__icon {
+  color: color-mix(in srgb, var(--accent) 60%, var(--text-3));
 }
 
 .design-pill-button:hover {

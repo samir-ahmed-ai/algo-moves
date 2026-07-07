@@ -1,12 +1,22 @@
 import type { ReactNode, RefObject } from 'react';
-import { getTag } from '@/content/tags';
+import { Boxes, Hash, Target, Workflow, type LucideIcon } from 'lucide-react';
+import { getTag, type TagKind } from '@/content/tags';
 import { TAG_KIND_COLOR, TAG_KIND_LABEL } from '@/content/tagColors';
 import { cn } from '@/lib/utils/cn';
 import { TONE_BANNER, TONE_LABEL, type UiTone } from '@/design/tone';
 import { nodeText, RADIUS_CTRL } from '@/design/typography';
 
+/** Colored glyph per tag kind — tinted with the shared TAG_KIND_COLOR. */
+const TAG_KIND_ICON: Readonly<Record<TagKind, LucideIcon>> = {
+  pattern: Workflow,
+  structure: Boxes,
+  skill: Target,
+  meta: Hash,
+};
+
 export function NodeTagChip({ id }: { id: string }) {
   const t = getTag(id);
+  const Icon = TAG_KIND_ICON[t.kind];
   return (
     <span
       data-tag-kind={t.kind}
@@ -17,9 +27,10 @@ export function NodeTagChip({ id }: { id: string }) {
         nodeText.xs,
       )}
     >
-      <span
-        className="node-tag-chip__dot size-[calc(var(--node-icon,1.125rem)*0.4)] shrink-0 rounded-full"
-        style={{ background: TAG_KIND_COLOR[t.kind] }}
+      <Icon
+        className="node-tag-chip__glyph size-[calc(var(--node-icon,1.125rem)*0.62)] shrink-0"
+        style={{ color: TAG_KIND_COLOR[t.kind] }}
+        aria-hidden
       />
       {t.label}
     </span>

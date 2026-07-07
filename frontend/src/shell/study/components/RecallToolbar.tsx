@@ -1,209 +1,89 @@
-import {
-  useCallback,
-  useState,
-  type Dispatch,
-  type MutableRefObject,
-  type ReactNode,
-  type SetStateAction,
-} from 'react';
-import { createPortal } from 'react-dom';
+import { type Dispatch, type MutableRefObject, type ReactNode, type SetStateAction } from 'react';
 import type { EditorView } from '@codemirror/view';
 import {
   Eye,
   EyeOff,
+  Highlighter,
   Keyboard,
+  Minus,
+  Plus,
   RotateCcw,
   ScanEye,
-  Settings2,
+  SlidersHorizontal,
   SquareTerminal,
   TextQuote,
   Timer,
-  AlignVerticalSpaceAround,
-  ChevronsDownUp,
-  ChevronsUpDown,
 } from 'lucide-react';
-import { autoSelectAndIndent } from '@/lib/editor/codeFormat';
+import {
+  clampRecallFontSize,
+  RECALL_FONT_MAX,
+  RECALL_FONT_MIN,
+} from '@/lib/editor/recallEditorTheme';
 import { Chip } from '@/shell/canvas';
 import { cn } from '@/lib/utils/cn';
-import { chromeText, ChromeLabel } from '@/shell/chromeUi';
+import { chromeText } from '@/shell/chromeUi';
 import type { EditorPrefs } from '@/store/user-prefs';
-import { recallEditorMenuItems } from './recallEditorControls';
+import {
+  activeDiffToggleCount,
+  diffMenuItems,
+  displayMenuItems,
+  displayMenuTriggerTitle,
+  formatMenuItems,
+  resetRecallTypography,
+  sessionMenuItems,
+  type RecallMenuContext,
+} from './recallEditorControls';
+import { RecallToolbarMenu } from './RecallToolbarMenu';
 import { ToolbarGroup, ToolbarGroupBtn } from './ToolbarGroup';
-import { useAnchoredPopover } from '@/hooks/useAnchoredPopover';
 
-/** Compact popover combining Session controls + Editor settings under one trigger. */
-function RecallSettingsPopover({
-  timerRunning,
-  setTimerRunning,
-  timerLabel,
-  persistDraft,
-  editorPrefs,
+function FontSizeStepper({
+  fontSize,
   setEditorPrefs,
-  compact,
-  draftViewRef,
-  formatBothRef,
-  foldBothRef,
-  lang,
 }: {
-  timerRunning: boolean;
-  setTimerRunning: Dispatch<SetStateAction<boolean>>;
-  timerLabel: string;
-  persistDraft: (v: string) => void;
-  editorPrefs: EditorPrefs;
+  fontSize: number;
   setEditorPrefs: (patch: Partial<EditorPrefs>) => void;
-  compact?: boolean;
-  draftViewRef?: MutableRefObject<EditorView | null>;
-  formatBothRef?: MutableRefObject<(() => void) | null>;
-  foldBothRef?: MutableRefObject<{ collapse: () => void; expand: () => void } | null>;
-  lang?: string;
 }) {
-  const [open, setOpen] = useState(false);
-  const close = useCallback(() => setOpen(false), []);
-  const { anchorRef, panelRef, pos, panelStyle } = useAnchoredPopover(open, close, 'right', 300);
-
-  const editorItems = recallEditorMenuItems(
-    editorPrefs,
-    setEditorPrefs,
-    draftViewRef?.current,
-    formatBothRef?.current,
-    foldBothRef?.current,
-    lang,
-  );
-
-  const sessionCards = [
-    {
-      id: 'timer',
-      icon: <Timer className="h-4 w-4" />,
-      title: timerRunning ? 'Stop timer' : 'Start timer',
-      subtitle: timerRunning ? timerLabel : 'Timed recall',
-      active: timerRunning,
-      onClick: () => setTimerRunning((r) => !r),
-    },
-    {
-      id: 'clear',
-      icon: <RotateCcw className="h-4 w-4" />,
-      title: 'Clear draft',
-      subtitle: '⌘⇧R',
-      active: false,
-      onClick: () => {
-        persistDraft('');
-        setOpen(false);
-      },
-    },
-  ];
-
   return (
-    <div className="relative shrink-0">
-      <button
-        ref={anchorRef}
-        type="button"
-        title="Recall settings"
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-        className={cn(
-          'grid place-items-center rounded-md border border-edge bg-panel2/60 transition-colors hover:bg-panel2',
-          open && 'border-accent/40 bg-panel2 text-accent',
-          compact
-            ? 'h-[calc(var(--row)*0.875)] w-[calc(var(--row)*0.875)]'
-            : 'h-[var(--row,28px)] w-[var(--row,28px)]',
-        )}
-      >
-        <Settings2 className="h-3.5 w-3.5 text-ink3" />
-      </button>
-
-      {open &&
-        pos &&
-        panelStyle &&
-        createPortal(
-          <div
-            ref={panelRef}
-            role="dialog"
-            aria-label="Recall settings"
-            style={panelStyle}
-            className="fixed z-[200] rounded-lg border border-edge bg-panel shadow-[var(--shadow-xl)]"
-          >
-            {/* Session */}
-            <div className="p-2">
-              <ChromeLabel className="mb-1.5 px-1">Session</ChromeLabel>
-              <div className="flex gap-1.5">
-                {sessionCards.map((card) => (
-                  <button
-                    key={card.id}
-                    type="button"
-                    onClick={card.onClick}
-                    className={cn(
-                      'flex w-[min(8rem,42%)] flex-col items-center gap-1.5 rounded-lg border p-2 text-center transition-colors',
-                      card.active
-                        ? 'border-accent/60 bg-accentbg'
-                        : 'border-edge bg-panel2/60 hover:border-accent/40 hover:bg-panel2',
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        'grid h-8 w-8 place-items-center rounded-md border border-dashed',
-                        card.active
-                          ? 'border-accent/40 bg-panel text-accent'
-                          : 'border-edge bg-panel text-ink3',
-                      )}
-                    >
-                      {card.icon}
-                    </span>
-                    <span className="w-full">
-                      <span
-                        className={cn(
-                          'block truncate font-medium',
-                          chromeText.xs,
-                          card.active ? 'text-accent' : 'text-ink',
-                        )}
-                      >
-                        {card.title}
-                      </span>
-                      <span className={cn('block truncate text-ink3', chromeText.xs)}>
-                        {card.subtitle}
-                      </span>
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Editor settings */}
-            <div className="border-t border-edge px-2 pb-2 pt-2">
-              <ChromeLabel className="mb-1.5 px-1">Editor</ChromeLabel>
-              <div className="flex flex-col gap-0.5">
-                {editorItems.map((item) => (
-                  <button
-                    key={item.label}
-                    type="button"
-                    disabled={item.disabled}
-                    onClick={() => {
-                      if (!item.disabled) item.onClick();
-                    }}
-                    className={cn(
-                      'flex w-full items-center gap-2 rounded-md px-2 py-1 text-left transition-colors disabled:opacity-40',
-                      chromeText.sm,
-                      item.active
-                        ? 'bg-accentbg text-accent'
-                        : 'text-ink2 hover:bg-panel2 hover:text-ink',
-                    )}
-                  >
-                    {item.icon && (
-                      <span className="grid h-4 w-4 shrink-0 place-items-center">{item.icon}</span>
-                    )}
-                    <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>,
-          document.body,
-        )}
+    <div className="flex items-center justify-between gap-2">
+      <span className={cn('font-medium text-ink3', chromeText.xs)}>Font size</span>
+      <ToolbarGroup className="shadow-none">
+        <ToolbarGroupBtn
+          title="Decrease font size (⌘⇧-)"
+          disabled={fontSize <= RECALL_FONT_MIN}
+          onClick={() => setEditorPrefs({ fontSize: clampRecallFontSize(fontSize - 1) })}
+          className="h-6 w-6 px-0"
+        >
+          <Minus className="h-3 w-3" />
+        </ToolbarGroupBtn>
+        <span
+          className={cn(
+            'inline-flex min-w-[2.25rem] items-center justify-center border-r border-edge px-1 font-mono tabular-nums text-ink',
+            chromeText.xs,
+          )}
+        >
+          {fontSize}
+        </span>
+        <ToolbarGroupBtn
+          title="Increase font size (⌘⇧+)"
+          disabled={fontSize >= RECALL_FONT_MAX}
+          onClick={() => setEditorPrefs({ fontSize: clampRecallFontSize(fontSize + 1) })}
+          className="h-6 w-6 px-0"
+        >
+          <Plus className="h-3 w-3" />
+        </ToolbarGroupBtn>
+        <ToolbarGroupBtn
+          title="Reset font size"
+          onClick={() => resetRecallTypography(setEditorPrefs)}
+          className="h-6 w-6 px-0"
+        >
+          <RotateCcw className="h-3 w-3" />
+        </ToolbarGroupBtn>
+      </ToolbarGroup>
     </div>
   );
 }
 
-/** Compact grouped recall controls — shared by RecallPane and Code Studio header. */
+/** Unified recall toolbar — view, edit, display, diff, and session controls. */
 export function RecallToolbar({
   blind,
   setBlind,
@@ -250,6 +130,22 @@ export function RecallToolbar({
       ? Math.max(0, Math.min(100, Math.round(scorePct)))
       : undefined;
 
+  const menuCtx: RecallMenuContext = {
+    editorPrefs,
+    setEditorPrefs,
+    timerRunning,
+    setTimerRunning,
+    timerLabel,
+    persistDraft,
+    ...(draftViewRef ? { draftViewRef } : {}),
+    ...(formatBothRef ? { formatBothRef } : {}),
+    ...(foldBothRef ? { foldBothRef } : {}),
+    ...(lang !== undefined ? { lang } : {}),
+  };
+
+  const diffActiveCount = activeDiffToggleCount(editorPrefs);
+  const displayActive = editorPrefs.lineHeight !== 'normal' || editorPrefs.recallCompact !== false;
+
   return (
     <div
       className={cn(
@@ -264,12 +160,11 @@ export function RecallToolbar({
           <span className={cn('mr-0.5 shrink-0 truncate font-medium text-ink', chromeText.xs)}>
             Recall
           </span>
-          <div className="mx-0.5 h-3.5 w-px shrink-0 bg-edge" />
+          <div className="recall-toolbar-divider mx-0.5 h-3.5 w-px shrink-0 bg-edge" />
         </>
       )}
 
-      {/* High-frequency view toggles — kept accessible at top level */}
-      <ToolbarGroup title="View mode">
+      <ToolbarGroup title="Recall editor controls">
         <ToolbarGroupBtn
           active={blind}
           title={blind ? 'Blind recall (⌘\\)' : 'Reference mode (⌘\\)'}
@@ -287,9 +182,6 @@ export function RecallToolbar({
         >
           <ScanEye className="h-3 w-3" />
         </ToolbarGroupBtn>
-      </ToolbarGroup>
-
-      <ToolbarGroup title="Vim keybindings">
         <ToolbarGroupBtn
           active={editorPrefs.vim}
           title={
@@ -298,56 +190,48 @@ export function RecallToolbar({
           onClick={() => setEditorPrefs({ vim: !editorPrefs.vim })}
         >
           <SquareTerminal className="h-3 w-3" />
-          <span className="font-semibold">Vim</span>
+          {!compact && <span className="font-semibold">Vim</span>}
         </ToolbarGroupBtn>
+        <RecallToolbarMenu
+          label="Format"
+          icon={<TextQuote className="h-3 w-3" />}
+          items={formatMenuItems(menuCtx)}
+          {...(compact !== undefined ? { compact } : {})}
+        />
+
+        <RecallToolbarMenu
+          label="Display"
+          icon={<SlidersHorizontal className="h-3 w-3" />}
+          items={displayMenuItems(menuCtx)}
+          active={displayActive}
+          title={displayMenuTriggerTitle(editorPrefs)}
+          {...(compact !== undefined ? { compact } : {})}
+          panelWidth={260}
+          header={
+            <FontSizeStepper fontSize={editorPrefs.fontSize} setEditorPrefs={setEditorPrefs} />
+          }
+        />
+
+        <RecallToolbarMenu
+          label="Diff"
+          icon={<Highlighter className="h-3 w-3" />}
+          items={diffMenuItems(menuCtx)}
+          active={diffActiveCount > 0}
+          badge={diffActiveCount}
+          {...(compact !== undefined ? { compact } : {})}
+        />
+
+        <RecallToolbarMenu
+          label="Session"
+          icon={<Timer className="h-3 w-3" />}
+          items={sessionMenuItems(menuCtx)}
+          active={timerRunning}
+          {...(compact !== undefined ? { compact } : {})}
+        />
       </ToolbarGroup>
 
-      <ToolbarGroup title="Format">
-        <ToolbarGroupBtn
-          title="Format both panes — spacing, braces, indent (⌘⇧F)"
-          onClick={() => formatBothRef?.current?.()}
-        >
-          <TextQuote className="h-3 w-3" />
-        </ToolbarGroupBtn>
-        <ToolbarGroupBtn
-          title="Auto-select block and indent (⌘⇧I)"
-          onClick={() => {
-            const view = draftViewRef?.current;
-            if (view) autoSelectAndIndent(view);
-          }}
-        >
-          <AlignVerticalSpaceAround className="h-3 w-3" />
-        </ToolbarGroupBtn>
-        <ToolbarGroupBtn
-          title="Collapse sections — funcs, types (⌘⌥[)"
-          onClick={() => foldBothRef?.current?.collapse()}
-        >
-          <ChevronsDownUp className="h-3 w-3" />
-        </ToolbarGroupBtn>
-        <ToolbarGroupBtn
-          title="Expand all sections (⌘⌥])"
-          onClick={() => foldBothRef?.current?.expand()}
-        >
-          <ChevronsUpDown className="h-3 w-3" />
-        </ToolbarGroupBtn>
-      </ToolbarGroup>
+      <div className="min-w-0 flex-1" />
 
-      {/* Session + editor settings combined into one popover */}
-      <RecallSettingsPopover
-        timerRunning={timerRunning}
-        setTimerRunning={setTimerRunning}
-        timerLabel={timerLabel}
-        persistDraft={persistDraft}
-        editorPrefs={editorPrefs}
-        setEditorPrefs={setEditorPrefs}
-        {...(compact !== undefined ? { compact } : {})}
-        {...(draftViewRef ? { draftViewRef } : {})}
-        {...(formatBothRef ? { formatBothRef } : {})}
-        {...(foldBothRef ? { foldBothRef } : {})}
-        {...(lang ? { lang } : {})}
-      />
-
-      <div className="flex-1" />
       {safeScorePct !== undefined && (
         <Chip tone={safeScorePct >= 80 ? 'good' : safeScorePct >= 50 ? 'accent' : 'muted'} mono>
           {compact ? `${safeScorePct}%` : `${safeScorePct}% match`}

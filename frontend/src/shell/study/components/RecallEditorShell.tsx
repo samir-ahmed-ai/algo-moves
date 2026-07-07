@@ -2,9 +2,8 @@ import { useRef, type MutableRefObject } from 'react';
 import type { EditorView } from '@codemirror/view';
 import { SplitCodeEditor } from '@/components/code/SplitCodeEditor';
 import type { EditorPrefs } from '@/store/user-prefs';
-import { RecallEditorFooter } from './RecallEditorFooter';
 
-/** Split merge diff editor + footer controls — shared by RecallPane and Code Studio body. */
+/** Split merge diff editor — shared by RecallPane and Code Studio body. */
 export function RecallEditorShell({
   reference,
   draft,
@@ -68,11 +67,6 @@ export function RecallEditorShell({
         draftViewRef={viewRef}
         formatBothRef={formatRef}
         foldBothRef={foldRef}
-      />
-      <RecallEditorFooter
-        editorPrefs={editorPrefs}
-        setEditorPrefs={setEditorPrefs}
-        {...(compact !== undefined ? { compact } : {})}
       />
     </div>
   );

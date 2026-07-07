@@ -1,4 +1,4 @@
-import { Film, Keyboard } from 'lucide-react';
+import { Boxes, Film, Keyboard } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
 export type OverviewView = 'animate' | 'recall';
@@ -7,15 +7,21 @@ export function OverviewViewSwitch({
   view,
   onView,
   canToggle,
+  boardLabel = 'Animate',
   className,
 }: {
   view: OverviewView;
   onView: (view: OverviewView) => void;
   /** Only meaningful when the problem has BOTH an animation and a source to recall. */
   canToggle: boolean;
+  /** Label for the board pane tab (e.g. "Design" for static design problems). */
+  boardLabel?: string;
   className?: string;
 }) {
   if (!canToggle) return null;
+
+  const boardIcon =
+    boardLabel === 'Design' ? <Boxes className="h-3 w-3" /> : <Film className="h-3 w-3" />;
 
   return (
     <div
@@ -27,10 +33,10 @@ export function OverviewViewSwitch({
       <TabBtn
         active={view === 'animate'}
         onClick={() => onView('animate')}
-        icon={<Film className="h-3 w-3" />}
-        title="Animate (Alt+1)"
+        icon={boardIcon}
+        title={`${boardLabel} (Alt+1)`}
       >
-        Animate
+        {boardLabel}
       </TabBtn>
       <TabBtn
         active={view === 'recall'}

@@ -60,7 +60,13 @@ export function VizPanelBody({
     <div
       className={cn('flex flex-col', nodeText.base, inVisualize ? 'gap-0' : 'h-full min-h-0 gap-2')}
     >
-      {inVisualize ? (
+      {isStatic ? (
+        // Static design diagrams fill their own area (self-measured layout), so
+        // skip VizFitBox letterbox scaling and hand them the whole panel.
+        <div className="viz-design-stage flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+          {viewEl}
+        </div>
+      ) : inVisualize ? (
         <div ref={vizMeasureRef} className="viz-panel-stage flex min-w-0 justify-center">
           <VizFitBox
             layout="hug"

@@ -13,6 +13,7 @@ import { PlansPage } from './shell/plans/PlansPage';
 import { ResumesPage } from './shell/resumes/ResumesPage';
 import { ProfilePage } from './shell/profile/ProfilePage';
 import { SettingsDialog } from '@/shell/canvas';
+import { useUserSettingsSync } from '@/shell/settings/useUserSettingsSync';
 
 const ROUTE_LABELS = {
   home: 'Algo Moves landing page',
@@ -41,6 +42,7 @@ function Shell() {
 function AppFrame() {
   const { route } = useWorkspace();
   const routeLabel = ROUTE_LABELS[route as keyof typeof ROUTE_LABELS] ?? 'Algorithm workspace';
+  useUserSettingsSync();
 
   return (
     <div className="h-[100dvh] min-h-[100dvh] w-screen overflow-hidden bg-bg font-sans text-ink antialiased">

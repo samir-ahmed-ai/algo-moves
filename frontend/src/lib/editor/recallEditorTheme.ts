@@ -44,11 +44,26 @@ export function recallLineHeightLabel(value: RecallLineHeight): string {
   }
 }
 
-/** Live font size + line height for recall merge editors. */
+/** Live font size + uniform line height for recall merge editors. */
 export function buildRecallFontTheme(fontSize: number, lineHeight: RecallLineHeight): Extension {
   const safeLineHeight = isRecallLineHeight(lineHeight) ? lineHeight : 'normal';
+  const lh = RECALL_LINE_HEIGHTS[safeLineHeight];
+  const size = clampRecallFontSize(fontSize);
   return EditorView.theme({
-    '&': { fontSize: `${clampRecallFontSize(fontSize)}px` },
-    '.cm-scroller': { lineHeight: RECALL_LINE_HEIGHTS[safeLineHeight] },
+    '&': {
+      fontSize: `${size}px`,
+      '--recall-line-height': lh,
+      '--recall-line-step': `calc(${size}px * ${lh})`,
+    },
+    '.cm-scroller': { lineHeight: lh },
+    '.cm-content': { lineHeight: lh },
+    '.cm-line': {
+      lineHeight: lh,
+      minHeight: `calc(${size}px * ${lh})`,
+      paddingTop: '0',
+      paddingBottom: '0',
+    },
+    '.cm-gutters': { lineHeight: lh },
+    '.cm-gutterElement': { lineHeight: lh },
   });
 }

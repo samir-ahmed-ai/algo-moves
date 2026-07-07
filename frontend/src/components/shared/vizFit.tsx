@@ -40,7 +40,7 @@ export function VizFitBox({
 }) {
   const selfRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const [layout, setLayout] = useState({ scale: 1, w: 0, h: 0, nw: 0, nh: 0 });
+  const [layout, setLayout] = useState({ scale: 1, w: 0, h: 0, nw: 0, nh: 0, fillH: 0 });
   // Ease size/scale changes only after the first painted layout, so mount
   // doesn't animate in from zero.
   const [animReady, setAnimReady] = useState(false);
@@ -91,7 +91,12 @@ export function VizFitBox({
       const fitH = hug ? nh : boxH;
       const fit = computeVizFitLayout(nw, fitH, cw, ch);
       lastMeasureW.current = cw;
-      const next = { scale: fit.scale, w: fit.w, h: fit.h, nw, nh: boxH };
+      // Staged boards (main animation + side rail) stretch to the full panel
+      // height so the rail column and its divider reach the bottom instead of
+      // hugging the short main-animation height and clipping the rail's stack.
+      const isStage = !hug && target.classList.contains('viz-stage');
+      const fillH = isStage ? Math.max(1, ch - VIZ_FIT_PAD * 2) : 0;
+      const next = { scale: fit.scale, w: fit.w, h: fit.h, nw, nh: boxH, fillH };
       // Bail on identical values: the eased box resize re-fires the observer
       // for ~13 frames per step, and each converged tick must not re-render.
       setLayout((prev) =>
@@ -99,7 +104,8 @@ export function VizFitBox({
         prev.w === next.w &&
         prev.h === next.h &&
         prev.nw === next.nw &&
-        prev.nh === next.nh
+        prev.nh === next.nh &&
+        prev.fillH === next.fillH
           ? prev
           : next,
       );
@@ -107,6 +113,13 @@ export function VizFitBox({
 
     syncRef.current = sync;
     sync();
+
+    const onRemeasure = () => requestAnimationFrame(sync);
+    content.addEventListener('vizfit:remeasure', onRemeasure);
+
+    return () => {
+      content.removeEventListener('vizfit:remeasure', onRemeasure);
+    };
   }, [children, remeasureKey, hug, measureRef]);
 
   // Persistent observer — created once per (hug, measureRef), NOT per frame.
@@ -137,6 +150,12 @@ export function VizFitBox({
   }, [hug, measureRef]);
 
   const scaled = layout.scale !== 1 && layout.nw > 0 && layout.nh > 0;
+  // Staged fill: stretch the scaled content to the full panel height so the
+  // rail reaches the bottom. Applies even at scale 1 (an exact-width fit).
+  const stageFill = !hug && layout.fillH > 0 && layout.nw > 0;
+  const sized = scaled || stageFill;
+  const contentH = stageFill ? layout.fillH / layout.scale : scaled ? layout.nh : undefined;
+  const stageH = stageFill ? layout.fillH : layout.h || undefined;
   const hugSize =
     hug && layout.w > 0 && layout.h > 0
       ? { width: layout.w + VIZ_FIT_PAD * 2, height: layout.h + VIZ_FIT_PAD * 2, maxWidth: '100%' }
@@ -159,8 +178,8 @@ export function VizFitBox({
         className={cn('viz-fit-box__stage', animReady && 'viz-fit-anim-size')}
         style={{
           width: layout.w || undefined,
-          height: layout.h || undefined,
-          overflow: scaled ? 'hidden' : undefined,
+          height: stageH,
+          overflow: sized ? 'hidden' : undefined,
           flexShrink: 0,
         }}
       >
@@ -168,9 +187,9 @@ export function VizFitBox({
           ref={contentRef}
           className={cn('viz-fit-box__content', animReady && 'viz-fit-anim-scale')}
           style={{
-            width: scaled ? layout.nw : undefined,
-            height: scaled ? layout.nh : undefined,
-            transform: scaled ? `scale(${layout.scale})` : undefined,
+            width: sized ? layout.nw : undefined,
+            height: contentH,
+            transform: sized && layout.scale !== 1 ? `scale(${layout.scale})` : undefined,
             transformOrigin: '0 0',
           }}
         >

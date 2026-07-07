@@ -57,19 +57,23 @@ function ToolTile({
 export function InterviewToolkitGrid({
   onSelect,
   compact,
+  showLabel = true,
   className,
 }: {
   onSelect: ToolAction;
   compact?: boolean;
+  showLabel?: boolean;
   className?: string;
 }) {
   const [canvas, plans, resumes] = INTERVIEW_TOOLS;
 
   return (
     <div className={cn('interview-toolkit-grid', className)}>
-      <p className="mb-2 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-[0.12em] text-ink3">
-        Interview
-      </p>
+      {showLabel ? (
+        <p className="mb-2 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-[0.12em] text-ink3">
+          Interview
+        </p>
+      ) : null}
       <div className="grid grid-cols-2 gap-2">
         {canvas ? (
           <ToolTile tool={canvas} onSelect={onSelect} {...(compact ? { compact: true } : {})} />

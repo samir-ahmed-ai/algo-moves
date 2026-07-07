@@ -4,7 +4,7 @@ import type { QuizQuestion } from '@/core/types';
 import type { QuizProgress } from '@/store/user-prefs';
 import { QuizChoiceLabel } from '@/components/shared/QuizChoiceLabel';
 import { cn } from '@/lib/utils/cn';
-import { QUIZ_WRONG_MS } from '@/lib/quiz';
+import { QUIZ_CORRECT_MS, QUIZ_WRONG_MS } from '@/lib/quiz';
 import { newQuizRunSeed, quizQuestionSeed, shuffleQuizQuestion } from '@/lib/quiz';
 import { recordAttempt } from '@/store/persistence';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
@@ -170,6 +170,13 @@ export function CodeStudioQuiz({
     if (isCorrect) advance();
     else restart();
   }, [isCorrect, advance, restart]);
+
+  // Correct answer: brief feedback, then advance (same as mobile / canvas quiz).
+  useEffect(() => {
+    if (!answered || !isCorrect || done) return;
+    const t = window.setTimeout(advance, QUIZ_CORRECT_MS);
+    return () => window.clearTimeout(t);
+  }, [answered, isCorrect, done, advance]);
 
   // Wrong answer: flash feedback, then restart the full run (same as mobile).
   useEffect(() => {

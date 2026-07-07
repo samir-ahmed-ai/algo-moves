@@ -62,16 +62,25 @@ export function MobileVizShell({
         )}
         data-noswipe
       >
-        <VizFitBox
-          className="h-full min-h-0 w-full"
-          remeasureKey={`${plugin.meta.id}-${player.index}-${frame.move.type}`}
-        >
-          <FlipFrame frameKey={player.index} resetKey={plugin.meta.id}>
+        {plugin.meta.static ? (
+          // Static design diagrams self-measure and fill; skip fit/flip wrappers.
+          <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
             <ErrorBoundary resetKey={`${plugin.meta.id}:${player.index}`} label={plugin.meta.id}>
               <View frame={frame} />
             </ErrorBoundary>
-          </FlipFrame>
-        </VizFitBox>
+          </div>
+        ) : (
+          <VizFitBox
+            className="h-full min-h-0 w-full"
+            remeasureKey={`${plugin.meta.id}-${player.index}-${frame.move.type}`}
+          >
+            <FlipFrame frameKey={player.index} resetKey={plugin.meta.id}>
+              <ErrorBoundary resetKey={`${plugin.meta.id}:${player.index}`} label={plugin.meta.id}>
+                <View frame={frame} />
+              </ErrorBoundary>
+            </FlipFrame>
+          </VizFitBox>
+        )}
       </div>
 
       {!plugin.meta.static && (

@@ -24,7 +24,6 @@ export function LandingPage() {
     enterVim,
     enterDojo,
     enterGames,
-    enterCollabCanvas,
   } = useWorkspace();
   const isMobile = useIsMobile();
   const progress = useProgress();
@@ -43,7 +42,6 @@ export function LandingPage() {
     else if (id === 'games') enterGames();
     else if (id === 'vim') enterVim();
     else if (id === 'dojo') enterDojo();
-    else if (id === 'interview-canvas') enterCollabCanvas();
   };
 
   const openItem = (id: string) => enterWorkspace(id);

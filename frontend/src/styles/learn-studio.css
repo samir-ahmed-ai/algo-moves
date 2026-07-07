@@ -225,6 +225,7 @@
 .learn-studio .studio-recall-toolbar {
   min-height: var(--studio-row);
   padding-inline: var(--studio-pad);
+  scrollbar-width: thin;
 }
 
 .studio-split-second__header {

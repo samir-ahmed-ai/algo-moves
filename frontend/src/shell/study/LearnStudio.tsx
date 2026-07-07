@@ -18,7 +18,7 @@ import { QuizStageBody } from '@/shell/panels/problem/QuizStageBody';
 import { StudioAssembleStageBody } from '@/shell/panels/problem/StudioAssembleStageBody';
 import { StudioPanelStageBody } from '@/shell/panels/problem/StudioPanelStageBody';
 import { StudioArc, StudioArcSlotProvider } from './StudioArc';
-import { ProblemSurfaceBar } from './ProblemSurfaceBar';
+import { HeaderBadge, ProblemSurfaceBar } from './ProblemSurfaceBar';
 import { readStudioTab, writeStudioTab } from '@/store/study/studioTab';
 import {
   arcTabs,
@@ -134,15 +134,17 @@ function StudioShell({
     active: activeVariant,
     setActive: setVariant,
   } = useCodeStudioContent();
-  const { item } = useCanvasStatic();
+  const { item, plugin } = useCanvasStatic();
   const { present } = useWorkspace();
+  const isStatic = !!plugin.meta.static;
 
   const avail = useMemo(
     () =>
-      STUDIO_TABS.filter((t) =>
-        isTabAvailable(t, { hasQuiz, hasPieces: hasReassemble, hasSource: !!reference }),
-      ),
-    [hasQuiz, hasReassemble, reference],
+      STUDIO_TABS.filter((t) => {
+        if (isStatic && (t.id === 'simulate' || t.id === 'predict')) return false;
+        return isTabAvailable(t, { hasQuiz, hasPieces: hasReassemble, hasSource: !!reference });
+      }),
+    [hasQuiz, hasReassemble, reference, isStatic],
   );
   const order = useMemo(() => flatOrder(avail), [avail]);
   const arc = useMemo(() => arcTabs(avail), [avail]);
@@ -271,8 +273,9 @@ function LearnTopBar({
     <ProblemSurfaceBar
       onOpenPalette={onOpenPalette}
       onOpenHelp={onOpenHelp}
-      badgeIcon={<GraduationCap className="h-4 w-4 text-accent" />}
-      meta={null}
+      badge={<HeaderBadge icon={<GraduationCap />} />}
+      showThemeView
+      showAuth
     />
   );
 }

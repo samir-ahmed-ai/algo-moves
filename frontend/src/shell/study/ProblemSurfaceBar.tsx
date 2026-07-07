@@ -12,6 +12,8 @@ import { FeatureSelectorPopover, ToolbarSegment } from '@/components/shared';
 import { SURFACE_THEME_GROUPS, SURFACE_VIEW_GROUPS } from './surfaceBarFeatureGroups';
 import { usePlan } from '@/shell/plans/PlanContext';
 
+/* ------------------------------------------------------------ primitives */
+
 export function IconBtn({
   title,
   active,
@@ -42,25 +44,82 @@ export function IconBtn({
   );
 }
 
-function BarDivider() {
+export function BarDivider() {
   return <div className="mx-0.5 hidden h-4 w-px shrink-0 bg-edge sm:block" aria-hidden />;
 }
 
-export interface ProblemSurfaceBarProps {
-  onOpenPalette?: (() => void) | undefined;
-  onOpenHelp?: (() => void) | undefined;
-  badgeIcon?: ReactNode;
-  afterTitle?: ReactNode;
-  meta?: ReactNode;
+/** Identity tile shown before the title — either a bordered accent chip or a track gradient tile. */
+export function HeaderBadge({
+  icon,
+  gradient,
+  className,
+}: {
+  icon: ReactNode;
+  gradient?: { c1: string; c2: string } | undefined;
+  className?: string;
+}) {
+  if (gradient) {
+    return (
+      <span
+        aria-hidden
+        className={cn(
+          'surface-badge grid h-7 w-7 shrink-0 place-items-center rounded-md text-white shadow-[var(--shadow-sm)] [&>svg]:h-3.5 [&>svg]:w-3.5',
+          className,
+        )}
+        style={{ background: `linear-gradient(135deg, ${gradient.c1}, ${gradient.c2})` }}
+      >
+        {icon}
+      </span>
+    );
+  }
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        'surface-badge hidden h-7 w-7 shrink-0 place-items-center rounded-md border border-edge bg-panel2 text-accent sm:grid [&>svg]:h-4 [&>svg]:w-4',
+        className,
+      )}
+    >
+      {icon}
+    </span>
+  );
 }
 
-/** Shared compact header for learn and play problem surfaces. */
+/* ------------------------------------------------------------------- bar */
+
+export interface ProblemSurfaceBarProps {
+  /** Learn surface: opens the workspace command menu / help. */
+  onOpenPalette?: (() => void) | undefined;
+  onOpenHelp?: (() => void) | undefined;
+  /** Play surface: leading back button (e.g. back to category). */
+  onBack?: (() => void) | undefined;
+  backTitle?: string;
+  /** Identity tile rendered before the title (use `HeaderBadge`). */
+  badge?: ReactNode;
+  /** Extra node rendered immediately after the title block. */
+  afterTitle?: ReactNode;
+  /** Extra node rendered in the meta cluster (before nav). */
+  meta?: ReactNode;
+  /** Right-aligned, surface-specific action controls. */
+  actions?: ReactNode;
+  /** Show the built-in theme + view popovers (learn surface). */
+  showThemeView?: boolean;
+  /** Show the built-in auth button (learn surface). */
+  showAuth?: boolean;
+}
+
+/** Shared compact header for the learn and play problem surfaces. */
 export function ProblemSurfaceBar({
   onOpenPalette,
   onOpenHelp,
-  badgeIcon,
+  onBack,
+  backTitle = 'Back',
+  badge,
   afterTitle,
   meta,
+  actions,
+  showThemeView = false,
+  showAuth = false,
 }: ProblemSurfaceBarProps) {
   const { item } = useCanvasStatic();
   const isMobile = useIsMobile();
@@ -87,17 +146,27 @@ export function ProblemSurfaceBar({
     if (next) openProblem(next.id);
   };
 
+  const hasMenu = !!onOpenPalette && !!onOpenHelp;
+  const hasLeading = hasMenu || !!onBack;
+
   return (
     <header className="problem-surface-bar nodrag sticky top-0 z-20 flex h-11 shrink-0 items-center gap-1.5 border-b border-edge bg-panel/90 px-2 py-1 shadow-[var(--shadow-sm)] backdrop-blur sm:gap-2 sm:px-2.5">
-      {onOpenPalette && onOpenHelp ? (
+      {hasMenu ? (
         <WorkspaceMenuDropdown compact onOpenPalette={onOpenPalette} onOpenHelp={onOpenHelp} />
       ) : null}
-      <BarDivider />
-      {badgeIcon ? (
-        <span className="surface-badge hidden h-7 w-7 shrink-0 place-items-center rounded-md border border-edge bg-panel2 text-accent sm:grid">
-          {badgeIcon}
-        </span>
+      {onBack ? (
+        <IconBtn
+          title={backTitle}
+          onClick={onBack}
+          className="border border-edge bg-panel2/70 hover:bg-panel"
+        >
+          <ChevronLeft />
+        </IconBtn>
       ) : null}
+      {hasLeading ? <BarDivider /> : null}
+
+      {badge}
+
       <div className="min-w-0 flex-1 leading-tight">
         <span className={cn('block truncate font-semibold text-ink', chromeText.sm)}>
           {item.title}
@@ -156,31 +225,35 @@ export function ProblemSurfaceBar({
         </div>
       )}
 
-      <ToolbarSegment className="hidden sm:flex">
-        <FeatureSelectorPopover
-          groups={SURFACE_THEME_GROUPS}
-          value={theme}
-          onChange={(v) => setTheme(v as 'light' | 'dark')}
-          panelTitle="Theme"
-          triggerIcon={
-            theme === 'dark' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />
-          }
-          triggerAriaLabel="Theme"
-          compact
-          align="right"
-        />
-        <FeatureSelectorPopover
-          groups={SURFACE_VIEW_GROUPS}
-          value={present ? 'on' : 'off'}
-          onChange={(v) => setPresent(v === 'on')}
-          panelTitle="View"
-          triggerIcon={<Maximize2 className="h-3.5 w-3.5" />}
-          triggerAriaLabel="View options"
-          compact
-          align="right"
-        />
-      </ToolbarSegment>
-      <AuthButton compact />
+      {actions}
+
+      {showThemeView && (
+        <ToolbarSegment className="hidden sm:flex">
+          <FeatureSelectorPopover
+            groups={SURFACE_THEME_GROUPS}
+            value={theme}
+            onChange={(v) => setTheme(v as 'light' | 'dark')}
+            panelTitle="Theme"
+            triggerIcon={
+              theme === 'dark' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />
+            }
+            triggerAriaLabel="Theme"
+            compact
+            align="right"
+          />
+          <FeatureSelectorPopover
+            groups={SURFACE_VIEW_GROUPS}
+            value={present ? 'on' : 'off'}
+            onChange={(v) => setPresent(v === 'on')}
+            panelTitle="View"
+            triggerIcon={<Maximize2 className="h-3.5 w-3.5" />}
+            triggerAriaLabel="View options"
+            compact
+            align="right"
+          />
+        </ToolbarSegment>
+      )}
+      {showAuth && <AuthButton compact />}
     </header>
   );
 }

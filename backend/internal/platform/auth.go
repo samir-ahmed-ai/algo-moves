@@ -189,6 +189,10 @@ func (s *Service) HandleProfiles(w http.ResponseWriter, r *http.Request) {
 		s.HandleProfileIntegrations(w, r)
 		return
 	}
+	if path == "me/settings" {
+		s.HandleProfileSettings(w, r)
+		return
+	}
 	if path == "me" && r.Method == http.MethodPatch {
 		p, code, msg := s.ProfileFromRequest(ctx, r)
 		if code != 0 {

@@ -58,12 +58,14 @@ export function OverviewProblemColumn({
   view,
   onView,
   canToggle,
+  boardLabel,
   children,
 }: {
   className?: string;
   view: OverviewView;
   onView: (view: OverviewView) => void;
   canToggle: boolean;
+  boardLabel?: string;
   children: ReactNode;
 }) {
   return (
@@ -74,6 +76,7 @@ export function OverviewProblemColumn({
           view={view}
           onView={onView}
           canToggle={canToggle}
+          {...(boardLabel !== undefined ? { boardLabel } : {})}
           className="mt-2 shrink-0"
         />
       }
