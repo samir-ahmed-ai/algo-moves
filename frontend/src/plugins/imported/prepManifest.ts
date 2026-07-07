@@ -2568,15 +2568,15 @@ export const PREP_DATA: PrepProblem[] = [
     "variants": []
   },
   {
-    "id": "prep-math-covert-integer-to-roman-numeral",
+    "id": "prep-math-convert-integer-to-roman-numeral",
     "topic": "math",
     "topicTitle": "Math",
     "course": "Math · prep library",
     "courseIcon": "Sigma",
-    "slug": "covert-integer-to-roman-numeral",
+    "slug": "convert-integer-to-roman-numeral",
     "number": "14.23",
     "title": "Covert integer to roman numeral",
-    "ask": "Find the covert integer to roman numeral.",
+    "ask": "Find the convert integer to roman numeral.",
     "difficulty": "Medium",
     "tags": [
       "math",
@@ -2589,8 +2589,8 @@ export const PREP_DATA: PrepProblem[] = [
     "acquired": "Greedily subtract the largest symbol value that fits—values/symbols incl 900,400,90,40,9,4; while num>=v emit symbol",
     "time": "O(1)",
     "space": "O(1)",
-    "code": "package main\nimport (\n\t\"strings\"\n)\n\n\nfunc covertIntegerToRomanNumeral(num int) string {\n\tvalues := []int{1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1}\n\tsymbols := []string{\"M\", \"CM\", \"D\", \"CD\", \"C\", \"XC\", \"L\", \"XL\", \"X\", \"IX\", \"V\", \"IV\", \"I\"}\n\tvar out strings.Builder\n\tfor i, v := range values {\n\t\tfor num >= v {\n\t\t\tout.WriteString(symbols[i])\n\t\t\tnum -= v\n\t\t}\n\t}\n\treturn out.String()\n}\n",
-    "notes": "# Notes: 14.23 Covert integer to roman numeral\n\n## Status\n- [ ] First pass  [ ] Blind recall  [ ] Interview-ready\n\n\n## Scene\nRead the `--- Scene ---` block in [`solution.go`](./solution.go) before each recall.\n\n## Mistakes\n-\n\n## Revisions\n- YYYY-MM-DD:",
+    "code": "package main\n// Pattern: Greedy roman numeral | Time: O(1) | Space: O(1)\nimport (\n\t\"strings\"\n)\n\n\nfunc convertIntegerToRomanNumeral(num int) string {\n\tvalues := []int{1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1}\n\tsymbols := []string{\"M\", \"CM\", \"D\", \"CD\", \"C\", \"XC\", \"L\", \"XL\", \"X\", \"IX\", \"V\", \"IV\", \"I\"}\n\tvar out strings.Builder\n\tfor i, v := range values {\n\t\tfor num >= v {\n\t\t\tout.WriteString(symbols[i])\n\t\t\tnum -= v\n\t\t}\n\t}\n\treturn out.String()\n}\n",
+    "notes": "# Notes: 14.23 Convert integer to roman numeral\n\n## Status\n- [ ] First pass  [ ] Blind recall  [ ] Interview-ready\n\n\n## Scene\nRead the `--- Scene ---` block in [`solution.go`](./solution.go) before each recall.\n\n## Mistakes\n-\n\n## Revisions\n- YYYY-MM-DD:",
     "approaches": "",
     "variants": []
   },

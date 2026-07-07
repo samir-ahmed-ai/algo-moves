@@ -2490,7 +2490,7 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "group": "prep"
   },
   {
-    "id": "prep-math-covert-integer-to-roman-numeral",
+    "id": "prep-math-convert-integer-to-roman-numeral",
     "title": "Covert integer to roman numeral",
     "number": "14.23",
     "difficulty": "Medium",

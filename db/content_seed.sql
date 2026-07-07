@@ -315,7 +315,7 @@ insert into public.problems (id, title, difficulty, summary, source_url, region_
   ('prep-math-convert-decimal-to-base-n', 'Convert decimal to base N', 'Medium', 'Base conversion repeated divmod', null, null, null),
   ('prep-math-convert-string-to-integer', 'Convert string to integer', 'Medium', 'atoi parse with overflow guard', null, null, null),
   ('prep-math-count-set-bits-in-number', 'Count set bits in number', 'Medium', 'Brian Kernighan bit count', null, null, null),
-  ('prep-math-covert-integer-to-roman-numeral', 'Covert integer to roman numeral', 'Medium', 'Greedy roman numeral', null, null, null),
+  ('prep-math-convert-integer-to-roman-numeral', 'Covert integer to roman numeral', 'Medium', 'Greedy roman numeral', null, null, null),
   ('prep-math-factorial-number', 'Factorial number', 'Medium', 'Iterative factorial', null, null, null),
   ('prep-math-fibonacci-number', 'Fibonacci number', 'Medium', 'Fibonacci iterative', null, null, null),
   ('prep-math-find-missing-number', 'Find missing number', 'Medium', 'Gauss sum XOR trick', null, null, null),
@@ -1269,8 +1269,8 @@ insert into public.problem_tags (problem_id, tag_id) values
   ('prep-math-convert-decimal-to-base-n', 'math'),
   ('prep-math-convert-string-to-integer', 'math'),
   ('prep-math-count-set-bits-in-number', 'math'),
-  ('prep-math-covert-integer-to-roman-numeral', 'math'),
-  ('prep-math-covert-integer-to-roman-numeral', 'greedy'),
+  ('prep-math-convert-integer-to-roman-numeral', 'math'),
+  ('prep-math-convert-integer-to-roman-numeral', 'greedy'),
   ('prep-math-factorial-number', 'math'),
   ('prep-math-fibonacci-number', 'math'),
   ('prep-math-find-missing-number', 'math'),
@@ -16986,13 +16986,14 @@ def count_set_bits_in_number(n: int) -> int:
         return count;
     }
 }', false, 2),
-  ('prep-math-covert-integer-to-roman-numeral', 'go', 'solution.go', 'package main
+  ('prep-math-convert-integer-to-roman-numeral', 'go', 'solution.go', 'package main
+// Pattern: Greedy roman numeral | Time: O(1) | Space: O(1)
 import (
 	"strings"
 )
 
 
-func covertIntegerToRomanNumeral(num int) string {
+func convertIntegerToRomanNumeral(num int) string {
 	values := []int{1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1}
 	symbols := []string{"M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"}
 	var out strings.Builder
@@ -17005,31 +17006,6 @@ func covertIntegerToRomanNumeral(num int) string {
 	return out.String()
 }
 ', true, 0),
-  ('prep-math-covert-integer-to-roman-numeral', 'python', 'solution.py', 'def covert_integer_to_roman_numeral(num: int) -> str:
-    values = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1]
-    symbols = ["M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"]
-    out = []
-    for i, v in enumerate(values):
-        while num >= v:
-            out.append(symbols[i])
-            num -= v
-    return "".join(out)', false, 1),
-  ('prep-math-covert-integer-to-roman-numeral', 'java', 'Solution.java', 'import java.util.*;
-
-class Solution {
-    public String covertIntegerToRomanNumeral(long num) {
-        int[] values = {1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
-        String[] symbols = {"M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"};
-        StringBuilder out = new StringBuilder();
-        for (int i = 0; i < values.length; i++) {
-            while (num >= values[i]) {
-                out.append(symbols[i]);
-                num -= values[i];
-            }
-        }
-        return out.toString();
-    }
-}', false, 2),
   ('prep-math-factorial-number', 'go', 'solution.go', 'package main
 func factorialNumber(n int) int {
 	if n < 0 {
@@ -37949,12 +37925,12 @@ insert into public.quiz_questions (id, problem_id, prompt, explain, sort_order) 
   ('prep-math-count-set-bits-in-number::state', 'prep-math-count-set-bits-in-number', 'What does the `original` field track in the visualization state?', 'The recorder keeps `original` in sync: the number we started with (for the header)', 3),
   ('prep-math-count-set-bits-in-number::complexity', 'prep-math-count-set-bits-in-number', 'What are the time and space complexities for "Count set bits in number"?', 'O(bits set). O(1). count=0; while n!=0 { n&=n-1; count++ }', 4),
   ('prep-math-count-set-bits-in-number::outcome', 'prep-math-count-set-bits-in-number', 'When the run completes, what does the final step convey?', 'n has reached 0, so every 1 bit has been cleared and counted.  has  set bit. Time O(bits set), Space O(1).', 5),
-  ('prep-math-covert-integer-to-roman-numeral::pattern', 'prep-math-covert-integer-to-roman-numeral', 'Which approach fits "Covert integer to roman numeral"?', 'Greedily subtract the largest symbol value that fits', 0),
-  ('prep-math-covert-integer-to-roman-numeral::init', 'prep-math-covert-integer-to-roman-numeral', 'At the start of a run (Covert integer to roman numeral), what strategy is established?', 'Integer → Roman: greedily subtract the largest symbol value that still fits. We walk the value table (1000, 900, 500, 400, …, 1) once, and for each value repeatedly emit its symbol while it is ≤ the remaining number.', 1),
-  ('prep-math-covert-integer-to-roman-numeral::key-step', 'prep-math-covert-integer-to-roman-numeral', 'On the "SKIP" step ( < ), what happens?', 'Now  < , so  no longer fits. Move down to the next-smaller symbol.', 2),
-  ('prep-math-covert-integer-to-roman-numeral::state', 'prep-math-covert-integer-to-roman-numeral', 'What does the `original` field track in the visualization state?', 'The recorder keeps `original` in sync: the number we started with', 3),
-  ('prep-math-covert-integer-to-roman-numeral::complexity', 'prep-math-covert-integer-to-roman-numeral', 'What are the time and space complexities for "Covert integer to roman numeral"?', 'O(1). O(1). values/symbols incl 900,400,90,40,9,4; while num>=v emit symbol', 4),
-  ('prep-math-covert-integer-to-roman-numeral::outcome', 'prep-math-covert-integer-to-roman-numeral', 'When the run completes, what does the final step convey?', 'Remaining number is 0 — everything has been converted. The Roman numeral is complete: "".', 5),
+  ('prep-math-convert-integer-to-roman-numeral::pattern', 'prep-math-convert-integer-to-roman-numeral', 'Which approach fits "Covert integer to roman numeral"?', 'Greedily subtract the largest symbol value that fits', 0),
+  ('prep-math-convert-integer-to-roman-numeral::init', 'prep-math-convert-integer-to-roman-numeral', 'At the start of a run (Covert integer to roman numeral), what strategy is established?', 'Integer → Roman: greedily subtract the largest symbol value that still fits. We walk the value table (1000, 900, 500, 400, …, 1) once, and for each value repeatedly emit its symbol while it is ≤ the remaining number.', 1),
+  ('prep-math-convert-integer-to-roman-numeral::key-step', 'prep-math-convert-integer-to-roman-numeral', 'On the "SKIP" step ( < ), what happens?', 'Now  < , so  no longer fits. Move down to the next-smaller symbol.', 2),
+  ('prep-math-convert-integer-to-roman-numeral::state', 'prep-math-convert-integer-to-roman-numeral', 'What does the `original` field track in the visualization state?', 'The recorder keeps `original` in sync: the number we started with', 3),
+  ('prep-math-convert-integer-to-roman-numeral::complexity', 'prep-math-convert-integer-to-roman-numeral', 'What are the time and space complexities for "Covert integer to roman numeral"?', 'O(1). O(1). values/symbols incl 900,400,90,40,9,4; while num>=v emit symbol', 4),
+  ('prep-math-convert-integer-to-roman-numeral::outcome', 'prep-math-convert-integer-to-roman-numeral', 'When the run completes, what does the final step convey?', 'Remaining number is 0 — everything has been converted. The Roman numeral is complete: "".', 5),
   ('prep-math-factorial-number::pattern', 'prep-math-factorial-number', 'Which approach fits "Factorial number"?', 'Multiply 1..n into an accumulator', 0),
   ('prep-math-factorial-number::init', 'prep-math-factorial-number', 'At the start of a run (Factorial number), what strategy is established?', 'Factorial number: compute n! = 1·2·3·…·n iteratively. Start an accumulator result = 1, then fold each factor from 2 up to  into it. Time O(n), Space O(1).', 1),
   ('prep-math-factorial-number::key-step', 'prep-math-factorial-number', 'On the "MUL" step (× → ), what happens?', 'Multiply factor  into the accumulator: result =  ×  = . This folds  into the running product 1·2·…·.', 2),
@@ -43799,30 +43775,30 @@ insert into public.quiz_choices (id, question_id, label, is_correct, sort_order)
   ('prep-math-count-set-bits-in-number::outcome#1', 'prep-math-count-set-bits-in-number::outcome', 'Incomplete partial result — more steps needed', false, 1),
   ('prep-math-count-set-bits-in-number::outcome#2', 'prep-math-count-set-bits-in-number::outcome', 'Input left unchanged — no mutations applied', false, 2),
   ('prep-math-count-set-bits-in-number::outcome#3', 'prep-math-count-set-bits-in-number::outcome', 'Aborted run on failure — infinite loop detected', false, 3),
-  ('prep-math-covert-integer-to-roman-numeral::pattern#0', 'prep-math-covert-integer-to-roman-numeral::pattern', 'Greedy roman numeral — fits this problem', true, 0),
-  ('prep-math-covert-integer-to-roman-numeral::pattern#1', 'prep-math-covert-integer-to-roman-numeral::pattern', 'Bit trick power of two — different approach', false, 1),
-  ('prep-math-covert-integer-to-roman-numeral::pattern#2', 'prep-math-covert-integer-to-roman-numeral::pattern', 'Iterative factorial — different approach', false, 2),
-  ('prep-math-covert-integer-to-roman-numeral::pattern#3', 'prep-math-covert-integer-to-roman-numeral::pattern', 'Sort + Sliding Window (atan2) — different approach', false, 3),
-  ('prep-math-covert-integer-to-roman-numeral::init#0', 'prep-math-covert-integer-to-roman-numeral::init', 'Greedily subtract the largest symbol value — described in INIT caption', true, 0),
-  ('prep-math-covert-integer-to-roman-numeral::init#1', 'prep-math-covert-integer-to-roman-numeral::init', 'Precomputed final answer — before scanning input', false, 1),
-  ('prep-math-covert-integer-to-roman-numeral::init#2', 'prep-math-covert-integer-to-roman-numeral::init', 'Descending sort required — as mandatory first step', false, 2),
-  ('prep-math-covert-integer-to-roman-numeral::init#3', 'prep-math-covert-integer-to-roman-numeral::init', 'Every element visited upfront — marked from the start', false, 3),
-  ('prep-math-covert-integer-to-roman-numeral::key-step#0', 'prep-math-covert-integer-to-roman-numeral::key-step', 'Now < , so no longer — this move caption', true, 0),
-  ('prep-math-covert-integer-to-roman-numeral::key-step#1', 'prep-math-covert-integer-to-roman-numeral::key-step', 'Run terminates immediately — no further frames', false, 1),
-  ('prep-math-covert-integer-to-roman-numeral::key-step#2', 'prep-math-covert-integer-to-roman-numeral::key-step', 'Pointers reset to zero — restart scan', false, 2),
-  ('prep-math-covert-integer-to-roman-numeral::key-step#3', 'prep-math-covert-integer-to-roman-numeral::key-step', 'Remaining input skipped — early return path', false, 3),
-  ('prep-math-covert-integer-to-roman-numeral::state#0', 'prep-math-covert-integer-to-roman-numeral::state', 'the number we started — updated each frame', true, 0),
-  ('prep-math-covert-integer-to-roman-numeral::state#1', 'prep-math-covert-integer-to-roman-numeral::state', 'Fixed display label — unchanged each frame', false, 1),
-  ('prep-math-covert-integer-to-roman-numeral::state#2', 'prep-math-covert-integer-to-roman-numeral::state', 'Shuffle seed value — for random ordering', false, 2),
-  ('prep-math-covert-integer-to-roman-numeral::state#3', 'prep-math-covert-integer-to-roman-numeral::state', 'Failure error code — set once at end', false, 3),
-  ('prep-math-covert-integer-to-roman-numeral::complexity#0', 'prep-math-covert-integer-to-roman-numeral::complexity', 'O(1) time, O(1) space — standard bounds here', true, 0),
-  ('prep-math-covert-integer-to-roman-numeral::complexity#1', 'prep-math-covert-integer-to-roman-numeral::complexity', 'O(m·n) time, O(n) space — wrong order of growth', false, 1),
-  ('prep-math-covert-integer-to-roman-numeral::complexity#2', 'prep-math-covert-integer-to-roman-numeral::complexity', 'O(log n) time, O(log n) space — wrong order of growth', false, 2),
-  ('prep-math-covert-integer-to-roman-numeral::complexity#3', 'prep-math-covert-integer-to-roman-numeral::complexity', 'O(sqrt(n)) time, O(1) space — wrong order of growth', false, 3),
-  ('prep-math-covert-integer-to-roman-numeral::outcome#0', 'prep-math-covert-integer-to-roman-numeral::outcome', 'Remaining number is 0 — everything — final DONE caption', true, 0),
-  ('prep-math-covert-integer-to-roman-numeral::outcome#1', 'prep-math-covert-integer-to-roman-numeral::outcome', 'Incomplete partial result — more steps needed', false, 1),
-  ('prep-math-covert-integer-to-roman-numeral::outcome#2', 'prep-math-covert-integer-to-roman-numeral::outcome', 'Input left unchanged — no mutations applied', false, 2),
-  ('prep-math-covert-integer-to-roman-numeral::outcome#3', 'prep-math-covert-integer-to-roman-numeral::outcome', 'Aborted run on failure — infinite loop detected', false, 3),
+  ('prep-math-convert-integer-to-roman-numeral::pattern#0', 'prep-math-convert-integer-to-roman-numeral::pattern', 'Greedy roman numeral — fits this problem', true, 0),
+  ('prep-math-convert-integer-to-roman-numeral::pattern#1', 'prep-math-convert-integer-to-roman-numeral::pattern', 'Bit trick power of two — different approach', false, 1),
+  ('prep-math-convert-integer-to-roman-numeral::pattern#2', 'prep-math-convert-integer-to-roman-numeral::pattern', 'Iterative factorial — different approach', false, 2),
+  ('prep-math-convert-integer-to-roman-numeral::pattern#3', 'prep-math-convert-integer-to-roman-numeral::pattern', 'Sort + Sliding Window (atan2) — different approach', false, 3),
+  ('prep-math-convert-integer-to-roman-numeral::init#0', 'prep-math-convert-integer-to-roman-numeral::init', 'Greedily subtract the largest symbol value — described in INIT caption', true, 0),
+  ('prep-math-convert-integer-to-roman-numeral::init#1', 'prep-math-convert-integer-to-roman-numeral::init', 'Precomputed final answer — before scanning input', false, 1),
+  ('prep-math-convert-integer-to-roman-numeral::init#2', 'prep-math-convert-integer-to-roman-numeral::init', 'Descending sort required — as mandatory first step', false, 2),
+  ('prep-math-convert-integer-to-roman-numeral::init#3', 'prep-math-convert-integer-to-roman-numeral::init', 'Every element visited upfront — marked from the start', false, 3),
+  ('prep-math-convert-integer-to-roman-numeral::key-step#0', 'prep-math-convert-integer-to-roman-numeral::key-step', 'Now < , so no longer — this move caption', true, 0),
+  ('prep-math-convert-integer-to-roman-numeral::key-step#1', 'prep-math-convert-integer-to-roman-numeral::key-step', 'Run terminates immediately — no further frames', false, 1),
+  ('prep-math-convert-integer-to-roman-numeral::key-step#2', 'prep-math-convert-integer-to-roman-numeral::key-step', 'Pointers reset to zero — restart scan', false, 2),
+  ('prep-math-convert-integer-to-roman-numeral::key-step#3', 'prep-math-convert-integer-to-roman-numeral::key-step', 'Remaining input skipped — early return path', false, 3),
+  ('prep-math-convert-integer-to-roman-numeral::state#0', 'prep-math-convert-integer-to-roman-numeral::state', 'the number we started — updated each frame', true, 0),
+  ('prep-math-convert-integer-to-roman-numeral::state#1', 'prep-math-convert-integer-to-roman-numeral::state', 'Fixed display label — unchanged each frame', false, 1),
+  ('prep-math-convert-integer-to-roman-numeral::state#2', 'prep-math-convert-integer-to-roman-numeral::state', 'Shuffle seed value — for random ordering', false, 2),
+  ('prep-math-convert-integer-to-roman-numeral::state#3', 'prep-math-convert-integer-to-roman-numeral::state', 'Failure error code — set once at end', false, 3),
+  ('prep-math-convert-integer-to-roman-numeral::complexity#0', 'prep-math-convert-integer-to-roman-numeral::complexity', 'O(1) time, O(1) space — standard bounds here', true, 0),
+  ('prep-math-convert-integer-to-roman-numeral::complexity#1', 'prep-math-convert-integer-to-roman-numeral::complexity', 'O(m·n) time, O(n) space — wrong order of growth', false, 1),
+  ('prep-math-convert-integer-to-roman-numeral::complexity#2', 'prep-math-convert-integer-to-roman-numeral::complexity', 'O(log n) time, O(log n) space — wrong order of growth', false, 2),
+  ('prep-math-convert-integer-to-roman-numeral::complexity#3', 'prep-math-convert-integer-to-roman-numeral::complexity', 'O(sqrt(n)) time, O(1) space — wrong order of growth', false, 3),
+  ('prep-math-convert-integer-to-roman-numeral::outcome#0', 'prep-math-convert-integer-to-roman-numeral::outcome', 'Remaining number is 0 — everything — final DONE caption', true, 0),
+  ('prep-math-convert-integer-to-roman-numeral::outcome#1', 'prep-math-convert-integer-to-roman-numeral::outcome', 'Incomplete partial result — more steps needed', false, 1),
+  ('prep-math-convert-integer-to-roman-numeral::outcome#2', 'prep-math-convert-integer-to-roman-numeral::outcome', 'Input left unchanged — no mutations applied', false, 2),
+  ('prep-math-convert-integer-to-roman-numeral::outcome#3', 'prep-math-convert-integer-to-roman-numeral::outcome', 'Aborted run on failure — infinite loop detected', false, 3),
   ('prep-math-factorial-number::pattern#0', 'prep-math-factorial-number::pattern', 'Iterative factorial — fits this problem', true, 0),
   ('prep-math-factorial-number::pattern#1', 'prep-math-factorial-number::pattern', 'atoi parse with overflow guard — different approach', false, 1),
   ('prep-math-factorial-number::pattern#2', 'prep-math-factorial-number::pattern', 'Sort — different approach', false, 2),
@@ -49625,7 +49601,7 @@ insert into public.items (id, course_id, topic_id, problem_id, kind, title, summ
   ('prep-math-convert-decimal-to-base-n', 'prep-math', 'prep-math-all', 'prep-math-convert-decimal-to-base-n', 'problem', 'Convert decimal to base N', 'Base conversion repeated divmod', 'Medium', null, '{}'::text[], 311),
   ('prep-math-convert-string-to-integer', 'prep-math', 'prep-math-all', 'prep-math-convert-string-to-integer', 'problem', 'Convert string to integer', 'atoi parse with overflow guard', 'Medium', null, '{}'::text[], 312),
   ('prep-math-count-set-bits-in-number', 'prep-math', 'prep-math-all', 'prep-math-count-set-bits-in-number', 'problem', 'Count set bits in number', 'Brian Kernighan bit count', 'Medium', null, '{}'::text[], 313),
-  ('prep-math-covert-integer-to-roman-numeral', 'prep-math', 'prep-math-all', 'prep-math-covert-integer-to-roman-numeral', 'problem', 'Covert integer to roman numeral', 'Greedy roman numeral', 'Medium', null, '{}'::text[], 314),
+  ('prep-math-convert-integer-to-roman-numeral', 'prep-math', 'prep-math-all', 'prep-math-convert-integer-to-roman-numeral', 'problem', 'Covert integer to roman numeral', 'Greedy roman numeral', 'Medium', null, '{}'::text[], 314),
   ('prep-math-factorial-number', 'prep-math', 'prep-math-all', 'prep-math-factorial-number', 'problem', 'Factorial number', 'Iterative factorial', 'Medium', null, '{}'::text[], 315),
   ('prep-math-fibonacci-number', 'prep-math', 'prep-math-all', 'prep-math-fibonacci-number', 'problem', 'Fibonacci number', 'Fibonacci iterative', 'Medium', null, '{}'::text[], 316),
   ('prep-math-find-missing-number', 'prep-math', 'prep-math-all', 'prep-math-find-missing-number', 'problem', 'Find missing number', 'Gauss sum XOR trick', 'Medium', null, '{}'::text[], 317),

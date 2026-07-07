@@ -1977,9 +1977,9 @@ export const PREP_COURSES: CourseDef[] = [
             "status": "todo"
           },
           {
-            "id": "prep-math-covert-integer-to-roman-numeral",
+            "id": "prep-math-convert-integer-to-roman-numeral",
             "kind": "problem",
-            "pluginId": "prep-math-covert-integer-to-roman-numeral",
+            "pluginId": "prep-math-convert-integer-to-roman-numeral",
             "status": "todo"
           },
           {

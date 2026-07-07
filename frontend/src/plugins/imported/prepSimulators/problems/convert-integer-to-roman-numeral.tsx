@@ -143,7 +143,7 @@ function Inspector({ frame }: InspectorProps<RomanState>) {
   );
 }
 
-export const manifestId = 'prep-math-covert-integer-to-roman-numeral';
+export const manifestId = 'prep-math-convert-integer-to-roman-numeral';
 export const title = 'Covert integer to roman numeral';
 
 
