@@ -18,10 +18,10 @@ export function Roster({ compact = false }: { compact?: boolean }) {
     reactions.filter((r) => r.fromId === id).slice(-1)[0]?.emoji;
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className={cn('game-roster flex flex-col gap-3', compact && 'game-roster--compact')}>
       <div>
         {!compact ? (
-          <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-ink3">
+          <p className="game-roster__label mb-1.5 text-xs font-semibold uppercase tracking-wide text-ink3">
             {t.room.players} · {players.length}
           </p>
         ) : null}
@@ -42,7 +42,7 @@ export function Roster({ compact = false }: { compact?: boolean }) {
       </div>
 
       {spectators.length > 0 ? (
-        <div className="flex items-center gap-2 text-ink3">
+        <div className="game-roster__spectators flex items-center gap-2 text-ink3">
           <Eye className="h-3.5 w-3.5" />
           <span className="text-xs font-medium">{t.room.spectatorCount(spectators.length)}</span>
           <div className="flex -space-x-1.5">
@@ -82,7 +82,7 @@ function PlayerChip({
   return (
     <li
       className={cn(
-        'relative inline-flex items-center gap-2 rounded-full border py-1 ps-1 pe-3 transition-colors',
+        'game-player-chip relative inline-flex items-center gap-2 rounded-full border py-1 ps-1 pe-3 transition-colors',
         isReady ? 'border-good/50 bg-good/10' : 'border-edge bg-panel',
       )}
     >

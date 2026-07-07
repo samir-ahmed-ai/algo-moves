@@ -14,6 +14,7 @@ import {
   type LayoutDir,
 } from '../layout/layout';
 import { restoreNodeWidth } from '../nodes/nodeSnapshot';
+import { buildInterviewBoardNodes } from '@/shell/interview/interviewLayout';
 
 import type { PanelNodeStyle } from '@/core/panelFlowTypes';
 
@@ -43,6 +44,8 @@ export interface CanvasFrameInput {
   saved?: SavedNodeLayout;
   /** Seed the first problem-backed visualize canvas with useful panels. */
   seedProblemCanvas?: boolean;
+  /** Seed the standalone canvas with the interview board layout (whiteboard + notes + collab code). */
+  seedInterviewCanvas?: boolean;
   layoutOpts: LayoutVisualizeOptions;
   dir: LayoutDir;
   edgeOpts: EdgeOpts;
@@ -58,19 +61,19 @@ export function buildCanvasFrame(
   mode: CanvasMode,
   input: CanvasFrameInput,
 ): { nodes: PanelFlowNode[]; edges: Edge[] } {
-  const { removed, removedEdges, saved, seedProblemCanvas, dir, edgeOpts } = input;
+  const { removed, removedEdges, saved, seedProblemCanvas, seedInterviewCanvas, dir, edgeOpts } =
+    input;
 
   let nodes = buildNodes(plugin, mode);
   const hasSavedLayout = !!saved && Object.keys(saved).length > 0;
   const hasRemovedNodes = !!removed?.size;
-  const seededProblemCanvas =
-    seedProblemCanvas &&
-    mode === 'visualize' &&
-    nodes.length === 0 &&
-    !hasSavedLayout &&
-    !hasRemovedNodes;
+  const canSeed = mode === 'visualize' && nodes.length === 0 && !hasSavedLayout && !hasRemovedNodes;
+  const seededProblemCanvas = !!seedProblemCanvas && canSeed;
+  const seededInterviewCanvas = !seededProblemCanvas && !!seedInterviewCanvas && canSeed;
   if (seededProblemCanvas) {
     nodes = [nodeForKind(plugin, 'workbench', { x: 0, y: 0 })];
+  } else if (seededInterviewCanvas) {
+    nodes = buildInterviewBoardNodes({ includeNotes: true, includeProblem: false });
   }
   if (removed?.size) nodes = nodes.filter((n) => !removed.has(n.id));
   const present = new Set(nodes.map((n) => n.id));

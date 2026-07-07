@@ -5,6 +5,7 @@ import {
   orbitLineDy,
   orbitTextSpan,
   ORBIT_FONT,
+  type OrbitFontConfig,
   type OrbitTextLayout,
 } from './orbitArc';
 
@@ -21,6 +22,7 @@ export function OrbitFitText({
   slot,
   className,
   dy = slot === 'center' ? -9 : 8,
+  font,
   onClick,
 }: {
   text: string;
@@ -28,10 +30,11 @@ export function OrbitFitText({
   slot: 'center' | 'side';
   className?: string;
   dy?: number;
+  font?: OrbitFontConfig;
   onClick?: () => void;
 }) {
   const measureRef = useRef<SVGTextElement>(null);
-  const { max, min, maxLines } = ORBIT_FONT[slot];
+  const { max, min, maxLines } = font ?? ORBIT_FONT[slot];
   const { startOffset, textAnchor, budget } = orbitTextSpan(slot);
   const [layout, setLayout] = useState<OrbitTextLayout>(() => ({
     fontSize: max,

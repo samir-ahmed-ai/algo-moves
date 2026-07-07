@@ -68,16 +68,16 @@ export function AssembleModes() {
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-edge px-3 py-2">
+    <div className="assemble-mode-shell flex min-h-0 flex-1 flex-col">
+      <div className="assemble-mode-toolbar ws-scroll flex shrink-0 items-center gap-2 overflow-x-auto border-b border-edge px-3 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <MiniTabs value={mode} options={MODES} onChange={setMode} />
       </div>
       {GAME_MODE_IDS.has(mode) ? (
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-2 sm:p-3">
+        <div className="assemble-mode-workspace flex min-h-0 flex-1 flex-col overflow-hidden p-2 sm:p-3">
           <GameMode mode={mode} />
         </div>
       ) : (
-        <div className="ws-scroll min-h-0 flex-1 overflow-auto p-3">
+        <div className="assemble-mode-workspace ws-scroll min-h-0 flex-1 overflow-auto p-3">
           {mode === 'blocks' && <BlocksMode />}
           {mode === 'blanks' && <BlanksMode />}
           {mode === 'scramble' && <ScrambleMode />}

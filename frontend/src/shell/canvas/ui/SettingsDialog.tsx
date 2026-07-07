@@ -30,17 +30,18 @@ function Segmented<T extends string>({
   onChange: (v: T) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-1">
+    <div className="settings-segmented flex flex-wrap gap-1">
       {options.map((o) => (
         <button
           key={o.v}
           type="button"
           onClick={() => onChange(o.v)}
           className={cn(
-            `${RADIUS_CTRL} border px-1.5 py-0.5 font-medium transition-colors`,
+            `settings-segmented__button ${RADIUS_CTRL} border px-1.5 py-0.5 font-medium transition-colors`,
             value === o.v
               ? 'border-accent bg-accentbg text-accent'
               : 'border-edge text-ink2 hover:text-ink',
+            value === o.v && 'is-active',
           )}
         >
           {o.label}
@@ -98,39 +99,42 @@ export function SettingsDialog() {
 
   return (
     <div
-      className="fixed inset-0 z-[60] grid place-items-center bg-black/40 backdrop-blur-sm"
+      className="settings-dialog-backdrop fixed inset-0 z-[60] grid place-items-center bg-black/40 backdrop-blur-sm"
       onClick={() => setSettingsOpen(false)}
       role="dialog"
       aria-label="Settings"
     >
       <div
-        className="w-[420px] max-w-[92vw] overflow-hidden rounded-[var(--radius)] border border-edge bg-panel shadow-[var(--shadow-xl)]"
+        className="settings-dialog w-[420px] max-w-[92vw] overflow-hidden rounded-[var(--radius)] border border-edge bg-panel shadow-[var(--shadow-xl)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <header className="flex items-center gap-1.5 border-b border-edge px-3 py-2">
-          <Settings className="h-3.5 w-3.5 text-accent" />
+        <header className="settings-dialog__header flex items-center gap-1.5 border-b border-edge px-3 py-2">
+          <span className="settings-dialog__icon">
+            <Settings className="h-3.5 w-3.5 text-accent" />
+          </span>
           <h2 className={cn('flex-1 font-semibold text-ink', chromeText.base)}>Settings</h2>
           <button
             type="button"
             onClick={() => setSettingsOpen(false)}
-            className={`grid h-5 w-5 place-items-center text-ink3 hover:bg-panel2 hover:text-ink ${RADIUS_CTRL}`}
+            className={`settings-dialog__close grid h-5 w-5 place-items-center text-ink3 hover:bg-panel2 hover:text-ink ${RADIUS_CTRL}`}
             aria-label="Close settings"
           >
             <X className="h-3 w-3" />
           </button>
         </header>
 
-        <div className="flex gap-1 border-b border-edge px-3 py-2">
+        <div className="settings-dialog__tabs flex gap-1 border-b border-edge px-3 py-2">
           {SETTINGS_TABS.map((tab) => (
             <button
               key={tab.id}
               type="button"
               onClick={() => setSettingsTab(tab.id)}
               className={cn(
-                `${RADIUS_CTRL} px-2.5 py-1 font-medium transition`,
+                `settings-dialog__tab ${RADIUS_CTRL} px-2.5 py-1 font-medium transition`,
                 settingsTab === tab.id
                   ? 'bg-accentbg text-accent'
                   : 'text-ink2 hover:bg-panel2 hover:text-ink',
+                settingsTab === tab.id && 'is-active',
                 chromeText.sm,
               )}
             >
@@ -139,90 +143,102 @@ export function SettingsDialog() {
           ))}
         </div>
 
-        <div className="ws-scroll max-h-[70vh] space-y-3 overflow-y-auto p-3">
+        <div className="settings-dialog__body ws-scroll max-h-[70vh] space-y-3 overflow-y-auto p-3">
           {settingsTab === 'profile' ? (
             <ProfileIntegrationsSection />
           ) : (
             <>
-              <Field label="Density">
-                <Segmented<Density>
-                  value={density}
-                  onChange={setDensity}
-                  options={[
-                    { v: 'ultra', label: 'Ultra' },
-                    { v: 'compact', label: 'Compact' },
-                    { v: 'spacious', label: 'Spacious' },
-                  ]}
-                />
-              </Field>
+              <div className="settings-dialog__section">
+                <Field label="Density">
+                  <Segmented<Density>
+                    value={density}
+                    onChange={setDensity}
+                    options={[
+                      { v: 'ultra', label: 'Ultra' },
+                      { v: 'compact', label: 'Compact' },
+                      { v: 'spacious', label: 'Spacious' },
+                    ]}
+                  />
+                </Field>
+              </div>
 
-              <Field label="Theme preset">
-                <div className="grid max-h-[160px] grid-cols-2 gap-1 overflow-y-auto">
-                  {THEME_META.map((t) => (
-                    <button
-                      key={t.id}
-                      type="button"
-                      onClick={() => setThemePreset(t.id as ThemePreset)}
-                      className={cn(
-                        `flex items-center gap-1.5 border px-2 py-1 text-left${RADIUS_CTRL}`,
-                        themePreset === t.id
-                          ? 'border-accent bg-accentbg'
-                          : 'border-edge hover:border-accent/40',
-                      )}
-                    >
-                      <span
-                        className="h-4 w-4 shrink-0 rounded-full border border-edge"
-                        style={{ background: t.swatch }}
-                      />
-                      <span className="truncate">{t.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </Field>
+              <div className="settings-dialog__section">
+                <Field label="Theme preset">
+                  <div className="grid max-h-[160px] grid-cols-2 gap-1 overflow-y-auto">
+                    {THEME_META.map((t) => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => setThemePreset(t.id as ThemePreset)}
+                        className={cn(
+                          `flex items-center gap-1.5 border px-2 py-1 text-left${RADIUS_CTRL}`,
+                          themePreset === t.id
+                            ? 'border-accent bg-accentbg'
+                            : 'border-edge hover:border-accent/40',
+                        )}
+                      >
+                        <span
+                          className="h-4 w-4 shrink-0 rounded-full border border-edge"
+                          style={{ background: t.swatch }}
+                        />
+                        <span className="truncate">{t.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </Field>
+              </div>
 
-              <Field label="Default layout preset">
-                <Segmented<LayoutPreset>
-                  value={layoutPreset}
-                  onChange={setLayoutPreset}
-                  options={LAYOUT_PRESETS.map((p) => ({ v: p, label: p }))}
-                />
-              </Field>
+              <div className="settings-dialog__section">
+                <Field label="Default layout preset">
+                  <Segmented<LayoutPreset>
+                    value={layoutPreset}
+                    onChange={setLayoutPreset}
+                    options={LAYOUT_PRESETS.map((p) => ({ v: p, label: p }))}
+                  />
+                </Field>
+              </div>
 
               {canvasHud && (
                 <>
-                  <Field label="Edge style">
-                    <Segmented<EdgePathType>
-                      value={canvasHud.edgeOpts.pathType}
-                      onChange={(v) => canvasHud.setEdgeOpts((o) => ({ ...o, pathType: v }))}
-                      options={[
-                        { v: 'bezier', label: 'Bezier' },
-                        { v: 'smoothstep', label: 'Smooth' },
-                        { v: 'step', label: 'Step' },
-                        { v: 'straight', label: 'Straight' },
-                      ]}
+                  <div className="settings-dialog__section">
+                    <Field label="Edge style">
+                      <Segmented<EdgePathType>
+                        value={canvasHud.edgeOpts.pathType}
+                        onChange={(v) => canvasHud.setEdgeOpts((o) => ({ ...o, pathType: v }))}
+                        options={[
+                          { v: 'bezier', label: 'Bezier' },
+                          { v: 'smoothstep', label: 'Smooth' },
+                          { v: 'step', label: 'Step' },
+                          { v: 'straight', label: 'Straight' },
+                        ]}
+                      />
+                    </Field>
+                  </div>
+                  <div className="settings-dialog__section">
+                    <Field label="Canvas background">
+                      <Segmented<BgVariant>
+                        value={canvasHud.bg}
+                        onChange={canvasHud.setBg}
+                        options={[
+                          { v: 'dots', label: 'Dots' },
+                          { v: 'lines', label: 'Lines' },
+                          { v: 'cross', label: 'Cross' },
+                          { v: 'none', label: 'None' },
+                        ]}
+                      />
+                    </Field>
+                  </div>
+                  <div className="settings-dialog__section">
+                    <Toggle
+                      label="Snap to grid"
+                      checked={canvasHud.snap}
+                      onChange={canvasHud.setSnap}
                     />
-                  </Field>
-                  <Field label="Canvas background">
-                    <Segmented<BgVariant>
-                      value={canvasHud.bg}
-                      onChange={canvasHud.setBg}
-                      options={[
-                        { v: 'dots', label: 'Dots' },
-                        { v: 'lines', label: 'Lines' },
-                        { v: 'cross', label: 'Cross' },
-                        { v: 'none', label: 'None' },
-                      ]}
-                    />
-                  </Field>
-                  <Toggle
-                    label="Snap to grid"
-                    checked={canvasHud.snap}
-                    onChange={canvasHud.setSnap}
-                  />
+                  </div>
                 </>
               )}
 
-              <div className="-mx-1 border-t border-edge pt-3">
+              <div className="settings-dialog__section settings-dialog__section--toggles -mx-1 border-t border-edge pt-3">
                 <Toggle
                   label="Sound cues"
                   checked={tweaks.sound}
@@ -244,11 +260,14 @@ export function SettingsDialog() {
         </div>
 
         {settingsTab === 'appearance' && (
-          <footer className="flex justify-end gap-2 border-t border-edge px-3 py-2">
+          <footer className="settings-dialog__footer flex justify-end gap-2 border-t border-edge px-3 py-2">
             <button
               type="button"
               onClick={() => setSettingsOpen(false)}
-              className={cn(`px-2.5 py-1 text-ink2 hover:bg-panel2 ${RADIUS_CTRL}`, chromeText.sm)}
+              className={cn(
+                `settings-dialog__cancel px-2.5 py-1 text-ink2 hover:bg-panel2 ${RADIUS_CTRL}`,
+                chromeText.sm,
+              )}
             >
               Cancel
             </button>
@@ -256,7 +275,7 @@ export function SettingsDialog() {
               type="button"
               onClick={persist}
               className={cn(
-                `bg-accent px-2.5 py-1 font-medium text-white hover:opacity-90 ${RADIUS_CTRL}`,
+                `settings-dialog__save bg-accent px-2.5 py-1 font-medium text-white hover:opacity-90 ${RADIUS_CTRL}`,
                 chromeText.sm,
               )}
             >

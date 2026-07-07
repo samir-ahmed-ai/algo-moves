@@ -11,7 +11,6 @@ import {
   useCanvasActions,
   useCanvasFrame,
   useCanvasStatic,
-  Banner,
   Btn,
   Chip,
   EmptyState,
@@ -118,15 +117,17 @@ export function PredictPanelBody() {
   };
 
   return (
-    <div className="nodrag flex flex-col gap-2">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Label>score</Label>
-          <span className={cn('font-mono tabular-nums text-ink', nodeText.base)}>
-            {score.ok}/{score.total}
-          </span>
+    <section className="nodrag predict-panel">
+      <div className="predict-panel__header">
+        <div className="min-w-0">
+          <Label>decision drill</Label>
+          <div className="predict-panel__score">
+            <span className="predict-panel__score-value">{score.ok}</span>
+            <span className="predict-panel__score-divider">/</span>
+            <span className="predict-panel__score-total">{score.total}</span>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="predict-panel__actions">
           {timed && !answered && (
             <Chip tone={timeLeft <= 5 ? 'bad' : 'muted'} mono>
               ⏱ {timeLeft}s
@@ -137,29 +138,42 @@ export function PredictPanelBody() {
           </Btn>
         </div>
       </div>
-      <Banner tone="default" label="Just happened">
-        <div className={cn('font-mono text-ink', nodeText.base)}>{cur.move.note}</div>
-        <p className={cn('mt-1 leading-snug text-ink2', nodeText.base)}>{cur.move.caption}</p>
-      </Banner>
-      <Label>What is the next move?</Label>
-      <div className="flex flex-col gap-1.5">
-        {choices.map((t) => {
-          const state = !answered
-            ? 'idle'
-            : t === answer
-              ? 'correct'
-              : t === picked
-                ? 'wrong'
-                : 'dim';
-          return (
-            <Option key={t} state={state} disabled={answered} onClick={() => pick(t)}>
-              {t.toLowerCase()}
-            </Option>
-          );
-        })}
+      <div className="predict-event-card">
+        <div className="predict-event-card__kicker">
+          <span className="predict-event-card__dot" />
+          <Label>Just happened</Label>
+        </div>
+        <div className={cn('predict-event-card__note font-mono', nodeText.base)}>
+          {cur.move.note}
+        </div>
+        <p className={cn('predict-event-card__caption', nodeText.base)}>{cur.move.caption}</p>
+      </div>
+      <div className="predict-question-card">
+        <Label>What is the next move?</Label>
+        <div className="predict-choice-list">
+          {choices.map((t, index) => {
+            const state = !answered
+              ? 'idle'
+              : t === answer
+                ? 'correct'
+                : t === picked
+                  ? 'wrong'
+                  : 'dim';
+            return (
+              <Option key={t} state={state} disabled={answered} onClick={() => pick(t)}>
+                <span className="predict-choice">
+                  <span className="predict-choice__index">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <span className="predict-choice__label">{t.toLowerCase()}</span>
+                </span>
+              </Option>
+            );
+          })}
+        </div>
       </div>
       {answered && picked !== answer && (
-        <div className="flex flex-col gap-2">
+        <div className="predict-feedback predict-feedback--wrong">
           <Hint>
             {picked === '(timed out)' ? '⏱ Timed out — ' : '✕ Actually — '}
             {frames[pos + 1].move.caption}
@@ -169,7 +183,11 @@ export function PredictPanelBody() {
           </Btn>
         </div>
       )}
-      {answered && picked === answer && <Hint>✓ Right — {frames[pos + 1].move.caption}</Hint>}
-    </div>
+      {answered && picked === answer && (
+        <div className="predict-feedback predict-feedback--right">
+          <Hint>✓ Right — {frames[pos + 1].move.caption}</Hint>
+        </div>
+      )}
+    </section>
   );
 }

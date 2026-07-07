@@ -2,13 +2,20 @@ import { useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, GraduationCap, Network } from 'lucide-react';
 import type { Frame, Player, ProblemPlugin } from '../../core';
 import type { Item } from '../../content';
-import { catalog, browseBreadcrumbForItem, getSiblingItems } from '../../content';
+import {
+  catalog,
+  browseBreadcrumbForItem,
+  getCategoryById,
+  getSiblingItems,
+  getTrackById,
+} from '../../content';
 import { cn } from '@/lib/utils/cn';
 import { computeInputFrameCounts, buildFrameContextValue } from '@/lib/canvas';
 import { useWorkspace } from '@/store/workspace';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
-import { BrowseBreadcrumb } from '../browse/BrowseBreadcrumb';
-import { ChromeLabel, chromeText } from '../chromeUi';
+import { courseIcon } from '../courseIcon';
+import { trackColor } from '../browse/trackColors';
+import { chromeText } from '../chromeUi';
 import {
   Btn,
   Chip,
@@ -136,6 +143,10 @@ function ProblemPageHeader() {
   const derived = browseBreadcrumbForItem(item.id, catalog);
   const trackId = activeTrackId ?? derived.track?.id ?? null;
   const categoryId = activeCategoryId ?? derived.category?.id ?? null;
+  const track = trackId ? getTrackById(trackId) : undefined;
+  const category = categoryId ? getCategoryById(categoryId) : undefined;
+  const color = trackId ? trackColor(trackId) : null;
+  const Icon = courseIcon(category?.icon ?? track?.icon);
 
   const list = useMemo(() => getSiblingItems(activeItemId, catalog), [activeItemId]);
   const idx = list.findIndex((i) => i.id === activeItemId);
@@ -147,61 +158,85 @@ function ProblemPageHeader() {
   };
 
   return (
-    <header className="shrink-0 border-b border-edge bg-panel px-2 py-2 sm:px-3">
+    <header className="problem-surface-bar nodrag sticky top-0 z-20 flex h-11 shrink-0 items-center gap-1.5 border-b border-edge px-2 py-1 shadow-[var(--shadow-sm)] backdrop-blur sm:gap-2 sm:px-2.5">
       {(trackId || categoryId) && (
-        <BrowseBreadcrumb trackId={trackId} categoryId={categoryId} onBack={backToBrowse} />
+        <button
+          type="button"
+          onClick={backToBrowse}
+          title="Back to category"
+          aria-label="Back to category"
+          className="grid h-7 w-7 shrink-0 place-items-center rounded-md border border-edge bg-panel2/70 text-ink3 transition-colors hover:bg-panel hover:text-ink"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
       )}
-      <div className="flex items-center gap-2">
-        {showNav && (
-          <div className="flex shrink-0 items-center gap-0.5 rounded-full border border-edge bg-panel2/60 px-0.5 py-0.5">
-            <button
-              type="button"
-              onClick={() => goSibling(-1)}
-              title="Previous problem"
-              aria-label="Previous problem"
-              className="grid h-6 w-6 place-items-center rounded-full text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <span className={cn('px-1 font-mono tabular-nums text-ink3', chromeText.xs)}>
-              {idx + 1}/{list.length}
-            </span>
-            <button
-              type="button"
-              onClick={() => goSibling(1)}
-              title="Next problem"
-              aria-label="Next problem"
-              className="grid h-6 w-6 place-items-center rounded-full text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
+      {color && (
+        <span
+          className="surface-badge grid h-7 w-7 shrink-0 place-items-center rounded-md text-white shadow-[var(--shadow-sm)] [&>svg]:h-3.5 [&>svg]:w-3.5"
+          style={{ background: `linear-gradient(135deg, ${color.c1}, ${color.c2})` }}
+        >
+          <Icon strokeWidth={1.6} />
+        </span>
+      )}
+      <div className="min-w-0 flex-1 leading-tight">
+        <h1 className={cn('truncate font-semibold text-ink', chromeText.sm)}>{item.title}</h1>
+        {!isMobile && (track || category) && (
+          <p className={cn('truncate text-ink3', chromeText.xs)} aria-label="Browse path">
+            {track?.title}
+            {track && category && ' › '}
+            {category?.title}
+          </p>
         )}
-        <div className="min-w-0 flex-1">
-          <ChromeLabel className="font-mono tracking-[0.12em]">PROBLEM</ChromeLabel>
-          <h1 className={cn('truncate font-semibold text-ink', chromeText.base)}>{item.title}</h1>
-        </div>
-        {item.difficulty && !isMobile && (
-          <Chip tone={difficultyTone(item.difficulty)}>{item.difficulty}</Chip>
-        )}
-        <div className="flex shrink-0 items-center gap-1">
-          <Btn
-            variant="ghost"
-            size="sm"
-            icon={<GraduationCap className="h-3.5 w-3.5" />}
-            onClick={() => setMode('learn')}
+      </div>
+      {showNav && (
+        <div className="flex shrink-0 items-center gap-0.5 rounded-md border border-edge bg-panel2/70 px-0.5 py-0.5">
+          <button
+            type="button"
+            onClick={() => goSibling(-1)}
+            title="Previous problem"
+            aria-label="Previous problem"
+            className="grid h-6 w-6 place-items-center rounded-md text-ink3 transition-colors hover:bg-panel hover:text-ink"
           >
-            {!isMobile && 'Learn'}
-          </Btn>
-          <Btn
-            variant="ghost"
-            size="sm"
-            icon={<Network className="h-3.5 w-3.5" />}
-            onClick={() => enterProblemInMode(item.id, 'visualize')}
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <span
+            className={cn('hidden px-1 font-mono tabular-nums text-ink3 sm:inline', chromeText.xs)}
           >
-            {!isMobile && 'Canvas'}
-          </Btn>
+            {idx + 1}/{list.length}
+          </span>
+          <button
+            type="button"
+            onClick={() => goSibling(1)}
+            title="Next problem"
+            aria-label="Next problem"
+            className="grid h-6 w-6 place-items-center rounded-md text-ink3 transition-colors hover:bg-panel hover:text-ink"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
         </div>
+      )}
+      {item.difficulty && (
+        <Chip tone={difficultyTone(item.difficulty)} className="hidden sm:inline-flex">
+          {item.difficulty}
+        </Chip>
+      )}
+      <div className="flex shrink-0 items-center gap-1">
+        <Btn
+          variant="ghost"
+          size="sm"
+          icon={<GraduationCap className="h-3.5 w-3.5" />}
+          onClick={() => setMode('learn')}
+        >
+          {!isMobile && 'Learn'}
+        </Btn>
+        <Btn
+          variant="ghost"
+          size="sm"
+          icon={<Network className="h-3.5 w-3.5" />}
+          onClick={() => enterProblemInMode(item.id, 'visualize')}
+        >
+          {!isMobile && 'Canvas'}
+        </Btn>
       </div>
     </header>
   );

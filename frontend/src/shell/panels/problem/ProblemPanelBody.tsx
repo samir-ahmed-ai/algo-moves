@@ -269,11 +269,11 @@ export function ProblemPanelBody() {
     <div className="flex flex-col">
       {!inVisualize && (
         <div
-          className="mb-1.5 border-l-2 pl-2"
+          className="mb-2 rounded-md border border-edge bg-panel2/35 px-2.5 py-2"
           style={{ borderLeftColor: item.difficulty ? TONE_BAR[tone] : 'transparent' }}
         >
           <div className="flex flex-wrap items-center gap-[var(--node-gap,6px)]">
-            <span className={cn(nodeText.title, 'text-base font-bold leading-tight text-ink')}>
+            <span className={cn(nodeText.title, 'text-base font-semibold leading-tight text-ink')}>
               {item.title}
             </span>
             {item.difficulty && <Chip tone={tone}>{item.difficulty}</Chip>}

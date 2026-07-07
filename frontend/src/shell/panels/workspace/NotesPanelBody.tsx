@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { readStorageText, writeStorageText } from '@/store/persistence';
 import { STORAGE_KEYS } from '@/store/storageKeys';
 
-import { useCanvasStatic, Hint, Label, Pill, TextArea } from '@/shell/canvas';
+import { useCanvasStatic, Hint, TextArea } from '@/shell/canvas';
 /** #118 Notes: freeform markdown-ish notes pinned per problem (localStorage). */
 export function NotesPanelBody() {
   const { item } = useCanvasStatic();
@@ -16,18 +16,25 @@ export function NotesPanelBody() {
     writeStorageText(k, v);
   };
   return (
-    <div className="nodrag flex h-full flex-col gap-1.5">
-      <div className="flex items-center justify-between">
-        <Label>Notes</Label>
-        <Pill>{text.length} chars</Pill>
+    <section className="nodrag notes-panel">
+      <div className="notes-panel__head">
+        <div>
+          <span className="notes-panel__eyebrow">autosaved notes</span>
+          <h3>{item.title}</h3>
+        </div>
+        <span className="notes-panel__count">{text.length} chars</span>
       </div>
-      <TextArea
-        value={text}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="Jot the invariant, an edge case, a reminder…"
-        className="min-h-0 flex-1"
-      />
-      <Hint>Markdown-ish · saved automatically</Hint>
-    </div>
+      <div className="notes-panel__editor">
+        <TextArea
+          value={text}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Jot the invariant, an edge case, a reminder…"
+          className="min-h-0 flex-1"
+        />
+      </div>
+      <div className="notes-panel__footer">
+        <Hint>Markdown-ish · saved automatically</Hint>
+      </div>
+    </section>
   );
 }

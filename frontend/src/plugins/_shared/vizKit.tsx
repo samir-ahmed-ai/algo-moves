@@ -492,7 +492,7 @@ export function RailSteps({
               title={typeof step.label === 'string' ? step.label : undefined}
             >
               <RailStepMarker state={state} />
-              <span className="truncate">{step.label}</span>
+              <span className="viz-rail-step-label">{step.label}</span>
             </div>
           );
         })}
@@ -561,6 +561,11 @@ export function RailStat(props: StatKVProps) {
  */
 export function VizStatStrip({ children, className }: { children: ReactNode; className?: string }) {
   return <div className={cn('viz-statstrip', className)}>{children}</div>;
+}
+
+/** Cluster related VizStat cells with a subtle divider between groups. */
+export function VizStatGroup({ children }: { children: ReactNode }) {
+  return <div className="viz-statstrip-group">{children}</div>;
 }
 
 /** One labelled cell in a VizStatStrip. */

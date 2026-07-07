@@ -6,7 +6,6 @@ import {
   useCanvasActions,
   useCanvasFrame,
   useCanvasStatic,
-  Banner,
   Btn,
   Field,
   Hint,
@@ -35,40 +34,49 @@ export function ExplainPanelBody() {
   }, [graded, advancePractice]);
 
   return (
-    <div className="nodrag flex flex-col gap-2">
-      <Field label="Explain the invariant" hint={`What key idea makes ${item.title} work?`}>
-        <TextArea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onFocus={() => focusPanel('explain')}
-          rows={4}
-          placeholder="e.g. each step preserves … so when it ends …"
-        />
-      </Field>
+    <section className="nodrag worked-cases-panel">
+      <div className="worked-cases-brief">
+        <span className="worked-cases-brief__eyebrow">worked case</span>
+        <h3>Explain the invariant</h3>
+        <p>Capture the reason {item.title} stays correct before you reveal the reference.</p>
+      </div>
+      <div className="worked-cases-editor">
+        <Field label="Your explanation" hint={`What key idea makes ${item.title} work?`}>
+          <TextArea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onFocus={() => focusPanel('explain')}
+            rows={5}
+            placeholder="e.g. each step preserves … so when it ends …"
+          />
+        </Field>
+      </div>
       {!revealed ? (
-        <Btn
-          variant="primary"
-          size="sm"
-          disabled={!text.trim()}
-          onClick={() => {
-            focusPanel('explain');
-            setRevealed(true);
-          }}
-          className="self-start"
-        >
-          Reveal reference
-        </Btn>
+        <div className="worked-cases-actions">
+          <Btn
+            variant="primary"
+            size="sm"
+            disabled={!text.trim()}
+            onClick={() => {
+              focusPanel('explain');
+              setRevealed(true);
+            }}
+          >
+            Reveal reference
+          </Btn>
+        </div>
       ) : (
-        <div className="flex flex-col gap-2">
-          <Banner tone="accent" label="Reference">
-            <div className="flex flex-col gap-1">
+        <div className="worked-cases-review">
+          <div className="worked-cases-reference-card">
+            <div className="worked-cases-reference-card__label">Reference</div>
+            <div className="worked-cases-reference-card__body">
               {item.summary && <p className="text-ink">{item.summary}</p>}
               {intro && <p>{intro}</p>}
               {outro && outro !== intro && <p>{outro}</p>}
             </div>
-          </Banner>
+          </div>
           {graded === null ? (
-            <div className="flex items-center gap-2">
+            <div className="worked-cases-grade-row">
               <Hint>How did you do?</Hint>
               <Btn variant="good" size="sm" onClick={() => grade(true)}>
                 I had it
@@ -84,6 +92,6 @@ export function ExplainPanelBody() {
           )}
         </div>
       )}
-    </div>
+    </section>
   );
 }

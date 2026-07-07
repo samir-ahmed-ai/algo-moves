@@ -17,6 +17,7 @@ import {
   VizEmpty,
   VizStage,
   VizStat,
+  VizStatGroup,
   VizStatStrip,
   type RailStep,
 } from '../../../_shared/vizKit';
@@ -205,8 +206,6 @@ function View({ frame }: PluginViewProps<DupMissState>) {
       ? `${s.bucketVal} → ${s.bucketHasBit ? 'X' : 'Y'}`
       : null;
   const op = folding !== null ? `^ ${folding}` : (routing ?? '—');
-  // Widest possible xorAll rendering: all values stay below the next power of two.
-  const maxXor = (1 << s.n.toString(2).length) - 1;
 
   const rail = (
     <>
@@ -232,39 +231,38 @@ function View({ frame }: PluginViewProps<DupMissState>) {
     <VizStage rail={rail} minHeight={290}>
       <ArrayRow values={s.nums} cellTone={tone} pointers={pointers} windowRange={null} />
       <VizStatStrip>
-        <VizStat k="holds" icon={<IconRange />} v={`1..${s.n}`} />
-        <VizStat
-          k="op"
-          icon={<IconSpark />}
-          v={op}
-          tone={op !== '—' ? 'accent' : undefined}
-          reserve={`${s.n} → X`}
-        />
-        <VizStat
-          k="xorAll"
-          icon={<IconXor />}
-          v={`${s.xorAll} · 0b${s.xorAll.toString(2)}`}
-          tone={showXor ? 'accent' : undefined}
-          reserve={`${maxXor} · 0b${maxXor.toString(2)}`}
-        />
-        <VizStat
-          k="rightBit"
-          icon={<IconBit />}
-          v={s.rightBit ?? '—'}
-          tone={s.phase === 'split' ? 'accent' : undefined}
-        />
-        <VizStat
-          k="X"
-          icon={<IconBucket />}
-          v={bucketsLive ? s.x : '—'}
-          tone={s.bucketHasBit === true ? 'accent' : undefined}
-        />
-        <VizStat
-          k="Y"
-          icon={<IconBucket />}
-          v={bucketsLive ? s.y : '—'}
-          tone={s.bucketHasBit === false ? 'accent' : undefined}
-        />
+        <VizStatGroup>
+          <VizStat k="holds" icon={<IconRange />} v={`1..${s.n}`} />
+          <VizStat k="op" icon={<IconSpark />} v={op} tone={op !== '—' ? 'accent' : undefined} />
+        </VizStatGroup>
+        <VizStatGroup>
+          <VizStat
+            k="xor"
+            icon={<IconXor />}
+            v={`${s.xorAll} · 0b${s.xorAll.toString(2)}`}
+            tone={showXor ? 'accent' : undefined}
+          />
+          <VizStat
+            k="bit"
+            icon={<IconBit />}
+            v={s.rightBit ?? '—'}
+            tone={s.phase === 'split' ? 'accent' : undefined}
+          />
+        </VizStatGroup>
+        <VizStatGroup>
+          <VizStat
+            k="X"
+            icon={<IconBucket />}
+            v={bucketsLive ? s.x : '—'}
+            tone={s.bucketHasBit === true ? 'accent' : undefined}
+          />
+          <VizStat
+            k="Y"
+            icon={<IconBucket />}
+            v={bucketsLive ? s.y : '—'}
+            tone={s.bucketHasBit === false ? 'accent' : undefined}
+          />
+        </VizStatGroup>
       </VizStatStrip>
     </VizStage>
   );

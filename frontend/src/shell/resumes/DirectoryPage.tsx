@@ -56,7 +56,7 @@ export function DirectoryPage({ onSelect, onCustomize }: DirectoryPageProps) {
 
   if (fetching) {
     return (
-      <div className="flex flex-1 items-center justify-center">
+      <div className="resume-directory-loading flex flex-1 items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-ink3" />
       </div>
     );
@@ -64,19 +64,22 @@ export function DirectoryPage({ onSelect, onCustomize }: DirectoryPageProps) {
 
   if (entries.length === 0) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center p-8">
-        <Users className="h-10 w-10 text-ink3" />
+      <div className="resume-directory-empty flex flex-1 flex-col items-center justify-center gap-3 text-center p-8">
+        <div className="resume-directory-empty__icon">
+          <Users className="h-8 w-8" />
+        </div>
+        <h3>No public resumes yet</h3>
         <p className={cn('text-ink3', chromeText.base)}>
-          No public resumes yet. Upload yours to get started!
+          Upload yours to seed the directory and make role-targeted versions easier to build.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-1 flex-col min-h-0">
-      <div className="shrink-0 px-4 pt-3 pb-2">
-        <div className="relative">
+    <div className="resume-directory-shell flex flex-1 flex-col min-h-0">
+      <div className="resume-directory-search shrink-0 px-4 pt-3 pb-2">
+        <div className="resume-directory-search__box relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink3" />
           <input
             value={query}
@@ -91,21 +94,25 @@ export function DirectoryPage({ onSelect, onCustomize }: DirectoryPageProps) {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 pt-1">
+      <div className="resume-directory-grid-wrap flex-1 overflow-y-auto p-4 pt-1">
         {filtered.length === 0 ? (
-          <p className={cn('text-center text-ink3 py-8', chromeText.base)}>
-            No resumes match &ldquo;{query}&rdquo;
-          </p>
+          <div className="resume-directory-empty resume-directory-empty--compact">
+            <div className="resume-directory-empty__icon">
+              <Search className="h-7 w-7" />
+            </div>
+            <h3>No matches</h3>
+            <p className={chromeText.base}>No resumes match &ldquo;{query}&rdquo;.</p>
+          </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((e) => (
               <div
                 key={e.id}
-                className="rounded-xl border border-edge bg-panel p-4 flex flex-col gap-3 transition hover:border-accent/30"
+                className="resume-directory-card rounded-xl border border-edge bg-panel p-4 flex flex-col gap-3 transition hover:border-accent/30"
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className="h-10 w-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
+                    className="resume-directory-card__avatar h-10 w-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
                     style={{ backgroundColor: avatarColor(e.ownerAvatarSeed) }}
                   >
                     {e.ownerDisplayName.slice(0, 1).toUpperCase()}
@@ -115,13 +122,15 @@ export function DirectoryPage({ onSelect, onCustomize }: DirectoryPageProps) {
                     <p className={cn('text-ink3 truncate', chromeText.sm)}>{e.ownerDisplayName}</p>
                   </div>
                 </div>
-                <p className={cn('text-ink3 truncate', chromeText.sm)}>{e.originalFilename}</p>
-                <div className="flex gap-2 mt-auto">
+                <p className={cn('resume-directory-card__file text-ink3 truncate', chromeText.sm)}>
+                  {e.originalFilename}
+                </p>
+                <div className="resume-directory-card__actions flex gap-2 mt-auto">
                   <button
                     type="button"
                     onClick={() => openResume(e.id, false)}
                     disabled={loadingId === e.id}
-                    className="flex-1 rounded-lg border border-edge bg-panel2 px-3 py-1.5 text-xs font-medium text-ink2 hover:border-accent/40 transition disabled:opacity-50"
+                    className="resume-directory-card__secondary flex-1 rounded-lg border border-edge bg-panel2 px-3 py-1.5 text-xs font-medium text-ink2 hover:border-accent/40 transition disabled:opacity-50"
                   >
                     {loadingId === e.id ? (
                       <Loader2 className="h-3 w-3 animate-spin mx-auto" />
@@ -133,7 +142,7 @@ export function DirectoryPage({ onSelect, onCustomize }: DirectoryPageProps) {
                     type="button"
                     onClick={() => openResume(e.id, true)}
                     disabled={loadingId === e.id}
-                    className="flex-1 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 transition disabled:opacity-50"
+                    className="resume-directory-card__primary flex-1 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 transition disabled:opacity-50"
                   >
                     Customize
                   </button>
@@ -149,11 +158,16 @@ export function DirectoryPage({ onSelect, onCustomize }: DirectoryPageProps) {
 
 export function DirectoryHeader() {
   return (
-    <div className="flex items-center gap-2 px-4 py-2 border-b border-edge">
-      <FileText className="h-4 w-4 text-ink3" />
-      <span className={cn('text-sm font-medium text-ink2', chromeText.base)}>
-        Browse all resumes
-      </span>
+    <div className="resume-directory-header flex items-center gap-2 px-4 py-2 border-b border-edge">
+      <div className="resume-directory-header__icon">
+        <FileText className="h-4 w-4" />
+      </div>
+      <div>
+        <span className={cn('text-sm font-medium text-ink2', chromeText.base)}>
+          Browse all resumes
+        </span>
+        <p className={cn('text-ink3', chromeText.xs)}>Discover public templates to adapt.</p>
+      </div>
     </div>
   );
 }

@@ -217,7 +217,7 @@ export function CodeStudioQuiz({
     <div
       ref={rootRef}
       tabIndex={0}
-      className="code-studio-quiz flex min-h-0 flex-1 flex-col py-1 outline-none"
+      className="code-studio-quiz mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col py-1 outline-none"
       aria-label="Concept check quiz"
       role="region"
     >
@@ -262,7 +262,7 @@ export function CodeStudioQuiz({
             </div>
           </div>
         ) : (
-          <div className="flex min-h-0 flex-1 flex-col gap-2.5">
+          <div className="quiz-question-card flex min-h-0 flex-1 flex-col gap-3 rounded-lg border border-edge bg-panel/80 p-3 shadow-[var(--shadow-sm)] sm:p-4">
             <div className="flex items-center gap-2">
               <div className="flex min-w-0 flex-1 gap-0.5">
                 {quiz.map((_, idx) => {
@@ -295,14 +295,20 @@ export function CodeStudioQuiz({
               </span>
             </div>
 
-            <p
-              className={cn('font-medium leading-snug text-ink', chromeText.base)}
-              id={`quiz-q-${i}`}
-            >
-              {q.prompt}
-            </p>
+            <div className="rounded-lg border border-edge bg-panel2/35 px-3 py-2">
+              <p
+                className={cn('font-semibold leading-snug text-ink', chromeText.base)}
+                id={`quiz-q-${i}`}
+              >
+                {q.prompt}
+              </p>
+            </div>
 
-            <div className="flex flex-col gap-1" role="radiogroup" aria-labelledby={`quiz-q-${i}`}>
+            <div
+              className="flex flex-col gap-1.5"
+              role="radiogroup"
+              aria-labelledby={`quiz-q-${i}`}
+            >
               {q.choices.map((c, idx) => {
                 const letter = String.fromCharCode(65 + idx);
                 let state: 'idle' | 'correct' | 'wrong' | 'dim' = 'idle';
@@ -321,7 +327,7 @@ export function CodeStudioQuiz({
                     onClick={() => pick(idx)}
                     disabled={answered}
                     className={cn(
-                      'quiz-choice nodrag flex items-start gap-2 rounded-lg border px-2 py-1.5 text-left transition-all',
+                      'quiz-choice nodrag flex items-start gap-2.5 rounded-lg border px-2.5 py-2 text-left transition-all',
                       state === 'idle' &&
                         'border-edge bg-panel2/40 text-ink hover:border-accent/60 hover:bg-panel2',
                       state === 'correct' && 'quiz-choice-correct border-good bg-goodbg text-good',
@@ -331,7 +337,7 @@ export function CodeStudioQuiz({
                   >
                     <span
                       className={cn(
-                        'grid h-[18px] w-[18px] shrink-0 place-items-center rounded font-mono font-semibold',
+                        'grid h-6 w-6 shrink-0 place-items-center rounded-md font-mono font-semibold',
                         chromeText.sm,
                         state === 'correct'
                           ? 'bg-good text-white'

@@ -55,17 +55,17 @@ export function ProgressOverlay({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="fixed inset-0 z-40 flex justify-end bg-black/40 backdrop-blur-sm"
+      className="game-progress-backdrop fixed inset-0 z-40 flex justify-end bg-black/40 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="ws-scroll flex h-full w-full max-w-md flex-col overflow-y-auto border-s border-edge bg-bg shadow-[var(--shadow-xl)] [padding-top:env(safe-area-inset-top)]"
+        className="game-progress-panel ws-scroll flex h-full w-full max-w-md flex-col overflow-y-auto border-s border-edge bg-bg shadow-[var(--shadow-xl)] [padding-top:env(safe-area-inset-top)]"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-label={t.profile.title}
       >
-        <header className="sticky top-0 z-10 flex items-center gap-1 border-b border-edge bg-bg/90 px-3 py-2 backdrop-blur">
+        <header className="game-progress-panel__header sticky top-0 z-10 flex items-center gap-1 border-b border-edge bg-bg/90 px-3 py-2 backdrop-blur">
           <TabButton
             active={tab === 'profile'}
             onClick={() => setTab('profile')}
@@ -84,13 +84,15 @@ export function ProgressOverlay({ onClose }: { onClose: () => void }) {
             ref={closeRef}
             type="button"
             onClick={onClose}
-            className="ms-auto grid h-10 w-10 place-items-center rounded-md text-ink3 hover:bg-panel2 hover:text-ink"
+            className="game-progress-panel__close ms-auto grid h-10 w-10 place-items-center rounded-md text-ink3 hover:bg-panel2 hover:text-ink"
             aria-label={t.header.close}
           >
             <X className="h-5 w-5" />
           </button>
         </header>
-        <div className="flex-1 p-4">{tab === 'profile' ? <ProfileTab /> : <LeaderboardTab />}</div>
+        <div className="game-progress-panel__body flex-1 p-4">
+          {tab === 'profile' ? <ProfileTab /> : <LeaderboardTab />}
+        </div>
       </div>
     </div>
   );
@@ -112,8 +114,9 @@ function TabButton({
       type="button"
       onClick={onClick}
       className={cn(
-        'inline-flex min-h-10 items-center gap-1.5 rounded-md px-3 text-sm font-semibold',
+        'game-progress-tab inline-flex min-h-10 items-center gap-1.5 rounded-md px-3 text-sm font-semibold',
         active ? 'bg-panel2 text-ink' : 'text-ink3 hover:text-ink',
+        active && 'is-active',
       )}
     >
       {icon}
@@ -180,8 +183,8 @@ function ProfileTab() {
     const totalLosses = myRows.filter((row) => row.placement !== 1).length;
 
     return (
-      <div className="flex flex-col gap-5">
-        <div className="flex items-center gap-3">
+      <div className="game-profile-tab flex flex-col gap-5">
+        <div className="game-profile-card flex items-center gap-3">
           <Avatar seed={displayName} name={displayName} size={56} />
           <div className="min-w-0 flex-1">
             <p className="text-lg font-bold text-ink">{displayName}</p>
@@ -189,8 +192,8 @@ function ProfileTab() {
           </div>
         </div>
 
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink3">
+        <div className="game-progress-section">
+          <p className="game-progress-section__label mb-2 text-xs font-semibold uppercase tracking-wide text-ink3">
             {t.profile.stats}
           </p>
           {myRows.length === 0 ? (
@@ -204,8 +207,8 @@ function ProfileTab() {
           )}
         </div>
 
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink3">
+        <div className="game-progress-section">
+          <p className="game-progress-section__label mb-2 text-xs font-semibold uppercase tracking-wide text-ink3">
             {t.profile.history}
           </p>
           {localHistory.length === 0 ? (
@@ -216,7 +219,10 @@ function ProfileTab() {
                 const game = GAMES.find((g) => g.id === h.gameId);
                 const won = h.placement === 1;
                 return (
-                  <li key={h.id} className="flex items-center justify-between text-sm">
+                  <li
+                    key={h.id}
+                    className="game-history-row flex items-center justify-between text-sm"
+                  >
                     <span className="text-ink2">
                       {game ? localizedGameMeta(game, locale).title : h.gameId}
                     </span>
@@ -239,8 +245,8 @@ function ProfileTab() {
   const bestStreak = stats.reduce((n, s) => Math.max(n, s.best_streak), 0);
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex items-center gap-3">
+    <div className="game-profile-tab flex flex-col gap-5">
+      <div className="game-profile-card flex items-center gap-3">
         <Avatar seed={profile?.avatar_seed ?? name} name={name} size={56} />
         <div className="min-w-0 flex-1">
           {editing ? (
@@ -289,7 +295,7 @@ function ProfileTab() {
 
       {/* Sign-in / upgrade for anonymous guests */}
       {isAnonymous ? (
-        <div className="rounded-[var(--radius)] border border-edge bg-panel/60 p-3">
+        <div className="game-progress-section rounded-[var(--radius)] border border-edge bg-panel/60 p-3">
           <p className="text-sm text-ink3">{t.profile.guestHint}</p>
           <button
             ref={authBtnRef}
@@ -329,8 +335,8 @@ function ProfileTab() {
       )}
 
       {/* Aggregate stats */}
-      <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink3">
+      <div className="game-progress-section">
+        <p className="game-progress-section__label mb-2 text-xs font-semibold uppercase tracking-wide text-ink3">
           {t.profile.stats}
         </p>
         {stats.length === 0 ? (
@@ -345,13 +351,13 @@ function ProfileTab() {
       </div>
 
       {stats.length > 0 ? (
-        <ul className="flex flex-col gap-1.5">
+        <ul className="game-stat-list flex flex-col gap-1.5">
           {stats.map((s) => {
             const game = GAMES.find((g) => g.id === s.game_id);
             return (
               <li
                 key={s.game_id}
-                className="flex items-center justify-between rounded-md border border-edge bg-panel/50 px-3 py-2 text-sm"
+                className="game-stat-row flex items-center justify-between rounded-md border border-edge bg-panel/50 px-3 py-2 text-sm"
               >
                 <span className="font-medium text-ink">
                   {game ? localizedGameMeta(game, locale).title : s.game_id}
@@ -367,8 +373,8 @@ function ProfileTab() {
 
       {/* Achievements */}
       {achievements.length > 0 ? (
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink3">
+        <div className="game-progress-section">
+          <p className="game-progress-section__label mb-2 text-xs font-semibold uppercase tracking-wide text-ink3">
             {t.profile.achievements} · {t.profile.unlocked(unlocked.length, achievements.length)}
           </p>
           <div className="flex flex-wrap gap-2">
@@ -379,10 +385,11 @@ function ProfileTab() {
                   key={a.id}
                   title={`${a.title} — ${a.description}`}
                   className={cn(
-                    'inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium',
+                    'game-achievement-chip inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium',
                     has
                       ? 'border-good/50 bg-good/10 text-good'
                       : 'border-edge bg-panel2 text-ink3 opacity-60',
+                    has && 'is-unlocked',
                   )}
                 >
                   {a.title}
@@ -394,8 +401,8 @@ function ProfileTab() {
       ) : null}
 
       {/* Recent matches */}
-      <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink3">
+      <div className="game-progress-section">
+        <p className="game-progress-section__label mb-2 text-xs font-semibold uppercase tracking-wide text-ink3">
           {t.profile.history}
         </p>
         {history.length === 0 ? (
@@ -406,7 +413,10 @@ function ProfileTab() {
               const game = GAMES.find((g) => g.id === h.match.game_id);
               const won = h.placement === 1;
               return (
-                <li key={h.id} className="flex items-center justify-between text-sm">
+                <li
+                  key={h.id}
+                  className="game-history-row flex items-center justify-between text-sm"
+                >
                   <span className="text-ink2">
                     {game ? localizedGameMeta(game, locale).title : h.match.game_id}
                   </span>
@@ -433,7 +443,7 @@ function StatCell({
   tone: 'good' | 'bad' | 'accent';
 }) {
   return (
-    <div className="rounded-[var(--radius)] border border-edge bg-panel/60 p-3 text-center">
+    <div className="game-stat-cell rounded-[var(--radius)] border border-edge bg-panel/60 p-3 text-center">
       <div
         className={cn(
           'text-2xl font-bold tabular-nums',
@@ -507,16 +517,17 @@ function LeaderboardTab() {
   if (authLoading) return <p className="py-6 text-center text-sm text-ink3">…</p>;
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex gap-1 rounded-[var(--radius)] border border-edge bg-panel2 p-1 text-sm">
+    <div className="game-leaderboard-tab flex flex-col gap-3">
+      <div className="game-leaderboard-period flex gap-1 rounded-[var(--radius)] border border-edge bg-panel2 p-1 text-sm">
         {(['all', 'week', 'today'] as Period[]).map((p) => (
           <button
             key={p}
             type="button"
             onClick={() => setPeriod(p)}
             className={cn(
-              'min-h-9 flex-1 rounded-[calc(var(--radius)-2px)] font-semibold',
+              'game-leaderboard-period__button min-h-9 flex-1 rounded-[calc(var(--radius)-2px)] font-semibold',
               period === p ? 'bg-panel text-ink shadow-sm' : 'text-ink3',
+              period === p && 'is-active',
             )}
           >
             {p === 'all'
@@ -528,7 +539,7 @@ function LeaderboardTab() {
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-1.5">
+      <div className="game-leaderboard-scopes flex flex-wrap gap-1.5">
         <ScopeChip active={gameId === null} onClick={() => setGameId(null)}>
           {t.leaderboard.global}
         </ScopeChip>
@@ -544,11 +555,11 @@ function LeaderboardTab() {
       ) : rows.length === 0 ? (
         <p className="py-6 text-center text-sm text-ink3">{t.leaderboard.empty}</p>
       ) : (
-        <ol className="flex flex-col gap-1">
+        <ol className="game-leaderboard-list flex flex-col gap-1">
           {rows.map((r) => (
             <li
               key={r.profile_id}
-              className="flex items-center gap-3 rounded-md border border-edge bg-panel/50 px-3 py-2"
+              className="game-leaderboard-row flex items-center gap-3 rounded-md border border-edge bg-panel/50 px-3 py-2"
             >
               <span className="w-6 text-center text-sm font-bold tabular-nums text-ink3">
                 {r.rank}
@@ -582,10 +593,11 @@ function ScopeChip({
       type="button"
       onClick={onClick}
       className={cn(
-        'rounded-full border px-3 py-1 text-xs font-medium',
+        'game-scope-chip rounded-full border px-3 py-1 text-xs font-medium',
         active
           ? 'border-accent bg-accentbg text-accent'
           : 'border-edge bg-panel text-ink3 hover:text-ink',
+        active && 'is-active',
       )}
     >
       {children}

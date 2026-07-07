@@ -13,16 +13,16 @@ function FloatingChrome() {
   const { completedCount } = useVimGame();
 
   return (
-    <div className="pointer-events-none absolute left-[var(--hpad)] top-[var(--pad)] z-10 flex items-center gap-[var(--gap)] min-[960px]:left-[calc(210px+var(--hpad))]">
+    <div className="vim-floating-chrome pointer-events-none absolute left-[var(--hpad)] top-[var(--pad)] z-10 flex items-center gap-[var(--gap)] min-[960px]:left-[calc(210px+var(--hpad))]">
       <button
         type="button"
         title="Home"
         onClick={goHome}
-        className="pointer-events-auto grid h-[var(--row)] w-[var(--row)] place-items-center rounded-md border border-edge bg-panel/90 text-ink3 shadow-sm backdrop-blur hover:bg-panel2 hover:text-ink"
+        className="vim-floating-home pointer-events-auto grid h-[var(--row)] w-[var(--row)] place-items-center rounded-md border border-edge bg-panel/90 text-ink3 shadow-sm backdrop-blur hover:bg-panel2 hover:text-ink"
       >
         <Home className="h-3.5 w-3.5" />
       </button>
-      <div className="pointer-events-auto flex items-center gap-[var(--gap)] rounded-md border border-edge bg-panel/90 px-[var(--pad)] py-[var(--gap)] shadow-sm backdrop-blur">
+      <div className="vim-floating-brand pointer-events-auto flex items-center gap-[var(--gap)] rounded-md border border-edge bg-panel/90 px-[var(--pad)] py-[var(--gap)] shadow-sm backdrop-blur">
         <span className="grid h-6 w-6 place-items-center rounded bg-accent text-white">
           <Keyboard className="h-3.5 w-3.5" />
         </span>
@@ -109,7 +109,7 @@ export function VimDojoPage() {
     <VimGameProvider>
       <div
         data-density={density}
-        className="relative flex h-full w-full flex-col overflow-hidden bg-bg min-[960px]:grid min-[960px]:grid-cols-[210px_1fr_210px]"
+        className="vim-dojo-page relative flex h-full w-full flex-col overflow-hidden bg-bg min-[960px]:grid min-[960px]:grid-cols-[210px_1fr_210px]"
       >
         <VimLevelSidebar />
         <div className="relative flex min-h-0 min-w-0 flex-1 flex-col min-[960px]:col-start-2 min-[960px]:row-start-1">

@@ -61,6 +61,7 @@ export function useAppNavigation(shared: ShareState | null) {
     if (canvasFocus) return false;
     return !!sharedItemId;
   });
+  const [canvasVariant, setCanvasVariant] = useState<'plain' | 'interview'>('plain');
   const [route, setRoute] = useState<AppRoute>(() => {
     if (canvasFocus) return 'workspace';
     if (sharedItemId) return 'workspace';
@@ -84,6 +85,9 @@ export function useAppNavigation(shared: ShareState | null) {
   });
 
   const goHome = useCallback(() => {
+    setActiveTrackId(null);
+    setActiveCategoryId(null);
+    setProblemFocused(false);
     setRoute('home');
     writeAppUrl('home');
   }, []);
@@ -102,11 +106,20 @@ export function useAppNavigation(shared: ShareState | null) {
     setActiveTopicId(null);
     setMode('visualize');
     setProblemFocused(false);
+    setCanvasVariant('plain');
     setRoute('workspace');
   }, []);
 
-  /** Alias for {@link enterCanvas} — freeform collab surface. */
-  const enterCollabCanvas = enterCanvas;
+  /** Open the freeform canvas pre-seeded with the interview board layout. */
+  const enterCollabCanvas = useCallback(() => {
+    setActiveTrackId(null);
+    setActiveCategoryId(null);
+    setActiveTopicId(null);
+    setMode('visualize');
+    setProblemFocused(false);
+    setCanvasVariant('interview');
+    setRoute('workspace');
+  }, []);
 
   const backToBrowse = useCallback(() => {
     const target = resolveBackToBrowseTarget(activeItemId, activeTrackId, activeCategoryId);
@@ -185,6 +198,7 @@ export function useAppNavigation(shared: ShareState | null) {
     setActiveCategoryId,
     problemFocused,
     setProblemFocused,
+    canvasVariant,
     route,
     goHome,
     enterWorkspace,

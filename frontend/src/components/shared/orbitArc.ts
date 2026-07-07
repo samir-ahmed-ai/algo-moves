@@ -191,7 +191,7 @@ function orbitLinesWithStretch(
   }));
 }
 
-/** Start at max font, shrink until lines fit; wrap only when a single line won't fit. */
+/** Start at max font; try one line, then two, before stepping down. */
 export function fitOrbitMultilineLayout(
   measureLine: (line: string, fontSize: number) => number,
   text: string,
@@ -204,15 +204,11 @@ export function fitOrbitMultilineLayout(
   if (!trimmed) return { fontSize: max, lines: [] };
 
   for (let size = max; size >= min; size--) {
-    const width = measureLine(trimmed, size);
-    if (width <= budget) {
-      return { fontSize: size, lines: orbitLinesWithStretch([trimmed], () => width, budget) };
+    const measure = (line: string) => measureLine(line, size);
+    if (measure(trimmed) <= budget) {
+      return { fontSize: size, lines: orbitLinesWithStretch([trimmed], measure, budget) };
     }
-  }
-
-  if (maxLines >= 2) {
-    for (let size = max; size >= min; size--) {
-      const measure = (line: string) => measureLine(line, size);
+    if (maxLines >= 2) {
       const lines = wrapOrbitTwoLines(trimmed, measure, budget);
       if (lines.length <= 2 && lines.every((line) => measure(line) <= budget)) {
         return { fontSize: size, lines: orbitLinesWithStretch(lines, measure, budget) };
@@ -251,7 +247,15 @@ export function orbitLineDy(
 
 export const ORBIT_LINE_HEIGHT = 1.22;
 
+export type OrbitFontConfig = { max: number; min: number; maxLines: number };
+
 export const ORBIT_FONT = {
   center: { max: 20, min: 10, maxLines: 2 },
   side: { max: 12, min: 8, maxLines: 2 },
-} as const;
+} as const satisfies Record<'center' | 'side', OrbitFontConfig>;
+
+/** Larger arc captions for mobile gist intro cards. */
+export const GIST_ORBIT_FONT = {
+  center: { max: 26, min: 12, maxLines: 2 },
+  side: { max: 14, min: 9, maxLines: 2 },
+} as const satisfies Record<'center' | 'side', OrbitFontConfig>;

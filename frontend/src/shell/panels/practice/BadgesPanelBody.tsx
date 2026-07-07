@@ -3,7 +3,7 @@ import { catalog } from '../../../content';
 import { useProgress, statFor } from '@/store/persistence';
 import { cn } from '@/lib/utils/cn';
 
-import { useCanvasActions, Meter, Pill, Section, nodeText, nodeTextWrap } from '@/shell/canvas';
+import { useCanvasActions, Meter, nodeTextWrap } from '@/shell/canvas';
 /** #60 Badges: award a badge per course when all its problems are mastered. */
 export function BadgesPanelBody() {
   const progress = useProgress();
@@ -21,44 +21,37 @@ export function BadgesPanelBody() {
   });
   const earned = courses.filter((c) => c.done).length;
   return (
-    <div className="nodrag flex flex-col" onPointerDown={() => focusPanel('badges')}>
-      <Section
-        title="Courses"
-        bordered={false}
-        right={
-          <Pill tone={earned > 0 ? 'good' : 'muted'}>
-            {earned}/{courses.length}
-          </Pill>
-        }
-      >
-        <div className="flex flex-col gap-2">
-          {courses.map((c) => (
-            <div key={c.id} className="flex items-center gap-2">
-              <Award
-                className="h-4 w-4 shrink-0"
-                style={{
-                  color: c.done ? 'var(--ring)' : 'var(--text-3)',
-                  opacity: c.done ? 1 : 0.5,
-                }}
-              />
-              <div className="min-w-0 flex-1">
-                <div className={cn('text-ink', nodeTextWrap, nodeText.sm)}>{c.title}</div>
-                <div className="mt-1">
-                  <Meter
-                    value={c.mastered}
-                    max={c.total || 1}
-                    tone={c.done ? 'accent' : 'good'}
-                    height={5}
-                  />
-                </div>
-              </div>
-              <Pill>
-                {c.mastered}/{c.total}
-              </Pill>
-            </div>
-          ))}
+    <section className="nodrag badges-panel" onPointerDown={() => focusPanel('badges')}>
+      <div className="badges-panel__hero">
+        <div>
+          <span className="badges-panel__eyebrow">credential board</span>
+          <h3>Course mastery</h3>
         </div>
-      </Section>
-    </div>
+        <div className={cn('badges-panel__score', earned > 0 && 'badges-panel__score--active')}>
+          {earned}/{courses.length}
+        </div>
+      </div>
+      <div className="badges-list">
+        {courses.map((c) => (
+          <article key={c.id} className={cn('badge-course-card', c.done && 'is-complete')}>
+            <div className="badge-course-card__icon">
+              <Award className="h-4 w-4" />
+            </div>
+            <div className="badge-course-card__body">
+              <div className={cn('badge-course-card__title text-ink', nodeTextWrap)}>{c.title}</div>
+              <Meter
+                value={c.mastered}
+                max={c.total || 1}
+                tone={c.done ? 'accent' : 'good'}
+                height={5}
+              />
+            </div>
+            <div className="badge-course-card__count">
+              {c.mastered}/{c.total}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }

@@ -580,28 +580,37 @@ function CaseCard<I, S>({
   return (
     <div
       ref={ref}
-      className="flex flex-col gap-2 rounded-[var(--radius)] border border-edge bg-panel p-3"
+      className="case-card flex flex-col gap-2 rounded-[var(--radius)] border border-edge bg-panel p-3"
     >
-      <div className="flex items-center justify-between gap-2">
-        <span className={cn('font-medium text-ink', vizText.base)}>{c.title}</span>
-        <span className={cn('shrink-0 px-2 py-0.5', vizText.xs, vizText.mono, toneChip)}>
-          {tone}
-        </span>
-        {c.returns && (
+      <div className="case-card__header">
+        <span className={cn('case-card__title font-medium text-ink', vizText.base)}>{c.title}</span>
+        <div className="case-card__badges">
           <span
             className={cn(
-              'shrink-0 rounded-full px-2 py-0.5',
+              'case-card__tone shrink-0 px-2 py-0.5',
               vizText.xs,
               vizText.mono,
-              tone === 'ok' ? 'bg-goodbg text-good' : 'bg-badbg text-bad',
+              toneChip,
             )}
           >
-            {c.returns}
+            {tone}
           </span>
-        )}
+          {c.returns && (
+            <span
+              className={cn(
+                'case-card__return shrink-0 rounded-full px-2 py-0.5',
+                vizText.xs,
+                vizText.mono,
+                tone === 'ok' ? 'bg-goodbg text-good' : 'bg-badbg text-bad',
+              )}
+            >
+              {c.returns}
+            </span>
+          )}
+        </div>
       </div>
 
-      <div className="case-preview-fit overflow-hidden rounded-lg border border-edge bg-panel2/40">
+      <div className="case-preview-fit case-card__preview overflow-hidden rounded-lg border border-edge bg-panel2/40">
         <VizFitBox
           className="viz-board-col viz-board-col--fit h-full min-h-0"
           remeasureKey={`${c.id}-${k}-${move.type}`}
@@ -612,7 +621,9 @@ function CaseCard<I, S>({
 
       {animated && (
         <>
-          <div className={cn('flex items-center gap-1.5 text-ink3', vizText.xs)}>
+          <div
+            className={cn('case-card__meta-row flex items-center gap-1.5 text-ink3', vizText.xs)}
+          >
             <span className={cn(toneChip, 'px-2 py-0.5')}>{playing ? 'auto-play' : 'paused'}</span>
             <span className="rounded-full border border-edge bg-panel2 px-2 py-0.5 text-ink3">
               frame {k + 1}/{frames.length}
@@ -624,7 +635,7 @@ function CaseCard<I, S>({
 
           <div
             className={cn(
-              cn('border-l-2 pl-2 leading-snug', vizText.tight),
+              cn('case-card__move border-l-2 pl-2 leading-snug', vizText.tight),
               move.tone === 'good'
                 ? 'border-good text-good'
                 : move.tone === 'bad'
@@ -696,12 +707,12 @@ function CaseCard<I, S>({
       )}
 
       <JsonBlock value={inputDisplay} size="xs" variant="nested" maxHeight="160px" />
-      <p className={cn('leading-relaxed text-ink2', vizText.sm)}>
-        <span className="mr-1.5 inline-block w-3 font-medium text-ink3">Q</span>
+      <p className={cn('case-card__qa leading-relaxed text-ink2', vizText.sm)}>
+        <span className="case-card__qa-label mr-1.5 inline-block w-3 font-medium text-ink3">Q</span>
         {c.question}
       </p>
-      <p className={cn('leading-relaxed text-ink2', vizText.sm)}>
-        <span className="mr-1.5 inline-block w-3 font-medium text-ink3">A</span>
+      <p className={cn('case-card__qa leading-relaxed text-ink2', vizText.sm)}>
+        <span className="case-card__qa-label mr-1.5 inline-block w-3 font-medium text-ink3">A</span>
         {c.answer}
       </p>
     </div>
@@ -733,9 +744,11 @@ export function makeCasesPanel<I, S>(config: CasesConfig<I, S>) {
 
     return (
       <div className="cases-panel flex flex-col gap-3">
-        {intro && <p className={cn('leading-relaxed text-ink2', vizText.sm)}>{intro}</p>}
+        {intro && (
+          <p className={cn('cases-intro leading-relaxed text-ink2', vizText.sm)}>{intro}</p>
+        )}
         {allCases.length > 1 && (
-          <div className={cn('text-ink3', vizText.xs)}>
+          <div className={cn('cases-meta text-ink3', vizText.xs)}>
             Case {Math.max(1, activeIndex + 1)} / {allCases.length} ·
             <span className="ml-1">
               {good.length} worked
@@ -744,7 +757,7 @@ export function makeCasesPanel<I, S>(config: CasesConfig<I, S>) {
           </div>
         )}
         {allCases.length > 1 && (
-          <div className="ws-scroll -mx-0.5 overflow-x-auto px-0.5">
+          <div className="cases-tabs-scroll ws-scroll -mx-0.5 overflow-x-auto px-0.5">
             <MiniTabs value={active.id} options={tabOptions} onChange={setActiveId} />
           </div>
         )}

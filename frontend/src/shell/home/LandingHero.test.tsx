@@ -23,16 +23,26 @@ describe('LandingHero CTAs', () => {
         onSwipe={noop}
         onVim={noop}
         onGames={noop}
+        onPlans={noop}
+        onResumes={noop}
+        onInterviewCanvas={noop}
       />,
     );
 
     expect(html).toContain('Start learning');
     expect(html).toContain('Browse tracks');
     expect(html).toContain('>Play<');
-    expect(html).toContain('>Visualize<');
     expect(html).toContain('>Learn<');
-    expect(html).toContain('Open dojo');
-    expect(html).toContain('Vim Dojo');
+    expect(html).toContain('>Swipe<');
+    expect(html).toContain('>Games<');
+    expect(html).toContain('>Vim Dojo<');
+    expect(html).toContain('>Plans<');
+    expect(html).toContain('>Resumes<');
+    expect(html).toContain('>Interview Canvas<');
+    expect(html).toContain('Whiteboard + code studio');
+    expect(html).toContain('>Interview<');
+    expect(html).toContain('>Games &amp; drills<');
+    expect(html).toContain('8 ways to practice');
   });
 
   it('renders resume CTA when a last item is present', () => {
@@ -51,6 +61,9 @@ describe('LandingHero CTAs', () => {
         onSwipe={noop}
         onVim={noop}
         onGames={noop}
+        onPlans={noop}
+        onResumes={noop}
+        onInterviewCanvas={noop}
       />,
     );
 

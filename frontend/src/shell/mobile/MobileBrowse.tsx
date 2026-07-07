@@ -2,24 +2,18 @@ import { useMemo, useState } from 'react';
 import { BookmarkPlus, Check, CheckCircle2, Play, Search } from 'lucide-react';
 import {
   catalog,
-  getCategoryById,
   getItemsForCategory,
-  getTrackById,
   searchBrowse,
   topicForCategory,
   type Item,
   type Topic,
-  type TrackId,
 } from '../../content';
 import { useProgress, statFor } from '@/store/persistence';
 import { useWorkspace } from '@/store/workspace';
 import { Chip, difficultyTone } from '@/design/components';
-import { TrackGrid } from '../browse/TrackGrid';
-import { CategoryGrid } from '../browse/CategoryGrid';
-import { BrowseBreadcrumb } from '../browse/BrowseBreadcrumb';
+import { CourseTree } from '../browse/CourseTree';
 import { ProblemGlyph } from './scenes/ProblemGlyph';
 import { loadMobileSession } from './mobileSession';
-import { writeMobileHash } from '@/lib/navigation';
 import { usePlan } from '@/shell/plans/PlanContext';
 import { cn } from '@/lib/utils/cn';
 
@@ -30,7 +24,7 @@ export function MobileBrowse({
 }) {
   const progress = useProgress();
   const { isBuilding, hasItem, addItem, removeItem } = usePlan();
-  const { activeTrackId, setActiveTrackId, activeCategoryId, setActiveCategoryId } = useWorkspace();
+  const { activeTrackId, activeCategoryId } = useWorkspace();
   const [query, setQuery] = useState('');
 
   const resume = loadMobileSession();
@@ -47,33 +41,6 @@ export function MobileBrowse({
 
   const q = query.trim().toLowerCase();
   const searchResults = useMemo(() => (q ? searchBrowse(q, catalog) : null), [q]);
-
-  const categoryItems = useMemo(
-    () => (activeCategoryId ? getItemsForCategory(activeCategoryId, catalog) : []),
-    [activeCategoryId],
-  );
-
-  const pickTrack = (trackId: TrackId) => {
-    setActiveTrackId(trackId);
-    setActiveCategoryId(null);
-    writeMobileHash({ trackId }, { replace: false });
-  };
-
-  const pickCategory = (categoryId: string) => {
-    setActiveCategoryId(categoryId);
-    writeMobileHash({ trackId: activeTrackId ?? 'interview-prep', categoryId }, { replace: false });
-  };
-
-  const backFromCategory = () => {
-    setActiveCategoryId(null);
-    writeMobileHash(activeTrackId ? { trackId: activeTrackId } : null, { replace: true });
-  };
-
-  const backFromTrack = () => {
-    setActiveTrackId(null);
-    setActiveCategoryId(null);
-    writeMobileHash(null, { replace: true });
-  };
 
   const startDeck = (categoryId: string, startItemId?: string) => {
     const topic = topicForCategory(categoryId, catalog);
@@ -144,29 +111,54 @@ export function MobileBrowse({
     );
   };
 
+  const planToggleAccessory = (it: Item) => {
+    const inPlan = hasItem(it.id);
+    return (
+      <button
+        type="button"
+        onClick={() => (inPlan ? removeItem(it.id) : addItem(it.id))}
+        aria-label={inPlan ? `Remove ${it.title} from plan` : `Add ${it.title} to plan`}
+        className={cn(
+          'grid h-7 w-7 shrink-0 place-items-center rounded-lg border transition-colors',
+          inPlan
+            ? 'border-accent/60 bg-accent text-white'
+            : 'border-edge bg-panel text-ink3 active:bg-panel2',
+        )}
+      >
+        {inPlan ? (
+          <CheckCircle2 className="h-3.5 w-3.5" />
+        ) : (
+          <BookmarkPlus className="h-3.5 w-3.5" />
+        )}
+      </button>
+    );
+  };
+
   return (
-    <div className="ws-scroll min-h-0 flex-1 overflow-y-auto px-3 pb-10">
+    <div className="ws-scroll min-h-0 flex-1 overflow-y-auto px-3 pb-10 pt-3">
       {/* hero */}
-      <div className="relative mt-1 overflow-hidden rounded-2xl border border-edge bg-panel p-4">
+      <div className="relative overflow-hidden rounded-lg border border-edge bg-panel/80 p-4 shadow-[var(--shadow-sm)]">
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-60"
+          className="pointer-events-none absolute inset-0 opacity-55"
           style={{
-            background: 'radial-gradient(70% 90% at 90% 0%, var(--accent-bg) 0%, transparent 60%)',
+            background:
+              'linear-gradient(135deg, var(--accent-bg), transparent 58%), repeating-linear-gradient(90deg, color-mix(in srgb, var(--edge) 28%, transparent) 0 1px, transparent 1px 28px)',
           }}
         />
         <div className="relative">
-          <h1 className="text-[20px] font-semibold leading-tight tracking-tight text-ink">
-            Swipe to master
-          </h1>
-          <p className="mt-1 text-[length:var(--fs-sm)] text-ink2">
-            Pick a track, then a category — animate, quiz, rebuild.
+          <p className="mb-1 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-[0.14em] text-accent">
+            Mobile drill deck
           </p>
-          {resumeTopic && resumeCategoryId && !activeCategoryId && (
+          <h1 className="text-[20px] font-semibold leading-tight text-ink">Swipe to master</h1>
+          <p className="mt-1 text-[length:var(--fs-sm)] text-ink2">
+            Expand a course, then a subtopic — animate, quiz, rebuild.
+          </p>
+          {resumeTopic && resumeCategoryId && (
             <button
               type="button"
               onClick={() => startDeck(resumeCategoryId, resume!.itemId)}
-              className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-[length:var(--fs)] font-semibold text-white"
+              className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-[length:var(--fs)] font-semibold text-white shadow-[var(--shadow-sm)]"
             >
               <Play className="h-4 w-4" />
               Continue {resumeTopic.title}
@@ -176,7 +168,7 @@ export function MobileBrowse({
             </button>
           )}
           <div className="mt-3 flex items-center gap-2">
-            <div className="h-2 flex-1 overflow-hidden rounded-full bg-panel2">
+            <div className="h-2 flex-1 overflow-hidden rounded-full border border-edge bg-panel2/80">
               <div
                 className="h-full rounded-full bg-good transition-[width] duration-700"
                 style={{ width: `${totals.total ? (totals.mastered / totals.total) * 100 : 0}%` }}
@@ -189,145 +181,86 @@ export function MobileBrowse({
         </div>
       </div>
 
-      {/* search — only on root / track level */}
-      {!activeCategoryId && (
-        <div className="relative mt-3">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink3" />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search problems or categories…"
-            className="w-full rounded-xl border border-edge bg-panel py-2.5 pl-9 pr-3 text-[length:var(--fs)] text-ink outline-none placeholder:text-ink3 focus:border-accent"
-          />
-        </div>
-      )}
+      {/* search */}
+      <div className="relative mt-3">
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink3" />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search problems or categories…"
+          className="w-full rounded-lg border border-edge bg-panel/80 py-2.5 pl-9 pr-3 text-[length:var(--fs)] text-ink shadow-[var(--shadow-sm)] outline-none placeholder:text-ink3 focus:border-accent"
+        />
+      </div>
 
-      {/* level 3: flat problem list */}
-      {activeCategoryId ? (
-        <div className="mt-4">
-          <BrowseBreadcrumb
-            trackId={activeTrackId}
-            categoryId={activeCategoryId}
-            onBack={backFromCategory}
-          />
-          {(() => {
-            const cat = getCategoryById(activeCategoryId);
-            const items = categoryItems;
-            const mastered = items.filter((i) => statFor(progress, i.id).mastered).length;
-            return (
-              <>
-                <div className="mb-3 flex items-center justify-between gap-2 px-1">
-                  <div>
-                    <h2 className="text-[16px] font-semibold text-ink">{cat?.title}</h2>
-                    <p className="text-[length:var(--fs-xs)] text-ink3">
-                      {items.length} problems · {mastered} mastered
-                    </p>
-                  </div>
-                  {items.length > 0 && (
+      {q && searchResults ? (
+        <div className="mt-4 flex flex-col gap-4">
+          {searchResults.categories.length > 0 && (
+            <section>
+              <h2 className="mb-2 px-1 text-[length:var(--fs-xs)] font-semibold uppercase tracking-wide text-ink3">
+                Categories
+              </h2>
+              <div className="flex flex-col gap-2">
+                {searchResults.categories.map((cat) => {
+                  const count = getItemsForCategory(cat.id, catalog).length;
+                  if (count === 0) return null;
+                  return (
                     <button
+                      key={cat.id}
                       type="button"
-                      onClick={() => startDeck(activeCategoryId)}
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-accent px-3 py-2 text-[length:var(--fs-sm)] font-semibold text-white"
+                      onClick={() => startDeck(cat.id)}
+                      className="flex items-center justify-between gap-2 rounded-lg border border-edge bg-panel/80 px-3 py-2.5 text-left text-[length:var(--fs)] font-medium text-ink shadow-[var(--shadow-sm)] active:bg-panel2"
                     >
-                      <Play className="h-3.5 w-3.5" />
-                      Start
+                      <span className="truncate">{cat.title}</span>
+                      <span className="shrink-0 text-[length:var(--fs-xs)] text-ink3">{count}</span>
                     </button>
-                  )}
-                </div>
-                <ul className="overflow-hidden rounded-2xl border border-edge bg-panel">
-                  {items.map((it) => renderProblemRow(it, activeCategoryId))}
-                </ul>
-              </>
-            );
-          })()}
-        </div>
-      ) : activeTrackId ? (
-        /* level 2: category grid */
-        <div className="mt-4">
-          <BrowseBreadcrumb trackId={activeTrackId} onBack={backFromTrack} />
-          <div className="mb-3 px-1">
-            <h2 className="text-[16px] font-semibold text-ink">
-              {getTrackById(activeTrackId)?.title}
-            </h2>
-            <p className="text-[length:var(--fs-xs)] text-ink3">
-              {getTrackById(activeTrackId)?.summary}
+                  );
+                })}
+              </div>
+            </section>
+          )}
+          {searchResults.items.length > 0 && (
+            <section>
+              <h2 className="mb-2 px-1 text-[length:var(--fs-xs)] font-semibold uppercase tracking-wide text-ink3">
+                Problems
+              </h2>
+              <ul className="overflow-hidden rounded-lg border border-edge bg-panel/80 shadow-[var(--shadow-sm)]">
+                {searchResults.items.slice(0, 20).map((it) => {
+                  const cat = searchResults.categories.find((c) =>
+                    getItemsForCategory(c.id, catalog).some((i) => i.id === it.id),
+                  );
+                  return cat ? renderProblemRow(it, cat.id) : null;
+                })}
+              </ul>
+            </section>
+          )}
+          {searchResults.categories.length === 0 && searchResults.items.length === 0 && (
+            <p className="px-1 py-8 text-center text-[length:var(--fs)] text-ink3">
+              No matches for “{query}”.
             </p>
-          </div>
-          {q && searchResults ? (
-            <div className="flex flex-col gap-2">
-              {searchResults.categories.map((cat) => {
-                const count = getItemsForCategory(cat.id, catalog).length;
-                if (count === 0) return null;
-                return (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => pickCategory(cat.id)}
-                    className="rounded-xl border border-edge bg-panel px-3 py-2.5 text-left text-[length:var(--fs)] font-medium text-ink active:bg-panel2"
-                  >
-                    {cat.title}
-                    <span className="ml-2 text-[length:var(--fs-xs)] text-ink3">{count}</span>
-                  </button>
-                );
-              })}
-            </div>
-          ) : (
-            <CategoryGrid trackId={activeTrackId} onPick={pickCategory} />
           )}
         </div>
       ) : (
-        /* level 1: track grid */
-        <div className="mt-4">
-          {q && searchResults ? (
-            <div className="flex flex-col gap-4">
-              {searchResults.categories.length > 0 && (
-                <section>
-                  <h2 className="mb-2 px-1 text-[length:var(--fs-xs)] font-semibold uppercase tracking-wide text-ink3">
-                    Categories
-                  </h2>
-                  <div className="flex flex-col gap-2">
-                    {searchResults.categories.map((cat) => (
-                      <button
-                        key={cat.id}
-                        type="button"
-                        onClick={() => {
-                          const track = getTrackById('interview-prep');
-                          if (track) setActiveTrackId('interview-prep');
-                          pickCategory(cat.id);
-                        }}
-                        className="rounded-xl border border-edge bg-panel px-3 py-2.5 text-left text-[length:var(--fs)] font-medium text-ink active:bg-panel2"
-                      >
-                        {cat.title}
-                      </button>
-                    ))}
-                  </div>
-                </section>
-              )}
-              {searchResults.items.length > 0 && (
-                <section>
-                  <h2 className="mb-2 px-1 text-[length:var(--fs-xs)] font-semibold uppercase tracking-wide text-ink3">
-                    Problems
-                  </h2>
-                  <ul className="overflow-hidden rounded-2xl border border-edge bg-panel">
-                    {searchResults.items.slice(0, 20).map((it) => {
-                      const cat = searchResults.categories.find((c) =>
-                        getItemsForCategory(c.id, catalog).some((i) => i.id === it.id),
-                      );
-                      return cat ? renderProblemRow(it, cat.id) : null;
-                    })}
-                  </ul>
-                </section>
-              )}
-              {searchResults.categories.length === 0 && searchResults.items.length === 0 && (
-                <p className="px-1 py-8 text-center text-[length:var(--fs)] text-ink3">
-                  No matches for “{query}”.
-                </p>
-              )}
-            </div>
-          ) : (
-            <TrackGrid onPick={pickTrack} />
+        <CourseTree
+          className="mt-4"
+          storageKey="algo.mobile.courseTree"
+          showBulkToggle
+          showItemSummary
+          initialOpen={{ trackId: activeTrackId, categoryId: activeCategoryId }}
+          onProblem={(item, categoryId) => startDeck(categoryId, item.id)}
+          subtopicAccessory={(categoryId) => (
+            <button
+              type="button"
+              onClick={() => startDeck(categoryId)}
+              aria-label="Start this subtopic"
+              title="Start this subtopic"
+              className="inline-flex shrink-0 items-center gap-1 rounded-md bg-accent px-2 py-1 text-[length:var(--fs-xs)] font-semibold text-white shadow-[var(--shadow-sm)] active:opacity-90"
+            >
+              <Play className="h-3 w-3" />
+              Start
+            </button>
           )}
-        </div>
+          problemAccessory={isBuilding ? planToggleAccessory : undefined}
+        />
       )}
     </div>
   );

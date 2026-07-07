@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Check, Copy } from 'lucide-react';
+import { Check, Code2, Copy } from 'lucide-react';
 import { COPY_FEEDBACK_MS } from '../../copyFeedback';
 import { codeVariants, LangTabs } from '../shared/codeVariants';
 
@@ -34,9 +34,13 @@ export function CopyPanelBody() {
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2">
+    <div className="source-panel-shell flex min-h-0 flex-col gap-2">
+      <div className="source-panel-toolbar flex items-center gap-2 rounded-lg border border-edge bg-panel2/40 px-2 py-1.5">
         <LangTabs variants={variants} active={active} onPick={setActive} />
+        <span className="inline-flex min-w-0 items-center gap-1.5 rounded-md border border-edge bg-panel/70 px-2 py-1 font-mono text-[length:var(--fs-2xs)] text-ink2">
+          <Code2 className="h-3.5 w-3.5 shrink-0 text-accent" />
+          <span className="truncate">{file}</span>
+        </span>
         <span className="flex-1" />
         <Btn
           variant="good"
@@ -54,7 +58,9 @@ export function CopyPanelBody() {
         </Btn>
       </div>
       {status === 'failed' && <Hint>Selected — press ⌘/Ctrl+C to copy.</Hint>}
-      <Code text={code} file={file} preRef={preRef} />
+      <div className="source-code-frame min-h-0 overflow-hidden rounded-lg border border-edge bg-panel shadow-[var(--shadow-sm)]">
+        <Code text={code} file={file} preRef={preRef} />
+      </div>
     </div>
   );
 }

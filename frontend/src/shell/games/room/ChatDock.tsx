@@ -36,11 +36,11 @@ export function ChatDock() {
   };
 
   return (
-    <div className="overflow-hidden rounded-[var(--radius)] border border-edge bg-panel/70">
+    <div className="game-chat-dock overflow-hidden rounded-[var(--radius)] border border-edge bg-panel/70">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-2 px-2.5 py-2 text-start transition-colors hover:bg-panel2/60 touch-manipulation"
+        className="game-chat-dock__toggle flex w-full items-center gap-2 px-2.5 py-2 text-start transition-colors hover:bg-panel2/60 touch-manipulation"
         aria-expanded={open}
       >
         {open ? (
@@ -57,14 +57,14 @@ export function ChatDock() {
           <span className="flex-1" />
         )}
         {unread ? (
-          <span className="shrink-0 rounded-full bg-accent px-1.5 py-px text-[length:var(--fs-2xs)] font-bold leading-none text-white">
+          <span className="game-chat-dock__unread shrink-0 rounded-full bg-accent px-1.5 py-px text-[length:var(--fs-2xs)] font-bold leading-none text-white">
             {unreadCount}
           </span>
         ) : null}
       </button>
 
       {open ? (
-        <div className="flex flex-col border-t border-edge">
+        <div className="game-chat-dock__body flex flex-col border-t border-edge">
           <ChatMessageLog
             messages={messages}
             selfId={self?.id}
@@ -74,7 +74,7 @@ export function ChatDock() {
             className="max-h-44 min-h-[2.75rem] overflow-y-auto px-2 py-2 scroll-smooth"
           />
 
-          <div className="flex items-center gap-1.5 border-t border-edge p-1.5">
+          <div className="game-chat-dock__composer flex items-center gap-1.5 border-t border-edge p-1.5">
             <ReactionPicker onPick={sendReaction} label={t.room.reactions} />
             <ChatComposer
               value={draft}

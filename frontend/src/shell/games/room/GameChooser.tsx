@@ -44,15 +44,15 @@ export function GameChooser() {
   const filteredGames = GAMES.filter((game) => filter === 'all' || game.category === filter);
 
   return (
-    <div>
-      <h2 className="mb-1 text-center text-xl font-extrabold tracking-tight text-ink">
+    <div className="game-chooser">
+      <h2 className="game-chooser__title mb-1 text-center text-xl font-extrabold tracking-tight text-ink">
         {t.room.chooseGame}
       </h2>
-      <p className="mb-4 text-center text-sm text-ink3">
+      <p className="game-chooser__meta mb-4 text-center text-sm text-ink3">
         {t.room.playersHere(playerCount, capacity)}
       </p>
 
-      <div className="mb-4 flex items-center justify-center">
+      <div className="game-chooser__filters mb-4 flex items-center justify-center">
         <FeatureSelectorPopover
           groups={[
             {
@@ -86,7 +86,7 @@ export function GameChooser() {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
+      <div className="game-chooser__grid grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3">
         {filteredGames.map((game) => (
           <GameChooserCard
             key={game.id}
@@ -127,10 +127,10 @@ function GameChooserCard({
     game.pace === 'turns' ? `🔄 ${t.picker.paceTurns}` : `⚡ ${t.picker.paceTogether}`;
 
   return (
-    <div className="flex min-w-0 flex-col">
+    <div className="game-chooser-card-shell flex min-w-0 flex-col">
       <div
         className={cn(
-          'group relative flex h-full flex-col rounded-2xl border-2 bg-panel/70 transition-all',
+          'game-chooser-card group relative flex h-full flex-col rounded-2xl border-2 bg-panel/70 transition-all',
           fits
             ? 'hover:-translate-y-0.5 hover:bg-panel hover:shadow-[var(--shadow-md)]'
             : 'opacity-50',
@@ -142,7 +142,7 @@ function GameChooserCard({
           onClick={onToggleInfo}
           aria-expanded={expanded}
           aria-label={expanded ? t.picker.hideHowToPlay : t.picker.showHowToPlay}
-          className="absolute end-1.5 top-1.5 z-10 grid h-7 w-7 place-items-center rounded-full text-ink3 hover:bg-panel2 hover:text-ink transition-colors touch-manipulation"
+          className="game-chooser-card__info absolute end-1.5 top-1.5 z-10 grid h-7 w-7 place-items-center rounded-full text-ink3 hover:bg-panel2 hover:text-ink transition-colors touch-manipulation"
         >
           <Info className="h-3.5 w-3.5" />
         </button>
@@ -152,12 +152,12 @@ function GameChooserCard({
           disabled={!fits}
           onClick={onChoose}
           className={cn(
-            'flex min-h-[10.5rem] w-full flex-col items-center gap-2.5 px-2.5 pb-3 pt-4 text-center touch-manipulation sm:min-h-[11rem]',
+            'game-chooser-card__button flex min-h-[10.5rem] w-full flex-col items-center gap-2.5 px-2.5 pb-3 pt-4 text-center touch-manipulation sm:min-h-[11rem]',
             fits ? 'active:scale-[0.98]' : 'cursor-not-allowed',
           )}
         >
           <span
-            className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl sm:h-[4.5rem] sm:w-[4.5rem]"
+            className="game-chooser-card__glyph grid h-16 w-16 shrink-0 place-items-center rounded-2xl sm:h-[4.5rem] sm:w-[4.5rem]"
             style={{ background: `${color}22`, color }}
           >
             <Glyph markup={game.glyph} className="h-9 w-9 sm:h-10 sm:w-10" />
@@ -189,7 +189,7 @@ function GameChooserCard({
 
       {expanded ? (
         <div
-          className="-mt-1 rounded-b-2xl border border-t-0 bg-panel2 px-3 py-2.5 text-[length:var(--fs-tight)] text-ink2 leading-relaxed"
+          className="game-chooser-card__details -mt-1 rounded-b-2xl border border-t-0 bg-panel2 px-3 py-2.5 text-[length:var(--fs-tight)] text-ink2 leading-relaxed"
           style={{ borderColor: `${color}30` }}
         >
           <span className="font-bold text-ink">

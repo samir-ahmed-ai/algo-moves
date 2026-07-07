@@ -86,15 +86,17 @@ export function ProblemSurfaceBar({
   };
 
   return (
-    <header className="nodrag sticky top-0 z-20 flex h-10 shrink-0 items-center gap-1.5 border-b border-edge bg-panel px-2 py-0.5 shadow-sm sm:gap-2">
+    <header className="problem-surface-bar nodrag sticky top-0 z-20 flex h-11 shrink-0 items-center gap-1.5 border-b border-edge bg-panel/90 px-2 py-1 shadow-[var(--shadow-sm)] backdrop-blur sm:gap-2 sm:px-2.5">
       {onOpenPalette && onOpenHelp ? (
         <WorkspaceMenuDropdown compact onOpenPalette={onOpenPalette} onOpenHelp={onOpenHelp} />
       ) : null}
       <BarDivider />
       {badgeIcon ? (
-        <span className="hidden shrink-0 sm:grid sm:place-items-center">{badgeIcon}</span>
+        <span className="surface-badge hidden h-7 w-7 shrink-0 place-items-center rounded-md border border-edge bg-panel2 text-accent sm:grid">
+          {badgeIcon}
+        </span>
       ) : null}
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 leading-tight">
         <span className={cn('block truncate font-semibold text-ink', chromeText.sm)}>
           {item.title}
         </span>
@@ -114,14 +116,14 @@ export function ProblemSurfaceBar({
       {meta}
 
       {showNav && (
-        <div className="flex shrink-0 items-center gap-0.5 rounded-full border border-edge bg-panel2/60 px-0.5 py-0.5">
+        <div className="flex shrink-0 items-center gap-0.5 rounded-md border border-edge bg-panel2/70 px-0.5 py-0.5">
           <button
             type="button"
             onClick={() => goNav(-1)}
             title={isRunning ? 'Previous in plan (p)' : 'Previous problem ([)'}
             aria-label={isRunning ? 'Previous in plan' : 'Previous problem'}
             disabled={isRunning && navIdx <= 0}
-            className="grid h-6 w-6 place-items-center rounded-full text-ink3 transition-colors hover:bg-panel2 hover:text-ink disabled:opacity-40"
+            className="grid h-6 w-6 place-items-center rounded-md text-ink3 transition-colors hover:bg-panel hover:text-ink disabled:opacity-40"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -137,7 +139,7 @@ export function ProblemSurfaceBar({
             title={isRunning ? 'Next in plan (n)' : 'Next problem (])'}
             aria-label={isRunning ? 'Next in plan' : 'Next problem'}
             disabled={isRunning && navIdx >= navList.length - 1}
-            className="grid h-6 w-6 place-items-center rounded-full text-ink3 transition-colors hover:bg-panel2 hover:text-ink disabled:opacity-40"
+            className="grid h-6 w-6 place-items-center rounded-md text-ink3 transition-colors hover:bg-panel hover:text-ink disabled:opacity-40"
           >
             <ChevronRight className="h-4 w-4" />
           </button>

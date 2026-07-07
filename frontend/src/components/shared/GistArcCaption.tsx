@@ -1,7 +1,7 @@
 import { useId } from 'react';
 import { cn } from '@/lib/utils/cn';
 import { OrbitFitText } from './OrbitFitText';
-import { ORBIT_PATH_D, ORBIT_VIEWBOX } from './orbitArc';
+import { GIST_ORBIT_FONT, ORBIT_PATH_D, ORBIT_VIEWBOX } from './orbitArc';
 
 /** Static arched caption for mobile gist intro — same arc styling as MoveOrbit. */
 export function GistArcCaption({
@@ -26,7 +26,14 @@ export function GistArcCaption({
     >
       <path id={pathId} d={ORBIT_PATH_D} className="move-orbit-track" pathLength={1} />
       {side && (
-        <OrbitFitText text={side} pathId={pathId} slot="side" className="move-orbit-side" dy={8} />
+        <OrbitFitText
+          text={side}
+          pathId={pathId}
+          slot="side"
+          className="move-orbit-side"
+          dy={8}
+          font={GIST_ORBIT_FONT.side}
+        />
       )}
       {cur && (
         <OrbitFitText
@@ -35,6 +42,7 @@ export function GistArcCaption({
           slot="center"
           className="move-orbit-current"
           dy={-9}
+          font={GIST_ORBIT_FONT.center}
         />
       )}
     </svg>

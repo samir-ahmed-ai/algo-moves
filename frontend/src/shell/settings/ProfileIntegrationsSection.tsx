@@ -32,9 +32,12 @@ export function ProfileIntegrationsSection() {
 
   if (loading || isAnonymous) {
     return (
-      <p className={cn('text-ink3', chromeText.sm)}>
-        Sign in to manage your API keys and integrations.
-      </p>
+      <div className="profile-integrations-empty">
+        <KeyRound className="h-5 w-5" />
+        <p className={cn('text-ink3', chromeText.sm)}>
+          Sign in to manage your API keys and integrations.
+        </p>
+      </div>
     );
   }
 
@@ -71,12 +74,17 @@ export function ProfileIntegrationsSection() {
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <KeyRound className="h-4 w-4 text-accent" />
-        <h3 className={cn('font-semibold text-ink', chromeText.base)}>OpenAI API key</h3>
+    <div className="profile-integrations-card space-y-3">
+      <div className="profile-integrations-card__head flex items-center gap-2">
+        <span className="profile-integrations-card__icon">
+          <KeyRound className="h-4 w-4 text-accent" />
+        </span>
+        <div>
+          <span className="profile-integrations-card__eyebrow">secure integration</span>
+          <h3 className={cn('font-semibold text-ink', chromeText.base)}>OpenAI API key</h3>
+        </div>
       </div>
-      <p className={cn('text-ink3', chromeText.sm)}>
+      <p className={cn('profile-integrations-card__copy text-ink3', chromeText.sm)}>
         Used for resume parsing and AI customization. Your key is encrypted on the server and never
         shown again after saving.{' '}
         <a
@@ -90,13 +98,15 @@ export function ProfileIntegrationsSection() {
       </p>
 
       {fetching ? (
-        <Loader2 className="h-5 w-5 animate-spin text-ink3" />
+        <div className="profile-integrations-loading">
+          <Loader2 className="h-5 w-5 animate-spin text-ink3" />
+        </div>
       ) : (
         <>
           {status?.openai.configured && (
             <p
               className={cn(
-                'rounded-lg border border-good/30 bg-good/10 px-3 py-2 text-good',
+                'profile-integrations-status rounded-lg border border-good/30 bg-good/10 px-3 py-2 text-good',
                 chromeText.sm,
               )}
             >
@@ -104,7 +114,7 @@ export function ProfileIntegrationsSection() {
             </p>
           )}
 
-          <div className="relative">
+          <div className="profile-integrations-input-wrap relative">
             <input
               type={showKey ? 'text' : 'password'}
               value={keyInput}
@@ -112,7 +122,7 @@ export function ProfileIntegrationsSection() {
               placeholder={status?.openai.configured ? 'Enter new key to replace' : 'sk-...'}
               autoComplete="off"
               className={cn(
-                'w-full rounded-lg border border-edge bg-panel2 py-2 pl-3 pr-10 text-ink outline-none',
+                'profile-integrations-input w-full rounded-lg border border-edge bg-panel2 py-2 pl-3 pr-10 text-ink outline-none',
                 'focus:border-accent/60 focus:ring-2 focus:ring-accent/15',
                 chromeText.sm,
               )}
@@ -120,20 +130,20 @@ export function ProfileIntegrationsSection() {
             <button
               type="button"
               onClick={() => setShowKey((v) => !v)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-ink3 hover:text-ink"
+              className="profile-integrations-reveal absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-ink3 hover:text-ink"
               aria-label={showKey ? 'Hide API key' : 'Show API key'}
             >
               {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
 
-          <div className="flex gap-2">
+          <div className="profile-integrations-actions flex gap-2">
             <button
               type="button"
               onClick={save}
               disabled={busy}
               className={cn(
-                'flex-1 rounded-lg bg-accent px-3 py-2 font-medium text-white transition hover:opacity-90 disabled:opacity-50',
+                'profile-integrations-save flex-1 rounded-lg bg-accent px-3 py-2 font-medium text-white transition hover:opacity-90 disabled:opacity-50',
                 chromeText.sm,
               )}
             >
@@ -145,7 +155,7 @@ export function ProfileIntegrationsSection() {
                 onClick={remove}
                 disabled={busy}
                 className={cn(
-                  'inline-flex items-center gap-1 rounded-lg border border-edge bg-panel2 px-3 py-2 text-ink2 transition hover:border-bad/40 hover:text-bad disabled:opacity-50',
+                  'profile-integrations-remove inline-flex items-center gap-1 rounded-lg border border-edge bg-panel2 px-3 py-2 text-ink2 transition hover:border-bad/40 hover:text-bad disabled:opacity-50',
                   chromeText.sm,
                 )}
               >
@@ -155,7 +165,9 @@ export function ProfileIntegrationsSection() {
             )}
           </div>
 
-          {error && <p className={cn('text-bad', chromeText.sm)}>{error}</p>}
+          {error && (
+            <p className={cn('profile-integrations-error text-bad', chromeText.sm)}>{error}</p>
+          )}
         </>
       )}
     </div>

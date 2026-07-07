@@ -6,14 +6,13 @@ import {
   ChevronRight,
   Circle,
   Loader2,
-  LogIn,
   Plus,
   Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useAuth } from '@/shell/auth/AuthProvider';
 import { useWorkspace } from '@/store/workspace';
-import { AuthPopover } from '@/shell/auth/AuthPopover';
+import { ProductAuthGate } from '@/shell/auth/ProductAuthGate';
 import { chromeText } from '@/shell/chromeUi';
 import {
   createPrepPlan,
@@ -26,29 +25,35 @@ import { usePlan } from './PlanContext';
 // ─── Auth gate ────────────────────────────────────────────────────────────────
 
 function SignInGate() {
-  const signInRef = useRef<HTMLButtonElement>(null);
-  const [open, setOpen] = useState(false);
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
-      <div className="flex flex-col items-center gap-3">
-        <BookMarked className="h-12 w-12 text-ink3" strokeWidth={1.3} />
-        <h2 className="text-xl font-semibold text-ink">Interview Prep Plans</h2>
-        <p className={cn('max-w-xs text-ink3', chromeText.base)}>
-          Sign in to create named study plans, collect problems from any track, and step through
-          them one-by-one before your interview.
-        </p>
-      </div>
-      <button
-        ref={signInRef}
-        type="button"
-        onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 active:scale-[0.98]"
-      >
-        <LogIn className="h-4 w-4" />
-        Sign in to get started
-      </button>
-      <AuthPopover open={open} onOpenChange={setOpen} anchorRef={signInRef} />
-    </div>
+    <ProductAuthGate
+      variant="plans"
+      icon={<BookMarked className="h-6 w-6" strokeWidth={1.5} />}
+      eyebrow="Interview command center"
+      title="Build a prep plan that actually ships."
+      lede="Create named study plans, collect problems from any track, and move through the exact reps you need before the interview."
+      features={[
+        { icon: <BookMarked className="h-4 w-4" />, label: 'Named plans for each role' },
+        { icon: <CheckCircle2 className="h-4 w-4" />, label: 'Progress that survives sessions' },
+        { icon: <ChevronRight className="h-4 w-4" />, label: 'One clear next problem' },
+      ]}
+      preview={
+        <>
+          <div className="product-auth-gate__preview-top">
+            <span>FAANG sprint</span>
+            <strong>72%</strong>
+          </div>
+          <div className="product-auth-gate__progress">
+            <span style={{ width: '72%' }} />
+          </div>
+          <div className="product-auth-gate__mini-list">
+            <span>Backtracking review</span>
+            <span>Graph traversal refresh</span>
+            <span>Mock interview warmup</span>
+          </div>
+        </>
+      }
+    />
   );
 }
 
@@ -72,7 +77,7 @@ function CreatePlanForm({ onCreated }: { onCreated: (id: string) => void }) {
   }, [title, onCreated]);
 
   return (
-    <div className="flex gap-2">
+    <div className="plan-create-form flex gap-2">
       <input
         ref={inputRef}
         value={title}
@@ -80,7 +85,7 @@ function CreatePlanForm({ onCreated }: { onCreated: (id: string) => void }) {
         onKeyDown={(e) => e.key === 'Enter' && submit()}
         placeholder='e.g. "Comcast interview"'
         className={cn(
-          'flex-1 rounded-xl border border-edge bg-panel2 px-3 py-2 text-ink outline-none',
+          'plan-create-form__input flex-1 rounded-xl border border-edge bg-panel2 px-3 py-2 text-ink outline-none',
           'placeholder:text-ink3 focus:border-accent/60 focus:ring-2 focus:ring-accent/15',
           chromeText.base,
         )}
@@ -91,7 +96,7 @@ function CreatePlanForm({ onCreated }: { onCreated: (id: string) => void }) {
         type="button"
         onClick={submit}
         disabled={!title.trim() || busy}
-        className="inline-flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-50"
+        className="plan-create-form__button inline-flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-50"
       >
         {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
         Create
@@ -117,12 +122,12 @@ function PlanCard({
   const allDone = plan.itemCount > 0 && plan.completedCount === plan.itemCount;
 
   return (
-    <div className="group relative flex flex-col gap-3 rounded-xl border border-edge bg-panel p-4 transition hover:border-accent/40 hover:bg-panel2">
+    <div className="plan-card group relative flex flex-col gap-3 rounded-xl border border-edge bg-panel p-4 transition hover:border-accent/40 hover:bg-panel2">
       {/* Header */}
       <div className="flex items-start gap-3">
         <div
           className={cn(
-            'mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg border',
+            'plan-card__status mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg border',
             allDone ? 'border-good/40 text-good' : 'border-edge text-ink3',
           )}
         >
@@ -143,7 +148,7 @@ function PlanCard({
             e.stopPropagation();
             onDelete();
           }}
-          className="shrink-0 rounded-lg p-1.5 text-ink3 opacity-0 transition hover:bg-panel2 hover:text-red-500 group-hover:opacity-100"
+          className="plan-card__delete shrink-0 rounded-lg p-1.5 text-ink3 opacity-0 transition hover:bg-panel2 hover:text-red-500 group-hover:opacity-100"
         >
           <Trash2 className="h-4 w-4" />
         </button>
@@ -151,21 +156,24 @@ function PlanCard({
 
       {/* Progress bar */}
       {plan.itemCount > 0 && (
-        <div className="h-1 w-full overflow-hidden rounded-full bg-border">
+        <div className="plan-card__progress h-1 w-full overflow-hidden rounded-full bg-border">
           <div
-            className={cn('h-full rounded-full transition-all', allDone ? 'bg-good' : 'bg-accent')}
+            className={cn(
+              'plan-card__progress-fill h-full rounded-full transition-all',
+              allDone ? 'is-complete bg-good' : 'bg-accent',
+            )}
             style={{ width: `${pct}%` }}
           />
         </div>
       )}
 
       {/* Actions */}
-      <div className="flex gap-2">
+      <div className="plan-card__actions flex gap-2">
         <button
           type="button"
           onClick={onOpen}
           className={cn(
-            'flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-edge py-2 text-sm font-medium text-ink3',
+            'plan-card__secondary flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-edge py-2 text-sm font-medium text-ink3',
             'transition hover:border-accent/50 hover:bg-panel2 hover:text-ink',
           )}
         >
@@ -176,7 +184,7 @@ function PlanCard({
           onClick={onStart}
           disabled={plan.itemCount === 0}
           className={cn(
-            'flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-accent py-2 text-sm font-semibold text-white shadow-sm',
+            'plan-card__primary flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-accent py-2 text-sm font-semibold text-white shadow-sm',
             'transition hover:opacity-90 disabled:opacity-40',
           )}
         >
@@ -278,10 +286,16 @@ export function PlansPage() {
         ) : needsAuth ? (
           <SignInGate />
         ) : (
-          <div className="mx-auto w-full max-w-2xl px-4 py-8">
+          <div className="product-hub-shell mx-auto w-full max-w-2xl px-4 py-8">
             {/* Create */}
-            <section className="mb-8">
-              <h2 className="mb-3 text-lg font-semibold text-ink">New plan</h2>
+            <section className="product-hub-card mb-8">
+              <div className="product-hub-card__head">
+                <div>
+                  <span className="product-hub-card__eyebrow">prep queue</span>
+                  <h2>New plan</h2>
+                </div>
+                <Plus className="h-4 w-4 text-accent" />
+              </div>
               <CreatePlanForm onCreated={handleCreated} />
               <p className={cn('mt-2 text-ink3', chromeText.sm)}>
                 Give your plan a name, then browse tracks to add problems.
@@ -289,16 +303,25 @@ export function PlansPage() {
             </section>
 
             {/* Existing plans */}
-            <section>
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-ink">Your plans</h2>
+            <section className="product-hub-card">
+              <div className="product-hub-card__head mb-3">
+                <div>
+                  <span className="product-hub-card__eyebrow">active plans</span>
+                  <h2>Your plans</h2>
+                </div>
                 {fetching && <Loader2 className="h-4 w-4 animate-spin text-ink3" />}
               </div>
 
               {!fetching && plans.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-edge py-12 text-center text-ink3">
-                  <BookMarked className="mx-auto mb-2 h-8 w-8 opacity-40" />
-                  <p className={chromeText.base}>No plans yet — create one above.</p>
+                <div className="product-empty-state">
+                  <div className="product-empty-state__icon">
+                    <BookMarked className="h-7 w-7" />
+                  </div>
+                  <h3>No plans yet</h3>
+                  <p className={chromeText.base}>
+                    Create your first plan, then add problems from any track to build a focused prep
+                    queue.
+                  </p>
                 </div>
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -321,29 +344,32 @@ export function PlansPage() {
       {/* Delete confirmation overlay */}
       {deleteConfirm && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-bg/60 backdrop-blur-sm"
+          className="product-confirm-backdrop fixed inset-0 z-50 flex items-center justify-center bg-bg/60 backdrop-blur-sm"
           onClick={() => setDeleteConfirm(null)}
         >
           <div
-            className="w-full max-w-sm rounded-2xl border border-edge bg-panel p-6 shadow-xl"
+            className="product-confirm-modal w-full max-w-sm rounded-2xl border border-edge bg-panel p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
+            <div className="product-confirm-modal__icon">
+              <Trash2 className="h-5 w-5" />
+            </div>
             <h3 className="mb-1 font-semibold text-ink">Delete plan?</h3>
             <p className={cn('mb-5 text-ink3', chromeText.sm)}>
               This will permanently delete the plan and all its saved problems.
             </p>
-            <div className="flex justify-end gap-2">
+            <div className="product-confirm-modal__actions flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setDeleteConfirm(null)}
-                className="rounded-xl border border-edge px-4 py-2 text-sm font-medium text-ink3 transition hover:bg-panel2"
+                className="product-confirm-modal__cancel rounded-xl border border-edge px-4 py-2 text-sm font-medium text-ink3 transition hover:bg-panel2"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={() => handleDelete(deleteConfirm)}
-                className="rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600"
+                className="product-confirm-modal__danger rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600"
               >
                 Delete
               </button>

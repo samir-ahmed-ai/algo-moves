@@ -303,16 +303,21 @@ export function SplitCodeEditor({
   return (
     <div
       className={cn(
-        'flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius)] border border-edge',
+        'recall-split-editor flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-edge',
         compact && 'cm-merge-compact-chrome',
       )}
     >
-      <div className={cn('flex shrink-0 border-b border-edge bg-panel2', compact ? 'h-6' : 'h-7')}>
+      <div
+        className={cn(
+          'recall-split-header flex shrink-0 border-b border-edge bg-panel2',
+          compact ? 'h-6' : 'h-7',
+        )}
+      >
         {showLeft && (
           <div
             style={{ flex: `0 0 ${splitPct}%`, maxWidth: `${splitPct}%` }}
             className={cn(
-              'truncate border-r border-edge font-mono uppercase tracking-wide text-ink3',
+              'recall-pane-label truncate border-r border-edge font-mono uppercase tracking-wide text-ink3',
               compact ? 'px-2 py-0.5' : 'px-2.5 py-1',
               nodeText['2xs'],
             )}
@@ -327,7 +332,7 @@ export function SplitCodeEditor({
               : { flex: '1 1 100%' }
           }
           className={cn(
-            'truncate font-mono uppercase tracking-wide text-ink3',
+            'recall-pane-label recall-pane-label--attempt truncate font-mono uppercase tracking-wide text-ink3',
             compact ? 'px-2 py-0.5' : 'px-2.5 py-1',
             nodeText['2xs'],
           )}

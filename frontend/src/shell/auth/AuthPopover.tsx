@@ -264,7 +264,7 @@ export function AuthPopover({
       aria-describedby={error ? errorId : undefined}
       style={useAnchoredPopover && anchoredStyle ? anchoredStyle : undefined}
       className={cn(
-        'relative w-full max-w-[22rem] overflow-hidden border border-edge bg-bg shadow-theme-xl ring-1 ring-accent/10',
+        'auth-popover-panel relative w-full max-w-[22rem] overflow-hidden border border-edge bg-bg shadow-theme-xl ring-1 ring-accent/10',
         useAnchoredPopover
           ? cn(
               'fixed z-[60] animate-auth-popover-in rounded-[1.15rem]',
@@ -284,22 +284,22 @@ export function AuthPopover({
         className="auth-modal-glow pointer-events-none absolute inset-x-0 top-0 h-24"
       />
 
-      <div className="relative px-4 pb-4 pt-4 sm:px-5 sm:pb-5 sm:pt-5">
+      <div className="auth-popover-panel__inner relative px-4 pb-4 pt-4 sm:px-5 sm:pb-5 sm:pt-5">
         <button
           type="button"
           onClick={() => onOpenChange(false)}
-          className="absolute end-2.5 top-2.5 grid h-7 w-7 place-items-center rounded-lg text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
+          className="auth-popover-panel__close absolute end-2.5 top-2.5 grid h-7 w-7 place-items-center rounded-lg text-ink3 transition-colors hover:bg-panel2 hover:text-ink"
           aria-label={s.close}
         >
           <X className="h-3.5 w-3.5" />
         </button>
 
-        <div className="mb-3 flex flex-col items-center text-center">
-          <BrandLogo className="h-8 w-8 ring-2 ring-accent/15 ring-offset-2 ring-offset-bg" />
+        <div className="auth-popover-panel__hero mb-3 flex flex-col items-center text-center">
+          <BrandLogo className="auth-popover-panel__brand h-8 w-8 ring-2 ring-accent/15 ring-offset-2 ring-offset-bg" />
           <h2 id={titleId} className="mt-2 text-base font-bold tracking-tight text-ink">
             {tab === 'login' ? s.welcomeBack : s.createAccount}
           </h2>
-          <p className="mt-0.5 max-w-[16rem] text-[length:var(--fs-sm)] leading-snug text-ink3">
+          <p className="auth-popover-panel__subtitle mt-0.5 max-w-[16rem] text-[length:var(--fs-sm)] leading-snug text-ink3">
             {tab === 'login' ? s.loginSubtitle : s.signupSubtitle}
           </p>
         </div>
@@ -375,7 +375,7 @@ export function AuthPopover({
               role="alert"
               aria-live="assertive"
               className={cn(
-                'flex items-start gap-2 rounded-xl border border-bad/35 bg-badbg px-3 py-2.5 text-sm text-bad',
+                'auth-popover-error flex items-start gap-2 rounded-xl border border-bad/35 bg-badbg px-3 py-2.5 text-sm text-bad',
                 shakeError && 'animate-[shake_0.45s_ease-in-out]',
               )}
             >
@@ -388,7 +388,7 @@ export function AuthPopover({
             type="submit"
             disabled={!canSubmit}
             className={cn(
-              'mt-0.5 inline-flex min-h-[calc(var(--row)*1.35)] w-full items-center justify-center gap-1.5 rounded-xl bg-accent px-3 text-sm font-semibold text-white',
+              'auth-popover-submit mt-0.5 inline-flex min-h-[calc(var(--row)*1.35)] w-full items-center justify-center gap-1.5 rounded-xl bg-accent px-3 text-sm font-semibold text-white',
               'shadow-[0_1px_2px_hsl(0_0%_0%/0.12),0_4px_12px_hsl(var(--accent-h,220)_80%_40%/0.25)]',
               'transition-all hover:opacity-95 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45',
             )}
@@ -407,7 +407,7 @@ export function AuthPopover({
           </button>
         </form>
 
-        <div className="mt-3 border-t border-edge pt-3">
+        <div className="auth-popover-switch mt-3 border-t border-edge pt-3">
           <p className="text-center text-xs text-ink3">
             {tab === 'login' ? s.noAccount : s.hasAccount}{' '}
             <button
@@ -447,7 +447,7 @@ function AuthTabList({ tab, onSwitch }: { tab: AuthTab; onSwitch: (tab: AuthTab)
     <div
       role="tablist"
       aria-label="Account mode"
-      className="relative mb-3 grid grid-cols-2 rounded-xl border border-edge bg-panel2 p-[var(--gap)]"
+      className="auth-tab-list relative mb-3 grid grid-cols-2 rounded-xl border border-edge bg-panel2 p-[var(--gap)]"
     >
       <span
         aria-hidden
@@ -480,7 +480,7 @@ function TabChip({
       aria-selected={active}
       onClick={onClick}
       className={cn(
-        'relative z-[1] min-h-[var(--row)] rounded-lg text-sm font-semibold transition-colors duration-200',
+        'auth-tab-chip relative z-[1] min-h-[var(--row)] rounded-lg text-sm font-semibold transition-colors duration-200',
         active ? 'text-ink' : 'text-ink3 hover:text-ink2',
       )}
     >
@@ -496,7 +496,7 @@ function PasswordStrengthMeter({ strength }: { strength: 'weak' | 'fair' | 'stro
   const label = s.passwordStrength[strength];
 
   return (
-    <div className="mt-1.5 space-y-1.5">
+    <div className="auth-password-strength mt-1.5 space-y-1.5">
       <div className="flex gap-1" aria-hidden>
         {[0, 1, 2, 3].map((i) => (
           <span
@@ -545,14 +545,14 @@ function AuthField({
   footer?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-1 text-start">
+    <div className="auth-field flex flex-col gap-1 text-start">
       <label
         className="text-[length:var(--fs-tight)] font-semibold uppercase tracking-wide text-ink3"
         htmlFor={id}
       >
         {label}
       </label>
-      <div className="relative">
+      <div className="auth-field__control relative">
         {leading ? (
           <div className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-ink3/80">
             {leading}
@@ -570,7 +570,7 @@ function AuthField({
           aria-invalid={invalid || undefined}
           aria-describedby={error && id ? `${id}-error` : undefined}
           className={cn(
-            'min-h-[calc(var(--row)*1.35)] w-full rounded-xl border bg-panel text-sm text-ink outline-none transition-all',
+            'auth-field__input min-h-[calc(var(--row)*1.35)] w-full rounded-xl border bg-panel text-sm text-ink outline-none transition-all',
             'placeholder:text-ink3/70 focus:border-accent focus:ring-2 focus:ring-accent/20',
             leading ? 'ps-10' : 'px-3',
             trailing ? 'pe-11' : leading ? 'pe-3' : undefined,
@@ -633,13 +633,13 @@ export function AuthUserMenu({
       ref={menuRef}
       role="menu"
       aria-label="Account menu"
-      className="absolute end-0 top-full z-50 mt-1.5 min-w-[12rem] animate-auth-popover-in rounded-xl border border-edge bg-panel p-1.5 shadow-theme-lg"
+      className="auth-user-menu absolute end-0 top-full z-50 mt-1.5 min-w-[12rem] animate-auth-popover-in rounded-xl border border-edge bg-panel p-1.5 shadow-theme-lg"
     >
-      <div className="border-b border-edge px-2.5 py-2">
+      <div className="auth-user-menu__head border-b border-edge px-2.5 py-2">
         <p className="truncate text-sm font-semibold text-ink">{profile.display_name}</p>
         {profile.email ? <p className="truncate text-xs text-ink3">{profile.email}</p> : null}
         {profile.is_admin ? (
-          <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[length:var(--fs-2xs)] font-bold uppercase tracking-wide text-accent">
+          <span className="auth-user-menu__admin mt-1 inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[length:var(--fs-2xs)] font-bold uppercase tracking-wide text-accent">
             <Shield className="h-3 w-3" /> {s.admin}
           </span>
         ) : null}
@@ -682,7 +682,7 @@ function MenuRow({
       role="menuitem"
       onClick={onClick}
       className={cn(
-        'flex w-full min-h-9 items-center gap-2 rounded-lg px-2.5 text-sm transition-colors hover:bg-panel2',
+        'auth-user-menu__row flex w-full min-h-9 items-center gap-2 rounded-lg px-2.5 text-sm transition-colors hover:bg-panel2',
         danger ? 'text-bad' : 'text-ink2 hover:text-ink',
       )}
     >

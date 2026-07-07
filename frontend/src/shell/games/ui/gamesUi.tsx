@@ -236,14 +236,14 @@ export function RoundProgress({
   badge?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center gap-1.5">
+    <div className="game-round-progress flex flex-col items-center gap-1.5">
       <div className="flex items-center gap-2">
-        <span className="font-mono text-xs font-semibold tabular-nums text-ink2">
+        <span className="game-round-progress__count font-mono text-xs font-semibold tabular-nums text-ink2">
           {current} / {total}
         </span>
         {badge}
       </div>
-      <div className="flex flex-wrap justify-center gap-1">
+      <div className="game-round-progress__dots flex flex-wrap justify-center gap-1">
         {Array.from({ length: total }, (_, i) => (
           <span
             key={i}
@@ -271,7 +271,10 @@ export function SwipeHint({ message }: { message: string }) {
     return () => clearTimeout(t);
   }, []);
   return (
-    <div ref={ref} className="flex items-center justify-center gap-2 text-xs text-ink3 py-1">
+    <div
+      ref={ref}
+      className="game-swipe-hint flex items-center justify-center gap-2 text-xs text-ink3 py-1"
+    >
       <span className="animate-[swipeArrow_1s_ease-in-out_infinite]">👆</span>
       <span>{message}</span>
       <style>{`

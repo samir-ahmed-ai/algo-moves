@@ -1,7 +1,7 @@
 import { ScrollText } from 'lucide-react';
 import { patternsForTags } from '../../../content';
 
-import { useCanvasStatic, Chip, DefRow, EmptyState } from '@/shell/canvas';
+import { useCanvasStatic, Chip, EmptyState } from '@/shell/canvas';
 /** #66 Cheat sheet: terse one-liners for the problem's patterns. */
 export function CheatPanelBody() {
   const { item } = useCanvasStatic();
@@ -16,15 +16,23 @@ export function CheatPanelBody() {
     );
   }
   return (
-    <div className="flex flex-col">
+    <div className="cheat-panel">
+      <div className="cheat-panel__head">
+        <span>quick reference</span>
+        <strong>{item.title}</strong>
+      </div>
       {cards.map((c) => (
-        <DefRow
-          key={c.id}
-          term={c.title}
-          meta={<Chip mono>{c.complexity.split('|')[0].trim()}</Chip>}
-        >
-          {c.idea}
-        </DefRow>
+        <article key={c.id} className="cheat-card">
+          <div className="cheat-card__header">
+            <h3>{c.title}</h3>
+            <Chip mono>{c.complexity.split('|')[0].trim()}</Chip>
+          </div>
+          <p className="cheat-card__idea">{c.idea}</p>
+          <div className="cheat-card__signal">
+            <span>Use when</span>
+            <p>{c.whenToUse}</p>
+          </div>
+        </article>
       ))}
     </div>
   );

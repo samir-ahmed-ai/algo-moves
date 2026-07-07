@@ -40,6 +40,45 @@ describe('buildCanvasFrame', () => {
     expect(nodes).toHaveLength(0);
   });
 
+  it('seeds the interview canvas with the board layout and preset positions', () => {
+    const { nodes, edges } = buildCanvasFrame(stubPlugin, 'visualize', {
+      ...baseInput,
+      seedInterviewCanvas: true,
+    });
+    expect(nodes.map(kindOf)).toEqual(['whiteboard', 'notes', 'collab-code']);
+    // Preset positions from buildInterviewBoardNodes are preserved (no auto-layout).
+    const whiteboard = nodes.find((n) => kindOf(n) === 'whiteboard')!;
+    expect(whiteboard.position).toEqual({ x: 40, y: 40 });
+    expect(edges).toHaveLength(0);
+  });
+
+  it('does not reseed the interview canvas once panels were removed', () => {
+    const { nodes } = buildCanvasFrame(stubPlugin, 'visualize', {
+      ...baseInput,
+      seedInterviewCanvas: true,
+      removed: new Set(['whiteboard']),
+    });
+    expect(nodes).toHaveLength(0);
+  });
+
+  it('does not reseed the interview canvas when a saved layout exists', () => {
+    const { nodes } = buildCanvasFrame(stubPlugin, 'visualize', {
+      ...baseInput,
+      seedInterviewCanvas: true,
+      saved: { 'whiteboard-1': { position: { x: 10, y: 10 } } },
+    });
+    expect(nodes).toHaveLength(0);
+  });
+
+  it('prefers the problem seed over the interview seed when both are set', () => {
+    const { nodes } = buildCanvasFrame(stubPlugin, 'visualize', {
+      ...baseInput,
+      seedProblemCanvas: true,
+      seedInterviewCanvas: true,
+    });
+    expect(nodes.map((n) => n.id)).toEqual(['workbench']);
+  });
+
   it('tidies current optional visualize panels instead of dropping them', () => {
     const seeded = buildCanvasFrame(stubPlugin, 'visualize', {
       ...baseInput,

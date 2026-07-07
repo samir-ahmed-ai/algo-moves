@@ -7,8 +7,35 @@
   min-height: 0;
   overflow: hidden;
 }
+.assemble-mode-toolbar {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--accent-bg) 32%, transparent), transparent 42%),
+    color-mix(in srgb, var(--surface-2) 54%, transparent);
+}
+.assemble-mode-toolbar > .nodrag {
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--edge) 78%, transparent);
+  box-shadow: var(--shadow-sm);
+}
+.assemble-mode-workspace {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--surface) 74%, transparent),
+      color-mix(in srgb, var(--surface-2) 30%, transparent)
+    ),
+    var(--surface);
+}
 .code-studio-reassemble .reassemble-bar {
   flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--surface-2) 72%, transparent),
+      color-mix(in srgb, var(--surface) 60%, transparent)
+    ),
+    var(--surface-2);
 }
 .code-studio-reassemble .assembled {
   flex: 0 1 auto;
@@ -18,6 +45,8 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  border-radius: var(--radius);
+  border: 1px solid color-mix(in srgb, var(--edge) 82%, transparent);
 }
 .code-studio-reassemble .reassemble-body {
   flex: 1 1 auto;
@@ -45,7 +74,7 @@
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
-  padding: 4px 2px 6px;
+  padding: 8px 2px 8px;
 }
 .code-studio-reassemble .tray-grid {
   align-content: flex-start;

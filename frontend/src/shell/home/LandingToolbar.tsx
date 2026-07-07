@@ -52,8 +52,8 @@ export function LandingToolbar({
   return (
     <header className="sticky top-0 z-30 border-b border-edge bg-bg/90 pt-[env(safe-area-inset-top,0px)] backdrop-blur">
       <div className="flex items-center gap-2 px-4 py-2.5 sm:px-6">
-        <EagleMark className="h-8 w-8 shrink-0 rounded-lg shadow-[var(--shadow-md)] lg:h-9 lg:w-9 lg:rounded-xl" />
-        <span className="min-w-0 truncate font-semibold tracking-tight">Algo Moves</span>
+        <EagleMark className="h-8 w-8 shrink-0 rounded-lg shadow-[var(--shadow-md)] lg:h-9 lg:w-9" />
+        <span className="min-w-0 truncate text-sm font-semibold sm:text-base">Algo Moves</span>
         <div className="flex min-w-0 flex-1 items-center gap-2 lg:hidden">
           <button
             type="button"
@@ -86,7 +86,7 @@ export function LandingToolbar({
               value={exploreId}
               onChange={onExplore}
               panelTitle="Explore modes"
-              panelHint="Swipe, Vim, games, plans"
+              panelHint="Swipe, games, Vim, interview canvas, plans"
               triggerIcon={<MoreHorizontal className="h-3.5 w-3.5" />}
               triggerAriaLabel="Explore modes"
               compact

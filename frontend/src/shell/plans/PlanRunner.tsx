@@ -80,30 +80,30 @@ export function PlanRunner() {
   const pct = Math.round((completedCount / total) * 100);
 
   return (
-    <div className="flex h-12 shrink-0 items-center gap-3 border-b border-edge bg-panel px-4">
+    <div className="plan-runner-bar flex h-12 shrink-0 items-center gap-3 border-b border-edge bg-panel px-4">
       {/* Plan badge */}
-      <div className="flex items-center gap-1.5 text-accent">
+      <div className="plan-runner-bar__badge flex items-center gap-1.5 text-accent">
         <BookMarked className="h-3.5 w-3.5 shrink-0" />
         <span className={cn('hidden truncate max-w-[120px] font-semibold sm:block', chromeText.sm)}>
           {activePlan.title}
         </span>
       </div>
 
-      <div className="h-4 w-px shrink-0 bg-edge" />
+      <div className="plan-runner-bar__divider h-4 w-px shrink-0 bg-edge" />
 
       {/* Prev */}
       <button
         type="button"
         onClick={handlePrev}
         disabled={runnerIndex === 0}
-        className="grid h-7 w-7 place-items-center rounded-lg border border-edge text-ink3 transition hover:bg-panel2 hover:text-ink disabled:opacity-30"
+        className="plan-runner-bar__nav grid h-7 w-7 place-items-center rounded-lg border border-edge text-ink3 transition hover:bg-panel2 hover:text-ink disabled:opacity-30"
         title="Previous problem (p)"
       >
         <ChevronLeft className="h-4 w-4" />
       </button>
 
       {/* Current label */}
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="plan-runner-bar__current flex min-w-0 flex-1 flex-col">
         <span className={cn('truncate font-medium text-ink', chromeText.sm)}>
           {currentItem?.title ?? currentId}
         </span>
@@ -117,13 +117,13 @@ export function PlanRunner() {
         type="button"
         onClick={handleNext}
         disabled={runnerIndex === total - 1}
-        className="grid h-7 w-7 place-items-center rounded-lg border border-edge text-ink3 transition hover:bg-panel2 hover:text-ink disabled:opacity-30"
+        className="plan-runner-bar__nav grid h-7 w-7 place-items-center rounded-lg border border-edge text-ink3 transition hover:bg-panel2 hover:text-ink disabled:opacity-30"
         title="Next problem (n)"
       >
         <ChevronRight className="h-4 w-4" />
       </button>
 
-      <div className="h-4 w-px shrink-0 bg-edge" />
+      <div className="plan-runner-bar__divider h-4 w-px shrink-0 bg-edge" />
 
       {/* Mark complete */}
       <button
@@ -131,6 +131,7 @@ export function PlanRunner() {
         onClick={handleToggle}
         className={cn(
           'flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold transition',
+          'plan-runner-bar__complete',
           isCompleted
             ? 'border-good/40 bg-good/10 text-good hover:bg-good/20'
             : 'border-edge text-ink3 hover:border-accent/50 hover:bg-panel2 hover:text-ink',
@@ -147,7 +148,7 @@ export function PlanRunner() {
 
       {/* Progress */}
       <div className="hidden items-center gap-1.5 sm:flex">
-        <div className="h-1.5 w-20 overflow-hidden rounded-full bg-border">
+        <div className="plan-runner-bar__progress h-1.5 w-20 overflow-hidden rounded-full bg-border">
           <div
             className="h-full rounded-full bg-accent transition-all"
             style={{ width: `${pct}%` }}
@@ -156,13 +157,13 @@ export function PlanRunner() {
         <span className={cn('text-ink3', chromeText.xs)}>{pct}%</span>
       </div>
 
-      <div className="h-4 w-px shrink-0 bg-edge" />
+      <div className="plan-runner-bar__divider h-4 w-px shrink-0 bg-edge" />
 
       {/* Exit runner */}
       <button
         type="button"
         onClick={stopRun}
-        className="grid h-7 w-7 place-items-center rounded-lg border border-edge text-ink3 transition hover:bg-panel2 hover:text-ink"
+        className="plan-runner-bar__exit grid h-7 w-7 place-items-center rounded-lg border border-edge text-ink3 transition hover:bg-panel2 hover:text-ink"
         title="Exit run mode"
       >
         <X className="h-4 w-4" />

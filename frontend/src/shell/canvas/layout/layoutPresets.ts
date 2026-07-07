@@ -6,6 +6,9 @@ import { STRUDEL_NODE_W } from '../tokens';
 /** Persistence key for the standalone freeform canvas (not tied to a catalog item). */
 export const STANDALONE_CANVAS_KEY = 'standalone:visualize';
 
+/** Persistence key for the interview-board freeform canvas (kept separate from the plain canvas). */
+export const STANDALONE_INTERVIEW_CANVAS_KEY = 'standalone:interview';
+
 /** Width of the right-side dock that hosts `mode:'visualize'` plugin tabs (e.g. Cases). */
 export const SIDE_DOCK_WIDTH = STRUDEL_NODE_W;
 
@@ -145,13 +148,7 @@ function isSideTab(tab: { mode?: string; side?: boolean }): boolean {
 }
 
 /** Optional panels that work on the standalone canvas without a loaded problem plugin. */
-export const STANDALONE_ADDABLE_PANELS = [
-  'notes',
-  'bookmarks',
-  'projects',
-  'whiteboard',
-  'collab-code',
-] as const;
+export const STANDALONE_ADDABLE_PANELS = ['notes', 'whiteboard', 'collab-code'] as const;
 
 export function standaloneNodeIds(): string[] {
   return [...STANDALONE_ADDABLE_PANELS];

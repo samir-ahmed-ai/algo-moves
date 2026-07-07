@@ -43,7 +43,7 @@ export function CategoryGrid({
             key={cat.id}
             type="button"
             onClick={() => onPick(cat.id)}
-            className="group relative flex min-h-[120px] flex-col gap-2 overflow-hidden rounded-lg border border-edge bg-panel p-4 text-left transition-all hover:border-accent/60 hover:bg-panel2 hover:shadow-md"
+            className="group relative flex min-h-[120px] flex-col gap-2 overflow-hidden rounded-lg border border-edge bg-panel/80 p-4 text-left shadow-[var(--shadow-sm)] transition-all hover:border-accent/60 hover:bg-panel2 hover:shadow-md"
           >
             <span
               aria-hidden
@@ -51,7 +51,7 @@ export function CategoryGrid({
               style={gridStyle}
             />
             <div className="relative flex items-start gap-3">
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-edge bg-panel2 text-accent transition-colors group-hover:border-accent/40">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md border border-edge bg-panel2 text-accent transition-colors group-hover:border-accent/40">
                 <Icon className="h-5 w-5" strokeWidth={1.5} />
               </span>
               <div className="min-w-0 flex-1">

@@ -14,9 +14,11 @@ import {
 } from '@/shell/canvas';
 function PatField({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div>
+    <div className="pattern-field">
       <Label>{label}</Label>
-      <p className={cn('mt-0.5 leading-snug text-ink2', nodeText.base)}>{children}</p>
+      <p className={cn('pattern-field__copy mt-0.5 leading-snug text-ink2', nodeText.base)}>
+        {children}
+      </p>
     </div>
   );
 }
@@ -35,31 +37,36 @@ export function PatternPanelBody() {
     );
   }
   return (
-    <div className="flex flex-col">
+    <div className="pattern-panel">
       {cards.map((c, idx) => (
-        <Section
-          key={c.id}
-          title={c.title}
-          collapsible
-          defaultOpen={idx === 0}
-          right={<Chip mono>{c.complexity.split('|')[0].trim()}</Chip>}
-        >
-          <div className="flex flex-col gap-2">
-            <PatField label="Intuition">{c.idea}</PatField>
-            <PatField label="When to use">{c.whenToUse}</PatField>
-            <PatField label="Complexity">{c.complexity}</PatField>
-            {c.tradeoff && <PatField label="Brute force vs optimal">{c.tradeoff}</PatField>}
-            <PatField label="Real-world">{c.realWorld}</PatField>
-            {c.pitfall && (
-              <Banner tone="bad" label="Common pitfall">
-                {c.pitfall}
-              </Banner>
-            )}
-            <Banner tone="accent" label="Interview tip">
-              {c.interviewTip}
-            </Banner>
-          </div>
-        </Section>
+        <div key={c.id} className="pattern-card">
+          <Section
+            title={c.title}
+            collapsible
+            defaultOpen={idx === 0}
+            right={<Chip mono>{c.complexity.split('|')[0].trim()}</Chip>}
+          >
+            <div className="pattern-card__content">
+              <div className="pattern-field-grid">
+                <PatField label="Intuition">{c.idea}</PatField>
+                <PatField label="When to use">{c.whenToUse}</PatField>
+                <PatField label="Complexity">{c.complexity}</PatField>
+                {c.tradeoff && <PatField label="Brute force vs optimal">{c.tradeoff}</PatField>}
+                <PatField label="Real-world">{c.realWorld}</PatField>
+              </div>
+              <div className="pattern-callouts">
+                {c.pitfall && (
+                  <Banner tone="bad" label="Common pitfall">
+                    {c.pitfall}
+                  </Banner>
+                )}
+                <Banner tone="accent" label="Interview tip">
+                  {c.interviewTip}
+                </Banner>
+              </div>
+            </div>
+          </Section>
+        </div>
       ))}
     </div>
   );

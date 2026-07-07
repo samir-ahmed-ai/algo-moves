@@ -4,7 +4,6 @@ import {
   FileText,
   KeyRound,
   Loader2,
-  LogIn,
   Pencil,
   Sparkles,
   Trash2,
@@ -13,7 +12,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { useAuth } from '@/shell/auth/AuthProvider';
-import { AuthPopover } from '@/shell/auth/AuthPopover';
+import { ProductAuthGate } from '@/shell/auth/ProductAuthGate';
 import { chromeText } from '@/shell/chromeUi';
 import { getProfileIntegrations } from '@/platform/api/profileIntegrationsApi';
 import { useWorkspace } from '@/store/workspace';
@@ -33,29 +32,36 @@ import { formatResumeAiError, isOpenAIKeyError } from './formatResumeAiError';
 type View = 'hub' | 'editor' | 'customizer' | 'directory';
 
 function SignInGate() {
-  const signInRef = useRef<HTMLButtonElement>(null);
-  const [open, setOpen] = useState(false);
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
-      <div className="flex flex-col items-center gap-3">
-        <FileText className="h-12 w-12 text-ink3" strokeWidth={1.3} />
-        <h2 className="text-xl font-semibold text-ink">Resume Template Creator</h2>
-        <p className={cn('max-w-sm text-ink3', chromeText.base)}>
-          Sign in to upload your resume, get an AI-parsed mapping, and generate customized versions
-          for Java, Python, and more.
-        </p>
-      </div>
-      <button
-        ref={signInRef}
-        type="button"
-        onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 active:scale-[0.98]"
-      >
-        <LogIn className="h-4 w-4" />
-        Sign in to get started
-      </button>
-      <AuthPopover open={open} onOpenChange={setOpen} anchorRef={signInRef} />
-    </div>
+    <ProductAuthGate
+      variant="resumes"
+      icon={<FileText className="h-6 w-6" strokeWidth={1.5} />}
+      eyebrow="Resume operating system"
+      title="Turn one resume into targeted versions."
+      lede="Upload once, get an AI-parsed skill map, and generate role-specific resumes for Java, Python, frontend, backend, and more."
+      features={[
+        { icon: <Upload className="h-4 w-4" />, label: 'Upload PDF, DOCX, or text' },
+        { icon: <Sparkles className="h-4 w-4" />, label: 'AI mapping for stronger bullets' },
+        { icon: <Users className="h-4 w-4" />, label: 'Versions for each target role' },
+      ]}
+      preview={
+        <>
+          <div className="resume-preview-sheet">
+            <div className="resume-preview-sheet__top">
+              <span>Backend SWE</span>
+              <KeyRound className="h-4 w-4" />
+            </div>
+            <div className="resume-preview-sheet__line resume-preview-sheet__line--wide" />
+            <div className="resume-preview-sheet__line" />
+            <div className="resume-preview-sheet__bullets">
+              <span />
+              <span />
+              <span />
+            </div>
+          </div>
+        </>
+      }
+    />
   );
 }
 
@@ -99,7 +105,7 @@ function UploadZone({
       onDragLeave={() => setDragOver(false)}
       onDrop={onDrop}
       className={cn(
-        'rounded-xl border-2 border-dashed p-8 text-center transition',
+        'resume-upload-zone rounded-xl border-2 border-dashed p-8 text-center transition',
         dragOver ? 'border-accent bg-accent/5' : 'border-edge bg-panel/50',
       )}
     >
@@ -121,13 +127,15 @@ function UploadZone({
         </div>
       ) : (
         <>
-          <Upload className="mx-auto h-8 w-8 text-ink3 mb-3" />
+          <div className="resume-upload-zone__icon">
+            <Upload className="h-7 w-7" />
+          </div>
           <p className={cn('text-ink2 mb-1', chromeText.base)}>
             Drop your resume here or{' '}
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className="text-accent font-medium hover:underline"
+              className="resume-upload-zone__browse text-accent font-medium hover:underline"
             >
               browse files
             </button>
@@ -166,8 +174,8 @@ function ResumeCard({
   onDelete: () => void;
 }) {
   return (
-    <div className="rounded-xl border border-edge bg-panel p-4 flex flex-col gap-3">
-      <div>
+    <div className="resume-card rounded-xl border border-edge bg-panel p-4 flex flex-col gap-3">
+      <div className="resume-card__body">
         <p className="font-medium text-ink">{summary.title}</p>
         <p className={cn('text-ink3', chromeText.sm)}>{summary.originalFilename}</p>
         <p className={cn('text-ink3 mt-1', chromeText.sm)}>
@@ -175,11 +183,11 @@ function ResumeCard({
           {new Date(summary.updatedAt).toLocaleDateString()}
         </p>
       </div>
-      <div className="flex gap-2 mt-auto">
+      <div className="resume-card__actions flex gap-2 mt-auto">
         <button
           type="button"
           onClick={onEdit}
-          className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg border border-edge bg-panel2 px-3 py-1.5 text-xs font-medium text-ink2 hover:border-accent/40 transition"
+          className="resume-card__secondary flex-1 inline-flex items-center justify-center gap-1 rounded-lg border border-edge bg-panel2 px-3 py-1.5 text-xs font-medium text-ink2 hover:border-accent/40 transition"
         >
           <Pencil className="h-3 w-3" />
           Edit
@@ -187,7 +195,7 @@ function ResumeCard({
         <button
           type="button"
           onClick={onCustomize}
-          className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 transition"
+          className="resume-card__primary flex-1 inline-flex items-center justify-center gap-1 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 transition"
         >
           <Sparkles className="h-3 w-3" />
           Customize
@@ -195,7 +203,7 @@ function ResumeCard({
         <button
           type="button"
           onClick={onDelete}
-          className="rounded-lg border border-edge bg-panel2 px-2 py-1.5 text-ink3 hover:text-bad hover:border-bad/40 transition"
+          className="resume-card__delete rounded-lg border border-edge bg-panel2 px-2 py-1.5 text-ink3 hover:text-bad hover:border-bad/40 transition"
           aria-label="Delete resume"
         >
           <Trash2 className="h-3.5 w-3.5" />
@@ -347,9 +355,9 @@ export function ResumesPage() {
       ) : view === 'customizer' && activeResume ? (
         <CustomizerStudio resume={activeResume} />
       ) : (
-        <div className="flex-1 overflow-y-auto p-4 space-y-6 max-w-3xl mx-auto w-full">
+        <div className="product-hub-shell flex-1 overflow-y-auto p-4 space-y-6 max-w-3xl mx-auto w-full">
           {openaiConfigured === false && (
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/30 bg-accent/5 px-4 py-3">
+            <div className="product-hub-notice flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/30 bg-accent/5 px-4 py-3">
               <div className="flex items-start gap-2">
                 <KeyRound className="h-4 w-4 shrink-0 text-accent mt-0.5" />
                 <p className={cn('text-ink2', chromeText.sm)}>
@@ -366,16 +374,40 @@ export function ResumesPage() {
             </div>
           )}
 
-          <UploadZone onUploaded={handleUploaded} onOpenSettings={() => openSettings('profile')} />
+          <section className="product-hub-card">
+            <div className="product-hub-card__head">
+              <div>
+                <span className="product-hub-card__eyebrow">resume intake</span>
+                <h2>Upload source resume</h2>
+              </div>
+              <Upload className="h-4 w-4 text-accent" />
+            </div>
+            <UploadZone
+              onUploaded={handleUploaded}
+              onOpenSettings={() => openSettings('profile')}
+            />
+          </section>
 
-          <section>
-            <h2 className="text-sm font-semibold text-ink mb-3">My resumes</h2>
+          <section className="product-hub-card">
+            <div className="product-hub-card__head mb-3">
+              <div>
+                <span className="product-hub-card__eyebrow">library</span>
+                <h2>My resumes</h2>
+              </div>
+              <FileText className="h-4 w-4 text-accent" />
+            </div>
             {fetching ? (
               <Loader2 className="h-6 w-6 animate-spin text-ink3" />
             ) : resumes.length === 0 ? (
-              <p className={cn('text-ink3', chromeText.base)}>
-                No resumes yet. Upload one above to get started.
-              </p>
+              <div className="product-empty-state">
+                <div className="product-empty-state__icon">
+                  <FileText className="h-7 w-7" />
+                </div>
+                <h3>No resumes yet</h3>
+                <p className={chromeText.base}>
+                  Upload a source resume above to unlock editing, AI parsing, and targeted versions.
+                </p>
+              </div>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2">
                 {resumes.map((r) => (

@@ -93,7 +93,7 @@ export function StudioSplitLayout({
 
 function StudioSplitFooter({ children }: { children: ReactNode }) {
   return (
-    <div className="studio-split-footer shrink-0 border-t border-edge bg-panel/80 px-2.5 py-1.5 sm:px-3">
+    <div className="studio-split-footer shrink-0 border-t border-edge bg-panel/85 px-2.5 py-1.5 sm:px-3">
       {children}
     </div>
   );
@@ -111,7 +111,7 @@ export function StudioContentPanel({
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-2">
         <div
           className={cn(
-            'flex min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius)] border border-edge bg-panel shadow-sm',
+            'studio-content-card flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-edge bg-panel/85 shadow-[var(--shadow-sm)]',
             className,
           )}
         >

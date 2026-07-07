@@ -4,6 +4,21 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+.mobile-app-shell {
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--edge) 18%, transparent) 0 1px,
+      transparent 1px 32px
+    ),
+    linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--edge) 14%, transparent) 0 1px,
+      transparent 1px 32px
+    ),
+    var(--bg);
+}
+
 .mobile-card-shell {
   min-height: 0;
 }
@@ -735,6 +750,49 @@
 }
 .mobile-viz-board {
   min-height: 180px;
+  padding: 4px;
+}
+/* Pin scaled boards to the top-left — centering leaves a dead gutter on mobile. */
+.mobile-viz-board > .relative {
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+/* Mobile rail: in-flow scroll so tree-indented sections aren't clipped. */
+.mobile-viz-board .viz-stage {
+  --viz-rail-w: clamp(112px, 34%, 148px);
+  gap: 8px;
+  width: 100%;
+}
+.mobile-viz-board .viz-stage:has(.viz-statstrip) {
+  --viz-rail-w: clamp(104px, 32%, 124px);
+  gap: 8px;
+}
+.mobile-viz-board .viz-rail {
+  flex: 0 0 var(--viz-rail-w);
+  min-width: 0;
+}
+.mobile-viz-board .viz-rail-scroll {
+  position: static;
+  inset: auto;
+  overflow: visible;
+  padding: 2px 4px 2px 6px;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+/* Slightly tighter stat typography on small screens. */
+.mobile-viz-board .viz-statstrip {
+  padding-top: 6px;
+}
+.mobile-viz-board .viz-statstrip-group {
+  gap: 7px;
+  padding: 0 6px;
+}
+.mobile-viz-board .viz-statstrip-item .viz-rail-stat-k {
+  font-size: var(--node-fs-2xs, 9px);
+}
+.mobile-viz-board .viz-statstrip-item .viz-rail-stat-v {
+  font-size: 11px;
+  line-height: 1.28;
 }
 .mobile-viz-chip {
   display: inline-flex;
@@ -783,7 +841,7 @@
   }
 }
 
-/* gist (problem intro) card — big scene + arched ask + countdown */
+/* gist (problem intro) card — big scene + arched ask */
 .mobile-gist-card {
   min-height: 0;
 }
@@ -793,14 +851,20 @@
 }
 .mobile-gist-stage .gist-arc-caption {
   position: absolute;
-  top: 0;
+  top: 12px;
   left: 0;
   right: 0;
   z-index: 2;
   max-width: 100%;
-  max-height: 96px;
+  max-height: 120px;
   margin: 0 auto;
   pointer-events: none;
+}
+.mobile-gist-stage .gist-arc-caption.move-orbit-current {
+  font-size: 26px;
+}
+.mobile-gist-stage .gist-arc-caption.move-orbit-side {
+  font-size: 14px;
 }
 .mobile-gist-stage {
   min-height: 168px;

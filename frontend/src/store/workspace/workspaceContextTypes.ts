@@ -94,8 +94,10 @@ export interface WorkspaceNavigationCtx {
   enterWorkspace: (itemId?: string) => void;
   /** Open the standalone freeform canvas (no problem nodes). */
   enterCanvas: () => void;
-  /** Alias for {@link enterCanvas} — collab / interview surface. */
+  /** Open the freeform canvas pre-seeded with the interview board layout. */
   enterCollabCanvas: () => void;
+  /** Which standalone canvas layout to seed: plain freeform or the interview board. */
+  canvasVariant: 'plain' | 'interview';
   /** Open a problem in a specific workspace mode (play or learn). */
   enterProblemInMode: (id: string, mode: CanvasMode) => void;
   /** Open a problem in the workspace and leave browse grids. */

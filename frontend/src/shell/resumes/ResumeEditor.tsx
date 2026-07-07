@@ -12,7 +12,7 @@ import type {
 import { updateResume } from './data/resumesApi';
 
 const inputCls =
-  'w-full rounded-lg border border-edge bg-panel2 px-3 py-2 text-ink outline-none focus:border-accent/60 focus:ring-2 focus:ring-accent/15';
+  'resume-editor-input w-full rounded-lg border border-edge bg-panel2 px-3 py-2 text-ink outline-none focus:border-accent/60 focus:ring-2 focus:ring-accent/15';
 
 function tagsToStr(tags: string[]): string {
   return tags.join(', ');
@@ -100,16 +100,20 @@ export function ResumeEditor({
     }));
 
   return (
-    <div className="flex flex-col gap-4 overflow-y-auto p-4 max-w-3xl mx-auto w-full">
+    <div className="resume-editor-shell flex flex-col gap-4 overflow-y-auto p-4 max-w-3xl mx-auto w-full">
       {/* Toolbar */}
-      <div className="sticky top-0 z-10 -mx-4 flex flex-wrap items-center gap-3 border-b border-edge bg-bg/95 px-4 py-2 backdrop-blur">
+      <div className="resume-editor-toolbar sticky top-0 z-10 -mx-4 flex flex-wrap items-center gap-3 border-b border-edge bg-bg/95 px-4 py-2 backdrop-blur">
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className={cn('flex-1 min-w-[200px]', inputCls, chromeText.base)}
+          className={cn(
+            'resume-editor-title-input flex-1 min-w-[200px]',
+            inputCls,
+            chromeText.base,
+          )}
           placeholder="Resume title"
         />
-        <label className="flex items-center gap-2 text-sm text-ink2">
+        <label className="resume-editor-visibility flex items-center gap-2 text-sm text-ink2">
           <input
             type="checkbox"
             checked={isPublic}
@@ -123,7 +127,7 @@ export function ResumeEditor({
           onClick={save}
           disabled={busy}
           className={cn(
-            'inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-50',
+            'resume-editor-save inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-50',
             savedFlash ? 'bg-good' : 'bg-accent',
           )}
         >
@@ -133,8 +137,10 @@ export function ResumeEditor({
       </div>
 
       {/* Summary */}
-      <section className="rounded-xl border border-edge bg-panel p-4">
-        <h3 className="text-sm font-semibold text-ink mb-2">Summary</h3>
+      <section className="resume-editor-section rounded-xl border border-edge bg-panel p-4">
+        <h3 className="resume-editor-section__title text-sm font-semibold text-ink mb-2">
+          Summary
+        </h3>
         <textarea
           value={mapping.summary}
           onChange={(e) => setMapping({ ...mapping, summary: e.target.value })}
@@ -144,8 +150,10 @@ export function ResumeEditor({
       </section>
 
       {/* Contact */}
-      <section className="rounded-xl border border-edge bg-panel p-4">
-        <h3 className="text-sm font-semibold text-ink mb-2">Contact</h3>
+      <section className="resume-editor-section rounded-xl border border-edge bg-panel p-4">
+        <h3 className="resume-editor-section__title text-sm font-semibold text-ink mb-2">
+          Contact
+        </h3>
         <div className="grid gap-2 sm:grid-cols-2">
           {(['name', 'email', 'phone', 'location'] as const).map((field) => (
             <input
@@ -182,20 +190,22 @@ export function ResumeEditor({
       </section>
 
       {/* Skills */}
-      <section className="rounded-xl border border-edge bg-panel p-4">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-semibold text-ink">Skills ({mapping.skills.length})</h3>
+      <section className="resume-editor-section rounded-xl border border-edge bg-panel p-4">
+        <div className="resume-editor-section__head flex items-center justify-between mb-2">
+          <h3 className="resume-editor-section__title text-sm font-semibold text-ink">
+            Skills ({mapping.skills.length})
+          </h3>
           <button
             type="button"
             onClick={addSkill}
-            className="inline-flex items-center gap-1 rounded-lg border border-edge bg-panel2 px-2 py-1 text-xs text-ink2 hover:border-accent/40"
+            className="resume-editor-add inline-flex items-center gap-1 rounded-lg border border-edge bg-panel2 px-2 py-1 text-xs text-ink2 hover:border-accent/40"
           >
             <Plus className="h-3 w-3" /> Add
           </button>
         </div>
         <div className="flex flex-col gap-2">
           {mapping.skills.map((s, i) => (
-            <div key={i} className="flex flex-wrap items-center gap-2">
+            <div key={i} className="resume-editor-skill-row flex flex-wrap items-center gap-2">
               <input
                 value={s.name}
                 onChange={(e) => updateSkill(i, { name: e.target.value })}
@@ -211,7 +221,7 @@ export function ResumeEditor({
               <button
                 type="button"
                 onClick={() => removeSkill(i)}
-                className="rounded-lg border border-edge bg-panel2 px-2 py-2 text-ink3 hover:text-bad hover:border-bad/40"
+                className="resume-editor-remove rounded-lg border border-edge bg-panel2 px-2 py-2 text-ink3 hover:text-bad hover:border-bad/40"
                 aria-label="Remove skill"
               >
                 <Trash2 className="h-3.5 w-3.5" />
@@ -222,12 +232,15 @@ export function ResumeEditor({
       </section>
 
       {/* Experience */}
-      <section className="rounded-xl border border-edge bg-panel p-4">
-        <h3 className="text-sm font-semibold text-ink mb-2">
+      <section className="resume-editor-section rounded-xl border border-edge bg-panel p-4">
+        <h3 className="resume-editor-section__title text-sm font-semibold text-ink mb-2">
           Experience ({mapping.experience.length})
         </h3>
         {mapping.experience.map((exp, ei) => (
-          <div key={ei} className="mb-4 border-b border-edge/50 pb-4 last:border-0 last:pb-0">
+          <div
+            key={ei}
+            className="resume-editor-experience mb-4 border-b border-edge/50 pb-4 last:border-0 last:pb-0"
+          >
             <div className="grid gap-2 sm:grid-cols-2">
               <input
                 value={exp.role}
@@ -256,7 +269,7 @@ export function ResumeEditor({
             </div>
             <div className="mt-2 flex flex-col gap-2">
               {exp.bullets.map((b, bi) => (
-                <div key={bi} className="flex items-start gap-2">
+                <div key={bi} className="resume-editor-bullet-row flex items-start gap-2">
                   <textarea
                     value={b.text}
                     onChange={(e) => updateExpBullet(ei, bi, e.target.value, b.tags)}
@@ -274,7 +287,7 @@ export function ResumeEditor({
                     <button
                       type="button"
                       onClick={() => removeExpBullet(ei, bi)}
-                      className="rounded-lg border border-edge bg-panel2 px-2 py-1 text-xs text-ink3 hover:text-bad hover:border-bad/40"
+                      className="resume-editor-remove rounded-lg border border-edge bg-panel2 px-2 py-1 text-xs text-ink3 hover:text-bad hover:border-bad/40"
                     >
                       Remove
                     </button>
@@ -284,7 +297,7 @@ export function ResumeEditor({
               <button
                 type="button"
                 onClick={() => addExpBullet(ei)}
-                className="inline-flex items-center gap-1 self-start rounded-lg border border-edge bg-panel2 px-2 py-1 text-xs text-ink2 hover:border-accent/40"
+                className="resume-editor-add inline-flex items-center gap-1 self-start rounded-lg border border-edge bg-panel2 px-2 py-1 text-xs text-ink2 hover:border-accent/40"
               >
                 <Plus className="h-3 w-3" /> Add bullet
               </button>
@@ -295,12 +308,12 @@ export function ResumeEditor({
 
       {/* Projects */}
       {mapping.projects.length > 0 && (
-        <section className="rounded-xl border border-edge bg-panel p-4">
-          <h3 className="text-sm font-semibold text-ink mb-2">
+        <section className="resume-editor-section rounded-xl border border-edge bg-panel p-4">
+          <h3 className="resume-editor-section__title text-sm font-semibold text-ink mb-2">
             Projects ({mapping.projects.length})
           </h3>
           {mapping.projects.map((p, i) => (
-            <div key={i} className="mb-2">
+            <div key={i} className="resume-editor-project mb-2">
               <input
                 value={p.name}
                 onChange={(e) => updateProject(i, { name: e.target.value })}

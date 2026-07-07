@@ -1,55 +1,16 @@
 import {
   BookMarked,
-  Code2,
   Contrast,
   FileText,
   Gamepad2,
   Keyboard,
-  Megaphone,
+  LayoutTemplate,
   Moon,
   Palette,
   Smartphone,
   Sun,
-  Target,
 } from 'lucide-react';
 import type { FeatureGroup } from '@/components/shared';
-
-export const MORE_MODES_GROUPS: FeatureGroup[] = [
-  {
-    options: [
-      {
-        id: 'swipe',
-        icon: <Smartphone />,
-        title: 'Swipe',
-        subtitle: 'Mobile deck',
-        tone: 'accent',
-        detailTitle: 'Swipe Mode',
-        detailDescription:
-          'A swipeable card deck optimised for phone practice — flip through problems one-handed.',
-      },
-      {
-        id: 'vim',
-        icon: <Keyboard />,
-        title: 'Vim Dojo',
-        subtitle: 'Keyboard drills',
-        tone: 'team2',
-        detailTitle: 'Vim Dojo',
-        detailDescription:
-          'Timed keyboard-mastery drills to build muscle memory for Vim motions and shortcuts.',
-      },
-      {
-        id: 'games',
-        icon: <Gamepad2 />,
-        title: 'Games',
-        subtitle: 'Two-player rooms',
-        tone: 'team1',
-        detailTitle: 'Games',
-        detailDescription:
-          'Create or join a room and race a friend through head-to-head algorithm rounds.',
-      },
-    ],
-  },
-];
 
 export const EXPLORE_GROUPS: FeatureGroup[] = [
   {
@@ -82,6 +43,16 @@ export const EXPLORE_GROUPS: FeatureGroup[] = [
         detailTitle: 'Vim Dojo',
         detailDescription:
           'Timed keyboard-mastery drills to build muscle memory for Vim motions and shortcuts.',
+      },
+      {
+        id: 'interview-canvas',
+        icon: <LayoutTemplate />,
+        title: 'Interview Canvas',
+        subtitle: 'Whiteboard + code studio',
+        tone: 'accent',
+        detailTitle: 'Interview Canvas',
+        detailDescription:
+          'Opens straight into a pre-built interview board — whiteboard, notes, and a collaborative code studio, ready to invite a peer into.',
       },
       {
         id: 'plans',
@@ -153,43 +124,3 @@ export const PALETTE_GROUPS: FeatureGroup[] = [
     ],
   },
 ];
-
-export function trackGroups(
-  goConceptCount: number,
-  openrtbConceptCount: number,
-  prepProblemCount: number,
-): FeatureGroup[] {
-  return [
-    {
-      options: [
-        {
-          id: 'go',
-          icon: <Code2 />,
-          title: 'Go',
-          subtitle: 'Senior Developer',
-          tone: 'accent',
-          detailTitle: 'Go — Senior Developer',
-          detailDescription: `${goConceptCount} concepts covering concurrency, memory management, and generics.`,
-        },
-        {
-          id: 'openrtb',
-          icon: <Megaphone />,
-          title: 'OpenRTB',
-          subtitle: 'Ad Platforms',
-          tone: 'team2',
-          detailTitle: 'OpenRTB & Ad Platforms',
-          detailDescription: `${openrtbConceptCount} concepts spanning bidder architecture, exchange protocols, and privacy.`,
-        },
-        {
-          id: 'interview-prep',
-          icon: <Target />,
-          title: 'Interview Prep',
-          subtitle: 'Hand-authored',
-          tone: 'good',
-          detailTitle: 'Interview Preparation',
-          detailDescription: `${prepProblemCount} hand-authored problems designed to simulate real interview conditions.`,
-        },
-      ],
-    },
-  ];
-}

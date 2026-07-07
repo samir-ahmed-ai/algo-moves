@@ -20,6 +20,7 @@ import { StudioAssembleStageBody } from '@/shell/panels/problem/StudioAssembleSt
 import { StudioPanelStageBody } from '@/shell/panels/problem/StudioPanelStageBody';
 import { StudioViewPicker } from './StudioViewPicker';
 import { ProblemSurfaceBar } from './ProblemSurfaceBar';
+import { LibraryStatsBar } from './LibraryStatsBar';
 import { readStudioTab, writeStudioTab } from '@/store/study/studioTab';
 import {
   flatOrder,
@@ -212,6 +213,7 @@ function StudioShell({
             onOpenHelp={onOpenHelp}
           />
         )}
+        {!present && !isMobile && active.render === 'overview' && <LibraryStatsBar />}
         <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
           <StageBody avail={avail} active={active} cont={cont} lastTab={lastTab} onGo={go} />
         </div>

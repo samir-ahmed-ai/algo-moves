@@ -102,7 +102,7 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
     createError ?? (error && (status === 'error' || status === 'full') ? error : null);
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col gap-6">
+    <div className="game-lobby-shell mx-auto flex w-full max-w-md flex-col gap-6">
       {/* Hero */}
       <HeroBanner />
 
@@ -110,20 +110,20 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
       <GamePreviewStrip />
 
       {bannerError ? (
-        <div className="flex items-start gap-2 rounded-2xl border border-bad/40 bg-bad/10 p-3 text-sm text-bad">
+        <div className="game-lobby-alert flex items-start gap-2 rounded-2xl border border-bad/40 bg-bad/10 p-3 text-sm text-bad">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{bannerError}</span>
         </div>
       ) : null}
 
       {!configuredServer ? (
-        <p className="rounded-2xl border border-edge bg-panel2 px-3 py-2.5 text-start text-xs text-ink3">
+        <p className="game-lobby-note rounded-2xl border border-edge bg-panel2 px-3 py-2.5 text-start text-xs text-ink3">
           {t.lobby.lanHint}
         </p>
       ) : null}
 
       {/* Name input */}
-      <label className="flex flex-col gap-2 text-start">
+      <label className="game-lobby-field flex flex-col gap-2 text-start">
         <span className="text-xs font-bold uppercase tracking-widest text-ink3">
           {t.lobby.yourName}
         </span>
@@ -139,13 +139,13 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
             value={name}
             onChange={(e) => setName(e.target.value.slice(0, 24))}
             placeholder={t.lobby.namePlaceholder}
-            className="min-h-14 flex-1 rounded-2xl border-2 border-edge bg-panel px-4 text-lg font-semibold text-ink outline-none focus:border-accent transition-colors"
+            className="game-lobby-input min-h-14 flex-1 rounded-2xl border-2 border-edge bg-panel px-4 text-lg font-semibold text-ink outline-none focus:border-accent transition-colors"
             autoComplete="given-name"
           />
         </div>
       </label>
 
-      <div className="rounded-2xl border border-edge bg-panel p-4">
+      <div className="game-lobby-room-card rounded-2xl border border-edge bg-panel p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="text-xs font-bold uppercase tracking-widest text-ink3">
@@ -178,7 +178,7 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
       </div>
 
       {/* Create / Join tabs */}
-      <div className="grid grid-cols-2 gap-1.5 rounded-2xl border border-edge bg-panel2 p-1.5">
+      <div className="game-lobby-tabs grid grid-cols-2 gap-1.5 rounded-2xl border border-edge bg-panel2 p-1.5">
         <TabButton
           active={tab === 'create'}
           onClick={() => setTab('create')}
@@ -196,12 +196,12 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
       </div>
 
       {tab === 'create' ? (
-        <div className="flex flex-col gap-4">
+        <div className="game-lobby-action-card flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <span className="text-xs font-bold uppercase tracking-widest text-ink3">
               {t.room.capacity}
             </span>
-            <div className="grid grid-cols-4 gap-1.5 rounded-2xl border border-edge bg-panel2 p-1.5">
+            <div className="game-lobby-capacity-grid grid grid-cols-4 gap-1.5 rounded-2xl border border-edge bg-panel2 p-1.5">
               {CAPACITIES.map((c) => (
                 <button
                   key={c}
@@ -231,7 +231,7 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
           </TouchButton>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="game-lobby-action-card flex flex-col gap-3">
           <input
             value={joinCode}
             onChange={(e) => setJoinCode(normalizeRoomCode(e.target.value))}
@@ -239,7 +239,7 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
             inputMode="text"
             autoCapitalize="characters"
             dir="ltr"
-            className="min-h-[68px] rounded-2xl border-2 border-edge bg-panel text-center font-mono text-3xl font-bold uppercase tracking-[0.35em] text-ink outline-none focus:border-accent transition-colors"
+            className="game-lobby-code-input min-h-[68px] rounded-2xl border-2 border-edge bg-panel text-center font-mono text-3xl font-bold uppercase tracking-[0.35em] text-ink outline-none focus:border-accent transition-colors"
           />
           <TouchButton
             variant="primary"
@@ -277,17 +277,19 @@ export function Lobby({ prefillRoom }: { prefillRoom?: string }) {
 
 function HeroBanner() {
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-accent via-accent/80 to-purple-600 p-6 text-white shadow-[var(--shadow-lg)]">
-      {/* Decorative circles */}
-      <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
-      <div className="pointer-events-none absolute -bottom-6 -left-6 h-24 w-24 rounded-full bg-white/10" />
-      <div className="relative flex flex-col items-center gap-2 text-center">
-        <div className="flex gap-3 text-6xl">
-          <span className="animate-[bounce_1.2s_ease-in-out_infinite]">🎮</span>
-          <span className="animate-[bounce_1.2s_ease-in-out_0.2s_infinite]">💕</span>
-          <span className="animate-[bounce_1.2s_ease-in-out_0.4s_infinite]">🎲</span>
+    <div className="game-lobby-hero relative overflow-hidden rounded-3xl p-6 text-white shadow-[var(--shadow-lg)]">
+      <div className="game-lobby-hero__grid" />
+      <div className="relative flex flex-col items-center gap-3 text-center">
+        <div className="game-lobby-hero__glyphs">
+          {GAMES.slice(0, 3).map((game) => (
+            <span key={game.id} style={{ color: gameAccentColor(game) }}>
+              <Glyph markup={game.glyph} className="h-7 w-7" />
+            </span>
+          ))}
         </div>
+        <span className="game-lobby-hero__eyebrow">Multiplayer lab</span>
         <h1 className="text-2xl font-extrabold tracking-tight drop-shadow-sm">Games Arcade</h1>
+        <p>Fast rooms, shared codes, and party games built for the same screen or a LAN.</p>
       </div>
     </div>
   );
@@ -295,7 +297,7 @@ function HeroBanner() {
 
 function GamePreviewStrip() {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="game-preview-strip flex flex-col gap-2">
       <p className="text-xs font-bold uppercase tracking-widest text-ink3 px-0.5">
         Games available
       </p>
@@ -305,7 +307,7 @@ function GamePreviewStrip() {
           return (
             <div
               key={game.id}
-              className="flex shrink-0 flex-col items-center gap-1.5 rounded-2xl border border-edge bg-panel px-3 py-2.5 text-center"
+              className="game-preview-card flex shrink-0 flex-col items-center gap-1.5 rounded-2xl border border-edge bg-panel px-3 py-2.5 text-center"
               style={{ minWidth: 80 }}
             >
               <span

@@ -133,6 +133,14 @@ describe('fitOrbitMultilineLayout', () => {
     expect(layout.fontSize).toBe(28);
     expect(layout.lines.map((l) => l.text)).toEqual(['aa bb', 'cc dd']);
   });
+
+  it('prefers two lines at max over a smaller single line', () => {
+    const measureLine = (line: string, size: number) => line.length * size;
+    const layout = fitOrbitMultilineLayout(measureLine, 'aa bb cc', 28, 14, 200, 2);
+    expect(layout.fontSize).toBe(28);
+    expect(layout.lines).toHaveLength(2);
+    expect(layout.lines.map((l) => l.text).join(' ')).toBe('aa bb cc');
+  });
 });
 
 describe('orbitLineDy', () => {

@@ -32,6 +32,7 @@ import { useWorkflowRunner } from '../../hooks/useWorkflowRunner';
 import { CanvasActionsProvider, CanvasFrameProvider, CanvasStaticProvider } from './CanvasContext';
 import {
   CanvasToolbar,
+  InterviewPanelTray,
   ContextMenu,
   LaserPointer,
   type MenuItem,
@@ -51,6 +52,7 @@ import {
   connectionLineType,
   FIT_PADDING,
   STANDALONE_CANVAS_KEY,
+  STANDALONE_INTERVIEW_CANVAS_KEY,
   type BgVariant,
 } from './layout/layout';
 import {
@@ -187,9 +189,15 @@ function Inner({
     setRightOpen,
     setRightTab,
     enterProblemInMode,
+    canvasVariant,
   } = useWorkspace();
   const pluginId = plugin.meta.id;
-  const key = standalone ? STANDALONE_CANVAS_KEY : `${pluginId}:${mode}`;
+  const isInterviewCanvas = standalone && canvasVariant === 'interview';
+  const key = standalone
+    ? isInterviewCanvas
+      ? STANDALONE_INTERVIEW_CANVAS_KEY
+      : STANDALONE_CANVAS_KEY
+    : `${pluginId}:${mode}`;
   const [selectedNode, setSelectedNode] = useState<number | null>(null);
   useEffect(() => {
     setSelectedNode(null);
@@ -232,6 +240,7 @@ function Inner({
         removedEdges: removedEdgesRef.current[k],
         saved: layoutRef.current[k],
         seedProblemCanvas: !standalone,
+        seedInterviewCanvas: isInterviewCanvas,
         layoutOpts: layoutOpts(),
         dir,
         edgeOpts,
@@ -242,7 +251,7 @@ function Inner({
       }
       return built;
     },
-    [plugin, edgeOpts, dir, layoutOpts, standalone, item.id],
+    [plugin, edgeOpts, dir, layoutOpts, standalone, isInterviewCanvas, item.id],
   );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -702,6 +711,7 @@ function Inner({
                       />
                     )}
                     {!present && <CanvasFloatingHud />}
+                    {!present && <InterviewPanelTray />}
                     {!present && (
                       <CanvasToolbar
                         lock={lock}

@@ -1,5 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { BookmarkPlus, Clock, Download, Loader2, Sparkles, Trash2, Wand2 } from 'lucide-react';
+import {
+  BookmarkPlus,
+  Clock,
+  Download,
+  KeyRound,
+  Loader2,
+  Sparkles,
+  Trash2,
+  Wand2,
+} from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '@/shell/chromeUi';
 import type { Resume, ResumeMapping, ResumeVariant } from './data/resumesApi';
@@ -8,7 +17,6 @@ import { formatResumeAiError, isOpenAIKeyError } from './formatResumeAiError';
 import { FOCUS_PRESETS, reorderMappingForFocus } from './customize/reorder';
 import { ResumeTemplate } from './ResumeTemplate';
 import { useWorkspace } from '@/store/workspace';
-import { KeyRound } from 'lucide-react';
 
 interface CustomizerStudioProps {
   resume: Resume;
@@ -134,19 +142,21 @@ export function CustomizerStudio({
   }, [resume.title, focus]);
 
   return (
-    <div className="flex flex-1 min-h-0 flex-col lg:flex-row gap-4 p-4 overflow-hidden">
+    <div className="resume-customizer-shell flex flex-1 min-h-0 flex-col lg:flex-row gap-4 p-4 overflow-hidden">
       {/* Controls */}
-      <div className="lg:w-80 shrink-0 flex flex-col gap-4 overflow-y-auto pr-1">
-        <div>
-          <h3 className="text-sm font-semibold text-ink mb-2">Focus presets</h3>
-          <div className="flex flex-wrap gap-2">
+      <div className="resume-customizer-controls lg:w-80 shrink-0 flex flex-col gap-4 overflow-y-auto pr-1">
+        <div className="resume-customizer-card">
+          <h3 className="resume-customizer-card__title text-sm font-semibold text-ink mb-2">
+            Focus presets
+          </h3>
+          <div className="resume-customizer-presets flex flex-wrap gap-2">
             {FOCUS_PRESETS.map((p) => (
               <button
                 key={p.focus}
                 type="button"
                 onClick={() => selectPreset(p)}
                 className={cn(
-                  'rounded-lg border px-2.5 py-1 text-xs font-medium transition',
+                  'resume-customizer-preset rounded-lg border px-2.5 py-1 text-xs font-medium transition',
                   focus === p.focus
                     ? 'border-accent bg-accent/10 text-accent'
                     : 'border-edge bg-panel2 text-ink2 hover:border-accent/40',
@@ -158,37 +168,37 @@ export function CustomizerStudio({
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="resume-customizer-card space-y-2">
           <label className={cn('block text-xs font-medium text-ink2', chromeText.base)}>
             Focus keyword
           </label>
           <input
             value={focus}
             onChange={(e) => setFocus(e.target.value)}
-            className="w-full rounded-lg border border-edge bg-panel2 px-3 py-2 text-sm text-ink outline-none focus:border-accent/60"
+            className="resume-customizer-input w-full rounded-lg border border-edge bg-panel2 px-3 py-2 text-sm text-ink outline-none focus:border-accent/60"
             placeholder="e.g. java, python"
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="resume-customizer-card space-y-2">
           <label className={cn('block text-xs font-medium text-ink2', chromeText.base)}>
             Target role
           </label>
           <input
             value={targetRole}
             onChange={(e) => setTargetRole(e.target.value)}
-            className="w-full rounded-lg border border-edge bg-panel2 px-3 py-2 text-sm text-ink outline-none focus:border-accent/60"
+            className="resume-customizer-input w-full rounded-lg border border-edge bg-panel2 px-3 py-2 text-sm text-ink outline-none focus:border-accent/60"
             placeholder="e.g. Senior Java Engineer"
           />
         </div>
 
-        <div>
+        <div className="resume-customizer-card">
           <div className="flex gap-2">
             <button
               type="button"
               onClick={() => setMode('rules')}
               className={cn(
-                'flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition',
+                'resume-customizer-mode flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition',
                 mode === 'rules'
                   ? 'border-accent bg-accent/10 text-accent'
                   : 'border-edge bg-panel2 text-ink2',
@@ -201,7 +211,7 @@ export function CustomizerStudio({
               type="button"
               onClick={() => setMode('ai')}
               className={cn(
-                'flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition',
+                'resume-customizer-mode flex-1 rounded-lg border px-3 py-2 text-xs font-medium transition',
                 mode === 'ai'
                   ? 'border-accent bg-accent/10 text-accent'
                   : 'border-edge bg-panel2 text-ink2',
@@ -222,19 +232,19 @@ export function CustomizerStudio({
           type="button"
           onClick={applyCustomize}
           disabled={busy}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-50"
+          className="resume-customizer-primary inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-50"
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
           {busy ? 'Working…' : mode === 'ai' ? 'Generate with AI' : 'Apply reorder'}
         </button>
 
-        <div className="flex gap-2">
+        <div className="resume-customizer-actions flex gap-2">
           {canSave && (
             <button
               type="button"
               onClick={saveVariant}
               disabled={saving}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-edge bg-panel2 px-3 py-2 text-sm font-medium text-ink transition hover:border-accent/40 disabled:opacity-50"
+              className="resume-customizer-secondary flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-edge bg-panel2 px-3 py-2 text-sm font-medium text-ink transition hover:border-accent/40 disabled:opacity-50"
             >
               {saving ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -247,7 +257,7 @@ export function CustomizerStudio({
           <button
             type="button"
             onClick={exportPdf}
-            className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-edge bg-panel2 px-3 py-2 text-sm font-medium text-ink transition hover:border-accent/40"
+            className="resume-customizer-secondary flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-edge bg-panel2 px-3 py-2 text-sm font-medium text-ink transition hover:border-accent/40"
           >
             <Download className="h-4 w-4" />
             PDF
@@ -255,7 +265,7 @@ export function CustomizerStudio({
         </div>
 
         {error && (
-          <div className="space-y-1">
+          <div className="resume-customizer-error space-y-1">
             <p className="text-xs text-bad">{error}</p>
             {isOpenAIKeyError(error) && (
               <button
@@ -271,8 +281,8 @@ export function CustomizerStudio({
         )}
 
         {canSave && variants.length > 0 && (
-          <div>
-            <h3 className="text-sm font-semibold text-ink mb-2 flex items-center gap-1.5">
+          <div className="resume-customizer-card">
+            <h3 className="resume-customizer-card__title text-sm font-semibold text-ink mb-2 flex items-center gap-1.5">
               <Clock className="h-3.5 w-3.5 text-ink3" />
               Saved variants
             </h3>
@@ -280,7 +290,7 @@ export function CustomizerStudio({
               {variants.map((v) => (
                 <div
                   key={v.id}
-                  className="flex items-center gap-1 rounded-lg border border-edge bg-panel2 pr-1"
+                  className="resume-customizer-variant flex items-center gap-1 rounded-lg border border-edge bg-panel2 pr-1"
                 >
                   <button
                     type="button"
@@ -314,7 +324,7 @@ export function CustomizerStudio({
       </div>
 
       {/* Preview */}
-      <div className="flex-1 min-h-0 overflow-y-auto rounded-xl border border-edge bg-panel2/50 p-4">
+      <div className="resume-customizer-preview flex-1 min-h-0 overflow-y-auto rounded-xl border border-edge bg-panel2/50 p-4">
         <ResumeTemplate ref={previewRef} mapping={preview} focus={focus} />
       </div>
     </div>

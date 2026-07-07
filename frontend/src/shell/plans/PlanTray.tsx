@@ -53,7 +53,7 @@ function EditableTitle({ title, onRename }: { title: string; onRename: (t: strin
         maxLength={200}
         aria-label="Rename plan"
         className={cn(
-          'min-w-0 flex-1 rounded border border-accent/50 bg-panel2 px-1.5 py-0.5 text-ink outline-none ring-2 ring-accent/15',
+          'plan-tray-title-input min-w-0 flex-1 rounded border border-accent/50 bg-panel2 px-1.5 py-0.5 text-ink outline-none ring-2 ring-accent/15',
           chromeText.sm,
         )}
       />
@@ -66,7 +66,7 @@ function EditableTitle({ title, onRename }: { title: string; onRename: (t: strin
       onClick={() => setEditing(true)}
       title="Rename plan"
       className={cn(
-        'group/title flex min-w-0 flex-1 items-center gap-1 text-left font-semibold text-ink hover:text-accent',
+        'plan-tray-title group/title flex min-w-0 flex-1 items-center gap-1 text-left font-semibold text-ink hover:text-accent',
         chromeText.sm,
       )}
     >
@@ -125,17 +125,17 @@ function ItemRow({
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       className={cn(
-        'group flex items-center gap-1.5 rounded-lg border border-transparent px-1.5 py-1.5 transition',
+        'plan-tray-row group flex items-center gap-1.5 rounded-lg border border-transparent px-1.5 py-1.5 transition',
         'hover:border-edge hover:bg-panel2',
         completed && 'opacity-60',
       )}
     >
-      <GripVertical className="h-3.5 w-3.5 shrink-0 cursor-grab text-ink3 opacity-40 group-hover:opacity-80" />
+      <GripVertical className="plan-tray-row__grip h-3.5 w-3.5 shrink-0 cursor-grab text-ink3 opacity-40 group-hover:opacity-80" />
 
       <button
         type="button"
         onClick={onToggle}
-        className="shrink-0 text-ink3 transition hover:text-good"
+        className="plan-tray-row__toggle shrink-0 text-ink3 transition hover:text-good"
         title={completed ? 'Mark incomplete' : 'Mark complete'}
       >
         {completed ? (
@@ -160,7 +160,7 @@ function ItemRow({
       <button
         type="button"
         onClick={onRemove}
-        className="shrink-0 rounded p-0.5 text-ink3 opacity-0 transition hover:text-red-500 group-hover:opacity-100"
+        className="plan-tray-row__remove shrink-0 rounded p-0.5 text-ink3 opacity-0 transition hover:text-red-500 group-hover:opacity-100"
         title="Remove from plan"
       >
         <X className="h-3 w-3" />
@@ -212,13 +212,13 @@ function TrayBody({
   return (
     <>
       {/* Header */}
-      <div className="flex h-10 shrink-0 items-center gap-2 border-b border-edge px-3">
+      <div className="plan-tray-head flex h-10 shrink-0 items-center gap-2 border-b border-edge px-3">
         <BookMarked className="h-3.5 w-3.5 shrink-0 text-accent" />
         <EditableTitle title={activePlan.title} onRename={renamePlan} />
         <button
           type="button"
           onClick={onCollapse}
-          className="shrink-0 rounded p-1 text-ink3 transition hover:bg-panel2 hover:text-ink"
+          className="plan-tray-head__close shrink-0 rounded p-1 text-ink3 transition hover:bg-panel2 hover:text-ink"
           title="Close plan"
         >
           <CollapseIcon className="h-4 w-4" />
@@ -229,6 +229,7 @@ function TrayBody({
       <div
         className={cn(
           'flex items-center gap-2 border-b border-edge px-3 py-2 text-ink3',
+          'plan-tray-stats',
           chromeText.xs,
         )}
       >
@@ -251,9 +252,9 @@ function TrayBody({
       </div>
 
       {/* Item list */}
-      <div className="min-h-0 flex-1 overflow-y-auto px-1.5 py-1.5">
+      <div className="plan-tray-list min-h-0 flex-1 overflow-y-auto px-1.5 py-1.5">
         {itemIds.length === 0 ? (
-          <div className="mt-6 px-2 text-center text-ink3">
+          <div className="plan-tray-empty mt-6 px-2 text-center text-ink3">
             <p className={chromeText.sm}>Click a problem card to add it.</p>
           </div>
         ) : (
@@ -272,12 +273,12 @@ function TrayBody({
       </div>
 
       {/* Footer */}
-      <div className="flex flex-col gap-2 border-t border-edge p-2.5">
+      <div className="plan-tray-footer flex flex-col gap-2 border-t border-edge p-2.5">
         {canAddCurrent && (
           <button
             type="button"
             onClick={() => addItem(activeItemId)}
-            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-edge py-2 text-sm font-medium text-ink3 transition hover:border-accent/50 hover:bg-panel2 hover:text-ink"
+            className="plan-tray-add-current flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-edge py-2 text-sm font-medium text-ink3 transition hover:border-accent/50 hover:bg-panel2 hover:text-ink"
             title="Add the problem you're viewing"
           >
             <Plus className="h-3.5 w-3.5" />
@@ -288,7 +289,7 @@ function TrayBody({
           type="button"
           onClick={handleStartRun}
           disabled={itemIds.length === 0}
-          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-accent py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-40"
+          className="plan-tray-start flex w-full items-center justify-center gap-1.5 rounded-xl bg-accent py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-40"
         >
           <Play className="h-3.5 w-3.5" />
           Start run
@@ -317,21 +318,21 @@ export function PlanTray() {
       <>
         {mobileOpen && (
           <div
-            className="fixed inset-0 z-40 bg-bg/50 backdrop-blur-sm"
+            className="plan-tray-mobile-backdrop fixed inset-0 z-40 bg-bg/50 backdrop-blur-sm"
             onClick={() => setMobileOpen(false)}
             aria-hidden
           />
         )}
         <div
           className={cn(
-            'fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl border-t border-edge bg-panel shadow-[0_-4px_24px_hsl(0_0%_0%/0.2)] transition-transform',
+            'plan-tray-mobile fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl border-t border-edge bg-panel shadow-[0_-4px_24px_hsl(0_0%_0%/0.2)] transition-transform',
             mobileOpen ? 'h-[70dvh] translate-y-0' : 'h-auto',
           )}
         >
           {mobileOpen ? (
             <TrayBody onCollapse={() => setMobileOpen(false)} collapseIcon={ChevronDown} />
           ) : (
-            <div className="flex items-center gap-2 px-4 py-3">
+            <div className="plan-tray-mobile-pill flex items-center gap-2 px-4 py-3">
               <button
                 type="button"
                 onClick={() => setMobileOpen(true)}
@@ -363,7 +364,7 @@ export function PlanTray() {
 
   // ── Desktop: docked right panel ──
   return (
-    <div className="flex w-64 shrink-0 flex-col border-l border-edge bg-panel">
+    <div className="plan-tray-desktop flex w-64 shrink-0 flex-col border-l border-edge bg-panel">
       <TrayBody onCollapse={closePlan} collapseIcon={XCircle} />
     </div>
   );

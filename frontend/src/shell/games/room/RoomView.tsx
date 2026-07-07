@@ -46,9 +46,11 @@ function Staging({ game, children }: { game?: GameDef; children: ReactNode }) {
     : t.waitingRoom.serverHintLan;
 
   return (
-    <div className="mx-auto flex w-full max-w-xl flex-col gap-2.5">
+    <div className="game-room-stage mx-auto flex w-full max-w-xl flex-col gap-2.5">
       <Roster />
-      <div className="rounded-xl border border-edge bg-panel/60 p-3">{children}</div>
+      <div className="game-room-stage__card rounded-xl border border-edge bg-panel/60 p-3">
+        {children}
+      </div>
       {!game ? <ShareRoom room={room ?? ''} hint={serverHint} locale={locale} /> : null}
       <ChatDock />
     </div>
@@ -58,8 +60,8 @@ function Staging({ game, children }: { game?: GameDef; children: ReactNode }) {
 function WaitingForHost() {
   const t = useArcadeStrings();
   return (
-    <div className="flex flex-col items-center gap-3 py-8 text-center">
-      <span className="grid h-12 w-12 animate-pulse place-items-center rounded-full bg-accentbg text-accent">
+    <div className="game-waiting-host flex flex-col items-center gap-3 py-8 text-center">
+      <span className="game-waiting-host__icon grid h-12 w-12 animate-pulse place-items-center rounded-full bg-accentbg text-accent">
         <Users className="h-6 w-6" />
       </span>
       <p className="text-sm font-medium text-ink2">{t.picker.guestHint}</p>
@@ -101,14 +103,14 @@ function ReadyRoom({ game }: { game: GameDef }) {
   };
 
   return (
-    <div className="flex flex-col items-center gap-4 text-center">
+    <div className="game-ready-room flex flex-col items-center gap-4 text-center">
       <span
-        className="grid h-16 w-16 place-items-center rounded-3xl shadow-lg"
+        className="game-ready-room__glyph grid h-16 w-16 place-items-center rounded-3xl shadow-lg"
         style={{ background: `${color}20`, color }}
       >
         <Glyph markup={game.glyph} className="h-9 w-9" />
       </span>
-      <div>
+      <div className="game-ready-room__copy">
         <h2 className="text-xl font-extrabold tracking-tight text-ink">{meta.title}</h2>
         <p className="text-xs text-ink3 mt-1">{meta.tagline}</p>
       </div>
@@ -138,7 +140,7 @@ function ReadyRoom({ game }: { game: GameDef }) {
       )}
 
       {isHost ? (
-        <div className="flex w-full max-w-xs flex-col gap-2">
+        <div className="game-ready-room__host-actions flex w-full max-w-xs flex-col gap-2">
           <TouchButton
             variant="primary"
             size="md"
@@ -161,7 +163,7 @@ function ReadyRoom({ game }: { game: GameDef }) {
 
       <SessionStandings />
 
-      <p className="text-[length:var(--fs-tight)] text-ink3">
+      <p className="game-ready-room__capacity text-[length:var(--fs-tight)] text-ink3">
         {t.room.playersHere(playerCount, capacity)}
       </p>
     </div>
@@ -183,7 +185,7 @@ function SessionStandings() {
   const topWins = ranked[0]?.wins ?? 0;
 
   return (
-    <div className="w-full rounded-2xl border border-edge bg-panel/50 p-3 text-start">
+    <div className="game-standings w-full rounded-2xl border border-edge bg-panel/50 p-3 text-start">
       <p className="mb-2 text-xs font-bold uppercase tracking-widest text-ink3">
         {t.room.standings}
       </p>
@@ -212,8 +214,8 @@ function SpectatorControls() {
   const { playerCount, capacity, requestSeat } = useGameRoom();
   const seatFree = playerCount < capacity;
   return (
-    <div className="flex flex-col items-center gap-2">
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-panel2 px-3 py-1 text-sm text-ink2">
+    <div className="game-spectator-controls flex flex-col items-center gap-2">
+      <span className="game-spectator-controls__badge inline-flex items-center gap-1.5 rounded-full bg-panel2 px-3 py-1 text-sm text-ink2">
         <Eye className="h-4 w-4" /> {t.room.spectating}
       </span>
       {seatFree ? (
@@ -244,8 +246,8 @@ function PlayArea({ game }: { game: GameDef }) {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-col gap-2.5">
-      <div className="flex items-center justify-between gap-2">
+    <div className="game-play-shell mx-auto flex w-full max-w-lg flex-col gap-2.5">
+      <div className="game-play-shell__top flex items-center justify-between gap-2">
         <Roster compact />
         {isHost ? (
           <button
@@ -259,7 +261,7 @@ function PlayArea({ game }: { game: GameDef }) {
       </div>
 
       <div
-        className="relative rounded-xl border-2 bg-gradient-to-b from-panel/90 to-panel/40 p-3"
+        className="game-play-arena relative rounded-xl border-2 bg-gradient-to-b from-panel/90 to-panel/40 p-3"
         style={{
           borderColor: `${accent}44`,
           boxShadow: `0 4px 28px -10px ${accent}33`,
@@ -309,7 +311,7 @@ function StartCountdown({
   }, [n]);
 
   return (
-    <div className="flex flex-col items-center gap-3 py-6">
+    <div className="game-countdown flex flex-col items-center gap-3 py-6">
       <span key={n} className="text-4xl animate-countdown-pop">
         {n > 0 ? emoji : '🚀'}
       </span>

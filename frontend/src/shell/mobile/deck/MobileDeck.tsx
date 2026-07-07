@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { ChevronLeft, Layers } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Layers } from 'lucide-react';
 import { catalog, type Topic } from '../../../content';
 import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
@@ -145,6 +145,15 @@ export function MobileDeck({
     }
   }, [blocks, cIdx, pIdx]);
 
+  const goToNextProblem = useCallback(() => {
+    if (pIdx >= blocks.length - 1) return;
+    setDir(1);
+    setCIdx(0);
+    setPIdx(pIdx + 1);
+  }, [blocks.length, pIdx]);
+
+  const canNextProblem = !done && pIdx < blocks.length - 1;
+
   const goToCard = useCallback(
     (targetCIdx: number) => {
       if (!block) return;
@@ -253,11 +262,24 @@ export function MobileDeck({
             <ChevronLeft className="h-5 w-5" />
           </button>
           <div className="min-w-0 flex-1">
-            <div className="truncate text-[length:var(--fs-sm)] font-semibold text-ink">
-              {topic.title}
+            <div className="flex min-w-0 items-center gap-0.5">
+              <div className="truncate text-[length:var(--fs-sm)] font-semibold text-ink">
+                {block?.item.title ?? topic.title}
+              </div>
+              {canNextProblem && (
+                <button
+                  type="button"
+                  onClick={goToNextProblem}
+                  title="Next problem"
+                  aria-label="Next problem"
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink3 hover:bg-panel2 hover:text-ink"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              )}
             </div>
-            <div className="text-[length:var(--fs-tight)] text-ink3">
-              {done ? 'Topic complete' : `Problem ${pIdx + 1} of ${blocks.length}`}
+            <div className="truncate text-[length:var(--fs-tight)] text-ink3">
+              {done ? 'Topic complete' : `${topic.title} · Problem ${pIdx + 1} of ${blocks.length}`}
             </div>
           </div>
           {headerRight}

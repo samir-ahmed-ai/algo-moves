@@ -1,5 +1,6 @@
 export * from './CanvasFloatingHud';
 export * from './CanvasToolbar';
+export * from './InterviewPanelTray';
 export * from './CanvasTools';
 export * from './MobileTransportSheet';
 export * from './NodePropertiesBody';

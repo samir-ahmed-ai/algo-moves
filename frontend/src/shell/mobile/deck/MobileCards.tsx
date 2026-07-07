@@ -9,7 +9,6 @@ import {
   EyeOff,
   LayoutGrid,
   Lightbulb,
-  Play,
   RotateCcw,
   Sparkles,
   Trophy,
@@ -83,60 +82,9 @@ function Confetti() {
 
 /* -------------------------------------------------------------------- gist */
 
-const GIST_SECONDS = 10;
-
-/** Depleting ring that doubles as a pause toggle for the auto-advance. */
-function TimerRing({
-  remaining,
-  total,
-  paused,
-  onToggle,
-}: {
-  remaining: number;
-  total: number;
-  paused: boolean;
-  onToggle: () => void;
-}) {
-  const r = 15;
-  const circ = 2 * Math.PI * r;
-  const frac = Math.max(0, Math.min(1, remaining / total));
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      data-noswipe
-      aria-label={paused ? 'Resume auto-advance' : `Pause — starts in ${Math.ceil(remaining)}s`}
-      className="relative grid h-10 w-10 shrink-0 place-items-center rounded-full text-ink2 transition-colors hover:text-ink"
-    >
-      <svg viewBox="0 0 40 40" className="absolute inset-0 h-full w-full -rotate-90" aria-hidden>
-        <circle cx="20" cy="20" r={r} fill="none" stroke="var(--border-strong)" strokeWidth="3" />
-        <circle
-          cx="20"
-          cy="20"
-          r={r}
-          fill="none"
-          stroke="var(--accent)"
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeDasharray={circ}
-          strokeDashoffset={circ * (1 - frac)}
-          style={{ transition: 'stroke-dashoffset 90ms linear' }}
-        />
-      </svg>
-      {paused ? (
-        <Play className="h-3.5 w-3.5" />
-      ) : (
-        <span className="text-[length:var(--fs-xs)] font-semibold tabular-nums text-ink">
-          {Math.ceil(remaining)}
-        </span>
-      )}
-    </button>
-  );
-}
-
 /**
- * Problem intro: a big creative scene + one concise "ask", then it jumps to the
- * action after a 10s countdown (or the moment the student taps Start / Skip).
+ * Problem intro: a big creative scene + one concise "ask", then the student
+ * taps Start / Skip to continue.
  */
 export function GistCardView({
   card,
@@ -153,46 +101,6 @@ export function GistCardView({
 }) {
   const { item } = block;
   const tint = tintFor(item);
-  const [remaining, setRemaining] = useState(GIST_SECONDS);
-  const [paused, setPaused] = useState(false);
-  const pausedRef = useRef(false);
-  const onContinueRef = useRef(onContinue);
-  onContinueRef.current = onContinue;
-
-  // One rAF loop per problem; pause freezes it without resetting the clock.
-  useEffect(() => {
-    pausedRef.current = false;
-    setPaused(false);
-    setRemaining(GIST_SECONDS);
-    let raf = 0;
-    let last = performance.now();
-    let acc = 0;
-    let done = false;
-    const tick = (now: number) => {
-      const dt = now - last;
-      last = now;
-      if (!pausedRef.current && document.visibilityState === 'visible') {
-        acc += dt;
-        const left = Math.max(0, GIST_SECONDS - acc / 1000);
-        setRemaining(left);
-        if (left <= 0 && !done) {
-          done = true;
-          onContinueRef.current();
-          return;
-        }
-      }
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [card.key]);
-
-  const togglePause = () => {
-    const next = !pausedRef.current;
-    pausedRef.current = next;
-    setPaused(next);
-  };
-
   const summary = block.plugin.meta.summary;
 
   return (
@@ -207,17 +115,9 @@ export function GistCardView({
           )}
           <DiffChip item={item} />
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-[length:var(--fs-tight)] font-semibold tabular-nums text-ink3">
-            {problemIndex + 1}/{problemCount}
-          </span>
-          <TimerRing
-            remaining={remaining}
-            total={GIST_SECONDS}
-            paused={paused}
-            onToggle={togglePause}
-          />
-        </div>
+        <span className="text-[length:var(--fs-tight)] font-semibold tabular-nums text-ink3">
+          {problemIndex + 1}/{problemCount}
+        </span>
       </div>
 
       <div className="mobile-gist-visual mt-2 flex min-h-0 flex-1 flex-col">
@@ -282,7 +182,7 @@ export function AnimateCardView({
   const summary = plugin.meta.summary;
 
   return (
-    <div className="mobile-card-shell mobile-animate-card flex flex-1 flex-col px-4 pt-3">
+    <div className="mobile-card-shell mobile-animate-card flex flex-1 flex-col px-3 pt-3">
       <div className="shrink-0">
         <div className="flex items-center gap-2">
           <span className="text-[length:var(--fs-tight)] font-semibold tabular-nums text-ink3">

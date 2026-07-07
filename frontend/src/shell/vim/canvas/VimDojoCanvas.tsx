@@ -51,7 +51,7 @@ function VimDojoFlow() {
             <KeyboardHud />
           </Panel>
           <Panel position="bottom-center" className="!mb-3 max-[767px]:hidden">
-            <p className="rounded-md border border-edge/60 bg-panel/70 px-2 py-1 text-[length:var(--fs-2xs)] text-ink3 backdrop-blur">
+            <p className="vim-key-hint rounded-md border border-edge/60 bg-panel/70 px-2 py-1 text-[length:var(--fs-2xs)] text-ink3 backdrop-blur">
               Keys: h j k l w b · Esc reset · r retry
             </p>
           </Panel>

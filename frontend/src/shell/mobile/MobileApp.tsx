@@ -199,7 +199,10 @@ export function MobileApp() {
   );
 
   return (
-    <div data-density={density} className="flex h-full w-full justify-center bg-bg text-ink">
+    <div
+      data-density={density}
+      className="mobile-app-shell flex h-full w-full justify-center bg-bg text-ink"
+    >
       <div className="mobile-frame relative flex h-full w-full max-w-[480px] flex-col overflow-hidden border-edge bg-bg sm:border-x">
         {target ? (
           <MobileDeck
@@ -214,7 +217,7 @@ export function MobileApp() {
           />
         ) : (
           <>
-            <header className="flex shrink-0 items-center gap-2 px-3 py-2.5">
+            <header className="z-10 flex shrink-0 items-center gap-2 border-b border-edge bg-bg/90 px-3 py-2.5 backdrop-blur">
               <button
                 type="button"
                 onClick={goHome}
@@ -225,9 +228,7 @@ export function MobileApp() {
               </button>
               <div className="flex flex-1 items-center justify-center gap-1.5">
                 <BrandLogo size="sm" />
-                <span className="text-[length:var(--fs)] font-semibold tracking-tight">
-                  Algo Moves
-                </span>
+                <span className="text-[length:var(--fs)] font-semibold">Algo Moves</span>
               </div>
               {ThemeBtn}
               <AuthButton compact />

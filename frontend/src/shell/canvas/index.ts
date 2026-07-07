@@ -51,6 +51,7 @@ export {
   CANVAS_NODE_SEP,
   VIZ_WIRE_GAP,
   STANDALONE_CANVAS_KEY,
+  STANDALONE_INTERVIEW_CANVAS_KEY,
   LAYOUT_PRESETS,
   defaultEdgeOpts,
   CATEGORY_ORDER,
@@ -129,6 +130,7 @@ export {
 export * from './ui/nodeui';
 
 // Chrome dialogs & transport
+export { InterviewPanelTray } from './ui/InterviewPanelTray';
 export { TransportBar } from './ui/TransportBarCore';
 export { SettingsDialog } from './ui/SettingsDialog';
 export { MobileTransportSheet } from './ui/MobileTransportSheet';
