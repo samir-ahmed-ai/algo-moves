@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { nodeText } from '@/design/typography';
-import { cn } from '@/lib/utils/cn';
+
+const cx = (...parts: (string | false | undefined)[]) => parts.filter(Boolean).join(' ');
 
 /** Designed empty / placeholder state — shared across shell and canvas panels. */
 export function EmptyState({ icon, title, hint }: { icon?: ReactNode; title: string; hint?: string }) {
@@ -11,8 +12,8 @@ export function EmptyState({ icon, title, hint }: { icon?: ReactNode; title: str
           {icon}
         </span>
       )}
-      <p className={cn(nodeText.sm, 'font-medium text-ink2')}>{title}</p>
-      {hint && <p className={cn('max-w-[34ch] leading-snug text-ink3', nodeText.sm)}>{hint}</p>}
+      <p className={cx(nodeText.sm, 'font-medium text-ink2')}>{title}</p>
+      {hint && <p className={cx('max-w-[34ch] leading-snug text-ink3', nodeText.sm)}>{hint}</p>}
     </div>
   );
 }

@@ -40,6 +40,7 @@ function protectLiterals(line: string): { bare: string; slots: string[] } {
 }
 
 function restoreLiterals(bare: string, slots: string[]): string {
+  // eslint-disable-next-line no-control-regex -- placeholder tokens use NUL delimiters
   return bare.replace(/\x00(\d+)\x00/g, (_, i) => slots[Number(i)] ?? '');
 }
 
@@ -82,6 +83,7 @@ function formatBareSpacing(bare: string, style: StyleLang): string {
 
   // 4. Assignment `=` (standalone, not part of any compound op)
   s = s.replace(
+    // eslint-disable-next-line no-control-regex -- placeholder tokens use NUL delimiters
     /([a-zA-Z0-9_\])])\s*(?<![!<>:+\-*/%&|^=])=(?![=>])\s*([a-zA-Z0-9_(["'`\x00\-])/g,
     '$1 = $2',
   );

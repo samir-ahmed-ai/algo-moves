@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { STRUDEL_NODE_W, vizMinWidth, vizWireGap, LAYOUT_PRESET_META } from '@/shell/canvas';
 import { VizEmpty, VizHint, vizText } from '../plugins/_shared/vizKit';
 import { EmptyState } from '@/design/components';
-import { chromeText } from '@/shell/chromeUi';
+import { chromeText } from '@/design/chromeTypography';
 
 describe('layout integration', () => {
   it('theater preset uses tighter wire gap than default', () => {

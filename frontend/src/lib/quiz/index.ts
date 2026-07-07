@@ -6,4 +6,5 @@ export * from './shuffleQuizQuestion';
 export * from './shuffleSeeded';
 export * from './buildShuffledChoices';
 export * from './complexityHints';
+export * from './parseComplexity';
 export * from './quizReducer';

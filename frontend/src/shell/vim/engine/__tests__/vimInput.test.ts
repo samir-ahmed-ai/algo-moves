@@ -12,8 +12,6 @@ describe('vimInput', () => {
   });
 
   it('applies count prefix', () => {
-    let m = createInputMachine();
-    m = processKey(m, '3').type === 'partial' ? (processKey(m, '3') as { machine: typeof m }).machine : m;
     const partial = processKey(createInputMachine(), '3');
     expect(partial.type).toBe('partial');
     if (partial.type === 'partial') {

@@ -1,7 +1,6 @@
 import type { ComponentType } from 'react';
 import { definePlugin, type InspectorProps, type ProblemPlugin } from '../../core/types';
 import { wireTeachingStack, codePiecesFromSource } from '../_shared/pluginKit';
-import { VarGrid, CollapsibleDetails } from '../_shared/vizKit';
 import { withInspectorNotes } from '../_shared/withInspectorNotes';
 import { prepCodePieces } from './prepCodePieces';
 import { recordScene, SceneView, SceneInspector, sceneVerdict } from './prepScene';

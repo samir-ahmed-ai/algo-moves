@@ -277,19 +277,13 @@ Branch: `refactor/architecture-remediation`. Every commit verified with
 
 ### 🎉 Module-boundary debt: 29 → **0**. The Shell → Canvas → Plugins layering is fully enforced.
 
-### Remaining polish (incremental — architecture is now solid)
+### ✅ Completed in Phase 10 follow-up (formerly "remaining polish")
 
-- **Tranche 4 residual SoC** — split `layout.ts` (557) into
-  presets/wiring/algorithms/edge-styles behind a barrel (#78); split the wide
-  `CodeStudioProvider` / `WorkspaceCtx` contexts (the logic is already in hooks —
-  only the context surface is monolithic, #33/#39); optional `useCanvasLifecycle`
-  hook for CanvasStage's residual effects.
-- **Tranche 5 (store + backend)** — createSyncStore unification (#52), move IO
-  out of shell components (#61/#63), games-catalog table (#06), invariant docs +
-  tests (#55/#56/#64). Independent of the canvas work.
-- **Tranche 2/3 deferrals** — GameCommonStrings (#24), useReportOnce (#23),
-  per-game useXGame (#35); plugin `createRecorder`/factory consolidation
-  (#30/#31), `verdictLastFrameTone` (#50).
+The items below were tracked as incremental debt in the original audit; they are now shipped. See the progress log above and the codebase paths cited here.
+
+- **Tranche 4 SoC** — `layout.ts` split into presets/wiring/algorithms/edge-styles (`frontend/src/shell/canvas/layout/`); `CodeStudioProvider` and `WorkspaceCtx` split into slice contexts; `useCanvasLifecycle` extracted with characterization tests.
+- **Tranche 5 store + backend** — `createSyncStore` unification (`store/canvas-layout/`, `store/practice/`); IO moved out of shell components; games catalog table + FK; hub invariant docs and tests.
+- **Tranche 2/3 games + plugins** — games engine hooks (`shell/games/engine/`); `GameCommonStrings`; plugin factory helpers (`withInspectorNotes`, `verdictLastFrameTone`, `quizReducer`).
 
 ### ✅ Phase 10 — docs, CI & world-class finish (Todos 91–100)
 

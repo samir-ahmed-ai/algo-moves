@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { GripVertical, MoreVertical } from 'lucide-react';
+import type { CSSProperties, ReactNode } from 'react';
+import { GripVertical } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
-import { nodeText, nodeTextWrap, nodeIconGlyph } from '@/design/typography';
+import { nodeText, nodeTextWrap } from '@/design/typography';
 import {
   BODY_PAD,
   BODY_PAD_NARROW,

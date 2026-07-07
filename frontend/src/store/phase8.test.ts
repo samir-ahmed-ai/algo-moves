@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createSyncStore } from '@/store/createSyncStore';
 import { loadCanvasPrefs, saveCanvasPrefs } from '@/store/canvas-layout/canvasPrefs';
 import { loadLayouts, saveLayouts } from '@/store/canvas-layout/layoutStore';
 import { toggleEdgeCase, getEdgeCases } from '@/store/practice/edgeCases';

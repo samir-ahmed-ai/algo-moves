@@ -21,7 +21,7 @@ import { chromeText, ChromeLabel } from '@/shell/chromeUi';
 import type { EditorPrefs } from '@/store/user-prefs';
 import { recallEditorMenuItems } from './recallEditorControls';
 import { ToolbarGroup, ToolbarGroupBtn } from './ToolbarGroup';
-import { useAnchoredPopover } from '@/shell/ui/useAnchoredPopover';
+import { useAnchoredPopover } from '@/hooks/useAnchoredPopover';
 
 /** Compact popover combining Session controls + Editor settings under one trigger. */
 function RecallSettingsPopover({

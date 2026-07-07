@@ -12,7 +12,6 @@ import {
   useEffect,
   useRef,
   useState,
-  type CSSProperties,
   type ReactNode,
   type RefObject,
 } from 'react';

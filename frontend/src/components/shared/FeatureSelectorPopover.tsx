@@ -2,8 +2,9 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 import { createPortal } from 'react-dom';
 import { Check, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
-import { chromeText, ChromeLabel } from '@/shell/chromeUi';
-import { useAnchoredPopover } from '@/shell/ui/useAnchoredPopover';
+import { chromeText } from '@/design/chromeTypography';
+import { ChromeLabel } from '@/design/components';
+import { useAnchoredPopover } from '@/hooks/useAnchoredPopover';
 
 export type FeatureTone = 'accent' | 'good' | 'team1' | 'team2';
 

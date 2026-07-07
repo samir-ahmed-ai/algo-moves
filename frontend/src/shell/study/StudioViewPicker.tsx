@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Check, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { ChromeLabel, chromeText } from '../chromeUi';
-import { useAnchoredPopover } from '../ui/useAnchoredPopover';
+import { useAnchoredPopover } from '@/hooks/useAnchoredPopover';
 import { flatOrder, type StudioGroupId, type StudioTab } from './studioTabs';
 
 export interface StudioViewPickerProps {
