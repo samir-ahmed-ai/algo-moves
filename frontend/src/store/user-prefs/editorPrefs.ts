@@ -3,25 +3,19 @@ import { readStorageJson } from '@/store/persistence/storage';
 import { STORAGE_KEYS } from '@/store/storageKeys';
 import { createSyncStore } from '@/store/createSyncStore';
 import { clampCodeSplitPct } from '@/lib/editor/resizeSplit';
-import type { PointerMode } from '@/lib/editor/recallPointer';
 import {
   clampRecallFontSize,
   isRecallLineHeight,
   RECALL_FONT_DEFAULT,
   type RecallLineHeight,
 } from '@/lib/editor/recallEditorTheme';
-import { isRecallRevealMode, type RecallRevealMode } from '@/lib/editor/recallProgress';
 
 export interface EditorPrefs {
   vim: boolean;
   wrap: boolean;
   splitPct: number;
-  /** How the Recall pointer maps a cursor line between reference and draft. */
-  pointerMode: PointerMode;
   /** Icon-only recall toolbar with editor toggles in the overflow menu. */
   recallCompact: boolean;
-  /** How much of the not-yet-typed reference to show ahead of the current line in recall. */
-  recallReveal: RecallRevealMode;
   /** Show change markers in the recall merge gutter. */
   mergeGutter: boolean;
   /** Collapse long unchanged regions in the recall merge view. */
@@ -32,8 +26,6 @@ export interface EditorPrefs {
   lineHeight: RecallLineHeight;
   /** Show line numbers in recall merge view. */
   showLineNumbers: boolean;
-  /** Highlight the mirrored pointer line in the other pane. */
-  showPointer: boolean;
   /** Highlight changed lines in the merge diff view. */
   highlightChanges: boolean;
 }
@@ -43,21 +35,14 @@ const DEFAULTS: EditorPrefs = {
   vim: false,
   wrap: false,
   splitPct: 50,
-  pointerMode: 'line',
   recallCompact: true,
-  recallReveal: 'full',
   mergeGutter: true,
   mergeCollapse: true,
   fontSize: RECALL_FONT_DEFAULT,
   lineHeight: 'normal',
   showLineNumbers: true,
-  showPointer: true,
   highlightChanges: true,
 };
-
-function isPointerMode(value: unknown): value is PointerMode {
-  return value === 'line' || value === 'diff';
-}
 
 function load(): EditorPrefs {
   const data = readStorageJson(KEY, null as Partial<EditorPrefs> | null, (value): value is Partial<EditorPrefs> => {
@@ -68,15 +53,12 @@ function load(): EditorPrefs {
     vim: Boolean(data.vim),
     wrap: Boolean(data.wrap),
     splitPct: clampCodeSplitPct(typeof data.splitPct === 'number' ? data.splitPct : DEFAULTS.splitPct),
-    pointerMode: isPointerMode(data.pointerMode) ? data.pointerMode : DEFAULTS.pointerMode,
     recallCompact: data.recallCompact !== undefined ? Boolean(data.recallCompact) : DEFAULTS.recallCompact,
-    recallReveal: isRecallRevealMode(data.recallReveal) ? data.recallReveal : DEFAULTS.recallReveal,
     mergeGutter: data.mergeGutter !== undefined ? Boolean(data.mergeGutter) : DEFAULTS.mergeGutter,
     mergeCollapse: data.mergeCollapse !== undefined ? Boolean(data.mergeCollapse) : DEFAULTS.mergeCollapse,
     fontSize: clampRecallFontSize(typeof data.fontSize === 'number' ? data.fontSize : DEFAULTS.fontSize),
     lineHeight: isRecallLineHeight(data.lineHeight) ? data.lineHeight : DEFAULTS.lineHeight,
     showLineNumbers: data.showLineNumbers !== undefined ? Boolean(data.showLineNumbers) : DEFAULTS.showLineNumbers,
-    showPointer: data.showPointer !== undefined ? Boolean(data.showPointer) : DEFAULTS.showPointer,
     highlightChanges: data.highlightChanges !== undefined ? Boolean(data.highlightChanges) : DEFAULTS.highlightChanges,
   };
 }

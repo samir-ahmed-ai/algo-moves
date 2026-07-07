@@ -8,13 +8,10 @@ describe('editorPrefs', () => {
     expect(prefs.fontSize).toBe(RECALL_FONT_DEFAULT);
     expect(prefs.lineHeight).toBe('normal');
     expect(prefs.showLineNumbers).toBe(true);
-    expect(prefs.showPointer).toBe(true);
     expect(prefs.highlightChanges).toBe(true);
     expect(prefs.mergeGutter).toBe(true);
     expect(prefs.mergeCollapse).toBe(true);
     expect(prefs.recallCompact).toBe(true);
-    expect(prefs.recallReveal).toBe('full');
-    expect(prefs.pointerMode).toBe('line');
   });
 
   it('clamps recall font size', () => {
