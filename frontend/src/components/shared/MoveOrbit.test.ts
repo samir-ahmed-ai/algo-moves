@@ -10,7 +10,7 @@ import {
   wrapOrbitLines,
   wrapOrbitTwoLines,
 } from './orbitArc';
-import { orbitArcFraction, orbitPoint, orbitT, orbitTFromX, orbitTickIndices } from './MoveOrbit';
+import { orbitArcFraction, orbitPoint, orbitT, orbitTFromX, orbitTickIndices } from './orbitArc';
 
 describe('orbitPoint', () => {
   it('hits the arc endpoints and a raised apex', () => {

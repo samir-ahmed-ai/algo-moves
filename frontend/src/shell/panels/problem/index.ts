@@ -4,7 +4,6 @@ export * from './QuizStageBody';
 export * from './QuizAssembleGames';
 export * from './StudioAssembleStageBody';
 export * from './StudioPanelStageBody';
-export * from './StudioArcRail';
 export * from './StudioNextFooter';
 export * from './studioSplitLayout';
 export * from './overviewColumns';

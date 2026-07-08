@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils/cn';
 import { OrbitFitText } from './OrbitFitText';
 import { GIST_ORBIT_FONT, ORBIT_PATH_D, ORBIT_VIEWBOX } from './orbitArc';
 
-/** Static arched caption for mobile gist intro — same arc styling as MoveOrbit. */
+/** Static arched caption for mobile gist intro — same arc styling as the step orbit. */
 export function GistArcCaption({
   primary,
   secondary,

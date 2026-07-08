@@ -1,4 +1,4 @@
-/** Shared quadratic arc geometry for MoveOrbit and GistArcCaption. */
+/** Shared quadratic arc geometry for orbit captions and step scrubbers. */
 
 export const ORBIT_P0 = { x: 40, y: 132 };
 export const ORBIT_P1 = { x: 500, y: 4 };
@@ -11,6 +11,51 @@ export const ORBIT_VIEWBOX = '0 4 1000 148';
 /** Ticks live on t ∈ [T_MIN, T_MAX] so the arc ends stay clear. */
 export const ORBIT_T_MIN = 0.06;
 export const ORBIT_T_MAX = 0.94;
+
+const MAX_ORBIT_TICKS = 72;
+
+function positiveInt(value: number, fallback: number): number {
+  return Number.isFinite(value) && value > 0 ? Math.max(1, Math.round(value)) : fallback;
+}
+
+function clampFrameIndex(index: number, total: number): number {
+  if (total <= 0) return 0;
+  return Number.isFinite(index) ? Math.min(total - 1, Math.max(0, Math.round(index))) : 0;
+}
+
+/** Arc parameter for frame i of total. */
+export function orbitT(i: number, total: number): number {
+  const frameTotal = positiveInt(total, 1);
+  if (frameTotal <= 1) return 0.5;
+  const frameIndex = clampFrameIndex(i, frameTotal);
+  return ORBIT_T_MIN + (frameIndex / (frameTotal - 1)) * (ORBIT_T_MAX - ORBIT_T_MIN);
+}
+
+/** Decimated tick indices for long runs; always keeps the last frame. */
+export function orbitTickIndices(total: number, maxTicks = MAX_ORBIT_TICKS): number[] {
+  const frameTotal = positiveInt(total, 0);
+  const tickLimit = positiveInt(maxTicks, MAX_ORBIT_TICKS);
+  if (frameTotal === 0) return [];
+  if (frameTotal <= tickLimit) return Array.from({ length: frameTotal }, (_, i) => i);
+  const step = Math.ceil(frameTotal / tickLimit);
+  const out: number[] = [];
+  for (let i = 0; i < frameTotal; i += step) out.push(i);
+  if (out[out.length - 1] !== frameTotal - 1) out.push(frameTotal - 1);
+  return out;
+}
+
+/** Invert x(t) (monotonic) — maps a click/drag x back to the arc parameter. */
+export function orbitTFromX(x: number): number {
+  if (!Number.isFinite(x)) return 0.5;
+  let lo = 0;
+  let hi = 1;
+  for (let k = 0; k < 24; k++) {
+    const mid = (lo + hi) / 2;
+    if (orbitPoint(mid).x < x) lo = mid;
+    else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
 
 function finiteOr(value: number, fallback: number): number {
   return Number.isFinite(value) ? value : fallback;
