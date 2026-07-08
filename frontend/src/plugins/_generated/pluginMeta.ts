@@ -4399,6 +4399,866 @@ export const PLUGIN_META: PluginMetaEntry[] = [
     "group": "prep"
   },
   {
+    "id": "go-basics-program",
+    "title": "Program structure: package, import, main",
+    "difficulty": "Easy",
+    "tags": [
+      "package",
+      "import",
+      "main",
+      "entry-point"
+    ],
+    "summary": "Every Go program is a package; an executable is package main with a func main() entry point.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-basics-vars",
+    "title": "Declaring variables: var, :=, and zero values",
+    "difficulty": "Easy",
+    "tags": [
+      "var",
+      "shortdecl",
+      "zero-value",
+      "declaration"
+    ],
+    "summary": "var declares anywhere with a zero value default; := is short declaration usable only inside functions.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-basics-const-iota",
+    "title": "Constants and iota enumerations",
+    "difficulty": "Medium",
+    "tags": [
+      "const",
+      "iota",
+      "enum",
+      "untyped"
+    ],
+    "summary": "const values are compile-time fixed; iota auto-increments within a const block to build enumerations.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-basics-control-flow",
+    "title": "Control flow: if with init, for, switch (no fallthrough)",
+    "difficulty": "Easy",
+    "tags": [
+      "if",
+      "switch",
+      "for",
+      "control-flow"
+    ],
+    "summary": "if and switch take an optional init statement; switch cases break implicitly and for is the only loop.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-basics-conversions",
+    "title": "Explicit numeric and string/[]byte/[]rune conversions",
+    "difficulty": "Medium",
+    "tags": [
+      "conversion",
+      "rune",
+      "byte",
+      "string"
+    ],
+    "summary": "Go never converts types implicitly; T(x) converts numerics and string<->[]byte/[]rune explicitly.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-basics-fmt",
+    "title": "Formatted I/O with the fmt package (verbs, Sprintf)",
+    "difficulty": "Easy",
+    "tags": [
+      "fmt",
+      "printf",
+      "verbs",
+      "formatting"
+    ],
+    "summary": "fmt formats values with verbs: %v general, %d int, %s string, %q quoted, %T type, %+v with field names.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-types-basic",
+    "title": "Basic types: sized numbers, bool, string, byte/rune aliases",
+    "difficulty": "Easy",
+    "tags": [
+      "types",
+      "numbers",
+      "string",
+      "rune"
+    ],
+    "summary": "Go pins integer and float widths in the type name and treats byte and rune as aliases for uint8 and int32.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-types-defined",
+    "title": "Defined (named) types and their underlying type",
+    "difficulty": "Easy",
+    "tags": [
+      "types",
+      "defined",
+      "underlying",
+      "methods"
+    ],
+    "summary": "type Celsius float64 makes a distinct type that shares an underlying type but never mixes without a conversion.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-types-value-semantics",
+    "title": "Value semantics: assignment and function args copy",
+    "difficulty": "Easy",
+    "tags": [
+      "value-semantics",
+      "copy",
+      "struct",
+      "pointer"
+    ],
+    "summary": "Assignment and passing to a function copy the value, so mutating a struct copy leaves the original untouched.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-types-comparability",
+    "title": "Comparability and what may be a map key",
+    "difficulty": "Medium",
+    "tags": [
+      "comparability",
+      "map-key",
+      "equality",
+      "struct"
+    ],
+    "summary": "Only comparable types can be == or used as map keys; slices, maps, and functions are not comparable.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-types-conv-vs-assert",
+    "title": "Type conversion T(x) versus type assertion x.(T)",
+    "difficulty": "Medium",
+    "tags": [
+      "conversion",
+      "assertion",
+      "interface",
+      "type-switch"
+    ],
+    "summary": "T(x) reinterprets a concrete value at compile time; x.(T) extracts the dynamic type out of an interface at runtime.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-types-composite-literals",
+    "title": "Composite literals and zero values across types",
+    "difficulty": "Easy",
+    "tags": [
+      "composite-literal",
+      "zero-value",
+      "struct",
+      "slice"
+    ],
+    "summary": "Composite literals build structs, arrays, slices, and maps inline; every type has a usable zero value.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-coll-arrays",
+    "title": "Arrays: fixed length is part of the type; value semantics",
+    "difficulty": "Easy",
+    "tags": [
+      "arrays",
+      "value-semantics",
+      "types"
+    ],
+    "summary": "An array’s length is baked into its type, and assigning or passing one copies every element.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-coll-slices",
+    "title": "Slices: make, len, cap, append growth",
+    "difficulty": "Easy",
+    "tags": [
+      "slices",
+      "append",
+      "make",
+      "capacity"
+    ],
+    "summary": "A slice is a header (ptr, len, cap) over an array that append grows — reallocating when cap runs out.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-coll-slice-aliasing",
+    "title": "Slices share a backing array; copy() and full three-index slices",
+    "difficulty": "Medium",
+    "tags": [
+      "slices",
+      "aliasing",
+      "copy",
+      "three-index"
+    ],
+    "summary": "Sub-slices alias the same backing array, so writes bleed across — copy() or a capped s[a:b:c] isolate them.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-coll-maps",
+    "title": "Maps: comma-ok, delete, random iteration, nil-map write panic",
+    "difficulty": "Easy",
+    "tags": [
+      "maps",
+      "comma-ok",
+      "delete",
+      "nil"
+    ],
+    "summary": "Maps distinguish missing from zero via comma-ok, iterate in random order, and panic on writes to a nil map.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-coll-range",
+    "title": "range over slices, maps, strings, and ints (1.22)",
+    "difficulty": "Easy",
+    "tags": [
+      "range",
+      "strings",
+      "runes",
+      "loops"
+    ],
+    "summary": "range yields index/value pairs over slices and maps, decodes runes over strings, and counts 0..n-1 over an int.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-coll-grouping",
+    "title": "Nested slices and the map[K][]V grouping pattern",
+    "difficulty": "Medium",
+    "tags": [
+      "maps",
+      "slices",
+      "grouping",
+      "idioms"
+    ],
+    "summary": "map[K][]V groups items by key by appending to the nil slice that a missing key returns.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-fn-multi-return",
+    "title": "Multiple return values and the (result, error) idiom",
+    "difficulty": "Easy",
+    "tags": [
+      "functions",
+      "error",
+      "multi-return",
+      "idiom"
+    ],
+    "summary": "Go functions return any number of values; the canonical shape is (result, error) checked with if err != nil.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-fn-named-returns",
+    "title": "Named return values and the naked return (and its risk)",
+    "difficulty": "Medium",
+    "tags": [
+      "functions",
+      "named-returns",
+      "naked-return",
+      "defer"
+    ],
+    "summary": "Naming return values pre-declares them as zeroed locals so a bare return sends their current state back.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-fn-variadic",
+    "title": "Variadic parameters and spreading a slice with ...",
+    "difficulty": "Easy",
+    "tags": [
+      "functions",
+      "variadic",
+      "slices",
+      "spread"
+    ],
+    "summary": "A trailing ...T parameter collects extra args into a slice, and args... spreads an existing slice back in.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-fn-first-class",
+    "title": "First-class functions and higher-order functions",
+    "difficulty": "Easy",
+    "tags": [
+      "functions",
+      "first-class",
+      "higher-order",
+      "func-type"
+    ],
+    "summary": "Functions are values: store them in variables, pass them as arguments, and return them from other functions.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-fn-closures",
+    "title": "Closures capture variables by reference",
+    "difficulty": "Medium",
+    "tags": [
+      "closures",
+      "functions",
+      "capture",
+      "state"
+    ],
+    "summary": "A closure keeps a live reference to the outer variables it uses, so it can read and mutate them across calls.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-fn-defer",
+    "title": "defer: LIFO order and argument evaluation at defer time",
+    "difficulty": "Medium",
+    "tags": [
+      "defer",
+      "functions",
+      "lifo",
+      "cleanup"
+    ],
+    "summary": "defer schedules a call to run when the function returns; deferred calls fire in last-in, first-out order.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-struct-literals",
+    "title": "Struct types and keyed vs positional composite literals",
+    "difficulty": "Easy",
+    "tags": [
+      "structs",
+      "literals",
+      "zero-value",
+      "composite"
+    ],
+    "summary": "A struct is a fixed set of named fields; build one with a keyed literal (robust) or a positional literal (fragile).",
+    "group": "go-course"
+  },
+  {
+    "id": "go-struct-methods",
+    "title": "Methods on defined types and the receiver",
+    "difficulty": "Easy",
+    "tags": [
+      "methods",
+      "receiver",
+      "defined-types"
+    ],
+    "summary": "A method is a function with a receiver parameter bound to a type you defined in this package.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-struct-receivers",
+    "title": "Value vs pointer receivers and method sets",
+    "difficulty": "Medium",
+    "tags": [
+      "receiver",
+      "pointer",
+      "method-set",
+      "mutation"
+    ],
+    "summary": "A value receiver operates on a copy; a pointer receiver can mutate the original and defines the pointer method set.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-struct-embedding",
+    "title": "Embedding: promoted fields and methods, composition over inheritance",
+    "difficulty": "Medium",
+    "tags": [
+      "embedding",
+      "composition",
+      "promotion",
+      "methods"
+    ],
+    "summary": "Embed a type by declaring it without a field name; its fields and methods are promoted onto the outer struct.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-struct-tags",
+    "title": "Struct tags and encoding/json field control",
+    "difficulty": "Medium",
+    "tags": [
+      "tags",
+      "json",
+      "encoding",
+      "reflection"
+    ],
+    "summary": "A struct tag is a string of metadata read via reflection; encoding/json uses it to rename, omit, and skip fields.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-struct-method-values",
+    "title": "Method values versus method expressions",
+    "difficulty": "Medium",
+    "tags": [
+      "methods",
+      "closures",
+      "first-class",
+      "binding"
+    ],
+    "summary": "A method value binds the receiver now into a closure; a method expression leaves the receiver as the first argument.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-ib-satisfaction",
+    "title": "Implicit interface satisfaction (no implements keyword)",
+    "difficulty": "Easy",
+    "tags": [
+      "interfaces",
+      "structural",
+      "satisfaction",
+      "duck-typing"
+    ],
+    "summary": "A type satisfies an interface just by having its methods — you never declare the intent.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-ib-any",
+    "title": "The empty interface and the any alias",
+    "difficulty": "Easy",
+    "tags": [
+      "interfaces",
+      "any",
+      "empty-interface",
+      "generics"
+    ],
+    "summary": "interface{} has zero methods so every type satisfies it; any is its 1.18 alias.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-ib-assertion",
+    "title": "Type assertion with the comma-ok form",
+    "difficulty": "Easy",
+    "tags": [
+      "interfaces",
+      "assertion",
+      "comma-ok",
+      "panic"
+    ],
+    "summary": "x.(T) extracts the concrete type; the two-value form returns ok instead of panicking.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-ib-type-switch",
+    "title": "The type switch",
+    "difficulty": "Easy",
+    "tags": [
+      "interfaces",
+      "type-switch",
+      "assertion",
+      "control-flow"
+    ],
+    "summary": "switch v := x.(type) branches on the dynamic type, binding v to the matched concrete type per case.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-ib-nil-interface",
+    "title": "The typed-nil-in-an-interface trap",
+    "difficulty": "Medium",
+    "tags": [
+      "interfaces",
+      "nil",
+      "gotcha",
+      "pointers"
+    ],
+    "summary": "An interface holding a nil pointer is NOT itself nil — it carries a type, so == nil is false.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-ib-stringer-error",
+    "title": "Implementing the Stringer and error interfaces",
+    "difficulty": "Easy",
+    "tags": [
+      "interfaces",
+      "stringer",
+      "error",
+      "fmt"
+    ],
+    "summary": "Define String() to control %v/Println output and Error() to make a type usable as an error.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-str-immutable",
+    "title": "Strings are immutable, read-only byte sequences",
+    "difficulty": "Easy",
+    "tags": [
+      "strings",
+      "immutable",
+      "bytes"
+    ],
+    "summary": "A Go string is an immutable read-only slice of bytes; you cannot assign into it by index.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-str-runes-bytes",
+    "title": "Bytes vs runes and UTF-8 encoding",
+    "difficulty": "Medium",
+    "tags": [
+      "runes",
+      "bytes",
+      "utf-8",
+      "unicode"
+    ],
+    "summary": "A byte is one uint8 of UTF-8; a rune is an int32 Unicode code point that may span multiple bytes.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-str-range",
+    "title": "Ranging a string decodes runes; indexing yields a byte",
+    "difficulty": "Medium",
+    "tags": [
+      "range",
+      "runes",
+      "strings",
+      "utf-8"
+    ],
+    "summary": "for..range over a string yields byte-offset + decoded rune; direct indexing yields a single byte.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-str-builder",
+    "title": "strings.Builder for efficient concatenation",
+    "difficulty": "Easy",
+    "tags": [
+      "strings",
+      "builder",
+      "performance"
+    ],
+    "summary": "strings.Builder accumulates bytes in a growable buffer and returns the result with zero final copy.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-str-strconv",
+    "title": "Converting numbers and strings with strconv",
+    "difficulty": "Easy",
+    "tags": [
+      "strconv",
+      "parsing",
+      "conversion"
+    ],
+    "summary": "strconv parses and formats numbers; Atoi/Itoa handle base-10 ints and return an error on bad input.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-str-ops",
+    "title": "Common strings package operations (Split, Join, Fields, TrimSpace)",
+    "difficulty": "Easy",
+    "tags": [
+      "strings",
+      "split",
+      "join",
+      "fields"
+    ],
+    "summary": "The strings package covers everyday text work: Split, Join, Fields, TrimSpace, Contains, and more.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-pkg-visibility",
+    "title": "Exported vs unexported identifiers and package encapsulation",
+    "difficulty": "Easy",
+    "tags": [
+      "packages",
+      "visibility",
+      "encapsulation",
+      "exports"
+    ],
+    "summary": "A leading uppercase letter exports an identifier across package boundaries; lowercase keeps it package-private.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-pkg-imports",
+    "title": "Import paths, aliases, and blank imports",
+    "difficulty": "Easy",
+    "tags": [
+      "imports",
+      "aliases",
+      "blank-import",
+      "packages"
+    ],
+    "summary": "Import a package by path; alias it to rename, or use _ to run its init side effects without a usable name.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-pkg-init",
+    "title": "init functions and package initialization order",
+    "difficulty": "Medium",
+    "tags": [
+      "init",
+      "initialization",
+      "packages",
+      "order"
+    ],
+    "summary": "Package-level vars initialize by dependency, then every init() runs, all before main() begins.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-pkg-modules",
+    "title": "Modules: go.mod, module path, semantic import versioning",
+    "difficulty": "Medium",
+    "tags": [
+      "modules",
+      "go.mod",
+      "versioning",
+      "imports"
+    ],
+    "summary": "A module is a versioned tree rooted at go.mod; its module path prefixes every import, and v2+ appends the major version.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-pkg-layout",
+    "title": "internal/ packages and standard project layout",
+    "difficulty": "Medium",
+    "tags": [
+      "internal",
+      "layout",
+      "packages",
+      "encapsulation"
+    ],
+    "summary": "An internal/ directory limits imports to code rooted at its parent, enforcing module-private packages beyond capitalization.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-pkg-tooling",
+    "title": "Tooling: go build/run, go test, go vet, gofmt",
+    "difficulty": "Easy",
+    "tags": [
+      "tooling",
+      "go-test",
+      "go-vet",
+      "gofmt"
+    ],
+    "summary": "The go command bundles build, run, test, vet, and fmt into one toolchain with fixed conventions.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-err-wrapping",
+    "title": "Wrapping with %w, errors.Is / As",
+    "difficulty": "Hard",
+    "tags": [
+      "errors",
+      "wrapping",
+      "errors.is",
+      "errors.as",
+      "fmt.errorf"
+    ],
+    "summary": "Build unwrap chains with %w and interrogate them via errors.Is/As, including multi-%w trees.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-err-sentinel-typed",
+    "title": "Sentinel vs typed errors",
+    "difficulty": "Hard",
+    "tags": [
+      "errors",
+      "errors.is",
+      "errors.as",
+      "sentinel",
+      "typed-errors",
+      "unwrap",
+      "api-design"
+    ],
+    "summary": "When to expose a package-level sentinel vs a typed error, and how Is/As traverse and customize matching.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-err-panic-recover",
+    "title": "panic, recover & defer semantics",
+    "difficulty": "Hard",
+    "tags": [
+      "error-handling",
+      "panic",
+      "recover",
+      "defer",
+      "runtime"
+    ],
+    "summary": "How recover intercepts panics, how deferred functions run, and the timing traps that decide return values.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-err-custom",
+    "title": "Custom error types & Unwrap",
+    "difficulty": "Hard",
+    "tags": [
+      "errors",
+      "unwrap",
+      "errors.is",
+      "errors.as",
+      "errors.join",
+      "wrapping"
+    ],
+    "summary": "Build custom error types that participate correctly in Is/As chains and joined trees.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-data-slice-internals",
+    "title": "Slice header, len, cap & append growth",
+    "difficulty": "Hard",
+    "tags": [
+      "slices",
+      "append",
+      "memory",
+      "runtime",
+      "aliasing"
+    ],
+    "summary": "How the {ptr,len,cap} header, append reallocation, and three-index slicing govern backing-array sharing.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-data-slice-aliasing",
+    "title": "Slice aliasing & the append gotcha",
+    "difficulty": "Hard",
+    "tags": [
+      "slices",
+      "append",
+      "memory",
+      "aliasing",
+      "copy"
+    ],
+    "summary": "Subslices share a backing array, so append can silently clobber data unless you cap capacity or copy().",
+    "group": "go-course"
+  },
+  {
+    "id": "go-data-maps",
+    "title": "Map internals & iteration order",
+    "difficulty": "Hard",
+    "tags": [
+      "maps",
+      "runtime",
+      "iteration",
+      "hashing",
+      "addressability"
+    ],
+    "summary": "How Go maps hash, grow, and iterate, plus the addressability and nil-map rules that trip up seniors.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-data-strings-runes",
+    "title": "Strings, bytes, runes & UTF-8",
+    "difficulty": "Hard",
+    "tags": [
+      "strings",
+      "runes",
+      "utf8",
+      "bytes",
+      "encoding"
+    ],
+    "summary": "Strings are immutable byte sequences; indexing yields bytes, range yields runes.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-iface-internals",
+    "title": "Interface internals: iface, eface, itab",
+    "difficulty": "Hard",
+    "tags": [
+      "interfaces",
+      "runtime",
+      "itab",
+      "dynamic-dispatch",
+      "memory-layout"
+    ],
+    "summary": "How Go represents interface values as two words and dispatches methods via the itab.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-iface-nil",
+    "title": "The nil interface trap",
+    "difficulty": "Hard",
+    "tags": [
+      "interfaces",
+      "nil",
+      "error-handling",
+      "type-system",
+      "runtime"
+    ],
+    "summary": "A typed nil pointer wrapped in an interface is NOT equal to nil.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-iface-method-sets",
+    "title": "Method sets: pointer vs value receivers",
+    "difficulty": "Hard",
+    "tags": [
+      "interfaces",
+      "method-sets",
+      "receivers",
+      "addressability",
+      "gotchas"
+    ],
+    "summary": "Why *T satisfies an interface but T often does not, and where addressability bites.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-iface-embedding",
+    "title": "Embedding & composition",
+    "difficulty": "Hard",
+    "tags": [
+      "interfaces",
+      "embedding",
+      "composition",
+      "method-sets",
+      "decorator"
+    ],
+    "summary": "How promotion, overriding, and interface embedding work — and where ambiguity bites.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-iface-assertions",
+    "title": "Type assertions & type switches",
+    "difficulty": "Hard",
+    "tags": [
+      "interfaces",
+      "type-assertions",
+      "type-switch",
+      "runtime",
+      "comparability"
+    ],
+    "summary": "x.(T) forms, panic vs comma-ok, type switches, interface-to-interface assertions, and comparable dynamic types.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-gen-type-params",
+    "title": "Type parameters & instantiation",
+    "difficulty": "Hard",
+    "tags": [
+      "generics",
+      "type-parameters",
+      "instantiation",
+      "gcshape",
+      "monomorphization"
+    ],
+    "summary": "How func/type parameters instantiate and how Go compiles them via GCShape stenciling plus dictionaries.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-gen-constraints",
+    "title": "Constraints, ~ and comparable",
+    "difficulty": "Hard",
+    "tags": [
+      "generics",
+      "constraints",
+      "comparable",
+      "cmp.ordered",
+      "tilde",
+      "type-sets"
+    ],
+    "summary": "Type sets, union elements, ~underlying approximation, and the two flavors of comparable.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-gen-inference",
+    "title": "Type inference & its limits",
+    "difficulty": "Hard",
+    "tags": [
+      "generics",
+      "type-inference",
+      "type-parameters",
+      "go1.26"
+    ],
+    "summary": "How Go infers type arguments from function args, and the hard limits where you must be explicit.",
+    "group": "go-course"
+  },
+  {
+    "id": "go-gen-pitfalls",
+    "title": "Generics pitfalls & when not to use",
+    "difficulty": "Hard",
+    "tags": [
+      "generics",
+      "type-parameters",
+      "interfaces",
+      "monomorphization",
+      "api-design"
+    ],
+    "summary": "Know the hard limits of Go generics and when a plain interface beats a type parameter.",
+    "group": "go-course"
+  },
+  {
     "id": "go-conc-scheduler",
     "title": "Goroutines & the GMP scheduler",
     "difficulty": "Hard",
@@ -4566,247 +5426,6 @@ export const PLUGIN_META: PluginMetaEntry[] = [
       "false-sharing"
     ],
     "summary": "Cut allocations with sync.Pool, preallocation, and cache-aware layout — and know exactly when each backfires.",
-    "group": "go-course"
-  },
-  {
-    "id": "go-iface-internals",
-    "title": "Interface internals: iface, eface, itab",
-    "difficulty": "Hard",
-    "tags": [
-      "interfaces",
-      "runtime",
-      "itab",
-      "dynamic-dispatch",
-      "memory-layout"
-    ],
-    "summary": "How Go represents interface values as two words and dispatches methods via the itab.",
-    "group": "go-course"
-  },
-  {
-    "id": "go-iface-nil",
-    "title": "The nil interface trap",
-    "difficulty": "Hard",
-    "tags": [
-      "interfaces",
-      "nil",
-      "error-handling",
-      "type-system",
-      "runtime"
-    ],
-    "summary": "A typed nil pointer wrapped in an interface is NOT equal to nil.",
-    "group": "go-course"
-  },
-  {
-    "id": "go-iface-method-sets",
-    "title": "Method sets: pointer vs value receivers",
-    "difficulty": "Hard",
-    "tags": [
-      "interfaces",
-      "method-sets",
-      "receivers",
-      "addressability",
-      "gotchas"
-    ],
-    "summary": "Why *T satisfies an interface but T often does not, and where addressability bites.",
-    "group": "go-course"
-  },
-  {
-    "id": "go-iface-embedding",
-    "title": "Embedding & composition",
-    "difficulty": "Hard",
-    "tags": [
-      "interfaces",
-      "embedding",
-      "composition",
-      "method-sets",
-      "decorator"
-    ],
-    "summary": "How promotion, overriding, and interface embedding work — and where ambiguity bites.",
-    "group": "go-course"
-  },
-  {
-    "id": "go-iface-assertions",
-    "title": "Type assertions & type switches",
-    "difficulty": "Hard",
-    "tags": [
-      "interfaces",
-      "type-assertions",
-      "type-switch",
-      "runtime",
-      "comparability"
-    ],
-    "summary": "x.(T) forms, panic vs comma-ok, type switches, interface-to-interface assertions, and comparable dynamic types.",
-    "group": "go-course"
-  },
-  {
-    "id": "go-gen-type-params",
-    "title": "Type parameters & instantiation",
-    "difficulty": "Hard",
-    "tags": [
-      "generics",
-      "type-parameters",
-      "instantiation",
-      "gcshape",
-      "monomorphization"
-    ],
-    "summary": "How func/type parameters instantiate and how Go compiles them via GCShape stenciling plus dictionaries.",
-    "group": "go-course"
-  },
-  {
-    "id": "go-gen-constraints",
-    "title": "Constraints, ~ and comparable",
-    "difficulty": "Hard",
-    "tags": [
-      "generics",
-      "constraints",
-      "comparable",
-      "cmp.ordered",
-      "tilde",
-      "type-sets"
-    ],
-    "summary": "Type sets, union elements, ~underlying approximation, and the two flavors of comparable.",
-    "group": "go-course"
-  },
-  {
-    "id": "go-gen-inference",
-    "title": "Type inference & its limits",
-    "difficulty": "Hard",
-    "tags": [
-      "generics",
-      "type-inference",
-      "type-parameters",
-      "go1.26"
-    ],
-    "summary": "How Go infers type arguments from function args, and the hard limits where you must be explicit.",
-    "group": "go-course"
-  },
-  {
-    "id": "go-gen-pitfalls",
-    "title": "Generics pitfalls & when not to use",
-    "difficulty": "Hard",
-    "tags": [
-      "generics",
-      "type-parameters",
-      "interfaces",
-      "monomorphization",
-      "api-design"
-    ],
-    "summary": "Know the hard limits of Go generics and when a plain interface beats a type parameter.",
-    "group": "go-course"
-  },
-  {
-    "id": "go-err-wrapping",
-    "title": "Wrapping with %w, errors.Is / As",
-    "difficulty": "Hard",
-    "tags": [
-      "errors",
-      "wrapping",
-      "errors.is",
-      "errors.as",
-      "fmt.errorf"
-    ],
-    "summary": "Build unwrap chains with %w and interrogate them via errors.Is/As, including multi-%w trees.",
-    "group": "go-course"
-  },
-  {
-    "id": "go-err-sentinel-typed",
-    "title": "Sentinel vs typed errors",
-    "difficulty": "Hard",
-    "tags": [
-      "errors",
-      "errors.is",
-      "errors.as",
-      "sentinel",
-      "typed-errors",
-      "unwrap",
-      "api-design"
-    ],
-    "summary": "When to expose a package-level sentinel vs a typed error, and how Is/As traverse and customize matching.",
-    "group": "go-course"
-  },
-  {
-    "id": "go-err-panic-recover",
-    "title": "panic, recover & defer semantics",
-    "difficulty": "Hard",
-    "tags": [
-      "error-handling",
-      "panic",
-      "recover",
-      "defer",
-      "runtime"
-    ],
-    "summary": "How recover intercepts panics, how deferred functions run, and the timing traps that decide return values.",
-    "group": "go-course"
-  },
-  {
-    "id": "go-err-custom",
-    "title": "Custom error types & Unwrap",
-    "difficulty": "Hard",
-    "tags": [
-      "errors",
-      "unwrap",
-      "errors.is",
-      "errors.as",
-      "errors.join",
-      "wrapping"
-    ],
-    "summary": "Build custom error types that participate correctly in Is/As chains and joined trees.",
-    "group": "go-course"
-  },
-  {
-    "id": "go-data-slice-internals",
-    "title": "Slice header, len, cap & append growth",
-    "difficulty": "Hard",
-    "tags": [
-      "slices",
-      "append",
-      "memory",
-      "runtime",
-      "aliasing"
-    ],
-    "summary": "How the {ptr,len,cap} header, append reallocation, and three-index slicing govern backing-array sharing.",
-    "group": "go-course"
-  },
-  {
-    "id": "go-data-slice-aliasing",
-    "title": "Slice aliasing & the append gotcha",
-    "difficulty": "Hard",
-    "tags": [
-      "slices",
-      "append",
-      "memory",
-      "aliasing",
-      "copy"
-    ],
-    "summary": "Subslices share a backing array, so append can silently clobber data unless you cap capacity or copy().",
-    "group": "go-course"
-  },
-  {
-    "id": "go-data-maps",
-    "title": "Map internals & iteration order",
-    "difficulty": "Hard",
-    "tags": [
-      "maps",
-      "runtime",
-      "iteration",
-      "hashing",
-      "addressability"
-    ],
-    "summary": "How Go maps hash, grow, and iterate, plus the addressability and nil-map rules that trip up seniors.",
-    "group": "go-course"
-  },
-  {
-    "id": "go-data-strings-runes",
-    "title": "Strings, bytes, runes & UTF-8",
-    "difficulty": "Hard",
-    "tags": [
-      "strings",
-      "runes",
-      "utf8",
-      "bytes",
-      "encoding"
-    ],
-    "summary": "Strings are immutable byte sequences; indexing yields bytes, range yields runes.",
     "group": "go-course"
   },
   {

@@ -34,7 +34,7 @@ insert into public.courses (id, title, summary, icon, "group", family, sort_orde
   ('prep-design', 'Design · prep library', '30 Design problems from your prep study collection.', 'Boxes', 'prep', 'Design', 22),
   ('prep-streams-io', 'Streams & I/O · prep library', '12 Streams & I/O problems from your prep study collection.', 'Waves', 'prep', 'Design', 23),
   ('prep-database', 'Database · prep library', '1 Database problems from your prep study collection.', 'Database', 'prep', 'Other', 24),
-  ('go-senior', 'Go — Senior Developer', 'Advanced Go for senior & staff interviews — concurrency, runtime & memory, generics, and system design. Each concept ships an advanced quiz, a coding drill, and a design question.', 'Boxes', 'go-course', 'Go', 25),
+  ('go-senior', 'Go Course', 'A complete Go course for senior-interview prep — from fundamentals (types, structs, interfaces, closures, modules) through concurrency, the runtime & memory model, generics, and system design. Recall-first: every concept pairs a memory hook with a compilable Go snippet you rebuild from memory.', 'Boxes', 'go-course', 'Go', 25),
   ('openrtb-eng', 'OpenRTB & Ad Platform Engineering', 'Hands-on prep for Golang ads-platform roles — programmatic ecosystem, OpenRTB 2.6 bid request/response, bidder & exchange implementation, tracking, creatives, and at-scale system design. Each concept ships an advanced quiz, a Go coding drill, and a design question.', 'Megaphone', 'openrtb', 'Go', 26);
 
 insert into public.story_regions (id, course_id, code_name, title, subtitle, blurb, sort_order) values
@@ -88,16 +88,24 @@ insert into public.topics (id, course_id, title, summary, sort_order) values
   ('prep-design-all', 'prep-design', 'Design', null, 0),
   ('prep-streams-io-all', 'prep-streams-io', 'Streams & I/O', null, 0),
   ('prep-database-all', 'prep-database', 'Database', null, 0),
-  ('go-senior-concurrency', 'go-senior', 'Concurrency & Goroutines', '8 senior concurrency & goroutines concepts.', 0),
-  ('go-senior-runtime-memory', 'go-senior', 'Runtime & Memory', '4 senior runtime & memory concepts.', 1),
-  ('go-senior-interfaces-types', 'go-senior', 'Interfaces & Type System', '5 senior interfaces & type system concepts.', 2),
-  ('go-senior-generics', 'go-senior', 'Generics', '4 senior generics concepts.', 3),
-  ('go-senior-errors', 'go-senior', 'Error Handling', '4 senior error handling concepts.', 4),
-  ('go-senior-slices-maps', 'go-senior', 'Slices, Maps & Data', '4 senior slices, maps & data concepts.', 5),
-  ('go-senior-stdlib-idioms', 'go-senior', 'Standard Library & Idioms', '4 senior standard library & idioms concepts.', 6),
-  ('go-senior-performance', 'go-senior', 'Performance & Profiling', '4 senior performance & profiling concepts.', 7),
-  ('go-senior-testing', 'go-senior', 'Testing & Reliability', '4 senior testing & reliability concepts.', 8),
-  ('go-senior-design', 'go-senior', 'System Design in Go', '5 senior system design in go concepts.', 9),
+  ('go-senior-basics', 'go-senior', 'Go Fundamentals', '6 go fundamentals concepts to recall.', 0),
+  ('go-senior-types-values', 'go-senior', 'Types & Value Semantics', '6 types & value semantics concepts to recall.', 1),
+  ('go-senior-collections', 'go-senior', 'Slices, Maps & Arrays', '6 slices, maps & arrays concepts to recall.', 2),
+  ('go-senior-functions-closures', 'go-senior', 'Functions & Closures', '6 functions & closures concepts to recall.', 3),
+  ('go-senior-structs-methods', 'go-senior', 'Structs, Methods & Embedding', '6 structs, methods & embedding concepts to recall.', 4),
+  ('go-senior-interfaces-basics', 'go-senior', 'Interfaces (Basics)', '6 interfaces (basics) concepts to recall.', 5),
+  ('go-senior-strings-runes', 'go-senior', 'Strings, Bytes & Runes', '6 strings, bytes & runes concepts to recall.', 6),
+  ('go-senior-packages-modules', 'go-senior', 'Packages, Modules & Tooling', '6 packages, modules & tooling concepts to recall.', 7),
+  ('go-senior-errors', 'go-senior', 'Error Handling', '4 error handling concepts to recall.', 8),
+  ('go-senior-slices-maps', 'go-senior', 'Slices, Maps & Data', '4 slices, maps & data concepts to recall.', 9),
+  ('go-senior-interfaces-types', 'go-senior', 'Interfaces & Type System', '5 interfaces & type system concepts to recall.', 10),
+  ('go-senior-generics', 'go-senior', 'Generics', '4 generics concepts to recall.', 11),
+  ('go-senior-concurrency', 'go-senior', 'Concurrency & Goroutines', '8 concurrency & goroutines concepts to recall.', 12),
+  ('go-senior-runtime-memory', 'go-senior', 'Runtime & Memory', '4 runtime & memory concepts to recall.', 13),
+  ('go-senior-stdlib-idioms', 'go-senior', 'Standard Library & Idioms', '4 standard library & idioms concepts to recall.', 14),
+  ('go-senior-performance', 'go-senior', 'Performance & Profiling', '4 performance & profiling concepts to recall.', 15),
+  ('go-senior-testing', 'go-senior', 'Testing & Reliability', '4 testing & reliability concepts to recall.', 16),
+  ('go-senior-design', 'go-senior', 'System Design in Go', '5 system design in go concepts to recall.', 17),
   ('openrtb-eng-ad-tech-foundations', 'openrtb-eng', 'Ad Tech Foundations', '4 OpenRTB ad tech foundations concepts.', 0),
   ('openrtb-eng-bid-request', 'openrtb-eng', 'OpenRTB BidRequest', '4 OpenRTB openrtb bidrequest concepts.', 1),
   ('openrtb-eng-bid-response', 'openrtb-eng', 'BidResponse & Settlement', '4 OpenRTB bidresponse & settlement concepts.', 2),
@@ -489,6 +497,71 @@ insert into public.problems (id, title, difficulty, summary, source_url, region_
   ('prep-tries-find-distinct-palindromic-sub', 'Find distinct palindromic sub-', 'Medium', 'Suffix trie + palindrome check', null, null, null, 'O(s^2)', 'O(s^2)'),
   ('prep-tries-implement-trie-methods', 'Implement trie methods', 'Medium', 'Trie with 26-way branching', null, null, null, 'O(s) insert, O(s) search/prefix', 'O(s) insert, O(1) search/prefix'),
   ('prep-tries-longest-repeated-substring', 'Longest repeated substring', 'Medium', 'Suffix array + LCP scan', null, null, null, 'O(s^2 log s)', 'O(s)'),
+  ('go-basics-program', 'Program structure: package, import, main', 'Easy', 'Every Go program is a package; an executable is package main with a func main() entry point.', null, null, null, null, null),
+  ('go-basics-vars', 'Declaring variables: var, :=, and zero values', 'Easy', 'var declares anywhere with a zero value default; := is short declaration usable only inside functions.', null, null, null, null, null),
+  ('go-basics-const-iota', 'Constants and iota enumerations', 'Medium', 'const values are compile-time fixed; iota auto-increments within a const block to build enumerations.', null, null, null, null, null),
+  ('go-basics-control-flow', 'Control flow: if with init, for, switch (no fallthrough)', 'Easy', 'if and switch take an optional init statement; switch cases break implicitly and for is the only loop.', null, null, null, null, null),
+  ('go-basics-conversions', 'Explicit numeric and string/[]byte/[]rune conversions', 'Medium', 'Go never converts types implicitly; T(x) converts numerics and string<->[]byte/[]rune explicitly.', null, null, null, null, null),
+  ('go-basics-fmt', 'Formatted I/O with the fmt package (verbs, Sprintf)', 'Easy', 'fmt formats values with verbs: %v general, %d int, %s string, %q quoted, %T type, %+v with field names.', null, null, null, null, null),
+  ('go-types-basic', 'Basic types: sized numbers, bool, string, byte/rune aliases', 'Easy', 'Go pins integer and float widths in the type name and treats byte and rune as aliases for uint8 and int32.', null, null, null, null, null),
+  ('go-types-defined', 'Defined (named) types and their underlying type', 'Easy', 'type Celsius float64 makes a distinct type that shares an underlying type but never mixes without a conversion.', null, null, null, null, null),
+  ('go-types-value-semantics', 'Value semantics: assignment and function args copy', 'Easy', 'Assignment and passing to a function copy the value, so mutating a struct copy leaves the original untouched.', null, null, null, null, null),
+  ('go-types-comparability', 'Comparability and what may be a map key', 'Medium', 'Only comparable types can be == or used as map keys; slices, maps, and functions are not comparable.', null, null, null, null, null),
+  ('go-types-conv-vs-assert', 'Type conversion T(x) versus type assertion x.(T)', 'Medium', 'T(x) reinterprets a concrete value at compile time; x.(T) extracts the dynamic type out of an interface at runtime.', null, null, null, null, null),
+  ('go-types-composite-literals', 'Composite literals and zero values across types', 'Easy', 'Composite literals build structs, arrays, slices, and maps inline; every type has a usable zero value.', null, null, null, null, null),
+  ('go-coll-arrays', 'Arrays: fixed length is part of the type; value semantics', 'Easy', 'An array’s length is baked into its type, and assigning or passing one copies every element.', null, null, null, null, null),
+  ('go-coll-slices', 'Slices: make, len, cap, append growth', 'Easy', 'A slice is a header (ptr, len, cap) over an array that append grows — reallocating when cap runs out.', null, null, null, null, null),
+  ('go-coll-slice-aliasing', 'Slices share a backing array; copy() and full three-index slices', 'Medium', 'Sub-slices alias the same backing array, so writes bleed across — copy() or a capped s[a:b:c] isolate them.', null, null, null, null, null),
+  ('go-coll-maps', 'Maps: comma-ok, delete, random iteration, nil-map write panic', 'Easy', 'Maps distinguish missing from zero via comma-ok, iterate in random order, and panic on writes to a nil map.', null, null, null, null, null),
+  ('go-coll-range', 'range over slices, maps, strings, and ints (1.22)', 'Easy', 'range yields index/value pairs over slices and maps, decodes runes over strings, and counts 0..n-1 over an int.', null, null, null, null, null),
+  ('go-coll-grouping', 'Nested slices and the map[K][]V grouping pattern', 'Medium', 'map[K][]V groups items by key by appending to the nil slice that a missing key returns.', null, null, null, null, null),
+  ('go-fn-multi-return', 'Multiple return values and the (result, error) idiom', 'Easy', 'Go functions return any number of values; the canonical shape is (result, error) checked with if err != nil.', null, null, null, null, null),
+  ('go-fn-named-returns', 'Named return values and the naked return (and its risk)', 'Medium', 'Naming return values pre-declares them as zeroed locals so a bare return sends their current state back.', null, null, null, null, null),
+  ('go-fn-variadic', 'Variadic parameters and spreading a slice with ...', 'Easy', 'A trailing ...T parameter collects extra args into a slice, and args... spreads an existing slice back in.', null, null, null, null, null),
+  ('go-fn-first-class', 'First-class functions and higher-order functions', 'Easy', 'Functions are values: store them in variables, pass them as arguments, and return them from other functions.', null, null, null, null, null),
+  ('go-fn-closures', 'Closures capture variables by reference', 'Medium', 'A closure keeps a live reference to the outer variables it uses, so it can read and mutate them across calls.', null, null, null, null, null),
+  ('go-fn-defer', 'defer: LIFO order and argument evaluation at defer time', 'Medium', 'defer schedules a call to run when the function returns; deferred calls fire in last-in, first-out order.', null, null, null, null, null),
+  ('go-struct-literals', 'Struct types and keyed vs positional composite literals', 'Easy', 'A struct is a fixed set of named fields; build one with a keyed literal (robust) or a positional literal (fragile).', null, null, null, null, null),
+  ('go-struct-methods', 'Methods on defined types and the receiver', 'Easy', 'A method is a function with a receiver parameter bound to a type you defined in this package.', null, null, null, null, null),
+  ('go-struct-receivers', 'Value vs pointer receivers and method sets', 'Medium', 'A value receiver operates on a copy; a pointer receiver can mutate the original and defines the pointer method set.', null, null, null, null, null),
+  ('go-struct-embedding', 'Embedding: promoted fields and methods, composition over inheritance', 'Medium', 'Embed a type by declaring it without a field name; its fields and methods are promoted onto the outer struct.', null, null, null, null, null),
+  ('go-struct-tags', 'Struct tags and encoding/json field control', 'Medium', 'A struct tag is a string of metadata read via reflection; encoding/json uses it to rename, omit, and skip fields.', null, null, null, null, null),
+  ('go-struct-method-values', 'Method values versus method expressions', 'Medium', 'A method value binds the receiver now into a closure; a method expression leaves the receiver as the first argument.', null, null, null, null, null),
+  ('go-ib-satisfaction', 'Implicit interface satisfaction (no implements keyword)', 'Easy', 'A type satisfies an interface just by having its methods — you never declare the intent.', null, null, null, null, null),
+  ('go-ib-any', 'The empty interface and the any alias', 'Easy', 'interface{} has zero methods so every type satisfies it; any is its 1.18 alias.', null, null, null, null, null),
+  ('go-ib-assertion', 'Type assertion with the comma-ok form', 'Easy', 'x.(T) extracts the concrete type; the two-value form returns ok instead of panicking.', null, null, null, null, null),
+  ('go-ib-type-switch', 'The type switch', 'Easy', 'switch v := x.(type) branches on the dynamic type, binding v to the matched concrete type per case.', null, null, null, null, null),
+  ('go-ib-nil-interface', 'The typed-nil-in-an-interface trap', 'Medium', 'An interface holding a nil pointer is NOT itself nil — it carries a type, so == nil is false.', null, null, null, null, null),
+  ('go-ib-stringer-error', 'Implementing the Stringer and error interfaces', 'Easy', 'Define String() to control %v/Println output and Error() to make a type usable as an error.', null, null, null, null, null),
+  ('go-str-immutable', 'Strings are immutable, read-only byte sequences', 'Easy', 'A Go string is an immutable read-only slice of bytes; you cannot assign into it by index.', null, null, null, null, null),
+  ('go-str-runes-bytes', 'Bytes vs runes and UTF-8 encoding', 'Medium', 'A byte is one uint8 of UTF-8; a rune is an int32 Unicode code point that may span multiple bytes.', null, null, null, null, null),
+  ('go-str-range', 'Ranging a string decodes runes; indexing yields a byte', 'Medium', 'for..range over a string yields byte-offset + decoded rune; direct indexing yields a single byte.', null, null, null, null, null),
+  ('go-str-builder', 'strings.Builder for efficient concatenation', 'Easy', 'strings.Builder accumulates bytes in a growable buffer and returns the result with zero final copy.', null, null, null, null, null),
+  ('go-str-strconv', 'Converting numbers and strings with strconv', 'Easy', 'strconv parses and formats numbers; Atoi/Itoa handle base-10 ints and return an error on bad input.', null, null, null, null, null),
+  ('go-str-ops', 'Common strings package operations (Split, Join, Fields, TrimSpace)', 'Easy', 'The strings package covers everyday text work: Split, Join, Fields, TrimSpace, Contains, and more.', null, null, null, null, null),
+  ('go-pkg-visibility', 'Exported vs unexported identifiers and package encapsulation', 'Easy', 'A leading uppercase letter exports an identifier across package boundaries; lowercase keeps it package-private.', null, null, null, null, null),
+  ('go-pkg-imports', 'Import paths, aliases, and blank imports', 'Easy', 'Import a package by path; alias it to rename, or use _ to run its init side effects without a usable name.', null, null, null, null, null),
+  ('go-pkg-init', 'init functions and package initialization order', 'Medium', 'Package-level vars initialize by dependency, then every init() runs, all before main() begins.', null, null, null, null, null),
+  ('go-pkg-modules', 'Modules: go.mod, module path, semantic import versioning', 'Medium', 'A module is a versioned tree rooted at go.mod; its module path prefixes every import, and v2+ appends the major version.', null, null, null, null, null),
+  ('go-pkg-layout', 'internal/ packages and standard project layout', 'Medium', 'An internal/ directory limits imports to code rooted at its parent, enforcing module-private packages beyond capitalization.', null, null, null, null, null),
+  ('go-pkg-tooling', 'Tooling: go build/run, go test, go vet, gofmt', 'Easy', 'The go command bundles build, run, test, vet, and fmt into one toolchain with fixed conventions.', null, null, null, null, null),
+  ('go-err-wrapping', 'Wrapping with %w, errors.Is / As', 'Hard', 'Build unwrap chains with %w and interrogate them via errors.Is/As, including multi-%w trees.', null, null, null, null, null),
+  ('go-err-sentinel-typed', 'Sentinel vs typed errors', 'Hard', 'When to expose a package-level sentinel vs a typed error, and how Is/As traverse and customize matching.', null, null, null, null, null),
+  ('go-err-panic-recover', 'panic, recover & defer semantics', 'Hard', 'How recover intercepts panics, how deferred functions run, and the timing traps that decide return values.', null, null, null, null, null),
+  ('go-err-custom', 'Custom error types & Unwrap', 'Hard', 'Build custom error types that participate correctly in Is/As chains and joined trees.', null, null, null, null, null),
+  ('go-data-slice-internals', 'Slice header, len, cap & append growth', 'Hard', 'How the {ptr,len,cap} header, append reallocation, and three-index slicing govern backing-array sharing.', null, null, null, null, null),
+  ('go-data-slice-aliasing', 'Slice aliasing & the append gotcha', 'Hard', 'Subslices share a backing array, so append can silently clobber data unless you cap capacity or copy().', null, null, null, null, null),
+  ('go-data-maps', 'Map internals & iteration order', 'Hard', 'How Go maps hash, grow, and iterate, plus the addressability and nil-map rules that trip up seniors.', null, null, null, null, null),
+  ('go-data-strings-runes', 'Strings, bytes, runes & UTF-8', 'Hard', 'Strings are immutable byte sequences; indexing yields bytes, range yields runes.', null, null, null, null, null),
+  ('go-iface-internals', 'Interface internals: iface, eface, itab', 'Hard', 'How Go represents interface values as two words and dispatches methods via the itab.', null, null, null, null, null),
+  ('go-iface-nil', 'The nil interface trap', 'Hard', 'A typed nil pointer wrapped in an interface is NOT equal to nil.', null, null, null, null, null),
+  ('go-iface-method-sets', 'Method sets: pointer vs value receivers', 'Hard', 'Why *T satisfies an interface but T often does not, and where addressability bites.', null, null, null, null, null),
+  ('go-iface-embedding', 'Embedding & composition', 'Hard', 'How promotion, overriding, and interface embedding work — and where ambiguity bites.', null, null, null, null, null),
+  ('go-iface-assertions', 'Type assertions & type switches', 'Hard', 'x.(T) forms, panic vs comma-ok, type switches, interface-to-interface assertions, and comparable dynamic types.', null, null, null, null, null),
+  ('go-gen-type-params', 'Type parameters & instantiation', 'Hard', 'How func/type parameters instantiate and how Go compiles them via GCShape stenciling plus dictionaries.', null, null, null, null, null),
+  ('go-gen-constraints', 'Constraints, ~ and comparable', 'Hard', 'Type sets, union elements, ~underlying approximation, and the two flavors of comparable.', null, null, null, null, null),
+  ('go-gen-inference', 'Type inference & its limits', 'Hard', 'How Go infers type arguments from function args, and the hard limits where you must be explicit.', null, null, null, null, null),
+  ('go-gen-pitfalls', 'Generics pitfalls & when not to use', 'Hard', 'Know the hard limits of Go generics and when a plain interface beats a type parameter.', null, null, null, null, null),
   ('go-conc-scheduler', 'Goroutines & the GMP scheduler', 'Hard', 'How Go''s M:N scheduler multiplexes millions of goroutines onto OS threads.', null, null, null, null, null),
   ('go-conc-channels', 'Channels: buffered, unbuffered, closed, nil', 'Hard', 'Send/receive, close semantics, comma-ok, and the nil-channel trick that senior Go hinges on.', null, null, null, null, null),
   ('go-conc-select', 'select, timeouts & non-blocking ops', 'Hard', 'How select picks ready cases, disables nil cases, and models timeouts/non-blocking I/O.', null, null, null, null, null),
@@ -501,23 +574,6 @@ insert into public.problems (id, title, difficulty, summary, source_url, region_
   ('go-mem-gc', 'The garbage collector', 'Hard', 'Concurrent tricolor mark-sweep with a hybrid write barrier, tuned by GOGC and GOMEMLIMIT.', null, null, null, null, null),
   ('go-mem-model', 'The Go memory model & happens-before', 'Hard', 'Happens-before is the only contract that makes cross-goroutine reads observe the right writes.', null, null, null, null, null),
   ('go-mem-pool-alloc', 'Allocation control & sync.Pool', 'Hard', 'Cut allocations with sync.Pool, preallocation, and cache-aware layout — and know exactly when each backfires.', null, null, null, null, null),
-  ('go-iface-internals', 'Interface internals: iface, eface, itab', 'Hard', 'How Go represents interface values as two words and dispatches methods via the itab.', null, null, null, null, null),
-  ('go-iface-nil', 'The nil interface trap', 'Hard', 'A typed nil pointer wrapped in an interface is NOT equal to nil.', null, null, null, null, null),
-  ('go-iface-method-sets', 'Method sets: pointer vs value receivers', 'Hard', 'Why *T satisfies an interface but T often does not, and where addressability bites.', null, null, null, null, null),
-  ('go-iface-embedding', 'Embedding & composition', 'Hard', 'How promotion, overriding, and interface embedding work — and where ambiguity bites.', null, null, null, null, null),
-  ('go-iface-assertions', 'Type assertions & type switches', 'Hard', 'x.(T) forms, panic vs comma-ok, type switches, interface-to-interface assertions, and comparable dynamic types.', null, null, null, null, null),
-  ('go-gen-type-params', 'Type parameters & instantiation', 'Hard', 'How func/type parameters instantiate and how Go compiles them via GCShape stenciling plus dictionaries.', null, null, null, null, null),
-  ('go-gen-constraints', 'Constraints, ~ and comparable', 'Hard', 'Type sets, union elements, ~underlying approximation, and the two flavors of comparable.', null, null, null, null, null),
-  ('go-gen-inference', 'Type inference & its limits', 'Hard', 'How Go infers type arguments from function args, and the hard limits where you must be explicit.', null, null, null, null, null),
-  ('go-gen-pitfalls', 'Generics pitfalls & when not to use', 'Hard', 'Know the hard limits of Go generics and when a plain interface beats a type parameter.', null, null, null, null, null),
-  ('go-err-wrapping', 'Wrapping with %w, errors.Is / As', 'Hard', 'Build unwrap chains with %w and interrogate them via errors.Is/As, including multi-%w trees.', null, null, null, null, null),
-  ('go-err-sentinel-typed', 'Sentinel vs typed errors', 'Hard', 'When to expose a package-level sentinel vs a typed error, and how Is/As traverse and customize matching.', null, null, null, null, null),
-  ('go-err-panic-recover', 'panic, recover & defer semantics', 'Hard', 'How recover intercepts panics, how deferred functions run, and the timing traps that decide return values.', null, null, null, null, null),
-  ('go-err-custom', 'Custom error types & Unwrap', 'Hard', 'Build custom error types that participate correctly in Is/As chains and joined trees.', null, null, null, null, null),
-  ('go-data-slice-internals', 'Slice header, len, cap & append growth', 'Hard', 'How the {ptr,len,cap} header, append reallocation, and three-index slicing govern backing-array sharing.', null, null, null, null, null),
-  ('go-data-slice-aliasing', 'Slice aliasing & the append gotcha', 'Hard', 'Subslices share a backing array, so append can silently clobber data unless you cap capacity or copy().', null, null, null, null, null),
-  ('go-data-maps', 'Map internals & iteration order', 'Hard', 'How Go maps hash, grow, and iterate, plus the addressability and nil-map rules that trip up seniors.', null, null, null, null, null),
-  ('go-data-strings-runes', 'Strings, bytes, runes & UTF-8', 'Hard', 'Strings are immutable byte sequences; indexing yields bytes, range yields runes.', null, null, null, null, null),
   ('go-std-io', 'io.Reader / io.Writer composition', 'Hard', 'Compose small io interfaces to stream data through wrappers without buffering everything in memory.', null, null, null, null, null),
   ('go-std-json', 'encoding/json quirks', 'Hard', 'Reflection-driven (un)marshaling: exported fields, tags, omitempty, embedding, and interface{} defaults.', null, null, null, null, null),
   ('go-std-time', 'time: monotonic clocks & tickers', 'Hard', 'How time.Time carries a monotonic reading, and how Timers and Tickers behave under Go 1.23+ unbuffered-channel semantics.', null, null, null, null, null),
@@ -579,13 +635,17 @@ insert into public.tags (id, label) values
   ('adm', 'adm'),
   ('adomain', 'adomain'),
   ('ads.txt', 'ads.txt'),
+  ('aliases', 'aliases'),
   ('aliasing', 'aliasing'),
   ('allocations', 'allocations'),
+  ('any', 'any'),
   ('api-design', 'api-design'),
   ('app', 'app'),
   ('append', 'append'),
   ('architecture', 'architecture'),
   ('array', 'array'),
+  ('arrays', 'arrays'),
+  ('assertion', 'assertion'),
   ('assets', 'assets'),
   ('async', 'async'),
   ('at', 'at'),
@@ -613,19 +673,25 @@ insert into public.tags (id, label) values
   ('bidresponse', 'bidresponse'),
   ('billing', 'billing'),
   ('binary-search', 'binary-search'),
+  ('binding', 'binding'),
   ('bit-manipulation', 'bit-manipulation'),
   ('bitmask', 'bitmask'),
+  ('blank-import', 'blank-import'),
   ('brand-safety', 'brand-safety'),
   ('breadth-first-search', 'breadth-first-search'),
   ('budget', 'budget'),
   ('bufio', 'bufio'),
+  ('builder', 'builder'),
   ('burl', 'burl'),
+  ('byte', 'byte'),
   ('bytes', 'bytes'),
   ('cache', 'cache'),
   ('caching', 'caching'),
   ('campaign', 'campaign'),
   ('cancellation', 'cancellation'),
+  ('capacity', 'capacity'),
   ('capstone', 'capstone'),
+  ('capture', 'capture'),
   ('ccpa', 'ccpa'),
   ('cdn', 'cdn'),
   ('channel', 'channel'),
@@ -634,16 +700,23 @@ insert into public.tags (id, label) values
   ('cleanup', 'cleanup'),
   ('clearing-price', 'clearing-price'),
   ('click', 'click'),
+  ('closures', 'closures'),
   ('cmp.ordered', 'cmp.ordered'),
   ('coloring', 'coloring'),
+  ('comma-ok', 'comma-ok'),
   ('comparability', 'comparability'),
   ('comparable', 'comparable'),
+  ('composite', 'composite'),
+  ('composite-literal', 'composite-literal'),
   ('composition', 'composition'),
   ('concurrency', 'concurrency'),
   ('consent', 'consent'),
   ('consistent-hashing', 'consistent-hashing'),
+  ('const', 'const'),
   ('constraints', 'constraints'),
   ('context', 'context'),
+  ('control-flow', 'control-flow'),
+  ('conversion', 'conversion'),
   ('cookieless', 'cookieless'),
   ('copy', 'copy'),
   ('corpus', 'corpus'),
@@ -658,9 +731,13 @@ insert into public.tags (id, label) values
   ('deadline', 'deadline'),
   ('deadlock', 'deadlock'),
   ('deals', 'deals'),
+  ('declaration', 'declaration'),
   ('decorator', 'decorator'),
   ('deduplication', 'deduplication'),
   ('defer', 'defer'),
+  ('defined', 'defined'),
+  ('defined-types', 'defined-types'),
+  ('delete', 'delete'),
   ('dependency-injection', 'dependency-injection'),
   ('design', 'design'),
   ('device', 'device'),
@@ -670,13 +747,20 @@ insert into public.tags (id, label) values
   ('discrepancy', 'discrepancy'),
   ('divide-and-conquer', 'divide-and-conquer'),
   ('dsp', 'dsp'),
+  ('duck-typing', 'duck-typing'),
   ('dynamic-dispatch', 'dynamic-dispatch'),
   ('dynamic-programming', 'dynamic-programming'),
   ('eids', 'eids'),
   ('embedding', 'embedding'),
+  ('empty-interface', 'empty-interface'),
+  ('encapsulation', 'encapsulation'),
   ('encoding', 'encoding'),
   ('encoding/json', 'encoding/json'),
+  ('entry-point', 'entry-point'),
+  ('enum', 'enum'),
+  ('equality', 'equality'),
   ('errgroup', 'errgroup'),
+  ('error', 'error'),
   ('error-handling', 'error-handling'),
   ('errors', 'errors'),
   ('errors.as', 'errors.as'),
@@ -685,16 +769,24 @@ insert into public.tags (id, label) values
   ('escape-analysis', 'escape-analysis'),
   ('exchange', 'exchange'),
   ('expire', 'expire'),
+  ('exports', 'exports'),
   ('fakes', 'fakes'),
   ('false-sharing', 'false-sharing'),
   ('fan-in', 'fan-in'),
   ('fan-out', 'fan-out'),
+  ('fields', 'fields'),
+  ('first-class', 'first-class'),
   ('first-price', 'first-price'),
   ('floor', 'floor'),
   ('floyd-warshall', 'floyd-warshall'),
+  ('fmt', 'fmt'),
   ('fmt.errorf', 'fmt.errorf'),
+  ('for', 'for'),
+  ('formatting', 'formatting'),
   ('fraud', 'fraud'),
   ('frequency-cap', 'frequency-cap'),
+  ('func-type', 'func-type'),
+  ('functions', 'functions'),
   ('fuzzing', 'fuzzing'),
   ('gaid', 'gaid'),
   ('gc', 'gc'),
@@ -706,22 +798,28 @@ insert into public.tags (id, label) values
   ('go', 'go'),
   ('go-cmp', 'go-cmp'),
   ('go-test', 'go-test'),
+  ('go-vet', 'go-vet'),
+  ('go.mod', 'go.mod'),
   ('go1.26', 'go1.26'),
+  ('gofmt', 'gofmt'),
   ('golden-files', 'golden-files'),
   ('goroutine-leak', 'goroutine-leak'),
   ('goroutine-leaks', 'goroutine-leaks'),
   ('goroutines', 'goroutines'),
+  ('gotcha', 'gotcha'),
   ('gotchas', 'gotchas'),
   ('gpp', 'gpp'),
   ('graph', 'graph'),
   ('greedy', 'greedy'),
   ('grid', 'grid'),
+  ('grouping', 'grouping'),
   ('happens-before', 'happens-before'),
   ('hash-map', 'hash-map'),
   ('hash-table', 'hash-table'),
   ('hashing', 'hashing'),
   ('heap', 'heap'),
   ('hedged-requests', 'hedged-requests'),
+  ('higher-order', 'higher-order'),
   ('html', 'html'),
   ('http', 'http'),
   ('http-204', 'http-204'),
@@ -734,61 +832,91 @@ insert into public.tags (id, label) values
   ('idempotent', 'idempotent'),
   ('identity', 'identity'),
   ('idfa', 'idfa'),
+  ('idiom', 'idiom'),
+  ('idioms', 'idioms'),
+  ('if', 'if'),
   ('image', 'image'),
+  ('immutable', 'immutable'),
   ('imp', 'imp'),
+  ('import', 'import'),
+  ('imports', 'imports'),
   ('impression', 'impression'),
   ('impression-counting', 'impression-counting'),
   ('incr', 'incr'),
+  ('init', 'init'),
+  ('initialization', 'initialization'),
   ('inline', 'inline'),
   ('inlining', 'inlining'),
   ('instantiation', 'instantiation'),
+  ('interface', 'interface'),
   ('interfaces', 'interfaces'),
+  ('internal', 'internal'),
   ('intervals', 'intervals'),
   ('io', 'io'),
+  ('iota', 'iota'),
   ('itab', 'itab'),
   ('iteration', 'iteration'),
   ('iurl', 'iurl'),
   ('ivt', 'ivt'),
+  ('join', 'join'),
   ('json', 'json'),
   ('kafka', 'kafka'),
   ('latency', 'latency'),
+  ('layout', 'layout'),
+  ('lifo', 'lifo'),
   ('link', 'link'),
   ('linked-list', 'linked-list'),
+  ('literals', 'literals'),
   ('liveramp', 'liveramp'),
   ('lock-free', 'lock-free'),
   ('logging', 'logging'),
   ('loops', 'loops'),
   ('lurl', 'lurl'),
   ('macros', 'macros'),
+  ('main', 'main'),
+  ('make', 'make'),
+  ('map-key', 'map-key'),
   ('maps', 'maps'),
   ('markup', 'markup'),
   ('math', 'math'),
   ('memory', 'memory'),
   ('memory-layout', 'memory-layout'),
   ('memory-model', 'memory-model'),
+  ('method-set', 'method-set'),
   ('method-sets', 'method-sets'),
+  ('methods', 'methods'),
   ('modifyresponse', 'modifyresponse'),
+  ('modules', 'modules'),
   ('monomorphization', 'monomorphization'),
   ('monotonic', 'monotonic'),
   ('mraid', 'mraid'),
   ('mst', 'mst'),
   ('mtype', 'mtype'),
+  ('multi-return', 'multi-return'),
+  ('mutation', 'mutation'),
   ('mutex', 'mutex'),
+  ('naked-return', 'naked-return'),
+  ('named-returns', 'named-returns'),
   ('native', 'native'),
   ('nbr', 'nbr'),
   ('net/http', 'net/http'),
   ('nil', 'nil'),
   ('no-bid', 'no-bid'),
+  ('numbers', 'numbers'),
   ('nurl', 'nurl'),
   ('observability', 'observability'),
   ('once', 'once'),
   ('openrtb', 'openrtb'),
   ('openrtb-2.6', 'openrtb-2.6'),
   ('openrtb-native', 'openrtb-native'),
+  ('order', 'order'),
   ('p99', 'p99'),
   ('pacing', 'pacing'),
+  ('package', 'package'),
+  ('packages', 'packages'),
   ('panic', 'panic'),
   ('parallel', 'parallel'),
+  ('parsing', 'parsing'),
   ('performance', 'performance'),
   ('pipeline', 'pipeline'),
   ('pixel', 'pixel'),
@@ -797,17 +925,23 @@ insert into public.tags (id, label) values
   ('pod-bidding', 'pod-bidding'),
   ('poddur', 'poddur'),
   ('podid', 'podid'),
+  ('pointer', 'pointer'),
+  ('pointers', 'pointers'),
   ('pprof', 'pprof'),
   ('preferred-deal', 'preferred-deal'),
   ('prefix-sum', 'prefix-sum'),
+  ('printf', 'printf'),
   ('priority-queue', 'priority-queue'),
   ('profiling', 'profiling'),
   ('programmatic', 'programmatic'),
   ('programmatic-guaranteed', 'programmatic-guaranteed'),
+  ('promotion', 'promotion'),
   ('queue', 'queue'),
   ('quickselect', 'quickselect'),
   ('race', 'race'),
+  ('range', 'range'),
   ('rate-limiting', 'rate-limiting'),
+  ('receiver', 'receiver'),
   ('receivers', 'receivers'),
   ('reconciliation', 'reconciliation'),
   ('recover', 'recover'),
@@ -820,11 +954,13 @@ insert into public.tags (id, label) values
   ('reverse-proxy', 'reverse-proxy'),
   ('ring-buffer', 'ring-buffer'),
   ('rtb', 'rtb'),
+  ('rune', 'rune'),
   ('runes', 'runes'),
   ('runtime', 'runtime'),
   ('rwmutex', 'rwmutex'),
   ('safeframe', 'safeframe'),
   ('sampling', 'sampling'),
+  ('satisfaction', 'satisfaction'),
   ('scalability', 'scalability'),
   ('schain', 'schain'),
   ('scheduler', 'scheduler'),
@@ -836,22 +972,32 @@ insert into public.tags (id, label) values
   ('serialization', 'serialization'),
   ('server-to-server', 'server-to-server'),
   ('settlement', 'settlement'),
+  ('shortdecl', 'shortdecl'),
   ('signals', 'signals'),
   ('simulation', 'simulation'),
   ('site', 'site'),
+  ('slice', 'slice'),
   ('slices', 'slices'),
   ('sliding-window', 'sliding-window'),
   ('sorting', 'sorting'),
+  ('split', 'split'),
+  ('spread', 'spread'),
   ('ssp', 'ssp'),
   ('stack', 'stack'),
+  ('state', 'state'),
+  ('strconv', 'strconv'),
   ('streaming', 'streaming'),
   ('string', 'string'),
+  ('stringer', 'stringer'),
   ('strings', 'strings'),
+  ('struct', 'struct'),
   ('struct-tags', 'struct-tags'),
   ('structs', 'structs'),
+  ('structural', 'structural'),
   ('substitution', 'substitution'),
   ('subtests', 'subtests'),
   ('supply-chain', 'supply-chain'),
+  ('switch', 'switch'),
   ('sync', 'sync'),
   ('sync.pool', 'sync.pool'),
   ('sync/atomic', 'sync/atomic'),
@@ -859,10 +1005,12 @@ insert into public.tags (id, label) values
   ('system-design', 'system-design'),
   ('t.cleanup', 't.cleanup'),
   ('t.run', 't.run'),
+  ('tags', 'tags'),
   ('targeting', 'targeting'),
   ('tarjan', 'tarjan'),
   ('tcf', 'tcf'),
   ('testing', 'testing'),
+  ('three-index', 'three-index'),
   ('ticker', 'ticker'),
   ('tilde', 'tilde'),
   ('time', 'time'),
@@ -872,6 +1020,7 @@ insert into public.tags (id, label) values
   ('title', 'title'),
   ('tmax', 'tmax'),
   ('token-bucket', 'token-bucket'),
+  ('tooling', 'tooling'),
   ('topological-sort', 'topological-sort'),
   ('tracking', 'tracking'),
   ('tracking-events', 'tracking-events'),
@@ -885,16 +1034,27 @@ insert into public.tags (id, label) values
   ('type-switch', 'type-switch'),
   ('type-system', 'type-system'),
   ('typed-errors', 'typed-errors'),
+  ('types', 'types'),
   ('uid2', 'uid2'),
+  ('underlying', 'underlying'),
+  ('unicode', 'unicode'),
   ('union-find', 'union-find'),
+  ('untyped', 'untyped'),
   ('unwrap', 'unwrap'),
   ('url-encoding', 'url-encoding'),
   ('us_privacy', 'us_privacy'),
   ('user', 'user'),
   ('user-tracking', 'user-tracking'),
+  ('utf-8', 'utf-8'),
   ('utf8', 'utf8'),
+  ('value-semantics', 'value-semantics'),
+  ('var', 'var'),
+  ('variadic', 'variadic'),
   ('vast', 'vast'),
+  ('verbs', 'verbs'),
+  ('versioning', 'versioning'),
   ('video', 'video'),
+  ('visibility', 'visibility'),
   ('vpaid', 'vpaid'),
   ('waitgroup', 'waitgroup'),
   ('win-notice', 'win-notice'),
@@ -904,7 +1064,8 @@ insert into public.tags (id, label) values
   ('wrapping', 'wrapping'),
   ('write-behind', 'write-behind'),
   ('wseat', 'wseat'),
-  ('x/time/rate', 'x/time/rate');
+  ('x/time/rate', 'x/time/rate'),
+  ('zero-value', 'zero-value');
 
 insert into public.problem_tags (problem_id, tag_id) values
   ('union-find', 'graph'),
@@ -1504,6 +1665,281 @@ insert into public.problem_tags (problem_id, tag_id) values
   ('prep-tries-implement-trie-methods', 'trie'),
   ('prep-tries-longest-repeated-substring', 'trie'),
   ('prep-tries-longest-repeated-substring', 'array'),
+  ('go-basics-program', 'package'),
+  ('go-basics-program', 'import'),
+  ('go-basics-program', 'main'),
+  ('go-basics-program', 'entry-point'),
+  ('go-basics-vars', 'var'),
+  ('go-basics-vars', 'shortdecl'),
+  ('go-basics-vars', 'zero-value'),
+  ('go-basics-vars', 'declaration'),
+  ('go-basics-const-iota', 'const'),
+  ('go-basics-const-iota', 'iota'),
+  ('go-basics-const-iota', 'enum'),
+  ('go-basics-const-iota', 'untyped'),
+  ('go-basics-control-flow', 'if'),
+  ('go-basics-control-flow', 'switch'),
+  ('go-basics-control-flow', 'for'),
+  ('go-basics-control-flow', 'control-flow'),
+  ('go-basics-conversions', 'conversion'),
+  ('go-basics-conversions', 'rune'),
+  ('go-basics-conversions', 'byte'),
+  ('go-basics-conversions', 'string'),
+  ('go-basics-fmt', 'fmt'),
+  ('go-basics-fmt', 'printf'),
+  ('go-basics-fmt', 'verbs'),
+  ('go-basics-fmt', 'formatting'),
+  ('go-types-basic', 'types'),
+  ('go-types-basic', 'numbers'),
+  ('go-types-basic', 'string'),
+  ('go-types-basic', 'rune'),
+  ('go-types-defined', 'types'),
+  ('go-types-defined', 'defined'),
+  ('go-types-defined', 'underlying'),
+  ('go-types-defined', 'methods'),
+  ('go-types-value-semantics', 'value-semantics'),
+  ('go-types-value-semantics', 'copy'),
+  ('go-types-value-semantics', 'struct'),
+  ('go-types-value-semantics', 'pointer'),
+  ('go-types-comparability', 'comparability'),
+  ('go-types-comparability', 'map-key'),
+  ('go-types-comparability', 'equality'),
+  ('go-types-comparability', 'struct'),
+  ('go-types-conv-vs-assert', 'conversion'),
+  ('go-types-conv-vs-assert', 'assertion'),
+  ('go-types-conv-vs-assert', 'interface'),
+  ('go-types-conv-vs-assert', 'type-switch'),
+  ('go-types-composite-literals', 'composite-literal'),
+  ('go-types-composite-literals', 'zero-value'),
+  ('go-types-composite-literals', 'struct'),
+  ('go-types-composite-literals', 'slice'),
+  ('go-coll-arrays', 'arrays'),
+  ('go-coll-arrays', 'value-semantics'),
+  ('go-coll-arrays', 'types'),
+  ('go-coll-slices', 'slices'),
+  ('go-coll-slices', 'append'),
+  ('go-coll-slices', 'make'),
+  ('go-coll-slices', 'capacity'),
+  ('go-coll-slice-aliasing', 'slices'),
+  ('go-coll-slice-aliasing', 'aliasing'),
+  ('go-coll-slice-aliasing', 'copy'),
+  ('go-coll-slice-aliasing', 'three-index'),
+  ('go-coll-maps', 'maps'),
+  ('go-coll-maps', 'comma-ok'),
+  ('go-coll-maps', 'delete'),
+  ('go-coll-maps', 'nil'),
+  ('go-coll-range', 'range'),
+  ('go-coll-range', 'strings'),
+  ('go-coll-range', 'runes'),
+  ('go-coll-range', 'loops'),
+  ('go-coll-grouping', 'maps'),
+  ('go-coll-grouping', 'slices'),
+  ('go-coll-grouping', 'grouping'),
+  ('go-coll-grouping', 'idioms'),
+  ('go-fn-multi-return', 'functions'),
+  ('go-fn-multi-return', 'error'),
+  ('go-fn-multi-return', 'multi-return'),
+  ('go-fn-multi-return', 'idiom'),
+  ('go-fn-named-returns', 'functions'),
+  ('go-fn-named-returns', 'named-returns'),
+  ('go-fn-named-returns', 'naked-return'),
+  ('go-fn-named-returns', 'defer'),
+  ('go-fn-variadic', 'functions'),
+  ('go-fn-variadic', 'variadic'),
+  ('go-fn-variadic', 'slices'),
+  ('go-fn-variadic', 'spread'),
+  ('go-fn-first-class', 'functions'),
+  ('go-fn-first-class', 'first-class'),
+  ('go-fn-first-class', 'higher-order'),
+  ('go-fn-first-class', 'func-type'),
+  ('go-fn-closures', 'closures'),
+  ('go-fn-closures', 'functions'),
+  ('go-fn-closures', 'capture'),
+  ('go-fn-closures', 'state'),
+  ('go-fn-defer', 'defer'),
+  ('go-fn-defer', 'functions'),
+  ('go-fn-defer', 'lifo'),
+  ('go-fn-defer', 'cleanup'),
+  ('go-struct-literals', 'structs'),
+  ('go-struct-literals', 'literals'),
+  ('go-struct-literals', 'zero-value'),
+  ('go-struct-literals', 'composite'),
+  ('go-struct-methods', 'methods'),
+  ('go-struct-methods', 'receiver'),
+  ('go-struct-methods', 'defined-types'),
+  ('go-struct-receivers', 'receiver'),
+  ('go-struct-receivers', 'pointer'),
+  ('go-struct-receivers', 'method-set'),
+  ('go-struct-receivers', 'mutation'),
+  ('go-struct-embedding', 'embedding'),
+  ('go-struct-embedding', 'composition'),
+  ('go-struct-embedding', 'promotion'),
+  ('go-struct-embedding', 'methods'),
+  ('go-struct-tags', 'tags'),
+  ('go-struct-tags', 'json'),
+  ('go-struct-tags', 'encoding'),
+  ('go-struct-tags', 'reflection'),
+  ('go-struct-method-values', 'methods'),
+  ('go-struct-method-values', 'closures'),
+  ('go-struct-method-values', 'first-class'),
+  ('go-struct-method-values', 'binding'),
+  ('go-ib-satisfaction', 'interfaces'),
+  ('go-ib-satisfaction', 'structural'),
+  ('go-ib-satisfaction', 'satisfaction'),
+  ('go-ib-satisfaction', 'duck-typing'),
+  ('go-ib-any', 'interfaces'),
+  ('go-ib-any', 'any'),
+  ('go-ib-any', 'empty-interface'),
+  ('go-ib-any', 'generics'),
+  ('go-ib-assertion', 'interfaces'),
+  ('go-ib-assertion', 'assertion'),
+  ('go-ib-assertion', 'comma-ok'),
+  ('go-ib-assertion', 'panic'),
+  ('go-ib-type-switch', 'interfaces'),
+  ('go-ib-type-switch', 'type-switch'),
+  ('go-ib-type-switch', 'assertion'),
+  ('go-ib-type-switch', 'control-flow'),
+  ('go-ib-nil-interface', 'interfaces'),
+  ('go-ib-nil-interface', 'nil'),
+  ('go-ib-nil-interface', 'gotcha'),
+  ('go-ib-nil-interface', 'pointers'),
+  ('go-ib-stringer-error', 'interfaces'),
+  ('go-ib-stringer-error', 'stringer'),
+  ('go-ib-stringer-error', 'error'),
+  ('go-ib-stringer-error', 'fmt'),
+  ('go-str-immutable', 'strings'),
+  ('go-str-immutable', 'immutable'),
+  ('go-str-immutable', 'bytes'),
+  ('go-str-runes-bytes', 'runes'),
+  ('go-str-runes-bytes', 'bytes'),
+  ('go-str-runes-bytes', 'utf-8'),
+  ('go-str-runes-bytes', 'unicode'),
+  ('go-str-range', 'range'),
+  ('go-str-range', 'runes'),
+  ('go-str-range', 'strings'),
+  ('go-str-range', 'utf-8'),
+  ('go-str-builder', 'strings'),
+  ('go-str-builder', 'builder'),
+  ('go-str-builder', 'performance'),
+  ('go-str-strconv', 'strconv'),
+  ('go-str-strconv', 'parsing'),
+  ('go-str-strconv', 'conversion'),
+  ('go-str-ops', 'strings'),
+  ('go-str-ops', 'split'),
+  ('go-str-ops', 'join'),
+  ('go-str-ops', 'fields'),
+  ('go-pkg-visibility', 'packages'),
+  ('go-pkg-visibility', 'visibility'),
+  ('go-pkg-visibility', 'encapsulation'),
+  ('go-pkg-visibility', 'exports'),
+  ('go-pkg-imports', 'imports'),
+  ('go-pkg-imports', 'aliases'),
+  ('go-pkg-imports', 'blank-import'),
+  ('go-pkg-imports', 'packages'),
+  ('go-pkg-init', 'init'),
+  ('go-pkg-init', 'initialization'),
+  ('go-pkg-init', 'packages'),
+  ('go-pkg-init', 'order'),
+  ('go-pkg-modules', 'modules'),
+  ('go-pkg-modules', 'go.mod'),
+  ('go-pkg-modules', 'versioning'),
+  ('go-pkg-modules', 'imports'),
+  ('go-pkg-layout', 'internal'),
+  ('go-pkg-layout', 'layout'),
+  ('go-pkg-layout', 'packages'),
+  ('go-pkg-layout', 'encapsulation'),
+  ('go-pkg-tooling', 'tooling'),
+  ('go-pkg-tooling', 'go-test'),
+  ('go-pkg-tooling', 'go-vet'),
+  ('go-pkg-tooling', 'gofmt'),
+  ('go-err-wrapping', 'errors'),
+  ('go-err-wrapping', 'wrapping'),
+  ('go-err-wrapping', 'errors.is'),
+  ('go-err-wrapping', 'errors.as'),
+  ('go-err-wrapping', 'fmt.errorf'),
+  ('go-err-sentinel-typed', 'errors'),
+  ('go-err-sentinel-typed', 'errors.is'),
+  ('go-err-sentinel-typed', 'errors.as'),
+  ('go-err-sentinel-typed', 'sentinel'),
+  ('go-err-sentinel-typed', 'typed-errors'),
+  ('go-err-sentinel-typed', 'unwrap'),
+  ('go-err-sentinel-typed', 'api-design'),
+  ('go-err-panic-recover', 'error-handling'),
+  ('go-err-panic-recover', 'panic'),
+  ('go-err-panic-recover', 'recover'),
+  ('go-err-panic-recover', 'defer'),
+  ('go-err-panic-recover', 'runtime'),
+  ('go-err-custom', 'errors'),
+  ('go-err-custom', 'unwrap'),
+  ('go-err-custom', 'errors.is'),
+  ('go-err-custom', 'errors.as'),
+  ('go-err-custom', 'errors.join'),
+  ('go-err-custom', 'wrapping'),
+  ('go-data-slice-internals', 'slices'),
+  ('go-data-slice-internals', 'append'),
+  ('go-data-slice-internals', 'memory'),
+  ('go-data-slice-internals', 'runtime'),
+  ('go-data-slice-internals', 'aliasing'),
+  ('go-data-slice-aliasing', 'slices'),
+  ('go-data-slice-aliasing', 'append'),
+  ('go-data-slice-aliasing', 'memory'),
+  ('go-data-slice-aliasing', 'aliasing'),
+  ('go-data-slice-aliasing', 'copy'),
+  ('go-data-maps', 'maps'),
+  ('go-data-maps', 'runtime'),
+  ('go-data-maps', 'iteration'),
+  ('go-data-maps', 'hashing'),
+  ('go-data-maps', 'addressability'),
+  ('go-data-strings-runes', 'strings'),
+  ('go-data-strings-runes', 'runes'),
+  ('go-data-strings-runes', 'utf8'),
+  ('go-data-strings-runes', 'bytes'),
+  ('go-data-strings-runes', 'encoding'),
+  ('go-iface-internals', 'interfaces'),
+  ('go-iface-internals', 'runtime'),
+  ('go-iface-internals', 'itab'),
+  ('go-iface-internals', 'dynamic-dispatch'),
+  ('go-iface-internals', 'memory-layout'),
+  ('go-iface-nil', 'interfaces'),
+  ('go-iface-nil', 'nil'),
+  ('go-iface-nil', 'error-handling'),
+  ('go-iface-nil', 'type-system'),
+  ('go-iface-nil', 'runtime'),
+  ('go-iface-method-sets', 'interfaces'),
+  ('go-iface-method-sets', 'method-sets'),
+  ('go-iface-method-sets', 'receivers'),
+  ('go-iface-method-sets', 'addressability'),
+  ('go-iface-method-sets', 'gotchas'),
+  ('go-iface-embedding', 'interfaces'),
+  ('go-iface-embedding', 'embedding'),
+  ('go-iface-embedding', 'composition'),
+  ('go-iface-embedding', 'method-sets'),
+  ('go-iface-embedding', 'decorator'),
+  ('go-iface-assertions', 'interfaces'),
+  ('go-iface-assertions', 'type-assertions'),
+  ('go-iface-assertions', 'type-switch'),
+  ('go-iface-assertions', 'runtime'),
+  ('go-iface-assertions', 'comparability'),
+  ('go-gen-type-params', 'generics'),
+  ('go-gen-type-params', 'type-parameters'),
+  ('go-gen-type-params', 'instantiation'),
+  ('go-gen-type-params', 'gcshape'),
+  ('go-gen-type-params', 'monomorphization'),
+  ('go-gen-constraints', 'generics'),
+  ('go-gen-constraints', 'constraints'),
+  ('go-gen-constraints', 'comparable'),
+  ('go-gen-constraints', 'cmp.ordered'),
+  ('go-gen-constraints', 'tilde'),
+  ('go-gen-constraints', 'type-sets'),
+  ('go-gen-inference', 'generics'),
+  ('go-gen-inference', 'type-inference'),
+  ('go-gen-inference', 'type-parameters'),
+  ('go-gen-inference', 'go1.26'),
+  ('go-gen-pitfalls', 'generics'),
+  ('go-gen-pitfalls', 'type-parameters'),
+  ('go-gen-pitfalls', 'interfaces'),
+  ('go-gen-pitfalls', 'monomorphization'),
+  ('go-gen-pitfalls', 'api-design'),
   ('go-conc-scheduler', 'concurrency'),
   ('go-conc-scheduler', 'runtime'),
   ('go-conc-scheduler', 'scheduler'),
@@ -1566,94 +2002,6 @@ insert into public.problem_tags (problem_id, tag_id) values
   ('go-mem-pool-alloc', 'gc'),
   ('go-mem-pool-alloc', 'performance'),
   ('go-mem-pool-alloc', 'false-sharing'),
-  ('go-iface-internals', 'interfaces'),
-  ('go-iface-internals', 'runtime'),
-  ('go-iface-internals', 'itab'),
-  ('go-iface-internals', 'dynamic-dispatch'),
-  ('go-iface-internals', 'memory-layout'),
-  ('go-iface-nil', 'interfaces'),
-  ('go-iface-nil', 'nil'),
-  ('go-iface-nil', 'error-handling'),
-  ('go-iface-nil', 'type-system'),
-  ('go-iface-nil', 'runtime'),
-  ('go-iface-method-sets', 'interfaces'),
-  ('go-iface-method-sets', 'method-sets'),
-  ('go-iface-method-sets', 'receivers'),
-  ('go-iface-method-sets', 'addressability'),
-  ('go-iface-method-sets', 'gotchas'),
-  ('go-iface-embedding', 'interfaces'),
-  ('go-iface-embedding', 'embedding'),
-  ('go-iface-embedding', 'composition'),
-  ('go-iface-embedding', 'method-sets'),
-  ('go-iface-embedding', 'decorator'),
-  ('go-iface-assertions', 'interfaces'),
-  ('go-iface-assertions', 'type-assertions'),
-  ('go-iface-assertions', 'type-switch'),
-  ('go-iface-assertions', 'runtime'),
-  ('go-iface-assertions', 'comparability'),
-  ('go-gen-type-params', 'generics'),
-  ('go-gen-type-params', 'type-parameters'),
-  ('go-gen-type-params', 'instantiation'),
-  ('go-gen-type-params', 'gcshape'),
-  ('go-gen-type-params', 'monomorphization'),
-  ('go-gen-constraints', 'generics'),
-  ('go-gen-constraints', 'constraints'),
-  ('go-gen-constraints', 'comparable'),
-  ('go-gen-constraints', 'cmp.ordered'),
-  ('go-gen-constraints', 'tilde'),
-  ('go-gen-constraints', 'type-sets'),
-  ('go-gen-inference', 'generics'),
-  ('go-gen-inference', 'type-inference'),
-  ('go-gen-inference', 'type-parameters'),
-  ('go-gen-inference', 'go1.26'),
-  ('go-gen-pitfalls', 'generics'),
-  ('go-gen-pitfalls', 'type-parameters'),
-  ('go-gen-pitfalls', 'interfaces'),
-  ('go-gen-pitfalls', 'monomorphization'),
-  ('go-gen-pitfalls', 'api-design'),
-  ('go-err-wrapping', 'errors'),
-  ('go-err-wrapping', 'wrapping'),
-  ('go-err-wrapping', 'errors.is'),
-  ('go-err-wrapping', 'errors.as'),
-  ('go-err-wrapping', 'fmt.errorf'),
-  ('go-err-sentinel-typed', 'errors'),
-  ('go-err-sentinel-typed', 'errors.is'),
-  ('go-err-sentinel-typed', 'errors.as'),
-  ('go-err-sentinel-typed', 'sentinel'),
-  ('go-err-sentinel-typed', 'typed-errors'),
-  ('go-err-sentinel-typed', 'unwrap'),
-  ('go-err-sentinel-typed', 'api-design'),
-  ('go-err-panic-recover', 'error-handling'),
-  ('go-err-panic-recover', 'panic'),
-  ('go-err-panic-recover', 'recover'),
-  ('go-err-panic-recover', 'defer'),
-  ('go-err-panic-recover', 'runtime'),
-  ('go-err-custom', 'errors'),
-  ('go-err-custom', 'unwrap'),
-  ('go-err-custom', 'errors.is'),
-  ('go-err-custom', 'errors.as'),
-  ('go-err-custom', 'errors.join'),
-  ('go-err-custom', 'wrapping'),
-  ('go-data-slice-internals', 'slices'),
-  ('go-data-slice-internals', 'append'),
-  ('go-data-slice-internals', 'memory'),
-  ('go-data-slice-internals', 'runtime'),
-  ('go-data-slice-internals', 'aliasing'),
-  ('go-data-slice-aliasing', 'slices'),
-  ('go-data-slice-aliasing', 'append'),
-  ('go-data-slice-aliasing', 'memory'),
-  ('go-data-slice-aliasing', 'aliasing'),
-  ('go-data-slice-aliasing', 'copy'),
-  ('go-data-maps', 'maps'),
-  ('go-data-maps', 'runtime'),
-  ('go-data-maps', 'iteration'),
-  ('go-data-maps', 'hashing'),
-  ('go-data-maps', 'addressability'),
-  ('go-data-strings-runes', 'strings'),
-  ('go-data-strings-runes', 'runes'),
-  ('go-data-strings-runes', 'utf8'),
-  ('go-data-strings-runes', 'bytes'),
-  ('go-data-strings-runes', 'encoding'),
   ('go-std-io', 'io'),
   ('go-std-io', 'interfaces'),
   ('go-std-io', 'streaming'),
@@ -31159,6 +31507,1696 @@ func longestRepeatedSubstring(str string) string {
 	return longest
 }
 ', true, 0),
+  ('go-basics-program', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	greeting := strings.ToUpper("hello")
+	fmt.Println(greeting, "go")
+}
+', true, 0),
+  ('go-basics-vars', 'go', 'main.go', 'package main
+
+import "fmt"
+
+var pi = 3.14
+
+func main() {
+	var count int
+	var name string
+	var ok bool
+
+	sum := count + 5
+
+	fmt.Println(count, name == "", ok)
+	fmt.Println(sum, pi)
+}
+', true, 0),
+  ('go-basics-const-iota', 'go', 'main.go', 'package main
+
+import "fmt"
+
+type Weekday int
+
+const (
+	Sunday Weekday = iota
+	Monday
+	Tuesday
+)
+
+const (
+	_  = iota
+	KB = 1 << (10 * iota)
+	MB
+)
+
+func main() {
+	fmt.Println(Sunday, Monday, Tuesday)
+	fmt.Println(KB, MB)
+}
+', true, 0),
+  ('go-basics-control-flow', 'go', 'main.go', 'package main
+
+import "fmt"
+
+func classify(n int) string {
+	if r := n % 2; r == 0 {
+		return "even"
+	}
+	return "odd"
+}
+
+func main() {
+	for i := 1; i <= 3; i++ {
+		fmt.Println(i, classify(i))
+	}
+
+	switch x := 2; x {
+	case 1:
+		fmt.Println("one")
+	case 2:
+		fmt.Println("two")
+	default:
+		fmt.Println("many")
+	}
+}
+', true, 0),
+  ('go-basics-conversions', 'go', 'main.go', 'package main
+
+import "fmt"
+
+func main() {
+	var f float64 = 9.7
+	i := int(f)
+
+	s := "héllo"
+	bs := []byte(s)
+	rs := []rune(s)
+
+	fmt.Println(i)
+	fmt.Println(len(bs), len(rs))
+	fmt.Println(string(rs[1]))
+	fmt.Println(string(rune(65)))
+}
+', true, 0),
+  ('go-basics-fmt', 'go', 'main.go', 'package main
+
+import "fmt"
+
+type Point struct {
+	X, Y int
+}
+
+func main() {
+	p := Point{1, 2}
+	s := fmt.Sprintf("%d-%s", 42, "go")
+
+	fmt.Printf("%v\n", p)
+	fmt.Printf("%+v\n", p)
+	fmt.Printf("%T %q\n", p, "hi")
+	fmt.Println(s)
+}
+', true, 0),
+  ('go-types-basic', 'go', 'main.go', 'package main
+
+import "fmt"
+
+func main() {
+	var i8 int8 = 127
+	var u uint8 = 255
+	var f float64 = 1.5
+	var ok bool = true
+
+	b := byte(''A'')
+	r := rune(''世'')
+	fmt.Println(i8, u, f, ok)
+	fmt.Println(b, r)
+
+	s := "héllo"
+	fmt.Println(len(s))
+	for i, c := range s {
+		fmt.Printf("%d:%c ", i, c)
+	}
+	fmt.Println()
+}
+', true, 0),
+  ('go-types-defined', 'go', 'main.go', 'package main
+
+import "fmt"
+
+type Celsius float64
+type Fahrenheit float64
+
+func (c Celsius) ToF() Fahrenheit {
+	return Fahrenheit(c*9/5 + 32)
+}
+
+func main() {
+	var c Celsius = 100
+	f := c.ToF()
+	fmt.Println(c, f)
+
+	var plain float64 = 21
+	c2 := Celsius(plain)
+	fmt.Println(c2)
+}
+', true, 0),
+  ('go-types-value-semantics', 'go', 'main.go', 'package main
+
+import "fmt"
+
+type Point struct{ X, Y int }
+
+func bump(p Point) {
+	p.X++
+}
+
+func bumpPtr(p *Point) {
+	p.X++
+}
+
+func main() {
+	a := Point{X: 1, Y: 2}
+	b := a
+	b.X = 99
+	fmt.Println(a.X, b.X)
+
+	bump(a)
+	fmt.Println(a.X)
+
+	bumpPtr(&a)
+	fmt.Println(a.X)
+}
+', true, 0),
+  ('go-types-comparability', 'go', 'main.go', 'package main
+
+import "fmt"
+
+type Key struct {
+	ID   int
+	Name string
+}
+
+func main() {
+	m := map[Key]int{}
+	k1 := Key{ID: 1, Name: "a"}
+	k2 := Key{ID: 1, Name: "a"}
+	m[k1] = 10
+	fmt.Println(m[k2])
+	fmt.Println(k1 == k2)
+
+	x := [2]int{1, 2}
+	y := [2]int{1, 2}
+	fmt.Println(x == y)
+
+	var s []int
+	fmt.Println(s == nil)
+}
+', true, 0),
+  ('go-types-conv-vs-assert', 'go', 'main.go', 'package main
+
+import "fmt"
+
+func main() {
+	var i int = 65
+	f := float64(i)
+	s := string(rune(i))
+	fmt.Println(f, s)
+
+	var any interface{} = "hello"
+	if str, ok := any.(string); ok {
+		fmt.Println("string:", str)
+	}
+
+	if n, ok := any.(int); ok {
+		fmt.Println("int:", n)
+	} else {
+		fmt.Println("not an int")
+	}
+}
+', true, 0),
+  ('go-types-composite-literals', 'go', 'main.go', 'package main
+
+import "fmt"
+
+type User struct {
+	Name string
+	Age  int
+	Tags []string
+}
+
+func main() {
+	u := User{Name: "Ada"}
+	fmt.Println(u.Name, u.Age, u.Tags == nil)
+
+	nums := []int{1, 2, 3}
+	grid := [2][2]int{{1, 2}, {3, 4}}
+	ages := map[string]int{"a": 1}
+	fmt.Println(nums, grid, ages["a"])
+
+	var zero User
+	fmt.Printf("%+v\n", zero)
+}
+', true, 0),
+  ('go-coll-arrays', 'go', 'main.go', 'package main
+
+import "fmt"
+
+func bump(a [3]int) {
+	a[0] = 99
+}
+
+func main() {
+	x := [3]int{1, 2, 3}
+	y := x
+	y[0] = 42
+
+	bump(x)
+
+	fmt.Println(x)
+	fmt.Println(y)
+	fmt.Println(len(x))
+}
+', true, 0),
+  ('go-coll-slices', 'go', 'main.go', 'package main
+
+import "fmt"
+
+func main() {
+	s := make([]int, 0, 2)
+	fmt.Println(len(s), cap(s))
+
+	s = append(s, 1, 2)
+	fmt.Println(len(s), cap(s))
+
+	s = append(s, 3)
+	fmt.Println(len(s), cap(s))
+	fmt.Println(s)
+}
+', true, 0),
+  ('go-coll-slice-aliasing', 'go', 'main.go', 'package main
+
+import "fmt"
+
+func main() {
+	a := []int{1, 2, 3, 4}
+	b := a[1:3]
+	b[0] = 99
+	fmt.Println(a)
+
+	c := make([]int, len(b))
+	copy(c, b)
+	c[0] = 0
+	fmt.Println(b, c)
+
+	d := a[0:2:2]
+	d = append(d, 7)
+	fmt.Println(a, cap(d))
+}
+', true, 0),
+  ('go-coll-maps', 'go', 'main.go', 'package main
+
+import "fmt"
+
+func main() {
+	m := map[string]int{"a": 1}
+
+	v, ok := m["a"]
+	fmt.Println(v, ok)
+
+	z, ok := m["x"]
+	fmt.Println(z, ok)
+
+	m["b"] = 2
+	delete(m, "a")
+	fmt.Println(len(m))
+
+	var n map[string]int
+	fmt.Println(n["missing"])
+}
+', true, 0),
+  ('go-coll-range', 'go', 'main.go', 'package main
+
+import "fmt"
+
+func main() {
+	for i, v := range []string{"a", "b"} {
+		fmt.Println(i, v)
+	}
+
+	for i, r := range "hé" {
+		fmt.Println(i, r)
+	}
+
+	total := 0
+	for i := range 3 {
+		total += i
+	}
+	fmt.Println(total)
+}
+', true, 0),
+  ('go-coll-grouping', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"sort"
+)
+
+func main() {
+	words := []string{"ant", "bee", "art", "bug"}
+	groups := map[byte][]string{}
+
+	for _, w := range words {
+		k := w[0]
+		groups[k] = append(groups[k], w)
+	}
+
+	keys := []byte{}
+	for k := range groups {
+		keys = append(keys, k)
+	}
+	sort.Slice(keys, func(i, j int) bool { return keys[i] < keys[j] })
+
+	for _, k := range keys {
+		fmt.Printf("%c: %v\n", k, groups[k])
+	}
+}
+', true, 0),
+  ('go-fn-multi-return', 'go', 'main.go', 'package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+func div(a, b int) (int, error) {
+	if b == 0 {
+		return 0, errors.New("divide by zero")
+	}
+	return a / b, nil
+}
+
+func main() {
+	q, err := div(10, 2)
+	if err != nil {
+		fmt.Println("error:", err)
+		return
+	}
+	fmt.Println("quotient:", q)
+
+	_, err = div(1, 0)
+	fmt.Println("second:", err)
+}
+', true, 0),
+  ('go-fn-named-returns', 'go', 'main.go', 'package main
+
+import "fmt"
+
+func split(sum int) (x, y int) {
+	x = sum * 4 / 9
+	y = sum - x
+	return
+}
+
+func inc() (n int) {
+	defer func() { n++ }()
+	return 41
+}
+
+func main() {
+	a, b := split(17)
+	fmt.Println(a, b)
+	fmt.Println("inc:", inc())
+}
+', true, 0),
+  ('go-fn-variadic', 'go', 'main.go', 'package main
+
+import "fmt"
+
+func sum(nums ...int) int {
+	total := 0
+	for _, n := range nums {
+		total += n
+	}
+	return total
+}
+
+func main() {
+	fmt.Println(sum(1, 2, 3))
+	fmt.Println(sum())
+
+	xs := []int{4, 5, 6}
+	fmt.Println(sum(xs...))
+}
+', true, 0),
+  ('go-fn-first-class', 'go', 'main.go', 'package main
+
+import "fmt"
+
+func apply(xs []int, f func(int) int) []int {
+	out := make([]int, len(xs))
+	for i, x := range xs {
+		out[i] = f(x)
+	}
+	return out
+}
+
+func main() {
+	double := func(n int) int { return n * 2 }
+	fmt.Println(apply([]int{1, 2, 3}, double))
+
+	fmt.Println(apply([]int{1, 2, 3}, func(n int) int {
+		return n * n
+	}))
+}
+', true, 0),
+  ('go-fn-closures', 'go', 'main.go', 'package main
+
+import "fmt"
+
+func counter() func() int {
+	n := 0
+	return func() int {
+		n++
+		return n
+	}
+}
+
+func main() {
+	c := counter()
+	fmt.Println(c(), c(), c())
+
+	d := counter()
+	fmt.Println(d())
+}
+', true, 0),
+  ('go-fn-defer', 'go', 'main.go', 'package main
+
+import "fmt"
+
+func main() {
+	i := 0
+	defer fmt.Println("deferred i:", i)
+	i = 99
+
+	for n := 1; n <= 3; n++ {
+		defer fmt.Println("cleanup", n)
+	}
+
+	fmt.Println("live i:", i)
+}
+', true, 0),
+  ('go-struct-literals', 'go', 'main.go', 'package main
+
+import "fmt"
+
+type Point struct {
+	X, Y int
+	Name string
+}
+
+func main() {
+	var zero Point
+	keyed := Point{X: 1, Name: "a"}
+	positional := Point{2, 3, "b"}
+
+	fmt.Println(zero)
+	fmt.Println(keyed)
+	fmt.Printf("%+v\n", positional)
+}
+', true, 0),
+  ('go-struct-methods', 'go', 'main.go', 'package main
+
+import "fmt"
+
+type Celsius float64
+
+func (c Celsius) Fahrenheit() float64 {
+	return float64(c)*9/5 + 32
+}
+
+type Rect struct{ W, H int }
+
+func (r Rect) Area() int {
+	return r.W * r.H
+}
+
+func main() {
+	c := Celsius(100)
+	fmt.Println(c.Fahrenheit())
+
+	r := Rect{W: 3, H: 4}
+	fmt.Println(r.Area())
+}
+', true, 0),
+  ('go-struct-receivers', 'go', 'main.go', 'package main
+
+import "fmt"
+
+type Counter struct{ n int }
+
+func (c Counter) IncCopy() {
+	c.n++
+}
+
+func (c *Counter) Inc() {
+	c.n++
+}
+
+func main() {
+	c := Counter{}
+	c.IncCopy()
+	fmt.Println(c.n)
+
+	c.Inc()
+	c.Inc()
+	fmt.Println(c.n)
+}
+', true, 0),
+  ('go-struct-embedding', 'go', 'main.go', 'package main
+
+import "fmt"
+
+type Engine struct{ HP int }
+
+func (e Engine) Start() string {
+	return fmt.Sprintf("vroom %d", e.HP)
+}
+
+type Car struct {
+	Engine
+	Name string
+}
+
+func main() {
+	c := Car{Engine: Engine{HP: 200}, Name: "GT"}
+
+	fmt.Println(c.HP)
+	fmt.Println(c.Start())
+	fmt.Println(c.Engine.HP)
+}
+', true, 0),
+  ('go-struct-tags', 'go', 'main.go', 'package main
+
+import (
+	"encoding/json"
+	"fmt"
+)
+
+type User struct {
+	ID    int    `json:"id"`
+	Name  string `json:"name,omitempty"`
+	Token string `json:"-"`
+}
+
+func main() {
+	u := User{ID: 7, Token: "secret"}
+	b, _ := json.Marshal(u)
+	fmt.Println(string(b))
+}
+', true, 0),
+  ('go-struct-method-values', 'go', 'main.go', 'package main
+
+import "fmt"
+
+type Adder struct{ base int }
+
+func (a Adder) Add(x int) int {
+	return a.base + x
+}
+
+func main() {
+	a := Adder{base: 10}
+
+	value := a.Add
+	fmt.Println(value(5))
+
+	expr := Adder.Add
+	fmt.Println(expr(a, 5))
+
+	a.base = 100
+	fmt.Println(value(5))
+}
+', true, 0),
+  ('go-ib-satisfaction', 'go', 'main.go', 'package main
+
+import "fmt"
+
+type Speaker interface {
+	Speak() string
+}
+
+type Dog struct{ name string }
+
+func (d Dog) Speak() string {
+	return d.name + " says woof"
+}
+
+func announce(s Speaker) {
+	fmt.Println(s.Speak())
+}
+
+func main() {
+	d := Dog{name: "Rex"}
+	announce(d)
+}
+', true, 0),
+  ('go-ib-any', 'go', 'main.go', 'package main
+
+import "fmt"
+
+func describe(v any) {
+	fmt.Printf("%v is a %T\n", v, v)
+}
+
+func main() {
+	var box any
+	box = 42
+	describe(box)
+	box = "hi"
+	describe(box)
+	box = []int{1, 2}
+	describe(box)
+}
+', true, 0),
+  ('go-ib-assertion', 'go', 'main.go', 'package main
+
+import "fmt"
+
+func main() {
+	var x any = "hello"
+
+	if s, ok := x.(string); ok {
+		fmt.Println("string of len", len(s))
+	}
+
+	n, ok := x.(int)
+	fmt.Println("int?", n, ok)
+
+	s := x.(string)
+	fmt.Println("forced:", s)
+}
+', true, 0),
+  ('go-ib-type-switch', 'go', 'main.go', 'package main
+
+import "fmt"
+
+func classify(x any) string {
+	switch v := x.(type) {
+	case int:
+		return fmt.Sprintf("int doubled: %d", v*2)
+	case string:
+		return fmt.Sprintf("string len: %d", len(v))
+	case bool:
+		return fmt.Sprintf("bool: %t", v)
+	default:
+		return fmt.Sprintf("unknown: %T", v)
+	}
+}
+
+func main() {
+	fmt.Println(classify(21))
+	fmt.Println(classify("go"))
+	fmt.Println(classify(3.14))
+}
+', true, 0),
+  ('go-ib-nil-interface', 'go', 'main.go', 'package main
+
+import "fmt"
+
+type myErr struct{}
+
+func (e *myErr) Error() string {
+	return "boom"
+}
+
+func bad() error {
+	var p *myErr = nil
+	return p
+}
+
+func main() {
+	err := bad()
+	fmt.Println(err == nil)
+	fmt.Printf("%T\n", err)
+}
+', true, 0),
+  ('go-ib-stringer-error', 'go', 'main.go', 'package main
+
+import "fmt"
+
+type Point struct{ x, y int }
+
+func (p Point) String() string {
+	return fmt.Sprintf("(%d,%d)", p.x, p.y)
+}
+
+type NotFound struct{ id int }
+
+func (e NotFound) Error() string {
+	return fmt.Sprintf("id %d not found", e.id)
+}
+
+func main() {
+	p := Point{1, 2}
+	fmt.Println(p)
+
+	var err error = NotFound{id: 7}
+	fmt.Println(err)
+}
+', true, 0),
+  ('go-str-immutable', 'go', 'main.go', 'package main
+
+import "fmt"
+
+func main() {
+	s := "hello"
+	fmt.Println(s[0], len(s))
+
+	b := []byte(s)
+	b[0] = ''H''
+	s2 := string(b)
+
+	fmt.Println(s)
+	fmt.Println(s2)
+}
+', true, 0),
+  ('go-str-runes-bytes', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"unicode/utf8"
+)
+
+func main() {
+	s := "héllo"
+
+	fmt.Println(len(s))
+	fmt.Println(utf8.RuneCountInString(s))
+
+	r := []rune(s)
+	fmt.Println(len(r))
+	fmt.Printf("%c %d\n", r[1], r[1])
+}
+', true, 0),
+  ('go-str-range', 'go', 'main.go', 'package main
+
+import "fmt"
+
+func main() {
+	s := "a世b"
+
+	for i, r := range s {
+		fmt.Printf("%d:%c ", i, r)
+	}
+	fmt.Println()
+
+	fmt.Println(s[1])
+}
+', true, 0),
+  ('go-str-builder', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	var b strings.Builder
+	for i := 0; i < 3; i++ {
+		fmt.Fprintf(&b, "n%d ", i)
+	}
+	b.WriteString("done")
+
+	fmt.Println(b.String())
+	fmt.Println(b.Len())
+}
+', true, 0),
+  ('go-str-strconv', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"strconv"
+)
+
+func main() {
+	n, err := strconv.Atoi("42")
+	fmt.Println(n, err)
+
+	_, err = strconv.Atoi("4x")
+	fmt.Println(err != nil)
+
+	s := strconv.Itoa(n * 2)
+	f, _ := strconv.ParseFloat("3.5", 64)
+	fmt.Println(s, f)
+}
+', true, 0),
+  ('go-str-ops', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func main() {
+	parts := strings.Split("a,b,c", ",")
+	fmt.Println(parts, len(parts))
+
+	fmt.Println(strings.Join(parts, "-"))
+	fmt.Println(strings.Fields("  x   y "))
+	fmt.Printf("%q\n", strings.TrimSpace("  hi \n"))
+	fmt.Println(strings.Contains("golang", "lang"))
+}
+', true, 0),
+  ('go-pkg-visibility', 'go', 'main.go', 'package main
+
+import "fmt"
+
+type account struct {
+	Owner   string
+	balance int
+}
+
+func (a *account) Deposit(n int) {
+	a.balance += n
+}
+
+func (a *account) Balance() int {
+	return a.balance
+}
+
+func main() {
+	a := &account{Owner: "Ada"}
+	a.Deposit(100)
+	fmt.Println(a.Owner, a.Balance())
+}
+', true, 0),
+  ('go-pkg-imports', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	str "strings"
+)
+
+func main() {
+	s := "go,is,fun"
+	parts := str.Split(s, ",")
+	fmt.Println(len(parts))
+	fmt.Println(str.ToUpper(parts[0]))
+}
+', true, 0),
+  ('go-pkg-init', 'go', 'main.go', 'package main
+
+import "fmt"
+
+var a = compute()
+
+func compute() int {
+	fmt.Println("var")
+	return 1
+}
+
+func init() {
+	fmt.Println("init", a)
+}
+
+func main() {
+	fmt.Println("main")
+}
+', true, 0),
+  ('go-pkg-modules', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"runtime"
+)
+
+func main() {
+	modulePath := "example.com/tools"
+	pkg := modulePath + "/text"
+	fmt.Println("import:", pkg)
+	fmt.Println("go:", runtime.Version()[:4])
+}
+', true, 0),
+  ('go-pkg-layout', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"path"
+)
+
+func main() {
+	imp := "example.com/app/internal/db"
+	parent := path.Dir(path.Dir(imp))
+	fmt.Println("parent:", parent)
+	fmt.Println("allowed:", parent == "example.com/app")
+}
+', true, 0),
+  ('go-pkg-tooling', 'go', 'main.go', 'package main
+
+import "fmt"
+
+func Sum(xs []int) int {
+	total := 0
+	for _, x := range xs {
+		total += x
+	}
+	return total
+}
+
+func main() {
+	fmt.Println(Sum([]int{1, 2, 3}))
+}
+', true, 0),
+  ('go-err-wrapping', 'go', 'main.go', 'package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+var ErrNotFound = errors.New("not found")
+
+type QueryError struct {
+	Query string
+	Code  int
+}
+
+func (e *QueryError) Error() string {
+	return fmt.Sprintf("query %q failed (code %d)", e.Query, e.Code)
+}
+
+func lookup(id string) error {
+	base := &QueryError{Query: id, Code: 42}
+	return fmt.Errorf("lookup %s: %w: %w", id, base, ErrNotFound)
+}
+
+func main() {
+	err := lookup("user-7")
+	fmt.Println(err)
+
+	fmt.Println("Is ErrNotFound:", errors.Is(err, ErrNotFound))
+
+	var qe *QueryError
+	if errors.As(err, &qe) {
+		fmt.Printf("extracted: query=%s code=%d\n", qe.Query, qe.Code)
+	}
+
+	wrapped := fmt.Errorf("handler: %w", err)
+	fmt.Println("still matches:", errors.Is(wrapped, ErrNotFound))
+}
+', true, 0),
+  ('go-err-sentinel-typed', 'go', 'main.go', 'package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+// ErrNotFound is an exported sentinel: part of the package''s API contract.
+var ErrNotFound = errors.New("not found")
+
+// QueryError is a typed error carrying structured context.
+type QueryError struct {
+	Query string
+	Code  int
+	Err   error
+}
+
+func (e *QueryError) Error() string {
+	return fmt.Sprintf("query %q failed (code %d): %v", e.Query, e.Code, e.Err)
+}
+
+// Unwrap exposes the cause so errors.Is/As can traverse the chain.
+func (e *QueryError) Unwrap() error { return e.Err }
+
+// Is customizes matching: two QueryErrors are equivalent when their codes
+// match, independent of the wrapped cause.
+func (e *QueryError) Is(target error) bool {
+	t, ok := target.(*QueryError)
+	if !ok {
+		return false
+	}
+	return e.Code == t.Code
+}
+
+func lookup(q string) error {
+	return &QueryError{Query: q, Code: 42, Err: ErrNotFound}
+}
+
+func main() {
+	err := lookup("user-7")
+	fmt.Println("lookup:", err)
+
+	// Traverses the Unwrap chain and reaches the sentinel.
+	fmt.Println("Is ErrNotFound:", errors.Is(err, ErrNotFound))
+
+	var qe *QueryError
+	if errors.As(err, &qe) {
+		fmt.Printf("extracted: query=%s code=%d\n", qe.Query, qe.Code)
+	}
+
+	// Custom Is matches on Code even though the cause differs.
+	probe := &QueryError{Code: 42, Err: errors.New("other")}
+	fmt.Println("still matches:", errors.Is(err, probe))
+}
+', true, 0),
+  ('go-err-panic-recover', 'go', 'main.go', 'package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+// safeDivide converts a panic into a named-return error, mutated inside defer.
+func safeDivide(a, b int) (result int, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("recovered: %v", r)
+		}
+	}()
+	result = a / b // panics when b == 0
+	return result, nil
+}
+
+// deferArgTiming shows args are captured at defer-time, not at call-time.
+func deferArgTiming() {
+	i := 10
+	defer fmt.Println("deferred arg captured:", i) // prints 10
+	i = 20
+	fmt.Println("final i:", i) // prints 20
+}
+
+// rethrow recovers, inspects, then re-panics values it will not handle.
+func rethrow() (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			if e, ok := r.(error); ok && errors.Is(e, errSentinel) {
+				err = e // handled
+				return
+			}
+			panic(r) // re-panic what we cannot handle
+		}
+	}()
+	panic(errSentinel)
+}
+
+var errSentinel = errors.New("sentinel")
+
+func main() {
+	q, err := safeDivide(4, 0)
+	fmt.Println(q, err)
+	deferArgTiming()
+	fmt.Println(rethrow())
+}
+', true, 0),
+  ('go-err-custom', 'go', 'main.go', 'package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+type NotFoundError struct {
+	Key string
+	err error
+}
+
+func (e *NotFoundError) Error() string {
+	return fmt.Sprintf("key %q not found: %v", e.Key, e.err)
+}
+
+func (e *NotFoundError) Unwrap() error { return e.err }
+
+var ErrBackend = errors.New("backend unavailable")
+
+func lookup(key string) error {
+	return &NotFoundError{Key: key, err: fmt.Errorf("query: %w", ErrBackend)}
+}
+
+func main() {
+	err := lookup("session")
+	joined := errors.Join(err, errors.New("audit failed"))
+
+	var nfe *NotFoundError
+	fmt.Println("As NotFoundError:", errors.As(joined, &nfe))
+	fmt.Println("Is ErrBackend:", errors.Is(joined, ErrBackend))
+	if nfe != nil {
+		fmt.Println("Recovered key:", nfe.Key)
+	}
+}
+', true, 0),
+  ('go-data-slice-internals', 'go', 'main.go', 'package main
+
+import "fmt"
+
+func main() {
+	backing := make([]int, 5, 8)
+	for i := range backing {
+		backing[i] = i
+	}
+
+	// Three-index slice: len=2, cap=3 -> appends within cap mutate backing.
+	view := backing[1:3:4]
+	fmt.Printf("view len=%d cap=%d\n", len(view), cap(view))
+
+	view = append(view, 99)
+	fmt.Println("backing after in-cap append:", backing)
+
+	// This append exceeds cap=3, forcing reallocation; backing is now detached.
+	view = append(view, 100)
+	view[0] = -1
+	fmt.Println("backing after realloc append:", backing)
+	fmt.Println("view detached:", view)
+
+	// Growth: append reallocates only when len==cap.
+	s := []int{}
+	prev := cap(s)
+	growths := 0
+	for i := 0; i < 2048; i++ {
+		s = append(s, i)
+		if cap(s) != prev {
+			prev = cap(s)
+			growths++
+		}
+	}
+	fmt.Println("reallocations for 2048 appends:", growths)
+}
+', true, 0),
+  ('go-data-slice-aliasing', 'go', 'main.go', 'package main
+
+import "fmt"
+
+func main() {
+	base := make([]int, 3, 5)
+	base[0], base[1], base[2] = 1, 2, 3
+
+	// view shares the same backing array as base.
+	view := base[0:2]
+	fmt.Printf("view=%v len=%d cap=%d\n", view, len(view), cap(view))
+
+	// append has spare capacity, so it writes into base[2] in place,
+	// silently clobbering the shared element.
+	view = append(view, 99)
+	fmt.Printf("after append view=%v base=%v\n", view, base)
+
+	// Detach with copy to get an independent backing array.
+	detached := make([]int, len(base))
+	copy(detached, base)
+	detached[0] = -1
+	fmt.Printf("detached=%v base=%v\n", detached, base)
+
+	// A full-slice expression caps capacity so append reallocates.
+	safe := base[0:2:2]
+	safe = append(safe, 7)
+	fmt.Printf("safe=%v base=%v\n", safe, base)
+
+	// nil vs empty: distinct headers, both len 0, both range-safe.
+	var nilSlice []int
+	emptySlice := []int{}
+	fmt.Printf("nil==nil? %v empty==nil? %v\n", nilSlice == nil, emptySlice == nil)
+	fmt.Printf("len nil=%d len empty=%d\n", len(nilSlice), len(emptySlice))
+}
+', true, 0),
+  ('go-data-maps', 'go', 'main.go', 'package main
+
+import "fmt"
+
+type Counter struct {
+	Hits int
+}
+
+func main() {
+	m := map[string]*Counter{
+		"a": {Hits: 1},
+		"b": {Hits: 3},
+	}
+
+	// Values are pointers, so we can mutate through them.
+	// We could NOT take &m["a"] if the value were a struct,
+	// because map elements are not addressable.
+	m["a"].Hits++
+
+	// Deleting during range is well-defined: a key deleted
+	// before it is reached will not be produced by the range.
+	for k, v := range m {
+		if v.Hits > 2 {
+			delete(m, k)
+		}
+	}
+
+	// Reading a missing key (even from a nil map) returns the
+	// zero value and never panics.
+	var nilMap map[string]int
+	fmt.Println("nil read:", nilMap["missing"])
+
+	// Iteration order is randomized per range; sort keys if you
+	// need determinism.
+	total := 0
+	for _, v := range m {
+		total += v.Hits
+	}
+	fmt.Println("total:", total)
+}
+', true, 0),
+  ('go-data-strings-runes', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"unicode/utf8"
+)
+
+func main() {
+	s := "héllo, 世界"
+
+	fmt.Println("len(s) =", len(s))
+	fmt.Println("RuneCountInString =", utf8.RuneCountInString(s))
+
+	fmt.Printf("s[1] = %d (byte, not rune)\n", s[1])
+
+	for i, r := range s {
+		fmt.Printf("byte %d: %c U+%04X width=%d\n", i, r, r, utf8.RuneLen(r))
+	}
+
+	b := []byte(s)
+	b[0] = ''H''
+	fmt.Println("mutated copy:", string(b), "| original:", s)
+
+	rs := []rune(s)
+	fmt.Println("rune count via slice:", len(rs), "| first rune:", string(rs[0]))
+}
+', true, 0),
+  ('go-iface-internals', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"unsafe"
+)
+
+// Speaker is a single-method interface; a non-empty interface value is
+// represented at runtime by a two-word (itab, data) pair.
+type Speaker interface {
+	Speak() string
+}
+
+// Dog has a value receiver, so both Dog and *Dog satisfy Speaker.
+type Dog struct {
+	name string
+}
+
+func (d Dog) Speak() string { return d.name + " says woof" }
+
+// eface mirrors runtime.eface: the empty-interface header is (type, data).
+type eface struct {
+	typ  unsafe.Pointer
+	data unsafe.Pointer
+}
+
+func main() {
+	// A non-empty interface holds an *itab (type + method table).
+	var s Speaker = Dog{name: "Rex"}
+	fmt.Println(s.Speak())
+
+	// any is an empty interface: its header is exactly two machine words.
+	var a any = Dog{name: "Fido"}
+	hdr := (*eface)(unsafe.Pointer(&a))
+	fmt.Println("eface words:", unsafe.Sizeof(a)/unsafe.Sizeof(uintptr(0)))
+	fmt.Println("data non-nil:", hdr.data != nil)
+
+	// A nil concrete pointer stored in an interface makes the interface
+	// non-nil: the type word is set even though the data word is nil.
+	var dp *Dog
+	var s2 Speaker = dpToSpeaker(dp)
+	fmt.Println("interface nil:", s2 == nil)
+}
+
+func dpToSpeaker(d *Dog) Speaker {
+	return d
+}
+
+func (d *Dog) SpeakPtr() string { return "ptr" }
+', true, 0),
+  ('go-iface-nil', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+)
+
+type ValidationError struct {
+	Field string
+}
+
+func (e *ValidationError) Error() string {
+	return "invalid field: " + e.Field
+}
+
+// Buggy: a concrete typed pointer flows out through the error interface.
+// Even when p is nil, the returned value holds (type=*ValidationError, value=nil).
+func validateBuggy(ok bool) error {
+	var p *ValidationError
+	if !ok {
+		p = &ValidationError{Field: "name"}
+	}
+	return p
+}
+
+// Correct: return the interface''s untyped nil on the success path.
+func validateFixed(ok bool) error {
+	if !ok {
+		return &ValidationError{Field: "name"}
+	}
+	return nil
+}
+
+func main() {
+	buggy := validateBuggy(true)
+	fmt.Printf("buggy: value=%v, isNil=%v\n", buggy, buggy == nil)
+
+	fixed := validateFixed(true)
+	fmt.Printf("fixed: value=%v, isNil=%v\n", fixed, fixed == nil)
+
+	var raw *ValidationError
+	var asIface error = raw
+	fmt.Printf("typed-nil vs untyped nil: %v\n", asIface == nil)
+	fmt.Printf("typed-nil vs typed nil:   %v\n", asIface == error(raw))
+}
+', true, 0),
+  ('go-iface-method-sets', 'go', 'main.go', 'package main
+
+import "fmt"
+
+type Counter interface {
+	Inc()
+	Value() int
+}
+
+type tally struct{ n int }
+
+func (t *tally) Inc()       { t.n++ }
+func (t *tally) Value() int { return t.n }
+
+func main() {
+	var c Counter = &tally{}
+	c.Inc()
+	c.Inc()
+	fmt.Println("counter:", c.Value())
+
+	m := map[string]*tally{"a": {}}
+	m["a"].Inc()
+	fmt.Println("map:", m["a"].Value())
+
+	s := []tally{{}}
+	s[0].Inc()
+	fmt.Println("slice:", s[0].Value())
+}
+', true, 0),
+  ('go-iface-embedding', 'go', 'main.go', 'package main
+
+import "fmt"
+
+type Logger struct{ prefix string }
+
+func (l Logger) Log(msg string) string { return l.prefix + ": " + msg }
+
+type Service struct {
+	Logger
+	name string
+}
+
+// Service overrides the promoted Log method.
+func (s Service) Log(msg string) string {
+	return s.Logger.Log("[" + s.name + "] " + msg)
+}
+
+type Handler interface{ Log(msg string) string }
+
+// countingLogger decorates any Handler by embedding the interface.
+type countingLogger struct {
+	Handler
+	count *int
+}
+
+func (c countingLogger) Log(msg string) string {
+	*c.count++
+	return c.Handler.Log(fmt.Sprintf("(#%d) %s", *c.count, msg))
+}
+
+func main() {
+	svc := Service{Logger: Logger{prefix: "svc"}, name: "auth"}
+	fmt.Println(svc.Log("start"))
+
+	n := 0
+	var h Handler = countingLogger{Handler: svc, count: &n}
+	fmt.Println(h.Log("login"))
+	fmt.Println(h.Log("logout"))
+	fmt.Println("calls:", n)
+}
+', true, 0),
+  ('go-iface-assertions', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+	"io"
+	"strings"
+)
+
+type Stringer interface {
+	String() string
+}
+
+type Named struct {
+	Name string
+}
+
+func (n Named) String() string { return n.Name }
+
+func describe(v any) string {
+	switch x := v.(type) {
+	case nil:
+		return "nil interface"
+	case int:
+		return fmt.Sprintf("int=%d", x)
+	case Stringer:
+		return "Stringer=" + x.String()
+	case io.Reader:
+		buf := make([]byte, 4)
+		n, _ := x.Read(buf)
+		return "reader read " + fmt.Sprint(n)
+	default:
+		return fmt.Sprintf("other %T", x)
+	}
+}
+
+func main() {
+	var v any = Named{Name: "go"}
+	if s, ok := v.(Stringer); ok {
+		fmt.Println("asserted:", s.String())
+	}
+
+	if _, ok := v.(int); !ok {
+		fmt.Println("not an int")
+	}
+
+	fmt.Println(describe(42))
+	fmt.Println(describe(Named{Name: "iface"}))
+	fmt.Println(describe(strings.NewReader("data")))
+	fmt.Println(describe(nil))
+
+	var a any = []int{1, 2}
+	var b any = []int{1, 2}
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("recovered:", r)
+		}
+	}()
+	fmt.Println("comparing uncomparable dynamic types")
+	fmt.Println(a == b)
+}
+', true, 0),
+  ('go-gen-type-params', 'go', 'main.go', 'package main
+
+import (
+	"cmp"
+	"fmt"
+)
+
+// Number constrains to the two GCShapes we care about: a pointer-free
+// integer and a floating value. Instantiations that share a GCShape
+// share one generated function body (dictionary-backed).
+type Number interface {
+	~int | ~float64
+}
+
+// Sum is generic over T. At compile time the caller instantiates it,
+// e.g. Sum[int], and the compiler picks a stenciled body per GCShape.
+func Sum[T Number](xs []T) T {
+	var total T
+	for _, x := range xs {
+		total += x
+	}
+	return total
+}
+
+// Max uses cmp.Ordered and returns the type parameter directly, so no
+// boxing occurs on the return value the way an `any` interface would.
+func Max[T cmp.Ordered](xs []T) T {
+	best := xs[0]
+	for _, x := range xs[1:] {
+		if x > best {
+			best = x
+		}
+	}
+	return best
+}
+
+// Pair is a generic type; each distinct instantiation is a distinct type.
+type Pair[A, B any] struct {
+	First  A
+	Second B
+}
+
+func (p Pair[A, B]) Swap() Pair[B, A] {
+	return Pair[B, A]{First: p.Second, Second: p.First}
+}
+
+func main() {
+	ints := []int{3, 1, 4, 1, 5, 9}
+	floats := []float64{2.5, 0.5, 7.0}
+
+	fmt.Println(Sum(ints))            // T inferred as int
+	fmt.Println(Sum[float64](floats)) // explicit instantiation
+
+	fmt.Println(Max(ints))
+	fmt.Println(Max([]string{"go", "rust", "zig"}))
+
+	p := Pair[string, int]{First: "age", Second: 30}
+	fmt.Println(p.Swap())
+}
+', true, 0),
+  ('go-gen-constraints', 'go', 'main.go', 'package main
+
+import (
+	"cmp"
+	"fmt"
+)
+
+type Celsius float64
+type Kelvin float64
+
+type Number interface {
+	~int | ~int64 | ~float64
+}
+
+func Sum[T Number](xs []T) T {
+	var total T
+	for _, x := range xs {
+		total += x
+	}
+	return total
+}
+
+func Max[T cmp.Ordered](xs []T) T {
+	m := xs[0]
+	for _, x := range xs[1:] {
+		if x > m {
+			m = x
+		}
+	}
+	return m
+}
+
+func Dedup[T comparable](xs []T) []T {
+	seen := make(map[T]struct{}, len(xs))
+	out := xs[:0]
+	for _, x := range xs {
+		if _, ok := seen[x]; !ok {
+			seen[x] = struct{}{}
+			out = append(out, x)
+		}
+	}
+	return out
+}
+
+func main() {
+	temps := []Celsius{20.5, 19.0, 21.5}
+	fmt.Printf("sum=%.1f max=%.1f\n", Sum(temps), Max(temps))
+	fmt.Println(Dedup([]Kelvin{300, 300, 301}))
+}
+', true, 0),
+  ('go-gen-inference', 'go', 'main.go', 'package main
+
+import "fmt"
+
+// Map infers T and U from the slice and function arguments.
+func Map[T, U any](in []T, f func(T) U) []U {
+	out := make([]U, len(in))
+	for i, v := range in {
+		out[i] = f(v)
+	}
+	return out
+}
+
+// Parse cannot infer T from context: its only type-param use is the
+// return type, so callers must supply T explicitly.
+func Parse[T any](s string) (T, error) {
+	var zero T
+	return zero, fmt.Errorf("cannot parse %q", s)
+}
+
+func main() {
+	nums := []int{1, 2, 3}
+	// T=int inferred from nums; U=string inferred from the func literal.
+	strs := Map(nums, func(n int) string { return fmt.Sprintf("#%d", n) })
+	fmt.Println(strs)
+
+	// No inference from return position: T must be given explicitly.
+	v, err := Parse[int]("42")
+	fmt.Println(v, err)
+}
+', true, 0),
+  ('go-gen-pitfalls', 'go', 'main.go', 'package main
+
+import (
+	"fmt"
+)
+
+// Box is generic, but methods CANNOT add their own type parameters.
+// A method like func (b Box[T]) MapTo[R any](f func(T) R) R is a compile error.
+type Box[T any] struct {
+	val T
+}
+
+func (b Box[T]) Get() T { return b.val }
+
+// describe shows you cannot type-switch on a type parameter T directly.
+// You must route through an interface value (any) to inspect the dynamic type.
+func describe[T any](v T) string {
+	switch x := any(v).(type) {
+	case int:
+		return fmt.Sprintf("int:%d", x)
+	case string:
+		return fmt.Sprintf("string:%q", x)
+	default:
+		return fmt.Sprintf("other:%v", x)
+	}
+}
+
+// Adder is a plain interface: when all you need is dynamic dispatch,
+// an interface is simpler and avoids per-type code stenciling.
+type Adder interface{ Add(int) int }
+
+func main() {
+	b := Box[string]{val: "hi"}
+	fmt.Println(b.Get())
+	fmt.Println(describe(42))
+	fmt.Println(describe("x"))
+	fmt.Println(describe(3.14))
+}
+', true, 0),
   ('go-conc-scheduler', 'go', 'main.go', 'package main
 
 import (
@@ -31245,7 +33283,8 @@ func main() {
 		sum += v
 	}
 	fmt.Println(sum)
-}', true, 0),
+}
+', true, 0),
   ('go-conc-select', 'go', 'main.go', 'package main
 
 import (
@@ -31717,731 +33756,6 @@ func main() {
 		total += stats[i].n
 	}
 	fmt.Println(total)
-}
-', true, 0),
-  ('go-iface-internals', 'go', 'main.go', 'package main
-
-import (
-	"fmt"
-	"unsafe"
-)
-
-// Speaker is a single-method interface; a non-empty interface value is
-// represented at runtime by a two-word (itab, data) pair.
-type Speaker interface {
-	Speak() string
-}
-
-// Dog has a value receiver, so both Dog and *Dog satisfy Speaker.
-type Dog struct {
-	name string
-}
-
-func (d Dog) Speak() string { return d.name + " says woof" }
-
-// eface mirrors runtime.eface: the empty-interface header is (type, data).
-type eface struct {
-	typ  unsafe.Pointer
-	data unsafe.Pointer
-}
-
-func main() {
-	// A non-empty interface holds an *itab (type + method table).
-	var s Speaker = Dog{name: "Rex"}
-	fmt.Println(s.Speak())
-
-	// any is an empty interface: its header is exactly two machine words.
-	var a any = Dog{name: "Fido"}
-	hdr := (*eface)(unsafe.Pointer(&a))
-	fmt.Println("eface words:", unsafe.Sizeof(a)/unsafe.Sizeof(uintptr(0)))
-	fmt.Println("data non-nil:", hdr.data != nil)
-
-	// A nil concrete pointer stored in an interface makes the interface
-	// non-nil: the type word is set even though the data word is nil.
-	var dp *Dog
-	var s2 Speaker = dpToSpeaker(dp)
-	fmt.Println("interface nil:", s2 == nil)
-}
-
-func dpToSpeaker(d *Dog) Speaker {
-	return d
-}
-
-func (d *Dog) SpeakPtr() string { return "ptr" }
-', true, 0),
-  ('go-iface-nil', 'go', 'main.go', 'package main
-
-import (
-	"fmt"
-)
-
-type ValidationError struct {
-	Field string
-}
-
-func (e *ValidationError) Error() string {
-	return "invalid field: " + e.Field
-}
-
-// Buggy: a concrete typed pointer flows out through the error interface.
-// Even when p is nil, the returned value holds (type=*ValidationError, value=nil).
-func validateBuggy(ok bool) error {
-	var p *ValidationError
-	if !ok {
-		p = &ValidationError{Field: "name"}
-	}
-	return p
-}
-
-// Correct: return the interface''s untyped nil on the success path.
-func validateFixed(ok bool) error {
-	if !ok {
-		return &ValidationError{Field: "name"}
-	}
-	return nil
-}
-
-func main() {
-	buggy := validateBuggy(true)
-	fmt.Printf("buggy: value=%v, isNil=%v\n", buggy, buggy == nil)
-
-	fixed := validateFixed(true)
-	fmt.Printf("fixed: value=%v, isNil=%v\n", fixed, fixed == nil)
-
-	var raw *ValidationError
-	var asIface error = raw
-	fmt.Printf("typed-nil vs untyped nil: %v\n", asIface == nil)
-	fmt.Printf("typed-nil vs typed nil:   %v\n", asIface == error(raw))
-}
-', true, 0),
-  ('go-iface-method-sets', 'go', 'main.go', 'package main
-
-import "fmt"
-
-type Counter interface {
-	Inc()
-	Value() int
-}
-
-type tally struct{ n int }
-
-func (t *tally) Inc()       { t.n++ }
-func (t *tally) Value() int { return t.n }
-
-func main() {
-	var c Counter = &tally{}
-	c.Inc()
-	c.Inc()
-	fmt.Println("counter:", c.Value())
-
-	m := map[string]*tally{"a": {}}
-	m["a"].Inc()
-	fmt.Println("map:", m["a"].Value())
-
-	s := []tally{{}}
-	s[0].Inc()
-	fmt.Println("slice:", s[0].Value())
-}
-', true, 0),
-  ('go-iface-embedding', 'go', 'main.go', 'package main
-
-import "fmt"
-
-type Logger struct{ prefix string }
-
-func (l Logger) Log(msg string) string { return l.prefix + ": " + msg }
-
-type Service struct {
-	Logger
-	name string
-}
-
-// Service overrides the promoted Log method.
-func (s Service) Log(msg string) string {
-	return s.Logger.Log("[" + s.name + "] " + msg)
-}
-
-type Handler interface{ Log(msg string) string }
-
-// countingLogger decorates any Handler by embedding the interface.
-type countingLogger struct {
-	Handler
-	count *int
-}
-
-func (c countingLogger) Log(msg string) string {
-	*c.count++
-	return c.Handler.Log(fmt.Sprintf("(#%d) %s", *c.count, msg))
-}
-
-func main() {
-	svc := Service{Logger: Logger{prefix: "svc"}, name: "auth"}
-	fmt.Println(svc.Log("start"))
-
-	n := 0
-	var h Handler = countingLogger{Handler: svc, count: &n}
-	fmt.Println(h.Log("login"))
-	fmt.Println(h.Log("logout"))
-	fmt.Println("calls:", n)
-}
-', true, 0),
-  ('go-iface-assertions', 'go', 'main.go', 'package main
-
-import (
-	"fmt"
-	"io"
-	"strings"
-)
-
-type Stringer interface {
-	String() string
-}
-
-type Named struct {
-	Name string
-}
-
-func (n Named) String() string { return n.Name }
-
-func describe(v any) string {
-	switch x := v.(type) {
-	case nil:
-		return "nil interface"
-	case int:
-		return fmt.Sprintf("int=%d", x)
-	case Stringer:
-		return "Stringer=" + x.String()
-	case io.Reader:
-		buf := make([]byte, 4)
-		n, _ := x.Read(buf)
-		return "reader read " + fmt.Sprint(n)
-	default:
-		return fmt.Sprintf("other %T", x)
-	}
-}
-
-func main() {
-	var v any = Named{Name: "go"}
-	if s, ok := v.(Stringer); ok {
-		fmt.Println("asserted:", s.String())
-	}
-
-	if _, ok := v.(int); !ok {
-		fmt.Println("not an int")
-	}
-
-	fmt.Println(describe(42))
-	fmt.Println(describe(Named{Name: "iface"}))
-	fmt.Println(describe(strings.NewReader("data")))
-	fmt.Println(describe(nil))
-
-	var a any = []int{1, 2}
-	var b any = []int{1, 2}
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Println("recovered:", r)
-		}
-	}()
-	fmt.Println("comparing uncomparable dynamic types")
-	fmt.Println(a == b)
-}
-', true, 0),
-  ('go-gen-type-params', 'go', 'main.go', 'package main
-
-import (
-	"cmp"
-	"fmt"
-)
-
-// Number constrains to the two GCShapes we care about: a pointer-free
-// integer and a floating value. Instantiations that share a GCShape
-// share one generated function body (dictionary-backed).
-type Number interface {
-	~int | ~float64
-}
-
-// Sum is generic over T. At compile time the caller instantiates it,
-// e.g. Sum[int], and the compiler picks a stenciled body per GCShape.
-func Sum[T Number](xs []T) T {
-	var total T
-	for _, x := range xs {
-		total += x
-	}
-	return total
-}
-
-// Max uses cmp.Ordered and returns the type parameter directly, so no
-// boxing occurs on the return value the way an `any` interface would.
-func Max[T cmp.Ordered](xs []T) T {
-	best := xs[0]
-	for _, x := range xs[1:] {
-		if x > best {
-			best = x
-		}
-	}
-	return best
-}
-
-// Pair is a generic type; each distinct instantiation is a distinct type.
-type Pair[A, B any] struct {
-	First  A
-	Second B
-}
-
-func (p Pair[A, B]) Swap() Pair[B, A] {
-	return Pair[B, A]{First: p.Second, Second: p.First}
-}
-
-func main() {
-	ints := []int{3, 1, 4, 1, 5, 9}
-	floats := []float64{2.5, 0.5, 7.0}
-
-	fmt.Println(Sum(ints))            // T inferred as int
-	fmt.Println(Sum[float64](floats)) // explicit instantiation
-
-	fmt.Println(Max(ints))
-	fmt.Println(Max([]string{"go", "rust", "zig"}))
-
-	p := Pair[string, int]{First: "age", Second: 30}
-	fmt.Println(p.Swap())
-}
-', true, 0),
-  ('go-gen-constraints', 'go', 'main.go', 'package main
-
-import (
-	"cmp"
-	"fmt"
-)
-
-type Celsius float64
-type Kelvin float64
-
-type Number interface {
-	~int | ~int64 | ~float64
-}
-
-func Sum[T Number](xs []T) T {
-	var total T
-	for _, x := range xs {
-		total += x
-	}
-	return total
-}
-
-func Max[T cmp.Ordered](xs []T) T {
-	m := xs[0]
-	for _, x := range xs[1:] {
-		if x > m {
-			m = x
-		}
-	}
-	return m
-}
-
-func Dedup[T comparable](xs []T) []T {
-	seen := make(map[T]struct{}, len(xs))
-	out := xs[:0]
-	for _, x := range xs {
-		if _, ok := seen[x]; !ok {
-			seen[x] = struct{}{}
-			out = append(out, x)
-		}
-	}
-	return out
-}
-
-func main() {
-	temps := []Celsius{20.5, 19.0, 21.5}
-	fmt.Printf("sum=%.1f max=%.1f\n", Sum(temps), Max(temps))
-	fmt.Println(Dedup([]Kelvin{300, 300, 301}))
-}
-', true, 0),
-  ('go-gen-inference', 'go', 'main.go', 'package main
-
-import "fmt"
-
-// Map infers T and U from the slice and function arguments.
-func Map[T, U any](in []T, f func(T) U) []U {
-	out := make([]U, len(in))
-	for i, v := range in {
-		out[i] = f(v)
-	}
-	return out
-}
-
-// Parse cannot infer T from context: its only type-param use is the
-// return type, so callers must supply T explicitly.
-func Parse[T any](s string) (T, error) {
-	var zero T
-	return zero, fmt.Errorf("cannot parse %q", s)
-}
-
-func main() {
-	nums := []int{1, 2, 3}
-	// T=int inferred from nums; U=string inferred from the func literal.
-	strs := Map(nums, func(n int) string { return fmt.Sprintf("#%d", n) })
-	fmt.Println(strs)
-
-	// No inference from return position: T must be given explicitly.
-	v, err := Parse[int]("42")
-	fmt.Println(v, err)
-}
-', true, 0),
-  ('go-gen-pitfalls', 'go', 'main.go', 'package main
-
-import (
-	"fmt"
-)
-
-// Box is generic, but methods CANNOT add their own type parameters.
-// A method like func (b Box[T]) MapTo[R any](f func(T) R) R is a compile error.
-type Box[T any] struct {
-	val T
-}
-
-func (b Box[T]) Get() T { return b.val }
-
-// describe shows you cannot type-switch on a type parameter T directly.
-// You must route through an interface value (any) to inspect the dynamic type.
-func describe[T any](v T) string {
-	switch x := any(v).(type) {
-	case int:
-		return fmt.Sprintf("int:%d", x)
-	case string:
-		return fmt.Sprintf("string:%q", x)
-	default:
-		return fmt.Sprintf("other:%v", x)
-	}
-}
-
-// Adder is a plain interface: when all you need is dynamic dispatch,
-// an interface is simpler and avoids per-type code stenciling.
-type Adder interface{ Add(int) int }
-
-func main() {
-	b := Box[string]{val: "hi"}
-	fmt.Println(b.Get())
-	fmt.Println(describe(42))
-	fmt.Println(describe("x"))
-	fmt.Println(describe(3.14))
-}
-', true, 0),
-  ('go-err-wrapping', 'go', 'main.go', 'package main
-
-import (
-	"errors"
-	"fmt"
-)
-
-var ErrNotFound = errors.New("not found")
-
-type QueryError struct {
-	Query string
-	Code  int
-}
-
-func (e *QueryError) Error() string {
-	return fmt.Sprintf("query %q failed (code %d)", e.Query, e.Code)
-}
-
-func lookup(id string) error {
-	base := &QueryError{Query: id, Code: 42}
-	return fmt.Errorf("lookup %s: %w: %w", id, base, ErrNotFound)
-}
-
-func main() {
-	err := lookup("user-7")
-	fmt.Println(err)
-
-	fmt.Println("Is ErrNotFound:", errors.Is(err, ErrNotFound))
-
-	var qe *QueryError
-	if errors.As(err, &qe) {
-		fmt.Printf("extracted: query=%s code=%d\n", qe.Query, qe.Code)
-	}
-
-	wrapped := fmt.Errorf("handler: %w", err)
-	fmt.Println("still matches:", errors.Is(wrapped, ErrNotFound))
-}
-', true, 0),
-  ('go-err-sentinel-typed', 'go', 'main.go', 'package main
-
-import (
-	"errors"
-	"fmt"
-)
-
-// ErrNotFound is an exported sentinel: part of the package''s API contract.
-var ErrNotFound = errors.New("not found")
-
-// QueryError is a typed error carrying structured context.
-type QueryError struct {
-	Query string
-	Code  int
-	Err   error
-}
-
-func (e *QueryError) Error() string {
-	return fmt.Sprintf("query %q failed (code %d): %v", e.Query, e.Code, e.Err)
-}
-
-// Unwrap exposes the cause so errors.Is/As can traverse the chain.
-func (e *QueryError) Unwrap() error { return e.Err }
-
-// Is customizes matching: two QueryErrors are equivalent when their codes
-// match, independent of the wrapped cause.
-func (e *QueryError) Is(target error) bool {
-	t, ok := target.(*QueryError)
-	if !ok {
-		return false
-	}
-	return e.Code == t.Code
-}
-
-func lookup(q string) error {
-	return &QueryError{Query: q, Code: 42, Err: ErrNotFound}
-}
-
-func main() {
-	err := lookup("user-7")
-	fmt.Println("lookup:", err)
-
-	// Traverses the Unwrap chain and reaches the sentinel.
-	fmt.Println("Is ErrNotFound:", errors.Is(err, ErrNotFound))
-
-	var qe *QueryError
-	if errors.As(err, &qe) {
-		fmt.Printf("extracted: query=%s code=%d\n", qe.Query, qe.Code)
-	}
-
-	// Custom Is matches on Code even though the cause differs.
-	probe := &QueryError{Code: 42, Err: errors.New("other")}
-	fmt.Println("still matches:", errors.Is(err, probe))
-}
-', true, 0),
-  ('go-err-panic-recover', 'go', 'main.go', 'package main
-
-import (
-	"errors"
-	"fmt"
-)
-
-// safeDivide converts a panic into a named-return error, mutated inside defer.
-func safeDivide(a, b int) (result int, err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			err = fmt.Errorf("recovered: %v", r)
-		}
-	}()
-	result = a / b // panics when b == 0
-	return result, nil
-}
-
-// deferArgTiming shows args are captured at defer-time, not at call-time.
-func deferArgTiming() {
-	i := 10
-	defer fmt.Println("deferred arg captured:", i) // prints 10
-	i = 20
-	fmt.Println("final i:", i) // prints 20
-}
-
-// rethrow recovers, inspects, then re-panics values it will not handle.
-func rethrow() (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			if e, ok := r.(error); ok && errors.Is(e, errSentinel) {
-				err = e // handled
-				return
-			}
-			panic(r) // re-panic what we cannot handle
-		}
-	}()
-	panic(errSentinel)
-}
-
-var errSentinel = errors.New("sentinel")
-
-func main() {
-	q, err := safeDivide(4, 0)
-	fmt.Println(q, err)
-	deferArgTiming()
-	fmt.Println(rethrow())
-}
-', true, 0),
-  ('go-err-custom', 'go', 'main.go', 'package main
-
-import (
-	"errors"
-	"fmt"
-)
-
-type NotFoundError struct {
-	Key string
-	err error
-}
-
-func (e *NotFoundError) Error() string {
-	return fmt.Sprintf("key %q not found: %v", e.Key, e.err)
-}
-
-func (e *NotFoundError) Unwrap() error { return e.err }
-
-var ErrBackend = errors.New("backend unavailable")
-
-func lookup(key string) error {
-	return &NotFoundError{Key: key, err: fmt.Errorf("query: %w", ErrBackend)}
-}
-
-func main() {
-	err := lookup("session")
-	joined := errors.Join(err, errors.New("audit failed"))
-
-	var nfe *NotFoundError
-	fmt.Println("As NotFoundError:", errors.As(joined, &nfe))
-	fmt.Println("Is ErrBackend:", errors.Is(joined, ErrBackend))
-	if nfe != nil {
-		fmt.Println("Recovered key:", nfe.Key)
-	}
-}
-', true, 0),
-  ('go-data-slice-internals', 'go', 'main.go', 'package main
-
-import "fmt"
-
-func main() {
-	backing := make([]int, 5, 8)
-	for i := range backing {
-		backing[i] = i
-	}
-
-	// Three-index slice: len=2, cap=3 -> appends within cap mutate backing.
-	view := backing[1:3:4]
-	fmt.Printf("view len=%d cap=%d\n", len(view), cap(view))
-
-	view = append(view, 99)
-	fmt.Println("backing after in-cap append:", backing)
-
-	// This append exceeds cap=3, forcing reallocation; backing is now detached.
-	view = append(view, 100)
-	view[0] = -1
-	fmt.Println("backing after realloc append:", backing)
-	fmt.Println("view detached:", view)
-
-	// Growth: append reallocates only when len==cap.
-	s := []int{}
-	prev := cap(s)
-	growths := 0
-	for i := 0; i < 2048; i++ {
-		s = append(s, i)
-		if cap(s) != prev {
-			prev = cap(s)
-			growths++
-		}
-	}
-	fmt.Println("reallocations for 2048 appends:", growths)
-}
-', true, 0),
-  ('go-data-slice-aliasing', 'go', 'main.go', 'package main
-
-import "fmt"
-
-func main() {
-	base := make([]int, 3, 5)
-	base[0], base[1], base[2] = 1, 2, 3
-
-	// view shares the same backing array as base.
-	view := base[0:2]
-	fmt.Printf("view=%v len=%d cap=%d\n", view, len(view), cap(view))
-
-	// append has spare capacity, so it writes into base[2] in place,
-	// silently clobbering the shared element.
-	view = append(view, 99)
-	fmt.Printf("after append view=%v base=%v\n", view, base)
-
-	// Detach with copy to get an independent backing array.
-	detached := make([]int, len(base))
-	copy(detached, base)
-	detached[0] = -1
-	fmt.Printf("detached=%v base=%v\n", detached, base)
-
-	// A full-slice expression caps capacity so append reallocates.
-	safe := base[0:2:2]
-	safe = append(safe, 7)
-	fmt.Printf("safe=%v base=%v\n", safe, base)
-
-	// nil vs empty: distinct headers, both len 0, both range-safe.
-	var nilSlice []int
-	emptySlice := []int{}
-	fmt.Printf("nil==nil? %v empty==nil? %v\n", nilSlice == nil, emptySlice == nil)
-	fmt.Printf("len nil=%d len empty=%d\n", len(nilSlice), len(emptySlice))
-}
-', true, 0),
-  ('go-data-maps', 'go', 'main.go', 'package main
-
-import "fmt"
-
-type Counter struct {
-	Hits int
-}
-
-func main() {
-	m := map[string]*Counter{
-		"a": {Hits: 1},
-		"b": {Hits: 3},
-	}
-
-	// Values are pointers, so we can mutate through them.
-	// We could NOT take &m["a"] if the value were a struct,
-	// because map elements are not addressable.
-	m["a"].Hits++
-
-	// Deleting during range is well-defined: a key deleted
-	// before it is reached will not be produced by the range.
-	for k, v := range m {
-		if v.Hits > 2 {
-			delete(m, k)
-		}
-	}
-
-	// Reading a missing key (even from a nil map) returns the
-	// zero value and never panics.
-	var nilMap map[string]int
-	fmt.Println("nil read:", nilMap["missing"])
-
-	// Iteration order is randomized per range; sort keys if you
-	// need determinism.
-	total := 0
-	for _, v := range m {
-		total += v.Hits
-	}
-	fmt.Println("total:", total)
-}
-', true, 0),
-  ('go-data-strings-runes', 'go', 'main.go', 'package main
-
-import (
-	"fmt"
-	"unicode/utf8"
-)
-
-func main() {
-	s := "héllo, 世界"
-
-	fmt.Println("len(s) =", len(s))
-	fmt.Println("RuneCountInString =", utf8.RuneCountInString(s))
-
-	fmt.Printf("s[1] = %d (byte, not rune)\n", s[1])
-
-	for i, r := range s {
-		fmt.Printf("byte %d: %c U+%04X width=%d\n", i, r, r, utf8.RuneLen(r))
-	}
-
-	b := []byte(s)
-	b[0] = ''H''
-	fmt.Println("mutated copy:", string(b), "| original:", s)
-
-	rs := []rune(s)
-	fmt.Println("rune count via slice:", len(rs), "| first rune:", string(rs[0]))
 }
 ', true, 0),
   ('go-std-io', 'go', 'main.go', 'package main
@@ -32959,7 +34273,8 @@ func FuzzRoundTrip(f *testing.F) {
 func main() {
 	out, _ := roundTrip(map[string]int{"answer": 42})
 	fmt.Println(out)
-}', true, 0),
+}
+', true, 0),
   ('go-test-doubles', 'go', 'main.go', 'package main
 
 import (
@@ -33293,7 +34608,8 @@ func main() {
 		_ = srv.Close()
 	}
 	log.Println("stopped")
-}', true, 0),
+}
+', true, 0),
   ('go-design-pipeline', 'go', 'main.go', 'package main
 
 import (
@@ -38961,282 +40277,6 @@ insert into public.quiz_questions (id, problem_id, prompt, explain, sort_order) 
   ('prep-tries-longest-repeated-substring::state', 'prep-tries-longest-repeated-substring', 'What does the `nodes` field track in the visualization state?', 'The recorder keeps `nodes` in sync: flat trie; node 0 is the root', 3),
   ('prep-tries-longest-repeated-substring::complexity', 'prep-tries-longest-repeated-substring', 'What are the time and space complexities for "Longest repeated substring"?', 'O(s^2 log s). O(s). sort suffixes; take max lcp over adjacent pairs', 4),
   ('prep-tries-longest-repeated-substring::outcome', 'prep-tries-longest-repeated-substring', 'When the run completes, what does the final step convey?', 'No edge '''' yet — create a new node for "". A brand-new branch means this exact prefix has not been seen before.', 5),
-  ('go-conc-scheduler::gmp-letters', 'go-conc-scheduler', 'In Go''s GMP model, what do G, M, and P denote, and which one does GOMAXPROCS bound?', 'P is the scheduling context (a run-queue plus resources) needed to execute Go code; GOMAXPROCS sets the number of P''s, capping goroutines running Go code simultaneously — not the total M count.', 0),
-  ('go-conc-scheduler::gmp-threadcount', 'go-conc-scheduler', 'With GOMAXPROCS=4, why can a program still show far more than 4 OS threads (M''s) alive?', 'When a G enters a blocking syscall, its M blocks with it and hands off P; the runtime creates or wakes another M to keep P busy, so live M count can exceed GOMAXPROCS.', 1),
-  ('go-conc-scheduler::gmp-preempt', 'go-conc-scheduler', 'A tight loop with no function calls once starved the scheduler. What lets Go 1.26 preempt it?', 'Since Go 1.14, signal-based (SIGURG) asynchronous preemption interrupts long-running loops at safe points, so a call-free tight loop no longer monopolizes its P.', 2),
-  ('go-conc-scheduler::gmp-steal', 'go-conc-scheduler', 'What does an idle P do under work-stealing, and from where does it primarily take work?', 'An idle P first checks the global queue and netpoller, then steals roughly half of a randomly chosen victim P''s local runqueue to amortize stealing cost and rebalance load.', 3),
-  ('go-conc-scheduler::gmp-cheap', 'go-conc-scheduler', 'Which factor most directly makes goroutines cheap compared to OS threads?', 'Goroutines begin with tiny (~2KB) contiguous stacks that grow by copying to a larger segment when needed, and user-space scheduling avoids kernel context-switch cost.', 4),
-  ('go-conc-scheduler::gmp-blocking', 'go-conc-scheduler', 'A goroutine blocks on a channel receive. How does this differ from blocking in a raw OS syscall for the scheduler?', 'A channel or mutex block is a runtime-managed park: the G is set aside and M+P immediately run other G''s. A raw blocking syscall blocks the M itself, forcing a P handoff to another M.', 5),
-  ('go-conc-channels::recv-from-closed', 'go-conc-channels', 'A goroutine executes `v, ok := <-ch` on a channel `ch` that has already been closed AND fully drained (buffer empty). What happens?', 'Receiving from a closed, drained channel never blocks: it yields the element type''s zero value with ok=false. Only sending on a closed channel panics; receiving is always safe.', 0),
-  ('go-conc-channels::nil-recv', 'go-conc-channels', 'What is the behavior of a receive `<-ch` when `ch` is a nil channel (declared `var ch chan int` and never made)?', 'Both send and receive on a nil channel block forever. This is deliberate and exploited in select to dynamically disable a case by setting its channel to nil.', 1),
-  ('go-conc-channels::close-nil', 'go-conc-channels', 'You call `close(ch)` where `ch` is a nil channel. What is the result?', 'close(nil) panics with ''close of nil channel'', just as closing an already-closed channel panics with ''close of closed channel''. close never returns a value, so it cannot report an error.', 2),
-  ('go-conc-channels::buffered-full-send', 'go-conc-channels', 'Given `ch := make(chan int, 2)` with two values already buffered and no active receiver, what does a third `ch <- 3` do?', 'A buffered channel''s cap is fixed; sending when len == cap blocks until a receive frees a slot. Channels never drop values or grow their buffer, and a full send is not a panic.', 3),
-  ('go-conc-channels::send-on-closed', 'go-conc-channels', 'After `close(ch)`, another goroutine still holds a reference and executes `ch <- 1`. What happens?', 'Sending on a closed channel always panics (''send on closed channel''), regardless of buffering. This is why the close-signaling convention is that only the sole sender closes, never receivers.', 4),
-  ('go-conc-channels::range-close', 'go-conc-channels', 'A `for v := range ch` loop reads a buffered channel that senders fill and then never close. What is the outcome once all buffered values are consumed?', 'range over a channel terminates only when the channel is closed and drained. If it is never closed, the loop blocks on the empty channel — a classic goroutine leak / deadlock source.', 5),
-  ('go-conc-select::random-ready', 'go-conc-select', 'Two cases in a select are both ready when the statement executes. How does the runtime decide which one runs?', 'When multiple cases can proceed, select chooses one uniformly at random (a pseudo-random permutation) to avoid starvation; source order does not affect which ready case wins.', 0),
-  ('go-conc-select::nil-case', 'go-conc-select', 'Inside a for-select loop you set a channel variable to nil after it closes. What is the effect on that case?', 'A receive from a nil channel blocks forever, so its select case is never selectable; niling out a channel is the idiom to permanently disable its case.', 1),
-  ('go-conc-select::default-nonblock', 'go-conc-select', 'A select has one send case on an unbuffered channel with no waiting receiver, plus a default. What happens?', 'With a default present, select never blocks: an unbuffered send cannot proceed without a ready receiver, so the default case executes immediately.', 2),
-  ('go-conc-select::time-after-leak', 'go-conc-select', 'You write `case <-time.After(d)` inside a hot for-select loop that mostly takes the other case. What is the main hazard?', 'Each time.After call allocates a new Timer that stays alive until it fires after d; in a tight loop these accumulate, wasting memory and timer-heap slots — reuse one time.Timer with Reset instead.', 3),
-  ('go-conc-select::empty-select', 'go-conc-select', 'What does a select statement with no cases at all — `select {}` — do?', '`select {}` has no runnable case and no default, so it blocks the goroutine permanently (the runtime reports a deadlock if every goroutine is blocked).', 4),
-  ('go-conc-select::eval-order', 'go-conc-select', 'For `case ch <- f():`, when is f() evaluated relative to case selection?', 'Upon entering select, all channel operands and the right-hand-side expressions of send statements are evaluated exactly once, in source order, before any case is chosen.', 5),
-  ('go-conc-context::cancel-leak', 'go-conc-context', 'You call ctx, _ := context.WithTimeout(parent, time.Second) and discard the cancel func. What is the concrete consequence even if the timeout eventually fires?', 'Discarding cancel keeps the child registered in the parent''s children set and its timer armed until the deadline expires, leaking those resources until then; go vet''s lostcancel check flags it. Calling cancel releases the timer and detaches the child immediately.', 0),
-  ('go-conc-context::deadline-err', 'go-conc-context', 'A context created with WithTimeout expires. What does ctx.Err() return, and how should callers test it?', 'Timeout/deadline expiry sets Err to context.DeadlineExceeded; explicit cancel sets context.Canceled. context.DeadlineExceeded is its own sentinel (distinct from os.ErrDeadlineExceeded), and callers should prefer errors.Is since wrapped errors may not compare equal with ==.', 1),
-  ('go-conc-context::values-misuse', 'go-conc-context', 'Which use of context.WithValue is the documented anti-pattern that seniors should reject in review?', 'Context values are for request-scoped data that transits API boundaries (trace IDs, request-scoped identity, loggers), not for passing mandatory arguments a function needs to operate. Using them to smuggle required params makes signatures dishonest and untyped.', 2),
-  ('go-conc-context::parent-propagate', 'go-conc-context', 'Parent context P has child C (via WithCancel) and grandchild G (derived from C). You call C''s cancel func. What happens to P and G?', 'Cancellation propagates from a context to all contexts derived from it, but never upward to ancestors. Cancelling C closes G''s Done() while leaving P live.', 3),
-  ('go-conc-context::done-nil', 'go-conc-context', 'You call ctx.Done() on a context.Background(). What does the returned channel do in a select?', 'Background/TODO can never be cancelled, so Done() returns a nil channel; a receive on a nil channel blocks forever, so that single select case is effectively disabled while the other cases still run normally.', 4),
-  ('go-conc-context::deadline-shorten', 'go-conc-context', 'parent has a deadline 10s from now. You call WithTimeout(parent, 30*time.Second). What is the child''s effective deadline?', 'A derived context can only tighten, never loosen, an ancestor''s deadline; WithTimeout effectively records min(parent deadline, requested). The child fires at the parent''s 10s mark.', 5),
-  ('go-conc-sync::copy-after-use', 'go-conc-sync', 'A function takes a struct containing a sync.Mutex by value, locks it, and mutates a field. What is the core problem?', 'A sync.Mutex must not be copied after first use; copying duplicates the internal state, so the copy''s lock protects nothing the original sees. go vet flags this via copylocks, but it is not a compile error.', 0),
-  ('go-conc-sync::wg-add-placement', 'go-conc-sync', 'Why must wg.Add(1) be called before launching the goroutine rather than inside it?', 'If Add runs inside the goroutine, Wait in the parent may observe a zero counter and return before the goroutine even increments it, defeating the barrier. Add must happen-before the corresponding Wait.', 1),
-  ('go-conc-sync::rwmutex-tradeoff', 'go-conc-sync', 'When does sync.RWMutex most likely UNDERperform a plain sync.Mutex?', 'RWMutex has higher per-operation overhead than Mutex; for tiny critical sections that overhead outweighs any read-parallelism benefit, so a plain Mutex is often faster unless reads are frequent and non-trivial.', 2),
-  ('go-conc-sync::once-panic', 'go-conc-sync', 'Inside sync.Once.Do, the function panics. What happens on a later Do call with the same function?', 'Once.Do sets its done flag via defer, so the call counts as complete even if f panics; it will never invoke f again. If initialization can fail and must retry, Once is the wrong tool.', 3),
-  ('go-conc-sync::rlock-reentrant', 'go-conc-sync', 'A goroutine holds RLock and, while holding it, calls RLock again on the same RWMutex. Is this safe?', 'Go''s RWMutex is not reentrant. If a writer is blocked waiting between the two RLock calls, the second RLock blocks to avoid writer starvation, causing a self-deadlock.', 4),
-  ('go-conc-sync::zero-value', 'go-conc-sync', 'Which statement about zero-value readiness of these primitives is correct?', 'sync.Mutex, sync.RWMutex, sync.WaitGroup, and sync.Once are all designed so their zero value is immediately usable; declaring var mu sync.Mutex yields an unlocked, ready mutex.', 5),
-  ('go-conc-worker-pool::who-closes-results', 'go-conc-worker-pool', 'In a fan-out/fan-in pool where N workers all send to a single unbuffered results channel, which strategy correctly closes results exactly once with no panic and no lost values?', 'A channel must be closed exactly once by a party that knows all senders are done. Only a dedicated goroutine that does wg.Wait() (after every worker returns) can safely close(results). Each worker closing panics on the second close; the producer closing early would race with in-flight sends.', 0),
-  ('go-conc-worker-pool::deadlock-unbuffered', 'go-conc-worker-pool', 'You launch the workers and then, in main, run the producer loop `for j := ...{ jobs <- j }` inline (not in a goroutine) BEFORE starting the results range loop, with unbuffered jobs and results channels. What happens?', 'Workers finish a job and block on `results <- ...` because nobody is receiving yet. Once N workers are blocked on results, they stop ranging jobs, so the producer blocks on `jobs <- j`, and no goroutine can make progress: deadlock. The fix is to consume results concurrently (or run the producer in its own goroutine).', 1),
-  ('go-conc-worker-pool::forgot-close-jobs', 'go-conc-worker-pool', 'A pool works correctly except the producer forgets to `close(jobs)` after sending all work. All results are still received by main''s range loop. What is the runtime outcome?', '`for j := range jobs` only ends when jobs is closed. Without close, workers block forever waiting for more jobs, so wg.Done() is never called, the closer''s wg.Wait() never returns, results is never closed, and main''s range loop blocks after the last value: the runtime detects all goroutines asleep and reports deadlock.', 2),
-  ('go-conc-worker-pool::done-channel-cancel', 'go-conc-worker-pool', 'To let a worker pool abandon remaining work on cancellation, you add a `done` channel and use `select { case results <- r: case <-done: return }` in workers. What is the essential property of the done channel that makes this a correct broadcast to all workers?', 'Closing a channel makes every receive on it proceed immediately (with the zero value), so `close(done)` unblocks all workers simultaneously — a one-to-many broadcast. Sending values would signal only one receiver per send. This is why cancellation channels are closed, never sent on, and closed exactly once by the canceller.', 3),
-  ('go-conc-worker-pool::bounded-concurrency', 'go-conc-worker-pool', 'What primarily bounds the maximum number of jobs executing concurrently in the canonical worker-pool pattern (fixed N goroutines ranging one jobs channel)?', 'Concurrency is bounded by how many goroutines consume jobs, which is exactly N. The jobs buffer only decouples producer/consumer timing, not concurrency. GOMAXPROCS caps OS-thread parallelism for running goroutines, not how many are logically in-flight (many can be blocked on I/O).', 4),
-  ('go-conc-worker-pool::waitgroup-add-placement', 'go-conc-worker-pool', 'A developer moves `wg.Add(1)` from the launching loop into the top of each worker goroutine, keeping the closer goroutine''s `wg.Wait(); close(results)`. Why is this a bug?', 'wg.Add must happen-before the corresponding wg.Wait. If Add(1) runs inside the worker goroutine, the closer''s Wait() can run before any worker has scheduled its Add, observe a counter of 0, return immediately, and close(results) while workers still send — causing a send-on-closed panic. Add must be called before starting the goroutine (or before Wait can run).', 5),
-  ('go-conc-hazards::race-detector-guarantee', 'go-conc-hazards', 'A team runs their full suite under `go test -race` and it passes green. What can they correctly conclude about data races in the code?', 'The race detector is a dynamic, happens-before analyzer: it flags races only on memory accesses that actually occur during the run. A clean run proves nothing about code paths or goroutine interleavings never exercised, so it cannot prove absence.', 0),
-  ('go-conc-hazards::closed-channel-send', 'go-conc-hazards', 'Consider these four channel operations. Exactly one of the statements below is a TRUE description of an operation that is guaranteed to panic at runtime. Which is it?', 'Closing an already-closed channel panics with ''close of closed channel'', so this statement is both true and describes a guaranteed panic. Receiving from a closed channel returns the zero value with ok=false (no panic); closing a nil channel actually panics rather than blocking, so that statement is false; sending on a full buffered channel simply blocks.', 1),
-  ('go-conc-hazards::leak-unreceived', 'go-conc-hazards', 'A helper does `ch := make(chan int); go func(){ ch <- compute() }()` then returns after a `select` picks a timeout branch instead of `<-ch`. What happens to the goroutine?', 'The goroutine blocks permanently on the unbuffered send because no receiver will ever arrive; goroutines are never GC''d while runnable or blocked, so it leaks. A buffered channel of size 1 or a context-aware select is the standard fix.', 2),
-  ('go-conc-hazards::fatal-deadlock-detect', 'go-conc-hazards', 'When does the Go runtime report `fatal error: all goroutines are asleep - deadlock!`?', 'The runtime''s deadlock detector fires only when NO goroutine is runnable — every one is blocked on channels, mutexes, or other sync primitives. A partial deadlock where a background timer, netpoller, or one live goroutine still runs is invisible to it.', 3),
-  ('go-conc-hazards::single-writer-race', 'go-conc-hazards', 'One goroutine only writes an `int` field and another only reads it, with no synchronization. Is this a data race under the Go memory model?', 'The Go memory model defines a data race as a read and a write (or two writes) to the same location with no happens-before ordering, regardless of hardware atomicity of the store. It is undefined behavior even with a single writer; use atomic.Int64 or a mutex.', 4),
-  ('go-conc-hazards::range-close-leak', 'go-conc-hazards', 'A consumer does `for v := range ch { ... }` but the producers finish and never `close(ch)`. What is the runtime outcome for the consumer?', '`range` over a channel terminates only when the channel is closed; if producers exit without closing, the consumer blocks forever on receive and leaks — or triggers a fatal deadlock if it is the last runnable goroutine.', 5),
-  ('go-conc-atomic::seqcst-ordering', 'go-conc-atomic', 'Under the Go memory model, what ordering guarantee do the sync/atomic operations (e.g. atomic.Int64.Add, Pointer.Store/Load) provide?', 'Since Go 1.19 the memory model specifies that atomic operations behave as if executed in some single, total order consistent with each goroutine''s program order — i.e. sequentially consistent. Go exposes no relaxed or acquire/release tiers like C++.', 0),
-  ('go-conc-atomic::racy-vs-atomic', 'go-conc-atomic', 'A field is written by one goroutine with atomic.StoreInt64 but read elsewhere with a plain `x := v` (non-atomic). Under Go 1.26 the race detector flags this. Why is the plain read undefined behavior?', 'The memory model requires that if any concurrent access to a location is a write, all such accesses must be atomic. Mixing an atomic write with a plain read is a data race with undefined behavior regardless of architecture or word size.', 1),
-  ('go-conc-atomic::copy-atomic', 'go-conc-atomic', 'You have `var n atomic.Int64` and write `m := n` to snapshot it. What is the correct assessment?', 'atomic.Int64 embeds a noCopy marker, so copying it after first use is a bug that go vet reports. It still compiles, but the copy is not a valid atomic. To read the value use n.Load().', 2),
-  ('go-conc-atomic::atomics-vs-mutex', 'go-conc-atomic', 'For which workload do atomics most clearly beat a sync.Mutex, and why?', 'Atomics excel when the entire operation is one machine word (a counter, a flag, a pointer swap): a single LOCK-prefixed instruction with no blocking or context switch. They cannot protect a multi-word invariant, which still needs a mutex.', 3),
-  ('go-conc-atomic::add-return', 'go-conc-atomic', 'Two goroutines each call `atomic.AddInt64(&c, 1)` 1000 times on a zero-valued c. What can you rely on for the final value and each call''s return?', 'AddInt64 is an atomic read-modify-write returning the new (post-add) value; no updates are lost so the sum is exactly 2000. Because each add is a distinct RMW step, every return value is unique — no two calls can return the same number, so returns can never repeat.', 4),
-  ('go-conc-atomic::pointer-publish', 'go-conc-atomic', 'A writer builds a fully-initialized struct then does `p.Store(ptr)` (atomic.Pointer); a reader does `cfg := p.Load()` and dereferences it. Are the struct''s fields safely visible to the reader?', 'An atomic Store observed by an atomic Load establishes a happens-before edge, so all writes sequenced before the Store (the struct initialization) are visible after the Load. This is the standard lock-free immutable-snapshot publication pattern.', 5),
-  ('go-mem-stack-heap::return-pointer-escapes', 'go-mem-stack-heap', 'In newPoint, a local Point is created and &p is returned. What does escape analysis decide, and why?', 'The address of p is returned, so p must remain valid after newPoint returns; the compiler moves it to the heap ("moved to heap: p"). Struct size is irrelevant to this decision, and returning &p is exactly what forces the escape.', 0),
-  ('go-mem-stack-heap::interface-boxing', 'go-mem-stack-heap', 'leak returns myInt(v) as an fmt.Stringer. Why does the concrete value escape to the heap?', 'An interface holds a (type, data) pair where data is a pointer; storing a concrete value in an interface that escapes forces the value onto the heap. It is the boxing, not the value''s size or the method body, that causes the escape.', 1),
-  ('go-mem-stack-heap::gcflags-m', 'go-mem-stack-heap', 'Which command reveals the compiler''s escape decisions without changing generated code?', '-gcflags=-m emits escape-analysis and inlining diagnostics (add a second -m for more detail) at compile time without altering codegen. -race changes the binary, pprof samples at runtime, and go vet has no -escape flag.', 2),
-  ('go-mem-stack-heap::slice-append-escape', 'go-mem-stack-heap', 'A function appends to a slice passed by value, then returns the (possibly reallocated) slice header. Does the backing array escape?', 'Escape is decided by lifetime, not the word "slice." If the returned backing array can be reachable after the frame returns it escapes; a slice used and dropped locally can stay on the stack. Growth alone does not force the heap when the compiler proves the array does not outlive the frame.', 3),
-  ('go-mem-stack-heap::why-perf', 'go-mem-stack-heap', 'Why does reducing escapes matter for performance in a hot path?', 'Stack allocation and reclamation is essentially free (adjusting SP on return), while heap allocations add allocator cost and later GC mark/scan work. Heap and stack are the same physical memory, and escaping does not inherently add copies.', 4),
-  ('go-mem-stack-heap::closure-capture', 'go-mem-stack-heap', 'A closure captures a local variable by reference and the closure is returned to the caller. What happens to that variable?', 'A returned closure keeps the captured variable reachable after the frame exits, so that variable is moved to the heap. Closures that never leave the frame can keep captures on the stack, so it is not every closure.', 5),
-  ('go-mem-gc::tricolor-invariant', 'go-mem-gc', 'What invariant does Go''s concurrent collector conceptually preserve during the mark phase, and why does it matter?', 'The hybrid write barrier upholds the tricolor invariant so that no black (fully scanned) object is left holding a pointer to a white (unscanned) object, ensuring nothing reachable is missed while mutators run concurrently.', 0),
-  ('go-mem-gc::gogc-meaning', 'go-mem-gc', 'With GOGC=100 and a live heap of 50 MB after a cycle, roughly when does the next GC trigger?', 'GOGC is a growth ratio: the heap goal is live_heap * (1 + GOGC/100). At GOGC=100 that is 50 MB * 2 = 100 MB, so GC targets when the heap reaches about 100 MB.', 1),
-  ('go-mem-gc::write-barrier-when', 'go-mem-gc', 'When is Go''s write barrier active in a running program?', 'Go''s hybrid write barrier is enabled only while marking is concurrently in progress; outside a mark phase pointer writes are plain stores, so steady-state code pays no barrier cost.', 2),
-  ('go-mem-gc::gomemlimit-behavior', 'go-mem-gc', 'How does GOMEMLIMIT interact with GOGC when memory pressure rises?', 'GOMEMLIMIT is a soft limit: as heap usage approaches it the pacer schedules GC more frequently regardless of GOGC, but it never fails allocation and can still exceed the limit under pressure, risking a GC death-spiral.', 3),
-  ('go-mem-gc::stw-phases', 'go-mem-gc', 'Which work still happens during stop-the-world pauses in Go''s current GC?', 'Go brackets concurrent marking with two short STW phases: mark setup (enable the write barrier and prepare roots) and mark termination (finish marking and disable the barrier). The bulk of marking and all sweeping run concurrently.', 4),
-  ('go-mem-gc::mark-assist', 'go-mem-gc', 'What is the purpose of GC mark assist charged to an allocating goroutine?', 'If a goroutine allocates faster than background markers can keep up, the pacer charges it mark-assist work proportional to its allocation, forcing it to do marking so the cycle finishes before the heap goal is blown.', 5),
-  ('go-mem-model::race-is-ub', 'go-mem-model', 'A program has one goroutine writing an int variable and another reading it with no synchronization. What does the Go memory model say the reader may observe?', 'The current Go memory model (published with Go 1.19) makes a data race on ordinary non-atomic memory undefined behavior: the compiler is entitled to assume no race occurs, so the read is not guaranteed to yield even an old-or-new single value.', 0),
-  ('go-mem-model::chan-hb-direction', 'go-mem-model', 'For a Go channel, which happens-before edge does the memory model guarantee about a send and its corresponding receive?', 'The spec states ''a send on a channel happens-before the completion of the corresponding receive.'' The receiver therefore observes every write the sender made before the send. (Unbuffered channels add a second edge in the other direction: the receive happens-before that send completes, since they rendezvous.)', 1),
-  ('go-mem-model::buffered-hb', 'go-mem-model', 'For a channel with capacity C, what happens-before guarantee lets a bounded semaphore work correctly?', 'The memory model states the k-th receive from a channel with capacity C happens-before the (k+C)-th send completes, which is exactly the back-pressure ordering a counting-semaphore pattern relies on.', 2),
-  ('go-mem-model::double-checked', 'go-mem-model', 'A lazy singleton reads a shared *T without a lock, and only takes the mutex if it''s nil (classic double-checked locking). Why is this broken in Go?', 'The lock-free read shares no happens-before edge with the write performed under the lock, so it is a data race and undefined behavior. The fix is sync.Once or atomic.Pointer, not a bare nil check.', 3),
-  ('go-mem-model::init-vs-goroutine', 'go-mem-model', 'Package-level var x is set in init(), then a goroutine started in main reads x. Is the read guaranteed to see the init value?', 'The model guarantees all package initialization happens-before the start of main, and starting a goroutine happens-before the goroutine''s execution, so the transitive edge makes the init value visible to the goroutine.', 4),
-  ('go-mem-model::atomic-vs-plain', 'go-mem-model', 'One goroutine does atomic.StoreInt64(&flag,1) then a plain write data=42. Another spins on atomic.LoadInt64(&flag)==1 then reads data. Is reading data safe?', 'Go''s sync/atomic operations are sequentially consistent and create happens-before edges: the store publishes the earlier plain write, and the matching load orders the subsequent read, so there is no race on data. Note the write ordering matters — the plain write must precede the atomic store for the edge to cover it.', 5),
-  ('go-mem-pool-alloc::pool-gc-lifetime', 'go-mem-pool-alloc', 'An object is put into a sync.Pool and never retrieved again. Under Go 1.26 semantics, how long can it be expected to survive?', 'Go''s Pool keeps a primary and a victim cache; each GC promotes the primary to victim and drops the old victim, so an unused object survives at most about two GC cycles rather than indefinitely.', 0),
-  ('go-mem-pool-alloc::pool-reset', 'go-mem-pool-alloc', 'Why must you call b.Reset() before bufPool.Put(b) for a *bytes.Buffer?', 'Pool returns objects with whatever state they had; without Reset the next Get sees leftover contents. Reset zeroes the length while retaining the backing capacity, which is exactly the reuse you want.', 1),
-  ('go-mem-pool-alloc::pool-value-vs-ptr', 'go-mem-pool-alloc', 'Why does storing *bytes.Buffer rather than bytes.Buffer in the Pool matter for allocation control?', 'Pool''s Get and Put take and return any (interface{}). Boxing a non-pointer struct value into an interface generally heap-allocates on each Put, defeating the pool''s purpose; a pointer boxes without a per-call heap allocation.', 2),
-  ('go-mem-pool-alloc::false-sharing-pad', 'go-mem-pool-alloc', 'The counter struct pads to 64 bytes. What problem does this padding specifically prevent?', 'Adjacent counters would otherwise sit on one 64-byte cache line; a write by one core invalidates the line for others (false sharing), causing coherence traffic. Padding each to a full line isolates them. Note this does not make the ++ atomic — it only removes the coherence contention.', 3),
-  ('go-mem-pool-alloc::prealloc-cap', 'go-mem-pool-alloc', 'Which preallocation choice most reduces GC pressure when building a slice whose final length you know is exactly n?', 'make([]T, 0, n) reserves capacity n at length 0, so n appends never reallocate. make([]T, n) plus append leaves the first n zero elements and appends beyond n; nil-slice append reallocates repeatedly during growth. make([]T, 0) has no capacity hint at all.', 4),
-  ('go-mem-pool-alloc::pool-get-nil', 'go-mem-pool-alloc', 'A sync.Pool is created with no New func. What does Get() return when both the primary and victim caches are empty?', 'Without a New function, Get returns nil on a miss; it never blocks and never panics. Providing New is the idiom precisely so Get can always yield a usable object.', 5),
-  ('go-iface-internals::iface-vs-eface', 'go-iface-internals', 'How does the runtime representation of a non-empty interface (e.g. io.Reader) differ from an empty interface (any)?', 'Both are two words with a data pointer second, but a non-empty interface''s first word is an *itab (which contains the type plus a method-pointer array), whereas an empty interface''s first word is a bare *_type since it has no methods to dispatch.', 0),
-  ('go-iface-internals::typed-nil', 'go-iface-internals', 'Given `var p *Dog; var s Speaker = p`, why does `s == nil` evaluate to false?', 'An interface is nil only when both the type/itab word and the data word are nil. Assigning a typed nil pointer sets the itab word (type *Dog is known), so the interface is non-nil even though its data word is nil.', 1),
-  ('go-iface-internals::dispatch-cost', 'go-iface-internals', 'What is the primary runtime cost of an interface method call compared to a direct static call?', 'The method address is loaded from a fixed offset in the itab''s fun array and called indirectly; there is no per-call hashing or allocation. The real cost is the extra indirection plus the loss of inlining and cross-call optimization the compiler could apply to a static call.', 2),
-  ('go-iface-internals::itab-construction', 'go-iface-internals', 'When is the *itab for a (concrete type, interface) pair typically produced?', 'For statically known pairs the compiler emits the itab; otherwise runtime.getitab builds it once and caches it in a global hash table keyed by (interface, type), so repeated conversions of the same pair reuse the same *itab rather than reconstructing it.', 3),
-  ('go-iface-internals::data-word-storage', 'go-iface-internals', 'For `var a any = int64(7)` on a 64-bit build, what does the data word hold?', 'Since Go 1.4 the data word is always a pointer, so non-pointer values are boxed: the runtime stores a pointer to a copy of the int64. Small integers (0-255) come from a shared static array rather than a fresh heap allocation, but the data word still holds a pointer, not the value. Inline storage was removed to keep the word unambiguously a pointer for the GC.', 4),
-  ('go-iface-internals::assert-mechanics', 'go-iface-internals', 'How does a type assertion `x.(T)` where x is a non-empty interface and T is a concrete type decide success?', 'The assertion compares the type descriptor recorded in the interface''s itab against the *_type for T (a pointer/identity comparison); no signature walking or name hashing occurs. Asserting to another interface type instead triggers itab lookup/construction to verify method-set inclusion.', 5),
-  ('go-iface-nil::typed-nil-compare', 'go-iface-nil', 'Given `var p *ValidationError = nil` and `var e error = p`, what does `e == nil` evaluate to and why?', 'An interface equals nil only when both its type and value words are nil. Assigning a typed nil pointer sets the type word to *ValidationError, so e != nil even though the boxed value is nil. No dereference happens during comparison.', 0),
-  ('go-iface-nil::named-return-leak', 'go-iface-nil', 'A function `func f() error` declares `var err *MyErr` and unconditionally `return err` on success paths. Callers doing `if err != nil` always see an error. What is the root cause?', 'Returning a concrete `*MyErr` (even nil) through the `error` return type boxes it, populating the interface''s type word. The fix is to return the literal `nil` (untyped) on success so both words stay nil.', 1),
-  ('go-iface-nil::func-signature-fix', 'go-iface-nil', 'Which change most reliably prevents accidentally returning a non-nil error interface that wraps a nil concrete pointer?', 'Returning the untyped `nil` literal keeps both interface words nil. `(*MyErr)(nil)` still fills the type word, `errors.Is(err, nil)` reports true only for an already-nil interface, and receiver kind does not change how a typed nil boxes.', 2),
-  ('go-iface-nil::reflect-detect', 'go-iface-nil', 'You must detect a typed-nil hiding in an `any` at runtime. Which check correctly reports it as effectively nil?', 'Only reflection can look past the type word: check that the boxed kind is a nillable kind (Ptr, Map, Chan, Func, Slice, Interface) and call reflect.Value.IsNil. Direct `== nil` returns false; `%v` prints `<nil>` for both typed and genuine nils, so it cannot distinguish them; and errors.Is does not unwrap typed nils.', 3),
-  ('go-iface-nil::panic-source', 'go-iface-nil', 'Code guards `if err != nil { return err }`, the guard passes, and later `err.Error()` panics with a nil dereference. What happened?', 'The interface was non-nil (type word set) so the guard was skipped, but the boxed pointer was nil. Calling a pointer-receiver method that dereferences the receiver then panics. A value receiver would tolerate it only if it never dereferences.', 4),
-  ('go-iface-nil::map-typed-nil', 'go-iface-nil', '`m := map[string]any{}; m["x"] = (*int)(nil)`. What does `m["x"] == nil` return?', 'Storing `(*int)(nil)` boxes a typed nil into the `any`, so its type word is *int and the comparison is false. Contrast a genuinely absent key, whose zero value IS an untyped nil interface and compares true.', 5),
-  ('go-iface-method-sets::value-vs-pointer-satisfy', 'go-iface-method-sets', 'Type T has exactly one method, declared with a pointer receiver: func (t *T) M(). Interface I requires M(). Which assignment compiles?', 'A pointer-receiver method is in *T''s method set only, not T''s. So &T{} satisfies I but a plain T value does not.', 0),
-  ('go-iface-method-sets::map-element-not-addressable', 'go-iface-method-sets', 'With m := map[string]T{"k": {}} and M declared as func (t *T) M(), why does m["k"].M() fail to compile?', 'Calling a pointer method on an addressable value auto-takes its address, but a map index expression is not addressable, so the compiler cannot synthesize &m["k"].', 1),
-  ('go-iface-method-sets::slice-element-addressable', 'go-iface-method-sets', 'With s := []T{{}} and M declared as func (t *T) M(), what is true of s[0].M()?', 'Unlike map elements, slice elements are addressable. The compiler auto-takes &s[0], so the pointer method runs on the actual element and mutations persist.', 2),
-  ('go-iface-method-sets::embedded-value-promotes', 'go-iface-method-sets', 'S embeds a value field of type T (not *T). T''s method M has a pointer receiver. Is M in the method set of the value type S?', 'Promotion mirrors receiver rules: embedding T by value puts T''s value methods in S and *S, but T''s pointer methods appear only in *S''s method set.', 3),
-  ('go-iface-method-sets::nil-interface-vs-typed-nil', 'go-iface-method-sets', 'func f() error returns var p *myErr = nil; return p, where *myErr implements error. Caller does if f() != nil. What happens?', 'Storing a typed nil pointer in an interface yields an interface with a non-nil type word, so the interface itself is not nil even though the pointer is.', 4),
-  ('go-iface-method-sets::reflect-set-addressability', 'go-iface-method-sets', 'You have a value v of type T (methods on *T) inside an interface{}. Why can''t reflect.ValueOf(x).MethodByName("M") find M and mutate the original?', 'An interface holds an unaddressable copy of the value, so reflect sees only T''s method set; to expose *T''s pointer methods you must store &v so the interface''s dynamic type is *T.', 5),
-  ('go-iface-embedding::promotion-depth', 'go-iface-embedding', 'A struct C embeds B, and B embeds A; A has method M and C also declares its own M. On a value of type C, what does c.M() call, and is it a compile error?', 'Method promotion favors the shallowest depth. C.M is at depth 0, A.M is promoted at depth 2, so C.M unambiguously wins and shadows A.M with no error.', 0),
-  ('go-iface-embedding::diamond-ambiguity', 'go-iface-embedding', 'Struct D embeds both X and Y (each at depth 1), and both X and Y define a method Ping. D declares no Ping of its own. What happens when you write d.Ping()?', 'When two promoted methods with the same name sit at the same depth, the selector is ambiguous and the program fails to compile unless D declares its own Ping or you qualify it (d.X.Ping()).', 1),
-  ('go-iface-embedding::iface-embed-nil', 'go-iface-embedding', 'You embed an interface (not a struct) in a decorator struct and forget to set that field, then call a promoted method that your struct does not override. What happens?', 'Embedding an interface promotes its methods, but the dynamic value is nil. Calling a promoted method dispatches through a nil interface, producing a runtime panic — a classic decorator pitfall. Go interfaces have no default method bodies.', 2),
-  ('go-iface-embedding::satisfies-via-embed', 'go-iface-embedding', 'Interface R requires Read and Close. Type T embeds an *os.File (which has both) and adds nothing. Does T satisfy R, and how?', 'Promoted methods become part of the embedder''s method set, so T satisfies R. Embedding a pointer *os.File promotes its methods to both T and *T, so the value type T already satisfies R.', 3),
-  ('go-iface-embedding::override-no-super', 'go-iface-embedding', 'Service overrides promoted Log but its body calls s.Logger.Log(...). What does this idiom accomplish, and could you instead call s.Log inside the body?', 'There is no super; you must qualify the embedded field (s.Logger.Log) to reach the shadowed method. Calling s.Log would re-invoke the override and recurse forever.', 4),
-  ('go-iface-embedding::iface-embed-composition', 'go-iface-embedding', 'An interface RW embeds interfaces Reader and Writer, both of which declare Close() with identical signatures. Is the RW definition valid in Go 1.26?', 'Since Go 1.14, embedding interfaces with overlapping methods is allowed as long as the duplicated method has an identical signature; the method set simply unions them. Only conflicting signatures for the same name would be an error.', 5),
-  ('go-iface-assertions::nil-comma-ok', 'go-iface-assertions', 'For `var v any` (a nil interface), what does `s, ok := v.(io.Reader)` yield?', 'A nil interface holds no dynamic type, so every type assertion misses; the comma-ok form returns the zero value of T (a nil io.Reader) and ok=false rather than panicking.', 0),
-  ('go-iface-assertions::single-return-panic', 'go-iface-assertions', '`var v any = "hi"; n := v.(int)` — what happens at runtime?', 'The single-return assertion panics with ''interface conversion: interface {} is string, not int'' when the dynamic type does not match; only the comma-ok form is safe.', 1),
-  ('go-iface-assertions::iface-to-iface', 'go-iface-assertions', 'With `var v any = Named{}` where `Named` has a `String() string` method, what does `v.(fmt.Stringer)` test?', 'Asserting to an interface type succeeds iff the value''s dynamic type''s method set implements that interface; it is a runtime method-set check, not a concrete-type identity check.', 2),
-  ('go-iface-assertions::uncomparable-panic', 'go-iface-assertions', '`var a, b any = []int{1}, []int{1}; _ = a == b` — result under Go 1.26?', 'Interfaces are comparable at compile time, but if both hold the same non-comparable dynamic type (slice, map, func), the equality check panics at runtime with ''comparing uncomparable type []int''.', 3),
-  ('go-iface-assertions::switch-order', 'go-iface-assertions', 'In a type switch, `int` implements no interfaces here but a `case Stringer` precedes `case int` — a value of dynamic type `int` matches which case?', 'A type switch evaluates cases top to bottom and takes the first match; since int does not implement Stringer, that case is skipped and case int matches. Ordering matters when interface and concrete cases overlap. (fallthrough is illegal in a type switch.)', 4),
-  ('go-iface-assertions::switch-var-type', 'go-iface-assertions', 'In `switch x := v.(type)` with `case Stringer, io.Reader:`, what is the type of `x` inside that multi-type case?', 'When a case lists multiple types, the guard variable keeps the switch expression''s original (static) type, so x is `any` here; it takes the specific listed type only in single-type cases. Go has no anonymous interface-union type for this variable.', 5),
-  ('go-gen-type-params::gcshape-sharing', 'go-gen-type-params', 'Given `func F[T any](x T)`, which set of instantiations is guaranteed by the current gc implementation to share a single generated function body (stencil)?', 'gc groups instantiations by GCShape; all pointer-shaped types (*T, and pointer-representable types) collapse to one shape and share a body, whereas distinct non-pointer scalar shapes each get their own stencil.', 0),
-  ('go-gen-type-params::dictionary-role', 'go-gen-type-params', 'In gc''s GCShape stenciling with dictionaries, what does the hidden dictionary argument passed to a shared generic body primarily carry?', 'Because one body serves many types of the same shape, it can''t hardcode type-specific facts; the dictionary supplies runtime type descriptors, itabs for constraint methods, and sub-dictionaries for nested generic calls.', 1),
-  ('go-gen-type-params::vs-interface-monomorph', 'go-gen-type-params', 'Why can a generic `Max[T cmp.Ordered]` outperform an `any`-based sort helper for a slice of ints, semantically?', 'An `any` API forces each int into an interface value (boxing and indirection), while the generic keeps T as a concrete int in the stencil, avoiding boxing and the associated allocations and indirection.', 2),
-  ('go-gen-type-params::instantiation-identity', 'go-gen-type-params', 'For `type Pair[A, B any] struct{...}`, what is true about `Pair[int, string]` versus `Pair[string, int]`?', 'Each instantiation of a generic type is its own distinct defined type; different type arguments yield unrelated types even when field layouts coincide, so no implicit assignment is allowed.', 3),
-  ('go-gen-type-params::inference-limits', 'go-gen-type-params', 'Regarding `Sum[float64](floats)` (explicit) versus `Sum(ints)` (inferred), how does gc decide the type argument T?', 'Type inference derives T from the types of the passed arguments; when arguments pin the type it is inferable, and explicit instantiation is available to disambiguate, document, or drive cases inference cannot resolve (Go does not infer from the return/assignment context).', 4),
-  ('go-gen-type-params::constraint-method-call', 'go-gen-type-params', 'Inside a shared (dictionary-backed) stencil, how is a call to a method required by the type parameter''s constraint dispatched?', 'A shared body can''t know the concrete type, so constraint-method calls go through an itab (interface table) provided in the dictionary, an indirect dispatch rather than a statically bound or inlined call.', 5),
-  ('go-gen-constraints::tilde-meaning', 'go-gen-constraints', 'In the constraint `~int | ~string`, what exactly does the `~int` term admit as a valid type argument?', '`~int` denotes the set of all types whose underlying type is int, so both `int` and defined types like `type ID int` qualify. Other integer widths have distinct underlying types, and float is unrelated, so neither is admitted by `~int`.', 0),
-  ('go-gen-constraints::tilde-defined-only', 'go-gen-constraints', 'Why must the type after `~` be an underlying type itself (e.g. `~int` is legal but `~ID` where `type ID int` is not)?', 'The spec requires the type in a `~T` term to be its own underlying type. Since `ID`''s underlying type is `int`, `~ID` is rejected and `~int` is the correct spelling of that type set.', 1),
-  ('go-gen-constraints::comparable-vs-any', 'go-gen-constraints', 'A generic function forms `map[K]V` from its type parameter `K`. Which constraint on `K` is both necessary and minimally sufficient in Go 1.26?', 'Map keys must support == and !=, which is precisely what `comparable` guarantees. `any` does not permit == on a type parameter, `cmp.Ordered` excludes many comparable types such as structs, and a custom Equal method is never used for map keying.', 2),
-  ('go-gen-constraints::strictly-comparable', 'go-gen-constraints', 'You instantiate a `comparable`-constrained function with an interface type whose dynamic value is a slice, causing a run-time panic on ==. What changed in Go 1.20 that even allowed this instantiation?', 'Go 1.20 loosened `comparable` so ordinary interface types, which are spec-comparable but not strictly comparable, satisfy it. `==` on such values can still panic at run time when the dynamic type is uncomparable, for example a slice.', 3),
-  ('go-gen-constraints::union-method-rule', 'go-gen-constraints', 'Why is `interface { ~int | fmt.Stringer }` illegal as a constraint in Go 1.26?', 'A union term must be a non-interface type, a `~T` term, or an interface with no methods. `fmt.Stringer` declares a method, so it cannot appear in a union; this is a hard syntactic spec rule, not about set overlap.', 4),
-  ('go-gen-constraints::ordered-vs-number', 'go-gen-constraints', '`Max` uses `cmp.Ordered` while `Sum` uses a numeric union. Regarding `Sum`''s body `total += x`, which statement about switching `Sum` to `cmp.Ordered` is accurate?', '`+` is defined for every type in `cmp.Ordered` (integers, floats, and strings), so `total += x` would compile fine. The problem is semantic: `cmp.Ordered` includes string, where `+` concatenates rather than sums, so a numeric union is used to keep `+=` meaning arithmetic addition uniformly.', 5),
-  ('go-gen-inference::no-return-inference', 'go-gen-inference', 'Given `func Parse[T any](s string) (T, error)`, why does `x, _ := Parse("42")` fail to compile while `x, _ := Parse[int]("42")` succeeds?', 'Go infers type arguments from the ordinary (typed) function arguments only. T appears solely in the result, and the compiler never uses the return context or the assignment target to infer type parameters, so it must be supplied explicitly.', 0),
-  ('go-gen-inference::method-type-params', 'go-gen-inference', 'Why can''t you write `func (r Repo) Fetch[T any](id int) T` on a type in Go 1.26?', 'Go disallows type parameters on methods entirely ("method must have no type parameters"). Put the type parameter on the enclosing type, or make it a top-level generic function.', 1),
-  ('go-gen-inference::untyped-const-default', 'go-gen-inference', 'For `func Id[T any](v T) T`, what is the inferred T in `x := Id(3)`?', 'When a type parameter is inferred from an untyped constant argument, the constant''s default type is used. The default type of the integer literal 3 is int, so T is int.', 2),
-  ('go-gen-inference::partial-inference', 'go-gen-inference', 'With `func Cast[From, To any](v From) To`, which call compiles?', 'To appears only in the return, so it can never be inferred; you must supply it. Supplying only From (partial) still leaves To unresolved, and Go will not read To from the assignment target, so only the fully explicit call compiles.', 3),
-  ('go-gen-inference::func-literal-inference', 'go-gen-inference', 'In `Map(nums, func(n int) string {...})` for `Map[T,U any]([]T, func(T)U)`, how are T and U resolved?', 'T unifies with the element type of nums ([]int gives T=int), and U unifies with the function literal''s declared result type (string). Both come from arguments; the assignment target plays no role.', 4),
-  ('go-gen-inference::typed-nil-inference', 'go-gen-inference', 'For `func First[T any](v T) T`, why does `First(nil)` fail but `First([]byte(nil))` compile?', 'The untyped nil identifier carries no type, so unification cannot determine T and inference fails. Converting to a typed nil, []byte(nil), gives a concrete argument type, letting T infer as []byte.', 5),
-  ('go-gen-pitfalls::method-type-param', 'go-gen-pitfalls', 'Why does Go reject `func (b Box[T]) MapTo[R any](f func(T) R) R` as a compile error?', 'Go disallows parameterized methods entirely; only top-level functions and type declarations may introduce type parameters, so the R on a method is rejected. Generic receivers like Box[T] are perfectly legal, and R shadowing rules are irrelevant here.', 0),
-  ('go-gen-pitfalls::switch-on-typeparam', 'go-gen-pitfalls', 'Inside `func f[T any](v T)`, why can''t you write `switch v.(type)` directly on `v`?', 'A type switch requires an interface value as its operand; a type parameter is not an interface type, so you must first convert via any(v) to obtain an interface to switch on. The copy from any(v) is real but irrelevant to why the direct switch is rejected.', 1),
-  ('go-gen-pitfalls::interface-vs-generic', 'go-gen-pitfalls', 'You need a function that calls `Write([]byte)` on its argument and returns nothing type-dependent. Interface param vs generic param — which is the better default, and why?', 'When the function only dispatches a method and returns nothing whose type depends on the input, an interface is simpler and adds no code bloat; generics buy you nothing here, and constraints can require methods just fine, so the anti-generic method-set claim is false.', 2),
-  ('go-gen-pitfalls::code-bloat', 'go-gen-pitfalls', 'Regarding the binary-size cost of generics, what does the Go 1.26 compiler actually do?', 'Go uses GC-shape stenciling: types with the same underlying memory shape (e.g. all pointer types) share a single instantiation that receives a dictionary, reducing — but not eliminating — the code duplication of full monomorphization.', 3),
-  ('go-gen-pitfalls::dictionary-cost', 'go-gen-pitfalls', 'A generic function instantiated for pointer-shaped types receives a runtime dictionary. What is the practical performance consequence versus a hand-written concrete version?', 'Shared (dictionary-based) instantiations add indirection for method calls and type info, so a generic function can be measurably slower than a specialized concrete implementation — a reason not to reach for generics in hot paths. It does not add interface-style double-dispatch, and dictionaries are not erased.', 4),
-  ('go-gen-pitfalls::constraint-not-union-method', 'go-gen-pitfalls', 'You write a constraint `interface{ ~int | ~string }` and try to call a method on values of that type param. What happens?', 'A constraint that is a union of type terms permits operators shared by those types but exposes no methods; to call a method you must add it to the interface constraint explicitly, otherwise it is a compile-time error — there is no inferred method set and no auto-promotion.', 5),
-  ('go-err-wrapping::multi-w-return-type', 'go-err-wrapping', 'In Go 1.20+, what does fmt.Errorf("a: %w: %w", e1, e2) return, and how do errors.Is/As traverse it?', 'Multiple %w produce an error whose Unwrap() returns []error; errors.Is/As perform a depth-first walk visiting every wrapped error.', 0),
-  ('go-err-wrapping::as-target-kind', 'go-err-wrapping', 'errors.As(err, target) requires target to be:', 'errors.As panics if target is not a non-nil pointer to either a type implementing error or to any interface type; it sets *target to the first match. A pointer to an interface (including interface{}) is accepted, so the notion that interfaces are rejected is false.', 1),
-  ('go-err-wrapping::is-comparability', 'go-err-wrapping', 'errors.Is walks the chain. For an error in the chain that is NOT comparable and has no Is method, what happens at that node?', 'errors.Is only performs == when the value is comparable; a non-comparable node with no Is method is silently skipped for the equality test (no panic) and the walk continues unwrapping, so a deeper node can still match.', 2),
-  ('go-err-wrapping::verb-w-vs-v', 'go-err-wrapping', 'You use %v instead of %w to format a sentinel into fmt.Errorf. The result:', '%v formats the error''s text only and creates no Unwrap link, so errors.Is/As cannot reach the sentinel; only %w records the wrapped error.', 3),
-  ('go-err-wrapping::custom-is-override', 'go-err-wrapping', 'A custom error type defines Is(target error) bool returning true for any *NetError. Calling errors.Is(err, someNetErr) where err wraps that type:', 'errors.Is calls a node''s Is(target) bool method when present, enabling semantic matching independent of pointer identity or ==; the method signature is Is(error) bool, not (bool, error).', 4),
-  ('go-err-wrapping::as-first-match', 'go-err-wrapping', 'A chain contains two *QueryError values at different depths. errors.As(err, &qe) sets qe to:', 'errors.As returns on the first error in the tree that matches the target type, using depth-first pre-order traversal, and stops there.', 5),
-  ('go-err-sentinel-typed::sentinel-identity', 'go-err-sentinel-typed', 'A library exports `var ErrClosed = errors.New("closed")`. Callers across the codebase check `errors.Is(err, ErrClosed)`. Within any single running program, what makes that check reliable?', 'errors.New returns a distinct *errorString each call; errors.Is compares plain sentinels with ==, which compares pointers, so every caller must reference the one exported variable. Matching by text or by type is not how Is resolves a plain sentinel.', 0),
-  ('go-err-sentinel-typed::custom-is-semantics', 'go-err-sentinel-typed', 'In the code, `QueryError.Is` returns true when codes match. Given `err` has Code 42 wrapping ErrNotFound, what does `errors.Is(err, &QueryError{Code: 42, Err: errors.New("other")})` return and why?', 'errors.Is calls the node''s Is method when present; QueryError.Is ignores Err and compares only Code, so 42==42 yields true regardless of the differing wrapped cause or the distinct pointers.', 1),
-  ('go-err-sentinel-typed::as-target-type', 'go-err-sentinel-typed', '`Error()`, `Unwrap()`, and `Is()` are all declared on `*QueryError` (pointer receiver). What must the second argument to errors.As be?', 'As needs a non-nil pointer whose pointee is a type implementing error. Only *QueryError implements error, so the pointee must be *QueryError and the target must be **QueryError, i.e. &qe where qe is *QueryError. A &qe over a QueryError value, or a bare *QueryError, panics at runtime because the pointee does not implement error.', 2),
-  ('go-err-sentinel-typed::missing-unwrap', 'go-err-sentinel-typed', 'If `QueryError` had NO Unwrap method but still stored ErrNotFound in its Err field, what would `errors.Is(err, ErrNotFound)` return?', 'errors.Is descends only via Unwrap (or a custom Is). Without Unwrap the Err field is invisible to Is; the walk stops at QueryError, whose own Is only matches another *QueryError, so ErrNotFound is never reached and Is returns false.', 3),
-  ('go-err-sentinel-typed::sentinel-api-coupling', 'go-err-sentinel-typed', 'Why is exporting a sentinel like `ErrNotFound` a heavier API commitment than returning an unexported typed error checked via a helper predicate?', 'Once callers write errors.Is(err, pkg.ErrNotFound), that exported symbol is a locked-in contract you cannot rename or remove without breaking them. A typed error behind a predicate such as IsNotFound(err) hides the identity and lets you evolve internals freely. Sentinels are allocated once at init, not per call, and package-level vars are not caller-reassignable across packages.', 4),
-  ('go-err-sentinel-typed::double-wrap-w', 'go-err-sentinel-typed', 'Go supports `fmt.Errorf("...: %w: %w", a, b)` wrapping two errors. If a QueryError is joined with ErrNotFound this way, how does errors.Is behave over the result?', 'Multiple %w verbs produce an error whose Unwrap() returns []error, and errors.Is/As do a depth-first traversal over the whole tree, so a match on any wrapped branch succeeds. Two %w verbs have been valid since Go 1.20.', 5),
-  ('go-err-panic-recover::recover-scope', 'go-err-panic-recover', 'A goroutine calls f(), which calls a helper() that recover()s (helper is NOT deferred) and then f() panics. Does helper''s recover() stop the panic?', 'recover only has effect when called directly by a function that was itself deferred and is running during unwinding; a plain call returns nil and never stops a panic.', 0),
-  ('go-err-panic-recover::defer-arg-eval', 'go-err-panic-recover', 'For `i := 10; defer fmt.Println(i); i = 20`, what does the deferred call print?', 'Deferred call arguments are evaluated when the defer statement executes, so i''s value of 10 is captured immediately; only the invocation is delayed.', 1),
-  ('go-err-panic-recover::named-return-mutation', 'go-err-panic-recover', 'In safeDivide with named returns (result, err), the deferred func sets err after a panic. What does the caller observe?', 'Named return variables are addressable slots; a deferred function that recovers can assign to them, and those values become the function''s actual return after unwinding stops.', 2),
-  ('go-err-panic-recover::repanic-value', 'go-err-panic-recover', 'A deferred func calls recover(), decides not to handle the value, and calls panic(r). What propagates to the caller?', 'recover() stops the current unwinding, but calling panic(r) starts a fresh panic carrying that same value, so it continues propagating to callers as if re-raised.', 3),
-  ('go-err-panic-recover::defer-order-panic', 'go-err-panic-recover', 'Three defers registered in a function that panics before returning. In what order do they run?', 'Deferred calls always run in last-in-first-out order, and a panic still executes all registered defers of the frame as it unwinds.', 4),
-  ('go-err-panic-recover::recover-return-value', 'go-err-panic-recover', 'If no panic is in progress, what does a call to recover() return?', 'recover() returns nil when the goroutine is not panicking (or when called outside a deferred function), making `r != nil` the standard guard.', 5),
-  ('go-err-custom::unwrap-signature', 'go-err-custom', 'For errors.Is and errors.As to walk into a custom error''s wrapped cause, which method must the custom type provide (in Go 1.26)?', 'The stdlib recognizes Unwrap() error for single-parent chains; Cause()/Wrapped() are not recognized. Unwrap() []error is only for multi-error trees (Join), not a general requirement.', 0),
-  ('go-err-custom::is-target-comparable', 'go-err-custom', 'errors.Is(err, target) is called where target is a *NotFoundError with a filled Key. NotFoundError does NOT implement an Is method. What decides a match at each node in the chain?', 'Without a custom Is method, errors.Is compares each node to target with ==. For *NotFoundError that == is pointer-identity, so two distinct instances never match regardless of Key. Use errors.As to extract by type instead.', 1),
-  ('go-err-custom::as-pointer-arg', 'go-err-custom', 'var e MyError (a struct implementing error via pointer receiver). What is the correct errors.As call, and why?', 'error is satisfied by *MyError (pointer receiver), so the target must be **MyError, i.e. &ep where ep is *MyError. Passing a non-pointer or a type that doesn''t implement error panics or fails to match.', 2),
-  ('go-err-custom::join-preserves-type', 'go-err-custom', 'j := errors.Join(a, b) where a is *NotFoundError. What is true of j?', 'Join returns an unexported type with Unwrap() []error; Is/As recursively descend into every branch, so a and its chain remain reachable. j itself is not a *NotFoundError.', 3),
-  ('go-err-custom::wrap-verb-vs-v', 'go-err-custom', 'fmt.Errorf("ctx: %v", cause) versus fmt.Errorf("ctx: %w", cause). Difference for error inspection?', '%w makes the returned wrapError expose the cause via Unwrap; %v only interpolates the string, so errors.Is/As cannot see the underlying error. Multiple %w in one Errorf produces a multi-error (Unwrap() []error).', 4),
-  ('go-err-custom::nil-unwrap-chain', 'go-err-custom', 'A *NotFoundError has Unwrap() returning its err field, which is nil. errors.Is(nfe, someTarget) behaves how at that node?', 'When Unwrap returns nil, errors.Is treats the chain as ended and stops without matching further; it does not panic. errors.Is(err, nil) is only true if err itself is nil.', 5),
-  ('go-data-slice-internals::three-index-cap', 'go-data-slice-internals', 'Given `b := make([]int, 5, 8)` and `v := b[1:3:4]`, what are `len(v)` and `cap(v)`?', 'For `b[low:high:max]`, len = high-low = 3-1 = 2 and cap = max-low = 4-1 = 3. The third index bounds cap without touching len; the parent''s own cap of 8 is irrelevant once max is supplied.', 0),
-  ('go-data-slice-internals::append-alias', 'go-data-slice-internals', 'After `v := b[1:3:4]` on `b := []int{0,1,2,3,4}` (cap 5), then `v = append(v, 99)`, what is `b`?', 'v has len 2, cap 3, so one append stays within cap and writes into the shared backing at index 3 (b[3]), overwriting the 3 with 99. No reallocation occurs.', 1),
-  ('go-data-slice-internals::realloc-detach', 'go-data-slice-internals', 'Continuing, v now has len 3, cap 3. What does the next `append(v, 100)` do?', 'len==cap==3, so append allocates a new backing array, copies the elements, and appends 100. From then on v points elsewhere; mutating v no longer affects b.', 2),
-  ('go-data-slice-internals::growth-factor', 'go-data-slice-internals', 'For appending 2048 ints one at a time to a nil slice in Go 1.26, which statement about growth is correct?', 'Go grows capacity geometrically (roughly doubling below 256 elements, then tapering toward ~1.25x for large slices), giving amortized O(1) appends. It is neither strict doubling across all sizes nor per-element growth.', 3),
-  ('go-data-slice-internals::header-copy', 'go-data-slice-internals', '`a := []int{1,2,3}; b := a; b = append(b, 4)` where a has cap 3. Which is true about a and b afterward?', 'b := a copies the header (same ptr/len/cap). Since len==cap==3, append reallocates b onto a new array; a still sees {1,2,3} with len 3. The copies diverged at the reallocation, and a has no fourth slot to reveal 4.', 4),
-  ('go-data-slice-internals::passing-slice', 'go-data-slice-internals', 'A function `func f(s []int) { s = append(s, 9) }` is called as `f(x)` where `len(x) < cap(x)`. What does the caller observe in x?', 'The header is passed by value, so the caller''s len is unaffected. But because cap>len, append writes 9 into the shared backing array at index len(x), so that spare element is mutated even though x''s length stays the same.', 5),
-  ('go-data-slice-aliasing::append-clobber', 'go-data-slice-aliasing', 'Given `base := []int{1,2,3,4}` with len==cap==4, then `v := base[0:2]` followed by `v = append(v, 99)`, what is `base` afterward?', 'v has len 2 but cap 4 (it inherits base''s capacity from index 0), so append writes into the shared slot at index 2, overwriting the 3 with 99. base still has len 4, so the trailing 4 is unchanged: [1 2 99 4].', 0),
-  ('go-data-slice-aliasing::full-slice-detach', 'go-data-slice-aliasing', 'To make `v := base[0:2]` such that a later `append(v, x)` can NEVER touch base''s backing array (base has cap 4), which single expression is both minimal and correct?', 'The full-slice expression base[0:2:2] sets cap==len==2, so the very next append has no spare capacity and must allocate a fresh array, guaranteeing isolation. base[0:2] and base[:2] are identical and keep cap 4; base[0:2:4] explicitly keeps cap 4, so all three let append write into base in place.', 1),
-  ('go-data-slice-aliasing::nil-vs-empty-json', 'go-data-slice-aliasing', 'For `var a []int` (nil) and `b := []int{}` (empty), which statement is TRUE under Go 1.26 semantics?', 'A nil slice compares equal to nil; an empty non-nil slice does not. Both have len 0 and range safely (a nil slice ranges zero times, no panic), but they differ in the nil comparison, and in encoding/json a nil slice marshals to null while an empty slice marshals to [].', 2),
-  ('go-data-slice-aliasing::shared-after-realloc', 'go-data-slice-aliasing', 'After `s := make([]int, 2, 2); t := append(s, 1); t[0] = 9`, does `s[0]` change?', 's had cap==len==2, so append had no spare capacity and allocated a new backing array for t (copying s''s elements into it). s and t are now independent, so mutating t[0] leaves s[0] untouched. The reason is reallocation, not that append avoids index 0.', 3),
-  ('go-data-slice-aliasing::copy-min-len', 'go-data-slice-aliasing', 'What does `copy(dst, src)` do when `dst` has len 3 and `src` has len 5, and what does it return?', 'copy never reallocates or grows the destination; it copies min(len(dst), len(src)) elements and returns that count. Here it copies 3 and returns 3.', 4),
-  ('go-data-slice-aliasing::append-two-branches', 'go-data-slice-aliasing', 'Two slices `x` and `y` both view `base[0:2]` (cap 4). You do `x = append(x, 10)` then `y = append(y, 20)`. What is `x[2]`?', 'Both appends have spare capacity and write into base''s index 2 in place. y''s append happens last, so it overwrites x''s 10 with 20; since x still aliases base, x[2] reads 20.', 5),
-  ('go-data-maps::nil-map-read-write', 'go-data-maps', 'Given `var m map[string]int` (never made with make), what happens when you first read `m["x"]` and then execute `m["x"] = 1`?', 'Reads, len, and delete on a nil map behave like an empty map: the read returns the zero value (0). Any write (assignment) to a nil map panics with ''assignment to entry in nil map''.', 0),
-  ('go-data-maps::iteration-order', 'go-data-maps', 'Why does Go deliberately randomize the starting point of each map range?', 'The runtime picks a random starting bucket and intra-bucket offset per range so programs cannot accidentally rely on a stable order; it is a correctness and portability safeguard, not a performance or security feature. Insertion order is never preserved regardless.', 1),
-  ('go-data-maps::map-addressability', 'go-data-maps', 'With `m := map[string]Point{}` where Point is a struct, why does `m["a"].X = 5` fail to compile?', 'Because rehashing and growth can relocate elements, map values are not addressable, so you cannot assign to a field of a map value in place. You must read the whole struct, modify it, and write it back, or store a pointer value type. This is a compile-time error, not a runtime one.', 2),
-  ('go-data-maps::delete-during-range', 'go-data-maps', 'Which statement about mutating a map during `for k := range m` is correct under Go 1.26 semantics?', 'Deleting during range is explicitly allowed by the spec: a key removed before the iterator reaches it will not be produced. Adding keys during range is legal but whether a newly added entry is produced is unspecified, so it is not guaranteed either way.', 3),
-  ('go-data-maps::load-factor-growth', 'go-data-maps', 'In Go''s traditional bucket (pre-Swiss-table) map implementation, growth is triggered primarily when which condition holds?', 'Growth is driven by average load (element count over bucket count) crossing ~6.5 (the runtime''s 13/2 load factor), or by too many overflow buckets triggering same-size growth to defragment. A single full bucket just allocates an overflow bucket rather than forcing a resize.', 4),
-  ('go-data-maps::concurrent-access', 'go-data-maps', 'What is the defined behavior of unsynchronized concurrent map reads and writes?', 'The runtime has lightweight concurrent-write detection that calls fatal (an unrecoverable crash, not a catchable panic) when it observes unsynchronized concurrent access. Even a concurrent read racing a write can trip it; use a mutex or sync.Map.', 5),
-  ('go-data-strings-runes::len-vs-runecount', 'go-data-strings-runes', 'For s := "héllo, 世界" (é is U+00E9 = 2 bytes; 世 and 界 are 3-byte CJK each), what do len(s) and utf8.RuneCountInString(s) return?', 'len returns the byte length: h,l,l,o (4) + é (2) + comma + space (2) + 世 (3) + 界 (3) = 14. RuneCountInString decodes UTF-8 and counts 9 code points.', 0),
-  ('go-data-strings-runes::index-yields-byte', 'go-data-strings-runes', 'Given s := "héllo" where é is 2 bytes (0xC3 0xA9), what is the type and value of s[1]?', 'Indexing a string returns a byte (uint8), never a rune. s[1] is the first byte of é''s two-byte encoding, 0xC3 (the lead byte). To get runes you must range or convert to []rune.', 1),
-  ('go-data-strings-runes::range-index-gap', 'go-data-strings-runes', 'When ranging over s := "a世b" with `for i, r := range s`, what index values does i take across the three iterations?', 'range over a string yields (byte-offset, rune). ''a'' is at offset 0, ''世'' (3 bytes) at offset 1, and ''b'' at offset 4 because the decoder advanced past 世''s three bytes. Indices are byte positions, not rune ordinals.', 2),
-  ('go-data-strings-runes::invalid-utf8-range', 'go-data-strings-runes', 'Ranging over a string containing an invalid UTF-8 byte (e.g. a lone 0xFF), what rune value does that iteration produce and how far does it advance?', 'range on a string treats invalid encoding leniently: each malformed byte yields RuneError (U+FFFD) and the offset advances by exactly one byte, guaranteeing progress. It never panics.', 3),
-  ('go-data-strings-runes::conversion-copy', 'go-data-strings-runes', 'Which statement about b := []byte(s) and back string(b) under standard Go 1.26 semantics is correct?', '[]byte(s) allocates and copies because the resulting slice is mutable while the string''s backing bytes must stay immutable. The compiler does optimize away some string(b) allocations (e.g. m[string(b)] lookups, range over string(b)), but []byte(s) itself copies.', 4),
-  ('go-data-strings-runes::rune-slice-mutation', 'go-data-strings-runes', 'After rs := []rune("héllo"), how does len(rs) compare to len("héllo"), and is rs mutable?', '[]rune decodes the UTF-8 into a fresh []int32 of code points, so len(rs)=5 (5 runes) even though the string is 6 bytes. The slice is an independent, mutable copy.', 5),
-  ('go-std-io::read-n-and-err', 'go-std-io', 'A correct io.Reader implementation calls into an underlying source. Which behavior must a caller of Read be prepared to handle per the io.Reader contract?', 'The io.Reader contract explicitly permits returning n>0 bytes AND a non-nil err (including io.EOF) in the same call; callers must consume the n bytes first, then handle err. (0, nil) is discouraged but not forbidden, so ''must never happen'' is wrong.', 0),
-  ('go-std-io::copy-eof', 'go-std-io', 'io.Copy(dst, src) returns after the source is exhausted. What does its returned error value reflect on a normal successful completion?', 'io.Copy treats io.EOF as the normal termination signal and returns nil on success; it only returns a non-nil error for real read/write failures or a short write.', 1),
-  ('go-std-io::bufio-flush', 'go-std-io', 'You wrap a net.Conn with bufio.NewWriter and issue several Write calls followed by returning from the handler. Why might the peer never receive the final bytes?', 'bufio.Writer accumulates data in memory and only pushes to the underlying writer when the buffer fills or Flush/Close is called; forgetting Flush leaves the tail buffered and never sent.', 2),
-  ('go-std-io::scanner-token-limit', 'go-std-io', 'bufio.Scanner reads a stream where one ''line'' is 128 KB with no newline. With default settings, what happens?', 'bufio.Scanner has a default max token size of bufio.MaxScanTokenSize (64 KB); a longer token makes Scan stop and return false, with Err reporting bufio.ErrTooLong unless you raise the limit via Buffer().', 3),
-  ('go-std-io::multiwriter-error', 'go-std-io', 'io.MultiWriter(a, b, c) is used as an io.Copy destination. Writer b returns an error mid-stream. What happens?', 'MultiWriter writes to each writer in order and returns on the first error without calling the remaining writers, so c is not written for that call and Copy aborts.', 4),
-  ('go-std-io::limitreader-eof', 'go-std-io', 'You wrap a body with io.LimitReader(r, 1024) to cap reads. The underlying r actually holds 5000 bytes. After reading 1024 bytes, what does the next Read return?', 'io.LimitReader returns io.EOF once N bytes have been read regardless of what remains underneath; when its internal limit hits zero it returns EOF without calling the underlying reader, and it does not close or drain it.', 5),
-  ('go-std-json::iface-number-type', 'go-std-json', 'Unmarshaling `{"n": 42}` into a variable of type `interface{}` yields a map whose `"n"` value has what dynamic type?', 'With no concrete target type, JSON numbers always decode into float64; json.Number requires opting in via Decoder.UseNumber().', 0),
-  ('go-std-json::unexported-skip', 'go-std-json', 'A struct has a field `tag string` (lowercase). What does `json.Marshal` do with it?', 'encoding/json uses reflection, which cannot read unexported fields, so they are silently skipped in both directions regardless of any tag.', 1),
-  ('go-std-json::omitempty-zero', 'go-std-json', 'For a field `Count int `json:"count,omitempty"``, when is `count` omitted from Marshal output?', 'omitempty drops a field when it equals its type''s zero value; for int that is 0. It cannot distinguish an explicit 0 from an unset field.', 2),
-  ('go-std-json::omitempty-struct', 'go-std-json', 'A field `Meta Info `json:"meta,omitempty"`` where Info is a struct type and the value is the zero struct. What appears in the output?', 'omitempty only recognizes false, 0, nil pointer/interface, and empty array/slice/map/string; a zero struct is never ''empty'', so the object is always emitted. To skip zero structs in Go 1.24+ use the omitzero tag option instead.', 3),
-  ('go-std-json::embed-promotion', 'go-std-json', 'An embedded struct `Base` (no json tag) with tagged fields is marshaled inside an outer struct. How do Base''s fields appear?', 'An anonymous (embedded) struct field without a json tag has its exported fields promoted and flattened into the parent object, as if declared inline. Adding a tag turns it into a nested object.', 4),
-  ('go-std-json::rawmessage-defer', 'go-std-json', 'What is the primary purpose of a `json.RawMessage` field during Unmarshal?', 'json.RawMessage captures the verbatim bytes of a sub-value without decoding it, enabling deferred/conditional parsing (for example, dispatching on a discriminator field first).', 5),
-  ('go-std-time::since-ntp-step', 'go-std-time', 'You measure a duration with start := time.Now() then time.Since(start). Midway, an NTP daemon steps the wall clock backward by 5 seconds. What does time.Since(start) report?', 'time.Now() records a monotonic reading alongside the wall clock, and Sub/Since use the monotonic delta when both operands carry it, so NTP steps, DST, and manual clock sets do not corrupt the measurement.', 0),
-  ('go-std-time::time-after-loop-leak', 'go-std-time', 'Inside a hot for-loop compiled with a Go 1.23+ module, each iteration does `select { case <-work: ...; case <-time.After(d): ... }`. What is the senior-level concern under current Go?', 'Since Go 1.23 an unreferenced, unstopped timer is eligible for garbage collection immediately, so time.After no longer leaks until it fires; the remaining cost in a tight loop is the per-iteration allocation and runtime-timer scheduling overhead. Reusing one time.Timer with Reset, or a Ticker, avoids that churn.', 1),
-  ('go-std-time::ticker-stop-drain', 'go-std-time', 'On a Go 1.23+ module you call ticker.Stop(), then immediately do a non-blocking `select { case <-ticker.C: ... default: }`. Which statement is true?', 'Stop halts future ticks but never closes C, so you cannot range over it waiting for a close. Since Go 1.23 the channel is unbuffered (cap 0) and Stop guarantees no value prepared before the call is delivered afterward, so the select falls to default rather than reading a stale tick.', 2),
-  ('go-std-time::round-zero-strip', 'go-std-time', 'Two time.Time values come from time.Now(); one is round-tripped through JSON (RFC3339) and back. Comparing with == unexpectedly returns false even for the ''same'' instant. Best fix?', '== compares struct fields including the monotonic reading, which marshaling drops, so a stamped value never equals its round-tripped copy; use t.Equal(u), which ignores monotonic, or strip it via Round(0). UTC() only changes the location and does not touch the monotonic reading.', 3),
-  ('go-std-time::timer-vs-ticker', 'go-std-time', 'You need a callback to fire repeatedly at a fixed cadence. Which primitive and why?', 'A Ticker delivers on a schedule and, when the receiver is slow, coalesces missed ticks rather than queueing them. A Timer fires exactly once, and Sleep-in-a-loop drifts because it adds the work''s own runtime to every interval.', 4),
-  ('go-std-time::timer-reset-race', 'go-std-time', 'On a Go 1.23+ module you reuse a single timer, calling t.Stop() then t.Reset(d). What is the correct expectation about the classic stale-value hazard?', 'Since Go 1.23 timer channels are unbuffered (cap 0) and Go guarantees no value prepared before a Stop or Reset is sent or received after it, so the pre-1.23 drain-guard dance is unnecessary. Reset re-arms a stopped timer without panicking, and Stop never closes C.', 5),
-  ('go-std-defer-idioms::return-value-mutation', 'go-std-defer-idioms', 'A function has signature `func f() (err error)` and its body does `defer func() { err = wrap(err) }(); return doWork()`. When does the deferred closure observe/modify `err`?', 'A `return x` statement first assigns the named result (err = the error from doWork()), then runs deferred calls, then transfers control. Because the result is a named variable, the deferred closure can read and overwrite it, so wrap(err) takes effect on the value actually returned.', 0),
-  ('go-std-defer-idioms::defer-args-eval', 'go-std-defer-idioms', '`i := 0; defer fmt.Println(i); i = 42` — what does the deferred call print, and why?', 'Deferred call arguments are evaluated immediately when the defer statement executes, not when the deferred function later runs. So i''s value 0 is captured; the subsequent i = 42 has no effect. Wrapping the call in a closure `defer func(){ fmt.Println(i) }()` would instead read i at run time and print 42.', 1),
-  ('go-std-defer-idioms::defer-in-loop', 'go-std-defer-idioms', 'Inside a single function you loop over 10000 files and write `f, _ := os.Open(path); defer f.Close()` in the loop body. What is the primary defect?', 'Defers are function-scoped, not block-scoped, so all 10000 Close calls are queued and only run when the enclosing function returns — meanwhile every descriptor stays open, risking exhaustion (EMFILE). The fix is a helper function invoked per iteration so each defer fires promptly, or closing explicitly at the end of the iteration.', 2),
-  ('go-std-defer-idioms::loopvar-1-22', 'go-std-defer-idioms', 'A function loops `for _, v := range items { defer fmt.Println(v) }` where items = ["a","b","c"]. What prints when the function returns, under both Go 1.22+ and pre-1.22 semantics?', 'Because `defer fmt.Println(v)` passes v as an argument, v is evaluated at each defer statement (a, then b, then c), so the loop-variable change in Go 1.22 is irrelevant here — the values a, b, c are captured either way. Defers unwind LIFO, printing c, b, a. The classic pre-1.22 c-c-c bug only appears with a closure like `defer func(){ fmt.Println(v) }()` that reads the shared variable at run time.', 3),
-  ('go-std-defer-idioms::defer-panic-recover', 'go-std-defer-idioms', 'Two defers are registered: first `defer a()`, then `defer b()`. The function body panics. Which runs first, and can it stop the panic?', 'Defers always unwind last-registered-first, so b() runs before a(), even during a panic. A recover() called directly inside b() stops the panicking sequence, after which a() runs normally as unwinding continues and the function returns without re-panicking.', 4),
-  ('go-std-defer-idioms::defer-cost', 'go-std-defer-idioms', 'A senior engineer claims ''defer is essentially free in modern Go, so use it everywhere including hot inner loops.'' What is the most accurate correction under Go 1.26?', 'Since Go 1.14 the compiler open-codes defers (a statically known count, up to 8 per function) making them nearly as cheap as a direct call, but defers placed inside loops or with a dynamic count fall back to the slower runtime.deferproc path that can allocate. So the nuance is: cheap in straight-line code, potentially costly in loops or dynamic sites.', 5),
-  ('go-perf-benchmarks::what-is-bn', 'go-perf-benchmarks', 'What determines the value of b.N inside a benchmark function, and why must the body be a loop over it?', 'The testing framework calls the function repeatedly with increasing b.N until the timed body accumulates roughly the benchmark time (default ~1s), then reports ns/op = total time / b.N. The loop lets it amortize a stable per-op cost. -count controls how many times each benchmark is re-run, not b.N.', 0),
-  ('go-perf-benchmarks::resettimer-purpose', 'go-perf-benchmarks', 'A benchmark does expensive setup (loading a file) before its loop but does NOT call b.ResetTimer(). What is the concrete consequence?', 'The timer starts when the function is entered, so pre-loop work is included in the measured elapsed time. Since ns/op divides by b.N, the fixed setup cost is amortized differently at each b.N, producing unstable, inflated results unless ResetTimer clears it.', 1),
-  ('go-perf-benchmarks::sink-elimination', 'go-perf-benchmarks', 'Why can a benchmark that computes a pure result and ignores it report an absurdly low or zero ns/op?', 'If the result never escapes or is observed, the optimizer may prove the call has no effect and eliminate it entirely, timing an empty loop. Assigning to a package-level sink forces the compiler to treat the result as observed; alternatively the Go 1.24+ ''for b.Loop() { ... }'' form keeps loop-body values alive (via a runtime.KeepAlive intrinsic) so the body cannot be optimized away.', 2),
-  ('go-perf-benchmarks::reportallocs-scope', 'go-perf-benchmarks', 'You call b.ReportAllocs() in one benchmark but run the package with -benchmem absent. What is reported for allocations?', 'b.ReportAllocs() enables allocation reporting for just the benchmark that calls it, independent of the global -benchmem flag. -benchmem enables the same columns for every benchmark in the run; the two are complementary, not mutually required.', 3),
-  ('go-perf-benchmarks::benchstat-count', 'go-perf-benchmarks', 'You run ''go test -bench=.'' once into old.txt, change code, run once into new.txt, and benchstat reports ''~'' (no significant difference). Why is this expected regardless of the real change?', 'benchstat performs a statistical test (Mann-Whitney U under its default AssumeNothing model) and needs multiple samples per side to estimate variance. With one measurement each it lacks the samples to reject the null hypothesis, so it prints ''~''. Use -count=10 (or more) on both runs.', 4),
-  ('go-perf-benchmarks::parallel-timer', 'go-perf-benchmarks', 'In a b.RunParallel benchmark, where should b.ResetTimer() and per-goroutine setup live to produce correct ns/op?', 'Timing is global to the benchmark, so ResetTimer must be called once on the *testing.B before RunParallel starts. Cheap per-goroutine state should be initialized inside the closure but outside the for pb.Next() loop so it is not remeasured each iteration.', 5),
-  ('go-perf-pprof::cpu-sampling', 'go-perf-pprof', 'How does Go''s CPU profiler decide which function to attribute a sample to?', 'The runtime arms a SIGPROF timer (default 100Hz); each signal records the currently executing stack, so samples reflect on-CPU time, not blocked/off-CPU time.', 0),
-  ('go-perf-pprof::flat-vs-cum', 'go-perf-pprof', 'A function shows flat=2ms but cum=800ms in a CPU profile. What does this mean?', 'Flat is time in the function''s own instructions; cum includes time in everything it calls. Low flat with high cum means the cost is in its callees, so optimizing this function''s body won''t help.', 1),
-  ('go-perf-pprof::inuse-vs-alloc', 'go-perf-pprof', 'You have a suspected memory leak. Which heap profile sample type should you inspect?', 'inuse_space/inuse_objects report live (unfreed) memory, which is what grows in a leak. alloc_space/alloc_objects are cumulative since start and stay high even for short-lived garbage.', 2),
-  ('go-perf-pprof::heap-sampling-rate', 'go-perf-pprof', 'Why might a small but frequently-allocated struct be underrepresented in a default heap profile?', 'The heap profiler samples on a byte interval (runtime.MemProfileRate, default 512KiB). Rare allocations of small objects may fall between sample points; results are statistically scaled but individual small hotspots can be under-sampled unless the rate is lowered.', 3),
-  ('go-perf-pprof::http-pprof-import', 'go-perf-pprof', 'What is the effect of `import _ "net/http/pprof"` in a server with a default mux?', 'The blank import runs the package''s init, which registers /debug/pprof/* handlers on http.DefaultServeMux. It does not start any profiling; profiles are captured on demand when those endpoints are hit.', 4),
-  ('go-perf-pprof::cpu-vs-blocked', 'go-perf-pprof', 'A goroutine spends most of its time blocked on a channel receive. Where does it show up in a CPU profile?', 'CPU profiling only samples goroutines actually running on a CPU. Time blocked on channels, mutexes, syscalls, or I/O is invisible there; you need the block or mutex profile (or execution tracer) to see off-CPU waits.', 5),
-  ('go-perf-allocations::builder-grow', 'go-perf-allocations', 'You call b.Grow(n) on a strings.Builder before writing exactly n bytes with WriteString, then call b.String(). How many heap allocations does the write phase incur, and does String() copy?', 'Grow reserves the backing []byte once; writing n bytes never re-grows. Builder.String() does an unsafe []byte-to-string conversion of that same buffer, so no copy occurs, though the buffer itself was heap-allocated once.', 0),
-  ('go-perf-allocations::iface-box', 'go-perf-allocations', 'Why can passing an int to a func(v any) parameter in a hot loop cause a heap allocation, whereas passing it to func(v int) does not?', 'An interface value is two words: a type word plus a data word. A non-pointer like int must be boxed, and the runtime allocates to hold it unless the compiler proves it does not escape (small-int values 0-255 use a static cache). The concrete int parameter stays on the stack. The interface header is 16 bytes, not 24, so that distractor is wrong.', 1),
-  ('go-perf-allocations::inline-budget', 'go-perf-allocations', 'Go''s mid-stack inliner assigns each function a cost budget (~80 nodes) it must fit under. Which construct historically makes a function non-inlinable and thus prevents inlining into its callers'' hot path?', 'Constructs like closures (and, in older toolchains, certain range/for loops) inflate the node cost or were outright disallowed, pushing a function over budget. A named result or a plain return is cheap, and reading a global does not block inlining.', 2),
-  ('go-perf-allocations::bce-hoist', 'go-perf-allocations', 'In `for i := 0; i < len(s); i++ { _ = s[i] }`, when can the compiler eliminate the bounds check on s[i]?', 'The prover sees 0<=i (from the init) and i<len(s) (from the condition), so s[i] is provably in range and the check is removed. BCE works on slices and needs no flag; -gcflags=-B disables all bounds checks globally and is unsafe.', 3),
-  ('go-perf-allocations::prealloc-cap', 'go-perf-allocations', 'You do `out := make([]T, 0, n)` then append n elements. Compared to `var out []T` + n appends, what is the concrete benefit?', 'Preallocating capacity avoids geometric regrowth (each growth allocates a new array and copies), collapsing many allocations into one. It does not force the slice onto the stack, unused capacity in a pointer-typed backing array is still scanned, and append is already amortized O(1) either way.', 4),
-  ('go-perf-allocations::builder-copy', 'go-perf-allocations', 'What runtime check makes copying a strings.Builder value after it has been written to a dangerous bug the API guards against?', 'strings.Builder keeps an addr *Builder field pointing at itself; after a write, a copied Builder''s addr no longer matches, and the next method call panics with "strings: illegal use of non-zero Builder copied by value". This prevents two Builders from unsafely aliasing one buffer.', 5),
-  ('go-perf-datastructures::field-padding-size', 'go-perf-datastructures', 'On a 64-bit platform, why is `struct{a bool; b int64; c bool}` 24 bytes while reordering to `struct{b int64; a bool; c bool}` is 16 bytes?', 'int64 requires 8-byte alignment. In the bad layout a leading bool is followed by 7 padding bytes so the int64 lands on an 8-byte boundary, then the trailing bool needs 7 more tail padding bytes to keep the whole struct a multiple of 8, giving 24. Reordering puts the int64 first and packs both bools into the next 8-byte word, dropping the size to 16.', 0),
-  ('go-perf-datastructures::slice-cache-locality', 'go-perf-datastructures', 'You iterate a large collection of small structs summing one field. Why does `[]T` typically outperform a hand-rolled linked list of `*T` for this scan?', 'A slice stores elements in one contiguous backing array, so a linear scan streams through cache lines with hardware prefetching; a pointer-linked list chases scattered heap addresses, causing cache misses that dominate the constant factor even though both are O(n).', 1),
-  ('go-perf-datastructures::map-key-slice', 'go-perf-datastructures', 'What happens when you try to use a `[]byte` value directly as a Go map key?', 'Map keys must be comparable, and slices (like maps and funcs) are not comparable, so the program fails to compile; the idiomatic workaround is to key by `string(b)`, which Go can hash and compare by content.', 2),
-  ('go-perf-datastructures::map-iteration-memory', 'go-perf-datastructures', 'A senior claims `map[int]V` gives cache-friendly sequential iteration like a slice. What is the correct rebuttal?', 'A Go map is a hash table of buckets whose in-memory arrangement is neither contiguous in key order nor stable; iteration order is randomized and jumps across buckets, so it lacks the sequential locality of a slice regardless of key type, including integer keys.', 3),
-  ('go-perf-datastructures::struct-key-vs-pointer', 'go-perf-datastructures', 'You want to dedupe (x,y) coordinates. Comparing `map[Point]bool` (Point is a comparable struct) with `map[*Point]bool`, which statement is accurate?', 'A comparable struct key hashes and compares its field values, so equal coordinates collapse to one entry; a `*Point` key compares pointer identity, so two distinct allocations holding the same coordinates are treated as different keys and dedup fails.', 4),
-  ('go-perf-datastructures::aos-vs-soa', 'go-perf-datastructures', 'For a hot loop that only reads one field from each element of a huge collection, why can struct-of-arrays (separate `[]field`) beat array-of-structs (`[]T`)?', 'With array-of-structs, each fetched cache line also drags in the unused fields, wasting bandwidth; storing that one field in its own contiguous slice packs only relevant data per cache line, raising effective throughput for field-selective scans.', 5),
-  ('go-test-table::parallel-loopvar', 'go-test-table', 'In Go 1.26, you write a table test where each subtest calls t.Parallel() as its first line, capturing tc from `for _, tc := range cases`. Compared to Go 1.21, what is the observable effect?', 'Since Go 1.22 the loop variable is scoped per-iteration, so the classic `tc := tc` shadow is unnecessary and every parallel subtest sees its own row. Pre-1.22 all parallel subtests would read the single shared tc after the loop advanced, so they observed the last row (a logic bug).', 0),
-  ('go-test-table::parallel-run-timing', 'go-test-table', 'A parent test calls t.Run("group", ...) whose body launches subtests that each call t.Parallel(). When does code *after* that t.Run("group", ...) call execute relative to those parallel subtests?', 'A parallel subtest pauses at t.Parallel() until its enclosing t.Run function returns, then the paused siblings run together; the outer t.Run("group") call does not return until all of them complete, so code after it sees them done. This is the standard idiom for grouped parallel cleanup.', 1),
-  ('go-test-table::cleanup-vs-defer', 'go-test-table', 'You register resource teardown inside a helper that a subtest calls. Why prefer t.Cleanup(fn) over `defer fn()` written in that helper?', 'A defer in the helper fires when the helper returns, often before the subtest body finishes using the resource; t.Cleanup defers teardown to the end of that test/subtest scope. Both run in LIFO order, and neither survives os.Exit.', 2),
-  ('go-test-table::cmp-vs-reflect', 'go-test-table', 'Comparing want/got structs that contain a time.Time and an unexported field, why is cmp.Diff (go-cmp) generally preferred over reflect.DeepEqual for assertions?', 'cmp.Diff yields a human-readable diff and supports Options like cmpopts.EquateApproxTime and custom Comparers, whereas DeepEqual only returns a bool. cmp still uses reflection internally, and it panics on unexported fields unless you pass an option (e.g. cmpopts.IgnoreUnexported), unlike DeepEqual which reads them.', 3),
-  ('go-test-table::golden-update', 'go-test-table', 'Golden-file tests read testdata/*.golden and compare against output, with a `-update` flag that rewrites them. What is the key risk of this pattern?', 'Regenerating golden files without reviewing the diff can silently enshrine a bug as the new expected output. The go tool skips the testdata directory for building and vetting, but test code still reads it at runtime; golden files are arbitrary bytes, not Go source.', 4),
-  ('go-test-table::subtest-naming', 'go-test-table', 'Two table rows have names "add x" and "add/x". How does the testing package expose these for `go test -run`?', 'testing rewrites spaces to underscores, so "add x" becomes add_x, while a literal slash in a name creates a nested subtest path (add/x). Identical resulting names get a #NN suffix rather than panicking, so these two rows stay distinct anyway.', 5),
-  ('go-test-parallel::scheduling-order', 'go-test-parallel', 'A parent test calls t.Run for three subtests, each calling t.Parallel() as its first line, and the parent body then executes a log statement after the loop. When does that final log statement run relative to the parallel subtests'' bodies?', 't.Parallel() pauses the subtest and returns control to the parent. The parent runs to completion (including the post-loop log); only when the parent function returns does the framework resume the paused parallel subtests concurrently.', 0),
-  ('go-test-parallel::loop-capture', 'go-test-parallel', 'In Go 1.26, the code sample''s loop uses `tc` directly inside the parallel closure without a shadow copy. Why is this safe, unlike in Go 1.21?', 'Go 1.22 changed for-loop semantics so the loop variable is scoped per iteration (a fresh variable each pass). Before that, all closures shared one `tc`, so parallel subtests observed the final value. This is a language change, not a testing/framework behavior.', 1),
-  ('go-test-parallel::cleanup-timing', 'go-test-parallel', 'The parent registers t.Cleanup checking that all parallel subtests ran, and the subtests populate `seen` under a mutex. Why does this Cleanup reliably observe a complete map?', 'A parent''s registered Cleanup functions run only after all of its subtests (including parallel ones, which resume after the parent returns) have completed. So by cleanup time every parallel child has updated `seen`. The mutex is needed for the concurrent writes, not for ordering.', 2),
-  ('go-test-parallel::helper-line', 'go-test-parallel', 'writeConfig calls t.Helper() and then t.Fatalf on write failure. What is the effect of t.Helper() on that failure report?', 't.Helper() marks the function so the test framework skips it when computing the file:line shown in failure messages, pointing at the calling test line instead. It does not change control flow; t.Fatalf works in any function whose t belongs to the running goroutine.', 3),
-  ('go-test-parallel::tempdir-parallel', 'go-test-parallel', 'Both parallel subtests call writeConfig, which calls t.TempDir(). Can these two parallel subtests collide on the same directory or clash on cleanup?', 't.TempDir() creates a unique directory per calling *testing.T and auto-removes it when that test (and its cleanups) finish. Each subtest has its own t, so the two parallel subtests get distinct directories with independent, correctly-ordered removal.', 4),
-  ('go-test-parallel::fatal-goroutine', 'go-test-parallel', 'Inside a parallel subtest, a developer spawns a goroutine that calls t.Fatalf on error and does not wait for it. What is the primary correctness problem?', 'FailNow/Fatal must be called from the goroutine running the test; from another goroutine it Goexits only that spawned goroutine and does not stop the test goroutine, which keeps running (and may return) concurrently. Because the test isn''t halted at the failure point, the failure can be recorded too late to matter or race with cleanup/completion. The fix is to signal back (channel/error) and call Fatal on the test goroutine. Note *testing.T methods are themselves safe for concurrent use, so option two is wrong.', 5),
-  ('go-test-fuzz::seed-vs-mutation', 'go-test-fuzz', 'During `go test -fuzz=FuzzRoundTrip`, what role do the arguments passed to `f.Add` play?', 'f.Add supplies the seed corpus: concrete inputs that are run as-is and then used as starting points for coverage-guided mutation. They are not assertions and are not discarded before mutation.', 0),
-  ('go-test-fuzz::add-type-match', 'go-test-fuzz', 'What constraint does `f.Add` impose relative to the `f.Fuzz` callback signature?', 'Each f.Add call must pass values whose types and order exactly match the fuzzed parameters of the f.Fuzz callback (the parameters after *testing.T); a mismatch panics at run time when the target executes. Multiple f.Add calls are allowed and encouraged.', 1),
-  ('go-test-fuzz::corpus-persist', 'go-test-fuzz', 'A fuzz run discovers an input that makes `t.Fatal` fire. Where does Go persist it?', 'Failing inputs are minimized and written to testdata/fuzz/FuzzXxx/ inside the package so they can be committed and replayed as ordinary regression tests. The engine-generated (non-failing) corpus lives under $GOCACHE/fuzz, but crashers go to testdata.', 2),
-  ('go-test-fuzz::no-fuzz-flag', 'go-test-fuzz', 'You run `go test` WITHOUT the `-fuzz` flag on a package containing `FuzzRoundTrip`. What happens?', 'Without -fuzz, the target still runs its seed corpus (f.Add inputs plus any persisted testdata) deterministically, so crashers stay covered on every CI run. Mutation only begins when -fuzz matches the target.', 3),
-  ('go-test-fuzz::fuzz-arg-types', 'go-test-fuzz', 'Which is a valid argument type for a `f.Fuzz` callback under Go 1.26?', 'The fuzzing engine supports only a fixed set of types: []byte, string, bool, the sized int/uint families, byte, rune, float32, and float64. Maps, structs, and interfaces (including any) are not fuzzable arguments.', 4),
-  ('go-test-fuzz::fuzz-terminal', 'go-test-fuzz', 'Why is calling `f.Add` after `f.Fuzz` has run considered a misuse of the fuzz API?', 'f.Fuzz is the terminal operation of a fuzz target: it runs the callback over the corpus and mutations, so all seeds must be registered via f.Add beforehand. f.Add is not deprecated and there is no f.Seed method.', 5),
-  ('go-test-doubles::httptest-server-vs-recorder', 'go-test-doubles', 'You want to test an http.Handler''s routing, status codes, and written body in memory, without paying for real TCP. What is the idiomatic tool?', 'ResponseRecorder implements http.ResponseWriter in memory; you invoke the handler''s ServeHTTP directly and read the recorded status/body/headers with no socket. httptest.NewServer is for testing clients against a real transport, not for exercising a handler in isolation.', 0),
-  ('go-test-doubles::fake-vs-mock', 'go-test-doubles', 'For an interface with 12 methods used across many tests, which double minimizes test brittleness while preserving realistic behavior?', 'A fake is a real, simplified implementation (e.g. an in-memory store) that behaves correctly, so tests assert on outcomes rather than interaction details. Strict mocks couple tests to call sequences, making unrelated refactors break tests.', 1),
-  ('go-test-doubles::interface-seam-location', 'go-test-doubles', 'Where should the RateFetcher interface be defined for the cleanest seam under Go conventions?', 'Go idiom is ''accept interfaces, return structs'' and define the interface where it is consumed, keeping it small and letting the producer stay a plain struct. Producer-defined interfaces tend to be wide and force consumers to depend on the whole contract.', 2),
-  ('go-test-doubles::httptest-client-tls', 'go-test-doubles', 'You start an httptest.NewTLSServer. Why must the client use srv.Client() rather than http.DefaultClient?', 'NewTLSServer generates a self-signed certificate; srv.Client() returns a client whose transport is configured to trust exactly that cert. http.DefaultClient would reject it with an x509 verification error.', 3),
-  ('go-test-doubles::avoid-globals-di', 'go-test-doubles', 'A package calls http.Get(url) directly via the global default client. What is the primary testability defect?', 'Reaching for the global default client hard-wires the dependency, leaving no injection point to substitute an httptest server or fake. Depending on an injected *http.Client or a small interface restores the seam. (The default client is in fact concurrency-safe.)', 4),
-  ('go-test-doubles::recorder-result-body', 'go-test-doubles', 'After handler.ServeHTTP(rec, req), which expression yields an *http.Response whose Body you read and then Close?', 'Result() returns an *http.Response whose Body is a reader over the recorded bytes and should be closed. rec.Body is a *bytes.Buffer (readable via String/Bytes) but is not an *http.Response and has no Close method; req.Response and a ''Body'' header are simply the wrong places to look.', 5),
-  ('go-design-rate-limiter::bucket-vs-leaky', 'go-design-rate-limiter', 'What is the key behavioral difference between a token-bucket limiter (as in x/time/rate) and a strict leaky-bucket-as-a-queue limiter?', 'A token bucket accumulates up to `burst` tokens during idle periods, so it permits a short burst then throttles to rate r. A leaky bucket drains at a fixed rate; queued requests only leave at that rate, so saved-up capacity cannot fire as an output burst.', 0),
-  ('go-design-rate-limiter::limiter-safety', 'go-design-rate-limiter', 'Regarding concurrency, which statement about a single *rate.Limiter shared across goroutines is correct?', 'rate.Limiter methods (Allow, Reserve, Wait) are safe for concurrent use; the limiter guards its own state internally. You only need your own lock to protect the map that hands out per-key limiters.', 1),
-  ('go-design-rate-limiter::reserve-vs-allow', 'go-design-rate-limiter', 'You call `r.Reserve()` on a rate.Limiter, then decide not to proceed. What must you do to avoid starving other callers?', 'Reserve() consumes tokens optimistically for a future time. If you abandon it, calling Reservation.Cancel() returns the reserved tokens (as much as possible) so they aren''t wasted; without Cancel the tokens stay consumed.', 2),
-  ('go-design-rate-limiter::refill-model', 'go-design-rate-limiter', 'How does x/time/rate compute available tokens on each call, and why does that matter for correctness?', 'The limiter is lazy: it derives current tokens from the time delta since the last event (tokens += elapsed * rate, capped at burst). No goroutine or ticker runs, so there is nothing to leak and no per-limiter background cost — important for millions of per-key limiters.', 3),
-  ('go-design-rate-limiter::perkey-eviction', 'go-design-rate-limiter', 'In a per-key limiter map keyed by client ID, what is the primary production risk and its standard mitigation?', 'Distinct keys (IPs, user IDs) create limiters that never get freed, so the map grows without bound and leaks memory. The standard fix is a sweeper that removes entries whose last-seen time exceeds an idle threshold.', 4),
-  ('go-design-rate-limiter::infinite-limit', 'go-design-rate-limiter', 'What does rate.NewLimiter(rate.Inf, 0) do?', 'rate.Inf is a special sentinel meaning no limit: Allow always returns true and the burst value is ignored. This is the idiomatic way to express an unlimited limiter without special-casing nil in call sites.', 5),
-  ('go-design-worker-pool::fixed-vs-semaphore', 'go-design-worker-pool', 'You must cap concurrency at N for a long-lived, high-throughput ingestion service. What is the key runtime advantage of a fixed pool of N long-lived worker goroutines over spawning one goroutine per job gated by a size-N semaphore?', 'A fixed pool amortizes goroutine creation/teardown and stack growth across all jobs; the semaphore variant still creates and destroys a goroutine per job. Neither approach guarantees completion ordering, and both still need context for cancellation.', 0),
-  ('go-design-worker-pool::backpressure-buffer', 'go-design-worker-pool', 'A producer sends to an unbuffered jobs channel feeding N workers. Under a sustained input rate exceeding total worker throughput, what actually happens?', 'An unbuffered (or bounded) channel blocks the sender once workers can''t keep up, propagating backpressure to the producer. Channels never drop values or auto-scale the pool; unbounded growth only happens with an unbounded queue, which a channel is not.', 1),
-  ('go-design-worker-pool::graceful-drain', 'go-design-worker-pool', 'For graceful drain — let in-flight and already-queued jobs finish, then stop — which sequence is correct?', 'Closing jobs lets each worker''s for-range consume remaining buffered items and then return, so wg.Wait() unblocks after a full drain. Cancelling ctx is abort, not drain; closing out (the receive side) makes workers panic on send, and waiting before closing jobs deadlocks because workers never leave the range.', 2),
-  ('go-design-worker-pool::close-out-owner', 'go-design-worker-pool', 'Multiple workers send Results to a shared out channel. Where must close(out) happen to avoid a panic?', 'A channel with multiple senders must be closed exactly once, after all senders are done — hence close(out) in a dedicated goroutine gated by wg.Wait(). Closing per-worker double-closes (panic), and the producer and the receiver are not senders on out.', 3),
-  ('go-design-worker-pool::ctx-cancel-inflight', 'go-design-worker-pool', 'Under context cancellation, why must the blocking send `out <- Result{...}` also be guarded by a select on ctx.Done() in a production pool?', 'If the collector returns on cancellation and stops draining out, a worker blocked on an unguarded send leaks forever; a select over ctx.Done() lets it exit. Cancelling a context does not close channels, and ctx.Err() is non-nil once Done() fires.', 4),
-  ('go-design-worker-pool::errgroup-first-error', 'go-design-worker-pool', 'You replace manual error collection with x/sync/errgroup using WithContext and SetLimit(N). What is the precise semantics of the returned error and the group''s context?', 'errgroup.WithContext cancels the derived context the moment any Go func returns a non-nil error, and Wait returns that first error. It does not join all errors (that''s a manual pattern) nor cancel only on full completion.', 5),
-  ('go-design-lru-cache::why-dll', 'go-design-lru-cache', 'Why does the classic LRU pair a hash map with a doubly linked list instead of using the map alone?', 'The map gives O(1) key->node lookup, but recency ordering must be maintained; a doubly linked list lets you unlink and move a node to the front in O(1) given the node pointer, which a slice (O(n) shift) or the unordered map cannot do.', 0),
-  ('go-design-lru-cache::shard-vs-mutex', 'go-design-lru-cache', 'Under heavy concurrent read/write load, why does sharding (N sub-caches keyed by hash(key)) usually beat one global mutex-guarded LRU?', 'Sharding partitions the keyspace so each shard has its own mutex; unrelated keys hit different locks, cutting contention. It does not raise hit rate (it can slightly lower it by fragmenting capacity), still needs a mutex per shard, and gives up a single global recency order.', 1),
-  ('go-design-lru-cache::get-writes', 'go-design-lru-cache', 'A reviewer proposes taking only a read lock (RLock) in Get so reads run concurrently. What is the flaw?', 'A read hit must splice the node to the front of the list and may lazily evict an expired entry, both of which mutate shared state. That write under a shared RLock is a data race, so Get needs the exclusive lock (or a design that defers reordering).', 2),
-  ('go-design-lru-cache::ttl-eviction', 'go-design-lru-cache', 'With per-entry TTL and purely lazy expiry (checked only on access), what failure mode must the design address?', 'Lazy expiry only removes an entry when it is next accessed, so keys that are never read again stay resident and consume capacity/memory until LRU eviction reaches them. Production caches add active expiry (a background sweeper or sampling) to reclaim them.', 3),
-  ('go-design-lru-cache::syncmap-fit', 'go-design-lru-cache', 'Why is sync.Map a poor foundation for an LRU cache despite being a concurrent map?', 'sync.Map is optimized for read-mostly, stable-key workloads and exposes no recency/size accounting or ordered structure, so you cannot implement O(1) eviction of the least-recently-used entry on top of it. LRU inherently needs the coordinated map+list mutation that a single lock (or sharded locks) provides.', 4),
-  ('go-design-lru-cache::amortized-evict', 'go-design-lru-cache', 'On Put of a brand-new key when the shard is at capacity, what is the cost of the eviction step?', 'The tail of the list is by construction the least-recently-used node; ll.Back() plus a map delete is O(1). No scan or heap is needed because recency order is maintained incrementally on every access.', 5),
-  ('go-design-graceful-shutdown::shutdown-vs-close', 'go-design-graceful-shutdown', 'What is the essential behavioral difference between http.Server.Shutdown(ctx) and http.Server.Close()?', 'Shutdown stops listeners, closes idle connections, then waits for active requests to finish (bounded by ctx). Close abruptly closes listeners and all connections without waiting for in-flight work.', 0),
-  ('go-design-graceful-shutdown::listenandserve-return', 'go-design-graceful-shutdown', 'After Shutdown is called, what does the still-blocked ListenAndServe call in the goroutine return?', 'ListenAndServe always returns a non-nil error; on Shutdown/Close it returns http.ErrServerClosed. Idiomatic code checks errors.Is(err, http.ErrServerClosed) and treats only other errors as fatal.', 1),
-  ('go-design-graceful-shutdown::notifycontext-restore', 'go-design-graceful-shutdown', 'Why call stop() (the cancel returned by signal.NotifyContext) right after <-ctx.Done() unblocks?', 'NotifyContext installs handlers that swallow the signal (only cancelling the context). Calling stop() uninstalls them, so if a slow drain hangs, an impatient operator''s second SIGTERM reverts to the default terminate behavior instead of being ignored.', 2),
-  ('go-design-graceful-shutdown::shutdown-timeout-hang', 'go-design-graceful-shutdown', 'A handler runs a 60s job ignoring r.Context(); Shutdown is given a 10s context. What happens at t=10s?', 'Shutdown returns the context''s error (DeadlineExceeded) but Go cannot forcibly kill a goroutine. The handler keeps running unless it observes cancellation; graceful shutdown requires handlers to honor their request context or you follow up with Close().', 3),
-  ('go-design-graceful-shutdown::close-ordering', 'go-design-graceful-shutdown', 'You have an HTTP server plus a DB pool the handlers use. What is the correct shutdown ordering?', 'Dependencies must outlive their users. Draining the server first lets in-flight handlers finish their DB work; closing the pool first would make those still-draining requests fail. Close in reverse order of initialization.', 4),
-  ('go-design-graceful-shutdown::registeronshutdown', 'go-design-graceful-shutdown', 'What does http.Server.RegisterOnShutdown(f) actually guarantee about when f runs during Shutdown?', 'RegisterOnShutdown callbacks fire early (each in its own goroutine) when Shutdown starts, primarily to notify hijacked/WebSocket connections to close gracefully, since Shutdown itself does not track hijacked connections.', 5),
-  ('go-design-pipeline::why-select-on-done', 'go-design-pipeline', 'In the pipeline, why must each stage''s send be wrapped in `select { case out <- v: case <-ctx.Done(): }` rather than a bare `out <- v`?', 'If the consumer stops reading (break/cancel), a bare `out <- v` on an unbuffered channel blocks with no receiver forever, leaking the goroutine. Selecting on ctx.Done() gives the blocked sender an exit path.', 0),
-  ('go-design-pipeline::who-closes', 'go-design-pipeline', 'Which stage is responsible for closing the merged output channel `out` in `merge`, and when?', 'Only one closer is allowed; closing from each fan-in goroutine would panic on the second close. A single goroutine waits on the WaitGroup, then closes out exactly once.', 1),
-  ('go-design-pipeline::leak-on-early-break', 'go-design-pipeline', 'After main does `cancel(); break`, what actually lets the still-running `square` and `gen` goroutines terminate instead of leaking?', 'Goroutines are never GC''d while runnable, and closing a channel does not propagate upstream. Cancellation unblocks each blocked send via the ctx.Done() case, and the returning stages then close their own outputs.', 2),
-  ('go-design-pipeline::shared-source-fanout', 'go-design-pipeline', 'Both `w1` and `w2` read from the same `source` channel. What is the semantic consequence of this fan-out?', 'Multiple receivers on one channel is safe; each sent value is handed to exactly one ready receiver. That is precisely how a single source is load-balanced across N workers.', 3),
-  ('go-design-pipeline::unbuffered-cancel-visibility', 'go-design-pipeline', 'All stage channels are unbuffered. When main calls cancel() mid-range, why might a worker have already computed a value it can never deliver — and is that a leak?', 'On the next select both the send and the ctx.Done() case may be ready; if Done wins, the already-computed value is simply dropped and the goroutine returns. Dropping an in-flight value under cancellation is expected, not a leak.', 4),
-  ('go-design-pipeline::context-vs-done-channel', 'go-design-pipeline', 'Compared to threading an explicit `done chan struct{}` through every stage, what does using `context.Context` primarily add here?', 'A plain done channel only broadcasts stop. context.Context adds deadlines/timeouts (WithTimeout), cancellation propagation through a context tree, and request-scoped values, while still using the same select-on-Done() discipline.', 5),
   ('ortb-foundations-ecosystem::ortb-ecosystem-ssp-role', 'ortb-foundations-ecosystem', 'Which entity in the programmatic stack is responsible for packaging publisher inventory and setting floor prices before forwarding bid requests to the exchange?', 'The SSP is the sell-side broker: it connects publisher ad slots to exchanges (and sometimes directly to DSPs), enforces floor prices, manages brand safety rules, and maximises publisher yield. The exchange sits downstream of the SSP and runs the actual auction among multiple DSPs.', 0),
   ('ortb-foundations-ecosystem::ortb-ecosystem-header-bidding', 'ortb-foundations-ecosystem', 'Header bidding differs from waterfall mediation primarily because:', 'Waterfall mediation tries demand sources one at a time in priority order, missing revenue if a lower-tier buyer would outbid a higher-tier one. Header bidding invites all connected buyers simultaneously via a JS wrapper (or server-side equivalent), then passes the highest bid to the ad server alongside direct deals, maximising yield.', 1),
   ('ortb-foundations-ecosystem::ortb-ecosystem-bidder-vs-dsp', 'ortb-foundations-ecosystem', 'Which statement best describes the relationship between a bidder and a DSP?', 'A DSP is the full platform: campaign management, audience targeting, budget management, reporting, and the bidder. The bidder specifically is the hot-path service that receives a BidRequest from an exchange, evaluates it against active campaigns, and returns a BidResponse in under 100 ms. Large DSPs may have many bidder pods behind a load balancer.', 2),
@@ -47768,1110 +48808,6 @@ insert into public.quiz_choices (id, question_id, label, is_correct, sort_order)
   ('prep-tries-longest-repeated-substring::outcome#1', 'prep-tries-longest-repeated-substring::outcome', 'Incomplete partial result — more steps needed', false, 1),
   ('prep-tries-longest-repeated-substring::outcome#2', 'prep-tries-longest-repeated-substring::outcome', 'Input left unchanged — no mutations applied', false, 2),
   ('prep-tries-longest-repeated-substring::outcome#3', 'prep-tries-longest-repeated-substring::outcome', 'Aborted run on failure — infinite loop detected', false, 3),
-  ('go-conc-scheduler::gmp-letters#0', 'go-conc-scheduler::gmp-letters', 'G=goroutine, M=thread, P=processor — GOMAXPROCS bounds P', true, 0),
-  ('go-conc-scheduler::gmp-letters#1', 'go-conc-scheduler::gmp-letters', 'G=goroutine, M=mutex, P=pointer — GOMAXPROCS bounds M', false, 1),
-  ('go-conc-scheduler::gmp-letters#2', 'go-conc-scheduler::gmp-letters', 'G=group, M=machine, P=process — GOMAXPROCS bounds G', false, 2),
-  ('go-conc-scheduler::gmp-letters#3', 'go-conc-scheduler::gmp-letters', 'G=goroutine, M=thread, P=processor — GOMAXPROCS bounds M', false, 3),
-  ('go-conc-scheduler::gmp-threadcount#0', 'go-conc-scheduler::gmp-threadcount', 'Blocking syscalls detach M from P — runtime spins up new M''s', true, 0),
-  ('go-conc-scheduler::gmp-threadcount#1', 'go-conc-scheduler::gmp-threadcount', 'Each goroutine gets its own M — threads scale with goroutines', false, 1),
-  ('go-conc-scheduler::gmp-threadcount#2', 'go-conc-scheduler::gmp-threadcount', 'GOMAXPROCS bounds P not threads — M count equals goroutine count', false, 2),
-  ('go-conc-scheduler::gmp-threadcount#3', 'go-conc-scheduler::gmp-threadcount', 'cgo forbids thread reuse — every call forks a fresh M', false, 3),
-  ('go-conc-scheduler::gmp-preempt#0', 'go-conc-scheduler::gmp-preempt', 'Asynchronous preemption — SIGURG interrupts the running G', true, 0),
-  ('go-conc-scheduler::gmp-preempt#1', 'go-conc-scheduler::gmp-preempt', 'Only cooperative yields — the loop must call runtime.Gosched', false, 1),
-  ('go-conc-scheduler::gmp-preempt#2', 'go-conc-scheduler::gmp-preempt', 'Only stack-growth checks — every backward jump inserts a check', false, 2),
-  ('go-conc-scheduler::gmp-preempt#3', 'go-conc-scheduler::gmp-preempt', 'Stop-the-world GC — collection forcibly rotates goroutines', false, 3),
-  ('go-conc-scheduler::gmp-steal#0', 'go-conc-scheduler::gmp-steal', 'Steals half a victim P''s local runqueue — balances load', true, 0),
-  ('go-conc-scheduler::gmp-steal#1', 'go-conc-scheduler::gmp-steal', 'Only drains the global runqueue — never touches other P''s', false, 1),
-  ('go-conc-scheduler::gmp-steal#2', 'go-conc-scheduler::gmp-steal', 'Blocks until its own queue fills — waits for the netpoller', false, 2),
-  ('go-conc-scheduler::gmp-steal#3', 'go-conc-scheduler::gmp-steal', 'Steals one G from a victim''s head — preserves strict FIFO', false, 3),
-  ('go-conc-scheduler::gmp-cheap#0', 'go-conc-scheduler::gmp-cheap', 'Small growable stacks start ~2KB — copied and resized on demand', true, 0),
-  ('go-conc-scheduler::gmp-cheap#1', 'go-conc-scheduler::gmp-cheap', 'Goroutines run in kernel space — the OS schedules them directly', false, 1),
-  ('go-conc-scheduler::gmp-cheap#2', 'go-conc-scheduler::gmp-cheap', 'Each goroutine preallocates ~1MB — mapped lazily by the OS', false, 2),
-  ('go-conc-scheduler::gmp-cheap#3', 'go-conc-scheduler::gmp-cheap', 'Goroutines share one stack — no per-goroutine allocation happens', false, 3),
-  ('go-conc-scheduler::gmp-blocking#0', 'go-conc-scheduler::gmp-blocking', 'Channel block parks G and frees M+P — syscall block ties up M', true, 0),
-  ('go-conc-scheduler::gmp-blocking#1', 'go-conc-scheduler::gmp-blocking', 'Both park the G identically — the M stays free in each case', false, 1),
-  ('go-conc-scheduler::gmp-blocking#2', 'go-conc-scheduler::gmp-blocking', 'Channel block spins the P — syscall block parks G cheaply', false, 2),
-  ('go-conc-scheduler::gmp-blocking#3', 'go-conc-scheduler::gmp-blocking', 'Channel block consumes an M — syscall block needs no thread', false, 3),
-  ('go-conc-channels::recv-from-closed#0', 'go-conc-channels::recv-from-closed', 'returns immediately — v is zero value, ok is false', true, 0),
-  ('go-conc-channels::recv-from-closed#1', 'go-conc-channels::recv-from-closed', 'blocks forever — no more senders exist', false, 1),
-  ('go-conc-channels::recv-from-closed#2', 'go-conc-channels::recv-from-closed', 'panics — receive on closed channel is illegal', false, 2),
-  ('go-conc-channels::recv-from-closed#3', 'go-conc-channels::recv-from-closed', 'returns last value — ok stays true until reset', false, 3),
-  ('go-conc-channels::nil-recv#0', 'go-conc-channels::nil-recv', 'blocks forever — nil channel never proceeds', true, 0),
-  ('go-conc-channels::nil-recv#1', 'go-conc-channels::nil-recv', 'returns zero — behaves like a closed channel', false, 1),
-  ('go-conc-channels::nil-recv#2', 'go-conc-channels::nil-recv', 'panics immediately — nil dereference at runtime', false, 2),
-  ('go-conc-channels::nil-recv#3', 'go-conc-channels::nil-recv', 'returns instantly — ok is false right away', false, 3),
-  ('go-conc-channels::close-nil#0', 'go-conc-channels::close-nil', 'panics — close of nil channel', true, 0),
-  ('go-conc-channels::close-nil#1', 'go-conc-channels::close-nil', 'no-op — closing nil is silently ignored', false, 1),
-  ('go-conc-channels::close-nil#2', 'go-conc-channels::close-nil', 'blocks forever — matches nil send semantics', false, 2),
-  ('go-conc-channels::close-nil#3', 'go-conc-channels::close-nil', 'returns error — close reports the nil state', false, 3),
-  ('go-conc-channels::buffered-full-send#0', 'go-conc-channels::buffered-full-send', 'blocks until a receive frees a slot — buffer is full', true, 0),
-  ('go-conc-channels::buffered-full-send#1', 'go-conc-channels::buffered-full-send', 'panics — buffer overflow at capacity', false, 1),
-  ('go-conc-channels::buffered-full-send#2', 'go-conc-channels::buffered-full-send', 'drops the value — oldest element evicted silently', false, 2),
-  ('go-conc-channels::buffered-full-send#3', 'go-conc-channels::buffered-full-send', 'succeeds immediately — buffer auto-grows on demand', false, 3),
-  ('go-conc-channels::send-on-closed#0', 'go-conc-channels::send-on-closed', 'panics — send on closed channel', true, 0),
-  ('go-conc-channels::send-on-closed#1', 'go-conc-channels::send-on-closed', 'blocks forever — closed channel accepts no sends', false, 1),
-  ('go-conc-channels::send-on-closed#2', 'go-conc-channels::send-on-closed', 'discarded — send on closed is a no-op', false, 2),
-  ('go-conc-channels::send-on-closed#3', 'go-conc-channels::send-on-closed', 'succeeds — value queued into the buffer', false, 3),
-  ('go-conc-channels::range-close#0', 'go-conc-channels::range-close', 'blocks awaiting next value — range ends only on close', true, 0),
-  ('go-conc-channels::range-close#1', 'go-conc-channels::range-close', 'exits cleanly — range stops when buffer empties', false, 1),
-  ('go-conc-channels::range-close#2', 'go-conc-channels::range-close', 'panics — range requires a closed channel', false, 2),
-  ('go-conc-channels::range-close#3', 'go-conc-channels::range-close', 'yields zero values — loops forever on defaults', false, 3),
-  ('go-conc-select::random-ready#0', 'go-conc-select::random-ready', 'Uniform random — chosen among ready cases', true, 0),
-  ('go-conc-select::random-ready#1', 'go-conc-select::random-ready', 'Source order — first ready case wins', false, 1),
-  ('go-conc-select::random-ready#2', 'go-conc-select::random-ready', 'Channel age — oldest blocked channel first', false, 2),
-  ('go-conc-select::random-ready#3', 'go-conc-select::random-ready', 'Goroutine priority — highest scheduler weight', false, 3),
-  ('go-conc-select::nil-case#0', 'go-conc-select::nil-case', 'Permanently disabled — nil channel never ready', true, 0),
-  ('go-conc-select::nil-case#1', 'go-conc-select::nil-case', 'Panics immediately — nil receive is illegal', false, 1),
-  ('go-conc-select::nil-case#2', 'go-conc-select::nil-case', 'Always ready — nil yields the zero value', false, 2),
-  ('go-conc-select::nil-case#3', 'go-conc-select::nil-case', 'Runs default — nil falls through to default', false, 3),
-  ('go-conc-select::default-nonblock#0', 'go-conc-select::default-nonblock', 'default runs — send cannot proceed now', true, 0),
-  ('go-conc-select::default-nonblock#1', 'go-conc-select::default-nonblock', 'Send case runs — value is buffered internally', false, 1),
-  ('go-conc-select::default-nonblock#2', 'go-conc-select::default-nonblock', 'Blocks — waits for a receiver to appear', false, 2),
-  ('go-conc-select::default-nonblock#3', 'go-conc-select::default-nonblock', 'Panics — send on unbuffered without receiver', false, 3),
-  ('go-conc-select::time-after-leak#0', 'go-conc-select::time-after-leak', 'Timer leak — a fresh timer per iteration', true, 0),
-  ('go-conc-select::time-after-leak#1', 'go-conc-select::time-after-leak', 'Panic — time.After cannot be used in select', false, 1),
-  ('go-conc-select::time-after-leak#2', 'go-conc-select::time-after-leak', 'Immediate fire — After returns a closed channel', false, 2),
-  ('go-conc-select::time-after-leak#3', 'go-conc-select::time-after-leak', 'Deadlock — timer blocks the select forever', false, 3),
-  ('go-conc-select::empty-select#0', 'go-conc-select::empty-select', 'Blocks forever — never becomes ready', true, 0),
-  ('go-conc-select::empty-select#1', 'go-conc-select::empty-select', 'Returns immediately — nothing to select', false, 1),
-  ('go-conc-select::empty-select#2', 'go-conc-select::empty-select', 'Panics — empty select is a compile error', false, 2),
-  ('go-conc-select::empty-select#3', 'go-conc-select::empty-select', 'Spins — busy-waits burning a core', false, 3),
-  ('go-conc-select::eval-order#0', 'go-conc-select::eval-order', 'Before selection — operands evaluated once upfront', true, 0),
-  ('go-conc-select::eval-order#1', 'go-conc-select::eval-order', 'After selection — only for the chosen case', false, 1),
-  ('go-conc-select::eval-order#2', 'go-conc-select::eval-order', 'Never — send RHS is lazy until receiver reads', false, 2),
-  ('go-conc-select::eval-order#3', 'go-conc-select::eval-order', 'Twice — once to test readiness, once to send', false, 3),
-  ('go-conc-context::cancel-leak#0', 'go-conc-context::cancel-leak', 'Context leak — timer and subtree held until deadline', true, 0),
-  ('go-conc-context::cancel-leak#1', 'go-conc-context::cancel-leak', 'Immediate panic — discarding cancel is illegal', false, 1),
-  ('go-conc-context::cancel-leak#2', 'go-conc-context::cancel-leak', 'No effect — timer contexts self-clean instantly', false, 2),
-  ('go-conc-context::cancel-leak#3', 'go-conc-context::cancel-leak', 'Deadlock — parent blocks on the child', false, 3),
-  ('go-conc-context::deadline-err#0', 'go-conc-context::deadline-err', 'context.DeadlineExceeded — check via errors.Is', true, 0),
-  ('go-conc-context::deadline-err#1', 'go-conc-context::deadline-err', 'context.Canceled — compare with ==', false, 1),
-  ('go-conc-context::deadline-err#2', 'go-conc-context::deadline-err', 'nil — Err stays nil after timeout', false, 2),
-  ('go-conc-context::deadline-err#3', 'go-conc-context::deadline-err', 'os.ErrDeadlineExceeded — same sentinel reused', false, 3),
-  ('go-conc-context::values-misuse#0', 'go-conc-context::values-misuse', 'Passing required function parameters — hides the API', true, 0),
-  ('go-conc-context::values-misuse#1', 'go-conc-context::values-misuse', 'Carrying a request-scoped trace ID — accepted use', false, 1),
-  ('go-conc-context::values-misuse#2', 'go-conc-context::values-misuse', 'Storing a request-scoped auth identity — accepted use', false, 2),
-  ('go-conc-context::values-misuse#3', 'go-conc-context::values-misuse', 'Attaching a per-request logger — accepted use', false, 3),
-  ('go-conc-context::parent-propagate#0', 'go-conc-context::parent-propagate', 'G cancelled, P unaffected — cancel flows downward only', true, 0),
-  ('go-conc-context::parent-propagate#1', 'go-conc-context::parent-propagate', 'Both G and P cancelled — signals flow both ways', false, 1),
-  ('go-conc-context::parent-propagate#2', 'go-conc-context::parent-propagate', 'Only C cancelled — derivation does not chain', false, 2),
-  ('go-conc-context::parent-propagate#3', 'go-conc-context::parent-propagate', 'Nothing cancels — cancel needs the root context', false, 3),
-  ('go-conc-context::done-nil#0', 'go-conc-context::done-nil', 'Returns nil channel — that case never fires', true, 0),
-  ('go-conc-context::done-nil#1', 'go-conc-context::done-nil', 'Returns a closed channel — case fires immediately', false, 1),
-  ('go-conc-context::done-nil#2', 'go-conc-context::done-nil', 'Panics — Background has no Done method', false, 2),
-  ('go-conc-context::done-nil#3', 'go-conc-context::done-nil', 'Blocks the whole select — starves other cases', false, 3),
-  ('go-conc-context::deadline-shorten#0', 'go-conc-context::deadline-shorten', 'Inherits parent''s 10s — child cannot extend it', true, 0),
-  ('go-conc-context::deadline-shorten#1', 'go-conc-context::deadline-shorten', 'Uses child''s 30s — the newer deadline wins', false, 1),
-  ('go-conc-context::deadline-shorten#2', 'go-conc-context::deadline-shorten', 'No deadline — conflicting deadlines cancel out', false, 2),
-  ('go-conc-context::deadline-shorten#3', 'go-conc-context::deadline-shorten', 'Sum of both — 40s total budget', false, 3),
-  ('go-conc-sync::copy-after-use#0', 'go-conc-sync::copy-after-use', 'Copying after use — the copy has independent lock state', true, 0),
-  ('go-conc-sync::copy-after-use#1', 'go-conc-sync::copy-after-use', 'Nothing wrong — value receivers lock fine', false, 1),
-  ('go-conc-sync::copy-after-use#2', 'go-conc-sync::copy-after-use', 'Deadlock always — value copies self-deadlock', false, 2),
-  ('go-conc-sync::copy-after-use#3', 'go-conc-sync::copy-after-use', 'Compile error — Mutex is not copyable', false, 3),
-  ('go-conc-sync::wg-add-placement#0', 'go-conc-sync::wg-add-placement', 'Race on the counter — Wait may return before Add runs', true, 0),
-  ('go-conc-sync::wg-add-placement#1', 'go-conc-sync::wg-add-placement', 'Add panics — inside goroutines it is illegal', false, 1),
-  ('go-conc-sync::wg-add-placement#2', 'go-conc-sync::wg-add-placement', 'Add is not goroutine-safe — needs a mutex', false, 2),
-  ('go-conc-sync::wg-add-placement#3', 'go-conc-sync::wg-add-placement', 'Done double-counts — inner Add doubles the total', false, 3),
-  ('go-conc-sync::rwmutex-tradeoff#0', 'go-conc-sync::rwmutex-tradeoff', 'Short critical sections — RWMutex bookkeeping dominates', true, 0),
-  ('go-conc-sync::rwmutex-tradeoff#1', 'go-conc-sync::rwmutex-tradeoff', 'Read-mostly load — writers are rare', false, 1),
-  ('go-conc-sync::rwmutex-tradeoff#2', 'go-conc-sync::rwmutex-tradeoff', 'Many CPUs reading — parallel readers scale', false, 2),
-  ('go-conc-sync::rwmutex-tradeoff#3', 'go-conc-sync::rwmutex-tradeoff', 'Long read holds — concurrency is exploited', false, 3),
-  ('go-conc-sync::once-panic#0', 'go-conc-sync::once-panic', 'Marked done — the function never runs again', true, 0),
-  ('go-conc-sync::once-panic#1', 'go-conc-sync::once-panic', 'Retried — Once reruns until it succeeds', false, 1),
-  ('go-conc-sync::once-panic#2', 'go-conc-sync::once-panic', 'Panics again — Once re-invokes on each call', false, 2),
-  ('go-conc-sync::once-panic#3', 'go-conc-sync::once-panic', 'Returns error — Do reports the prior panic', false, 3),
-  ('go-conc-sync::rlock-reentrant#0', 'go-conc-sync::rlock-reentrant', 'Deadlock-prone — a pending writer blocks the second RLock', true, 0),
-  ('go-conc-sync::rlock-reentrant#1', 'go-conc-sync::rlock-reentrant', 'Always safe — read locks are reentrant', false, 1),
-  ('go-conc-sync::rlock-reentrant#2', 'go-conc-sync::rlock-reentrant', 'Compile error — nested RLock is rejected', false, 2),
-  ('go-conc-sync::rlock-reentrant#3', 'go-conc-sync::rlock-reentrant', 'Auto-upgraded — the second call takes a write lock', false, 3),
-  ('go-conc-sync::zero-value#0', 'go-conc-sync::zero-value', 'All four usable at zero value — no constructor needed', true, 0),
-  ('go-conc-sync::zero-value#1', 'go-conc-sync::zero-value', 'WaitGroup needs New — zero value panics on Add', false, 1),
-  ('go-conc-sync::zero-value#2', 'go-conc-sync::zero-value', 'Mutex needs Init — zero value is unlocked-invalid', false, 2),
-  ('go-conc-sync::zero-value#3', 'go-conc-sync::zero-value', 'Once needs a flag — zero value runs immediately', false, 3),
-  ('go-conc-worker-pool::who-closes-results#0', 'go-conc-worker-pool::who-closes-results', 'Separate closer goroutine — wg.Wait then close(results)', true, 0),
-  ('go-conc-worker-pool::who-closes-results#1', 'go-conc-worker-pool::who-closes-results', 'Each worker calls close — last one wins the race', false, 1),
-  ('go-conc-worker-pool::who-closes-results#2', 'go-conc-worker-pool::who-closes-results', 'Producer closes results — right after close(jobs)', false, 2),
-  ('go-conc-worker-pool::who-closes-results#3', 'go-conc-worker-pool::who-closes-results', 'Never close results — rely on GC to reclaim it', false, 3),
-  ('go-conc-worker-pool::deadlock-unbuffered#0', 'go-conc-worker-pool::deadlock-unbuffered', 'Deadlock — workers block sending to unread results', true, 0),
-  ('go-conc-worker-pool::deadlock-unbuffered#1', 'go-conc-worker-pool::deadlock-unbuffered', 'Runs fine — workers buffer results internally', false, 1),
-  ('go-conc-worker-pool::deadlock-unbuffered#2', 'go-conc-worker-pool::deadlock-unbuffered', 'Panic — send on a full channel is fatal', false, 2),
-  ('go-conc-worker-pool::deadlock-unbuffered#3', 'go-conc-worker-pool::deadlock-unbuffered', 'Producer skips jobs — non-blocking send drops them', false, 3),
-  ('go-conc-worker-pool::forgot-close-jobs#0', 'go-conc-worker-pool::forgot-close-jobs', 'Deadlock — workers block on range, wg.Wait never returns', true, 0),
-  ('go-conc-worker-pool::forgot-close-jobs#1', 'go-conc-worker-pool::forgot-close-jobs', 'Clean exit — main returns after last result', false, 1),
-  ('go-conc-worker-pool::forgot-close-jobs#2', 'go-conc-worker-pool::forgot-close-jobs', 'Goroutines leak — program exits without deadlock', false, 2),
-  ('go-conc-worker-pool::forgot-close-jobs#3', 'go-conc-worker-pool::forgot-close-jobs', 'Panic — ranging a non-closed channel is illegal', false, 3),
-  ('go-conc-worker-pool::done-channel-cancel#0', 'go-conc-worker-pool::done-channel-cancel', 'close(done) — a closed channel is readable by all receivers', true, 0),
-  ('go-conc-worker-pool::done-channel-cancel#1', 'go-conc-worker-pool::done-channel-cancel', 'Send one value — the first worker to read wins', false, 1),
-  ('go-conc-worker-pool::done-channel-cancel#2', 'go-conc-worker-pool::done-channel-cancel', 'Buffer done to N — one slot reserved per worker', false, 2),
-  ('go-conc-worker-pool::done-channel-cancel#3', 'go-conc-worker-pool::done-channel-cancel', 'done must be bidirectional — workers also send on it', false, 3),
-  ('go-conc-worker-pool::bounded-concurrency#0', 'go-conc-worker-pool::bounded-concurrency', 'Worker count N — only N goroutines ever pull jobs', true, 0),
-  ('go-conc-worker-pool::bounded-concurrency#1', 'go-conc-worker-pool::bounded-concurrency', 'jobs channel capacity — buffer size caps parallelism', false, 1),
-  ('go-conc-worker-pool::bounded-concurrency#2', 'go-conc-worker-pool::bounded-concurrency', 'GOMAXPROCS — the scheduler runs at most that many', false, 2),
-  ('go-conc-worker-pool::bounded-concurrency#3', 'go-conc-worker-pool::bounded-concurrency', 'Number of jobs sent — more jobs means more parallelism', false, 3),
-  ('go-conc-worker-pool::waitgroup-add-placement#0', 'go-conc-worker-pool::waitgroup-add-placement', 'Add races Wait — Wait may see zero before workers add', true, 0),
-  ('go-conc-worker-pool::waitgroup-add-placement#1', 'go-conc-worker-pool::waitgroup-add-placement', 'Add inside goroutine is illegal — must be in main', false, 1),
-  ('go-conc-worker-pool::waitgroup-add-placement#2', 'go-conc-worker-pool::waitgroup-add-placement', 'Counter overflows — each worker adds independently', false, 2),
-  ('go-conc-worker-pool::waitgroup-add-placement#3', 'go-conc-worker-pool::waitgroup-add-placement', 'defer Done runs first — counter goes negative always', false, 3),
-  ('go-conc-hazards::race-detector-guarantee#0', 'go-conc-hazards::race-detector-guarantee', 'No races exist — detector proves absence', false, 0),
-  ('go-conc-hazards::race-detector-guarantee#1', 'go-conc-hazards::race-detector-guarantee', 'No races on executed interleavings — unexercised paths untested', true, 1),
-  ('go-conc-hazards::race-detector-guarantee#2', 'go-conc-hazards::race-detector-guarantee', 'Races impossible now — instrumentation rewrote the binary', false, 2),
-  ('go-conc-hazards::race-detector-guarantee#3', 'go-conc-hazards::race-detector-guarantee', 'Only map races ruled out — other types slip past', false, 3),
-  ('go-conc-hazards::closed-channel-send#0', 'go-conc-hazards::closed-channel-send', 'Receiving from a closed channel — yields zero value', false, 0),
-  ('go-conc-hazards::closed-channel-send#1', 'go-conc-hazards::closed-channel-send', 'Closing an already-closed channel — second close panics', true, 1),
-  ('go-conc-hazards::closed-channel-send#2', 'go-conc-hazards::closed-channel-send', 'Closing a nil channel — send blocks forever instead', false, 2),
-  ('go-conc-hazards::closed-channel-send#3', 'go-conc-hazards::closed-channel-send', 'Sending on a full buffered channel — it just blocks', false, 3),
-  ('go-conc-hazards::leak-unreceived#0', 'go-conc-hazards::leak-unreceived', 'Garbage collected — no references remain to it', false, 0),
-  ('go-conc-hazards::leak-unreceived#1', 'go-conc-hazards::leak-unreceived', 'Leaks forever — blocked on send nobody receives', true, 1),
-  ('go-conc-hazards::leak-unreceived#2', 'go-conc-hazards::leak-unreceived', 'Panics on send — receiver already gone', false, 2),
-  ('go-conc-hazards::leak-unreceived#3', 'go-conc-hazards::leak-unreceived', 'Returns cleanly — send on unbuffered succeeds anyway', false, 3),
-  ('go-conc-hazards::fatal-deadlock-detect#0', 'go-conc-hazards::fatal-deadlock-detect', 'Any goroutine blocks — scheduler flags the stall', false, 0),
-  ('go-conc-hazards::fatal-deadlock-detect#1', 'go-conc-hazards::fatal-deadlock-detect', 'Every goroutine blocks — none can make progress', true, 1),
-  ('go-conc-hazards::fatal-deadlock-detect#2', 'go-conc-hazards::fatal-deadlock-detect', 'A mutex is held — over a configurable timeout', false, 2),
-  ('go-conc-hazards::fatal-deadlock-detect#3', 'go-conc-hazards::fatal-deadlock-detect', 'Two goroutines block — on each other cyclically', false, 3),
-  ('go-conc-hazards::single-writer-race#0', 'go-conc-hazards::single-writer-race', 'Never a race — word-sized int writes are atomic on amd64', false, 0),
-  ('go-conc-hazards::single-writer-race#1', 'go-conc-hazards::single-writer-race', 'Yes — concurrent read/write lacks happens-before', true, 1),
-  ('go-conc-hazards::single-writer-race#2', 'go-conc-hazards::single-writer-race', 'Never a race — a single writer eliminates it', false, 2),
-  ('go-conc-hazards::single-writer-race#3', 'go-conc-hazards::single-writer-race', 'Only a data race — when the int spans a cache line', false, 3),
-  ('go-conc-hazards::range-close-leak#0', 'go-conc-hazards::range-close-leak', 'Loop exits — range detects idle producers', false, 0),
-  ('go-conc-hazards::range-close-leak#1', 'go-conc-hazards::range-close-leak', 'Consumer blocks — range waits on a channel never closed', true, 1),
-  ('go-conc-hazards::range-close-leak#2', 'go-conc-hazards::range-close-leak', 'Panic raised — range on drained channel errors', false, 2),
-  ('go-conc-hazards::range-close-leak#3', 'go-conc-hazards::range-close-leak', 'Loop spins — receiving zero values in a busy loop', false, 3),
-  ('go-conc-atomic::seqcst-ordering#0', 'go-conc-atomic::seqcst-ordering', 'Sequential consistency — one total order all goroutines agree on', true, 0),
-  ('go-conc-atomic::seqcst-ordering#1', 'go-conc-atomic::seqcst-ordering', 'Only acquire/release — no total order across atomics', false, 1),
-  ('go-conc-atomic::seqcst-ordering#2', 'go-conc-atomic::seqcst-ordering', 'Relaxed by default — you opt into a fence', false, 2),
-  ('go-conc-atomic::seqcst-ordering#3', 'go-conc-atomic::seqcst-ordering', 'Per-variable order — reordered across variables', false, 3),
-  ('go-conc-atomic::racy-vs-atomic#0', 'go-conc-atomic::racy-vs-atomic', 'Data race — read racing any write is UB', true, 0),
-  ('go-conc-atomic::racy-vs-atomic#1', 'go-conc-atomic::racy-vs-atomic', 'Only a torn read — stale but well-defined value', false, 1),
-  ('go-conc-atomic::racy-vs-atomic#2', 'go-conc-atomic::racy-vs-atomic', 'Fine on amd64 — 64-bit loads are naturally atomic', false, 2),
-  ('go-conc-atomic::racy-vs-atomic#3', 'go-conc-atomic::racy-vs-atomic', 'Only a race — if the read also used atomic.Add', false, 3),
-  ('go-conc-atomic::copy-atomic#0', 'go-conc-atomic::copy-atomic', 'noCopy violation — go vet flags it, use n.Load()', true, 0),
-  ('go-conc-atomic::copy-atomic#1', 'go-conc-atomic::copy-atomic', 'Safe copy — m becomes an independent counter', false, 1),
-  ('go-conc-atomic::copy-atomic#2', 'go-conc-atomic::copy-atomic', 'Compile error — atomic types are not copyable', false, 2),
-  ('go-conc-atomic::copy-atomic#3', 'go-conc-atomic::copy-atomic', 'Deep copy — but the two share a lock', false, 3),
-  ('go-conc-atomic::atomics-vs-mutex#0', 'go-conc-atomic::atomics-vs-mutex', 'Single-word hot counter — no critical section to serialize', true, 0),
-  ('go-conc-atomic::atomics-vs-mutex#1', 'go-conc-atomic::atomics-vs-mutex', 'Multi-field invariant update — atomics compose fields', false, 1),
-  ('go-conc-atomic::atomics-vs-mutex#2', 'go-conc-atomic::atomics-vs-mutex', 'Long read-mostly section — atomics scale reads better', false, 2),
-  ('go-conc-atomic::atomics-vs-mutex#3', 'go-conc-atomic::atomics-vs-mutex', 'Any shared state — atomics always beat a mutex', false, 3),
-  ('go-conc-atomic::add-return#0', 'go-conc-atomic::add-return', 'Final is 2000 — each return is the post-increment value', true, 0),
-  ('go-conc-atomic::add-return#1', 'go-conc-atomic::add-return', 'Final is 2000 — but two returns may repeat a value', false, 1),
-  ('go-conc-atomic::add-return#2', 'go-conc-atomic::add-return', 'Final may be under 2000 — updates can be lost', false, 2),
-  ('go-conc-atomic::add-return#3', 'go-conc-atomic::add-return', 'Final is 2000 — returns are the pre-increment value', false, 3),
-  ('go-conc-atomic::pointer-publish#0', 'go-conc-atomic::pointer-publish', 'Yes — Store happens-before the Load reading it', true, 0),
-  ('go-conc-atomic::pointer-publish#1', 'go-conc-atomic::pointer-publish', 'Still racy — a mutex must guard the field reads', false, 1),
-  ('go-conc-atomic::pointer-publish#2', 'go-conc-atomic::pointer-publish', 'Only the pointer — fields may be seen half-written', false, 2),
-  ('go-conc-atomic::pointer-publish#3', 'go-conc-atomic::pointer-publish', 'Yes — but only if fields are atomic types', false, 3),
-  ('go-mem-stack-heap::return-pointer-escapes#0', 'go-mem-stack-heap::return-pointer-escapes', 'Stays on stack — Go grows the caller frame', false, 0),
-  ('go-mem-stack-heap::return-pointer-escapes#1', 'go-mem-stack-heap::return-pointer-escapes', 'Escapes to heap — pointer outlives the frame', true, 1),
-  ('go-mem-stack-heap::return-pointer-escapes#2', 'go-mem-stack-heap::return-pointer-escapes', 'Stack via inlining — callee frame is reused', false, 2),
-  ('go-mem-stack-heap::return-pointer-escapes#3', 'go-mem-stack-heap::return-pointer-escapes', 'Escapes to heap — structs never fit the stack', false, 3),
-  ('go-mem-stack-heap::interface-boxing#0', 'go-mem-stack-heap::interface-boxing', 'Interface conversion boxes — value stored behind a pointer', true, 0),
-  ('go-mem-stack-heap::interface-boxing#1', 'go-mem-stack-heap::interface-boxing', 'myInt is too large — exceeds a stack word', false, 1),
-  ('go-mem-stack-heap::interface-boxing#2', 'go-mem-stack-heap::interface-boxing', 'String allocates — the method body forces it', false, 2),
-  ('go-mem-stack-heap::interface-boxing#3', 'go-mem-stack-heap::interface-boxing', 'Return value copied — copies always heap-allocate', false, 3),
-  ('go-mem-stack-heap::gcflags-m#0', 'go-mem-stack-heap::gcflags-m', 'go build -gcflags=-m — prints escape analysis', true, 0),
-  ('go-mem-stack-heap::gcflags-m#1', 'go-mem-stack-heap::gcflags-m', 'go build -race — instruments memory accesses', false, 1),
-  ('go-mem-stack-heap::gcflags-m#2', 'go-mem-stack-heap::gcflags-m', 'go tool pprof — samples the running heap', false, 2),
-  ('go-mem-stack-heap::gcflags-m#3', 'go-mem-stack-heap::gcflags-m', 'go vet -escape — statically flags escapes', false, 3),
-  ('go-mem-stack-heap::slice-append-escape#0', 'go-mem-stack-heap::slice-append-escape', 'Always heap — slices are reference types', false, 0),
-  ('go-mem-stack-heap::slice-append-escape#1', 'go-mem-stack-heap::slice-append-escape', 'Depends — escapes only if it outlives the frame', true, 1),
-  ('go-mem-stack-heap::slice-append-escape#2', 'go-mem-stack-heap::slice-append-escape', 'Never escapes — append reuses caller memory', false, 2),
-  ('go-mem-stack-heap::slice-append-escape#3', 'go-mem-stack-heap::slice-append-escape', 'Escapes on growth — realloc always uses heap', false, 3),
-  ('go-mem-stack-heap::why-perf#0', 'go-mem-stack-heap::why-perf', 'Stack frees are pointer bumps — no GC scanning', true, 0),
-  ('go-mem-stack-heap::why-perf#1', 'go-mem-stack-heap::why-perf', 'Heap is slower RAM — stack lives in cache', false, 1),
-  ('go-mem-stack-heap::why-perf#2', 'go-mem-stack-heap::why-perf', 'Escaped values skip inlining — calls get costlier', false, 2),
-  ('go-mem-stack-heap::why-perf#3', 'go-mem-stack-heap::why-perf', 'Heap values are copied more — extra memcpy per use', false, 3),
-  ('go-mem-stack-heap::closure-capture#0', 'go-mem-stack-heap::closure-capture', 'Escapes to heap — captured var outlives the frame', true, 0),
-  ('go-mem-stack-heap::closure-capture#1', 'go-mem-stack-heap::closure-capture', 'Stays on stack — closures copy captured vars', false, 1),
-  ('go-mem-stack-heap::closure-capture#2', 'go-mem-stack-heap::closure-capture', 'Escapes to heap — every closure allocates', false, 2),
-  ('go-mem-stack-heap::closure-capture#3', 'go-mem-stack-heap::closure-capture', 'Stack via inlining — the closure is inlined away', false, 3),
-  ('go-mem-gc::tricolor-invariant#0', 'go-mem-gc::tricolor-invariant', 'No black-to-white pointers — reachable objects stay marked', true, 0),
-  ('go-mem-gc::tricolor-invariant#1', 'go-mem-gc::tricolor-invariant', 'Only black-to-gray — black may reference gray but never white', false, 1),
-  ('go-mem-gc::tricolor-invariant#2', 'go-mem-gc::tricolor-invariant', 'White isolation — white objects never reference black ones', false, 2),
-  ('go-mem-gc::tricolor-invariant#3', 'go-mem-gc::tricolor-invariant', 'Gray monotonicity — gray count strictly decreases each step', false, 3),
-  ('go-mem-gc::gogc-meaning#0', 'go-mem-gc::gogc-meaning', '~100 MB heap — one live-heap increment past 50 MB', true, 0),
-  ('go-mem-gc::gogc-meaning#1', 'go-mem-gc::gogc-meaning', '~150 MB heap — grows to 3x the live set', false, 1),
-  ('go-mem-gc::gogc-meaning#2', 'go-mem-gc::gogc-meaning', '100 MB fixed — GOGC is an absolute megabyte cap', false, 2),
-  ('go-mem-gc::gogc-meaning#3', 'go-mem-gc::gogc-meaning', 'Every 100 ms — GOGC is a time interval', false, 3),
-  ('go-mem-gc::write-barrier-when#0', 'go-mem-gc::write-barrier-when', 'Only during concurrent mark — off in steady state', true, 0),
-  ('go-mem-gc::write-barrier-when#1', 'go-mem-gc::write-barrier-when', 'Always enabled — every pointer write pays the cost', false, 1),
-  ('go-mem-gc::write-barrier-when#2', 'go-mem-gc::write-barrier-when', 'Only during stop-the-world — mutators are paused anyway', false, 2),
-  ('go-mem-gc::write-barrier-when#3', 'go-mem-gc::write-barrier-when', 'Only during sweep — reclaiming needs pointer tracking', false, 3),
-  ('go-mem-gc::gomemlimit-behavior#0', 'go-mem-gc::gomemlimit-behavior', 'Soft ceiling tightens pacing — GC runs more often near limit', true, 0),
-  ('go-mem-gc::gomemlimit-behavior#1', 'go-mem-gc::gomemlimit-behavior', 'Hard cap — allocations fail with OOM once the limit is hit', false, 1),
-  ('go-mem-gc::gomemlimit-behavior#2', 'go-mem-gc::gomemlimit-behavior', 'Disables GOGC entirely — only the limit governs pacing', false, 2),
-  ('go-mem-gc::gomemlimit-behavior#3', 'go-mem-gc::gomemlimit-behavior', 'Ignored unless GOGC unset — GOGC always wins', false, 3),
-  ('go-mem-gc::stw-phases#0', 'go-mem-gc::stw-phases', 'Mark setup and mark termination — brief STW brackets', true, 0),
-  ('go-mem-gc::stw-phases#1', 'go-mem-gc::stw-phases', 'The entire mark phase — all marking is stop-the-world', false, 1),
-  ('go-mem-gc::stw-phases#2', 'go-mem-gc::stw-phases', 'The entire sweep phase — reclamation freezes the world', false, 2),
-  ('go-mem-gc::stw-phases#3', 'go-mem-gc::stw-phases', 'Zero STW ever — Go''s GC is fully pause-free', false, 3),
-  ('go-mem-gc::mark-assist#0', 'go-mem-gc::mark-assist', 'Allocation debt — fast allocators help mark to keep pace', true, 0),
-  ('go-mem-gc::mark-assist#1', 'go-mem-gc::mark-assist', 'Priority boost — allocators get scheduled ahead of markers', false, 1),
-  ('go-mem-gc::mark-assist#2', 'go-mem-gc::mark-assist', 'Sweep prepayment — allocators pre-clear future free spans', false, 2),
-  ('go-mem-gc::mark-assist#3', 'go-mem-gc::mark-assist', 'Barrier bypass — assisting goroutines skip the write barrier', false, 3),
-  ('go-mem-model::race-is-ub#0', 'go-mem-model::race-is-ub', 'Old or new value — but always one clean word', false, 0),
-  ('go-mem-model::race-is-ub#1', 'go-mem-model::race-is-ub', 'Undefined behavior — any value including torn or fabricated', true, 1),
-  ('go-mem-model::race-is-ub#2', 'go-mem-model::race-is-ub', 'Always the latest write — Go inserts implicit barriers', false, 2),
-  ('go-mem-model::race-is-ub#3', 'go-mem-model::race-is-ub', 'Zero value — until the write flushes to memory', false, 3),
-  ('go-mem-model::chan-hb-direction#0', 'go-mem-model::chan-hb-direction', 'Send is ordered first — its paired receive then completes', true, 0),
-  ('go-mem-model::chan-hb-direction#1', 'go-mem-model::chan-hb-direction', 'Receive completes — happens-before the send begins', false, 1),
-  ('go-mem-model::chan-hb-direction#2', 'go-mem-model::chan-hb-direction', 'Send and receive — are wholly unordered by the model', false, 2),
-  ('go-mem-model::chan-hb-direction#3', 'go-mem-model::chan-hb-direction', 'Close — happens-before every prior send on that channel', false, 3),
-  ('go-mem-model::buffered-hb#0', 'go-mem-model::buffered-hb', 'k-th receive — happens-before the (k+C)-th send completes', true, 0),
-  ('go-mem-model::buffered-hb#1', 'go-mem-model::buffered-hb', 'Every send — happens-before every receive globally', false, 1),
-  ('go-mem-model::buffered-hb#2', 'go-mem-model::buffered-hb', 'k-th send — happens-before the k-th receive on all CPUs', false, 2),
-  ('go-mem-model::buffered-hb#3', 'go-mem-model::buffered-hb', 'Buffered channels — provide no happens-before at all', false, 3),
-  ('go-mem-model::double-checked#0', 'go-mem-model::double-checked', 'Unlocked read — races with the locked write', true, 0),
-  ('go-mem-model::double-checked#1', 'go-mem-model::double-checked', 'Mutexes in Go — are not reentrant', false, 1),
-  ('go-mem-model::double-checked#2', 'go-mem-model::double-checked', 'Pointer writes — are never atomic on any platform', false, 2),
-  ('go-mem-model::double-checked#3', 'go-mem-model::double-checked', 'It works fine — the nil check acts as a barrier', false, 3),
-  ('go-mem-model::init-vs-goroutine#0', 'go-mem-model::init-vs-goroutine', 'Yes — init happens-before main which starts the goroutine', true, 0),
-  ('go-mem-model::init-vs-goroutine#1', 'go-mem-model::init-vs-goroutine', 'Not ordered — only atomics cross the init boundary', false, 1),
-  ('go-mem-model::init-vs-goroutine#2', 'go-mem-model::init-vs-goroutine', 'Only if x — has a pointer type', false, 2),
-  ('go-mem-model::init-vs-goroutine#3', 'go-mem-model::init-vs-goroutine', 'Unordered — init runs concurrently with main', false, 3),
-  ('go-mem-model::atomic-vs-plain#0', 'go-mem-model::atomic-vs-plain', 'Yes — the atomic load-acquire orders the later plain read', true, 0),
-  ('go-mem-model::atomic-vs-plain#1', 'go-mem-model::atomic-vs-plain', 'Always a race — mixing atomic with plain access', false, 1),
-  ('go-mem-model::atomic-vs-plain#2', 'go-mem-model::atomic-vs-plain', 'Only if data — is also accessed atomically', false, 2),
-  ('go-mem-model::atomic-vs-plain#3', 'go-mem-model::atomic-vs-plain', 'Relaxed ordering — Go atomics aren''t sequentially consistent', false, 3),
-  ('go-mem-pool-alloc::pool-gc-lifetime#0', 'go-mem-pool-alloc::pool-gc-lifetime', 'Forever — Pool pins objects strongly', false, 0),
-  ('go-mem-pool-alloc::pool-gc-lifetime#1', 'go-mem-pool-alloc::pool-gc-lifetime', 'About 2 GC cycles — victim cache drops survivors', true, 1),
-  ('go-mem-pool-alloc::pool-gc-lifetime#2', 'go-mem-pool-alloc::pool-gc-lifetime', 'Until memory pressure — only OOM triggers eviction', false, 2),
-  ('go-mem-pool-alloc::pool-gc-lifetime#3', 'go-mem-pool-alloc::pool-gc-lifetime', 'Exactly one GC cycle — cleared on next mark', false, 3),
-  ('go-mem-pool-alloc::pool-reset#0', 'go-mem-pool-alloc::pool-reset', 'Reset frees the backing array — reclaims heap eagerly', false, 0),
-  ('go-mem-pool-alloc::pool-reset#1', 'go-mem-pool-alloc::pool-reset', 'Get returns dirty state — stale bytes leak downstream', true, 1),
-  ('go-mem-pool-alloc::pool-reset#2', 'go-mem-pool-alloc::pool-reset', 'Put panics on non-empty buffers — runtime guard', false, 2),
-  ('go-mem-pool-alloc::pool-reset#3', 'go-mem-pool-alloc::pool-reset', 'Reset re-registers the object — Pool needs fresh identity', false, 3),
-  ('go-mem-pool-alloc::pool-value-vs-ptr#0', 'go-mem-pool-alloc::pool-value-vs-ptr', 'Interface boxing of values — Put allocates each call', true, 0),
-  ('go-mem-pool-alloc::pool-value-vs-ptr#1', 'go-mem-pool-alloc::pool-value-vs-ptr', 'Values are immutable — Reset cannot mutate them', false, 1),
-  ('go-mem-pool-alloc::pool-value-vs-ptr#2', 'go-mem-pool-alloc::pool-value-vs-ptr', 'Pool rejects non-pointers — compile-time type error', false, 2),
-  ('go-mem-pool-alloc::pool-value-vs-ptr#3', 'go-mem-pool-alloc::pool-value-vs-ptr', 'Values skip the victim cache — cleared immediately', false, 3),
-  ('go-mem-pool-alloc::false-sharing-pad#0', 'go-mem-pool-alloc::false-sharing-pad', 'Word tearing — non-atomic 64-bit writes split', false, 0),
-  ('go-mem-pool-alloc::false-sharing-pad#1', 'go-mem-pool-alloc::false-sharing-pad', 'False sharing — distinct counters share cache line', true, 1),
-  ('go-mem-pool-alloc::false-sharing-pad#2', 'go-mem-pool-alloc::false-sharing-pad', 'Heap escape — the slice moves off stack', false, 2),
-  ('go-mem-pool-alloc::false-sharing-pad#3', 'go-mem-pool-alloc::false-sharing-pad', 'GC scanning — pointers force mark work', false, 3),
-  ('go-mem-pool-alloc::prealloc-cap#0', 'go-mem-pool-alloc::prealloc-cap', 'make([]T, 0, n) — one alloc, no growth reslice', true, 0),
-  ('go-mem-pool-alloc::prealloc-cap#1', 'go-mem-pool-alloc::prealloc-cap', 'make([]T, n) then append — grows length past n', false, 1),
-  ('go-mem-pool-alloc::prealloc-cap#2', 'go-mem-pool-alloc::prealloc-cap', 'var s []T then append — amortized growth suffices', false, 2),
-  ('go-mem-pool-alloc::prealloc-cap#3', 'go-mem-pool-alloc::prealloc-cap', 'make([]T, 0) plus cap hint — cap arg is advisory', false, 3),
-  ('go-mem-pool-alloc::pool-get-nil#0', 'go-mem-pool-alloc::pool-get-nil', 'A zero value of the type — Pool infers type', false, 0),
-  ('go-mem-pool-alloc::pool-get-nil#1', 'go-mem-pool-alloc::pool-get-nil', 'nil — caller must handle the miss', true, 1),
-  ('go-mem-pool-alloc::pool-get-nil#2', 'go-mem-pool-alloc::pool-get-nil', 'It blocks — waits for a Put', false, 2),
-  ('go-mem-pool-alloc::pool-get-nil#3', 'go-mem-pool-alloc::pool-get-nil', 'It panics — New is mandatory', false, 3),
-  ('go-iface-internals::iface-vs-eface#0', 'go-iface-internals::iface-vs-eface', 'First word differs — *itab vs *_type', true, 0),
-  ('go-iface-internals::iface-vs-eface#1', 'go-iface-internals::iface-vs-eface', 'Identical layout — both store a raw *_type', false, 1),
-  ('go-iface-internals::iface-vs-eface#2', 'go-iface-internals::iface-vs-eface', 'eface is larger — it embeds the method set inline', false, 2),
-  ('go-iface-internals::iface-vs-eface#3', 'go-iface-internals::iface-vs-eface', 'iface is one word — data pointer only after Go 1.18', false, 3),
-  ('go-iface-internals::typed-nil#0', 'go-iface-internals::typed-nil', 'itab word is set — only both-words-nil is nil', true, 0),
-  ('go-iface-internals::typed-nil#1', 'go-iface-internals::typed-nil', 'Go copies Dog{} — so data is non-nil', false, 1),
-  ('go-iface-internals::typed-nil#2', 'go-iface-internals::typed-nil', 'Value receivers forbid nil — panic occurs instead', false, 2),
-  ('go-iface-internals::typed-nil#3', 'go-iface-internals::typed-nil', 'Compares data alone — nil data yields false', false, 3),
-  ('go-iface-internals::dispatch-cost#0', 'go-iface-internals::dispatch-cost', 'Indirect call via itab — blocks inlining', true, 0),
-  ('go-iface-internals::dispatch-cost#1', 'go-iface-internals::dispatch-cost', 'A full type assertion — runs on every call', false, 1),
-  ('go-iface-internals::dispatch-cost#2', 'go-iface-internals::dispatch-cost', 'Heap allocation — one per dispatch always', false, 2),
-  ('go-iface-internals::dispatch-cost#3', 'go-iface-internals::dispatch-cost', 'A map lookup by name — hashing the method', false, 3),
-  ('go-iface-internals::itab-construction#0', 'go-iface-internals::itab-construction', 'Compile time or cached at runtime — then reused', true, 0),
-  ('go-iface-internals::itab-construction#1', 'go-iface-internals::itab-construction', 'On every assignment — rebuilt each conversion', false, 1),
-  ('go-iface-internals::itab-construction#2', 'go-iface-internals::itab-construction', 'Only via reflect — normal code never builds one', false, 2),
-  ('go-iface-internals::itab-construction#3', 'go-iface-internals::itab-construction', 'At link time exclusively — no runtime creation', false, 3),
-  ('go-iface-internals::data-word-storage#0', 'go-iface-internals::data-word-storage', 'Pointer to a copy — values aren''t stored inline', true, 0),
-  ('go-iface-internals::data-word-storage#1', 'go-iface-internals::data-word-storage', 'The integer 7 inline — small scalars are packed', false, 1),
-  ('go-iface-internals::data-word-storage#2', 'go-iface-internals::data-word-storage', 'A pointer to the stack slot — of the original var', false, 2),
-  ('go-iface-internals::data-word-storage#3', 'go-iface-internals::data-word-storage', 'Zero — with the value encoded in the type word', false, 3),
-  ('go-iface-internals::assert-mechanics#0', 'go-iface-internals::assert-mechanics', 'Compares itab type word — against T''s *_type', true, 0),
-  ('go-iface-internals::assert-mechanics#1', 'go-iface-internals::assert-mechanics', 'Walks the itab fun array — matching signatures', false, 1),
-  ('go-iface-internals::assert-mechanics#2', 'go-iface-internals::assert-mechanics', 'Calls T''s methods — checks they don''t panic', false, 2),
-  ('go-iface-internals::assert-mechanics#3', 'go-iface-internals::assert-mechanics', 'Hashes the type name — and compares strings', false, 3),
-  ('go-iface-nil::typed-nil-compare#0', 'go-iface-nil::typed-nil-compare', 'false — e holds type *ValidationError, so not nil', true, 0),
-  ('go-iface-nil::typed-nil-compare#1', 'go-iface-nil::typed-nil-compare', 'true — the underlying pointer value is nil', false, 1),
-  ('go-iface-nil::typed-nil-compare#2', 'go-iface-nil::typed-nil-compare', 'true — assigning nil pointer yields nil interface', false, 2),
-  ('go-iface-nil::typed-nil-compare#3', 'go-iface-nil::typed-nil-compare', 'panic — comparing a nil pointer dereferences it', false, 3),
-  ('go-iface-nil::named-return-leak#0', 'go-iface-nil::named-return-leak', 'concrete type leaks — pointer type fills interface type word', true, 0),
-  ('go-iface-nil::named-return-leak#1', 'go-iface-nil::named-return-leak', 'nil pointer autoboxes — Go copies zero value into interface', false, 1),
-  ('go-iface-nil::named-return-leak#2', 'go-iface-nil::named-return-leak', 'error interface caches — last non-nil error is retained', false, 2),
-  ('go-iface-nil::named-return-leak#3', 'go-iface-nil::named-return-leak', 'named returns default — err initialized to sentinel', false, 3),
-  ('go-iface-nil::func-signature-fix#0', 'go-iface-nil::func-signature-fix', 'return nil literal — never a typed concrete value', true, 0),
-  ('go-iface-nil::func-signature-fix#1', 'go-iface-nil::func-signature-fix', 'return (*MyErr)(nil) — explicit conversion is safe', false, 1),
-  ('go-iface-nil::func-signature-fix#2', 'go-iface-nil::func-signature-fix', 'Compare via errors.Is helper — normalizes typed nils', false, 2),
-  ('go-iface-nil::func-signature-fix#3', 'go-iface-nil::func-signature-fix', 'use value receiver — avoids pointer boxing entirely', false, 3),
-  ('go-iface-nil::reflect-detect#0', 'go-iface-nil::reflect-detect', 'reflect Kind is pointer plus IsNil — inspects boxed value', true, 0),
-  ('go-iface-nil::reflect-detect#1', 'go-iface-nil::reflect-detect', 'v == nil — direct comparison catches typed nils', false, 1),
-  ('go-iface-nil::reflect-detect#2', 'go-iface-nil::reflect-detect', 'fmt %v equals <nil> — string form is reliable', false, 2),
-  ('go-iface-nil::reflect-detect#3', 'go-iface-nil::reflect-detect', 'errors.Is nil — treats typed nil pointers as nil', false, 3),
-  ('go-iface-nil::panic-source#0', 'go-iface-nil::panic-source', 'typed nil passed guard — method deref hit nil receiver', true, 0),
-  ('go-iface-nil::panic-source#1', 'go-iface-nil::panic-source', 'data race — err mutated to nil after the guard', false, 1),
-  ('go-iface-nil::panic-source#2', 'go-iface-nil::panic-source', 'interface corruption — GC moved the boxed pointer', false, 2),
-  ('go-iface-nil::panic-source#3', 'go-iface-nil::panic-source', 'shadowed variable — inner err shadowed outer nil', false, 3),
-  ('go-iface-nil::map-typed-nil#0', 'go-iface-nil::map-typed-nil', 'false — stored value carries type *int', true, 0),
-  ('go-iface-nil::map-typed-nil#1', 'go-iface-nil::map-typed-nil', 'true — missing keys and nil values both yield nil', false, 1),
-  ('go-iface-nil::map-typed-nil#2', 'go-iface-nil::map-typed-nil', 'true — nil pointer stored as untyped nil', false, 2),
-  ('go-iface-nil::map-typed-nil#3', 'go-iface-nil::map-typed-nil', 'false — map values are never comparable to nil', false, 3),
-  ('go-iface-method-sets::value-vs-pointer-satisfy#0', 'go-iface-method-sets::value-vs-pointer-satisfy', 'var i I = T{} — value has M in its set', false, 0),
-  ('go-iface-method-sets::value-vs-pointer-satisfy#1', 'go-iface-method-sets::value-vs-pointer-satisfy', 'var i I = &T{} — *T''s method set includes M', true, 1),
-  ('go-iface-method-sets::value-vs-pointer-satisfy#2', 'go-iface-method-sets::value-vs-pointer-satisfy', 'Both compile — receiver kind is irrelevant', false, 2),
-  ('go-iface-method-sets::value-vs-pointer-satisfy#3', 'go-iface-method-sets::value-vs-pointer-satisfy', 'Neither compiles — pointer receivers block interfaces', false, 3),
-  ('go-iface-method-sets::map-element-not-addressable#0', 'go-iface-method-sets::map-element-not-addressable', 'Read-only map values — writes are forbidden', false, 0),
-  ('go-iface-method-sets::map-element-not-addressable#1', 'go-iface-method-sets::map-element-not-addressable', 'm["k"] is not addressable — cannot auto-take its address', true, 1),
-  ('go-iface-method-sets::map-element-not-addressable#2', 'go-iface-method-sets::map-element-not-addressable', 'Maps store copies — M runs on a temporary', false, 2),
-  ('go-iface-method-sets::map-element-not-addressable#3', 'go-iface-method-sets::map-element-not-addressable', 'T lacks M entirely — only *T declares it', false, 3),
-  ('go-iface-method-sets::slice-element-addressable#0', 'go-iface-method-sets::slice-element-addressable', 'Compiles — s[0] is addressable, so &s[0] is taken', true, 0),
-  ('go-iface-method-sets::slice-element-addressable#1', 'go-iface-method-sets::slice-element-addressable', 'Fails — slice elements are not addressable', false, 1),
-  ('go-iface-method-sets::slice-element-addressable#2', 'go-iface-method-sets::slice-element-addressable', 'Compiles but mutates a copy — index yields a value', false, 2),
-  ('go-iface-method-sets::slice-element-addressable#3', 'go-iface-method-sets::slice-element-addressable', 'Fails — needs explicit (&s[0]).M() always', false, 3),
-  ('go-iface-method-sets::embedded-value-promotes#0', 'go-iface-method-sets::embedded-value-promotes', 'Yes — embedding always promotes every method', false, 0),
-  ('go-iface-method-sets::embedded-value-promotes#1', 'go-iface-method-sets::embedded-value-promotes', 'Only *S gets M — value S does not promote it', true, 1),
-  ('go-iface-method-sets::embedded-value-promotes#2', 'go-iface-method-sets::embedded-value-promotes', 'Yes — but M runs on a copy of T', false, 2),
-  ('go-iface-method-sets::embedded-value-promotes#3', 'go-iface-method-sets::embedded-value-promotes', 'Never promoted — pointer methods stay hidden', false, 3),
-  ('go-iface-method-sets::nil-interface-vs-typed-nil#0', 'go-iface-method-sets::nil-interface-vs-typed-nil', 'Branch skipped — nil pointer means nil interface', false, 0),
-  ('go-iface-method-sets::nil-interface-vs-typed-nil#1', 'go-iface-method-sets::nil-interface-vs-typed-nil', 'Branch taken — interface holds (*myErr, nil) non-nil', true, 1),
-  ('go-iface-method-sets::nil-interface-vs-typed-nil#2', 'go-iface-method-sets::nil-interface-vs-typed-nil', 'Panic — dereferencing a nil pointer receiver', false, 2),
-  ('go-iface-method-sets::nil-interface-vs-typed-nil#3', 'go-iface-method-sets::nil-interface-vs-typed-nil', 'Compile error — cannot return nil pointer as error', false, 3),
-  ('go-iface-method-sets::reflect-set-addressability#0', 'go-iface-method-sets::reflect-set-addressability', 'Pointer methods invisible — reflect drops them silently', false, 0),
-  ('go-iface-method-sets::reflect-set-addressability#1', 'go-iface-method-sets::reflect-set-addressability', 'Copy is unaddressable — *T''s set is absent', true, 1),
-  ('go-iface-method-sets::reflect-set-addressability#2', 'go-iface-method-sets::reflect-set-addressability', 'Only exported embedded — MethodByName sees a subset', false, 2),
-  ('go-iface-method-sets::reflect-set-addressability#3', 'go-iface-method-sets::reflect-set-addressability', 'Channel required — reflect cannot reach receivers', false, 3),
-  ('go-iface-embedding::promotion-depth#0', 'go-iface-embedding::promotion-depth', 'C.M — shallowest depth shadows deeper', true, 0),
-  ('go-iface-embedding::promotion-depth#1', 'go-iface-embedding::promotion-depth', 'A.M — deepest definition always wins', false, 1),
-  ('go-iface-embedding::promotion-depth#2', 'go-iface-embedding::promotion-depth', 'compile error — two M candidates conflict', false, 2),
-  ('go-iface-embedding::promotion-depth#3', 'go-iface-embedding::promotion-depth', 'B.M — intermediate embed promotes first', false, 3),
-  ('go-iface-embedding::diamond-ambiguity#0', 'go-iface-embedding::diamond-ambiguity', 'compile error — ambiguous selector at equal depth', true, 0),
-  ('go-iface-embedding::diamond-ambiguity#1', 'go-iface-embedding::diamond-ambiguity', 'X.Ping — first-listed embedded field wins', false, 1),
-  ('go-iface-embedding::diamond-ambiguity#2', 'go-iface-embedding::diamond-ambiguity', 'runtime panic — ambiguous method dispatch', false, 2),
-  ('go-iface-embedding::diamond-ambiguity#3', 'go-iface-embedding::diamond-ambiguity', 'both run — Go calls X then Y', false, 3),
-  ('go-iface-embedding::iface-embed-nil#0', 'go-iface-embedding::iface-embed-nil', 'nil-interface call — panics at call time', true, 0),
-  ('go-iface-embedding::iface-embed-nil#1', 'go-iface-embedding::iface-embed-nil', 'compile error — embedded interface must be set', false, 1),
-  ('go-iface-embedding::iface-embed-nil#2', 'go-iface-embedding::iface-embed-nil', 'zero values returned — silent no-op default', false, 2),
-  ('go-iface-embedding::iface-embed-nil#3', 'go-iface-embedding::iface-embed-nil', 'interface default runs — built-in fallback body', false, 3),
-  ('go-iface-embedding::satisfies-via-embed#0', 'go-iface-embedding::satisfies-via-embed', 'yes — promoted methods join T''s method set', true, 0),
-  ('go-iface-embedding::satisfies-via-embed#1', 'go-iface-embedding::satisfies-via-embed', 'Only declared methods count — embedding adds none', false, 1),
-  ('go-iface-embedding::satisfies-via-embed#2', 'go-iface-embedding::satisfies-via-embed', 'pointer embed differs — value embed would fail', false, 2),
-  ('go-iface-embedding::satisfies-via-embed#3', 'go-iface-embedding::satisfies-via-embed', 'only *T qualifies — plain T stays incomplete', false, 3),
-  ('go-iface-embedding::override-no-super#0', 'go-iface-embedding::override-no-super', 'explicit inner call — s.Log would recurse infinitely', true, 0),
-  ('go-iface-embedding::override-no-super#1', 'go-iface-embedding::override-no-super', 'virtual dispatch — s.Log routes to Logger.Log', false, 1),
-  ('go-iface-embedding::override-no-super#2', 'go-iface-embedding::override-no-super', 'no difference — both reach Logger.Log', false, 2),
-  ('go-iface-embedding::override-no-super#3', 'go-iface-embedding::override-no-super', 'compile error — cannot name the embedded method', false, 3),
-  ('go-iface-embedding::iface-embed-composition#0', 'go-iface-embedding::iface-embed-composition', 'valid — identical duplicate methods merge', true, 0),
-  ('go-iface-embedding::iface-embed-composition#1', 'go-iface-embedding::iface-embed-composition', 'invalid — duplicate Close from two interfaces', false, 1),
-  ('go-iface-embedding::iface-embed-composition#2', 'go-iface-embedding::iface-embed-composition', 'Only when signatures differ — else a name clash', false, 2),
-  ('go-iface-embedding::iface-embed-composition#3', 'go-iface-embedding::iface-embed-composition', 'invalid — interfaces cannot embed interfaces', false, 3),
-  ('go-iface-assertions::nil-comma-ok#0', 'go-iface-assertions::nil-comma-ok', 's=nil, ok=false — nil interface has no dynamic type', true, 0),
-  ('go-iface-assertions::nil-comma-ok#1', 'go-iface-assertions::nil-comma-ok', 's=nil, ok=true — nil satisfies every interface', false, 1),
-  ('go-iface-assertions::nil-comma-ok#2', 'go-iface-assertions::nil-comma-ok', 'panic — assertion on nil interface faults', false, 2),
-  ('go-iface-assertions::nil-comma-ok#3', 'go-iface-assertions::nil-comma-ok', 'compile error — cannot assert a nil value', false, 3),
-  ('go-iface-assertions::single-return-panic#0', 'go-iface-assertions::single-return-panic', 'panic — interface holds string not int', true, 0),
-  ('go-iface-assertions::single-return-panic#1', 'go-iface-assertions::single-return-panic', 'n=0 — mismatched assertion yields zero', false, 1),
-  ('go-iface-assertions::single-return-panic#2', 'go-iface-assertions::single-return-panic', 'n=0 — string coerces to int', false, 2),
-  ('go-iface-assertions::single-return-panic#3', 'go-iface-assertions::single-return-panic', 'compile error — types are incompatible', false, 3),
-  ('go-iface-assertions::iface-to-iface#0', 'go-iface-assertions::iface-to-iface', 'method-set membership — dynamic type implements Stringer', true, 0),
-  ('go-iface-assertions::iface-to-iface#1', 'go-iface-assertions::iface-to-iface', 'identity — dynamic type equals fmt.Stringer exactly', false, 1),
-  ('go-iface-assertions::iface-to-iface#2', 'go-iface-assertions::iface-to-iface', 'static type — v''s declared type is Stringer', false, 2),
-  ('go-iface-assertions::iface-to-iface#3', 'go-iface-assertions::iface-to-iface', 'always fails — cannot assert to interfaces', false, 3),
-  ('go-iface-assertions::uncomparable-panic#0', 'go-iface-assertions::uncomparable-panic', 'runtime panic — slice dynamic type not comparable', true, 0),
-  ('go-iface-assertions::uncomparable-panic#1', 'go-iface-assertions::uncomparable-panic', 'false — distinct backing arrays', false, 1),
-  ('go-iface-assertions::uncomparable-panic#2', 'go-iface-assertions::uncomparable-panic', 'true — element values are equal', false, 2),
-  ('go-iface-assertions::uncomparable-panic#3', 'go-iface-assertions::uncomparable-panic', 'compile error — interfaces reject equality', false, 3),
-  ('go-iface-assertions::switch-order#0', 'go-iface-assertions::switch-order', 'case int — first matching case wins', true, 0),
-  ('go-iface-assertions::switch-order#1', 'go-iface-assertions::switch-order', 'case Stringer — interface cases take priority', false, 1),
-  ('go-iface-assertions::switch-order#2', 'go-iface-assertions::switch-order', 'both — fallthrough evaluates every case', false, 2),
-  ('go-iface-assertions::switch-order#3', 'go-iface-assertions::switch-order', 'default — int is ambiguous across cases', false, 3),
-  ('go-iface-assertions::switch-var-type#0', 'go-iface-assertions::switch-var-type', 'any — keeps the switch guard''s static type', true, 0),
-  ('go-iface-assertions::switch-var-type#1', 'go-iface-assertions::switch-var-type', 'Stringer — the first listed case type', false, 1),
-  ('go-iface-assertions::switch-var-type#2', 'go-iface-assertions::switch-var-type', 'union type — Stringer combined with io.Reader', false, 2),
-  ('go-iface-assertions::switch-var-type#3', 'go-iface-assertions::switch-var-type', 'concrete type — v''s runtime dynamic type', false, 3),
-  ('go-gen-type-params::gcshape-sharing#0', 'go-gen-type-params::gcshape-sharing', 'All pointer-shaped types — one shape covers every pointer', true, 0),
-  ('go-gen-type-params::gcshape-sharing#1', 'go-gen-type-params::gcshape-sharing', 'int and int32 — same underlying numeric family', false, 1),
-  ('go-gen-type-params::gcshape-sharing#2', 'go-gen-type-params::gcshape-sharing', 'int and float64 — both are word-sized scalars', false, 2),
-  ('go-gen-type-params::gcshape-sharing#3', 'go-gen-type-params::gcshape-sharing', 'Every instantiation — Go fully monomorphizes generics', false, 3),
-  ('go-gen-type-params::dictionary-role#0', 'go-gen-type-params::dictionary-role', 'Per-instantiation type metadata — type descriptors, itabs, sub-dicts', true, 0),
-  ('go-gen-type-params::dictionary-role#1', 'go-gen-type-params::dictionary-role', 'The full method machine code — one copy per call site', false, 1),
-  ('go-gen-type-params::dictionary-role#2', 'go-gen-type-params::dictionary-role', 'A vtable of user methods — resolved like C++ virtuals', false, 2),
-  ('go-gen-type-params::dictionary-role#3', 'go-gen-type-params::dictionary-role', 'The receiver value itself — boxed into an interface', false, 3),
-  ('go-gen-type-params::vs-interface-monomorph#0', 'go-gen-type-params::vs-interface-monomorph', 'No boxing of elements — values stay unboxed at their real type', true, 0),
-  ('go-gen-type-params::vs-interface-monomorph#1', 'go-gen-type-params::vs-interface-monomorph', 'Generics are always fully inlined — interfaces never inline', false, 1),
-  ('go-gen-type-params::vs-interface-monomorph#2', 'go-gen-type-params::vs-interface-monomorph', 'Constraints skip bounds checks — the compiler trusts T', false, 2),
-  ('go-gen-type-params::vs-interface-monomorph#3', 'go-gen-type-params::vs-interface-monomorph', 'Type params disable the GC — no write barriers fire', false, 3),
-  ('go-gen-type-params::instantiation-identity#0', 'go-gen-type-params::instantiation-identity', 'Distinct named types — not assignable without conversion', true, 0),
-  ('go-gen-type-params::instantiation-identity#1', 'go-gen-type-params::instantiation-identity', 'Identical types — type args are erased at runtime', false, 1),
-  ('go-gen-type-params::instantiation-identity#2', 'go-gen-type-params::instantiation-identity', 'Structurally equal — field order makes them interchangeable', false, 2),
-  ('go-gen-type-params::instantiation-identity#3', 'go-gen-type-params::instantiation-identity', 'Same type if fields match — Go compares layouts', false, 3),
-  ('go-gen-type-params::inference-limits#0', 'go-gen-type-params::inference-limits', 'Inference flows from argument types — explicit args can override it', true, 0),
-  ('go-gen-type-params::inference-limits#1', 'go-gen-type-params::inference-limits', 'Constraints with unions — always block inference entirely', false, 1),
-  ('go-gen-type-params::inference-limits#2', 'go-gen-type-params::inference-limits', 'Return-only type params — infer from the assignment target', false, 2),
-  ('go-gen-type-params::inference-limits#3', 'go-gen-type-params::inference-limits', 'Float literals — untyped constants forbid all inference', false, 3),
-  ('go-gen-type-params::constraint-method-call#0', 'go-gen-type-params::constraint-method-call', 'Via an itab from the dictionary — indirect through supplied metadata', true, 0),
-  ('go-gen-type-params::constraint-method-call#1', 'go-gen-type-params::constraint-method-call', 'Statically bound — the stencil hardcodes the concrete method', false, 1),
-  ('go-gen-type-params::constraint-method-call#2', 'go-gen-type-params::constraint-method-call', 'Through reflection — resolved by name at each call', false, 2),
-  ('go-gen-type-params::constraint-method-call#3', 'go-gen-type-params::constraint-method-call', 'Inlined unconditionally — constraints guarantee a single target', false, 3),
-  ('go-gen-constraints::tilde-meaning#0', 'go-gen-constraints::tilde-meaning', 'Any type with underlying int — e.g. `type ID int` qualifies', true, 0),
-  ('go-gen-constraints::tilde-meaning#1', 'go-gen-constraints::tilde-meaning', 'Only int itself — named int types excluded', false, 1),
-  ('go-gen-constraints::tilde-meaning#2', 'go-gen-constraints::tilde-meaning', 'int plus every integer width — int8 through int64 included', false, 2),
-  ('go-gen-constraints::tilde-meaning#3', 'go-gen-constraints::tilde-meaning', 'Any type convertible to int — including float64', false, 3),
-  ('go-gen-constraints::tilde-defined-only#0', 'go-gen-constraints::tilde-defined-only', 'Underlying-type rule — T in `~T` must equal its own underlying type', true, 0),
-  ('go-gen-constraints::tilde-defined-only#1', 'go-gen-constraints::tilde-defined-only', 'Compiler limitation — slated to relax in a future release', false, 1),
-  ('go-gen-constraints::tilde-defined-only#2', 'go-gen-constraints::tilde-defined-only', 'ID is a named type — yet any named type after ~ is fine', false, 2),
-  ('go-gen-constraints::tilde-defined-only#3', 'go-gen-constraints::tilde-defined-only', '~ accepts predeclared types — user types never allowed', false, 3),
-  ('go-gen-constraints::comparable-vs-any#0', 'go-gen-constraints::comparable-vs-any', 'comparable — exactly what map keys require', true, 0),
-  ('go-gen-constraints::comparable-vs-any#1', 'go-gen-constraints::comparable-vs-any', 'any — every type supports == in generics', false, 1),
-  ('go-gen-constraints::comparable-vs-any#2', 'go-gen-constraints::comparable-vs-any', 'cmp.Ordered — ordering needed to hash keys', false, 2),
-  ('go-gen-constraints::comparable-vs-any#3', 'go-gen-constraints::comparable-vs-any', 'interface{ Equal(K) bool } — user equality suffices', false, 3),
-  ('go-gen-constraints::strictly-comparable#0', 'go-gen-constraints::strictly-comparable', 'comparable now admits spec-comparable types — interfaces included', true, 0),
-  ('go-gen-constraints::strictly-comparable#1', 'go-gen-constraints::strictly-comparable', 'comparable was always this permissive — nothing changed', false, 1),
-  ('go-gen-constraints::strictly-comparable#2', 'go-gen-constraints::strictly-comparable', 'Compiler inserts a recover — so == never panics', false, 2),
-  ('go-gen-constraints::strictly-comparable#3', 'go-gen-constraints::strictly-comparable', 'Interfaces became strictly comparable — panics now impossible', false, 3),
-  ('go-gen-constraints::union-method-rule#0', 'go-gen-constraints::union-method-rule', 'Union terms carry no methods — non-interface or method-free only', true, 0),
-  ('go-gen-constraints::union-method-rule#1', 'go-gen-constraints::union-method-rule', '~int and Stringer overlap — the sets turn ambiguous', false, 1),
-  ('go-gen-constraints::union-method-rule#2', 'go-gen-constraints::union-method-rule', 'Unions cap at two terms — Stringer is a third', false, 2),
-  ('go-gen-constraints::union-method-rule#3', 'go-gen-constraints::union-method-rule', 'fmt.Stringer is not comparable — unions demand comparability', false, 3),
-  ('go-gen-constraints::ordered-vs-number#0', 'go-gen-constraints::ordered-vs-number', 'It compiles but concatenates strings — no uniform addition', true, 0),
-  ('go-gen-constraints::ordered-vs-number#1', 'go-gen-constraints::ordered-vs-number', 'It fails to compile — + is undefined for cmp.Ordered', false, 1),
-  ('go-gen-constraints::ordered-vs-number#2', 'go-gen-constraints::ordered-vs-number', 'cmp.Ordered lacks == — so += cannot resolve', false, 2),
-  ('go-gen-constraints::ordered-vs-number#3', 'go-gen-constraints::ordered-vs-number', '+= needs pointer types — cmp.Ordered excludes pointers', false, 3),
-  ('go-gen-inference::no-return-inference#0', 'go-gen-inference::no-return-inference', 'Return position ignored — inference only reads argument types', true, 0),
-  ('go-gen-inference::no-return-inference#1', 'go-gen-inference::no-return-inference', 'string blocks inference — non-generic params disable it', false, 1),
-  ('go-gen-inference::no-return-inference#2', 'go-gen-inference::no-return-inference', 'Assignment target unknown — LHS var lacks a type', false, 2),
-  ('go-gen-inference::no-return-inference#3', 'go-gen-inference::no-return-inference', 'error return conflicts — multi-return breaks inference', false, 3),
-  ('go-gen-inference::method-type-params#0', 'go-gen-inference::method-type-params', 'Methods forbid type params — a language-level restriction', true, 0),
-  ('go-gen-inference::method-type-params#1', 'go-gen-inference::method-type-params', 'Receiver already generic — Repo must be Repo[T]', false, 1),
-  ('go-gen-inference::method-type-params#2', 'go-gen-inference::method-type-params', 'Return-only T — inference would be impossible', false, 2),
-  ('go-gen-inference::method-type-params#3', 'go-gen-inference::method-type-params', 'Pointer receiver needed — value receivers reject generics', false, 3),
-  ('go-gen-inference::untyped-const-default#0', 'go-gen-inference::untyped-const-default', 'int — untyped constant takes its default type', true, 0),
-  ('go-gen-inference::untyped-const-default#1', 'go-gen-inference::untyped-const-default', 'untyped int — T stays constant-kinded', false, 1),
-  ('go-gen-inference::untyped-const-default#2', 'go-gen-inference::untyped-const-default', 'rune — numeric literals infer as rune', false, 2),
-  ('go-gen-inference::untyped-const-default#3', 'go-gen-inference::untyped-const-default', 'any — inference falls back to the constraint', false, 3),
-  ('go-gen-inference::partial-inference#0', 'go-gen-inference::partial-inference', 'Cast[string, int]("x") — both args given explicitly', true, 0),
-  ('go-gen-inference::partial-inference#1', 'go-gen-inference::partial-inference', 'Cast("x") — From and To both inferred', false, 1),
-  ('go-gen-inference::partial-inference#2', 'go-gen-inference::partial-inference', 'Cast[string]("x") — To inferred from usage', false, 2),
-  ('go-gen-inference::partial-inference#3', 'go-gen-inference::partial-inference', 'var y int = Cast("x") — To read from LHS', false, 3),
-  ('go-gen-inference::func-literal-inference#0', 'go-gen-inference::func-literal-inference', 'T from nums, U from literal — args drive both', true, 0),
-  ('go-gen-inference::func-literal-inference#1', 'go-gen-inference::func-literal-inference', 'Both from func literal — the closure fixes T and U', false, 1),
-  ('go-gen-inference::func-literal-inference#2', 'go-gen-inference::func-literal-inference', 'T from nums, U from result assignment — LHS types U', false, 2),
-  ('go-gen-inference::func-literal-inference#3', 'go-gen-inference::func-literal-inference', 'Constraint defaults — any resolves to interface{}', false, 3),
-  ('go-gen-inference::typed-nil-inference#0', 'go-gen-inference::typed-nil-inference', 'Untyped nil has no type — nothing to infer T from', true, 0),
-  ('go-gen-inference::typed-nil-inference#1', 'go-gen-inference::typed-nil-inference', 'nil not comparable — any rejects nil values', false, 1),
-  ('go-gen-inference::typed-nil-inference#2', 'go-gen-inference::typed-nil-inference', 'T defaults missing — any lacks a zero default', false, 2),
-  ('go-gen-inference::typed-nil-inference#3', 'go-gen-inference::typed-nil-inference', 'Pointer required — nil needs a pointer target', false, 3),
-  ('go-gen-pitfalls::method-type-param#0', 'go-gen-pitfalls::method-type-param', 'Methods cannot declare type params — only funcs and types can', true, 0),
-  ('go-gen-pitfalls::method-type-param#1', 'go-gen-pitfalls::method-type-param', 'R shadows T — parameter names must be globally unique', false, 1),
-  ('go-gen-pitfalls::method-type-param#2', 'go-gen-pitfalls::method-type-param', 'Generic receivers are illegal — Box[T] cannot be a receiver', false, 2),
-  ('go-gen-pitfalls::method-type-param#3', 'go-gen-pitfalls::method-type-param', 'Func-typed params ban generics — closures erase type info', false, 3),
-  ('go-gen-pitfalls::switch-on-typeparam#0', 'go-gen-pitfalls::switch-on-typeparam', 'T is not an interface — type switch needs an interface operand', true, 0),
-  ('go-gen-pitfalls::switch-on-typeparam#1', 'go-gen-pitfalls::switch-on-typeparam', 'Switches are runtime — generics resolve fully at compile time', false, 1),
-  ('go-gen-pitfalls::switch-on-typeparam#2', 'go-gen-pitfalls::switch-on-typeparam', 'any(v) copies v — the switch sees a stale value', false, 2),
-  ('go-gen-pitfalls::switch-on-typeparam#3', 'go-gen-pitfalls::switch-on-typeparam', 'T lacks a method set — switches require named methods', false, 3),
-  ('go-gen-pitfalls::interface-vs-generic#0', 'go-gen-pitfalls::interface-vs-generic', 'Interface param — pure dispatch needs no type preservation', true, 0),
-  ('go-gen-pitfalls::interface-vs-generic#1', 'go-gen-pitfalls::interface-vs-generic', 'Generic param — avoids interface allocation per call', false, 1),
-  ('go-gen-pitfalls::interface-vs-generic#2', 'go-gen-pitfalls::interface-vs-generic', 'Generic param — enables devirtualization the interface blocks', false, 2),
-  ('go-gen-pitfalls::interface-vs-generic#3', 'go-gen-pitfalls::interface-vs-generic', 'Interface param — generics forbid method-set constraints', false, 3),
-  ('go-gen-pitfalls::code-bloat#0', 'go-gen-pitfalls::code-bloat', 'Stencils per GC shape — pointer types share one instantiation', true, 0),
-  ('go-gen-pitfalls::code-bloat#1', 'go-gen-pitfalls::code-bloat', 'Fully monomorphizes — one copy per named type argument', false, 1),
-  ('go-gen-pitfalls::code-bloat#2', 'go-gen-pitfalls::code-bloat', 'Fully boxes everything — one copy via type descriptors', false, 2),
-  ('go-gen-pitfalls::code-bloat#3', 'go-gen-pitfalls::code-bloat', 'Inlines all instantiations — no separate code emitted', false, 3),
-  ('go-gen-pitfalls::dictionary-cost#0', 'go-gen-pitfalls::dictionary-cost', 'Extra indirection — can be slower than inlined concrete code', true, 0),
-  ('go-gen-pitfalls::dictionary-cost#1', 'go-gen-pitfalls::dictionary-cost', 'Zero overhead — dictionaries erased before code generation', false, 1),
-  ('go-gen-pitfalls::dictionary-cost#2', 'go-gen-pitfalls::dictionary-cost', 'Slower than interfaces — adds vtable double-dispatch', false, 2),
-  ('go-gen-pitfalls::dictionary-cost#3', 'go-gen-pitfalls::dictionary-cost', 'Faster always — dictionary caches method results per call', false, 3),
-  ('go-gen-pitfalls::constraint-not-union-method#0', 'go-gen-pitfalls::constraint-not-union-method', 'Compile error — union-of-types constraints expose no methods', true, 0),
-  ('go-gen-pitfalls::constraint-not-union-method#1', 'go-gen-pitfalls::constraint-not-union-method', 'Works — compiler infers the union''s common method set', false, 1),
-  ('go-gen-pitfalls::constraint-not-union-method#2', 'go-gen-pitfalls::constraint-not-union-method', 'Works — union elements auto-promote to fmt.Stringer', false, 2),
-  ('go-gen-pitfalls::constraint-not-union-method#3', 'go-gen-pitfalls::constraint-not-union-method', 'Runtime panic — method dispatches on the zero element', false, 3),
-  ('go-err-wrapping::multi-w-return-type#0', 'go-err-wrapping::multi-w-return-type', 'Tree via Unwrap() []error — Is/As do a DFS over both', true, 0),
-  ('go-err-wrapping::multi-w-return-type#1', 'go-err-wrapping::multi-w-return-type', 'Single chain — second %w silently overwrites first', false, 1),
-  ('go-err-wrapping::multi-w-return-type#2', 'go-err-wrapping::multi-w-return-type', 'Compile error — only one %w allowed per call', false, 2),
-  ('go-err-wrapping::multi-w-return-type#3', 'go-err-wrapping::multi-w-return-type', 'Slice of errors — caller must type-assert to []error', false, 3),
-  ('go-err-wrapping::as-target-kind#0', 'go-err-wrapping::as-target-kind', 'Non-nil pointer to an error type or any interface — else it panics', true, 0),
-  ('go-err-wrapping::as-target-kind#1', 'go-err-wrapping::as-target-kind', 'An error value — As compares it by equality', false, 1),
-  ('go-err-wrapping::as-target-kind#2', 'go-err-wrapping::as-target-kind', 'Any interface{} — reflection figures out the type', false, 2),
-  ('go-err-wrapping::as-target-kind#3', 'go-err-wrapping::as-target-kind', 'Pointer to a matching concrete type — interfaces are rejected', false, 3),
-  ('go-err-wrapping::is-comparability#0', 'go-err-wrapping::is-comparability', 'Skipped for == — the walk continues to the next unwrapped error', true, 0),
-  ('go-err-wrapping::is-comparability#1', 'go-err-wrapping::is-comparability', 'Panics — uncomparable errors are forbidden in chains', false, 1),
-  ('go-err-wrapping::is-comparability#2', 'go-err-wrapping::is-comparability', 'Always returns false — halts the entire walk', false, 2),
-  ('go-err-wrapping::is-comparability#3', 'go-err-wrapping::is-comparability', 'Compared by Error() string — fallback to message equality', false, 3),
-  ('go-err-wrapping::verb-w-vs-v#0', 'go-err-wrapping::verb-w-vs-v', 'No wrap link — errors.Is against the sentinel returns false', true, 0),
-  ('go-err-wrapping::verb-w-vs-v#1', 'go-err-wrapping::verb-w-vs-v', 'Identical to %w — both create an Unwrap link', false, 1),
-  ('go-err-wrapping::verb-w-vs-v#2', 'go-err-wrapping::verb-w-vs-v', 'Wraps but loses the message — Is still returns true', false, 2),
-  ('go-err-wrapping::verb-w-vs-v#3', 'go-err-wrapping::verb-w-vs-v', 'Panics at runtime — %v rejects error operands', false, 3),
-  ('go-err-wrapping::custom-is-override#0', 'go-err-wrapping::custom-is-override', 'True via the custom Is method — semantic match wins', true, 0),
-  ('go-err-wrapping::custom-is-override#1', 'go-err-wrapping::custom-is-override', 'Returns false — only == is used, ignoring the Is method', false, 1),
-  ('go-err-wrapping::custom-is-override#2', 'go-err-wrapping::custom-is-override', 'Returns true only for identical pointers — no semantic Is call', false, 2),
-  ('go-err-wrapping::custom-is-override#3', 'go-err-wrapping::custom-is-override', 'Panics — Is must return (bool, error)', false, 3),
-  ('go-err-wrapping::as-first-match#0', 'go-err-wrapping::as-first-match', 'First match in DFS pre-order — traversal stops immediately', true, 0),
-  ('go-err-wrapping::as-first-match#1', 'go-err-wrapping::as-first-match', 'Deepest match — As always reaches the root cause', false, 1),
-  ('go-err-wrapping::as-first-match#2', 'go-err-wrapping::as-first-match', 'Last match — As overwrites until the chain ends', false, 2),
-  ('go-err-wrapping::as-first-match#3', 'go-err-wrapping::as-first-match', 'A slice of all matches — As collects every occurrence', false, 3),
-  ('go-err-sentinel-typed::sentinel-identity#0', 'go-err-sentinel-typed::sentinel-identity', 'Pointer identity — one shared *errorString value', true, 0),
-  ('go-err-sentinel-typed::sentinel-identity#1', 'go-err-sentinel-typed::sentinel-identity', 'String comparison — matches the "closed" text', false, 1),
-  ('go-err-sentinel-typed::sentinel-identity#2', 'go-err-sentinel-typed::sentinel-identity', 'Type equality — both sides are *errorString', false, 2),
-  ('go-err-sentinel-typed::sentinel-identity#3', 'go-err-sentinel-typed::sentinel-identity', 'Reflection — DeepEqual on the error value', false, 3),
-  ('go-err-sentinel-typed::custom-is-semantics#0', 'go-err-sentinel-typed::custom-is-semantics', 'true — custom Is compares Code only', true, 0),
-  ('go-err-sentinel-typed::custom-is-semantics#1', 'go-err-sentinel-typed::custom-is-semantics', 'false — wrapped causes differ', false, 1),
-  ('go-err-sentinel-typed::custom-is-semantics#2', 'go-err-sentinel-typed::custom-is-semantics', 'false — the two pointers are distinct', false, 2),
-  ('go-err-sentinel-typed::custom-is-semantics#3', 'go-err-sentinel-typed::custom-is-semantics', 'true — struct values are deep-equal', false, 3),
-  ('go-err-sentinel-typed::as-target-type#0', 'go-err-sentinel-typed::as-target-type', '&qe with qe *QueryError — a **QueryError', true, 0),
-  ('go-err-sentinel-typed::as-target-type#1', 'go-err-sentinel-typed::as-target-type', '&qe with qe QueryError — value does not satisfy error', false, 1),
-  ('go-err-sentinel-typed::as-target-type#2', 'go-err-sentinel-typed::as-target-type', 'qe of type *QueryError — passed to As directly', false, 2),
-  ('go-err-sentinel-typed::as-target-type#3', 'go-err-sentinel-typed::as-target-type', 'any typed nil — As infers the concrete type', false, 3),
-  ('go-err-sentinel-typed::missing-unwrap#0', 'go-err-sentinel-typed::missing-unwrap', 'false — chain cannot descend past QueryError', true, 0),
-  ('go-err-sentinel-typed::missing-unwrap#1', 'go-err-sentinel-typed::missing-unwrap', 'true — Is reads struct fields automatically', false, 1),
-  ('go-err-sentinel-typed::missing-unwrap#2', 'go-err-sentinel-typed::missing-unwrap', 'true — the Err field is scanned by reflection', false, 2),
-  ('go-err-sentinel-typed::missing-unwrap#3', 'go-err-sentinel-typed::missing-unwrap', 'panic — Is demands an Unwrap method', false, 3),
-  ('go-err-sentinel-typed::sentinel-api-coupling#0', 'go-err-sentinel-typed::sentinel-api-coupling', 'Callers couple to identity — sentinel becomes permanent API', true, 0),
-  ('go-err-sentinel-typed::sentinel-api-coupling#1', 'go-err-sentinel-typed::sentinel-api-coupling', 'Sentinels allocate — one heap object per call site', false, 1),
-  ('go-err-sentinel-typed::sentinel-api-coupling#2', 'go-err-sentinel-typed::sentinel-api-coupling', 'Sentinels break errors.Is use — wrapping is unsafe', false, 2),
-  ('go-err-sentinel-typed::sentinel-api-coupling#3', 'go-err-sentinel-typed::sentinel-api-coupling', 'Sentinels are mutable — callers can reassign them', false, 3),
-  ('go-err-sentinel-typed::double-wrap-w#0', 'go-err-sentinel-typed::double-wrap-w', 'Tree walk — matches either wrapped branch', true, 0),
-  ('go-err-sentinel-typed::double-wrap-w#1', 'go-err-sentinel-typed::double-wrap-w', 'Matches the first %w — ignores the second', false, 1),
-  ('go-err-sentinel-typed::double-wrap-w#2', 'go-err-sentinel-typed::double-wrap-w', 'Compile error — two %w verbs are rejected', false, 2),
-  ('go-err-sentinel-typed::double-wrap-w#3', 'go-err-sentinel-typed::double-wrap-w', 'Matches the last %w — ignores the first', false, 3),
-  ('go-err-panic-recover::recover-scope#0', 'go-err-panic-recover::recover-scope', 'Not recovered — recover ran outside defer', true, 0),
-  ('go-err-panic-recover::recover-scope#1', 'go-err-panic-recover::recover-scope', 'Yes — any recover in the goroutine catches it', false, 1),
-  ('go-err-panic-recover::recover-scope#2', 'go-err-panic-recover::recover-scope', 'Yes — recover catches later panics in the frame', false, 2),
-  ('go-err-panic-recover::recover-scope#3', 'go-err-panic-recover::recover-scope', 'Bad signature — recover takes no arguments', false, 3),
-  ('go-err-panic-recover::defer-arg-eval#0', 'go-err-panic-recover::defer-arg-eval', '10 — arguments evaluated at defer statement', true, 0),
-  ('go-err-panic-recover::defer-arg-eval#1', 'go-err-panic-recover::defer-arg-eval', '20 — arguments evaluated at return time', false, 1),
-  ('go-err-panic-recover::defer-arg-eval#2', 'go-err-panic-recover::defer-arg-eval', '0 — deferred args zeroed until run', false, 2),
-  ('go-err-panic-recover::defer-arg-eval#3', 'go-err-panic-recover::defer-arg-eval', 'panic — capturing a mutated variable', false, 3),
-  ('go-err-panic-recover::named-return-mutation#0', 'go-err-panic-recover::named-return-mutation', 'err set — deferred mutation of named return wins', true, 0),
-  ('go-err-panic-recover::named-return-mutation#1', 'go-err-panic-recover::named-return-mutation', 'err nil — panic discards all return values', false, 1),
-  ('go-err-panic-recover::named-return-mutation#2', 'go-err-panic-recover::named-return-mutation', 'err nil — return already committed pre-defer', false, 2),
-  ('go-err-panic-recover::named-return-mutation#3', 'go-err-panic-recover::named-return-mutation', 'runtime crash — cannot assign in a defer', false, 3),
-  ('go-err-panic-recover::repanic-value#0', 'go-err-panic-recover::repanic-value', 'Original value re-raised — unwinding resumes upward', true, 0),
-  ('go-err-panic-recover::repanic-value#1', 'go-err-panic-recover::repanic-value', 'A new nil panic — recover consumed the value', false, 1),
-  ('go-err-panic-recover::repanic-value#2', 'go-err-panic-recover::repanic-value', 'Nothing — recover stopped it permanently', false, 2),
-  ('go-err-panic-recover::repanic-value#3', 'go-err-panic-recover::repanic-value', 'runtime.Error wrapper — re-panic always rewraps', false, 3),
-  ('go-err-panic-recover::defer-order-panic#0', 'go-err-panic-recover::defer-order-panic', 'LIFO — last registered runs first during unwind', true, 0),
-  ('go-err-panic-recover::defer-order-panic#1', 'go-err-panic-recover::defer-order-panic', 'FIFO — registration order during unwind', false, 1),
-  ('go-err-panic-recover::defer-order-panic#2', 'go-err-panic-recover::defer-order-panic', 'Only the last defer — panic skips earlier ones', false, 2),
-  ('go-err-panic-recover::defer-order-panic#3', 'go-err-panic-recover::defer-order-panic', 'None run — panic skips pending defers', false, 3),
-  ('go-err-panic-recover::recover-return-value#0', 'go-err-panic-recover::recover-return-value', 'nil — no active panic to recover', true, 0),
-  ('go-err-panic-recover::recover-return-value#1', 'go-err-panic-recover::recover-return-value', 'empty error — zero-value error returned', false, 1),
-  ('go-err-panic-recover::recover-return-value#2', 'go-err-panic-recover::recover-return-value', 'zero value — of the last panic type', false, 2),
-  ('go-err-panic-recover::recover-return-value#3', 'go-err-panic-recover::recover-return-value', 'blocks — waits until a panic occurs', false, 3),
-  ('go-err-custom::unwrap-signature#0', 'go-err-custom::unwrap-signature', 'Unwrap() error — single-parent chain interface', true, 0),
-  ('go-err-custom::unwrap-signature#1', 'go-err-custom::unwrap-signature', 'Cause() error — pkg/errors convention ignored by stdlib', false, 1),
-  ('go-err-custom::unwrap-signature#2', 'go-err-custom::unwrap-signature', 'Wrapped() error — never inspected by errors package', false, 2),
-  ('go-err-custom::unwrap-signature#3', 'go-err-custom::unwrap-signature', 'Unwrap() []error mandatory — required for every unwrap', false, 3),
-  ('go-err-custom::is-target-comparable#0', 'go-err-custom::is-target-comparable', 'Pointer identity via == — same *NotFoundError address needed', true, 0),
-  ('go-err-custom::is-target-comparable#1', 'go-err-custom::is-target-comparable', 'Struct field equality — all fields including Key compared', false, 1),
-  ('go-err-custom::is-target-comparable#2', 'go-err-custom::is-target-comparable', 'Type identity alone — any *NotFoundError node matches', false, 2),
-  ('go-err-custom::is-target-comparable#3', 'go-err-custom::is-target-comparable', 'Always false — pointers can never compare with ==', false, 3),
-  ('go-err-custom::as-pointer-arg#0', 'go-err-custom::as-pointer-arg', 'errors.As(err, &ep) — &ep targets the *MyError value', true, 0),
-  ('go-err-custom::as-pointer-arg#1', 'go-err-custom::as-pointer-arg', 'errors.As(err, &e) with value e — struct value satisfies error', false, 1),
-  ('go-err-custom::as-pointer-arg#2', 'go-err-custom::as-pointer-arg', 'errors.As(err, e) — As accepts the target directly', false, 2),
-  ('go-err-custom::as-pointer-arg#3', 'go-err-custom::as-pointer-arg', 'errors.As(err, MyError{}) — zero value receives the match', false, 3),
-  ('go-err-custom::join-preserves-type#0', 'go-err-custom::join-preserves-type', 'Unwrap() []error — errors.As reaches a through the slice branch', true, 0),
-  ('go-err-custom::join-preserves-type#1', 'go-err-custom::join-preserves-type', 'j is *NotFoundError — Join keeps the first error''s type', false, 1),
-  ('go-err-custom::join-preserves-type#2', 'go-err-custom::join-preserves-type', 'Join flattens — a''s own Unwrap chain gets discarded', false, 2),
-  ('go-err-custom::join-preserves-type#3', 'go-err-custom::join-preserves-type', 'errors.Is(j, a) is false — Join severs identity checks', false, 3),
-  ('go-err-custom::wrap-verb-vs-v#0', 'go-err-custom::wrap-verb-vs-v', '%w sets Unwrap — %v only formats text, breaking Is/As', true, 0),
-  ('go-err-custom::wrap-verb-vs-v#1', 'go-err-custom::wrap-verb-vs-v', 'Both wrap — %v and %w behave identically for chains', false, 1),
-  ('go-err-custom::wrap-verb-vs-v#2', 'go-err-custom::wrap-verb-vs-v', '%v wraps, %w formats — the two verbs are reversed', false, 2),
-  ('go-err-custom::wrap-verb-vs-v#3', 'go-err-custom::wrap-verb-vs-v', '%w needs two args — a lone %w fails to compile', false, 3),
-  ('go-err-custom::nil-unwrap-chain#0', 'go-err-custom::nil-unwrap-chain', 'Chain terminates — nil Unwrap ends the walk cleanly', true, 0),
-  ('go-err-custom::nil-unwrap-chain#1', 'go-err-custom::nil-unwrap-chain', 'Panics — Is dereferences the nil error', false, 1),
-  ('go-err-custom::nil-unwrap-chain#2', 'go-err-custom::nil-unwrap-chain', 'Infinite loop — nil re-enters the same node', false, 2),
-  ('go-err-custom::nil-unwrap-chain#3', 'go-err-custom::nil-unwrap-chain', 'Matches nil target — Is(nfe, nil) returns true here', false, 3),
-  ('go-data-slice-internals::three-index-cap#0', 'go-data-slice-internals::three-index-cap', 'len 2, cap 3 — high minus low, then max minus low', true, 0),
-  ('go-data-slice-internals::three-index-cap#1', 'go-data-slice-internals::three-index-cap', 'len 2, cap 7 — parent cap 8 minus low, ignoring max', false, 1),
-  ('go-data-slice-internals::three-index-cap#2', 'go-data-slice-internals::three-index-cap', 'len 2, cap 4 — max index used directly as cap', false, 2),
-  ('go-data-slice-internals::three-index-cap#3', 'go-data-slice-internals::three-index-cap', 'len 4, cap 4 — three-index sets len from max', false, 3),
-  ('go-data-slice-internals::append-alias#0', 'go-data-slice-internals::append-alias', '[0 1 2 99 4] — in-cap append overwrites b[3]', true, 0),
-  ('go-data-slice-internals::append-alias#1', 'go-data-slice-internals::append-alias', '[0 1 2 3 4] — append never mutates the parent', false, 1),
-  ('go-data-slice-internals::append-alias#2', 'go-data-slice-internals::append-alias', '[0 1 99 3 4] — append writes at the slice start', false, 2),
-  ('go-data-slice-internals::append-alias#3', 'go-data-slice-internals::append-alias', 'panic — append exceeds the capped slice', false, 3),
-  ('go-data-slice-internals::realloc-detach#0', 'go-data-slice-internals::realloc-detach', 'reallocates — v detaches from the backing array', true, 0),
-  ('go-data-slice-internals::realloc-detach#1', 'go-data-slice-internals::realloc-detach', 'grows in place — b silently extends to hold 100', false, 1),
-  ('go-data-slice-internals::realloc-detach#2', 'go-data-slice-internals::realloc-detach', 'reuses b — cap raised to parent''s original 5', false, 2),
-  ('go-data-slice-internals::realloc-detach#3', 'go-data-slice-internals::realloc-detach', 'panics — cap 3 cannot be exceeded', false, 3),
-  ('go-data-slice-internals::growth-factor#0', 'go-data-slice-internals::growth-factor', 'amortized O(1) — cap grows geometrically not by one', true, 0),
-  ('go-data-slice-internals::growth-factor#1', 'go-data-slice-internals::growth-factor', 'exactly doubling — cap is 2x at every size range', false, 1),
-  ('go-data-slice-internals::growth-factor#2', 'go-data-slice-internals::growth-factor', 'grows by one — a copy happens on each append', false, 2),
-  ('go-data-slice-internals::growth-factor#3', 'go-data-slice-internals::growth-factor', 'fixed 1024 chunks — runtime preallocates page blocks', false, 3),
-  ('go-data-slice-internals::header-copy#0', 'go-data-slice-internals::header-copy', 'independent — b reallocated leaving a unchanged', true, 0),
-  ('go-data-slice-internals::header-copy#1', 'go-data-slice-internals::header-copy', 'aliased — a[?]=4 shows the append through a', false, 1),
-  ('go-data-slice-internals::header-copy#2', 'go-data-slice-internals::header-copy', 'shared — a now also has len 4', false, 2),
-  ('go-data-slice-internals::header-copy#3', 'go-data-slice-internals::header-copy', 'panic — appending to a copied header is illegal', false, 3),
-  ('go-data-slice-internals::passing-slice#0', 'go-data-slice-internals::passing-slice', 'len unchanged — but x''s spare slot may be overwritten', true, 0),
-  ('go-data-slice-internals::passing-slice#1', 'go-data-slice-internals::passing-slice', 'len grows — append updates the caller''s length', false, 1),
-  ('go-data-slice-internals::passing-slice#2', 'go-data-slice-internals::passing-slice', 'nothing changes — pass-by-value fully isolates s', false, 2),
-  ('go-data-slice-internals::passing-slice#3', 'go-data-slice-internals::passing-slice', 'panic — mutating a parameter slice is disallowed', false, 3),
-  ('go-data-slice-aliasing::append-clobber#0', 'go-data-slice-aliasing::append-clobber', '[1 2 99 4] — spare cap lets append write base[2]', true, 0),
-  ('go-data-slice-aliasing::append-clobber#1', 'go-data-slice-aliasing::append-clobber', '[1 2 3 4] — append always reallocates', false, 1),
-  ('go-data-slice-aliasing::append-clobber#2', 'go-data-slice-aliasing::append-clobber', '[1 2 99] — base is truncated by append', false, 2),
-  ('go-data-slice-aliasing::append-clobber#3', 'go-data-slice-aliasing::append-clobber', 'panic — index out of range on append', false, 3),
-  ('go-data-slice-aliasing::full-slice-detach#0', 'go-data-slice-aliasing::full-slice-detach', 'base[0:2:2] — three-index caps cap at len', true, 0),
-  ('go-data-slice-aliasing::full-slice-detach#1', 'go-data-slice-aliasing::full-slice-detach', 'base[0:2] — plain reslice keeps base''s cap', false, 1),
-  ('go-data-slice-aliasing::full-slice-detach#2', 'go-data-slice-aliasing::full-slice-detach', 'base[0:2:4] — spare cap appends in place', false, 2),
-  ('go-data-slice-aliasing::full-slice-detach#3', 'go-data-slice-aliasing::full-slice-detach', 'base[:2] — omitting low index changes nothing', false, 3),
-  ('go-data-slice-aliasing::nil-vs-empty-json#0', 'go-data-slice-aliasing::nil-vs-empty-json', 'a==nil true and b==nil false — headers differ', true, 0),
-  ('go-data-slice-aliasing::nil-vs-empty-json#1', 'go-data-slice-aliasing::nil-vs-empty-json', 'a==nil and b==nil both true — both length zero', false, 1),
-  ('go-data-slice-aliasing::nil-vs-empty-json#2', 'go-data-slice-aliasing::nil-vs-empty-json', 'ranging over a panics — nil slice not iterable', false, 2),
-  ('go-data-slice-aliasing::nil-vs-empty-json#3', 'go-data-slice-aliasing::nil-vs-empty-json', 'len(b) undefined — empty literal has no length', false, 3),
-  ('go-data-slice-aliasing::shared-after-realloc#0', 'go-data-slice-aliasing::shared-after-realloc', 'Detached now — append reallocated t''s array', true, 0),
-  ('go-data-slice-aliasing::shared-after-realloc#1', 'go-data-slice-aliasing::shared-after-realloc', 'Yes — t and s always alias one array', false, 1),
-  ('go-data-slice-aliasing::shared-after-realloc#2', 'go-data-slice-aliasing::shared-after-realloc', 'Independent copy — append duplicated s into t', false, 2),
-  ('go-data-slice-aliasing::shared-after-realloc#3', 'go-data-slice-aliasing::shared-after-realloc', 'Yes — writes to t[0] mirror into s[0]', false, 3),
-  ('go-data-slice-aliasing::copy-min-len#0', 'go-data-slice-aliasing::copy-min-len', 'Copies 3 — returns min(len) which is 3', true, 0),
-  ('go-data-slice-aliasing::copy-min-len#1', 'go-data-slice-aliasing::copy-min-len', 'Copies 5 — grows dst automatically', false, 1),
-  ('go-data-slice-aliasing::copy-min-len#2', 'go-data-slice-aliasing::copy-min-len', 'Copies 0 — length mismatch is a no-op', false, 2),
-  ('go-data-slice-aliasing::copy-min-len#3', 'go-data-slice-aliasing::copy-min-len', 'panics — dst too small for src', false, 3),
-  ('go-data-slice-aliasing::append-two-branches#0', 'go-data-slice-aliasing::append-two-branches', '20 — y''s append overwrote the shared slot', true, 0),
-  ('go-data-slice-aliasing::append-two-branches#1', 'go-data-slice-aliasing::append-two-branches', '10 — x captured the slot exclusively', false, 1),
-  ('go-data-slice-aliasing::append-two-branches#2', 'go-data-slice-aliasing::append-two-branches', '3 — the original base value survives', false, 2),
-  ('go-data-slice-aliasing::append-two-branches#3', 'go-data-slice-aliasing::append-two-branches', 'garbage — slot reads uninitialized memory', false, 3),
-  ('go-data-maps::nil-map-read-write#0', 'go-data-maps::nil-map-read-write', 'Read returns 0, write panics — nil map rejects writes', true, 0),
-  ('go-data-maps::nil-map-read-write#1', 'go-data-maps::nil-map-read-write', 'Both panic — nil map rejects every access', false, 1),
-  ('go-data-maps::nil-map-read-write#2', 'go-data-maps::nil-map-read-write', 'Both succeed — write lazily allocates backing store', false, 2),
-  ('go-data-maps::nil-map-read-write#3', 'go-data-maps::nil-map-read-write', 'Read panics, write succeeds — reads need storage', false, 3),
-  ('go-data-maps::iteration-order#0', 'go-data-maps::iteration-order', 'Prevents order dependence — surfaces fragile code early', true, 0),
-  ('go-data-maps::iteration-order#1', 'go-data-maps::iteration-order', 'Improves cache locality — random walk warms buckets', false, 1),
-  ('go-data-maps::iteration-order#2', 'go-data-maps::iteration-order', 'Reflects hash collisions — order mirrors bucket layout', false, 2),
-  ('go-data-maps::iteration-order#3', 'go-data-maps::iteration-order', 'Thwarts timing attacks — conceals insertion order', false, 3),
-  ('go-data-maps::map-addressability#0', 'go-data-maps::map-addressability', 'Map elements not addressable — value is not assignable lvalue', true, 0),
-  ('go-data-maps::map-addressability#1', 'go-data-maps::map-addressability', 'Missing key panics — must insert before field write', false, 1),
-  ('go-data-maps::map-addressability#2', 'go-data-maps::map-addressability', 'Copy semantics apply — write would be silently lost', false, 2),
-  ('go-data-maps::map-addressability#3', 'go-data-maps::map-addressability', 'Structs are immutable — Go forbids in-place field writes', false, 3),
-  ('go-data-maps::delete-during-range#0', 'go-data-maps::delete-during-range', 'delete is safe — removed-before-reached keys are skipped', true, 0),
-  ('go-data-maps::delete-during-range#1', 'go-data-maps::delete-during-range', 'delete panics — mutating during range is forbidden', false, 1),
-  ('go-data-maps::delete-during-range#2', 'go-data-maps::delete-during-range', 'Inserts guaranteed visible — new keys always appear later', false, 2),
-  ('go-data-maps::delete-during-range#3', 'go-data-maps::delete-during-range', 'delete corrupts iterator — undefined behavior results', false, 3),
-  ('go-data-maps::load-factor-growth#0', 'go-data-maps::load-factor-growth', 'Load factor exceeds ~6.5 per bucket — average chain too long', true, 0),
-  ('go-data-maps::load-factor-growth#1', 'go-data-maps::load-factor-growth', 'Any bucket reaches 8 entries — a single bucket fills', false, 1),
-  ('go-data-maps::load-factor-growth#2', 'go-data-maps::load-factor-growth', 'Element count exceeds cap hint — grows past make size', false, 2),
-  ('go-data-maps::load-factor-growth#3', 'go-data-maps::load-factor-growth', 'Total entries cross a power of two — resize on 2^n', false, 3),
-  ('go-data-maps::concurrent-access#0', 'go-data-maps::concurrent-access', 'Runtime may fatal — ''concurrent map writes'' aborts process', true, 0),
-  ('go-data-maps::concurrent-access#1', 'go-data-maps::concurrent-access', 'Only a data race — output garbled, run continues', false, 1),
-  ('go-data-maps::concurrent-access#2', 'go-data-maps::concurrent-access', 'Reads always safe — only writer-writer conflicts matter', false, 2),
-  ('go-data-maps::concurrent-access#3', 'go-data-maps::concurrent-access', 'Last write wins — updates serialize via hidden lock', false, 3),
-  ('go-data-strings-runes::len-vs-runecount#0', 'go-data-strings-runes::len-vs-runecount', '14 and 9 — bytes vs decoded runes', true, 0),
-  ('go-data-strings-runes::len-vs-runecount#1', 'go-data-strings-runes::len-vs-runecount', '9 and 9 — len counts runes', false, 1),
-  ('go-data-strings-runes::len-vs-runecount#2', 'go-data-strings-runes::len-vs-runecount', '14 and 14 — both count bytes', false, 2),
-  ('go-data-strings-runes::len-vs-runecount#3', 'go-data-strings-runes::len-vs-runecount', '9 and 14 — len counts runes, RuneCount counts bytes', false, 3),
-  ('go-data-strings-runes::index-yields-byte#0', 'go-data-strings-runes::index-yields-byte', 'byte 0xC3 — index reads one raw byte', true, 0),
-  ('go-data-strings-runes::index-yields-byte#1', 'go-data-strings-runes::index-yields-byte', 'rune ''é'' — indexing decodes UTF-8', false, 1),
-  ('go-data-strings-runes::index-yields-byte#2', 'go-data-strings-runes::index-yields-byte', 'rune U+00E9 — s[1] returns full code point', false, 2),
-  ('go-data-strings-runes::index-yields-byte#3', 'go-data-strings-runes::index-yields-byte', 'byte 0xA9 — index skips the lead byte', false, 3),
-  ('go-data-strings-runes::range-index-gap#0', 'go-data-strings-runes::range-index-gap', '0, 1, 4 — index is the byte offset', true, 0),
-  ('go-data-strings-runes::range-index-gap#1', 'go-data-strings-runes::range-index-gap', '0, 1, 2 — index is the rune position', false, 1),
-  ('go-data-strings-runes::range-index-gap#2', 'go-data-strings-runes::range-index-gap', '0, 3, 4 — first rune width added upfront', false, 2),
-  ('go-data-strings-runes::range-index-gap#3', 'go-data-strings-runes::range-index-gap', '1, 2, 3 — index is one-based rune count', false, 3),
-  ('go-data-strings-runes::invalid-utf8-range#0', 'go-data-strings-runes::invalid-utf8-range', 'U+FFFD advancing 1 — replacement char per bad byte', true, 0),
-  ('go-data-strings-runes::invalid-utf8-range#1', 'go-data-strings-runes::invalid-utf8-range', 'panic — range rejects invalid UTF-8', false, 1),
-  ('go-data-strings-runes::invalid-utf8-range#2', 'go-data-strings-runes::invalid-utf8-range', '0xFF as rune — raw byte promoted unchanged', false, 2),
-  ('go-data-strings-runes::invalid-utf8-range#3', 'go-data-strings-runes::invalid-utf8-range', 'U+FFFD advancing 0 — decoder loops forever', false, 3),
-  ('go-data-strings-runes::conversion-copy#0', 'go-data-strings-runes::conversion-copy', '[]byte(s) copies — strings immutable so mutation needs a copy', true, 0),
-  ('go-data-strings-runes::conversion-copy#1', 'go-data-strings-runes::conversion-copy', '[]byte(s) aliases s — zero-copy shares backing array', false, 1),
-  ('go-data-strings-runes::conversion-copy#2', 'go-data-strings-runes::conversion-copy', 'string(b) always allocates — even inside map lookups', false, 2),
-  ('go-data-strings-runes::conversion-copy#3', 'go-data-strings-runes::conversion-copy', 'both are free — compiler proves no allocation ever', false, 3),
-  ('go-data-strings-runes::rune-slice-mutation#0', 'go-data-strings-runes::rune-slice-mutation', 'len(rs)=5 mutable — []rune stores decoded code points', true, 0),
-  ('go-data-strings-runes::rune-slice-mutation#1', 'go-data-strings-runes::rune-slice-mutation', 'len(rs)=6 mutable — one int32 per byte', false, 1),
-  ('go-data-strings-runes::rune-slice-mutation#2', 'go-data-strings-runes::rune-slice-mutation', 'len(rs)=5 immutable — rune slice shares string memory', false, 2),
-  ('go-data-strings-runes::rune-slice-mutation#3', 'go-data-strings-runes::rune-slice-mutation', 'len(rs)=6 immutable — includes é continuation byte', false, 3),
-  ('go-std-io::read-n-and-err#0', 'go-std-io::read-n-and-err', 'n>0 with err!=nil — process bytes before checking err', true, 0),
-  ('go-std-io::read-n-and-err#1', 'go-std-io::read-n-and-err', 'err implies n==0 — a nonzero read never errors', false, 1),
-  ('go-std-io::read-n-and-err#2', 'go-std-io::read-n-and-err', 'n==0, err==nil forbidden — must never happen', false, 2),
-  ('go-std-io::read-n-and-err#3', 'go-std-io::read-n-and-err', 'io.EOF always alone — never returned with data', false, 3),
-  ('go-std-io::copy-eof#0', 'go-std-io::copy-eof', 'nil — io.Copy swallows io.EOF as success', true, 0),
-  ('go-std-io::copy-eof#1', 'go-std-io::copy-eof', 'io.EOF — propagated from the final Read', false, 1),
-  ('go-std-io::copy-eof#2', 'go-std-io::copy-eof', 'io.ErrUnexpectedEOF — signals stream end', false, 2),
-  ('go-std-io::copy-eof#3', 'go-std-io::copy-eof', 'io.ErrShortWrite — always on completion', false, 3),
-  ('go-std-io::bufio-flush#0', 'go-std-io::bufio-flush', 'Flush not called — buffered bytes never reach the conn', true, 0),
-  ('go-std-io::bufio-flush#1', 'go-std-io::bufio-flush', 'flushes on each Write — so data is lost elsewhere', false, 1),
-  ('go-std-io::bufio-flush#2', 'go-std-io::bufio-flush', 'flushes on GC finalizer — timing race', false, 2),
-  ('go-std-io::bufio-flush#3', 'go-std-io::bufio-flush', 'Write returns short — silently drops the tail', false, 3),
-  ('go-std-io::scanner-token-limit#0', 'go-std-io::scanner-token-limit', 'Scan returns false — Err is bufio.ErrTooLong', true, 0),
-  ('go-std-io::scanner-token-limit#1', 'go-std-io::scanner-token-limit', 'Scanner grows unbounded — reads the full line', false, 1),
-  ('go-std-io::scanner-token-limit#2', 'go-std-io::scanner-token-limit', 'Scan silently truncates — keeps first 64 KB', false, 2),
-  ('go-std-io::scanner-token-limit#3', 'go-std-io::scanner-token-limit', 'Scan panics — token exceeds the buffer', false, 3),
-  ('go-std-io::multiwriter-error#0', 'go-std-io::multiwriter-error', 'Write stops at b — returns b''s error immediately', true, 0),
-  ('go-std-io::multiwriter-error#1', 'go-std-io::multiwriter-error', 'all writers still called — errors aggregated at end', false, 1),
-  ('go-std-io::multiwriter-error#2', 'go-std-io::multiwriter-error', 'b is skipped — a and c keep receiving data', false, 2),
-  ('go-std-io::multiwriter-error#3', 'go-std-io::multiwriter-error', 'c also gets bytes — MultiWriter retries b', false, 3),
-  ('go-std-io::limitreader-eof#0', 'go-std-io::limitreader-eof', '(0, io.EOF) — limit reached, underlying untouched', true, 0),
-  ('go-std-io::limitreader-eof#1', 'go-std-io::limitreader-eof', '(0, nil) — signals more data may come', false, 1),
-  ('go-std-io::limitreader-eof#2', 'go-std-io::limitreader-eof', 'remaining 3976 bytes — limit is advisory', false, 2),
-  ('go-std-io::limitreader-eof#3', 'go-std-io::limitreader-eof', 'io.ErrUnexpectedEOF — truncation detected', false, 3),
-  ('go-std-json::iface-number-type#0', 'go-std-json::iface-number-type', 'float64 — every JSON number decodes to float64', true, 0),
-  ('go-std-json::iface-number-type#1', 'go-std-json::iface-number-type', 'int — integer literals stay integers', false, 1),
-  ('go-std-json::iface-number-type#2', 'go-std-json::iface-number-type', 'json.Number — default numeric wrapper', false, 2),
-  ('go-std-json::iface-number-type#3', 'go-std-json::iface-number-type', 'int64 — widest integer chosen automatically', false, 3),
-  ('go-std-json::unexported-skip#0', 'go-std-json::unexported-skip', 'Field omitted — unexported stays invisible to reflect', true, 0),
-  ('go-std-json::unexported-skip#1', 'go-std-json::unexported-skip', 'Emits "tag" — lowercase becomes the JSON key', false, 1),
-  ('go-std-json::unexported-skip#2', 'go-std-json::unexported-skip', 'Panics — unexported fields are unsupported', false, 2),
-  ('go-std-json::unexported-skip#3', 'go-std-json::unexported-skip', 'Emits null — value treated as absent', false, 3),
-  ('go-std-json::omitempty-zero#0', 'go-std-json::omitempty-zero', 'When Count is 0 — omitempty tests the zero value', true, 0),
-  ('go-std-json::omitempty-zero#1', 'go-std-json::omitempty-zero', 'Never for ints — omitempty ignores numeric fields', false, 1),
-  ('go-std-json::omitempty-zero#2', 'go-std-json::omitempty-zero', 'When Count is negative — negatives count as empty', false, 2),
-  ('go-std-json::omitempty-zero#3', 'go-std-json::omitempty-zero', 'Only for pointers — value ints always serialize', false, 3),
-  ('go-std-json::omitempty-struct#0', 'go-std-json::omitempty-struct', 'meta object — omitempty never fires for structs', true, 0),
-  ('go-std-json::omitempty-struct#1', 'go-std-json::omitempty-struct', 'Nothing emitted — zero struct counts as empty', false, 1),
-  ('go-std-json::omitempty-struct#2', 'go-std-json::omitempty-struct', 'meta null — zero struct marshals as null', false, 2),
-  ('go-std-json::omitempty-struct#3', 'go-std-json::omitempty-struct', 'empty object — struct collapses under omitempty', false, 3),
-  ('go-std-json::embed-promotion#0', 'go-std-json::embed-promotion', 'Flattened — promoted to the outer object level', true, 0),
-  ('go-std-json::embed-promotion#1', 'go-std-json::embed-promotion', 'Nested object — under a "Base" sub-object', false, 1),
-  ('go-std-json::embed-promotion#2', 'go-std-json::embed-promotion', 'Nested object — under a "base" lowercase key', false, 2),
-  ('go-std-json::embed-promotion#3', 'go-std-json::embed-promotion', 'Dropped — anonymous fields are skipped', false, 3),
-  ('go-std-json::rawmessage-defer#0', 'go-std-json::rawmessage-defer', 'Defers parsing — stores raw bytes for later decode', true, 0),
-  ('go-std-json::rawmessage-defer#1', 'go-std-json::rawmessage-defer', 'Validates JSON — rejects malformed nested values', false, 1),
-  ('go-std-json::rawmessage-defer#2', 'go-std-json::rawmessage-defer', 'Speeds numbers — parses ints without float64', false, 2),
-  ('go-std-json::rawmessage-defer#3', 'go-std-json::rawmessage-defer', 'Compresses input — stores a gzipped payload', false, 3),
-  ('go-std-time::since-ntp-step#0', 'go-std-time::since-ntp-step', 'Correct elapsed — Since reads the monotonic reading', true, 0),
-  ('go-std-time::since-ntp-step#1', 'go-std-time::since-ntp-step', '~5s too small — wall step subtracted out', false, 1),
-  ('go-std-time::since-ntp-step#2', 'go-std-time::since-ntp-step', 'Negative duration — clock went backward', false, 2),
-  ('go-std-time::since-ntp-step#3', 'go-std-time::since-ntp-step', 'Panic — monotonic and wall disagree', false, 3),
-  ('go-std-time::time-after-loop-leak#0', 'go-std-time::time-after-loop-leak', 'Allocation churn — a fresh runtime timer every pass', true, 0),
-  ('go-std-time::time-after-loop-leak#1', 'go-std-time::time-after-loop-leak', 'Timer leak — After lives until d fires, never GC''d', false, 1),
-  ('go-std-time::time-after-loop-leak#2', 'go-std-time::time-after-loop-leak', 'Nothing wrong — After needs no cleanup ever', false, 2),
-  ('go-std-time::time-after-loop-leak#3', 'go-std-time::time-after-loop-leak', 'Data race — After shares one global timer', false, 3),
-  ('go-std-time::ticker-stop-drain#0', 'go-std-time::ticker-stop-drain', 'C is never closed — cannot range-until-closed on it', true, 0),
-  ('go-std-time::ticker-stop-drain#1', 'go-std-time::ticker-stop-drain', 'Buffered tick survives — Stop leaves a stale value', false, 1),
-  ('go-std-time::ticker-stop-drain#2', 'go-std-time::ticker-stop-drain', 'Channel closed — receive yields the zero value', false, 2),
-  ('go-std-time::ticker-stop-drain#3', 'go-std-time::ticker-stop-drain', 'Panic — receiving on a stopped ticker', false, 3),
-  ('go-std-time::round-zero-strip#0', 'go-std-time::round-zero-strip', 'Round(0) then Equal — strip monotonic, then compare', true, 0),
-  ('go-std-time::round-zero-strip#1', 'go-std-time::round-zero-strip', 'Use < and > — == is unsupported on Time', false, 1),
-  ('go-std-time::round-zero-strip#2', 'go-std-time::round-zero-strip', 'Call UTC() on both — normalizes the monotonic part', false, 2),
-  ('go-std-time::round-zero-strip#3', 'go-std-time::round-zero-strip', 'Use time.Since — sidesteps the wall clock entirely', false, 3),
-  ('go-std-time::timer-vs-ticker#0', 'go-std-time::timer-vs-ticker', 'time.Ticker — re-arms and coalesces missed ticks', true, 0),
-  ('go-std-time::timer-vs-ticker#1', 'go-std-time::timer-vs-ticker', 'time.Timer — fires repeatedly until Stop', false, 1),
-  ('go-std-time::timer-vs-ticker#2', 'go-std-time::timer-vs-ticker', 'time.After goroutine — cheapest recurring source', false, 2),
-  ('go-std-time::timer-vs-ticker#3', 'go-std-time::timer-vs-ticker', 'time.Sleep loop — guarantees exact cadence', false, 3),
-  ('go-std-time::timer-reset-race#0', 'go-std-time::timer-reset-race', 'No hazard now — Go 1.23 channels are unbuffered', true, 0),
-  ('go-std-time::timer-reset-race#1', 'go-std-time::timer-reset-race', 'Reset panics — timer was already stopped', false, 1),
-  ('go-std-time::timer-reset-race#2', 'go-std-time::timer-reset-race', 'Reset ignored — Stop permanently disables it', false, 2),
-  ('go-std-time::timer-reset-race#3', 'go-std-time::timer-reset-race', 'Stop closes C — Reset must reopen the channel', false, 3),
-  ('go-std-defer-idioms::return-value-mutation#0', 'go-std-defer-idioms::return-value-mutation', 'After assignment — return value set then defer runs', true, 0),
-  ('go-std-defer-idioms::return-value-mutation#1', 'go-std-defer-idioms::return-value-mutation', 'Never — return snapshots err first', false, 1),
-  ('go-std-defer-idioms::return-value-mutation#2', 'go-std-defer-idioms::return-value-mutation', 'Before doWork — defers run at entry', false, 2),
-  ('go-std-defer-idioms::return-value-mutation#3', 'go-std-defer-idioms::return-value-mutation', 'Only on panic — defers skip normal returns', false, 3),
-  ('go-std-defer-idioms::defer-args-eval#0', 'go-std-defer-idioms::defer-args-eval', '0 — arguments evaluated at defer statement', true, 0),
-  ('go-std-defer-idioms::defer-args-eval#1', 'go-std-defer-idioms::defer-args-eval', '42 — args read when the call executes', false, 1),
-  ('go-std-defer-idioms::defer-args-eval#2', 'go-std-defer-idioms::defer-args-eval', 'Compile error — defer needs a closure', false, 2),
-  ('go-std-defer-idioms::defer-args-eval#3', 'go-std-defer-idioms::defer-args-eval', 'Garbage — i already out of scope', false, 3),
-  ('go-std-defer-idioms::defer-in-loop#0', 'go-std-defer-idioms::defer-in-loop', 'Descriptors leak — closes wait until func returns', true, 0),
-  ('go-std-defer-idioms::defer-in-loop#1', 'go-std-defer-idioms::defer-in-loop', 'Nothing wrong — each iteration closes its file', false, 1),
-  ('go-std-defer-idioms::defer-in-loop#2', 'go-std-defer-idioms::defer-in-loop', 'Compile error — defer illegal inside for', false, 2),
-  ('go-std-defer-idioms::defer-in-loop#3', 'go-std-defer-idioms::defer-in-loop', 'Immediate double close — defer fires twice', false, 3),
-  ('go-std-defer-idioms::loopvar-1-22#0', 'go-std-defer-idioms::loopvar-1-22', 'LIFO with early args — output is c b a', true, 0),
-  ('go-std-defer-idioms::loopvar-1-22#1', 'go-std-defer-idioms::loopvar-1-22', 'c c c — single shared v reused', false, 1),
-  ('go-std-defer-idioms::loopvar-1-22#2', 'go-std-defer-idioms::loopvar-1-22', 'a b c — defers run in queue order', false, 2),
-  ('go-std-defer-idioms::loopvar-1-22#3', 'go-std-defer-idioms::loopvar-1-22', 'Same value thrice — prints a a a via late capture', false, 3),
-  ('go-std-defer-idioms::defer-panic-recover#0', 'go-std-defer-idioms::defer-panic-recover', 'b first — LIFO and recover here aborts panic', true, 0),
-  ('go-std-defer-idioms::defer-panic-recover#1', 'go-std-defer-idioms::defer-panic-recover', 'a first — defers run in registration order', false, 1),
-  ('go-std-defer-idioms::defer-panic-recover#2', 'go-std-defer-idioms::defer-panic-recover', 'Neither — panic skips all deferred calls', false, 2),
-  ('go-std-defer-idioms::defer-panic-recover#3', 'go-std-defer-idioms::defer-panic-recover', 'b first — but recover cannot halt active panic', false, 3),
-  ('go-std-defer-idioms::defer-cost#0', 'go-std-defer-idioms::defer-cost', 'Open-coded defers — near-free but not in loops', true, 0),
-  ('go-std-defer-idioms::defer-cost#1', 'go-std-defer-idioms::defer-cost', 'Defer always heap-allocates — avoid it entirely', false, 1),
-  ('go-std-defer-idioms::defer-cost#2', 'go-std-defer-idioms::defer-cost', 'Defer is truly free — identical to direct call', false, 2),
-  ('go-std-defer-idioms::defer-cost#3', 'go-std-defer-idioms::defer-cost', 'Defer is 10x slower — always inline cleanup', false, 3),
-  ('go-perf-benchmarks::what-is-bn#0', 'go-perf-benchmarks::what-is-bn', 'chosen by the runtime — grows until the body runs long enough', true, 0),
-  ('go-perf-benchmarks::what-is-bn#1', 'go-perf-benchmarks::what-is-bn', 'fixed at 1000 — standard iteration count for all benchmarks', false, 1),
-  ('go-perf-benchmarks::what-is-bn#2', 'go-perf-benchmarks::what-is-bn', 'set by -count — that flag controls b.N directly', false, 2),
-  ('go-perf-benchmarks::what-is-bn#3', 'go-perf-benchmarks::what-is-bn', 'equal to GOMAXPROCS — one iteration per logical CPU', false, 3),
-  ('go-perf-benchmarks::resettimer-purpose#0', 'go-perf-benchmarks::resettimer-purpose', 'setup folds into ns/op — inflated and N-dependent numbers', true, 0),
-  ('go-perf-benchmarks::resettimer-purpose#1', 'go-perf-benchmarks::resettimer-purpose', 'no effect — setup before the loop is never timed', false, 1),
-  ('go-perf-benchmarks::resettimer-purpose#2', 'go-perf-benchmarks::resettimer-purpose', 'the benchmark panics — timer must be reset first', false, 2),
-  ('go-perf-benchmarks::resettimer-purpose#3', 'go-perf-benchmarks::resettimer-purpose', 'allocs/op doubles — setup allocations counted twice', false, 3),
-  ('go-perf-benchmarks::sink-elimination#0', 'go-perf-benchmarks::sink-elimination', 'dead-code elimination — compiler drops the unused computation', true, 0),
-  ('go-perf-benchmarks::sink-elimination#1', 'go-perf-benchmarks::sink-elimination', 'b.N stays 1 — runtime skips loops with no side effects', false, 1),
-  ('go-perf-benchmarks::sink-elimination#2', 'go-perf-benchmarks::sink-elimination', 'the timer never starts — pure functions are not instrumented', false, 2),
-  ('go-perf-benchmarks::sink-elimination#3', 'go-perf-benchmarks::sink-elimination', 'inlining caches the result — later iterations run free', false, 3),
-  ('go-perf-benchmarks::reportallocs-scope#0', 'go-perf-benchmarks::reportallocs-scope', 'only that benchmark shows B/op — ReportAllocs is per-benchmark', true, 0),
-  ('go-perf-benchmarks::reportallocs-scope#1', 'go-perf-benchmarks::reportallocs-scope', 'nothing — allocation stats require the -benchmem flag', false, 1),
-  ('go-perf-benchmarks::reportallocs-scope#2', 'go-perf-benchmarks::reportallocs-scope', 'all benchmarks show B/op — one call enables it package-wide', false, 2),
-  ('go-perf-benchmarks::reportallocs-scope#3', 'go-perf-benchmarks::reportallocs-scope', 'a compile error — ReportAllocs conflicts with missing -benchmem', false, 3),
-  ('go-perf-benchmarks::benchstat-count#0', 'go-perf-benchmarks::benchstat-count', 'n=1 per side — benchstat cannot establish significance', true, 0),
-  ('go-perf-benchmarks::benchstat-count#1', 'go-perf-benchmarks::benchstat-count', 'benchstat needs identical b.N — differing N voids the test', false, 1),
-  ('go-perf-benchmarks::benchstat-count#2', 'go-perf-benchmarks::benchstat-count', '''~'' means improvement — benchstat''s success marker', false, 2),
-  ('go-perf-benchmarks::benchstat-count#3', 'go-perf-benchmarks::benchstat-count', 'single files are averaged — the delta is discarded', false, 3),
-  ('go-perf-benchmarks::parallel-timer#0', 'go-perf-benchmarks::parallel-timer', 'ResetTimer before RunParallel — per-goroutine setup outside pb loop', true, 0),
-  ('go-perf-benchmarks::parallel-timer#1', 'go-perf-benchmarks::parallel-timer', 'ResetTimer inside each pb.Next() call — reset every op', false, 1),
-  ('go-perf-benchmarks::parallel-timer#2', 'go-perf-benchmarks::parallel-timer', 'ResetTimer inside the closure — after pb is created', false, 2),
-  ('go-perf-benchmarks::parallel-timer#3', 'go-perf-benchmarks::parallel-timer', 'no reset needed — RunParallel auto-excludes setup', false, 3),
-  ('go-perf-pprof::cpu-sampling#0', 'go-perf-pprof::cpu-sampling', 'SIGPROF timer — records the on-CPU stack ~100Hz', true, 0),
-  ('go-perf-pprof::cpu-sampling#1', 'go-perf-pprof::cpu-sampling', 'Function entry hooks — instruments every call site', false, 1),
-  ('go-perf-pprof::cpu-sampling#2', 'go-perf-pprof::cpu-sampling', 'GC assist accounting — charges pauses to callers', false, 2),
-  ('go-perf-pprof::cpu-sampling#3', 'go-perf-pprof::cpu-sampling', 'Wall-clock tracing — logs every goroutine transition', false, 3),
-  ('go-perf-pprof::flat-vs-cum#0', 'go-perf-pprof::flat-vs-cum', 'Callees dominate — self time is tiny, children heavy', true, 0),
-  ('go-perf-pprof::flat-vs-cum#1', 'go-perf-pprof::flat-vs-cum', 'Body is hot — spends 800ms in its own code', false, 1),
-  ('go-perf-pprof::flat-vs-cum#2', 'go-perf-pprof::flat-vs-cum', 'Profile is corrupt — flat must equal cum', false, 2),
-  ('go-perf-pprof::flat-vs-cum#3', 'go-perf-pprof::flat-vs-cum', 'Inlining bug — cum double-counts the frame', false, 3),
-  ('go-perf-pprof::inuse-vs-alloc#0', 'go-perf-pprof::inuse-vs-alloc', 'inuse_space — live bytes not yet freed', true, 0),
-  ('go-perf-pprof::inuse-vs-alloc#1', 'go-perf-pprof::inuse-vs-alloc', 'alloc_space — total bytes ever allocated', false, 1),
-  ('go-perf-pprof::inuse-vs-alloc#2', 'go-perf-pprof::inuse-vs-alloc', 'alloc_objects — cumulative allocation count', false, 2),
-  ('go-perf-pprof::inuse-vs-alloc#3', 'go-perf-pprof::inuse-vs-alloc', 'cpu samples — time spent in mallocgc', false, 3),
-  ('go-perf-pprof::heap-sampling-rate#0', 'go-perf-pprof::heap-sampling-rate', 'Size-based sampling — one sample per ~512KiB allocated', true, 0),
-  ('go-perf-pprof::heap-sampling-rate#1', 'go-perf-pprof::heap-sampling-rate', 'Stack values skipped — profiler tracks only heap objects', false, 1),
-  ('go-perf-pprof::heap-sampling-rate#2', 'go-perf-pprof::heap-sampling-rate', 'GC races WriteHeapProfile — collected before it is seen', false, 2),
-  ('go-perf-pprof::heap-sampling-rate#3', 'go-perf-pprof::heap-sampling-rate', 'Escape analysis filter — small structs dropped from profiles', false, 3),
-  ('go-perf-pprof::http-pprof-import#0', 'go-perf-pprof::http-pprof-import', 'Registers /debug/pprof handlers — via package init', true, 0),
-  ('go-perf-pprof::http-pprof-import#1', 'go-perf-pprof::http-pprof-import', 'Starts CPU profiling — automatically at startup', false, 1),
-  ('go-perf-pprof::http-pprof-import#2', 'go-perf-pprof::http-pprof-import', 'Enables block profiler — with zero configuration', false, 2),
-  ('go-perf-pprof::http-pprof-import#3', 'go-perf-pprof::http-pprof-import', 'Streams profiles — to stdout continuously', false, 3),
-  ('go-perf-pprof::cpu-vs-blocked#0', 'go-perf-pprof::cpu-vs-blocked', 'Nearly invisible — CPU profile misses off-CPU waits', true, 0),
-  ('go-perf-pprof::cpu-vs-blocked#1', 'go-perf-pprof::cpu-vs-blocked', 'Top hotspot — blocking counts as CPU time', false, 1),
-  ('go-perf-pprof::cpu-vs-blocked#2', 'go-perf-pprof::cpu-vs-blocked', 'Under runtime.gopark — with full wait duration', false, 2),
-  ('go-perf-pprof::cpu-vs-blocked#3', 'go-perf-pprof::cpu-vs-blocked', 'In alloc_space — blocking allocates wait records', false, 3),
-  ('go-perf-allocations::builder-grow#0', 'go-perf-allocations::builder-grow', 'One buffer alloc — String reuses it with no copy', true, 0),
-  ('go-perf-allocations::builder-grow#1', 'go-perf-allocations::builder-grow', 'n allocations — one growth per WriteString call', false, 1),
-  ('go-perf-allocations::builder-grow#2', 'go-perf-allocations::builder-grow', 'Two allocs — Grow plus a copy inside String', false, 2),
-  ('go-perf-allocations::builder-grow#3', 'go-perf-allocations::builder-grow', 'Zero allocs — Builder writes into stack storage', false, 3),
-  ('go-perf-allocations::iface-box#0', 'go-perf-allocations::iface-box', 'Boxing into any — value escapes via the interface', true, 0),
-  ('go-perf-allocations::iface-box#1', 'go-perf-allocations::iface-box', 'any is larger — it copies 24 bytes not 8', false, 1),
-  ('go-perf-allocations::iface-box#2', 'go-perf-allocations::iface-box', 'any triggers reflection — which always allocates', false, 2),
-  ('go-perf-allocations::iface-box#3', 'go-perf-allocations::iface-box', 'int is immutable — so it must be duplicated', false, 3),
-  ('go-perf-allocations::inline-budget#0', 'go-perf-allocations::inline-budget', 'Defining a closure — closures inflate node cost', true, 0),
-  ('go-perf-allocations::inline-budget#1', 'go-perf-allocations::inline-budget', 'A single return statement — return nodes are expensive', false, 1),
-  ('go-perf-allocations::inline-budget#2', 'go-perf-allocations::inline-budget', 'Any use of a named result — names blow the budget', false, 2),
-  ('go-perf-allocations::inline-budget#3', 'go-perf-allocations::inline-budget', 'Reading a package-level var — globals block inlining', false, 3),
-  ('go-perf-allocations::bce-hoist#0', 'go-perf-allocations::bce-hoist', 'Always here — i<len(s) proves i in range', true, 0),
-  ('go-perf-allocations::bce-hoist#1', 'go-perf-allocations::bce-hoist', 'Only with -gcflags=-B — a build flag required', false, 1),
-  ('go-perf-allocations::bce-hoist#2', 'go-perf-allocations::bce-hoist', 'Never on slices — only on fixed-size arrays', false, 2),
-  ('go-perf-allocations::bce-hoist#3', 'go-perf-allocations::bce-hoist', 'Reassignment matters — only if s stays fixed', false, 3),
-  ('go-perf-allocations::prealloc-cap#0', 'go-perf-allocations::prealloc-cap', 'One allocation — no repeated grow-and-copy', true, 0),
-  ('go-perf-allocations::prealloc-cap#1', 'go-perf-allocations::prealloc-cap', 'Zero allocations — cap makes the slice stack-only', false, 1),
-  ('go-perf-allocations::prealloc-cap#2', 'go-perf-allocations::prealloc-cap', 'Faster GC scan — capacity is not scanned', false, 2),
-  ('go-perf-allocations::prealloc-cap#3', 'go-perf-allocations::prealloc-cap', 'Append becomes O(1) — versus O(n) per call', false, 3),
-  ('go-perf-allocations::builder-copy#0', 'go-perf-allocations::builder-copy', 'Copy check panics — Builder stores a self pointer', true, 0),
-  ('go-perf-allocations::builder-copy#1', 'go-perf-allocations::builder-copy', 'No guard exists — copies silently share the buffer', false, 1),
-  ('go-perf-allocations::builder-copy#2', 'go-perf-allocations::builder-copy', 'Copies deep-clone — so it is always safe', false, 2),
-  ('go-perf-allocations::builder-copy#3', 'go-perf-allocations::builder-copy', 'Copy after String() is fine — buf was zeroed', false, 3),
-  ('go-perf-datastructures::field-padding-size#0', 'go-perf-datastructures::field-padding-size', 'Alignment padding — int64 forces gaps around the bools', true, 0),
-  ('go-perf-datastructures::field-padding-size#1', 'go-perf-datastructures::field-padding-size', 'Extra header — Go adds a type word per struct', false, 1),
-  ('go-perf-datastructures::field-padding-size#2', 'go-perf-datastructures::field-padding-size', 'bool is 8 bytes — three fields make 24', false, 2),
-  ('go-perf-datastructures::field-padding-size#3', 'go-perf-datastructures::field-padding-size', 'Escape analysis — the larger one heap-allocates', false, 3),
-  ('go-perf-datastructures::slice-cache-locality#0', 'go-perf-datastructures::slice-cache-locality', 'Contiguous memory — sequential access prefetches cache lines', true, 0),
-  ('go-perf-datastructures::slice-cache-locality#1', 'go-perf-datastructures::slice-cache-locality', 'Lower Big-O — slice traversal is O(log n)', false, 1),
-  ('go-perf-datastructures::slice-cache-locality#2', 'go-perf-datastructures::slice-cache-locality', 'No bounds checks — slices skip them in loops', false, 2),
-  ('go-perf-datastructures::slice-cache-locality#3', 'go-perf-datastructures::slice-cache-locality', 'Fewer GC roots — slices are never scanned by GC', false, 3),
-  ('go-perf-datastructures::map-key-slice#0', 'go-perf-datastructures::map-key-slice', 'Compile error — slices are not comparable', true, 0),
-  ('go-perf-datastructures::map-key-slice#1', 'go-perf-datastructures::map-key-slice', 'Runtime panic — only on the second insert', false, 1),
-  ('go-perf-datastructures::map-key-slice#2', 'go-perf-datastructures::map-key-slice', 'Compiles — Go hashes the backing array contents', false, 2),
-  ('go-perf-datastructures::map-key-slice#3', 'go-perf-datastructures::map-key-slice', 'Compiles — Go hashes the slice header pointer', false, 3),
-  ('go-perf-datastructures::map-iteration-memory#0', 'go-perf-datastructures::map-iteration-memory', 'Scattered buckets — map layout is not contiguous or ordered', true, 0),
-  ('go-perf-datastructures::map-iteration-memory#1', 'go-perf-datastructures::map-iteration-memory', 'Correct — maps store entries in insertion order', false, 1),
-  ('go-perf-datastructures::map-iteration-memory#2', 'go-perf-datastructures::map-iteration-memory', 'Correct — maps are backed by one flat array like slices', false, 2),
-  ('go-perf-datastructures::map-iteration-memory#3', 'go-perf-datastructures::map-iteration-memory', 'No difference — int keys iterate in sorted key order', false, 3),
-  ('go-perf-datastructures::struct-key-vs-pointer#0', 'go-perf-datastructures::struct-key-vs-pointer', 'Value key — dedupes by content, pointer key by identity', true, 0),
-  ('go-perf-datastructures::struct-key-vs-pointer#1', 'go-perf-datastructures::struct-key-vs-pointer', 'Both dedupe by content — pointers are auto-dereferenced', false, 1),
-  ('go-perf-datastructures::struct-key-vs-pointer#2', 'go-perf-datastructures::struct-key-vs-pointer', 'Pointer key — is faster because keys are 8 bytes', false, 2),
-  ('go-perf-datastructures::struct-key-vs-pointer#3', 'go-perf-datastructures::struct-key-vs-pointer', 'Value key — fails to compile for multi-field structs', false, 3),
-  ('go-perf-datastructures::aos-vs-soa#0', 'go-perf-datastructures::aos-vs-soa', 'Denser cache lines — only the used field is loaded', true, 0),
-  ('go-perf-datastructures::aos-vs-soa#1', 'go-perf-datastructures::aos-vs-soa', 'Lower Big-O — SoA turns the scan into O(1)', false, 1),
-  ('go-perf-datastructures::aos-vs-soa#2', 'go-perf-datastructures::aos-vs-soa', 'No padding ever — SoA removes all alignment rules', false, 2),
-  ('go-perf-datastructures::aos-vs-soa#3', 'go-perf-datastructures::aos-vs-soa', 'Avoids GC — parallel arrays are stack-allocated', false, 3),
-  ('go-test-table::parallel-loopvar#0', 'go-test-table::parallel-loopvar', 'Correct results — per-iteration loop variable', true, 0),
-  ('go-test-table::parallel-loopvar#1', 'go-test-table::parallel-loopvar', 'Data race — one shared tc pointer', false, 1),
-  ('go-test-table::parallel-loopvar#2', 'go-test-table::parallel-loopvar', 'Compile error — parallel needs explicit capture', false, 2),
-  ('go-test-table::parallel-loopvar#3', 'go-test-table::parallel-loopvar', 'All subtests skipped — parallel deferred forever', false, 3),
-  ('go-test-table::parallel-run-timing#0', 'go-test-table::parallel-run-timing', 'After they finish — parent blocks on the group', true, 0),
-  ('go-test-table::parallel-run-timing#1', 'go-test-table::parallel-run-timing', 'Concurrently — parent never waits', false, 1),
-  ('go-test-table::parallel-run-timing#2', 'go-test-table::parallel-run-timing', 'Before they start — subtests are queued only', false, 2),
-  ('go-test-table::parallel-run-timing#3', 'go-test-table::parallel-run-timing', 'Never — t.Run panics with parallel children', false, 3),
-  ('go-test-table::cleanup-vs-defer#0', 'go-test-table::cleanup-vs-defer', 'Runs at subtest end — not helper return', true, 0),
-  ('go-test-table::cleanup-vs-defer#1', 'go-test-table::cleanup-vs-defer', 'Guarantees LIFO — unlike defer', false, 1),
-  ('go-test-table::cleanup-vs-defer#2', 'go-test-table::cleanup-vs-defer', 'Survives os.Exit — defer skips it', false, 2),
-  ('go-test-table::cleanup-vs-defer#3', 'go-test-table::cleanup-vs-defer', 'Executes concurrently — speeds teardown', false, 3),
-  ('go-test-table::cmp-vs-reflect#0', 'go-test-table::cmp-vs-reflect', 'Readable diff — plus configurable equality', true, 0),
-  ('go-test-table::cmp-vs-reflect#1', 'go-test-table::cmp-vs-reflect', 'Faster path — avoids reflection entirely', false, 1),
-  ('go-test-table::cmp-vs-reflect#2', 'go-test-table::cmp-vs-reflect', 'Reads unexported fields — silently by default', false, 2),
-  ('go-test-table::cmp-vs-reflect#3', 'go-test-table::cmp-vs-reflect', 'Nil equals empty slice — treated same always', false, 3),
-  ('go-test-table::golden-update#0', 'go-test-table::golden-update', 'Blind -update — bakes in regressions', true, 0),
-  ('go-test-table::golden-update#1', 'go-test-table::golden-update', 'testdata compiled — bloats the binary', false, 1),
-  ('go-test-table::golden-update#2', 'go-test-table::golden-update', 'go test ignores testdata — by convention', false, 2),
-  ('go-test-table::golden-update#3', 'go-test-table::golden-update', 'Golden must be Go — valid source required', false, 3),
-  ('go-test-table::subtest-naming#0', 'go-test-table::subtest-naming', 'Spaces to underscores — slash nests subtests', true, 0),
-  ('go-test-table::subtest-naming#1', 'go-test-table::subtest-naming', 'Both identical — sanitized to add_x', false, 1),
-  ('go-test-table::subtest-naming#2', 'go-test-table::subtest-naming', 'Duplicate panic — names must be unique', false, 2),
-  ('go-test-table::subtest-naming#3', 'go-test-table::subtest-naming', 'Slash rejected — only letters allowed', false, 3),
-  ('go-test-parallel::scheduling-order#0', 'go-test-parallel::scheduling-order', 'Before them — parallel bodies resume after parent returns', true, 0),
-  ('go-test-parallel::scheduling-order#1', 'go-test-parallel::scheduling-order', 'After them — parent blocks until children finish', false, 1),
-  ('go-test-parallel::scheduling-order#2', 'go-test-parallel::scheduling-order', 'Interleaved — parent and children race freely', false, 2),
-  ('go-test-parallel::scheduling-order#3', 'go-test-parallel::scheduling-order', 'Undefined — depends on GOMAXPROCS value', false, 3),
-  ('go-test-parallel::loop-capture#0', 'go-test-parallel::loop-capture', 'Per-iteration scoping — loop var is fresh each iteration', true, 0),
-  ('go-test-parallel::loop-capture#1', 'go-test-parallel::loop-capture', 't.Parallel copies — the framework snapshots captured vars', false, 1),
-  ('go-test-parallel::loop-capture#2', 'go-test-parallel::loop-capture', 'Range over slice — never shared the variable anyway', false, 2),
-  ('go-test-parallel::loop-capture#3', 'go-test-parallel::loop-capture', 'Escape analysis — the compiler duplicates the closure', false, 3),
-  ('go-test-parallel::cleanup-timing#0', 'go-test-parallel::cleanup-timing', 'Runs after children — parent cleanup waits for parallels', true, 0),
-  ('go-test-parallel::cleanup-timing#1', 'go-test-parallel::cleanup-timing', 'Mutex forces order — cleanup blocks on the lock', false, 1),
-  ('go-test-parallel::cleanup-timing#2', 'go-test-parallel::cleanup-timing', 'Cleanup is synchronous — fires as each child finishes', false, 2),
-  ('go-test-parallel::cleanup-timing#3', 'go-test-parallel::cleanup-timing', 'map is race-free — Go maps synchronize automatically', false, 3),
-  ('go-test-parallel::helper-line#0', 'go-test-parallel::helper-line', 'Attributes failure — to the caller''s line, not helper', true, 0),
-  ('go-test-parallel::helper-line#1', 'go-test-parallel::helper-line', 'Reruns the helper — retries after marking it', false, 1),
-  ('go-test-parallel::helper-line#2', 'go-test-parallel::helper-line', 'Suppresses output — hides the helper from logs', false, 2),
-  ('go-test-parallel::helper-line#3', 'go-test-parallel::helper-line', 'Enables Fatalf — required for Fatal in helpers', false, 3),
-  ('go-test-parallel::tempdir-parallel#0', 'go-test-parallel::tempdir-parallel', 'No collision — each subtest t gets a unique dir', true, 0),
-  ('go-test-parallel::tempdir-parallel#1', 'go-test-parallel::tempdir-parallel', 'Possible collision — shared parent temp root reused', false, 1),
-  ('go-test-parallel::tempdir-parallel#2', 'go-test-parallel::tempdir-parallel', 'Cleanup clash — parent removes dir mid-test', false, 2),
-  ('go-test-parallel::tempdir-parallel#3', 'go-test-parallel::tempdir-parallel', 'Only if same name — TempDir keys off the test name', false, 3),
-  ('go-test-parallel::fatal-goroutine#0', 'go-test-parallel::fatal-goroutine', 'Fatal from other goroutine — does not stop the test', true, 0),
-  ('go-test-parallel::fatal-goroutine#1', 'go-test-parallel::fatal-goroutine', 'Data race — t is not safe from goroutines', false, 1),
-  ('go-test-parallel::fatal-goroutine#2', 'go-test-parallel::fatal-goroutine', 'Deadlock — Fatalf blocks the spawned goroutine', false, 2),
-  ('go-test-parallel::fatal-goroutine#3', 'go-test-parallel::fatal-goroutine', 'Panic — Fatalf outside the test goroutine panics', false, 3),
-  ('go-test-fuzz::seed-vs-mutation#0', 'go-test-fuzz::seed-vs-mutation', 'Fixed assertions — each must pass or fuzzing aborts', false, 0),
-  ('go-test-fuzz::seed-vs-mutation#1', 'go-test-fuzz::seed-vs-mutation', 'Seed inputs — mutator evolves new inputs from them', true, 1),
-  ('go-test-fuzz::seed-vs-mutation#2', 'go-test-fuzz::seed-vs-mutation', 'Type hints — discarded before mutation begins', false, 2),
-  ('go-test-fuzz::seed-vs-mutation#3', 'go-test-fuzz::seed-vs-mutation', 'Coverage targets — inputs the engine must reach', false, 3),
-  ('go-test-fuzz::add-type-match#0', 'go-test-fuzz::add-type-match', 'Types must match — order and types mirror the callback', true, 0),
-  ('go-test-fuzz::add-type-match#1', 'go-test-fuzz::add-type-match', 'No constraint — Add accepts any values freely', false, 1),
-  ('go-test-fuzz::add-type-match#2', 'go-test-fuzz::add-type-match', 'One Add allowed — at most a single call per target', false, 2),
-  ('go-test-fuzz::add-type-match#3', 'go-test-fuzz::add-type-match', 'Count must match — types coerced at runtime', false, 3),
-  ('go-test-fuzz::corpus-persist#0', 'go-test-fuzz::corpus-persist', 'testdata/fuzz/FuzzRoundTrip — checked-in regression corpus', true, 0),
-  ('go-test-fuzz::corpus-persist#1', 'go-test-fuzz::corpus-persist', '$GOCACHE/fuzz — cleared by go clean -cache', false, 1),
-  ('go-test-fuzz::corpus-persist#2', 'go-test-fuzz::corpus-persist', 'OS temp dir — lost when the process exits', false, 2),
-  ('go-test-fuzz::corpus-persist#3', 'go-test-fuzz::corpus-persist', 'Nowhere — reported to stderr but never saved', false, 3),
-  ('go-test-fuzz::no-fuzz-flag#0', 'go-test-fuzz::no-fuzz-flag', 'Skipped entirely — fuzz targets need the -fuzz flag', false, 0),
-  ('go-test-fuzz::no-fuzz-flag#1', 'go-test-fuzz::no-fuzz-flag', 'Seed corpus runs — deterministic, no mutation', true, 1),
-  ('go-test-fuzz::no-fuzz-flag#2', 'go-test-fuzz::no-fuzz-flag', 'Infinite mutation — until the default timeout hits', false, 2),
-  ('go-test-fuzz::no-fuzz-flag#3', 'go-test-fuzz::no-fuzz-flag', 'Compile error — Fuzz targets require -fuzz to build', false, 3),
-  ('go-test-fuzz::fuzz-arg-types#0', 'go-test-fuzz::fuzz-arg-types', '[]byte — a supported fuzzable input type', true, 0),
-  ('go-test-fuzz::fuzz-arg-types#1', 'go-test-fuzz::fuzz-arg-types', 'map[string]int — composite maps are fuzzable', false, 1),
-  ('go-test-fuzz::fuzz-arg-types#2', 'go-test-fuzz::fuzz-arg-types', 'time.Time — structs mutated field-wise', false, 2),
-  ('go-test-fuzz::fuzz-arg-types#3', 'go-test-fuzz::fuzz-arg-types', 'any — arbitrary concrete values generated', false, 3),
-  ('go-test-fuzz::fuzz-terminal#0', 'go-test-fuzz::fuzz-terminal', 'f.Fuzz is terminal — it must be the last call', true, 0),
-  ('go-test-fuzz::fuzz-terminal#1', 'go-test-fuzz::fuzz-terminal', 'Add is deprecated — replaced by f.Seed in 1.26', false, 1),
-  ('go-test-fuzz::fuzz-terminal#2', 'go-test-fuzz::fuzz-terminal', 'Concurrency panic — Add is not goroutine-safe', false, 2),
-  ('go-test-fuzz::fuzz-terminal#3', 'go-test-fuzz::fuzz-terminal', 'No misuse — either order works fine', false, 3),
-  ('go-test-doubles::httptest-server-vs-recorder#0', 'go-test-doubles::httptest-server-vs-recorder', 'httptest.NewRecorder — call handler, inspect Result', true, 0),
-  ('go-test-doubles::httptest-server-vs-recorder#1', 'go-test-doubles::httptest-server-vs-recorder', 'httptest.NewServer — spins a real loopback listener', false, 1),
-  ('go-test-doubles::httptest-server-vs-recorder#2', 'go-test-doubles::httptest-server-vs-recorder', 'http.DefaultServeMux — global mux is easiest', false, 2),
-  ('go-test-doubles::httptest-server-vs-recorder#3', 'go-test-doubles::httptest-server-vs-recorder', 'net.Pipe — hand-roll the transport yourself', false, 3),
-  ('go-test-doubles::fake-vs-mock#0', 'go-test-doubles::fake-vs-mock', 'A fake — working in-memory implementation of interface', true, 0),
-  ('go-test-doubles::fake-vs-mock#1', 'go-test-doubles::fake-vs-mock', 'A mock — strict call-order expectations on every method', false, 1),
-  ('go-test-doubles::fake-vs-mock#2', 'go-test-doubles::fake-vs-mock', 'A stub — returns zero values for all methods', false, 2),
-  ('go-test-doubles::fake-vs-mock#3', 'go-test-doubles::fake-vs-mock', 'A spy — asserts each method''s exact argument sequence', false, 3),
-  ('go-test-doubles::interface-seam-location#0', 'go-test-doubles::interface-seam-location', 'Consumer package — declares what it needs', true, 0),
-  ('go-test-doubles::interface-seam-location#1', 'go-test-doubles::interface-seam-location', 'Producer package — exports its own contract', false, 1),
-  ('go-test-doubles::interface-seam-location#2', 'go-test-doubles::interface-seam-location', 'Shared interfaces package — imported by both sides', false, 2),
-  ('go-test-doubles::interface-seam-location#3', 'go-test-doubles::interface-seam-location', 'On the concrete struct — as an embedded interface field', false, 3),
-  ('go-test-doubles::httptest-client-tls#0', 'go-test-doubles::httptest-client-tls', 'srv.Client trusts the cert — TLS to the test server works', true, 0),
-  ('go-test-doubles::httptest-client-tls#1', 'go-test-doubles::httptest-client-tls', 'Shorter default timeout — srv.Client tightens deadlines', false, 1),
-  ('go-test-doubles::httptest-client-tls#2', 'go-test-doubles::httptest-client-tls', 'No HTTPS redirects — DefaultClient would refuse them', false, 2),
-  ('go-test-doubles::httptest-client-tls#3', 'go-test-doubles::httptest-client-tls', 'Shares a goroutine pool — srv.Client reuses server''s', false, 3),
-  ('go-test-doubles::avoid-globals-di#0', 'go-test-doubles::avoid-globals-di', 'No seam — cannot inject a test double for transport', true, 0),
-  ('go-test-doubles::avoid-globals-di#1', 'go-test-doubles::avoid-globals-di', 'http.Get leaks goroutines — tests cannot join them', false, 1),
-  ('go-test-doubles::avoid-globals-di#2', 'go-test-doubles::avoid-globals-di', 'http.Get ignores context — tests cannot time out', false, 2),
-  ('go-test-doubles::avoid-globals-di#3', 'go-test-doubles::avoid-globals-di', 'Default client is unsafe — races under concurrent use', false, 3),
-  ('go-test-doubles::recorder-result-body#0', 'go-test-doubles::recorder-result-body', 'rec.Result().Body — snapshot Body, then Close it', true, 0),
-  ('go-test-doubles::recorder-result-body#1', 'go-test-doubles::recorder-result-body', 'rec.Body.Close — the buffer needs closing first', false, 1),
-  ('go-test-doubles::recorder-result-body#2', 'go-test-doubles::recorder-result-body', 'req.Response.Body — the request carries the reply', false, 2),
-  ('go-test-doubles::recorder-result-body#3', 'go-test-doubles::recorder-result-body', 'rec.Header().Get("Body") — headers hold the payload', false, 3),
-  ('go-design-rate-limiter::bucket-vs-leaky#0', 'go-design-rate-limiter::bucket-vs-leaky', 'Token bucket allows bursts — up to accumulated tokens', true, 0),
-  ('go-design-rate-limiter::bucket-vs-leaky#1', 'go-design-rate-limiter::bucket-vs-leaky', 'Leaky bucket allows larger bursts — it stores requests', false, 1),
-  ('go-design-rate-limiter::bucket-vs-leaky#2', 'go-design-rate-limiter::bucket-vs-leaky', 'Identical output rate — only the naming differs', false, 2),
-  ('go-design-rate-limiter::bucket-vs-leaky#3', 'go-design-rate-limiter::bucket-vs-leaky', 'Token bucket smooths perfectly — no burst possible', false, 3),
-  ('go-design-rate-limiter::limiter-safety#0', 'go-design-rate-limiter::limiter-safety', 'Safe for concurrent use — no external lock needed', true, 0),
-  ('go-design-rate-limiter::limiter-safety#1', 'go-design-rate-limiter::limiter-safety', 'Needs a mutex — Allow mutates state unsafely', false, 1),
-  ('go-design-rate-limiter::limiter-safety#2', 'go-design-rate-limiter::limiter-safety', 'Safe only for Wait — Allow races on tokens', false, 2),
-  ('go-design-rate-limiter::limiter-safety#3', 'go-design-rate-limiter::limiter-safety', 'One goroutine per limiter — sharing panics at runtime', false, 3),
-  ('go-design-rate-limiter::reserve-vs-allow#0', 'go-design-rate-limiter::reserve-vs-allow', 'Call Cancel on the reservation — returns the tokens', true, 0),
-  ('go-design-rate-limiter::reserve-vs-allow#1', 'go-design-rate-limiter::reserve-vs-allow', 'Nothing — an unused Reserve auto-refunds later', false, 1),
-  ('go-design-rate-limiter::reserve-vs-allow#2', 'go-design-rate-limiter::reserve-vs-allow', 'Call Allow again — that resets the reservation', false, 2),
-  ('go-design-rate-limiter::reserve-vs-allow#3', 'go-design-rate-limiter::reserve-vs-allow', 'Sleep for Delay — the token frees itself then', false, 3),
-  ('go-design-rate-limiter::refill-model#0', 'go-design-rate-limiter::refill-model', 'Elapsed-time math — no background goroutine or ticker', true, 0),
-  ('go-design-rate-limiter::refill-model#1', 'go-design-rate-limiter::refill-model', 'Background ticker — a goroutine adds tokens per tick', false, 1),
-  ('go-design-rate-limiter::refill-model#2', 'go-design-rate-limiter::refill-model', 'Fixed 1s window — counter resets every calendar second', false, 2),
-  ('go-design-rate-limiter::refill-model#3', 'go-design-rate-limiter::refill-model', 'OS timer callback — the kernel refills the bucket', false, 3),
-  ('go-design-rate-limiter::perkey-eviction#0', 'go-design-rate-limiter::perkey-eviction', 'Unbounded map growth — evict idle entries periodically', true, 0),
-  ('go-design-rate-limiter::perkey-eviction#1', 'go-design-rate-limiter::perkey-eviction', 'Token overflow — cap burst to prevent integer wrap', false, 1),
-  ('go-design-rate-limiter::perkey-eviction#2', 'go-design-rate-limiter::perkey-eviction', 'Lock contention — replace the map with a slice', false, 2),
-  ('go-design-rate-limiter::perkey-eviction#3', 'go-design-rate-limiter::perkey-eviction', 'Clock drift — call time.Now once at startup', false, 3),
-  ('go-design-rate-limiter::infinite-limit#0', 'go-design-rate-limiter::infinite-limit', 'Always allows — Inf disables throttling regardless of burst', true, 0),
-  ('go-design-rate-limiter::infinite-limit#1', 'go-design-rate-limiter::infinite-limit', 'Always denies — burst 0 blocks every request', false, 1),
-  ('go-design-rate-limiter::infinite-limit#2', 'go-design-rate-limiter::infinite-limit', 'Panics — Inf is not a valid rate.Limit', false, 2),
-  ('go-design-rate-limiter::infinite-limit#3', 'go-design-rate-limiter::infinite-limit', 'Allows one — then blocks until burst rises', false, 3),
-  ('go-design-worker-pool::fixed-vs-semaphore#0', 'go-design-worker-pool::fixed-vs-semaphore', 'Reuses N goroutines — avoids per-job stack churn', true, 0),
-  ('go-design-worker-pool::fixed-vs-semaphore#1', 'go-design-worker-pool::fixed-vs-semaphore', 'Guarantees ordering — jobs finish in arrival order', false, 1),
-  ('go-design-worker-pool::fixed-vs-semaphore#2', 'go-design-worker-pool::fixed-vs-semaphore', 'Removes cancellation need — workers self-terminate', false, 2),
-  ('go-design-worker-pool::fixed-vs-semaphore#3', 'go-design-worker-pool::fixed-vs-semaphore', 'Eliminates the channel — workers poll a shared slice', false, 3),
-  ('go-design-worker-pool::backpressure-buffer#0', 'go-design-worker-pool::backpressure-buffer', 'Producer blocks on send — natural backpressure to upstream', true, 0),
-  ('go-design-worker-pool::backpressure-buffer#1', 'go-design-worker-pool::backpressure-buffer', 'Jobs queue unbounded — memory grows until OOM', false, 1),
-  ('go-design-worker-pool::backpressure-buffer#2', 'go-design-worker-pool::backpressure-buffer', 'Runtime spawns extra workers — pool auto-scales', false, 2),
-  ('go-design-worker-pool::backpressure-buffer#3', 'go-design-worker-pool::backpressure-buffer', 'Sends silently drop — channel discards excess', false, 3),
-  ('go-design-worker-pool::graceful-drain#0', 'go-design-worker-pool::graceful-drain', 'close(jobs) then wg.Wait() — range exits after buffer drains', true, 0),
-  ('go-design-worker-pool::graceful-drain#1', 'go-design-worker-pool::graceful-drain', 'cancel(ctx) then wg.Wait() — abandons queued jobs', false, 1),
-  ('go-design-worker-pool::graceful-drain#2', 'go-design-worker-pool::graceful-drain', 'close(out) first — receiver side, panics on send', false, 2),
-  ('go-design-worker-pool::graceful-drain#3', 'go-design-worker-pool::graceful-drain', 'wg.Wait() then close(jobs) — deadlocks on the range loop', false, 3),
-  ('go-design-worker-pool::close-out-owner#0', 'go-design-worker-pool::close-out-owner', 'In a goroutine after wg.Wait() — single close post-drain', true, 0),
-  ('go-design-worker-pool::close-out-owner#1', 'go-design-worker-pool::close-out-owner', 'In each worker on return — last one closes it', false, 1),
-  ('go-design-worker-pool::close-out-owner#2', 'go-design-worker-pool::close-out-owner', 'By producer right after close(jobs) — same owner', false, 2),
-  ('go-design-worker-pool::close-out-owner#3', 'go-design-worker-pool::close-out-owner', 'In main before ranging out — receiver closes it', false, 3),
-  ('go-design-worker-pool::ctx-cancel-inflight#0', 'go-design-worker-pool::ctx-cancel-inflight', 'Receiver may stop reading — send blocks forever otherwise', true, 0),
-  ('go-design-worker-pool::ctx-cancel-inflight#1', 'go-design-worker-pool::ctx-cancel-inflight', 'Cancellation closes out — send panics on closed channel', false, 1),
-  ('go-design-worker-pool::ctx-cancel-inflight#2', 'go-design-worker-pool::ctx-cancel-inflight', 'ctx.Err() is nil mid-cancel — send corrupts result', false, 2),
-  ('go-design-worker-pool::ctx-cancel-inflight#3', 'go-design-worker-pool::ctx-cancel-inflight', 'Buffered sends ignore ctx — buffer must flush first', false, 3),
-  ('go-design-worker-pool::errgroup-first-error#0', 'go-design-worker-pool::errgroup-first-error', 'Returns first non-nil error — ctx cancels on that error', true, 0),
-  ('go-design-worker-pool::errgroup-first-error#1', 'go-design-worker-pool::errgroup-first-error', 'Returns joined errors — ctx cancels when all finish', false, 1),
-  ('go-design-worker-pool::errgroup-first-error#2', 'go-design-worker-pool::errgroup-first-error', 'Returns last error — ctx never auto-cancels', false, 2),
-  ('go-design-worker-pool::errgroup-first-error#3', 'go-design-worker-pool::errgroup-first-error', 'Returns nil until Wait — ctx cancels per goroutine', false, 3),
-  ('go-design-lru-cache::why-dll#0', 'go-design-lru-cache::why-dll', 'O(1) splice — DLL reorders touched node without scan', true, 0),
-  ('go-design-lru-cache::why-dll#1', 'go-design-lru-cache::why-dll', 'Slices suffice — map plus slice gives same complexity', false, 1),
-  ('go-design-lru-cache::why-dll#2', 'go-design-lru-cache::why-dll', 'Ordering is free — Go maps preserve insertion order', false, 2),
-  ('go-design-lru-cache::why-dll#3', 'go-design-lru-cache::why-dll', 'Memory savings — a DLL uses less space per entry', false, 3),
-  ('go-design-lru-cache::shard-vs-mutex#0', 'go-design-lru-cache::shard-vs-mutex', 'Contention split — locks spread across N independent shards', true, 0),
-  ('go-design-lru-cache::shard-vs-mutex#1', 'go-design-lru-cache::shard-vs-mutex', 'Higher hit rate — sharding improves cache hit ratio', false, 1),
-  ('go-design-lru-cache::shard-vs-mutex#2', 'go-design-lru-cache::shard-vs-mutex', 'Lock-free reads — sharding removes the need for any mutex', false, 2),
-  ('go-design-lru-cache::shard-vs-mutex#3', 'go-design-lru-cache::shard-vs-mutex', 'Global LRU order — shards keep one true recency list', false, 3),
-  ('go-design-lru-cache::get-writes#0', 'go-design-lru-cache::get-writes', 'MoveToFront mutates — Get writes list and needs exclusive lock', true, 0),
-  ('go-design-lru-cache::get-writes#1', 'go-design-lru-cache::get-writes', 'RWMutex is slower — read locks cost more than Lock', false, 1),
-  ('go-design-lru-cache::get-writes#2', 'go-design-lru-cache::get-writes', 'Reads never race — an RLock in Get is entirely safe', false, 2),
-  ('go-design-lru-cache::get-writes#3', 'go-design-lru-cache::get-writes', 'Map reads mutate — indexing a map needs a write lock', false, 3),
-  ('go-design-lru-cache::ttl-eviction#0', 'go-design-lru-cache::ttl-eviction', 'Stale retention — untouched expired keys pin memory', true, 0),
-  ('go-design-lru-cache::ttl-eviction#1', 'go-design-lru-cache::ttl-eviction', 'Early eviction — TTL entries are dropped before they expire', false, 1),
-  ('go-design-lru-cache::ttl-eviction#2', 'go-design-lru-cache::ttl-eviction', 'Clock skew — lazy TTL requires synchronized clocks', false, 2),
-  ('go-design-lru-cache::ttl-eviction#3', 'go-design-lru-cache::ttl-eviction', 'O(n) reads — every Get must scan for expired entries', false, 3),
-  ('go-design-lru-cache::syncmap-fit#0', 'go-design-lru-cache::syncmap-fit', 'No ordering hook — cannot track recency for eviction', true, 0),
-  ('go-design-lru-cache::syncmap-fit#1', 'go-design-lru-cache::syncmap-fit', 'Not concurrent — sync.Map still needs external locking', false, 1),
-  ('go-design-lru-cache::syncmap-fit#2', 'go-design-lru-cache::syncmap-fit', 'No generics — sync.Map cannot store typed values', false, 2),
-  ('go-design-lru-cache::syncmap-fit#3', 'go-design-lru-cache::syncmap-fit', 'Unbounded keys — sync.Map forbids Delete of entries', false, 3),
-  ('go-design-lru-cache::amortized-evict#0', 'go-design-lru-cache::amortized-evict', 'O(1) — remove list.Back and its map entry', true, 0),
-  ('go-design-lru-cache::amortized-evict#1', 'go-design-lru-cache::amortized-evict', 'O(n) — scan all entries for the oldest timestamp', false, 1),
-  ('go-design-lru-cache::amortized-evict#2', 'go-design-lru-cache::amortized-evict', 'O(log n) — pop from a priority queue by access time', false, 2),
-  ('go-design-lru-cache::amortized-evict#3', 'go-design-lru-cache::amortized-evict', 'O(cap) — shift remaining nodes toward the tail', false, 3),
-  ('go-design-graceful-shutdown::shutdown-vs-close#0', 'go-design-graceful-shutdown::shutdown-vs-close', 'Shutdown drains in-flight — Close aborts connections immediately', true, 0),
-  ('go-design-graceful-shutdown::shutdown-vs-close#1', 'go-design-graceful-shutdown::shutdown-vs-close', 'Shutdown blocks Accept — Close also drains open requests', false, 1),
-  ('go-design-graceful-shutdown::shutdown-vs-close#2', 'go-design-graceful-shutdown::shutdown-vs-close', 'They are identical — Close just lacks a context argument', false, 2),
-  ('go-design-graceful-shutdown::shutdown-vs-close#3', 'go-design-graceful-shutdown::shutdown-vs-close', 'Shutdown targets idle conns — Close ignores idle ones', false, 3),
-  ('go-design-graceful-shutdown::listenandserve-return#0', 'go-design-graceful-shutdown::listenandserve-return', 'http.ErrServerClosed — must be filtered from real errors', true, 0),
-  ('go-design-graceful-shutdown::listenandserve-return#1', 'go-design-graceful-shutdown::listenandserve-return', 'nil — a clean shutdown returns no error', false, 1),
-  ('go-design-graceful-shutdown::listenandserve-return#2', 'go-design-graceful-shutdown::listenandserve-return', 'context.Canceled — it propagates the shutdown context', false, 2),
-  ('go-design-graceful-shutdown::listenandserve-return#3', 'go-design-graceful-shutdown::listenandserve-return', 'io.EOF — the listener socket reached end of file', false, 3),
-  ('go-design-graceful-shutdown::notifycontext-restore#0', 'go-design-graceful-shutdown::notifycontext-restore', 'Restores default disposition — a second SIGTERM force-kills', true, 0),
-  ('go-design-graceful-shutdown::notifycontext-restore#1', 'go-design-graceful-shutdown::notifycontext-restore', 'Frees the context — otherwise Shutdown cannot run', false, 1),
-  ('go-design-graceful-shutdown::notifycontext-restore#2', 'go-design-graceful-shutdown::notifycontext-restore', 'Re-arms the handler — so future signals are caught again', false, 2),
-  ('go-design-graceful-shutdown::notifycontext-restore#3', 'go-design-graceful-shutdown::notifycontext-restore', 'Flushes buffered signals — pending SIGTERMs are discarded', false, 3),
-  ('go-design-graceful-shutdown::shutdown-timeout-hang#0', 'go-design-graceful-shutdown::shutdown-timeout-hang', 'Shutdown returns ctx error — the handler keeps running', true, 0),
-  ('go-design-graceful-shutdown::shutdown-timeout-hang#1', 'go-design-graceful-shutdown::shutdown-timeout-hang', 'Handler is force-killed — Shutdown terminates its goroutine', false, 1),
-  ('go-design-graceful-shutdown::shutdown-timeout-hang#2', 'go-design-graceful-shutdown::shutdown-timeout-hang', 'Shutdown extends automatically — waits for the 60s job', false, 2),
-  ('go-design-graceful-shutdown::shutdown-timeout-hang#3', 'go-design-graceful-shutdown::shutdown-timeout-hang', 'The process panics — deadline exceeded is fatal', false, 3),
-  ('go-design-graceful-shutdown::close-ordering#0', 'go-design-graceful-shutdown::close-ordering', 'Shutdown server first — then close the DB pool', true, 0),
-  ('go-design-graceful-shutdown::close-ordering#1', 'go-design-graceful-shutdown::close-ordering', 'Close the DB pool first — then Shutdown the server', false, 1),
-  ('go-design-graceful-shutdown::close-ordering#2', 'go-design-graceful-shutdown::close-ordering', 'Close both concurrently — order is irrelevant', false, 2),
-  ('go-design-graceful-shutdown::close-ordering#3', 'go-design-graceful-shutdown::close-ordering', 'Close the DB first — server drains without dependencies', false, 3),
-  ('go-design-graceful-shutdown::registeronshutdown#0', 'go-design-graceful-shutdown::registeronshutdown', 'Runs early asynchronously — signals hijacked conns to close', true, 0),
-  ('go-design-graceful-shutdown::registeronshutdown#1', 'go-design-graceful-shutdown::registeronshutdown', 'Runs after draining — all active requests finish first', false, 1),
-  ('go-design-graceful-shutdown::registeronshutdown#2', 'go-design-graceful-shutdown::registeronshutdown', 'Runs conditionally — only if the context expires first', false, 2),
-  ('go-design-graceful-shutdown::registeronshutdown#3', 'go-design-graceful-shutdown::registeronshutdown', 'Runs synchronously — before listeners are ever closed', false, 3),
-  ('go-design-pipeline::why-select-on-done#0', 'go-design-pipeline::why-select-on-done', 'Prevents leaked senders — bare send blocks forever if reader quits', true, 0),
-  ('go-design-pipeline::why-select-on-done#1', 'go-design-pipeline::why-select-on-done', 'Guarantees ordering — select serializes sends across stages', false, 1),
-  ('go-design-pipeline::why-select-on-done#2', 'go-design-pipeline::why-select-on-done', 'Improves throughput — select is faster than a direct send', false, 2),
-  ('go-design-pipeline::why-select-on-done#3', 'go-design-pipeline::why-select-on-done', 'Avoids data races — select adds a memory barrier per send', false, 3),
-  ('go-design-pipeline::who-closes#0', 'go-design-pipeline::who-closes', 'A dedicated goroutine after wg.Wait — once all fan-in readers finish', true, 0),
-  ('go-design-pipeline::who-closes#1', 'go-design-pipeline::who-closes', 'Each fan-in goroutine — it closes out via defer when its input drains', false, 1),
-  ('go-design-pipeline::who-closes#2', 'go-design-pipeline::who-closes', 'The main consumer — it closes out after the range loop ends', false, 2),
-  ('go-design-pipeline::who-closes#3', 'go-design-pipeline::who-closes', 'The context — cancel() closes out through Done propagation', false, 3),
-  ('go-design-pipeline::leak-on-early-break#0', 'go-design-pipeline::leak-on-early-break', 'ctx.Done closes — their select''s send case yields to the done case', true, 0),
-  ('go-design-pipeline::leak-on-early-break#1', 'go-design-pipeline::leak-on-early-break', 'break closes the channels — the range in each stage then returns', false, 1),
-  ('go-design-pipeline::leak-on-early-break#2', 'go-design-pipeline::leak-on-early-break', 'GC reclaims them — unreferenced goroutines are collected', false, 2),
-  ('go-design-pipeline::leak-on-early-break#3', 'go-design-pipeline::leak-on-early-break', 'defer close(out) fires — closing out signals upstream to stop', false, 3),
-  ('go-design-pipeline::shared-source-fanout#0', 'go-design-pipeline::shared-source-fanout', 'Work splits — each value is delivered to exactly one worker', true, 0),
-  ('go-design-pipeline::shared-source-fanout#1', 'go-design-pipeline::shared-source-fanout', 'Values duplicate — each worker receives every value from source', false, 1),
-  ('go-design-pipeline::shared-source-fanout#2', 'go-design-pipeline::shared-source-fanout', 'Race panic — two receivers on one channel is illegal', false, 2),
-  ('go-design-pipeline::shared-source-fanout#3', 'go-design-pipeline::shared-source-fanout', 'Deadlock — the second receiver blocks the first', false, 3),
-  ('go-design-pipeline::unbuffered-cancel-visibility#0', 'go-design-pipeline::unbuffered-cancel-visibility', 'Value discarded, no leak — send loses the race to ctx.Done', true, 0),
-  ('go-design-pipeline::unbuffered-cancel-visibility#1', 'go-design-pipeline::unbuffered-cancel-visibility', 'Value buffered, leak — the unsent item pins the goroutine', false, 1),
-  ('go-design-pipeline::unbuffered-cancel-visibility#2', 'go-design-pipeline::unbuffered-cancel-visibility', 'Panic — sending after cancel closes the channel', false, 2),
-  ('go-design-pipeline::unbuffered-cancel-visibility#3', 'go-design-pipeline::unbuffered-cancel-visibility', 'Blocked forever — worker cannot observe cancellation mid-send', false, 3),
-  ('go-design-pipeline::context-vs-done-channel#0', 'go-design-pipeline::context-vs-done-channel', 'Deadlines plus values — carries timeouts and request scope', true, 0),
-  ('go-design-pipeline::context-vs-done-channel#1', 'go-design-pipeline::context-vs-done-channel', 'Faster cancellation — ctx.Done signals before a done channel', false, 1),
-  ('go-design-pipeline::context-vs-done-channel#2', 'go-design-pipeline::context-vs-done-channel', 'Automatic goroutine cleanup — ctx joins and stops goroutines', false, 2),
-  ('go-design-pipeline::context-vs-done-channel#3', 'go-design-pipeline::context-vs-done-channel', 'Buffered cancellation — ctx queues cancel across stages', false, 3),
   ('ortb-foundations-ecosystem::ortb-ecosystem-ssp-role#0', 'ortb-foundations-ecosystem::ortb-ecosystem-ssp-role', 'SSP — sell-side broker packaging publisher inventory and floors', true, 0),
   ('ortb-foundations-ecosystem::ortb-ecosystem-ssp-role#1', 'ortb-foundations-ecosystem::ortb-ecosystem-ssp-role', 'DSP — demand-side buyer bidding for advertiser campaigns', false, 1),
   ('ortb-foundations-ecosystem::ortb-ecosystem-ssp-role#2', 'ortb-foundations-ecosystem::ortb-ecosystem-ssp-role', 'Ad Exchange — neutral marketplace running auctions among DSPs', false, 2),
@@ -49706,88 +49642,136 @@ insert into public.items (id, course_id, topic_id, problem_id, kind, title, summ
   ('prep-streams-io-rate-limiter-iterator', 'prep-streams-io', 'prep-streams-io-all', 'prep-streams-io-rate-limiter-iterator', 'problem', 'Rate limiter iterator', 'Token bucket rate limiter', 'Medium', null, '{}'::text[], 385),
   ('prep-streams-io-reverse-content-of-file-in-place', 'prep-streams-io', 'prep-streams-io-all', 'prep-streams-io-reverse-content-of-file-in-place', 'problem', 'Reverse content of file in place', 'In-place byte reversal', 'Medium', null, '{}'::text[], 386),
   ('prep-database-department-top-three-salaries', 'prep-database', 'prep-database-all', 'prep-database-department-top-three-salaries', 'problem', 'Department Top Three Salaries', 'Database', 'Medium', null, '{}'::text[], 387),
-  ('go-conc-scheduler', 'go-senior', 'go-senior-concurrency', 'go-conc-scheduler', 'problem', 'Goroutines & the GMP scheduler', 'How Go''s M:N scheduler multiplexes millions of goroutines onto OS threads.', 'Hard', 12, '{}'::text[], 388),
-  ('go-conc-channels', 'go-senior', 'go-senior-concurrency', 'go-conc-channels', 'problem', 'Channels: buffered, unbuffered, closed, nil', 'Send/receive, close semantics, comma-ok, and the nil-channel trick that senior Go hinges on.', 'Hard', 12, '{}'::text[], 389),
-  ('go-conc-select', 'go-senior', 'go-senior-concurrency', 'go-conc-select', 'problem', 'select, timeouts & non-blocking ops', 'How select picks ready cases, disables nil cases, and models timeouts/non-blocking I/O.', 'Hard', 12, '{}'::text[], 390),
-  ('go-conc-context', 'go-senior', 'go-senior-concurrency', 'go-conc-context', 'problem', 'context: cancellation & deadlines', 'Propagate cancellation and deadlines across API boundaries without leaking goroutines.', 'Hard', 12, '{}'::text[], 391),
-  ('go-conc-sync', 'go-senior', 'go-senior-concurrency', 'go-conc-sync', 'problem', 'sync primitives: Mutex, RWMutex, WaitGroup, Once', 'Zero-value-ready locks that must never be copied, with subtle WaitGroup and Once semantics.', 'Hard', 12, '{}'::text[], 392),
-  ('go-conc-worker-pool', 'go-senior', 'go-senior-concurrency', 'go-conc-worker-pool', 'problem', 'Worker pools, fan-in & fan-out', 'Bound concurrency with a fixed worker set; fan out over one channel, fan in results, close correctly.', 'Hard', 12, '{}'::text[], 393),
-  ('go-conc-hazards', 'go-senior', 'go-senior-concurrency', 'go-conc-hazards', 'problem', 'Races, deadlocks & goroutine leaks', 'The four canonical concurrency failure modes and why the runtime can only catch some of them.', 'Hard', 12, '{}'::text[], 394),
-  ('go-conc-atomic', 'go-senior', 'go-senior-concurrency', 'go-conc-atomic', 'problem', 'atomic operations & the sync/atomic types', 'Lock-free reads/writes with the typed atomics — and where their guarantees end.', 'Hard', 12, '{}'::text[], 395),
-  ('go-mem-stack-heap', 'go-senior', 'go-senior-runtime-memory', 'go-mem-stack-heap', 'problem', 'Escape analysis: stack vs heap', 'How the compiler decides stack vs heap, and why it drives allocation cost.', 'Hard', 12, '{}'::text[], 396),
-  ('go-mem-gc', 'go-senior', 'go-senior-runtime-memory', 'go-mem-gc', 'problem', 'The garbage collector', 'Concurrent tricolor mark-sweep with a hybrid write barrier, tuned by GOGC and GOMEMLIMIT.', 'Hard', 12, '{}'::text[], 397),
-  ('go-mem-model', 'go-senior', 'go-senior-runtime-memory', 'go-mem-model', 'problem', 'The Go memory model & happens-before', 'Happens-before is the only contract that makes cross-goroutine reads observe the right writes.', 'Hard', 12, '{}'::text[], 398),
-  ('go-mem-pool-alloc', 'go-senior', 'go-senior-runtime-memory', 'go-mem-pool-alloc', 'problem', 'Allocation control & sync.Pool', 'Cut allocations with sync.Pool, preallocation, and cache-aware layout — and know exactly when each backfires.', 'Hard', 12, '{}'::text[], 399),
-  ('go-iface-internals', 'go-senior', 'go-senior-interfaces-types', 'go-iface-internals', 'problem', 'Interface internals: iface, eface, itab', 'How Go represents interface values as two words and dispatches methods via the itab.', 'Hard', 12, '{}'::text[], 400),
-  ('go-iface-nil', 'go-senior', 'go-senior-interfaces-types', 'go-iface-nil', 'problem', 'The nil interface trap', 'A typed nil pointer wrapped in an interface is NOT equal to nil.', 'Hard', 12, '{}'::text[], 401),
-  ('go-iface-method-sets', 'go-senior', 'go-senior-interfaces-types', 'go-iface-method-sets', 'problem', 'Method sets: pointer vs value receivers', 'Why *T satisfies an interface but T often does not, and where addressability bites.', 'Hard', 12, '{}'::text[], 402),
-  ('go-iface-embedding', 'go-senior', 'go-senior-interfaces-types', 'go-iface-embedding', 'problem', 'Embedding & composition', 'How promotion, overriding, and interface embedding work — and where ambiguity bites.', 'Hard', 12, '{}'::text[], 403),
-  ('go-iface-assertions', 'go-senior', 'go-senior-interfaces-types', 'go-iface-assertions', 'problem', 'Type assertions & type switches', 'x.(T) forms, panic vs comma-ok, type switches, interface-to-interface assertions, and comparable dynamic types.', 'Hard', 12, '{}'::text[], 404),
-  ('go-gen-type-params', 'go-senior', 'go-senior-generics', 'go-gen-type-params', 'problem', 'Type parameters & instantiation', 'How func/type parameters instantiate and how Go compiles them via GCShape stenciling plus dictionaries.', 'Hard', 12, '{}'::text[], 405),
-  ('go-gen-constraints', 'go-senior', 'go-senior-generics', 'go-gen-constraints', 'problem', 'Constraints, ~ and comparable', 'Type sets, union elements, ~underlying approximation, and the two flavors of comparable.', 'Hard', 12, '{}'::text[], 406),
-  ('go-gen-inference', 'go-senior', 'go-senior-generics', 'go-gen-inference', 'problem', 'Type inference & its limits', 'How Go infers type arguments from function args, and the hard limits where you must be explicit.', 'Hard', 12, '{}'::text[], 407),
-  ('go-gen-pitfalls', 'go-senior', 'go-senior-generics', 'go-gen-pitfalls', 'problem', 'Generics pitfalls & when not to use', 'Know the hard limits of Go generics and when a plain interface beats a type parameter.', 'Hard', 12, '{}'::text[], 408),
-  ('go-err-wrapping', 'go-senior', 'go-senior-errors', 'go-err-wrapping', 'problem', 'Wrapping with %w, errors.Is / As', 'Build unwrap chains with %w and interrogate them via errors.Is/As, including multi-%w trees.', 'Hard', 12, '{}'::text[], 409),
-  ('go-err-sentinel-typed', 'go-senior', 'go-senior-errors', 'go-err-sentinel-typed', 'problem', 'Sentinel vs typed errors', 'When to expose a package-level sentinel vs a typed error, and how Is/As traverse and customize matching.', 'Hard', 12, '{}'::text[], 410),
-  ('go-err-panic-recover', 'go-senior', 'go-senior-errors', 'go-err-panic-recover', 'problem', 'panic, recover & defer semantics', 'How recover intercepts panics, how deferred functions run, and the timing traps that decide return values.', 'Hard', 12, '{}'::text[], 411),
-  ('go-err-custom', 'go-senior', 'go-senior-errors', 'go-err-custom', 'problem', 'Custom error types & Unwrap', 'Build custom error types that participate correctly in Is/As chains and joined trees.', 'Hard', 12, '{}'::text[], 412),
-  ('go-data-slice-internals', 'go-senior', 'go-senior-slices-maps', 'go-data-slice-internals', 'problem', 'Slice header, len, cap & append growth', 'How the {ptr,len,cap} header, append reallocation, and three-index slicing govern backing-array sharing.', 'Hard', 12, '{}'::text[], 413),
-  ('go-data-slice-aliasing', 'go-senior', 'go-senior-slices-maps', 'go-data-slice-aliasing', 'problem', 'Slice aliasing & the append gotcha', 'Subslices share a backing array, so append can silently clobber data unless you cap capacity or copy().', 'Hard', 12, '{}'::text[], 414),
-  ('go-data-maps', 'go-senior', 'go-senior-slices-maps', 'go-data-maps', 'problem', 'Map internals & iteration order', 'How Go maps hash, grow, and iterate, plus the addressability and nil-map rules that trip up seniors.', 'Hard', 12, '{}'::text[], 415),
-  ('go-data-strings-runes', 'go-senior', 'go-senior-slices-maps', 'go-data-strings-runes', 'problem', 'Strings, bytes, runes & UTF-8', 'Strings are immutable byte sequences; indexing yields bytes, range yields runes.', 'Hard', 12, '{}'::text[], 416),
-  ('go-std-io', 'go-senior', 'go-senior-stdlib-idioms', 'go-std-io', 'problem', 'io.Reader / io.Writer composition', 'Compose small io interfaces to stream data through wrappers without buffering everything in memory.', 'Hard', 12, '{}'::text[], 417),
-  ('go-std-json', 'go-senior', 'go-senior-stdlib-idioms', 'go-std-json', 'problem', 'encoding/json quirks', 'Reflection-driven (un)marshaling: exported fields, tags, omitempty, embedding, and interface{} defaults.', 'Hard', 12, '{}'::text[], 418),
-  ('go-std-time', 'go-senior', 'go-senior-stdlib-idioms', 'go-std-time', 'problem', 'time: monotonic clocks & tickers', 'How time.Time carries a monotonic reading, and how Timers and Tickers behave under Go 1.23+ unbuffered-channel semantics.', 'Hard', 12, '{}'::text[], 419),
-  ('go-std-defer-idioms', 'go-senior', 'go-senior-stdlib-idioms', 'go-std-defer-idioms', 'problem', 'defer patterns & resource cleanup', 'LIFO defers, loop pitfalls, error-preserving close, and defer cost under Go 1.26.', 'Hard', 12, '{}'::text[], 420),
-  ('go-perf-benchmarks', 'go-senior', 'go-senior-performance', 'go-perf-benchmarks', 'problem', 'Benchmarks & benchstat', 'Write trustworthy microbenchmarks with testing.B and compare them statistically with benchstat.', 'Hard', 12, '{}'::text[], 421),
-  ('go-perf-pprof', 'go-senior', 'go-senior-performance', 'go-perf-pprof', 'problem', 'pprof: CPU & heap profiling', 'Capture and read CPU and heap profiles with runtime/pprof and net/http/pprof, and interpret flat/cum and inuse/alloc samples.', 'Hard', 12, '{}'::text[], 422),
-  ('go-perf-allocations', 'go-senior', 'go-senior-performance', 'go-perf-allocations', 'problem', 'Reducing allocations & inlining', 'Cut heap traffic and keep hot functions inlinable to speed up Go code.', 'Hard', 12, '{}'::text[], 423),
-  ('go-perf-datastructures', 'go-senior', 'go-senior-performance', 'go-perf-datastructures', 'problem', 'Choosing structures for performance', 'Pick data structures by memory layout and access pattern, not just Big-O.', 'Hard', 12, '{}'::text[], 424),
-  ('go-test-table', 'go-senior', 'go-senior-testing', 'go-test-table', 'problem', 'Table-driven tests & subtests', 'Structure cases as data, run each via t.Run, and diff want/got with cleanups and golden files.', 'Hard', 12, '{}'::text[], 425),
-  ('go-test-parallel', 'go-senior', 'go-senior-testing', 'go-test-parallel', 'problem', 't.Parallel, helpers & cleanup', 'How parallel subtests schedule, capture loop vars, and interleave with cleanup and t.TempDir.', 'Hard', 12, '{}'::text[], 426),
-  ('go-test-fuzz', 'go-senior', 'go-senior-testing', 'go-test-fuzz', 'problem', 'Fuzzing', 'Native Go fuzzing: FuzzX targets, seed corpus, differential invariants, and persisted crashers.', 'Hard', 12, '{}'::text[], 427),
-  ('go-test-doubles', 'go-senior', 'go-senior-testing', 'go-test-doubles', 'problem', 'Test doubles & httptest', 'Design testable seams with interfaces, choose fakes over mocks, and drive HTTP code with httptest.', 'Hard', 12, '{}'::text[], 428),
-  ('go-design-rate-limiter', 'go-senior', 'go-senior-design', 'go-design-rate-limiter', 'problem', 'Design: token-bucket rate limiter', 'Token bucket with x/time/rate, per-key limiters, safe refill, and idle eviction.', 'Hard', 12, '{}'::text[], 429),
-  ('go-design-worker-pool', 'go-senior', 'go-senior-design', 'go-design-worker-pool', 'problem', 'Design: bounded worker-pool service', 'Bound concurrency with fixed workers or a semaphore, apply backpressure, drain gracefully, and aggregate errors under cancellation.', 'Hard', 12, '{}'::text[], 430),
-  ('go-design-lru-cache', 'go-senior', 'go-senior-design', 'go-design-lru-cache', 'problem', 'Design: concurrent LRU cache', 'Build an O(1) LRU with map + doubly linked list, then make it concurrent via sharding vs a single mutex.', 'Hard', 12, '{}'::text[], 431),
-  ('go-design-graceful-shutdown', 'go-senior', 'go-senior-design', 'go-design-graceful-shutdown', 'problem', 'Design: graceful shutdown', 'Drain in-flight requests on SIGTERM, then close dependencies in the right order.', 'Hard', 12, '{}'::text[], 432),
-  ('go-design-pipeline', 'go-senior', 'go-senior-design', 'go-design-pipeline', 'problem', 'Design: cancellable pipeline', 'Compose stage goroutines with channels, fan-out/fan-in, and context so cancellation drains cleanly without leaks.', 'Hard', 12, '{}'::text[], 433),
-  ('ortb-foundations-ecosystem', 'openrtb-eng', 'openrtb-eng-ad-tech-foundations', 'ortb-foundations-ecosystem', 'problem', 'Programmatic Ad Tech Ecosystem', 'Publishers, SSPs, ad exchanges, DSPs, bidders, and advertisers — how they interconnect.', 'Easy', 15, '{}'::text[], 434),
-  ('ortb-foundations-rtb-flow', 'openrtb-eng', 'openrtb-eng-ad-tech-foundations', 'ortb-foundations-rtb-flow', 'problem', 'The RTB Request-Response Flow', 'Step-by-step journey from page load to impression served, with sub-100 ms timing.', 'Easy', 15, '{}'::text[], 435),
-  ('ortb-foundations-auction-types', 'openrtb-eng', 'openrtb-eng-ad-tech-foundations', 'ortb-foundations-auction-types', 'problem', 'First-Price vs Second-Price Auctions', 'Vickrey second-price vs first-price mechanics and why the industry shifted.', 'Medium', 15, '{}'::text[], 436),
-  ('ortb-foundations-supply-chain', 'openrtb-eng', 'openrtb-eng-ad-tech-foundations', 'ortb-foundations-supply-chain', 'problem', 'ads.txt, sellers.json & SupplyChain Object', 'IAB standards for authorised reseller disclosure and supply path transparency.', 'Medium', 15, '{}'::text[], 437),
-  ('ortb-bid-request-object', 'openrtb-eng', 'openrtb-eng-bid-request', 'ortb-bid-request-object', 'problem', 'Top-Level BidRequest Object', 'The root BidRequest struct: required fields, auction rules, and allowlists.', 'Medium', 15, '{}'::text[], 438),
-  ('ortb-bid-request-imp', 'openrtb-eng', 'openrtb-eng-bid-request', 'ortb-bid-request-imp', 'problem', 'Impression Object & Ad Formats', 'The Imp object describes the ad slot: format (banner/video/native/audio), floor price, and deals.', 'Medium', 15, '{}'::text[], 439),
-  ('ortb-bid-request-site-app', 'openrtb-eng', 'openrtb-eng-bid-request', 'ortb-bid-request-site-app', 'problem', 'Site, App, Device & User Context', 'Publisher context (Site/App) and buyer data (Device/User) objects that fuel targeting.', 'Medium', 15, '{}'::text[], 440),
-  ('ortb-bid-request-26-fields', 'openrtb-eng', 'openrtb-eng-bid-request', 'ortb-bid-request-26-fields', 'problem', 'OpenRTB 2.6 New Fields', 'Pod bidding (poddur/podid/mincpmpersec), plcmt, and channel/network for CTV in 2.6.', 'Hard', 15, '{}'::text[], 441),
-  ('ortb-bid-response-object', 'openrtb-eng', 'openrtb-eng-bid-response', 'ortb-bid-response-object', 'problem', 'BidResponse & SeatBid Objects', 'Top-level BidResponse and the SeatBid grouping of bids by buyer seat.', 'Easy', 15, '{}'::text[], 442),
-  ('ortb-bid-response-bid', 'openrtb-eng', 'openrtb-eng-bid-response', 'ortb-bid-response-bid', 'problem', 'The Bid Object Deep Dive', 'Every field of the OpenRTB Bid object and how exchanges and DSPs use them.', 'Medium', 15, '{}'::text[], 443),
-  ('ortb-bid-response-settlement', 'openrtb-eng', 'openrtb-eng-bid-response', 'ortb-bid-response-settlement', 'problem', 'Win Notice, Billing Notice & Price Macros', 'How exchanges notify DSPs of wins/billing events and substitute price macros.', 'Medium', 15, '{}'::text[], 444),
-  ('ortb-bid-response-nobid', 'openrtb-eng', 'openrtb-eng-bid-response', 'ortb-bid-response-nobid', 'problem', 'No-Bid Codes & Timeout Handling', 'HTTP 204 vs JSON no-bid, nbr reason codes, and graceful timeout behaviour.', 'Easy', 15, '{}'::text[], 445),
-  ('ortb-bidder-server', 'openrtb-eng', 'openrtb-eng-bidder-in-go', 'ortb-bidder-server', 'problem', 'HTTP Bidder Server', 'A minimal OpenRTB bidder: HTTP server, JSON decode, validate, encode response.', 'Medium', 15, '{}'::text[], 446),
-  ('ortb-bidder-decision', 'openrtb-eng', 'openrtb-eng-bidder-in-go', 'ortb-bidder-decision', 'problem', 'Bid Decision Logic & Targeting', 'Evaluating targeting criteria, computing bid price, and respecting floor + budget.', 'Medium', 15, '{}'::text[], 447),
-  ('ortb-bidder-concurrency', 'openrtb-eng', 'openrtb-eng-bidder-in-go', 'ortb-bidder-concurrency', 'problem', 'Concurrency & Context Deadlines', 'Using context.WithDeadline, goroutines, and safe shared state in a real bidder.', 'Hard', 15, '{}'::text[], 448),
-  ('ortb-bidder-benchmark', 'openrtb-eng', 'openrtb-eng-bidder-in-go', 'ortb-bidder-benchmark', 'problem', 'Benchmarking the Hot Path', 'go test -bench, pprof CPU/memory profiling, and minimising allocations in JSON decode.', 'Hard', 15, '{}'::text[], 449),
-  ('ortb-exchange-fanout', 'openrtb-eng', 'openrtb-eng-exchange-auction', 'ortb-exchange-fanout', 'problem', 'Fan-Out to N DSPs', 'Sending a BidRequest to N DSPs concurrently and collecting responses within tmax.', 'Hard', 15, '{}'::text[], 450),
-  ('ortb-exchange-hedged', 'openrtb-eng', 'openrtb-eng-exchange-auction', 'ortb-exchange-hedged', 'problem', 'Hedged Requests & Timeout Enforcement', 'Cut tail latency by sending backup requests to slow DSPs; enforce hard deadlines.', 'Hard', 15, '{}'::text[], 451),
-  ('ortb-exchange-auction', 'openrtb-eng', 'openrtb-eng-exchange-auction', 'ortb-exchange-auction', 'problem', 'First/Second-Price Auction Logic', 'Implement exchange-side auction: collect bids, enforce floor, select winner, compute clearing price.', 'Medium', 15, '{}'::text[], 452),
-  ('ortb-exchange-floors', 'openrtb-eng', 'openrtb-eng-exchange-auction', 'ortb-exchange-floors', 'problem', 'Floor Prices, Deals & Private Marketplace', 'Publisher floor pricing, PMP deal types, and how deals are modelled in OpenRTB.', 'Medium', 15, '{}'::text[], 453),
-  ('ortb-serving-reverse-proxy', 'openrtb-eng', 'openrtb-eng-reverse-proxy', 'ortb-serving-reverse-proxy', 'problem', 'Reverse Proxy with httputil', 'Using net/http/httputil.ReverseProxy to forward ad requests and transform responses.', 'Medium', 15, '{}'::text[], 454),
-  ('ortb-serving-win-billing', 'openrtb-eng', 'openrtb-eng-reverse-proxy', 'ortb-serving-win-billing', 'problem', 'Win Notice (nurl) & Billing Notice (burl)', 'Implementing exchange-side nurl + burl dispatch and DSP-side win/billing handlers.', 'Medium', 15, '{}'::text[], 455),
-  ('ortb-serving-markup', 'openrtb-eng', 'openrtb-eng-reverse-proxy', 'ortb-serving-markup', 'problem', 'Markup Serving & AUCTION_PRICE Macro', 'Two markup-serving modes (inline adm vs nurl), macro substitution, and creative delivery.', 'Medium', 15, '{}'::text[], 456),
-  ('ortb-serving-cdn', 'openrtb-eng', 'openrtb-eng-reverse-proxy', 'ortb-serving-cdn', 'problem', 'CDN Creatives & Creative Auditing', 'Hosting creatives on CDN, the iurl audit snapshot, and brand-safety classification.', 'Easy', 15, '{}'::text[], 457),
-  ('ortb-tracking-impressions', 'openrtb-eng', 'openrtb-eng-tracking', 'ortb-tracking-impressions', 'problem', 'Impression Pixel Firing', 'How 1×1 impression pixels work, deduplication by impression ID, and server implementation.', 'Easy', 15, '{}'::text[], 458),
-  ('ortb-tracking-clicks', 'openrtb-eng', 'openrtb-eng-tracking', 'ortb-tracking-clicks', 'problem', 'Click Redirect Chains', 'Click tracking redirect chain: ad server → DSP tracker → advertiser landing page.', 'Medium', 15, '{}'::text[], 459),
-  ('ortb-tracking-macros', 'openrtb-eng', 'openrtb-eng-tracking', 'ortb-tracking-macros', 'problem', 'Tracking Macros & Substitution', 'All OpenRTB standard macros, their substitution context, and safe URL encoding.', 'Medium', 15, '{}'::text[], 460),
-  ('ortb-tracking-reconciliation', 'openrtb-eng', 'openrtb-eng-tracking', 'ortb-tracking-reconciliation', 'problem', 'Billing Reconciliation & Discrepancy', 'Why exchange and DSP impression counts diverge, acceptable discrepancy, and reconciliation.', 'Medium', 15, '{}'::text[], 461),
-  ('ortb-creative-banner', 'openrtb-eng', 'openrtb-eng-creatives-tags', 'ortb-creative-banner', 'problem', 'Banner HTML & MRAID', 'Banner creative markup in adm: plain HTML, MRAID for mobile rich media, and SafeFrame.', 'Easy', 15, '{}'::text[], 462),
-  ('ortb-creative-vast', 'openrtb-eng', 'openrtb-eng-creatives-tags', 'ortb-creative-vast', 'problem', 'VAST Video Ad Serving Template', 'VAST XML structure: Ad, InLine/Wrapper, Impression, Linear, MediaFiles, TrackingEvents.', 'Hard', 15, '{}'::text[], 463),
-  ('ortb-creative-native', 'openrtb-eng', 'openrtb-eng-creatives-tags', 'ortb-creative-native', 'problem', 'Native Ad Markup', 'OpenRTB Native spec: request/response JSON, asset types, and rendering by publisher.', 'Medium', 15, '{}'::text[], 464),
-  ('ortb-scale-pacing', 'openrtb-eng', 'openrtb-eng-scale-privacy', 'ortb-scale-pacing', 'problem', 'Budget Pacing with Token Bucket', 'Token-bucket algorithm for smooth budget pacing per advertiser per time window.', 'Hard', 15, '{}'::text[], 465),
-  ('ortb-scale-frequency-cap', 'openrtb-eng', 'openrtb-eng-scale-privacy', 'ortb-scale-frequency-cap', 'problem', 'Frequency Capping with Redis', 'Per-user per-campaign impression caps using Redis INCR+EXPIRE or sliding windows.', 'Hard', 15, '{}'::text[], 466),
-  ('ortb-scale-logging', 'openrtb-eng', 'openrtb-eng-scale-privacy', 'ortb-scale-logging', 'problem', 'Write-Behind Logging with Kafka', 'Never block the hot path: ring buffer → background writer → Kafka → data warehouse.', 'Hard', 15, '{}'::text[], 467),
-  ('ortb-privacy-consent', 'openrtb-eng', 'openrtb-eng-scale-privacy', 'ortb-privacy-consent', 'problem', 'GDPR, TCF & Consent Strings', 'TCF 2.2 consent strings in BidRequest, GDPR enforcement in bidders, and GPP/CCPA.', 'Hard', 15, '{}'::text[], 468),
-  ('ortb-privacy-identity', 'openrtb-eng', 'openrtb-eng-scale-privacy', 'ortb-privacy-identity', 'problem', 'Identity: IDFA, GAID, UID2 & Cookieless', 'Device IDs, cookie-sync, UID2, and identity in a cookieless world.', 'Hard', 15, '{}'::text[], 469),
-  ('ortb-design-capstone', 'openrtb-eng', 'openrtb-eng-scale-privacy', 'ortb-design-capstone', 'problem', 'Capstone: Design an Ad Exchange', 'End-to-end design of an ad exchange: 1M RPS, sub-100 ms auctions, impression tracking, billing.', 'Hard', 15, '{}'::text[], 470);
+  ('go-basics-program', 'go-senior', 'go-senior-basics', 'go-basics-program', 'problem', 'Program structure: package, import, main', 'Every Go program is a package; an executable is package main with a func main() entry point.', 'Easy', 12, '{}'::text[], 388),
+  ('go-basics-vars', 'go-senior', 'go-senior-basics', 'go-basics-vars', 'problem', 'Declaring variables: var, :=, and zero values', 'var declares anywhere with a zero value default; := is short declaration usable only inside functions.', 'Easy', 12, '{}'::text[], 389),
+  ('go-basics-const-iota', 'go-senior', 'go-senior-basics', 'go-basics-const-iota', 'problem', 'Constants and iota enumerations', 'const values are compile-time fixed; iota auto-increments within a const block to build enumerations.', 'Medium', 12, '{}'::text[], 390),
+  ('go-basics-control-flow', 'go-senior', 'go-senior-basics', 'go-basics-control-flow', 'problem', 'Control flow: if with init, for, switch (no fallthrough)', 'if and switch take an optional init statement; switch cases break implicitly and for is the only loop.', 'Easy', 12, '{}'::text[], 391),
+  ('go-basics-conversions', 'go-senior', 'go-senior-basics', 'go-basics-conversions', 'problem', 'Explicit numeric and string/[]byte/[]rune conversions', 'Go never converts types implicitly; T(x) converts numerics and string<->[]byte/[]rune explicitly.', 'Medium', 12, '{}'::text[], 392),
+  ('go-basics-fmt', 'go-senior', 'go-senior-basics', 'go-basics-fmt', 'problem', 'Formatted I/O with the fmt package (verbs, Sprintf)', 'fmt formats values with verbs: %v general, %d int, %s string, %q quoted, %T type, %+v with field names.', 'Easy', 12, '{}'::text[], 393),
+  ('go-types-basic', 'go-senior', 'go-senior-types-values', 'go-types-basic', 'problem', 'Basic types: sized numbers, bool, string, byte/rune aliases', 'Go pins integer and float widths in the type name and treats byte and rune as aliases for uint8 and int32.', 'Easy', 12, '{}'::text[], 394),
+  ('go-types-defined', 'go-senior', 'go-senior-types-values', 'go-types-defined', 'problem', 'Defined (named) types and their underlying type', 'type Celsius float64 makes a distinct type that shares an underlying type but never mixes without a conversion.', 'Easy', 12, '{}'::text[], 395),
+  ('go-types-value-semantics', 'go-senior', 'go-senior-types-values', 'go-types-value-semantics', 'problem', 'Value semantics: assignment and function args copy', 'Assignment and passing to a function copy the value, so mutating a struct copy leaves the original untouched.', 'Easy', 12, '{}'::text[], 396),
+  ('go-types-comparability', 'go-senior', 'go-senior-types-values', 'go-types-comparability', 'problem', 'Comparability and what may be a map key', 'Only comparable types can be == or used as map keys; slices, maps, and functions are not comparable.', 'Medium', 12, '{}'::text[], 397),
+  ('go-types-conv-vs-assert', 'go-senior', 'go-senior-types-values', 'go-types-conv-vs-assert', 'problem', 'Type conversion T(x) versus type assertion x.(T)', 'T(x) reinterprets a concrete value at compile time; x.(T) extracts the dynamic type out of an interface at runtime.', 'Medium', 12, '{}'::text[], 398),
+  ('go-types-composite-literals', 'go-senior', 'go-senior-types-values', 'go-types-composite-literals', 'problem', 'Composite literals and zero values across types', 'Composite literals build structs, arrays, slices, and maps inline; every type has a usable zero value.', 'Easy', 12, '{}'::text[], 399),
+  ('go-coll-arrays', 'go-senior', 'go-senior-collections', 'go-coll-arrays', 'problem', 'Arrays: fixed length is part of the type; value semantics', 'An array’s length is baked into its type, and assigning or passing one copies every element.', 'Easy', 12, '{}'::text[], 400),
+  ('go-coll-slices', 'go-senior', 'go-senior-collections', 'go-coll-slices', 'problem', 'Slices: make, len, cap, append growth', 'A slice is a header (ptr, len, cap) over an array that append grows — reallocating when cap runs out.', 'Easy', 12, '{}'::text[], 401),
+  ('go-coll-slice-aliasing', 'go-senior', 'go-senior-collections', 'go-coll-slice-aliasing', 'problem', 'Slices share a backing array; copy() and full three-index slices', 'Sub-slices alias the same backing array, so writes bleed across — copy() or a capped s[a:b:c] isolate them.', 'Medium', 12, '{}'::text[], 402),
+  ('go-coll-maps', 'go-senior', 'go-senior-collections', 'go-coll-maps', 'problem', 'Maps: comma-ok, delete, random iteration, nil-map write panic', 'Maps distinguish missing from zero via comma-ok, iterate in random order, and panic on writes to a nil map.', 'Easy', 12, '{}'::text[], 403),
+  ('go-coll-range', 'go-senior', 'go-senior-collections', 'go-coll-range', 'problem', 'range over slices, maps, strings, and ints (1.22)', 'range yields index/value pairs over slices and maps, decodes runes over strings, and counts 0..n-1 over an int.', 'Easy', 12, '{}'::text[], 404),
+  ('go-coll-grouping', 'go-senior', 'go-senior-collections', 'go-coll-grouping', 'problem', 'Nested slices and the map[K][]V grouping pattern', 'map[K][]V groups items by key by appending to the nil slice that a missing key returns.', 'Medium', 12, '{}'::text[], 405),
+  ('go-fn-multi-return', 'go-senior', 'go-senior-functions-closures', 'go-fn-multi-return', 'problem', 'Multiple return values and the (result, error) idiom', 'Go functions return any number of values; the canonical shape is (result, error) checked with if err != nil.', 'Easy', 12, '{}'::text[], 406),
+  ('go-fn-named-returns', 'go-senior', 'go-senior-functions-closures', 'go-fn-named-returns', 'problem', 'Named return values and the naked return (and its risk)', 'Naming return values pre-declares them as zeroed locals so a bare return sends their current state back.', 'Medium', 12, '{}'::text[], 407),
+  ('go-fn-variadic', 'go-senior', 'go-senior-functions-closures', 'go-fn-variadic', 'problem', 'Variadic parameters and spreading a slice with ...', 'A trailing ...T parameter collects extra args into a slice, and args... spreads an existing slice back in.', 'Easy', 12, '{}'::text[], 408),
+  ('go-fn-first-class', 'go-senior', 'go-senior-functions-closures', 'go-fn-first-class', 'problem', 'First-class functions and higher-order functions', 'Functions are values: store them in variables, pass them as arguments, and return them from other functions.', 'Easy', 12, '{}'::text[], 409),
+  ('go-fn-closures', 'go-senior', 'go-senior-functions-closures', 'go-fn-closures', 'problem', 'Closures capture variables by reference', 'A closure keeps a live reference to the outer variables it uses, so it can read and mutate them across calls.', 'Medium', 12, '{}'::text[], 410),
+  ('go-fn-defer', 'go-senior', 'go-senior-functions-closures', 'go-fn-defer', 'problem', 'defer: LIFO order and argument evaluation at defer time', 'defer schedules a call to run when the function returns; deferred calls fire in last-in, first-out order.', 'Medium', 12, '{}'::text[], 411),
+  ('go-struct-literals', 'go-senior', 'go-senior-structs-methods', 'go-struct-literals', 'problem', 'Struct types and keyed vs positional composite literals', 'A struct is a fixed set of named fields; build one with a keyed literal (robust) or a positional literal (fragile).', 'Easy', 12, '{}'::text[], 412),
+  ('go-struct-methods', 'go-senior', 'go-senior-structs-methods', 'go-struct-methods', 'problem', 'Methods on defined types and the receiver', 'A method is a function with a receiver parameter bound to a type you defined in this package.', 'Easy', 12, '{}'::text[], 413),
+  ('go-struct-receivers', 'go-senior', 'go-senior-structs-methods', 'go-struct-receivers', 'problem', 'Value vs pointer receivers and method sets', 'A value receiver operates on a copy; a pointer receiver can mutate the original and defines the pointer method set.', 'Medium', 12, '{}'::text[], 414),
+  ('go-struct-embedding', 'go-senior', 'go-senior-structs-methods', 'go-struct-embedding', 'problem', 'Embedding: promoted fields and methods, composition over inheritance', 'Embed a type by declaring it without a field name; its fields and methods are promoted onto the outer struct.', 'Medium', 12, '{}'::text[], 415),
+  ('go-struct-tags', 'go-senior', 'go-senior-structs-methods', 'go-struct-tags', 'problem', 'Struct tags and encoding/json field control', 'A struct tag is a string of metadata read via reflection; encoding/json uses it to rename, omit, and skip fields.', 'Medium', 12, '{}'::text[], 416),
+  ('go-struct-method-values', 'go-senior', 'go-senior-structs-methods', 'go-struct-method-values', 'problem', 'Method values versus method expressions', 'A method value binds the receiver now into a closure; a method expression leaves the receiver as the first argument.', 'Medium', 12, '{}'::text[], 417),
+  ('go-ib-satisfaction', 'go-senior', 'go-senior-interfaces-basics', 'go-ib-satisfaction', 'problem', 'Implicit interface satisfaction (no implements keyword)', 'A type satisfies an interface just by having its methods — you never declare the intent.', 'Easy', 12, '{}'::text[], 418),
+  ('go-ib-any', 'go-senior', 'go-senior-interfaces-basics', 'go-ib-any', 'problem', 'The empty interface and the any alias', 'interface{} has zero methods so every type satisfies it; any is its 1.18 alias.', 'Easy', 12, '{}'::text[], 419),
+  ('go-ib-assertion', 'go-senior', 'go-senior-interfaces-basics', 'go-ib-assertion', 'problem', 'Type assertion with the comma-ok form', 'x.(T) extracts the concrete type; the two-value form returns ok instead of panicking.', 'Easy', 12, '{}'::text[], 420),
+  ('go-ib-type-switch', 'go-senior', 'go-senior-interfaces-basics', 'go-ib-type-switch', 'problem', 'The type switch', 'switch v := x.(type) branches on the dynamic type, binding v to the matched concrete type per case.', 'Easy', 12, '{}'::text[], 421),
+  ('go-ib-nil-interface', 'go-senior', 'go-senior-interfaces-basics', 'go-ib-nil-interface', 'problem', 'The typed-nil-in-an-interface trap', 'An interface holding a nil pointer is NOT itself nil — it carries a type, so == nil is false.', 'Medium', 12, '{}'::text[], 422),
+  ('go-ib-stringer-error', 'go-senior', 'go-senior-interfaces-basics', 'go-ib-stringer-error', 'problem', 'Implementing the Stringer and error interfaces', 'Define String() to control %v/Println output and Error() to make a type usable as an error.', 'Easy', 12, '{}'::text[], 423),
+  ('go-str-immutable', 'go-senior', 'go-senior-strings-runes', 'go-str-immutable', 'problem', 'Strings are immutable, read-only byte sequences', 'A Go string is an immutable read-only slice of bytes; you cannot assign into it by index.', 'Easy', 12, '{}'::text[], 424),
+  ('go-str-runes-bytes', 'go-senior', 'go-senior-strings-runes', 'go-str-runes-bytes', 'problem', 'Bytes vs runes and UTF-8 encoding', 'A byte is one uint8 of UTF-8; a rune is an int32 Unicode code point that may span multiple bytes.', 'Medium', 12, '{}'::text[], 425),
+  ('go-str-range', 'go-senior', 'go-senior-strings-runes', 'go-str-range', 'problem', 'Ranging a string decodes runes; indexing yields a byte', 'for..range over a string yields byte-offset + decoded rune; direct indexing yields a single byte.', 'Medium', 12, '{}'::text[], 426),
+  ('go-str-builder', 'go-senior', 'go-senior-strings-runes', 'go-str-builder', 'problem', 'strings.Builder for efficient concatenation', 'strings.Builder accumulates bytes in a growable buffer and returns the result with zero final copy.', 'Easy', 12, '{}'::text[], 427),
+  ('go-str-strconv', 'go-senior', 'go-senior-strings-runes', 'go-str-strconv', 'problem', 'Converting numbers and strings with strconv', 'strconv parses and formats numbers; Atoi/Itoa handle base-10 ints and return an error on bad input.', 'Easy', 12, '{}'::text[], 428),
+  ('go-str-ops', 'go-senior', 'go-senior-strings-runes', 'go-str-ops', 'problem', 'Common strings package operations (Split, Join, Fields, TrimSpace)', 'The strings package covers everyday text work: Split, Join, Fields, TrimSpace, Contains, and more.', 'Easy', 12, '{}'::text[], 429),
+  ('go-pkg-visibility', 'go-senior', 'go-senior-packages-modules', 'go-pkg-visibility', 'problem', 'Exported vs unexported identifiers and package encapsulation', 'A leading uppercase letter exports an identifier across package boundaries; lowercase keeps it package-private.', 'Easy', 12, '{}'::text[], 430),
+  ('go-pkg-imports', 'go-senior', 'go-senior-packages-modules', 'go-pkg-imports', 'problem', 'Import paths, aliases, and blank imports', 'Import a package by path; alias it to rename, or use _ to run its init side effects without a usable name.', 'Easy', 12, '{}'::text[], 431),
+  ('go-pkg-init', 'go-senior', 'go-senior-packages-modules', 'go-pkg-init', 'problem', 'init functions and package initialization order', 'Package-level vars initialize by dependency, then every init() runs, all before main() begins.', 'Medium', 12, '{}'::text[], 432),
+  ('go-pkg-modules', 'go-senior', 'go-senior-packages-modules', 'go-pkg-modules', 'problem', 'Modules: go.mod, module path, semantic import versioning', 'A module is a versioned tree rooted at go.mod; its module path prefixes every import, and v2+ appends the major version.', 'Medium', 12, '{}'::text[], 433),
+  ('go-pkg-layout', 'go-senior', 'go-senior-packages-modules', 'go-pkg-layout', 'problem', 'internal/ packages and standard project layout', 'An internal/ directory limits imports to code rooted at its parent, enforcing module-private packages beyond capitalization.', 'Medium', 12, '{}'::text[], 434),
+  ('go-pkg-tooling', 'go-senior', 'go-senior-packages-modules', 'go-pkg-tooling', 'problem', 'Tooling: go build/run, go test, go vet, gofmt', 'The go command bundles build, run, test, vet, and fmt into one toolchain with fixed conventions.', 'Easy', 12, '{}'::text[], 435),
+  ('go-err-wrapping', 'go-senior', 'go-senior-errors', 'go-err-wrapping', 'problem', 'Wrapping with %w, errors.Is / As', 'Build unwrap chains with %w and interrogate them via errors.Is/As, including multi-%w trees.', 'Hard', 12, '{}'::text[], 436),
+  ('go-err-sentinel-typed', 'go-senior', 'go-senior-errors', 'go-err-sentinel-typed', 'problem', 'Sentinel vs typed errors', 'When to expose a package-level sentinel vs a typed error, and how Is/As traverse and customize matching.', 'Hard', 12, '{}'::text[], 437),
+  ('go-err-panic-recover', 'go-senior', 'go-senior-errors', 'go-err-panic-recover', 'problem', 'panic, recover & defer semantics', 'How recover intercepts panics, how deferred functions run, and the timing traps that decide return values.', 'Hard', 12, '{}'::text[], 438),
+  ('go-err-custom', 'go-senior', 'go-senior-errors', 'go-err-custom', 'problem', 'Custom error types & Unwrap', 'Build custom error types that participate correctly in Is/As chains and joined trees.', 'Hard', 12, '{}'::text[], 439),
+  ('go-data-slice-internals', 'go-senior', 'go-senior-slices-maps', 'go-data-slice-internals', 'problem', 'Slice header, len, cap & append growth', 'How the {ptr,len,cap} header, append reallocation, and three-index slicing govern backing-array sharing.', 'Hard', 12, '{}'::text[], 440),
+  ('go-data-slice-aliasing', 'go-senior', 'go-senior-slices-maps', 'go-data-slice-aliasing', 'problem', 'Slice aliasing & the append gotcha', 'Subslices share a backing array, so append can silently clobber data unless you cap capacity or copy().', 'Hard', 12, '{}'::text[], 441),
+  ('go-data-maps', 'go-senior', 'go-senior-slices-maps', 'go-data-maps', 'problem', 'Map internals & iteration order', 'How Go maps hash, grow, and iterate, plus the addressability and nil-map rules that trip up seniors.', 'Hard', 12, '{}'::text[], 442),
+  ('go-data-strings-runes', 'go-senior', 'go-senior-slices-maps', 'go-data-strings-runes', 'problem', 'Strings, bytes, runes & UTF-8', 'Strings are immutable byte sequences; indexing yields bytes, range yields runes.', 'Hard', 12, '{}'::text[], 443),
+  ('go-iface-internals', 'go-senior', 'go-senior-interfaces-types', 'go-iface-internals', 'problem', 'Interface internals: iface, eface, itab', 'How Go represents interface values as two words and dispatches methods via the itab.', 'Hard', 12, '{}'::text[], 444),
+  ('go-iface-nil', 'go-senior', 'go-senior-interfaces-types', 'go-iface-nil', 'problem', 'The nil interface trap', 'A typed nil pointer wrapped in an interface is NOT equal to nil.', 'Hard', 12, '{}'::text[], 445),
+  ('go-iface-method-sets', 'go-senior', 'go-senior-interfaces-types', 'go-iface-method-sets', 'problem', 'Method sets: pointer vs value receivers', 'Why *T satisfies an interface but T often does not, and where addressability bites.', 'Hard', 12, '{}'::text[], 446),
+  ('go-iface-embedding', 'go-senior', 'go-senior-interfaces-types', 'go-iface-embedding', 'problem', 'Embedding & composition', 'How promotion, overriding, and interface embedding work — and where ambiguity bites.', 'Hard', 12, '{}'::text[], 447),
+  ('go-iface-assertions', 'go-senior', 'go-senior-interfaces-types', 'go-iface-assertions', 'problem', 'Type assertions & type switches', 'x.(T) forms, panic vs comma-ok, type switches, interface-to-interface assertions, and comparable dynamic types.', 'Hard', 12, '{}'::text[], 448),
+  ('go-gen-type-params', 'go-senior', 'go-senior-generics', 'go-gen-type-params', 'problem', 'Type parameters & instantiation', 'How func/type parameters instantiate and how Go compiles them via GCShape stenciling plus dictionaries.', 'Hard', 12, '{}'::text[], 449),
+  ('go-gen-constraints', 'go-senior', 'go-senior-generics', 'go-gen-constraints', 'problem', 'Constraints, ~ and comparable', 'Type sets, union elements, ~underlying approximation, and the two flavors of comparable.', 'Hard', 12, '{}'::text[], 450),
+  ('go-gen-inference', 'go-senior', 'go-senior-generics', 'go-gen-inference', 'problem', 'Type inference & its limits', 'How Go infers type arguments from function args, and the hard limits where you must be explicit.', 'Hard', 12, '{}'::text[], 451),
+  ('go-gen-pitfalls', 'go-senior', 'go-senior-generics', 'go-gen-pitfalls', 'problem', 'Generics pitfalls & when not to use', 'Know the hard limits of Go generics and when a plain interface beats a type parameter.', 'Hard', 12, '{}'::text[], 452),
+  ('go-conc-scheduler', 'go-senior', 'go-senior-concurrency', 'go-conc-scheduler', 'problem', 'Goroutines & the GMP scheduler', 'How Go''s M:N scheduler multiplexes millions of goroutines onto OS threads.', 'Hard', 12, '{}'::text[], 453),
+  ('go-conc-channels', 'go-senior', 'go-senior-concurrency', 'go-conc-channels', 'problem', 'Channels: buffered, unbuffered, closed, nil', 'Send/receive, close semantics, comma-ok, and the nil-channel trick that senior Go hinges on.', 'Hard', 12, '{}'::text[], 454),
+  ('go-conc-select', 'go-senior', 'go-senior-concurrency', 'go-conc-select', 'problem', 'select, timeouts & non-blocking ops', 'How select picks ready cases, disables nil cases, and models timeouts/non-blocking I/O.', 'Hard', 12, '{}'::text[], 455),
+  ('go-conc-context', 'go-senior', 'go-senior-concurrency', 'go-conc-context', 'problem', 'context: cancellation & deadlines', 'Propagate cancellation and deadlines across API boundaries without leaking goroutines.', 'Hard', 12, '{}'::text[], 456),
+  ('go-conc-sync', 'go-senior', 'go-senior-concurrency', 'go-conc-sync', 'problem', 'sync primitives: Mutex, RWMutex, WaitGroup, Once', 'Zero-value-ready locks that must never be copied, with subtle WaitGroup and Once semantics.', 'Hard', 12, '{}'::text[], 457),
+  ('go-conc-worker-pool', 'go-senior', 'go-senior-concurrency', 'go-conc-worker-pool', 'problem', 'Worker pools, fan-in & fan-out', 'Bound concurrency with a fixed worker set; fan out over one channel, fan in results, close correctly.', 'Hard', 12, '{}'::text[], 458),
+  ('go-conc-hazards', 'go-senior', 'go-senior-concurrency', 'go-conc-hazards', 'problem', 'Races, deadlocks & goroutine leaks', 'The four canonical concurrency failure modes and why the runtime can only catch some of them.', 'Hard', 12, '{}'::text[], 459),
+  ('go-conc-atomic', 'go-senior', 'go-senior-concurrency', 'go-conc-atomic', 'problem', 'atomic operations & the sync/atomic types', 'Lock-free reads/writes with the typed atomics — and where their guarantees end.', 'Hard', 12, '{}'::text[], 460),
+  ('go-mem-stack-heap', 'go-senior', 'go-senior-runtime-memory', 'go-mem-stack-heap', 'problem', 'Escape analysis: stack vs heap', 'How the compiler decides stack vs heap, and why it drives allocation cost.', 'Hard', 12, '{}'::text[], 461),
+  ('go-mem-gc', 'go-senior', 'go-senior-runtime-memory', 'go-mem-gc', 'problem', 'The garbage collector', 'Concurrent tricolor mark-sweep with a hybrid write barrier, tuned by GOGC and GOMEMLIMIT.', 'Hard', 12, '{}'::text[], 462),
+  ('go-mem-model', 'go-senior', 'go-senior-runtime-memory', 'go-mem-model', 'problem', 'The Go memory model & happens-before', 'Happens-before is the only contract that makes cross-goroutine reads observe the right writes.', 'Hard', 12, '{}'::text[], 463),
+  ('go-mem-pool-alloc', 'go-senior', 'go-senior-runtime-memory', 'go-mem-pool-alloc', 'problem', 'Allocation control & sync.Pool', 'Cut allocations with sync.Pool, preallocation, and cache-aware layout — and know exactly when each backfires.', 'Hard', 12, '{}'::text[], 464),
+  ('go-std-io', 'go-senior', 'go-senior-stdlib-idioms', 'go-std-io', 'problem', 'io.Reader / io.Writer composition', 'Compose small io interfaces to stream data through wrappers without buffering everything in memory.', 'Hard', 12, '{}'::text[], 465),
+  ('go-std-json', 'go-senior', 'go-senior-stdlib-idioms', 'go-std-json', 'problem', 'encoding/json quirks', 'Reflection-driven (un)marshaling: exported fields, tags, omitempty, embedding, and interface{} defaults.', 'Hard', 12, '{}'::text[], 466),
+  ('go-std-time', 'go-senior', 'go-senior-stdlib-idioms', 'go-std-time', 'problem', 'time: monotonic clocks & tickers', 'How time.Time carries a monotonic reading, and how Timers and Tickers behave under Go 1.23+ unbuffered-channel semantics.', 'Hard', 12, '{}'::text[], 467),
+  ('go-std-defer-idioms', 'go-senior', 'go-senior-stdlib-idioms', 'go-std-defer-idioms', 'problem', 'defer patterns & resource cleanup', 'LIFO defers, loop pitfalls, error-preserving close, and defer cost under Go 1.26.', 'Hard', 12, '{}'::text[], 468),
+  ('go-perf-benchmarks', 'go-senior', 'go-senior-performance', 'go-perf-benchmarks', 'problem', 'Benchmarks & benchstat', 'Write trustworthy microbenchmarks with testing.B and compare them statistically with benchstat.', 'Hard', 12, '{}'::text[], 469),
+  ('go-perf-pprof', 'go-senior', 'go-senior-performance', 'go-perf-pprof', 'problem', 'pprof: CPU & heap profiling', 'Capture and read CPU and heap profiles with runtime/pprof and net/http/pprof, and interpret flat/cum and inuse/alloc samples.', 'Hard', 12, '{}'::text[], 470),
+  ('go-perf-allocations', 'go-senior', 'go-senior-performance', 'go-perf-allocations', 'problem', 'Reducing allocations & inlining', 'Cut heap traffic and keep hot functions inlinable to speed up Go code.', 'Hard', 12, '{}'::text[], 471),
+  ('go-perf-datastructures', 'go-senior', 'go-senior-performance', 'go-perf-datastructures', 'problem', 'Choosing structures for performance', 'Pick data structures by memory layout and access pattern, not just Big-O.', 'Hard', 12, '{}'::text[], 472),
+  ('go-test-table', 'go-senior', 'go-senior-testing', 'go-test-table', 'problem', 'Table-driven tests & subtests', 'Structure cases as data, run each via t.Run, and diff want/got with cleanups and golden files.', 'Hard', 12, '{}'::text[], 473),
+  ('go-test-parallel', 'go-senior', 'go-senior-testing', 'go-test-parallel', 'problem', 't.Parallel, helpers & cleanup', 'How parallel subtests schedule, capture loop vars, and interleave with cleanup and t.TempDir.', 'Hard', 12, '{}'::text[], 474),
+  ('go-test-fuzz', 'go-senior', 'go-senior-testing', 'go-test-fuzz', 'problem', 'Fuzzing', 'Native Go fuzzing: FuzzX targets, seed corpus, differential invariants, and persisted crashers.', 'Hard', 12, '{}'::text[], 475),
+  ('go-test-doubles', 'go-senior', 'go-senior-testing', 'go-test-doubles', 'problem', 'Test doubles & httptest', 'Design testable seams with interfaces, choose fakes over mocks, and drive HTTP code with httptest.', 'Hard', 12, '{}'::text[], 476),
+  ('go-design-rate-limiter', 'go-senior', 'go-senior-design', 'go-design-rate-limiter', 'problem', 'Design: token-bucket rate limiter', 'Token bucket with x/time/rate, per-key limiters, safe refill, and idle eviction.', 'Hard', 12, '{}'::text[], 477),
+  ('go-design-worker-pool', 'go-senior', 'go-senior-design', 'go-design-worker-pool', 'problem', 'Design: bounded worker-pool service', 'Bound concurrency with fixed workers or a semaphore, apply backpressure, drain gracefully, and aggregate errors under cancellation.', 'Hard', 12, '{}'::text[], 478),
+  ('go-design-lru-cache', 'go-senior', 'go-senior-design', 'go-design-lru-cache', 'problem', 'Design: concurrent LRU cache', 'Build an O(1) LRU with map + doubly linked list, then make it concurrent via sharding vs a single mutex.', 'Hard', 12, '{}'::text[], 479),
+  ('go-design-graceful-shutdown', 'go-senior', 'go-senior-design', 'go-design-graceful-shutdown', 'problem', 'Design: graceful shutdown', 'Drain in-flight requests on SIGTERM, then close dependencies in the right order.', 'Hard', 12, '{}'::text[], 480),
+  ('go-design-pipeline', 'go-senior', 'go-senior-design', 'go-design-pipeline', 'problem', 'Design: cancellable pipeline', 'Compose stage goroutines with channels, fan-out/fan-in, and context so cancellation drains cleanly without leaks.', 'Hard', 12, '{}'::text[], 481),
+  ('ortb-foundations-ecosystem', 'openrtb-eng', 'openrtb-eng-ad-tech-foundations', 'ortb-foundations-ecosystem', 'problem', 'Programmatic Ad Tech Ecosystem', 'Publishers, SSPs, ad exchanges, DSPs, bidders, and advertisers — how they interconnect.', 'Easy', 15, '{}'::text[], 482),
+  ('ortb-foundations-rtb-flow', 'openrtb-eng', 'openrtb-eng-ad-tech-foundations', 'ortb-foundations-rtb-flow', 'problem', 'The RTB Request-Response Flow', 'Step-by-step journey from page load to impression served, with sub-100 ms timing.', 'Easy', 15, '{}'::text[], 483),
+  ('ortb-foundations-auction-types', 'openrtb-eng', 'openrtb-eng-ad-tech-foundations', 'ortb-foundations-auction-types', 'problem', 'First-Price vs Second-Price Auctions', 'Vickrey second-price vs first-price mechanics and why the industry shifted.', 'Medium', 15, '{}'::text[], 484),
+  ('ortb-foundations-supply-chain', 'openrtb-eng', 'openrtb-eng-ad-tech-foundations', 'ortb-foundations-supply-chain', 'problem', 'ads.txt, sellers.json & SupplyChain Object', 'IAB standards for authorised reseller disclosure and supply path transparency.', 'Medium', 15, '{}'::text[], 485),
+  ('ortb-bid-request-object', 'openrtb-eng', 'openrtb-eng-bid-request', 'ortb-bid-request-object', 'problem', 'Top-Level BidRequest Object', 'The root BidRequest struct: required fields, auction rules, and allowlists.', 'Medium', 15, '{}'::text[], 486),
+  ('ortb-bid-request-imp', 'openrtb-eng', 'openrtb-eng-bid-request', 'ortb-bid-request-imp', 'problem', 'Impression Object & Ad Formats', 'The Imp object describes the ad slot: format (banner/video/native/audio), floor price, and deals.', 'Medium', 15, '{}'::text[], 487),
+  ('ortb-bid-request-site-app', 'openrtb-eng', 'openrtb-eng-bid-request', 'ortb-bid-request-site-app', 'problem', 'Site, App, Device & User Context', 'Publisher context (Site/App) and buyer data (Device/User) objects that fuel targeting.', 'Medium', 15, '{}'::text[], 488),
+  ('ortb-bid-request-26-fields', 'openrtb-eng', 'openrtb-eng-bid-request', 'ortb-bid-request-26-fields', 'problem', 'OpenRTB 2.6 New Fields', 'Pod bidding (poddur/podid/mincpmpersec), plcmt, and channel/network for CTV in 2.6.', 'Hard', 15, '{}'::text[], 489),
+  ('ortb-bid-response-object', 'openrtb-eng', 'openrtb-eng-bid-response', 'ortb-bid-response-object', 'problem', 'BidResponse & SeatBid Objects', 'Top-level BidResponse and the SeatBid grouping of bids by buyer seat.', 'Easy', 15, '{}'::text[], 490),
+  ('ortb-bid-response-bid', 'openrtb-eng', 'openrtb-eng-bid-response', 'ortb-bid-response-bid', 'problem', 'The Bid Object Deep Dive', 'Every field of the OpenRTB Bid object and how exchanges and DSPs use them.', 'Medium', 15, '{}'::text[], 491),
+  ('ortb-bid-response-settlement', 'openrtb-eng', 'openrtb-eng-bid-response', 'ortb-bid-response-settlement', 'problem', 'Win Notice, Billing Notice & Price Macros', 'How exchanges notify DSPs of wins/billing events and substitute price macros.', 'Medium', 15, '{}'::text[], 492),
+  ('ortb-bid-response-nobid', 'openrtb-eng', 'openrtb-eng-bid-response', 'ortb-bid-response-nobid', 'problem', 'No-Bid Codes & Timeout Handling', 'HTTP 204 vs JSON no-bid, nbr reason codes, and graceful timeout behaviour.', 'Easy', 15, '{}'::text[], 493),
+  ('ortb-bidder-server', 'openrtb-eng', 'openrtb-eng-bidder-in-go', 'ortb-bidder-server', 'problem', 'HTTP Bidder Server', 'A minimal OpenRTB bidder: HTTP server, JSON decode, validate, encode response.', 'Medium', 15, '{}'::text[], 494),
+  ('ortb-bidder-decision', 'openrtb-eng', 'openrtb-eng-bidder-in-go', 'ortb-bidder-decision', 'problem', 'Bid Decision Logic & Targeting', 'Evaluating targeting criteria, computing bid price, and respecting floor + budget.', 'Medium', 15, '{}'::text[], 495),
+  ('ortb-bidder-concurrency', 'openrtb-eng', 'openrtb-eng-bidder-in-go', 'ortb-bidder-concurrency', 'problem', 'Concurrency & Context Deadlines', 'Using context.WithDeadline, goroutines, and safe shared state in a real bidder.', 'Hard', 15, '{}'::text[], 496),
+  ('ortb-bidder-benchmark', 'openrtb-eng', 'openrtb-eng-bidder-in-go', 'ortb-bidder-benchmark', 'problem', 'Benchmarking the Hot Path', 'go test -bench, pprof CPU/memory profiling, and minimising allocations in JSON decode.', 'Hard', 15, '{}'::text[], 497),
+  ('ortb-exchange-fanout', 'openrtb-eng', 'openrtb-eng-exchange-auction', 'ortb-exchange-fanout', 'problem', 'Fan-Out to N DSPs', 'Sending a BidRequest to N DSPs concurrently and collecting responses within tmax.', 'Hard', 15, '{}'::text[], 498),
+  ('ortb-exchange-hedged', 'openrtb-eng', 'openrtb-eng-exchange-auction', 'ortb-exchange-hedged', 'problem', 'Hedged Requests & Timeout Enforcement', 'Cut tail latency by sending backup requests to slow DSPs; enforce hard deadlines.', 'Hard', 15, '{}'::text[], 499),
+  ('ortb-exchange-auction', 'openrtb-eng', 'openrtb-eng-exchange-auction', 'ortb-exchange-auction', 'problem', 'First/Second-Price Auction Logic', 'Implement exchange-side auction: collect bids, enforce floor, select winner, compute clearing price.', 'Medium', 15, '{}'::text[], 500),
+  ('ortb-exchange-floors', 'openrtb-eng', 'openrtb-eng-exchange-auction', 'ortb-exchange-floors', 'problem', 'Floor Prices, Deals & Private Marketplace', 'Publisher floor pricing, PMP deal types, and how deals are modelled in OpenRTB.', 'Medium', 15, '{}'::text[], 501),
+  ('ortb-serving-reverse-proxy', 'openrtb-eng', 'openrtb-eng-reverse-proxy', 'ortb-serving-reverse-proxy', 'problem', 'Reverse Proxy with httputil', 'Using net/http/httputil.ReverseProxy to forward ad requests and transform responses.', 'Medium', 15, '{}'::text[], 502),
+  ('ortb-serving-win-billing', 'openrtb-eng', 'openrtb-eng-reverse-proxy', 'ortb-serving-win-billing', 'problem', 'Win Notice (nurl) & Billing Notice (burl)', 'Implementing exchange-side nurl + burl dispatch and DSP-side win/billing handlers.', 'Medium', 15, '{}'::text[], 503),
+  ('ortb-serving-markup', 'openrtb-eng', 'openrtb-eng-reverse-proxy', 'ortb-serving-markup', 'problem', 'Markup Serving & AUCTION_PRICE Macro', 'Two markup-serving modes (inline adm vs nurl), macro substitution, and creative delivery.', 'Medium', 15, '{}'::text[], 504),
+  ('ortb-serving-cdn', 'openrtb-eng', 'openrtb-eng-reverse-proxy', 'ortb-serving-cdn', 'problem', 'CDN Creatives & Creative Auditing', 'Hosting creatives on CDN, the iurl audit snapshot, and brand-safety classification.', 'Easy', 15, '{}'::text[], 505),
+  ('ortb-tracking-impressions', 'openrtb-eng', 'openrtb-eng-tracking', 'ortb-tracking-impressions', 'problem', 'Impression Pixel Firing', 'How 1×1 impression pixels work, deduplication by impression ID, and server implementation.', 'Easy', 15, '{}'::text[], 506),
+  ('ortb-tracking-clicks', 'openrtb-eng', 'openrtb-eng-tracking', 'ortb-tracking-clicks', 'problem', 'Click Redirect Chains', 'Click tracking redirect chain: ad server → DSP tracker → advertiser landing page.', 'Medium', 15, '{}'::text[], 507),
+  ('ortb-tracking-macros', 'openrtb-eng', 'openrtb-eng-tracking', 'ortb-tracking-macros', 'problem', 'Tracking Macros & Substitution', 'All OpenRTB standard macros, their substitution context, and safe URL encoding.', 'Medium', 15, '{}'::text[], 508),
+  ('ortb-tracking-reconciliation', 'openrtb-eng', 'openrtb-eng-tracking', 'ortb-tracking-reconciliation', 'problem', 'Billing Reconciliation & Discrepancy', 'Why exchange and DSP impression counts diverge, acceptable discrepancy, and reconciliation.', 'Medium', 15, '{}'::text[], 509),
+  ('ortb-creative-banner', 'openrtb-eng', 'openrtb-eng-creatives-tags', 'ortb-creative-banner', 'problem', 'Banner HTML & MRAID', 'Banner creative markup in adm: plain HTML, MRAID for mobile rich media, and SafeFrame.', 'Easy', 15, '{}'::text[], 510),
+  ('ortb-creative-vast', 'openrtb-eng', 'openrtb-eng-creatives-tags', 'ortb-creative-vast', 'problem', 'VAST Video Ad Serving Template', 'VAST XML structure: Ad, InLine/Wrapper, Impression, Linear, MediaFiles, TrackingEvents.', 'Hard', 15, '{}'::text[], 511),
+  ('ortb-creative-native', 'openrtb-eng', 'openrtb-eng-creatives-tags', 'ortb-creative-native', 'problem', 'Native Ad Markup', 'OpenRTB Native spec: request/response JSON, asset types, and rendering by publisher.', 'Medium', 15, '{}'::text[], 512),
+  ('ortb-scale-pacing', 'openrtb-eng', 'openrtb-eng-scale-privacy', 'ortb-scale-pacing', 'problem', 'Budget Pacing with Token Bucket', 'Token-bucket algorithm for smooth budget pacing per advertiser per time window.', 'Hard', 15, '{}'::text[], 513),
+  ('ortb-scale-frequency-cap', 'openrtb-eng', 'openrtb-eng-scale-privacy', 'ortb-scale-frequency-cap', 'problem', 'Frequency Capping with Redis', 'Per-user per-campaign impression caps using Redis INCR+EXPIRE or sliding windows.', 'Hard', 15, '{}'::text[], 514),
+  ('ortb-scale-logging', 'openrtb-eng', 'openrtb-eng-scale-privacy', 'ortb-scale-logging', 'problem', 'Write-Behind Logging with Kafka', 'Never block the hot path: ring buffer → background writer → Kafka → data warehouse.', 'Hard', 15, '{}'::text[], 515),
+  ('ortb-privacy-consent', 'openrtb-eng', 'openrtb-eng-scale-privacy', 'ortb-privacy-consent', 'problem', 'GDPR, TCF & Consent Strings', 'TCF 2.2 consent strings in BidRequest, GDPR enforcement in bidders, and GPP/CCPA.', 'Hard', 15, '{}'::text[], 516),
+  ('ortb-privacy-identity', 'openrtb-eng', 'openrtb-eng-scale-privacy', 'ortb-privacy-identity', 'problem', 'Identity: IDFA, GAID, UID2 & Cookieless', 'Device IDs, cookie-sync, UID2, and identity in a cookieless world.', 'Hard', 15, '{}'::text[], 517),
+  ('ortb-design-capstone', 'openrtb-eng', 'openrtb-eng-scale-privacy', 'ortb-design-capstone', 'problem', 'Capstone: Design an Ad Exchange', 'End-to-end design of an ad exchange: 1M RPS, sub-100 ms auctions, impression tracking, billing.', 'Hard', 15, '{}'::text[], 518);
 
 commit;

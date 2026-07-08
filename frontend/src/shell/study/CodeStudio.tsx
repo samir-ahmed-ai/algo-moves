@@ -36,6 +36,7 @@ import {
 } from './hooks/useCodeStudio';
 import { useCodeStudioTimer } from './hooks/useCodeStudioTimer';
 import { useCodeStudioRecallShortcuts } from './hooks/useCodeStudioRecallShortcuts';
+import { useRecallDraftHandler } from './hooks/useRecallDraftHandler';
 import { useCodeStudioMachine } from './hooks/useCodeStudioMachine';
 import { RecallEditorShell } from './components/RecallEditorShell';
 
@@ -79,7 +80,10 @@ export function CodeStudioProvider({
   const formatBothRef = useRef<(() => void) | null>(null);
   const foldBothRef = useRef<{ collapse: () => void; expand: () => void } | null>(null);
   const copyTimerRef = useRef<number | null>(null);
-  const { timerRunning, setTimerRunning, setTimerSec, timerLabel } = useCodeStudioTimer(item.id);
+  const { timerRunning, setTimerRunning, setTimerSec, timerLabel } = useCodeStudioTimer(
+    item.id,
+    active,
+  );
 
   const code = variants[Math.min(active, Math.max(variants.length - 1, 0))];
   const reference = code?.text ?? '';
@@ -136,6 +140,7 @@ export function CodeStudioProvider({
     setBlind,
     fontSize: editorPrefs.fontSize,
     setEditorPrefs,
+    draftViewRef,
   });
 
   const copyRef = useCallback(async () => {
@@ -269,9 +274,10 @@ export function CodeStudioProvider({
 
 export function CodeStudioBody() {
   const { reference, code, theme, active } = useCodeStudioContent();
-  const { draft, blind, peek, persistDraft } = useCodeStudioDraft();
+  const { draft, blind, peek } = useCodeStudioDraft();
   const { editorPrefs, setEditorPrefs, draftViewRef, formatBothRef, foldBothRef } =
     useCodeStudioEditor();
+  const onDraftChange = useRecallDraftHandler();
   const {
     phase,
     phaseTransition,
@@ -340,11 +346,12 @@ export function CodeStudioBody() {
             setEditorPrefs={setEditorPrefs}
             blind={blind}
             peek={peek}
-            onDraftChange={persistDraft}
+            onDraftChange={onDraftChange}
             compact={editorPrefs.recallCompact}
             draftViewRef={draftViewRef}
             formatBothRef={formatBothRef}
             foldBothRef={foldBothRef}
+            autoFocusDraft
           />
         )}
       </div>

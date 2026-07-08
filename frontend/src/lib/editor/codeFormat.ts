@@ -167,14 +167,14 @@ export function formatMergeViews(
   opts: {
     lang?: string;
     readOnlyCompA: Compartment;
-    onDraftChange?: (value: string) => void;
   },
 ): void {
   const draftFormatted = formatEditorText(mergeView.b.state, opts.lang);
   const refFormatted = formatEditorText(mergeView.a.state, opts.lang);
 
+  // The pane-B dispatch's updateListener already propagates the formatted draft upward,
+  // so no explicit onDraftChange call is needed here (avoids a duplicate state write).
   applyFormattedText(mergeView.b, draftFormatted);
-  opts.onDraftChange?.(mergeView.b.state.doc.toString());
 
   mergeView.a.dispatch({ effects: opts.readOnlyCompA.reconfigure([]) });
   applyFormattedText(mergeView.a, refFormatted);

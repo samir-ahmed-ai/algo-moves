@@ -8,8 +8,9 @@ import type { CodePiece, PluginCode, ProblemPlugin, QuizQuestion } from '../../.
 import { resolveCodePieces, MIN_REASSEMBLE_PIECES } from '@/lib/code';
 import type { Item, Topic } from '../../../content';
 import { gistFor } from '../../../content/gists';
+import { isTextOnlyCourse } from '@/lib/canvas/conceptCourse';
 
-export type MobileCardKind = 'gist' | 'animate' | 'quiz' | 'reassemble';
+export type MobileCardKind = 'gist' | 'read' | 'animate' | 'quiz' | 'reassemble';
 
 interface BaseCard {
   /** Stable key within the deck. */
@@ -20,6 +21,10 @@ export interface GistCard extends BaseCard {
   kind: 'gist';
   /** One concise statement of what the problem asks. */
   gist: string;
+}
+/** Text-only concept card (recall-first courses): no animation, just prose + code. */
+export interface ReadCard extends BaseCard {
+  kind: 'read';
 }
 export interface AnimateCard extends BaseCard {
   kind: 'animate';
@@ -36,7 +41,7 @@ export interface ReassembleCard extends BaseCard {
   pieces: CodePiece[];
 }
 
-export type MobileCard = GistCard | AnimateCard | QuizCard | ReassembleCard;
+export type MobileCard = GistCard | ReadCard | AnimateCard | QuizCard | ReassembleCard;
 
 /** One problem's worth of cards, plus the resolved metadata the cards render. */
 export interface ProblemBlock {
@@ -90,7 +95,7 @@ function patternFor(tags: string[]): string | undefined {
   return hit ? prettyTag(hit) : undefined;
 }
 
-async function blockFor(item: Item): Promise<ProblemBlock | null> {
+async function blockFor(item: Item, textOnly: boolean): Promise<ProblemBlock | null> {
   if (!item.pluginId) return null;
   const plugin = await loadPlugin(item.pluginId);
   if (!plugin) return null;
@@ -99,8 +104,12 @@ async function blockFor(item: Item): Promise<ProblemBlock | null> {
   const pieces = code?.text ? resolveCodePieces(code.text, plugin.codePieces) : null;
   const tags = item.tags ?? [];
 
-  const cards: MobileCard[] = [{ kind: 'gist', key: `${item.id}:gist`, gist: gistFor(item) }];
-  if (!plugin.meta.static) {
+  // Recall-first (text-only) courses skip the animated gist scene + walkthrough
+  // player entirely and lead with a plain-text concept card.
+  const cards: MobileCard[] = textOnly
+    ? [{ kind: 'read', key: `${item.id}:read` }]
+    : [{ kind: 'gist', key: `${item.id}:gist`, gist: gistFor(item) }];
+  if (!textOnly && !plugin.meta.static) {
     cards.push({ kind: 'animate', key: `${item.id}:anim` });
   }
 
@@ -132,7 +141,8 @@ async function blockFor(item: Item): Promise<ProblemBlock | null> {
 }
 
 export async function buildDeck(topic: Topic): Promise<MobileDeck> {
-  const built = await Promise.all(topic.items.map(blockFor));
+  const textOnly = isTextOnlyCourse(topic.courseId);
+  const built = await Promise.all(topic.items.map((item) => blockFor(item, textOnly)));
   const blocks = built.filter((b): b is ProblemBlock => b != null);
   const totalQuiz = blocks.reduce((n, b) => n + b.quizCount, 0);
   return { topic, blocks, totalQuiz };

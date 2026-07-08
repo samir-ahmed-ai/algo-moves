@@ -6,6 +6,7 @@ import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { useWorkspace } from '@/store/workspace';
 import { EmptyState } from '@/shell/canvas';
 import { useCodeStudioContent, useCodeStudioDraft, useCodeStudioEditor } from '../CodeStudio';
+import { useRecallDraftHandler } from '../hooks/useRecallDraftHandler';
 import { RecallEditorShell } from './RecallEditorShell';
 import { RecallToolbar } from './RecallToolbar';
 
@@ -27,6 +28,10 @@ export function RecallPane({ className, showTitle }: { className?: string; showT
   const { editorPrefs, setEditorPrefs } = useCodeStudioEditor();
   const isMobile = useIsMobile();
   const { theme, themePreset } = useWorkspace();
+  const onDraftChange = useRecallDraftHandler();
+  const draftViewRef = useRef<EditorView | null>(null);
+  const formatBothRef = useRef<(() => void) | null>(null);
+  const foldBothRef = useRef<{ collapse: () => void; expand: () => void } | null>(null);
 
   if (!reference) {
     return (
@@ -41,9 +46,6 @@ export function RecallPane({ className, showTitle }: { className?: string; showT
   }
 
   const compact = editorPrefs.recallCompact !== false || isMobile;
-  const draftViewRef = useRef<EditorView | null>(null);
-  const formatBothRef = useRef<(() => void) | null>(null);
-  const foldBothRef = useRef<{ collapse: () => void; expand: () => void } | null>(null);
 
   return (
     <div
@@ -79,7 +81,7 @@ export function RecallPane({ className, showTitle }: { className?: string; showT
         setEditorPrefs={setEditorPrefs}
         blind={blind}
         peek={peek}
-        onDraftChange={persistDraft}
+        onDraftChange={onDraftChange}
         compact={compact}
         draftViewRef={draftViewRef}
         formatBothRef={formatBothRef}

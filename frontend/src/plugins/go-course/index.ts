@@ -4,19 +4,27 @@ import { makeGoConceptPlugin } from './factory';
 import { GO_TOPICS } from './topics';
 
 /**
- * The hand-authored "Go — Senior Developer" course. Every concept becomes a
- * generic ProblemPlugin (Scene player + Go sample + concept quiz); the concepts
- * are grouped into one catalog course with a topic per subject area.
+ * The hand-authored "Go Course" — a complete, recall-first Go curriculum from
+ * fundamentals through senior-interview topics. Every concept becomes a generic
+ * ProblemPlugin (Scene player + compilable Go snippet, auto-split into the
+ * Assemble/Recall exercise); the concepts are grouped into one catalog course
+ * with a topic per subject area. There are no quiz or design "problems" — the
+ * course is about internalizing concepts and code you can reproduce from memory.
  *
  * To extend the course, add a concept to a file under ./topics and it is picked
- * up automatically — the registry, sidebar, quiz, and Code Studio need no wiring.
+ * up automatically — the registry, sidebar, and Code Studio need no wiring.
  */
 export const goCoursePlugins: ProblemPlugin<any, any>[] = GO_TOPICS.flatMap((t) =>
   t.concepts.map((c) => makeGoConceptPlugin(c, t)),
 );
 
+// The course id stays `go-senior` to preserve saved progress and seeded content;
+// the display title is "Go Course".
 export const GO_COURSE_ID = 'go-senior';
 const COURSE_ID = GO_COURSE_ID;
+
+const conceptCount = (t: (typeof GO_TOPICS)[number]) =>
+  `${t.concepts.length} ${t.title.toLowerCase()} concept${t.concepts.length === 1 ? '' : 's'} to recall.`;
 
 /**
  * Browse-taxonomy categories for the Go course — one per topic, each scoped to
@@ -25,7 +33,7 @@ const COURSE_ID = GO_COURSE_ID;
 export const goBrowseCategories = GO_TOPICS.map((t) => ({
   id: `${COURSE_ID}-${t.id}`,
   title: t.title,
-  summary: `${t.concepts.length} senior ${t.title.toLowerCase()} concept${t.concepts.length === 1 ? '' : 's'}.`,
+  summary: conceptCount(t),
   icon: t.icon,
   courseTopicId: `${COURSE_ID}-${t.id}`,
 }));
@@ -33,14 +41,14 @@ export const goBrowseCategories = GO_TOPICS.map((t) => ({
 export const goCourses: CourseDef[] = [
   {
     id: COURSE_ID,
-    title: 'Go — Senior Developer',
+    title: 'Go Course',
     summary:
-      'Advanced Go for senior & staff interviews — concurrency, runtime & memory, generics, and system design. Each concept ships an advanced quiz, a coding drill, and a design question.',
+      'A complete Go course for senior-interview prep — from fundamentals (types, structs, interfaces, closures, modules) through concurrency, the runtime & memory model, generics, and system design. Recall-first: every concept pairs a memory hook with a compilable Go snippet you rebuild from memory.',
     icon: 'Boxes',
     topics: GO_TOPICS.map<TopicDef>((t) => ({
       id: `${COURSE_ID}-${t.id}`,
       title: t.title,
-      summary: `${t.concepts.length} senior ${t.title.toLowerCase()} concept${t.concepts.length === 1 ? '' : 's'}.`,
+      summary: conceptCount(t),
       items: t.concepts.map<ItemDef>((c) => ({
         id: c.id,
         kind: 'problem',

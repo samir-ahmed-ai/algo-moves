@@ -12,6 +12,7 @@ describe('editorPrefs', () => {
     expect(prefs.mergeGutter).toBe(true);
     expect(prefs.mergeCollapse).toBe(true);
     expect(prefs.recallCompact).toBe(true);
+    expect(prefs.strictRecall).toBe(false);
   });
 
   it('clamps recall font size', () => {

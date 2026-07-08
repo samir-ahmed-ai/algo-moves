@@ -19,6 +19,7 @@ export function RecallEditorShell({
   draftViewRef,
   formatBothRef,
   foldBothRef,
+  autoFocusDraft,
 }: {
   reference: string;
   draft: string;
@@ -34,6 +35,8 @@ export function RecallEditorShell({
   draftViewRef?: MutableRefObject<EditorView | null>;
   formatBothRef?: MutableRefObject<(() => void) | null>;
   foldBothRef?: MutableRefObject<{ collapse: () => void; expand: () => void } | null>;
+  /** Focus the draft pane once on mount (type-ready on entering Recall). */
+  autoFocusDraft?: boolean;
 }) {
   const localDraftRef = useRef<EditorView | null>(null);
   const localFormatBothRef = useRef<(() => void) | null>(null);
@@ -67,6 +70,7 @@ export function RecallEditorShell({
         draftViewRef={viewRef}
         formatBothRef={formatRef}
         foldBothRef={foldRef}
+        {...(autoFocusDraft !== undefined ? { autoFocusDraft } : {})}
       />
     </div>
   );

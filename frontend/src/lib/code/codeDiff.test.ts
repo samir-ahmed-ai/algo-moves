@@ -74,4 +74,19 @@ describe('computeRecallProgress', () => {
     expect(progress.currentLine).toBeNull();
     expect(progress.completedLines).toEqual([]);
   });
+
+  it('does not report phantom progress or a bogus prefix when the draft overruns the reference', () => {
+    const progress = computeRecallProgress('a\nb', 'a\nb\nc\nd');
+    expect(progress.completedLines).toEqual([1, 2]);
+    expect(progress.currentLine).toBeNull();
+    expect(progress.matchedPrefixLen).toBe(0);
+    expect(progress.total).toBe(2);
+  });
+
+  it('stops at the first diverging completed line instead of trusting the index', () => {
+    const progress = computeRecallProgress('a\nb\nc', 'X\nY\nZ');
+    expect(progress.completedLines).toEqual([]);
+    expect(progress.currentLine).toBe(1);
+    expect(progress.matchedPrefixLen).toBe(0);
+  });
 });

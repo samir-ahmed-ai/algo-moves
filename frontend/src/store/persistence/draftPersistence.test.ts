@@ -53,14 +53,18 @@ describe('draftPersistence', () => {
     expect(loadPersistedDraft(DRAFT_KEY)).toBe('draft text');
   });
 
-  it('clears draft on hard refresh (reload without beforeunload flag)', () => {
+  it('does not restore on hard refresh but preserves the saved attempt (never deletes on read)', () => {
     savePersistedDraft(DRAFT_KEY, 'draft text');
     resetDraftPageLoadPolicyForTests();
     vi.stubGlobal('performance', {
       getEntriesByType: () => [{ type: 'reload' }],
     });
+    // Editor starts empty (not auto-restored) on a hard refresh...
     expect(loadPersistedDraft(DRAFT_KEY)).toBe('');
-    expect(localStorage.getItem(DRAFT_KEY)).toBeNull();
+    // ...but the attempt survives so an unreliable reload signal can't erase work,
+    // and a later SPA item switch can still recover it.
+    expect(localStorage.getItem(DRAFT_KEY)).toBe('draft text');
+    expect(loadPersistedDraft(DRAFT_KEY, { itemSwitch: true })).toBe('draft text');
   });
 
   it('returns empty when nothing is saved', () => {

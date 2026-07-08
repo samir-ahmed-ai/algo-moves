@@ -7,21 +7,21 @@ import type { PrepProblem } from '../imported/prepFactory';
 import { recordTrace, TraceView, traceVerdict, makeGoInspector } from './anim/codeTrace';
 import type { GoConcept, GoTopic } from './types';
 
-const COURSE_TITLE = 'Go · Senior Developer';
-
 /**
  * Adapt a GoConcept to the PrepProblem shape the Scene player consumes, folding
- * the senior takeaways into `notes` and the design Q&A into `approaches` so both
- * surface as collapsible blocks in the inspector.
+ * the key points into `notes` and (when present) the design Q&A into `approaches`
+ * so both surface as collapsible blocks in the inspector. The recall-first Go
+ * Course has no design Q&A, so `approaches` stays empty there; the OpenRTB course
+ * supplies one.
  */
-function toPrepProblem(c: GoConcept, topic: GoTopic): PrepProblem {
+function toPrepProblem(c: GoConcept, topic: GoTopic, courseTitle: string): PrepProblem {
   const notes = c.keyPoints.length ? `- ${c.keyPoints.join('\n- ')}` : '';
-  const approaches = `${c.design.prompt}\n\nModel answer\n${c.design.answer}`;
+  const approaches = c.design ? `${c.design.prompt}\n\nModel answer\n${c.design.answer}` : '';
   return {
     id: c.id,
     topic: topic.id,
     topicTitle: topic.title,
-    course: COURSE_TITLE,
+    course: courseTitle,
     courseIcon: topic.icon,
     slug: c.id,
     number: '',
@@ -42,7 +42,7 @@ function toPrepProblem(c: GoConcept, topic: GoTopic): PrepProblem {
   };
 }
 
-/** Append the senior takeaways and design Q&A under the Scene inspector. */
+/** Append the concept's key points (and design Q&A, when present) under the Scene inspector. */
 function withGoNotes(
   Inspector: ComponentType<InspectorProps<any>>,
   p: PrepProblem,
@@ -54,11 +54,7 @@ function withGoNotes(
         <Inspector {...props} />
         <VarGrid>
           {p.notes && (
-            <CollapsibleDetails
-              title="Senior takeaways"
-              body={p.notes}
-              maxHeightClass="max-h-[240px]"
-            />
+            <CollapsibleDetails title="Key points" body={p.notes} maxHeightClass="max-h-[240px]" />
           )}
           {p.approaches && (
             <CollapsibleDetails
@@ -74,12 +70,17 @@ function withGoNotes(
 }
 
 /**
- * Turn a hand-authored Go concept into a generic ProblemPlugin: the Scene player
- * animates the mnemonic (Scene → How it runs → Memorize → Complexity), the Go
- * sample drives the Code Studio / reassembly, and the concept quiz powers the
- * Quiz phase and Learn-mode Quiz tab.
+ * Turn a hand-authored concept into a generic ProblemPlugin: the Scene player
+ * animates the mnemonic (Scene → How it runs → Memorize → Complexity) and the Go
+ * sample drives the Code Studio Source view and the Assemble/Recall reassembly.
+ * A quiz is wired only when the concept ships one — the recall-first Go Course
+ * omits it (so the Quiz tab is hidden), while the OpenRTB course supplies it.
  */
-export function makeGoConceptPlugin(c: GoConcept, topic: GoTopic): ProblemPlugin<any, any> {
+export function makeGoConceptPlugin(
+  c: GoConcept,
+  topic: GoTopic,
+  courseTitle = 'Go Course',
+): ProblemPlugin<any, any> {
   const meta = {
     id: c.id,
     title: c.title,
@@ -89,6 +90,7 @@ export function makeGoConceptPlugin(c: GoConcept, topic: GoTopic): ProblemPlugin
   };
   const code = { text: c.code, lang: 'go', file: 'main.go' };
   const codePieces = codePiecesFromSource(c.code);
+  const quiz = c.quiz && c.quiz.length > 0 ? { quiz: c.quiz } : {};
 
   // Concepts with an authored walkthrough get the narrative walkthrough player
   // (step caption + evolving state rail); the rest fall back to the Scene
@@ -102,12 +104,12 @@ export function makeGoConceptPlugin(c: GoConcept, topic: GoTopic): ProblemPlugin
       Inspector: makeGoInspector(c),
       verdict: traceVerdict,
       code,
-      quiz: c.quiz,
       codePieces,
+      ...quiz,
     });
   }
 
-  const p = toPrepProblem(c, topic);
+  const p = toPrepProblem(c, topic, courseTitle);
   return definePlugin<PrepProblem, any>({
     meta,
     inputs: [{ id: 'concept', label: 'Concept', value: p }],
@@ -116,7 +118,7 @@ export function makeGoConceptPlugin(c: GoConcept, topic: GoTopic): ProblemPlugin
     Inspector: withGoNotes(SceneInspector, p),
     verdict: sceneVerdict,
     code,
-    quiz: c.quiz,
     codePieces,
+    ...quiz,
   });
 }

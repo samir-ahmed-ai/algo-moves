@@ -35,6 +35,8 @@ export function ToolbarGroupBtn({
   return (
     <button
       type="button"
+      // Expose toggle state to assistive tech (blind/vim/diff toggles are on/off buttons).
+      {...(typeof active === 'boolean' ? { 'aria-pressed': active } : {})}
       className={cn(
         'toolbar-group-btn nodrag inline-flex h-6 min-w-6 items-center justify-center gap-1 border-r border-edge px-1.5 transition-colors last:border-r-0',
         chromeText.xs,

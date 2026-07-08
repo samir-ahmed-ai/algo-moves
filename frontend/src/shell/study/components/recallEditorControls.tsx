@@ -11,6 +11,7 @@ import {
   Minimize2,
   RotateCcw,
   SplitSquareHorizontal,
+  Target,
   TextQuote,
   Timer,
   WrapText,
@@ -167,8 +168,18 @@ export function diffMenuItems(ctx: RecallMenuContext): RecallEditorMenuItem[] {
 
 /** Session controls for the Session dropdown. */
 export function sessionMenuItems(ctx: RecallMenuContext): RecallEditorMenuItem[] {
-  const { timerRunning, setTimerRunning, timerLabel, persistDraft } = ctx;
+  const { editorPrefs, setEditorPrefs, timerRunning, setTimerRunning, timerLabel, persistDraft } =
+    ctx;
   const items: RecallEditorMenuItem[] = [];
+
+  items.push({
+    label: editorPrefs.strictRecall
+      ? 'Strict recall: on — resets on mistake'
+      : 'Strict recall: reset on mistake',
+    icon: <Target className={MENU_ICON_CLASS} />,
+    active: editorPrefs.strictRecall,
+    onClick: () => setEditorPrefs({ strictRecall: !editorPrefs.strictRecall }),
+  });
 
   if (setTimerRunning) {
     items.push({

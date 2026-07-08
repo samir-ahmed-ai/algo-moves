@@ -92,26 +92,45 @@ export interface RecallProgress {
 }
 
 /**
- * Recall progress against a `draft` known (by `strictRecallDraft`) to always be a verified,
- * line-by-line correct prefix of `reference` — so line `i` in the draft always maps to line
- * `i` in the reference. Used to drive the "recall progress" highlighter instead of a diff.
+ * Recall progress: which reference lines the `draft` has confirmed, the line in progress,
+ * and how much of it matches. Intended to pair with `strictRecallDraft` (which guarantees a
+ * verified correct prefix), but hardened to be safe on any input — it validates each
+ * supposedly-completed line against the reference and never reports progress past the end of
+ * the reference, so an over-typed or divergent draft can't produce phantom "completed" lines
+ * or a bogus matched prefix.
  */
 export function computeRecallProgress(reference: string, draft: string): RecallProgress {
-  const refLines = linesWithoutTrailingBlanks(reference);
-  const draftLines = linesWithoutTrailingBlanks(draft);
-  const total = refLines.length;
+  const refNorm = linesWithoutTrailingBlanks(reference).map(normLine);
+  const draftNorm = linesWithoutTrailingBlanks(draft).map(normLine);
+  const total = refNorm.length;
 
-  if (draftLines.length === 0) {
+  if (draftNorm.length === 0) {
     return { completedLines: [], currentLine: total > 0 ? 1 : null, matchedPrefixLen: 0, total };
   }
 
-  const lastIdx = draftLines.length - 1;
-  const completedLines = Array.from({ length: Math.min(lastIdx, total) }, (_, i) => i + 1);
+  const lastIdx = draftNorm.length - 1;
+  const completedLines: number[] = [];
 
-  const lastDraftNorm = normLine(draftLines[lastIdx] ?? '');
-  const refLineForLast = lastIdx < total ? normLine(refLines[lastIdx] ?? '') : '';
+  // Every finished (non-last) draft line must exactly match its reference counterpart to
+  // count as completed. The first divergence — or running past the end of the reference —
+  // stops progress at that line.
+  for (let i = 0; i < lastIdx; i++) {
+    if (i < total && draftNorm[i] === refNorm[i]) {
+      completedLines.push(i + 1);
+      continue;
+    }
+    return {
+      completedLines,
+      currentLine: i < total ? i + 1 : null,
+      matchedPrefixLen: 0,
+      total,
+    };
+  }
+
+  const lastDraftNorm = draftNorm[lastIdx] ?? '';
+  const withinRef = lastIdx < total;
   const lastLineComplete =
-    lastIdx < total && lastDraftNorm.length > 0 && lastDraftNorm === refLineForLast;
+    withinRef && lastDraftNorm.length > 0 && lastDraftNorm === refNorm[lastIdx];
 
   if (lastLineComplete) {
     completedLines.push(lastIdx + 1);
@@ -124,6 +143,12 @@ export function computeRecallProgress(reference: string, draft: string): RecallP
     };
   }
 
-  const currentLine = lastIdx + 1 <= total ? lastIdx + 1 : null;
-  return { completedLines, currentLine, matchedPrefixLen: lastDraftNorm.length, total };
+  // Last line is in progress; a matched prefix is only meaningful within the reference.
+  const currentLine = withinRef ? lastIdx + 1 : null;
+  return {
+    completedLines,
+    currentLine,
+    matchedPrefixLen: currentLine !== null ? lastDraftNorm.length : 0,
+    total,
+  };
 }

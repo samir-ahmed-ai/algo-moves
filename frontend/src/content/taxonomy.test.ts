@@ -27,9 +27,9 @@ describe('content/taxonomy', () => {
     ]);
   });
 
-  it('exposes the Go — Senior Developer track with per-topic categories', () => {
+  it('exposes the Go Course track with per-topic categories', () => {
     const go = getTrackById('go');
-    expect(go?.title).toBe('Go — Senior Developer');
+    expect(go?.title).toBe('Go Course');
     expect(getCategoriesForTrack('go').length).toBeGreaterThanOrEqual(5);
   });
 

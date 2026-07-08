@@ -1,6 +1,6 @@
 import type { QuizQuestion } from '../../core/types';
 
-/** An open-ended senior design question paired with a model answer. */
+/** An open-ended design question paired with a model answer (OpenRTB course). */
 export interface GoDesignQuestion {
   prompt: string;
   answer: string;
@@ -26,10 +26,14 @@ export interface GoTraceStep {
 }
 
 /**
- * One concept card in the hand-authored "Go — Senior Developer" course. Each
- * concept becomes a ProblemPlugin (see ./factory.tsx) reusing the prep Scene
- * player, and carries an advanced multiple-choice quiz, a compilable Go sample
- * (also auto-split into a code-reassembly exercise), and a design Q&A.
+ * One concept card in a hand-authored concept course. The primary consumer is
+ * the recall-first "Go Course" (see ./factory.tsx, ./topics), where each concept
+ * is just the explanation, the memory hook, and a compilable Go snippet
+ * auto-split into the Assemble/Recall exercise — no quiz or design problems.
+ *
+ * The same shape is reused by the OpenRTB course, which DOES ship a quiz and a
+ * design Q&A per concept, so `quiz` and `design` are optional here and wired only
+ * when present. Go Course concepts omit them (enforced by goCourse.test.ts).
  */
 export interface GoConcept {
   id: string;
@@ -51,14 +55,17 @@ export interface GoConcept {
   space: string;
   /** Self-contained, gofmt-clean, compilable Go program (package main). */
   code: string;
-  /** Advanced concept questions (multiple-choice, exactly one correct each). */
-  quiz: QuizQuestion[];
-  /** Open-ended design question + model answer. */
-  design: GoDesignQuestion;
-  /** Senior takeaways shown in the inspector. */
+  /** Key points to recall, shown in the inspector. */
   keyPoints: string[];
   /** Ordered narrative walkthrough steps; omit to fall back to the Scene reveal. */
   walkthrough?: GoTraceStep[];
+  /**
+   * Optional multiple-choice quiz. Omitted by the recall-first Go Course; the
+   * OpenRTB course ships one per concept. When present, the Quiz tab is wired.
+   */
+  quiz?: QuizQuestion[];
+  /** Optional design question + model answer (OpenRTB course only). */
+  design?: GoDesignQuestion;
 }
 
 /** A course topic grouping several concepts (Concurrency, Generics, …). */

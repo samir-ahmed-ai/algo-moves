@@ -12,7 +12,7 @@ import { OPENRTB_TOPICS } from './topics';
  * up automatically — the registry, sidebar, quiz, and Code Studio need no wiring.
  */
 export const openrtbPlugins: ProblemPlugin<any, any>[] = OPENRTB_TOPICS.flatMap((t) =>
-  t.concepts.map((c) => makeGoConceptPlugin(c, t)),
+  t.concepts.map((c) => makeGoConceptPlugin(c, t, 'OpenRTB & Ad Platform Engineering')),
 );
 
 export const OPENRTB_COURSE_ID = 'openrtb-eng';

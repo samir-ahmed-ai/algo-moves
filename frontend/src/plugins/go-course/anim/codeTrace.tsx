@@ -157,9 +157,7 @@ export function makeGoInspector(concept: GoConcept): ComponentType<InspectorProp
         )}
         {concept.keyPoints.length > 0 && (
           <details className="mt-1.5 rounded-md border border-edge bg-panel2/40 px-2 py-1.5">
-            <summary className={cn('cursor-pointer text-ink3', vizText.xs)}>
-              Senior takeaways
-            </summary>
+            <summary className={cn('cursor-pointer text-ink3', vizText.xs)}>Key points</summary>
             <ul
               className={cn(
                 'nodrag mt-1.5 list-disc space-y-1 pl-4 leading-relaxed text-ink2',

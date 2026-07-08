@@ -24,6 +24,20 @@ describe('deckModel', () => {
     }
   });
 
+  it('Go Course topics are text-only: read card first, no gist/animate/quiz', async () => {
+    const topic = catalog.getTopic('go-senior-basics');
+    expect(topic).toBeDefined();
+    const deck = await buildDeck(topic!);
+    expect(deck.blocks.length).toBeGreaterThan(0);
+    for (const block of deck.blocks) {
+      const kinds = block.cards.map((c) => c.kind);
+      expect(kinds[0]).toBe('read');
+      expect(kinds).not.toContain('gist');
+      expect(kinds).not.toContain('animate');
+      expect(kinds).not.toContain('quiz');
+    }
+  });
+
   it('skips quiz cards when plugin has no quiz', async () => {
     const topic = catalog.getTopic('placement');
     const deck = await buildDeck(topic!);

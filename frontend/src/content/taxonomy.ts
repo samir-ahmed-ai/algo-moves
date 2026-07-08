@@ -229,7 +229,7 @@ const CATEGORIES: BrowseCategory[] = [
     sources: [{ courseId: 'prep-design' }],
   },
 
-  // —— Go (Senior) —— one category per Go course topic, generated from the course.
+  // —— Go Course —— one category per Go course topic, generated from the course.
   ...goBrowseCategories.map((c): BrowseCategory => ({
     id: c.id,
     title: c.title,
@@ -316,8 +316,9 @@ const TRACKS: BrowseTrack[] = [
   },
   {
     id: 'go',
-    title: 'Go — Senior Developer',
-    summary: 'Concurrency, runtime & memory, generics, and system design in Go.',
+    title: 'Go Course',
+    summary:
+      'A complete Go course — fundamentals through concurrency, runtime & memory, generics, and system design. Concepts and code snippets to recall.',
     icon: 'Boxes',
     categoryIds: [...GO_IDS],
   },

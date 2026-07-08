@@ -31,13 +31,14 @@ describe('openrtb-course content integrity', () => {
 
   it('every concept has 3+ quiz questions', () => {
     for (const c of concepts) {
-      expect(c.quiz.length, `${c.id} needs 3+ questions`).toBeGreaterThanOrEqual(3);
+      expect(c.quiz, `${c.id} needs a quiz`).toBeDefined();
+      expect(c.quiz!.length, `${c.id} needs 3+ questions`).toBeGreaterThanOrEqual(3);
     }
   });
 
   it('every quiz question has exactly one correct choice and 4 choices', () => {
     for (const c of concepts) {
-      for (const q of c.quiz) {
+      for (const q of c.quiz ?? []) {
         const correct = q.choices.filter((ch) => ch.correct).length;
         expect(correct, `${c.id}·${q.id} must have exactly one correct`).toBe(1);
         expect(q.choices.length, `${c.id}·${q.id} must have 4 choices`).toBe(4);
@@ -47,8 +48,9 @@ describe('openrtb-course content integrity', () => {
 
   it('every concept has a design question and model answer', () => {
     for (const c of concepts) {
-      expect(c.design.prompt.length, `${c.id} design.prompt`).toBeGreaterThan(0);
-      expect(c.design.answer.length, `${c.id} design.answer`).toBeGreaterThan(0);
+      expect(c.design, `${c.id} needs a design question`).toBeDefined();
+      expect(c.design!.prompt.length, `${c.id} design.prompt`).toBeGreaterThan(0);
+      expect(c.design!.answer.length, `${c.id} design.answer`).toBeGreaterThan(0);
     }
   });
 

@@ -58,15 +58,17 @@ function shouldRestoreDraftOnPageLoad(): boolean {
   return pageLoadPolicy;
 }
 
-/** Load a saved attempt. SPA item switches always restore; full reload respects soft vs hard refresh. */
+/**
+ * Load a saved attempt. SPA item switches always restore; a full reload respects soft vs
+ * hard refresh for whether to *show* the draft — but never deletes it. Deleting on read was
+ * a data-loss hazard: an unreliable beforeunload signal (mobile background kill, crash,
+ * bfcache) would silently erase the attempt. Drafts are cleared only on explicit user action.
+ */
 export function loadPersistedDraft(draftKey: string, opts?: { itemSwitch?: boolean }): string {
   const key = normalizeDraftKey(draftKey);
   if (!key) return '';
   const allowRestore = opts?.itemSwitch || shouldRestoreDraftOnPageLoad();
-  if (!allowRestore) {
-    removeStorageValue(key);
-    return '';
-  }
+  if (!allowRestore) return '';
   return readStorageText(key, '') ?? '';
 }
 

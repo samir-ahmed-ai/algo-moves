@@ -2471,14 +2471,553 @@ export const PREP_COURSES: CourseDef[] = [
 export const GO_COURSES: CourseDef[] = [
   {
     "id": "go-senior",
-    "title": "Go — Senior Developer",
-    "summary": "Advanced Go for senior & staff interviews — concurrency, runtime & memory, generics, and system design. Each concept ships an advanced quiz, a coding drill, and a design question.",
+    "title": "Go Course",
+    "summary": "A complete Go course for senior-interview prep — from fundamentals (types, structs, interfaces, closures, modules) through concurrency, the runtime & memory model, generics, and system design. Recall-first: every concept pairs a memory hook with a compilable Go snippet you rebuild from memory.",
     "icon": "Boxes",
     "topics": [
       {
+        "id": "go-senior-basics",
+        "title": "Go Fundamentals",
+        "summary": "6 go fundamentals concepts to recall.",
+        "items": [
+          {
+            "id": "go-basics-program",
+            "kind": "problem",
+            "pluginId": "go-basics-program",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-basics-vars",
+            "kind": "problem",
+            "pluginId": "go-basics-vars",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-basics-const-iota",
+            "kind": "problem",
+            "pluginId": "go-basics-const-iota",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-basics-control-flow",
+            "kind": "problem",
+            "pluginId": "go-basics-control-flow",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-basics-conversions",
+            "kind": "problem",
+            "pluginId": "go-basics-conversions",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-basics-fmt",
+            "kind": "problem",
+            "pluginId": "go-basics-fmt",
+            "status": "todo",
+            "estimatedMinutes": 12
+          }
+        ]
+      },
+      {
+        "id": "go-senior-types-values",
+        "title": "Types & Value Semantics",
+        "summary": "6 types & value semantics concepts to recall.",
+        "items": [
+          {
+            "id": "go-types-basic",
+            "kind": "problem",
+            "pluginId": "go-types-basic",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-types-defined",
+            "kind": "problem",
+            "pluginId": "go-types-defined",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-types-value-semantics",
+            "kind": "problem",
+            "pluginId": "go-types-value-semantics",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-types-comparability",
+            "kind": "problem",
+            "pluginId": "go-types-comparability",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-types-conv-vs-assert",
+            "kind": "problem",
+            "pluginId": "go-types-conv-vs-assert",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-types-composite-literals",
+            "kind": "problem",
+            "pluginId": "go-types-composite-literals",
+            "status": "todo",
+            "estimatedMinutes": 12
+          }
+        ]
+      },
+      {
+        "id": "go-senior-collections",
+        "title": "Slices, Maps & Arrays",
+        "summary": "6 slices, maps & arrays concepts to recall.",
+        "items": [
+          {
+            "id": "go-coll-arrays",
+            "kind": "problem",
+            "pluginId": "go-coll-arrays",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-coll-slices",
+            "kind": "problem",
+            "pluginId": "go-coll-slices",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-coll-slice-aliasing",
+            "kind": "problem",
+            "pluginId": "go-coll-slice-aliasing",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-coll-maps",
+            "kind": "problem",
+            "pluginId": "go-coll-maps",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-coll-range",
+            "kind": "problem",
+            "pluginId": "go-coll-range",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-coll-grouping",
+            "kind": "problem",
+            "pluginId": "go-coll-grouping",
+            "status": "todo",
+            "estimatedMinutes": 12
+          }
+        ]
+      },
+      {
+        "id": "go-senior-functions-closures",
+        "title": "Functions & Closures",
+        "summary": "6 functions & closures concepts to recall.",
+        "items": [
+          {
+            "id": "go-fn-multi-return",
+            "kind": "problem",
+            "pluginId": "go-fn-multi-return",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-fn-named-returns",
+            "kind": "problem",
+            "pluginId": "go-fn-named-returns",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-fn-variadic",
+            "kind": "problem",
+            "pluginId": "go-fn-variadic",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-fn-first-class",
+            "kind": "problem",
+            "pluginId": "go-fn-first-class",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-fn-closures",
+            "kind": "problem",
+            "pluginId": "go-fn-closures",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-fn-defer",
+            "kind": "problem",
+            "pluginId": "go-fn-defer",
+            "status": "todo",
+            "estimatedMinutes": 12
+          }
+        ]
+      },
+      {
+        "id": "go-senior-structs-methods",
+        "title": "Structs, Methods & Embedding",
+        "summary": "6 structs, methods & embedding concepts to recall.",
+        "items": [
+          {
+            "id": "go-struct-literals",
+            "kind": "problem",
+            "pluginId": "go-struct-literals",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-struct-methods",
+            "kind": "problem",
+            "pluginId": "go-struct-methods",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-struct-receivers",
+            "kind": "problem",
+            "pluginId": "go-struct-receivers",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-struct-embedding",
+            "kind": "problem",
+            "pluginId": "go-struct-embedding",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-struct-tags",
+            "kind": "problem",
+            "pluginId": "go-struct-tags",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-struct-method-values",
+            "kind": "problem",
+            "pluginId": "go-struct-method-values",
+            "status": "todo",
+            "estimatedMinutes": 12
+          }
+        ]
+      },
+      {
+        "id": "go-senior-interfaces-basics",
+        "title": "Interfaces (Basics)",
+        "summary": "6 interfaces (basics) concepts to recall.",
+        "items": [
+          {
+            "id": "go-ib-satisfaction",
+            "kind": "problem",
+            "pluginId": "go-ib-satisfaction",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-ib-any",
+            "kind": "problem",
+            "pluginId": "go-ib-any",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-ib-assertion",
+            "kind": "problem",
+            "pluginId": "go-ib-assertion",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-ib-type-switch",
+            "kind": "problem",
+            "pluginId": "go-ib-type-switch",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-ib-nil-interface",
+            "kind": "problem",
+            "pluginId": "go-ib-nil-interface",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-ib-stringer-error",
+            "kind": "problem",
+            "pluginId": "go-ib-stringer-error",
+            "status": "todo",
+            "estimatedMinutes": 12
+          }
+        ]
+      },
+      {
+        "id": "go-senior-strings-runes",
+        "title": "Strings, Bytes & Runes",
+        "summary": "6 strings, bytes & runes concepts to recall.",
+        "items": [
+          {
+            "id": "go-str-immutable",
+            "kind": "problem",
+            "pluginId": "go-str-immutable",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-str-runes-bytes",
+            "kind": "problem",
+            "pluginId": "go-str-runes-bytes",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-str-range",
+            "kind": "problem",
+            "pluginId": "go-str-range",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-str-builder",
+            "kind": "problem",
+            "pluginId": "go-str-builder",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-str-strconv",
+            "kind": "problem",
+            "pluginId": "go-str-strconv",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-str-ops",
+            "kind": "problem",
+            "pluginId": "go-str-ops",
+            "status": "todo",
+            "estimatedMinutes": 12
+          }
+        ]
+      },
+      {
+        "id": "go-senior-packages-modules",
+        "title": "Packages, Modules & Tooling",
+        "summary": "6 packages, modules & tooling concepts to recall.",
+        "items": [
+          {
+            "id": "go-pkg-visibility",
+            "kind": "problem",
+            "pluginId": "go-pkg-visibility",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-pkg-imports",
+            "kind": "problem",
+            "pluginId": "go-pkg-imports",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-pkg-init",
+            "kind": "problem",
+            "pluginId": "go-pkg-init",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-pkg-modules",
+            "kind": "problem",
+            "pluginId": "go-pkg-modules",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-pkg-layout",
+            "kind": "problem",
+            "pluginId": "go-pkg-layout",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-pkg-tooling",
+            "kind": "problem",
+            "pluginId": "go-pkg-tooling",
+            "status": "todo",
+            "estimatedMinutes": 12
+          }
+        ]
+      },
+      {
+        "id": "go-senior-errors",
+        "title": "Error Handling",
+        "summary": "4 error handling concepts to recall.",
+        "items": [
+          {
+            "id": "go-err-wrapping",
+            "kind": "problem",
+            "pluginId": "go-err-wrapping",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-err-sentinel-typed",
+            "kind": "problem",
+            "pluginId": "go-err-sentinel-typed",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-err-panic-recover",
+            "kind": "problem",
+            "pluginId": "go-err-panic-recover",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-err-custom",
+            "kind": "problem",
+            "pluginId": "go-err-custom",
+            "status": "todo",
+            "estimatedMinutes": 12
+          }
+        ]
+      },
+      {
+        "id": "go-senior-slices-maps",
+        "title": "Slices, Maps & Data",
+        "summary": "4 slices, maps & data concepts to recall.",
+        "items": [
+          {
+            "id": "go-data-slice-internals",
+            "kind": "problem",
+            "pluginId": "go-data-slice-internals",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-data-slice-aliasing",
+            "kind": "problem",
+            "pluginId": "go-data-slice-aliasing",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-data-maps",
+            "kind": "problem",
+            "pluginId": "go-data-maps",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-data-strings-runes",
+            "kind": "problem",
+            "pluginId": "go-data-strings-runes",
+            "status": "todo",
+            "estimatedMinutes": 12
+          }
+        ]
+      },
+      {
+        "id": "go-senior-interfaces-types",
+        "title": "Interfaces & Type System",
+        "summary": "5 interfaces & type system concepts to recall.",
+        "items": [
+          {
+            "id": "go-iface-internals",
+            "kind": "problem",
+            "pluginId": "go-iface-internals",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-iface-nil",
+            "kind": "problem",
+            "pluginId": "go-iface-nil",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-iface-method-sets",
+            "kind": "problem",
+            "pluginId": "go-iface-method-sets",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-iface-embedding",
+            "kind": "problem",
+            "pluginId": "go-iface-embedding",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-iface-assertions",
+            "kind": "problem",
+            "pluginId": "go-iface-assertions",
+            "status": "todo",
+            "estimatedMinutes": 12
+          }
+        ]
+      },
+      {
+        "id": "go-senior-generics",
+        "title": "Generics",
+        "summary": "4 generics concepts to recall.",
+        "items": [
+          {
+            "id": "go-gen-type-params",
+            "kind": "problem",
+            "pluginId": "go-gen-type-params",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-gen-constraints",
+            "kind": "problem",
+            "pluginId": "go-gen-constraints",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-gen-inference",
+            "kind": "problem",
+            "pluginId": "go-gen-inference",
+            "status": "todo",
+            "estimatedMinutes": 12
+          },
+          {
+            "id": "go-gen-pitfalls",
+            "kind": "problem",
+            "pluginId": "go-gen-pitfalls",
+            "status": "todo",
+            "estimatedMinutes": 12
+          }
+        ]
+      },
+      {
         "id": "go-senior-concurrency",
         "title": "Concurrency & Goroutines",
-        "summary": "8 senior concurrency & goroutines concepts.",
+        "summary": "8 concurrency & goroutines concepts to recall.",
         "items": [
           {
             "id": "go-conc-scheduler",
@@ -2541,7 +3080,7 @@ export const GO_COURSES: CourseDef[] = [
       {
         "id": "go-senior-runtime-memory",
         "title": "Runtime & Memory",
-        "summary": "4 senior runtime & memory concepts.",
+        "summary": "4 runtime & memory concepts to recall.",
         "items": [
           {
             "id": "go-mem-stack-heap",
@@ -2574,156 +3113,9 @@ export const GO_COURSES: CourseDef[] = [
         ]
       },
       {
-        "id": "go-senior-interfaces-types",
-        "title": "Interfaces & Type System",
-        "summary": "5 senior interfaces & type system concepts.",
-        "items": [
-          {
-            "id": "go-iface-internals",
-            "kind": "problem",
-            "pluginId": "go-iface-internals",
-            "status": "todo",
-            "estimatedMinutes": 12
-          },
-          {
-            "id": "go-iface-nil",
-            "kind": "problem",
-            "pluginId": "go-iface-nil",
-            "status": "todo",
-            "estimatedMinutes": 12
-          },
-          {
-            "id": "go-iface-method-sets",
-            "kind": "problem",
-            "pluginId": "go-iface-method-sets",
-            "status": "todo",
-            "estimatedMinutes": 12
-          },
-          {
-            "id": "go-iface-embedding",
-            "kind": "problem",
-            "pluginId": "go-iface-embedding",
-            "status": "todo",
-            "estimatedMinutes": 12
-          },
-          {
-            "id": "go-iface-assertions",
-            "kind": "problem",
-            "pluginId": "go-iface-assertions",
-            "status": "todo",
-            "estimatedMinutes": 12
-          }
-        ]
-      },
-      {
-        "id": "go-senior-generics",
-        "title": "Generics",
-        "summary": "4 senior generics concepts.",
-        "items": [
-          {
-            "id": "go-gen-type-params",
-            "kind": "problem",
-            "pluginId": "go-gen-type-params",
-            "status": "todo",
-            "estimatedMinutes": 12
-          },
-          {
-            "id": "go-gen-constraints",
-            "kind": "problem",
-            "pluginId": "go-gen-constraints",
-            "status": "todo",
-            "estimatedMinutes": 12
-          },
-          {
-            "id": "go-gen-inference",
-            "kind": "problem",
-            "pluginId": "go-gen-inference",
-            "status": "todo",
-            "estimatedMinutes": 12
-          },
-          {
-            "id": "go-gen-pitfalls",
-            "kind": "problem",
-            "pluginId": "go-gen-pitfalls",
-            "status": "todo",
-            "estimatedMinutes": 12
-          }
-        ]
-      },
-      {
-        "id": "go-senior-errors",
-        "title": "Error Handling",
-        "summary": "4 senior error handling concepts.",
-        "items": [
-          {
-            "id": "go-err-wrapping",
-            "kind": "problem",
-            "pluginId": "go-err-wrapping",
-            "status": "todo",
-            "estimatedMinutes": 12
-          },
-          {
-            "id": "go-err-sentinel-typed",
-            "kind": "problem",
-            "pluginId": "go-err-sentinel-typed",
-            "status": "todo",
-            "estimatedMinutes": 12
-          },
-          {
-            "id": "go-err-panic-recover",
-            "kind": "problem",
-            "pluginId": "go-err-panic-recover",
-            "status": "todo",
-            "estimatedMinutes": 12
-          },
-          {
-            "id": "go-err-custom",
-            "kind": "problem",
-            "pluginId": "go-err-custom",
-            "status": "todo",
-            "estimatedMinutes": 12
-          }
-        ]
-      },
-      {
-        "id": "go-senior-slices-maps",
-        "title": "Slices, Maps & Data",
-        "summary": "4 senior slices, maps & data concepts.",
-        "items": [
-          {
-            "id": "go-data-slice-internals",
-            "kind": "problem",
-            "pluginId": "go-data-slice-internals",
-            "status": "todo",
-            "estimatedMinutes": 12
-          },
-          {
-            "id": "go-data-slice-aliasing",
-            "kind": "problem",
-            "pluginId": "go-data-slice-aliasing",
-            "status": "todo",
-            "estimatedMinutes": 12
-          },
-          {
-            "id": "go-data-maps",
-            "kind": "problem",
-            "pluginId": "go-data-maps",
-            "status": "todo",
-            "estimatedMinutes": 12
-          },
-          {
-            "id": "go-data-strings-runes",
-            "kind": "problem",
-            "pluginId": "go-data-strings-runes",
-            "status": "todo",
-            "estimatedMinutes": 12
-          }
-        ]
-      },
-      {
         "id": "go-senior-stdlib-idioms",
         "title": "Standard Library & Idioms",
-        "summary": "4 senior standard library & idioms concepts.",
+        "summary": "4 standard library & idioms concepts to recall.",
         "items": [
           {
             "id": "go-std-io",
@@ -2758,7 +3150,7 @@ export const GO_COURSES: CourseDef[] = [
       {
         "id": "go-senior-performance",
         "title": "Performance & Profiling",
-        "summary": "4 senior performance & profiling concepts.",
+        "summary": "4 performance & profiling concepts to recall.",
         "items": [
           {
             "id": "go-perf-benchmarks",
@@ -2793,7 +3185,7 @@ export const GO_COURSES: CourseDef[] = [
       {
         "id": "go-senior-testing",
         "title": "Testing & Reliability",
-        "summary": "4 senior testing & reliability concepts.",
+        "summary": "4 testing & reliability concepts to recall.",
         "items": [
           {
             "id": "go-test-table",
@@ -2828,7 +3220,7 @@ export const GO_COURSES: CourseDef[] = [
       {
         "id": "go-senior-design",
         "title": "System Design in Go",
-        "summary": "5 senior system design in go concepts.",
+        "summary": "5 system design in go concepts to recall.",
         "items": [
           {
             "id": "go-design-rate-limiter",
@@ -3214,72 +3606,128 @@ export interface GoBrowseCategory {
 
 export const GO_BROWSE_CATEGORIES: GoBrowseCategory[] = [
   {
-    "id": "go-senior-concurrency",
-    "title": "Concurrency & Goroutines",
-    "summary": "8 senior concurrency & goroutines concepts.",
-    "icon": "Workflow",
-    "courseTopicId": "go-senior-concurrency"
+    "id": "go-senior-basics",
+    "title": "Go Fundamentals",
+    "summary": "6 go fundamentals concepts to recall.",
+    "icon": "ListOrdered",
+    "courseTopicId": "go-senior-basics"
   },
   {
-    "id": "go-senior-runtime-memory",
-    "title": "Runtime & Memory",
-    "summary": "4 senior runtime & memory concepts.",
-    "icon": "Cpu",
-    "courseTopicId": "go-senior-runtime-memory"
+    "id": "go-senior-types-values",
+    "title": "Types & Value Semantics",
+    "summary": "6 types & value semantics concepts to recall.",
+    "icon": "Type",
+    "courseTopicId": "go-senior-types-values"
   },
   {
-    "id": "go-senior-interfaces-types",
-    "title": "Interfaces & Type System",
-    "summary": "5 senior interfaces & type system concepts.",
-    "icon": "Shapes",
-    "courseTopicId": "go-senior-interfaces-types"
+    "id": "go-senior-collections",
+    "title": "Slices, Maps & Arrays",
+    "summary": "6 slices, maps & arrays concepts to recall.",
+    "icon": "Layers",
+    "courseTopicId": "go-senior-collections"
   },
   {
-    "id": "go-senior-generics",
-    "title": "Generics",
-    "summary": "4 senior generics concepts.",
-    "icon": "Braces",
-    "courseTopicId": "go-senior-generics"
+    "id": "go-senior-functions-closures",
+    "title": "Functions & Closures",
+    "summary": "6 functions & closures concepts to recall.",
+    "icon": "Sigma",
+    "courseTopicId": "go-senior-functions-closures"
+  },
+  {
+    "id": "go-senior-structs-methods",
+    "title": "Structs, Methods & Embedding",
+    "summary": "6 structs, methods & embedding concepts to recall.",
+    "icon": "Boxes",
+    "courseTopicId": "go-senior-structs-methods"
+  },
+  {
+    "id": "go-senior-interfaces-basics",
+    "title": "Interfaces (Basics)",
+    "summary": "6 interfaces (basics) concepts to recall.",
+    "icon": "Link",
+    "courseTopicId": "go-senior-interfaces-basics"
+  },
+  {
+    "id": "go-senior-strings-runes",
+    "title": "Strings, Bytes & Runes",
+    "summary": "6 strings, bytes & runes concepts to recall.",
+    "icon": "Hash",
+    "courseTopicId": "go-senior-strings-runes"
+  },
+  {
+    "id": "go-senior-packages-modules",
+    "title": "Packages, Modules & Tooling",
+    "summary": "6 packages, modules & tooling concepts to recall.",
+    "icon": "Network",
+    "courseTopicId": "go-senior-packages-modules"
   },
   {
     "id": "go-senior-errors",
     "title": "Error Handling",
-    "summary": "4 senior error handling concepts.",
+    "summary": "4 error handling concepts to recall.",
     "icon": "TriangleAlert",
     "courseTopicId": "go-senior-errors"
   },
   {
     "id": "go-senior-slices-maps",
     "title": "Slices, Maps & Data",
-    "summary": "4 senior slices, maps & data concepts.",
+    "summary": "4 slices, maps & data concepts to recall.",
     "icon": "Table",
     "courseTopicId": "go-senior-slices-maps"
   },
   {
+    "id": "go-senior-interfaces-types",
+    "title": "Interfaces & Type System",
+    "summary": "5 interfaces & type system concepts to recall.",
+    "icon": "Shapes",
+    "courseTopicId": "go-senior-interfaces-types"
+  },
+  {
+    "id": "go-senior-generics",
+    "title": "Generics",
+    "summary": "4 generics concepts to recall.",
+    "icon": "Braces",
+    "courseTopicId": "go-senior-generics"
+  },
+  {
+    "id": "go-senior-concurrency",
+    "title": "Concurrency & Goroutines",
+    "summary": "8 concurrency & goroutines concepts to recall.",
+    "icon": "Workflow",
+    "courseTopicId": "go-senior-concurrency"
+  },
+  {
+    "id": "go-senior-runtime-memory",
+    "title": "Runtime & Memory",
+    "summary": "4 runtime & memory concepts to recall.",
+    "icon": "Cpu",
+    "courseTopicId": "go-senior-runtime-memory"
+  },
+  {
     "id": "go-senior-stdlib-idioms",
     "title": "Standard Library & Idioms",
-    "summary": "4 senior standard library & idioms concepts.",
+    "summary": "4 standard library & idioms concepts to recall.",
     "icon": "Library",
     "courseTopicId": "go-senior-stdlib-idioms"
   },
   {
     "id": "go-senior-performance",
     "title": "Performance & Profiling",
-    "summary": "4 senior performance & profiling concepts.",
+    "summary": "4 performance & profiling concepts to recall.",
     "icon": "Gauge",
     "courseTopicId": "go-senior-performance"
   },
   {
     "id": "go-senior-testing",
     "title": "Testing & Reliability",
-    "summary": "4 senior testing & reliability concepts.",
+    "summary": "4 testing & reliability concepts to recall.",
     "icon": "FlaskConical",
     "courseTopicId": "go-senior-testing"
   },
   {
     "id": "go-senior-design",
     "title": "System Design in Go",
-    "summary": "5 senior system design in go concepts.",
+    "summary": "5 system design in go concepts to recall.",
     "icon": "Blocks",
     "courseTopicId": "go-senior-design"
   }

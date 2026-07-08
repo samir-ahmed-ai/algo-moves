@@ -23,6 +23,7 @@ import {
   CompleteScreen,
   GistCardView,
   QuizCardView,
+  ReadCardView,
   ReassembleCardView,
 } from './MobileCards';
 
@@ -384,6 +385,14 @@ export function MobileDeck({
               problemIndex={pIdx}
               problemCount={blocks.length}
               onContinue={advance}
+            />
+          ) : block && card?.kind === 'read' ? (
+            <ReadCardView
+              block={block}
+              problemIndex={pIdx}
+              problemCount={blocks.length}
+              onContinue={advance}
+              onOpenStudio={openStudio}
             />
           ) : block && card?.kind === 'animate' ? (
             <AnimateCardView

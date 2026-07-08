@@ -28,6 +28,8 @@ export interface EditorPrefs {
   showLineNumbers: boolean;
   /** Highlight changed lines in the merge diff view. */
   highlightChanges: boolean;
+  /** Strict recall: reset the attempt to empty on any typing mistake (reset-on-mistake mode). */
+  strictRecall: boolean;
 }
 
 const KEY = STORAGE_KEYS.EDITOR_PREFS;
@@ -42,6 +44,7 @@ const DEFAULTS: Readonly<EditorPrefs> = {
   lineHeight: 'normal',
   showLineNumbers: true,
   highlightChanges: true,
+  strictRecall: false,
 };
 
 function booleanPref(value: unknown, fallback: boolean): boolean {
@@ -65,6 +68,7 @@ function normalizePrefs(data: Partial<EditorPrefs> | null | undefined): EditorPr
     lineHeight: isRecallLineHeight(data.lineHeight) ? data.lineHeight : DEFAULTS.lineHeight,
     showLineNumbers: booleanPref(data.showLineNumbers, DEFAULTS.showLineNumbers),
     highlightChanges: booleanPref(data.highlightChanges, DEFAULTS.highlightChanges),
+    strictRecall: booleanPref(data.strictRecall, DEFAULTS.strictRecall),
   };
 }
 

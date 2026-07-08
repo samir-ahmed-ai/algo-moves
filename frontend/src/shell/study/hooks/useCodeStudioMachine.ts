@@ -78,10 +78,26 @@ export function useCodeStudioMachine({
     [draftKey],
   );
 
+  // Reconcile the shared draft key across tabs/windows: another document editing the
+  // same attempt writes localStorage and fires a `storage` event here (never in the
+  // writing document), so we adopt its value instead of clobbering it on the next save.
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== draftKey) return;
+      if (e.storageArea && e.storageArea !== globalThis.localStorage) return;
+      const next = e.newValue ?? '';
+      setDraft((cur) => (cur === next ? cur : next));
+    };
+    globalThis.addEventListener('storage', onStorage);
+    return () => globalThis.removeEventListener('storage', onStorage);
+  }, [draftKey]);
+
   const enterRecall = useCallback(
     (startTimer = true) => {
       setPhaseTransition(true);
-      persistDraft('');
+      // Resume, don't wipe: keep any in-progress/saved attempt. The only intentional wipe is
+      // the explicit "Clear draft" action (⌘⇧R / Session menu). Wiping here silently destroyed
+      // typed recall on every re-entry (data loss).
       savePhase(itemId, active, 'recall');
       clearReassembleProgress(itemId, active);
       scheduleTransition(() => {
@@ -90,7 +106,7 @@ export function useCodeStudioMachine({
         if (startTimer) setTimerRunning(true);
       });
     },
-    [persistDraft, itemId, active, scheduleTransition, setTimerRunning],
+    [itemId, active, scheduleTransition, setTimerRunning],
   );
 
   /** Animated, persisted jump to any phase (stepper navigation). Re-entering the
@@ -100,9 +116,7 @@ export function useCodeStudioMachine({
       if (phaseLock) return;
       if (target === phase) return;
       if (target === 'quiz') clearQuizProgress(itemId, active);
-      if (target === 'recall') {
-        persistDraft('');
-      }
+      // Re-entering recall via the stepper resumes the saved attempt (no wipe) — data loss fix.
       setPhaseTransition(true);
       savePhase(itemId, active, target);
       if (target !== 'recall') {
@@ -114,16 +128,7 @@ export function useCodeStudioMachine({
         setPhaseTransition(false);
       });
     },
-    [
-      phaseLock,
-      phase,
-      itemId,
-      active,
-      persistDraft,
-      scheduleTransition,
-      setTimerRunning,
-      setTimerSec,
-    ],
+    [phaseLock, phase, itemId, active, scheduleTransition, setTimerRunning, setTimerSec],
   );
 
   /** Skip / continue to the next phase in the sequence. */

@@ -62,6 +62,8 @@ export interface SplitCodeEditorProps {
     collapse: () => void;
     expand: () => void;
   } | null>;
+  /** Focus the draft pane once on mount (so entering Recall is type-ready). */
+  autoFocusDraft?: boolean;
 }
 
 function sideWrap(view: EditorView): HTMLElement | null {
@@ -110,6 +112,7 @@ export function SplitCodeEditor({
   draftViewRef,
   formatBothRef,
   foldBothRef,
+  autoFocusDraft = false,
 }: SplitCodeEditorProps) {
   const showLeft = !hideLeft || Boolean(peekLeft);
   const hostRef = useRef<HTMLDivElement>(null);
@@ -117,7 +120,10 @@ export function SplitCodeEditor({
   const readOnlyCompA = useRef(new Compartment());
   const formatBothFnRef = useRef<(() => void) | null>(null);
   const skipDraftSyncRef = useRef(false);
-  const isLocalEditRef = useRef(false);
+  // The last value this editor pushed up via onDraftChange. The [draft] effect skips the
+  // sync only when the incoming prop equals this — a robust replacement for a write-once
+  // boolean flag that could get stuck true and swallow a later external draft change.
+  const lastLocalValueRef = useRef(draft);
   const prevDraftLenRef = useRef(draft.length);
   const mergeSchedulerRef = useRef<ReturnType<typeof createRecallMergeRefreshScheduler> | null>(
     null,
@@ -189,6 +195,8 @@ export function SplitCodeEditor({
   splitPctRef.current = splitPct;
   const showLeftRef = useRef(showLeft);
   showLeftRef.current = showLeft;
+  const autoFocusDraftRef = useRef(autoFocusDraft);
+  autoFocusDraftRef.current = autoFocusDraft;
 
   useEffect(() => {
     if (!hostRef.current) return;
@@ -234,8 +242,9 @@ export function SplitCodeEditor({
           mergeFormatKeymap(() => formatBothFnRef.current?.()),
           EditorView.updateListener.of((u) => {
             if (u.docChanged) {
-              isLocalEditRef.current = true;
-              onDraftChangeRef.current(u.state.doc.toString());
+              const value = u.state.doc.toString();
+              lastLocalValueRef.current = value;
+              onDraftChangeRef.current(value);
               if (!skipDraftSyncRef.current) {
                 mergeSchedulerRef.current?.schedule();
               }
@@ -246,13 +255,14 @@ export function SplitCodeEditor({
     });
 
     mergeViewRef.current = view;
+    // Anchor the sync baseline to the doc this view was created with (handles the [lang] remount).
+    lastLocalValueRef.current = view.b.state.doc.toString();
     if (draftViewRef) draftViewRef.current = view.b;
     formatBothFnRef.current = () => {
       skipDraftSyncRef.current = true;
       try {
         formatMergeViews(view, {
           readOnlyCompA: readOnlyCompA.current,
-          onDraftChange: onDraftChangeRef.current,
           ...(langRef.current ? { lang: langRef.current } : {}),
         });
       } finally {
@@ -269,6 +279,14 @@ export function SplitCodeEditor({
     };
     if (foldBothRef) foldBothRef.current = foldBoth;
     applySplitLayout(view, splitPctRef.current, showLeftRef.current);
+
+    // Type-ready on entry: focus the draft pane once mounted (deferred so layout has
+    // settled and StrictMode's throwaway first mount doesn't leave focus on a dead view).
+    if (autoFocusDraftRef.current) {
+      requestAnimationFrame(() => {
+        if (mergeViewRef.current === view && !view.b.hasFocus) view.b.focus();
+      });
+    }
 
     return () => {
       mergeSchedulerRef.current?.dispose();
@@ -294,11 +312,11 @@ export function SplitCodeEditor({
   useEffect(() => {
     const view = mergeViewRef.current?.b;
     if (!view || skipDraftSyncRef.current) return;
-    if (isLocalEditRef.current) {
-      isLocalEditRef.current = false;
-      return;
-    }
+    // Skip only when the prop is exactly what this editor last emitted; any genuinely
+    // external change (clear, item/variant switch, cross-tab storage, strict reset) syncs.
+    if (draft === lastLocalValueRef.current) return;
     if (syncDraftToEditorView(view, draft)) {
+      lastLocalValueRef.current = draft;
       mergeSchedulerRef.current?.flush();
     }
   }, [draft]);
@@ -400,15 +418,17 @@ export function SplitCodeEditor({
           ref={hostRef}
           className={cn('cm-merge-diff-host nodrag h-full min-h-0', compact && 'cm-merge-compact')}
         />
-        {showLeft && (
-          <div
-            {...handleProps}
-            className="recall-split-editor__handle nodrag group absolute top-0 z-10 flex h-full w-2 -translate-x-1/2 cursor-col-resize items-stretch justify-center"
-            style={{ left: `${splitPct}%` }}
-          >
-            <div className="split-handle h-full w-px bg-edge transition-colors hover:bg-accent" />
-          </div>
-        )}
+        {/* Kept mounted (visually hidden when blind) so tab order stays stable across blind
+            toggles. Inline display:none beats the `flex` utility class that `[hidden]` can't. */}
+        <div
+          {...handleProps}
+          tabIndex={showLeft ? 0 : -1}
+          aria-hidden={showLeft ? undefined : true}
+          className="recall-split-editor__handle nodrag group absolute top-0 z-10 flex h-full w-2 -translate-x-1/2 cursor-col-resize items-stretch justify-center"
+          style={{ left: `${splitPct}%`, ...(showLeft ? {} : { display: 'none' }) }}
+        >
+          <div className="split-handle h-full w-px bg-edge transition-colors hover:bg-accent" />
+        </div>
       </div>
     </div>
   );

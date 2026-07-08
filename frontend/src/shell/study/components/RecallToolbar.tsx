@@ -35,6 +35,7 @@ import {
 } from './recallEditorControls';
 import { RecallToolbarMenu } from './RecallToolbarMenu';
 import { ToolbarGroup, ToolbarGroupBtn } from './ToolbarGroup';
+import { useHoldToPeek } from '../hooks/useHoldToPeek';
 
 function FontSizeStepper({
   fontSize,
@@ -125,6 +126,8 @@ export function RecallToolbar({
   foldBothRef?: MutableRefObject<{ collapse: () => void; expand: () => void } | null>;
   lang?: string;
 }) {
+  const peekProps = useHoldToPeek(setPeek);
+
   const safeScorePct =
     typeof scorePct === 'number' && Number.isFinite(scorePct)
       ? Math.max(0, Math.min(100, Math.round(scorePct)))
@@ -167,6 +170,7 @@ export function RecallToolbar({
       <ToolbarGroup title="Recall editor controls">
         <ToolbarGroupBtn
           active={blind}
+          aria-label={blind ? 'Blind recall on' : 'Blind recall off'}
           title={blind ? 'Blind recall (⌘\\)' : 'Reference mode (⌘\\)'}
           onClick={() => setBlind((b) => !b)}
         >
@@ -174,16 +178,15 @@ export function RecallToolbar({
         </ToolbarGroupBtn>
         <ToolbarGroupBtn
           active={peek}
-          title="Hold to peek at reference"
-          onPointerDown={() => setPeek(true)}
-          onPointerUp={() => setPeek(false)}
-          onPointerCancel={() => setPeek(false)}
-          onPointerLeave={() => setPeek(false)}
+          aria-label="Peek at reference"
+          title="Hold to peek at reference (Enter/Space)"
+          {...peekProps}
         >
           <ScanEye className="h-3 w-3" />
         </ToolbarGroupBtn>
         <ToolbarGroupBtn
           active={editorPrefs.vim}
+          aria-label={editorPrefs.vim ? 'Vim mode on' : 'Vim mode off'}
           title={
             editorPrefs.vim ? 'Vim mode on — modal editing (⌘⌥V)' : 'Enable Vim keybindings (⌘⌥V)'
           }
@@ -225,7 +228,7 @@ export function RecallToolbar({
           label="Session"
           icon={<Timer className="h-3 w-3" />}
           items={sessionMenuItems(menuCtx)}
-          active={timerRunning}
+          active={timerRunning || editorPrefs.strictRecall}
           {...(compact !== undefined ? { compact } : {})}
         />
       </ToolbarGroup>
