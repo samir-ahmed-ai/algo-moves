@@ -2,7 +2,7 @@
   "name": "algo-moves",
   "private": true,
   "version": "0.1.0",
-  "description": "Step-through visual replay engine for ~400 coding-interview problems — LeetCode, HackerRank, and original plugins with Go solutions, Code Studio, and mobile drill mode.",
+  "description": "Learn algorithms the way AI learns — watch, predict, get feedback, repeat. Visual replay engine for ~400 interview problems with Code Studio and mobile drill mode.",
   "license": "AGPL-3.0",
   "type": "module",
   "keywords": [

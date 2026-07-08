@@ -4,7 +4,7 @@
   "dir": "ltr",
   "name": "Algo Moves",
   "short_name": "Algo",
-  "description": "Step through algorithm animations, quizzes, and code drills until the patterns stick.",
+  "description": "Learn algorithms the way AI learns — watch, predict, get feedback, repeat until the patterns stick.",
   "categories": ["education", "productivity", "developer"],
   "start_url": "/mobile",
   "scope": "/",

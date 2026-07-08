@@ -1,8 +1,10 @@
 # Algo Moves
 
-**Visual algorithm mastery for interviews.**
+**Learn algorithms the way AI learns — watch, predict, get feedback, repeat.**
 
-Step through algorithms like a chess transcript — watch the move, predict the next one, rebuild the code, and repeat until the pattern sticks. Algo Moves is a plugin-driven learning environment: the shell is algorithm-agnostic, every problem is a self-contained plugin, and the engine replays every pointer move, push/pop, and state change as a first-class **move transcript** you can scrub, drill, and share.
+> *How does a model get good? It tries, gets a signal, adjusts, and tries again.* Algo Moves applies that same loop to algorithm mastery.
+
+Visual interview prep — step through algorithms like a chess transcript: watch the move, predict the next one, rebuild the code, and repeat until the pattern sticks. Algo Moves is a plugin-driven learning environment: the shell is algorithm-agnostic, every problem is a self-contained plugin, and the engine replays every pointer move, push/pop, and state change as a first-class **move transcript** you can scrub, drill, and share.
 
 ~**400 problems** · real-time multiplayer arcade · collaborative canvas · interview facilitation · mobile swipe deck · Vim Dojo
 
