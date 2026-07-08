@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { GraduationCap, Network } from 'lucide-react';
+import { Bookmark, BookmarkPlus, GraduationCap, Network } from 'lucide-react';
 import type { Frame, Player, ProblemPlugin } from '../../core';
 import type { Item } from '../../content';
 import { catalog, browseBreadcrumbForItem, getCategoryById, getTrackById } from '../../content';
@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils/cn';
 import { computeInputFrameCounts, buildFrameContextValue } from '@/lib/canvas';
 import { useWorkspace } from '@/store/workspace';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
+import { usePlan } from '@/shell/plans/PlanContext';
 import { courseIcon } from '../courseIcon';
 import { trackColor } from '../browse/trackColors';
 import {
@@ -132,6 +133,7 @@ function ProblemPageHeader() {
   const { activeTrackId, activeCategoryId, backToBrowse, setMode, enterProblemInMode } =
     useWorkspace();
   const isMobile = useIsMobile();
+  const { isBuilding, hasItem, addItem, removeItem } = usePlan();
 
   const derived = browseBreadcrumbForItem(item.id, catalog);
   const trackId = activeTrackId ?? derived.track?.id ?? null;
@@ -141,6 +143,8 @@ function ProblemPageHeader() {
   const color = trackId ? trackColor(trackId) : null;
   const Icon = courseIcon(category?.icon ?? track?.icon);
 
+  const inPlan = isBuilding && hasItem(item.id);
+
   return (
     <ProblemSurfaceBar
       onBack={trackId || categoryId ? backToBrowse : undefined}
@@ -148,6 +152,22 @@ function ProblemPageHeader() {
       badge={color ? <HeaderBadge gradient={color} icon={<Icon strokeWidth={1.6} />} /> : undefined}
       actions={
         <div className="flex shrink-0 items-center gap-1">
+          {isBuilding && (
+            <Btn
+              variant={inPlan ? 'primary' : 'ghost'}
+              size="sm"
+              icon={
+                inPlan ? (
+                  <Bookmark className="h-3.5 w-3.5 fill-current" />
+                ) : (
+                  <BookmarkPlus className="h-3.5 w-3.5" />
+                )
+              }
+              onClick={() => (inPlan ? removeItem(item.id) : addItem(item.id))}
+            >
+              {!isMobile && (inPlan ? 'Bookmarked' : 'Bookmark')}
+            </Btn>
+          )}
           <Btn
             variant="ghost"
             size="sm"

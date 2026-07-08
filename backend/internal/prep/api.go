@@ -17,6 +17,13 @@ const maxPrepPlanTitle = 200
 const maxPrepPlanNotes = 50_000
 const maxPrepPlanItems = 500
 
+func requireSignedIn(p *profile.Profile) (int, string) {
+	if p == nil || p.IsAnonymous {
+		return http.StatusUnauthorized, "sign in required"
+	}
+	return 0, ""
+}
+
 func sanitizePrepPlanTitle(s string) string {
 	s = strings.TrimSpace(s)
 	if s == "" {
@@ -61,6 +68,10 @@ func (h *Handler) handleListPrepPlans(w http.ResponseWriter, r *http.Request) {
 		httputil.WriteErr(w, code, msg)
 		return
 	}
+	if code, msg := requireSignedIn(p); code != 0 {
+		httputil.WriteErr(w, code, msg)
+		return
+	}
 	list, err := h.repo.ListPrepPlans(ctx, p.ID)
 	if err != nil {
 		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "query failed")
@@ -73,6 +84,10 @@ func (h *Handler) handleCreatePrepPlan(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 	if code != 0 {
+		httputil.WriteErr(w, code, msg)
+		return
+	}
+	if code, msg := requireSignedIn(p); code != 0 {
 		httputil.WriteErr(w, code, msg)
 		return
 	}
@@ -115,6 +130,10 @@ func (h *Handler) handleGetPrepPlan(w http.ResponseWriter, r *http.Request) {
 		httputil.WriteErr(w, code, msg)
 		return
 	}
+	if code, msg := requireSignedIn(p); code != 0 {
+		httputil.WriteErr(w, code, msg)
+		return
+	}
 	plan, err := h.repo.GetPrepPlan(ctx, id, p.ID)
 	if err != nil {
 		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "query failed")
@@ -132,6 +151,10 @@ func (h *Handler) handleUpdatePrepPlan(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 	if code != 0 {
+		httputil.WriteErr(w, code, msg)
+		return
+	}
+	if code, msg := requireSignedIn(p); code != 0 {
 		httputil.WriteErr(w, code, msg)
 		return
 	}
@@ -178,6 +201,10 @@ func (h *Handler) handleDeletePrepPlan(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 	if code != 0 {
+		httputil.WriteErr(w, code, msg)
+		return
+	}
+	if code, msg := requireSignedIn(p); code != 0 {
 		httputil.WriteErr(w, code, msg)
 		return
 	}
