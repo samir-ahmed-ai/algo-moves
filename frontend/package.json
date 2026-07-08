@@ -4,6 +4,14 @@
   "version": "0.1.0",
   "description": "Learn algorithms the way AI learns — watch, predict, get feedback, repeat. Visual replay engine for ~400 interview problems with Code Studio and mobile drill mode.",
   "license": "AGPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/samir-ahmed-ai/algo-moves.git"
+  },
+  "homepage": "https://github.com/samir-ahmed-ai/algo-moves#readme",
+  "bugs": {
+    "url": "https://github.com/samir-ahmed-ai/algo-moves/issues"
+  },
   "type": "module",
   "keywords": [
     "algorithms",

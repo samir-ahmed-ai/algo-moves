@@ -1,4 +1,4 @@
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Github } from 'lucide-react';
 import { VimHeroPreview } from '@/shell/vim/ui/VimHeroPreview';
 import type { TrackId } from '../../content';
 import { LandingCourseTree } from './LandingCourseTree';
@@ -8,6 +8,7 @@ interface Maker {
   role: string;
   photo?: string;
   email?: string;
+  github?: string;
 }
 
 const MAKER: Maker = {
@@ -15,6 +16,7 @@ const MAKER: Maker = {
   role: 'Creator & Senior Go Engineer',
   photo: `${import.meta.env.BASE_URL}assets/ahmed.png`,
   email: 'ahmed.amer.samir@gmail.com',
+  github: 'https://github.com/samir-ahmed-ai/algo-moves',
 };
 
 const ROADMAP_STATS = [
@@ -59,14 +61,27 @@ export function LandingCatalogRail({ onVim }: { onVim: () => void }) {
               {MAKER.role}
             </p>
             <p className="truncate text-sm font-semibold text-ink">{MAKER.name}</p>
-            {MAKER.email ? (
-              <a
-                href={`mailto:${MAKER.email}`}
-                className="inline-flex items-center gap-1 text-xs font-medium text-accent transition-opacity hover:opacity-70"
-              >
-                {MAKER.email}
-              </a>
-            ) : null}
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              {MAKER.email ? (
+                <a
+                  href={`mailto:${MAKER.email}`}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-accent transition-opacity hover:opacity-70"
+                >
+                  {MAKER.email}
+                </a>
+              ) : null}
+              {MAKER.github ? (
+                <a
+                  href={MAKER.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs font-medium text-accent transition-opacity hover:opacity-70"
+                >
+                  <Github className="h-3 w-3" />
+                  GitHub
+                </a>
+              ) : null}
+            </div>
           </div>
         </div>
       </div>

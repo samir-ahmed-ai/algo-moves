@@ -8,6 +8,7 @@ Visual interview prep — step through algorithms like a chess transcript: watch
 
 ~**400 problems** · real-time multiplayer arcade · collaborative canvas · interview facilitation · mobile swipe deck · Vim Dojo
 
+[![GitHub](https://img.shields.io/badge/GitHub-algo--moves-181717?logo=github&logoColor=white)](https://github.com/samir-ahmed-ai/algo-moves)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
