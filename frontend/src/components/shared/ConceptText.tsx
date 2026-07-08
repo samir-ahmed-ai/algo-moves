@@ -1,5 +1,4 @@
 import { Brain } from 'lucide-react';
-import { cn } from '@/lib/utils/cn';
 import type { ProblemPlugin } from '../../core/types';
 
 const STATE_CHIP_TINTS = [
