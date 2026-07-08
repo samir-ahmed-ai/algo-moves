@@ -237,6 +237,52 @@
   background: transparent;
 }
 
+/* Go Course / concept read column — readable serif prose, tinted tag chips. */
+.concept-text {
+  font-family: ui-serif, Georgia, 'Times New Roman', serif;
+  font-size: var(--fs-sm);
+  line-height: var(--lh, 1.55);
+  letter-spacing: 0.01em;
+}
+
+.concept-text__step-num {
+  font-family: 'DM Sans', system-ui, sans-serif;
+}
+
+.concept-read-overview__tags .node-tag-chip[data-tag-kind='pattern'] {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  --tw-ring-color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.concept-read-overview__tags .node-tag-chip[data-tag-kind='structure'] {
+  color: var(--good);
+  background: color-mix(in srgb, var(--good) 14%, transparent);
+  --tw-ring-color: color-mix(in srgb, var(--good) 30%, transparent);
+}
+
+.concept-read-overview__tags .node-tag-chip[data-tag-kind='skill'] {
+  color: var(--team2-stroke);
+  background: color-mix(in srgb, var(--team2-stroke) 14%, transparent);
+  --tw-ring-color: color-mix(in srgb, var(--team2-stroke) 30%, transparent);
+}
+
+.concept-read-overview__tags .node-tag-chip[data-tag-kind='meta'] {
+  color: var(--text-3);
+  background: color-mix(in srgb, var(--text-3) 12%, transparent);
+  --tw-ring-color: color-mix(in srgb, var(--text-3) 24%, transparent);
+}
+
+.concept-read-overview__tags .node-tag-chip {
+  font-size: var(--fs-xs);
+  padding-inline: 0.625rem;
+  padding-block: 0.3rem;
+}
+
+.concept-state-chip {
+  font-family: 'DM Sans', system-ui, sans-serif;
+}
+
 /* ============================================================ Assemble blocks
  * Code pieces rendered as physical, interlocking puzzle blocks. A two-layer clip
  * (stroke layer + tinted face) gives a coloured outline that follows the puzzle

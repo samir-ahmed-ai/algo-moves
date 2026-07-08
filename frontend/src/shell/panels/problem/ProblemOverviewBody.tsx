@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
+import { Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { isEditableTarget } from '@/lib/utils/keyboard';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
 import { HighlightedCode } from '@/components/code/HighlightedCode';
 import { ConceptText, conceptFromPlugin } from '@/components/shared/ConceptText';
 import { isTextOnlyCourse } from '@/lib/canvas/conceptCourse';
+import { Chip, difficultyTone, NodeTagChip, useCanvasFrame, useCanvasStatic } from '@/shell/canvas';
 import { ProblemPanelBody } from './ProblemPanelBody';
 import {
   OverviewContentColumn,
@@ -17,7 +19,6 @@ import { StudioContentPanel, StudioSplitLayout } from './studioSplitLayout';
 import { useOverviewView } from './useOverviewView';
 import { useStudioNextShortcut } from './useStudioNextShortcut';
 import { useCodeStudioContent } from '@/shell/study/CodeStudio';
-import { useCanvasFrame, useCanvasStatic } from '@/shell/canvas';
 
 interface OverviewNav {
   nextLabel?: string | undefined;
@@ -47,6 +48,7 @@ function ConceptReadOverview({ nextLabel, onNext, nextAllLabel, onNextAll }: Ove
   const concept = conceptFromPlugin(plugin);
   const code = plugin.code?.text?.trim() ?? '';
   const lang = plugin.code?.lang ?? 'go';
+  const tone = difficultyTone(item.difficulty);
   useStudioNextShortcut(onNext, onNextAll);
 
   return (
@@ -61,19 +63,38 @@ function ConceptReadOverview({ nextLabel, onNext, nextAllLabel, onNextAll }: Ove
       }
       problem={
         <ProblemStatementColumn
-          className={cn(isMobile && 'max-h-[45vh] shrink-0 border-b border-edge')}
+          className={cn(
+            'concept-read-overview',
+            isMobile && 'max-h-[45vh] shrink-0 border-b border-edge',
+          )}
         >
-          <div className="flex flex-col gap-2">
-            <div>
-              <h2 className="text-[length:var(--fs-title)] font-semibold leading-tight text-ink">
-                {item.title}
-              </h2>
+          <div className="flex flex-col gap-3">
+            <header className="concept-read-overview__header flex flex-col gap-2">
+              <div className="flex flex-wrap items-start gap-2">
+                <h2 className="min-w-0 flex-1 text-[length:var(--fs-title)] font-semibold leading-tight text-ink">
+                  {item.title}
+                </h2>
+                {item.difficulty && <Chip tone={tone}>{item.difficulty}</Chip>}
+              </div>
               {item.summary && (
-                <p className="mt-0.5 text-[length:var(--fs-sm)] leading-relaxed text-ink3">
+                <p className="text-[length:var(--fs-sm)] leading-relaxed text-ink3">
                   {item.summary}
                 </p>
               )}
-            </div>
+              {(concept.pattern || item.tags.length > 0) && (
+                <div className="concept-read-overview__tags flex flex-wrap gap-1.5">
+                  {concept.pattern && (
+                    <span className="concept-pattern-chip inline-flex items-center gap-1 rounded-full border border-accent/30 bg-accentbg px-2.5 py-1 text-[length:var(--fs-xs)] font-semibold text-accent">
+                      <Sparkles className="h-3.5 w-3.5" />
+                      {concept.pattern}
+                    </span>
+                  )}
+                  {item.tags.map((t) => (
+                    <NodeTagChip key={t} id={t} />
+                  ))}
+                </div>
+              )}
+            </header>
             <ConceptText concept={concept} />
           </div>
         </ProblemStatementColumn>

@@ -20,8 +20,8 @@ export const OVERVIEW_PROBLEM_MIN = 18;
 export const OVERVIEW_PROBLEM_MAX = 50;
 export const OVERVIEW_PROBLEM_DEFAULT = 32;
 /** Concept courses (code trace, no graph board): wider problem column by default. */
-export const OVERVIEW_PROBLEM_CONCEPT_DEFAULT = 42;
-export const OVERVIEW_PROBLEM_CONCEPT_MAX = 55;
+export const OVERVIEW_PROBLEM_CONCEPT_DEFAULT = 50;
+export const OVERVIEW_PROBLEM_CONCEPT_MAX = 65;
 
 export function clampOverviewProblemPct(pct: number): number {
   return clampSplitPct(pct, OVERVIEW_PROBLEM_MIN, OVERVIEW_PROBLEM_MAX, OVERVIEW_PROBLEM_DEFAULT);
