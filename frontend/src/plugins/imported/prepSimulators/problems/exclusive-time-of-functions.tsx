@@ -8,7 +8,15 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  vizText,
+} from '../../../_shared/vizKit';
 
 interface ExclInput {
   n: number;
@@ -89,13 +97,23 @@ function record({ n, logs }: ExclInput): Frame<ExclState>[] {
 
 function View({ frame }: PluginViewProps<ExclState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="log">
+        <RailStat k="cmd" v={s.log || s.op || '—'} tone="accent" />
+      </RailGroup>
+      <RailGroup label="stack">
+        <RailStat k="top" v={s.stack.length ? s.stack[s.stack.length - 1]! : '—'} />
+        <RailStat k="depth" v={s.stack.length} />
+      </RailGroup>
+      <RailGroup label="time">
+        <RailStat k="prev" v={s.prev} />
+      </RailGroup>
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>{s.log || s.op || '—'}</div>
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>
-        stack: [{s.stack.join(', ') || 'empty'}]
-      </div>
-      <div className="mt-2 flex flex-wrap gap-2">
+    <VizStage rail={rail} railWidth={168}>
+      <div className="flex flex-wrap gap-2">
         {s.res.map((t, i) => (
           <span
             key={i}
@@ -109,8 +127,7 @@ function View({ frame }: PluginViewProps<ExclState>) {
           </span>
         ))}
       </div>
-      <div className={cn('mt-1', vizText.sm, 'text-ink3')}>prev = {s.prev}</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -133,124 +150,85 @@ export const title = 'Exclusive Time of Functions';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Exclusive Time of Functions"?',
+    prompt: 'Which structure tracks exclusive function time from logs?',
     choices: [
       {
-        label: 'Stack — fits this problem',
+        label: 'Call stack plus prev timestamp — credit elapsed to stack top',
         correct: true,
       },
       {
-        label: 'Round-robin load balancer — different approach',
+        label: 'Dual heaps median — split numeric stream into halves',
       },
       {
-        label: 'Bijective tiny URL encode/decode — different approach',
+        label: 'Sorted avail rooms — busy heap for meeting assignment',
       },
       {
-        label: 'Design — different approach',
-      },
-    ],
-    explain: 'See Exclusive Time Of Functions pattern',
-  },
-  {
-    id: 'init',
-    prompt: 'At the start of a run (Exclusive Time of Functions), what strategy is established?',
-    choices: [
-      {
-        label: 'See Exclusive Time Of Functions pattern — described in INIT caption',
-        correct: true,
-      },
-      {
-        label: 'Precomputed final answer — before scanning input',
-      },
-      {
-        label: 'Descending sort required — as mandatory first step',
-      },
-      {
-        label: 'Every element visited upfront — marked from the start',
+        label: 'Jump array paint — skip already colored line cells',
       },
     ],
     explain:
-      'Exclusive Time of Functions: stack tracks active function IDs. On start/end logs, credit elapsed time to stack top.',
+      'start/end logs adjust res[stackTop] using ts - prev; stack pushes and pops active function ids.',
   },
   {
     id: 'key-step',
-    prompt: 'On the "END" step (fn  @), what happens?',
+    prompt: 'On a start log, what happens before pushing the new function id?',
     choices: [
       {
-        label: '"": credit fn with tick(s), pop — this move caption',
+        label: 'Pause current fn — add ts minus prev to previous stack top',
         correct: true,
       },
       {
-        label: 'Run terminates immediately — no further frames',
+        label: 'Clear stack entirely — reset all active functions first',
       },
       {
-        label: 'Pointers reset to zero — restart scan',
+        label: 'Credit new fn immediately — add full ts to incoming id',
       },
       {
-        label: 'Remaining input skipped — early return path',
+        label: 'Pop until empty — unwind stack on every start event',
       },
     ],
-    explain: '"": credit fn  with  tick(s), pop stack, prev=.',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `n` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field n in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
-      },
-    ],
-    explain: 'The recorder snapshots `n` on every emit so each frame shows the algorithm mid-step.',
+    explain: 'If stack nonempty, res[stackTop] += ts - prev before push(id) and prev = ts.',
   },
   {
     id: 'complexity',
-    prompt: 'What are the time and space complexities for "Exclusive Time of Functions"?',
+    prompt: 'What are the bounds for Exclusive Time of Functions?',
     choices: [
       {
-        label: 'O(logs) time, O(n) space — standard bounds here',
+        label: 'O(logs) time, O(n) space — one stack pass over log lines',
         correct: true,
       },
       {
-        label: 'O(1) time, O(servers) space — wrong order of growth',
+        label: 'O(n²) time, O(1) space — pairwise compare all log pairs',
       },
       {
-        label: 'O(m·n) time, O(n) space — wrong order of growth',
+        label: 'O(log n) per log, O(log n) space — heap of timestamps',
       },
       {
-        label: 'O(1) time, O(urls) space — wrong order of growth',
+        label: 'O(1) time, O(logs) space — store logs without processing',
       },
     ],
-    explain: 'O(logs). O(n). Exclusive Time Of Functions',
+    explain: 'Each log line does O(1) stack work; res array size is number of functions n.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'edge',
+    prompt: 'After an end log, why is prev set to ts + 1?',
     choices: [
       {
-        label: '"": credit fn with tick(s), pop — final DONE caption',
+        label: 'Exclude end tick double-count — next interval starts after inclusive end',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'Reset timeline to zero — restart measurement from origin',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'Mark function idle — prev unused until next start log',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'Align to even timestamps — force parity on prev tracker',
       },
     ],
-    explain: '"": credit fn  with  tick(s), pop stack, prev=.',
+    explain:
+      'End credits inclusive ts - prev + 1, then prev becomes ts+1 so nested calls do not overlap ticks.',
   },
 ];
 export const simulator: ProblemSimulator = {

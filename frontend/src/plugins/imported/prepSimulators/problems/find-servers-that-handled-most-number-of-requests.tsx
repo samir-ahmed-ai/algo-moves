@@ -8,7 +8,16 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailStack,
+  vizText,
+} from '../../../_shared/vizKit';
 
 interface SrvInput {
   k: number;
@@ -154,16 +163,19 @@ function record({ k, arrival, load }: SrvInput): Frame<SrvState>[] {
 
 function View({ frame }: PluginViewProps<SrvState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+        {s.assigned !== null && <RailStat k="srv" v={s.assigned} tone="good" />}
+      </RailGroup>
+      <RailStack label="avail" items={s.avail.length ? s.avail.map(String) : []} empty="none" />
+      {s.result.length > 0 && <RailStack label="busiest" items={s.result.map(String)} />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.assigned !== null && <span className="ml-2 font-mono text-good">srv {s.assigned}</span>}
-      </div>
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>
-        avail: [{s.avail.join(', ') || 'none'}]
-      </div>
-      <div className="mt-1 flex flex-wrap gap-1">
+    <VizStage rail={rail} railWidth={168}>
+      <div className="flex flex-wrap gap-1">
         {s.cnt.map((c, i) => (
           <span
             key={i}
@@ -177,12 +189,7 @@ function View({ frame }: PluginViewProps<SrvState>) {
           </span>
         ))}
       </div>
-      {s.result.length > 0 && (
-        <div className={cn('mt-2 font-mono', vizText.sm, 'text-good')}>
-          busiest: [{s.result.join(', ')}]
-        </div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 
@@ -205,126 +212,85 @@ export const title = 'Find Servers That Handled Most Number of Requests';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Find Servers That Handled Most Number of Requests"?',
+    prompt: 'How are requests assigned to k servers in this simulation?',
     choices: [
       {
-        label: 'Heap + Sorted Available Set — fits this problem',
+        label: 'Min-heap busy by freeTime — sorted avail list with i mod k target',
         correct: true,
       },
       {
-        label: 'Trie dictionary + spell suggest — different approach',
+        label: 'Round-robin index cycling — ignore busy-until assignment rules',
       },
       {
-        label: 'Two Heaps — different approach',
+        label: 'Half-open calendar — reject overlapping server bookings',
       },
       {
-        label: 'Round-robin load balancer — different approach',
-      },
-    ],
-    explain: 'See Find Servers That Handled Most Number Of Requests pattern',
-  },
-  {
-    id: 'init',
-    prompt:
-      'At the start of a run (Find Servers That Handled Most Number of Requests), what strategy is established?',
-    choices: [
-      {
-        label: 'See Find Servers That Handled Most — described in INIT caption',
-        correct: true,
-      },
-      {
-        label: 'Precomputed final answer — before scanning input',
-      },
-      {
-        label: 'Descending sort required — as mandatory first step',
-      },
-      {
-        label: 'Every element visited upfront — marked from the start',
+        label: 'Reservoir pick — uniform random server among idle ids',
       },
     ],
     explain:
-      'Busiest Servers: min-heap of busy servers by freeTime. avail sorted list; assign request i to server at/after i%k (wrap).',
+      'Busy heap frees servers at arrival; avail picks first id ≥ i%k (wrap); cnt tracks handled load.',
   },
   {
     id: 'key-step',
-    prompt: 'On the "ASSIGN" step (srv ), what happens?',
+    prompt: 'On ASSIGN for request i, how is the server chosen?',
     choices: [
       {
-        label: 'Request at t=: target= → server — this move caption',
+        label: 'Target i mod k — first avail id at or after target, wrap if needed',
         correct: true,
       },
       {
-        label: 'Run terminates immediately — no further frames',
+        label: 'Smallest cnt always — pick least-used server ignoring target',
       },
       {
-        label: 'Pointers reset to zero — restart scan',
+        label: 'Highest freeTime — busiest server receives next request',
       },
       {
-        label: 'Remaining input skipped — early return path',
+        label: 'Random avail index — uniform among currently free servers',
       },
     ],
-    explain: 'Request  at t=: target= → server , busy until . cnt[]=.',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `k` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field k in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
-      },
-    ],
-    explain: 'The recorder snapshots `k` on every emit so each frame shows the algorithm mid-step.',
+    explain:
+      'findIndex on avail for x >= target; if none, idx=0; server removed from avail and pushed busy.',
   },
   {
     id: 'complexity',
-    prompt:
-      'What are the time and space complexities for "Find Servers That Handled Most Number of Requests"?',
+    prompt: 'What are the bounds for busiest-servers assignment?',
     choices: [
       {
-        label: 'O(n log k) time, O(k) space — standard bounds here',
+        label: 'O(m log k) time, O(k) space — heap ops over m requests',
         correct: true,
       },
       {
-        label: 'O(n³) time, O(n) space — wrong order of growth',
+        label: 'O(m) time, O(1) space — no heap structure maintained',
       },
       {
-        label: 'O(m log n) time, O(n) space — wrong order of growth',
+        label: 'O(k²) per request, O(m) space — scan all pairs each arrival',
       },
       {
-        label: 'O(total painted) time, O(max coordinate) — wrong order of growth',
+        label: 'O(log m) only, O(m) space — binary search arrivals once',
       },
     ],
-    explain: 'O(n log k). O(k). Find Servers That Handled Most Number Of Requests',
+    explain: 'Each request may pop/push busy heap; avail and cnt arrays size k.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'edge',
+    prompt: 'When does the recorder emit SKIP for a request?',
     choices: [
       {
-        label: 'Done. Max requests handled = . — final DONE caption',
+        label: 'avail empty after freeing — all k servers still busy at arrival',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'cnt already maximal — server hit request limit cap',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'arrival time zero — invalid timestamp rejects request',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'target server missing — id not in initial 0..k-1 range',
       },
     ],
-    explain: 'Done. Max requests handled = . Busiest server(s): [].',
+    explain: 'If no server freed by arrival time and avail.length===0, assignment is skipped.',
   },
 ];
 export const simulator: ProblemSimulator = {

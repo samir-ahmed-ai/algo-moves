@@ -8,7 +8,15 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  vizText,
+} from '../../../_shared/vizKit';
 
 type LbOp = { kind: 'next' } | { kind: 'add'; server: string } | { kind: 'remove'; server: string };
 
@@ -98,16 +106,21 @@ function record({ servers: init, ops }: LbInput): Frame<LbState>[] {
 
 function View({ frame }: PluginViewProps<LbState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+        {s.ok !== null && s.result && <RailStat k="out" v={s.result} tone="good" />}
+      </RailGroup>
+      <RailGroup label="round">
+        <RailStat k="index" v={s.index} />
+        <RailStat k="pool" v={s.servers.length} />
+      </RailGroup>
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.ok !== null && s.result && (
-          <span className="ml-2 font-mono text-good">→ {s.result}</span>
-        )}
-      </div>
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>index = {s.index}</div>
-      <div className="mt-1 flex flex-wrap gap-1">
+    <VizStage rail={rail} railWidth={168}>
+      <div className="flex flex-wrap gap-1">
         {s.servers.map((srv, i) => (
           <span
             key={srv}
@@ -123,7 +136,7 @@ function View({ frame }: PluginViewProps<LbState>) {
         ))}
         {s.servers.length === 0 && <span className={cn(vizText.sm, 'text-ink3')}>empty</span>}
       </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -146,64 +159,83 @@ export const title = 'Load balancer';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Load balancer"?',
+    prompt: 'How does this load balancer pick the next server?',
     choices: [
       {
-        label: 'Round-robin load balancer — fits this problem',
+        label: 'Round-robin index — return pool[index] then advance modulo size',
         correct: true,
       },
       {
-        label: 'Hash map + doubly linked list LRU — different approach',
+        label: 'Random reservoir — uniform pick among target occurrences',
       },
       {
-        label: 'Stack — different approach',
+        label: 'Min-heap by free time — assign earliest finishing server',
       },
       {
-        label: 'Trie phone directory autocomplete — different approach',
+        label: 'Prefix-sum buckets — binary search weighted draw',
       },
     ],
-    explain: 'Circular index cycling through the backend list',
+    explain: 'nextServer reads servers[index], then index becomes (index + 1) % servers.length.',
   },
   {
-    id: 'state',
-    prompt: 'What does the `servers` field track in the visualization state?',
+    id: 'key-step',
+    prompt: 'On a NEXT step with a non-empty pool, what happens?',
     choices: [
       {
-        label: 'Field servers in state — updated each frame',
+        label: 'Return server at index — advance index to next slot modulo n',
         correct: true,
       },
       {
-        label: 'Fixed display label — unchanged each frame',
+        label: 'Always return first server — index never changes after start',
       },
       {
-        label: 'Shuffle seed value — for random ordering',
+        label: 'Pick heaviest-loaded server — maximize current assignment count',
       },
       {
-        label: 'Failure error code — set once at end',
+        label: 'Skip to DONE — terminate when any server is returned',
       },
     ],
-    explain:
-      'The recorder snapshots `servers` on every emit so each frame shows the algorithm mid-step.',
+    explain: 'The caption names the returned server and the next index after the modulo wrap.',
   },
   {
     id: 'complexity',
-    prompt: 'What are the time and space complexities for "Load balancer"?',
+    prompt: 'What are the time and space complexities for this load balancer?',
     choices: [
       {
-        label: 'O(1) time, O(servers) space — standard bounds here',
+        label: 'O(1) per op time, O(servers) space — index plus server list',
         correct: true,
       },
       {
-        label: 'O(1) get/put time, O(capacity) space — wrong order of growth',
+        label: 'O(n log n) time, O(n) space — resort pool every next call',
       },
       {
-        label: 'O(1) time, O(n) space — wrong order of growth',
+        label: 'O(m log k) time, O(k) space — heap per request assignment',
       },
       {
-        label: 'O(n) time, O(n) space — wrong order of growth',
+        label: 'O(path depth) time, O(nodes) space — trie walk each route',
       },
     ],
-    explain: 'O(1). O(servers). server=servers[idx]!; idx=(idx+1)%len',
+    explain: 'next, add, and remove each touch only the pool array and a single index variable.',
+  },
+  {
+    id: 'edge',
+    prompt: 'What happens when removeServer shrinks the pool below the current index?',
+    choices: [
+      {
+        label: 'Reset index to zero — avoid pointing past the new pool end',
+        correct: true,
+      },
+      {
+        label: 'Keep old index — next call indexes out of bounds silently',
+      },
+      {
+        label: 'Clear entire pool — drop all servers after any removal',
+      },
+      {
+        label: 'Reverse server order — invert list on every remove',
+      },
+    ],
+    explain: 'After splice, if index >= servers.length the recorder sets index back to 0.',
   },
 ];
 export const simulator: ProblemSimulator = {

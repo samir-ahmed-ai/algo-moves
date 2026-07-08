@@ -9,7 +9,15 @@ import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
 import { DualHeapBoard } from '../../../_shared/dualHeapBoard';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  vizText,
+} from '../../../_shared/vizKit';
 
 type StockOp =
   | { kind: 'update'; timestamp: number; price: number }
@@ -117,21 +125,31 @@ function View({ frame }: PluginViewProps<StockState>) {
   const s = frame.state;
   const maxPrices = [...s.maxH].sort((a, b) => b.price - a.price).map((e) => e.price);
   const minPrices = [...s.minH].sort((a, b) => a.price - b.price).map((e) => e.price);
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+      </RailGroup>
+      {s.result !== null && (
+        <RailGroup label="result">
+          <RailStat k="val" v={s.result} tone="good" />
+        </RailGroup>
+      )}
+      <RailGroup label="price">
+        <RailStat k="latest" v={`@${s.latestTime}`} />
+        <RailStat k="records" v={Object.keys(s.records).length} />
+      </RailGroup>
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.result !== null && <span className="ml-2 font-mono text-good">{s.result}</span>}
-      </div>
-      <div className={cn('mt-1', vizText.sm, 'text-ink3')}>latest @ {s.latestTime}</div>
+    <VizStage rail={rail} railWidth={168}>
       <DualHeapBoard
         low={maxPrices.slice(0, 5)}
         high={minPrices.slice(0, 5)}
         highlightLow={s.highlightMax}
         highlightHigh={s.highlightMin}
       />
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>records</div>
-      <div className="mt-1 flex flex-wrap gap-1">
+      <div className="mt-2 flex flex-wrap gap-1">
         {Object.entries(s.records)
           .sort((a, b) => +a[0]! - +b[0]!)
           .map(([t, p]) => (
@@ -143,7 +161,7 @@ function View({ frame }: PluginViewProps<StockState>) {
             </span>
           ))}
       </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -166,84 +184,87 @@ export const title = 'Stock Price Fluctuation';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Stock Price Fluctuation"?',
+    prompt: 'Which structures track stock prices over time here?',
     choices: [
       {
-        label: 'Design — fits this problem',
+        label: 'Timestamp map plus lazy heaps — records and min/max heaps',
         correct: true,
       },
       {
-        label: 'Trie dictionary + spell suggest — different approach',
+        label: 'Dual median heaps — low and high halves of price stream',
       },
       {
-        label: 'Hash map + doubly linked list LRU — different approach',
+        label: 'Sorted booking intervals — half-open overlap calendar',
       },
       {
-        label: 'Heap + Sorted Available Set — different approach',
-      },
-    ],
-    explain: 'See Stock Price Fluctuation pattern',
-  },
-  {
-    id: 'key-step',
-    prompt: 'On the "UPDATE" step (@=), what happens?',
-    choices: [
-      {
-        label: 'Update(, ): store price, push lazy — this move caption',
-        correct: true,
-      },
-      {
-        label: 'Run terminates immediately — no further frames',
-      },
-      {
-        label: 'Pointers reset to zero — restart scan',
-      },
-      {
-        label: 'Remaining input skipped — early return path',
-      },
-    ],
-    explain: 'Update(, ): store price, push lazy heaps, latestTime=.',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `records` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field records in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
+        label: 'Jump-pointer line — count newly painted coordinate cells',
       },
     ],
     explain:
-      'The recorder snapshots `records` on every emit so each frame shows the algorithm mid-step.',
+      'records[timestamp]=price with latestTime; maxH/minH store lazy entries cleaned on query.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'key-step',
+    prompt: 'On MAXIMUM query, how is the answer found?',
     choices: [
       {
-        label: 'Update(, ): store price, push lazy — final DONE caption',
+        label: 'Pop stale heap tops — until records[timestamp] matches heap price',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'Scan all records — linear max without using heaps',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'Return latestTime price — most recent update always wins',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'Sort maxH fully — rebuild heap from scratch each query',
       },
     ],
-    explain: 'Update(, ): store price, push lazy heaps, latestTime=.',
+    explain:
+      'While records[maxH[0].timestamp] !== maxH[0].price, shift removes outdated heap entries.',
+  },
+  {
+    id: 'complexity',
+    prompt: 'What are typical bounds for Stock Price Fluctuation?',
+    choices: [
+      {
+        label: 'O(log n) update, amortized query cleanup, O(n) space — lazy heaps',
+        correct: true,
+      },
+      {
+        label: 'O(1) all ops, O(1) space — single variable tracks min/max',
+      },
+      {
+        label: 'O(n) every query, O(1) space — no auxiliary heap storage',
+      },
+      {
+        label: 'O(n log n) per update, O(n²) space — copy full history tree',
+      },
+    ],
+    explain:
+      'Update pushes heap entries O(1); maximum/minimum may discard several stale tops amortized.',
+  },
+  {
+    id: 'edge',
+    prompt: 'What does Current() return after several updates?',
+    choices: [
+      {
+        label: 'Price at latestTime — not necessarily the global max timestamp key',
+        correct: true,
+      },
+      {
+        label: 'Maximum heap top — same value as Maximum() always',
+      },
+      {
+        label: 'First update price — earliest timestamp in records map',
+      },
+      {
+        label: 'Average of min and max heap — midpoint of extrema heaps',
+      },
+    ],
+    explain:
+      'Current reads records[latestTime] where latestTime tracks the greatest update timestamp seen.',
   },
 ];
 export const simulator: ProblemSimulator = {

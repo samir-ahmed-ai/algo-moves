@@ -15,6 +15,7 @@ import {
   VizFitBox,
 } from '@/shell/canvas';
 import { useCanvasFrameFollow } from '@/shell/collab';
+import { useDesignHybridHidesTransport } from '@/plugins/imported/prepSimulators/designDiagrams/designHybridState';
 
 /**
  * Stacked: the board renders at natural size on the top row, the Controls rail
@@ -38,7 +39,8 @@ export function VizPanelBody({
   const View = plugin.View;
   const inVisualize = mode === 'visualize';
   const conceptCourse = isConceptCourse(item);
-  const isStatic = !!plugin.meta.static;
+  const hybridHidesTransport = useDesignHybridHidesTransport(plugin.meta.designHybrid);
+  const isStatic = !!plugin.meta.static || hybridHidesTransport;
   const vizMeasureRef = useRef<HTMLDivElement>(null);
 
   const viewInner = (

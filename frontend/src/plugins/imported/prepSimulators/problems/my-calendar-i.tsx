@@ -8,7 +8,15 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  vizText,
+} from '../../../_shared/vizKit';
 
 interface CalInput {
   books: [number, number][];
@@ -94,18 +102,25 @@ function record({ books }: CalInput): Frame<CalState>[] {
 function View({ frame }: PluginViewProps<CalState>) {
   const s = frame.state;
   const maxT = Math.max(20, ...s.events.flat(), s.end ?? 0);
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+      </RailGroup>
+      {s.allowed !== null && (
+        <RailGroup label="result">
+          <RailStat k="ok" v={s.allowed ? 'true' : 'false'} tone={s.allowed ? 'good' : 'bad'} />
+        </RailGroup>
+      )}
+      <RailGroup label="cal">
+        <RailStat k="bookings" v={s.events.length} />
+        <RailStat k="maxT" v={maxT} />
+      </RailGroup>
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.allowed !== null && (
-          <span className={cn('ml-2 font-mono', s.allowed ? 'text-good' : 'text-bad')}>
-            → {s.allowed ? 'true' : 'false'}
-          </span>
-        )}
-      </div>
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>timeline 0–{maxT}</div>
-      <div className="relative mt-2 h-8 w-full rounded border border-edge bg-surface2">
+    <VizStage rail={rail} railWidth={168}>
+      <div className="relative h-8 w-full rounded border border-edge bg-surface2">
         {s.events.map(([a, b], i) => (
           <div
             key={i}
@@ -125,7 +140,7 @@ function View({ frame }: PluginViewProps<CalState>) {
           </div>
         ))}
       </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -147,84 +162,86 @@ export const title = 'My Calendar I';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "My Calendar I"?',
+    prompt: 'How does My Calendar I detect booking conflicts?',
     choices: [
       {
-        label: 'Design — fits this problem',
+        label: 'Half-open interval list — overlap if start < e.end and end > e.start',
         correct: true,
       },
       {
-        label: 'Trie phone directory autocomplete — different approach',
+        label: 'Sorted merged ranges — AddRange union before each book',
       },
       {
-        label: 'Jump Array — different approach',
+        label: 'Dual heap median — rebalance low and high halves',
       },
       {
-        label: 'Log parsing aggregation — different approach',
-      },
-    ],
-    explain: 'See My Calendar I pattern',
-  },
-  {
-    id: 'key-step',
-    prompt: 'On the "BOOK" step (ok [,)), what happens?',
-    choices: [
-      {
-        label: 'Book(,): no overlap → append event. — this move caption',
-        correct: true,
-      },
-      {
-        label: 'Run terminates immediately — no further frames',
-      },
-      {
-        label: 'Pointers reset to zero — restart scan',
-      },
-      {
-        label: 'Remaining input skipped — early return path',
-      },
-    ],
-    explain: 'Book(,): no overlap → append event. Calendar has  booking(s).',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `events` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field events in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
+        label: 'Point count map — diagonal corner frequency lookup',
       },
     ],
     explain:
-      'The recorder snapshots `events` on every emit so each frame shows the algorithm mid-step.',
+      'Stored events are [start,end) pairs; Book scans for any overlapping existing interval.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'key-step',
+    prompt: 'On REJECT, which condition triggered the clash?',
     choices: [
       {
-        label: 'Done. booking(s) on calendar. — final DONE caption',
+        label: 'Existing interval overlaps new [start,end) — Book returns false',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'Calendar full — maximum number of events reached',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'start equals end — zero-length intervals forbidden always',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'Duplicate start rejection — same start time always blocked',
       },
     ],
-    explain: 'Done.  booking(s) on calendar.',
+    explain:
+      'The loop finds e where start < e.end && end > e.start, then emits REJECT without appending.',
+  },
+  {
+    id: 'complexity',
+    prompt: 'What are typical bounds for My Calendar I?',
+    choices: [
+      {
+        label: 'O(n) Book per call, O(n) space — scan all stored events',
+        correct: true,
+      },
+      {
+        label: 'O(log n) Book, O(1) space — tree without stored events',
+      },
+      {
+        label: 'O(1) Book always, O(n) space — hash by start minute only',
+      },
+      {
+        label: 'O(n log n) Book, O(n²) space — resort timeline every insert',
+      },
+    ],
+    explain:
+      'Each Book may scan the entire events list; successful books append one more interval.',
+  },
+  {
+    id: 'edge',
+    prompt: 'Do [10,20) and [20,30) conflict in this calendar?',
+    choices: [
+      {
+        label: 'No overlap — touching endpoints share a point but do not intersect',
+        correct: true,
+      },
+      {
+        label: 'Always conflict — any shared boundary rejects booking',
+      },
+      {
+        label: 'Conflict only if same start — end alignment ignored',
+      },
+      {
+        label: 'Second booking wins — later interval replaces earlier one',
+      },
+    ],
+    explain: 'Half-open intervals overlap only when each starts before the other ends strictly.',
   },
 ];
 export const simulator: ProblemSimulator = {

@@ -8,8 +8,14 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import { ArrayRow } from '../../../../components/board/ArrayRow';
 import type { ProblemSimulator } from '../types';
-import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+} from '../../../_shared/vizKit';
 
 type RsOp =
   { kind: 'insert'; val: number } | { kind: 'remove'; val: number } | { kind: 'getRandom' };
@@ -137,16 +143,23 @@ function record({ ops, randomIdx = 0 }: RsInput): Frame<RsState>[] {
 
 function View({ frame }: PluginViewProps<RsState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+      </RailGroup>
+      {s.out !== null && (
+        <RailGroup label="result">
+          <RailStat k="val" v={String(s.out)} tone="good" />
+        </RailGroup>
+      )}
+      <RailGroup label="set">
+        <RailStat k="size" v={s.nums.length} />
+      </RailGroup>
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        op = <span className="font-mono text-ink">{s.op || '—'}</span>
-        {s.out !== null && (
-          <>
-            {' · '}result <span className="font-mono text-ink">{String(s.out)}</span>
-          </>
-        )}
-      </div>
+    <VizStage rail={rail} railWidth={168}>
       <ArrayRow
         values={s.nums.length ? s.nums.map(String) : ['—']}
         cellTone={(i) =>
@@ -158,7 +171,7 @@ function View({ frame }: PluginViewProps<RsState>) {
         windowRange={null}
         label={(i) => String(i)}
       />
-    </div>
+    </VizStage>
   );
 }
 
@@ -181,84 +194,84 @@ export const title = 'Insert Delete GetRandom O(1)';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Insert Delete GetRandom O(1)"?',
+    prompt: 'Which structures enable O(1) insert, remove, and getRandom?',
     choices: [
       {
-        label: 'Design — fits this problem',
+        label: 'Dynamic array plus val-to-index map — swap-with-last delete',
         correct: true,
       },
       {
-        label: 'Bijective tiny URL encode/decode — different approach',
+        label: 'Doubly linked list scan — walk list for random index pick',
       },
       {
-        label: 'Trie dictionary + spell suggest — different approach',
+        label: 'Sorted rank array — binary search insert by value order',
       },
       {
-        label: 'Hash map + doubly linked list LRU — different approach',
-      },
-    ],
-    explain: 'See Insert Delete Getrandom O1 pattern',
-  },
-  {
-    id: 'key-step',
-    prompt: 'On the "REMOVE" step (swap ), what happens?',
-    choices: [
-      {
-        label: 'Remove() at index : swap — this move caption',
-        correct: true,
-      },
-      {
-        label: 'Run terminates immediately — no further frames',
-      },
-      {
-        label: 'Pointers reset to zero — restart scan',
-      },
-      {
-        label: 'Remaining input skipped — early return path',
-      },
-    ],
-    explain: 'Remove() at index : swap with last element  at index  so deletion is O(1).',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `nums` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field nums in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
+        label: 'Prefix trie of values — char path for each inserted int',
       },
     ],
     explain:
-      'The recorder snapshots `nums` on every emit so each frame shows the algorithm mid-step.',
+      'idx maps value to array index; remove swaps victim with last element then pops in O(1).',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'key-step',
+    prompt: 'On REMOVE, why swap with the last array element?',
     choices: [
       {
-        label: 'Done. Set holds {} with element(s). — final DONE caption',
+        label: 'Keep indexes dense — update map for moved last value then pop',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'Sort descending — maintain sorted order after deletion',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'Duplicate last value — allow multiple copies at same index',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'Clear entire array — delete all elements when removing one',
       },
     ],
-    explain: 'Done. Set holds {} with  element(s).',
+    explain: 'nums[i]=last, idx.set(last,i), pop(), idx.delete(val) preserves O(1) without holes.',
+  },
+  {
+    id: 'complexity',
+    prompt: 'What are the bounds for RandomizedSet operations?',
+    choices: [
+      {
+        label: 'O(1) insert/remove/random, O(n) space — array and hash map',
+        correct: true,
+      },
+      {
+        label: 'O(log n) all ops, O(n) space — balanced tree storage',
+      },
+      {
+        label: 'O(n) remove, O(1) insert, O(n) random — shift left deletion',
+      },
+      {
+        label: 'O(1) insert only, O(n) others — list scan for remove/random',
+      },
+    ],
+    explain: 'Insert appends with map update; remove is swap-pop; getRandom indexes nums directly.',
+  },
+  {
+    id: 'edge',
+    prompt: 'What happens on Insert when the value already exists?',
+    choices: [
+      {
+        label: 'Return false — duplicate insert does not change structure',
+        correct: true,
+      },
+      {
+        label: 'Increment count field — multiset allows duplicate values',
+      },
+      {
+        label: 'Move existing to end — treat duplicate like fresh insert',
+      },
+      {
+        label: 'Throw error — abort simulation on second insert of val',
+      },
+    ],
+    explain: 'idx.has(val) triggers INSERT dup frame with out=false and continue without mutation.',
   },
 ];
 export const simulator: ProblemSimulator = {

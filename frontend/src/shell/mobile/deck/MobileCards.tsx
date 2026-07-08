@@ -5,8 +5,10 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  Code2,
   Eye,
   EyeOff,
+  FileText,
   LayoutGrid,
   Lightbulb,
   RotateCcw,
@@ -33,6 +35,8 @@ import {
 import { GistArcCaption } from '../../../components/shared/GistArcCaption';
 import { GistScene } from '../scenes/gistScenes';
 import { MobileVizShell } from '../MobileVizShell';
+import { HighlightedCode } from '../../../components/code/HighlightedCode';
+import { ConceptText, type ReadConcept } from '@/components/shared/ConceptText';
 import { tintFor } from './mobileCardTints';
 
 /* ------------------------------------------------------------------ shared */
@@ -246,20 +250,12 @@ export function AnimateCardView({
 
 /* -------------------------------------------------------------------- read */
 
-/** Concept fields the text card reads off the plugin's trace input (Go Course). */
-interface ReadConcept {
-  pattern?: string;
-  visual?: string;
-  memorize?: string;
-  keyPoints?: string[];
-  walkthrough?: { title?: string; caption?: string; state?: { k: string; v: string }[] }[];
-}
-
 /**
  * Text-only concept card for the recall-first Go Course: no animation. The
- * walkthrough is shown as a numbered prose list, followed by the memory hook,
- * key points, and the code snippet — then the learner rebuilds it on the next
- * (reassemble) card.
+ * concept (walkthrough prose + memory hook + key points) and a syntax-colored
+ * code snippet sit in two columns when the card is wide enough, and collapse to
+ * a Concept / Code tab toggle on a narrow phone. The learner then rebuilds the
+ * snippet on the next (reassemble) card.
  */
 export function ReadCardView({
   block,
@@ -278,127 +274,98 @@ export function ReadCardView({
   const tint = tintFor(item);
   const summary = plugin.meta.summary;
   const concept = (plugin.inputs[0]?.value ?? {}) as ReadConcept;
-  const steps = concept.walkthrough ?? [];
   const code = block.code?.text?.trim() ?? '';
+  const lang = block.code?.lang ?? 'go';
   const pattern = block.pattern ?? concept.pattern;
   const hasReassemble = block.cards.some((c) => c.kind === 'reassemble');
+  const [tab, setTab] = useState<'concept' | 'code'>('concept');
 
   return (
-    <div className="mobile-card-shell mobile-read-card ws-scroll flex min-h-0 flex-1 flex-col overflow-y-auto px-5 pt-3">
-      <div className="flex shrink-0 items-center gap-2">
-        <span className="text-[length:var(--fs-tight)] font-semibold tabular-nums text-ink3">
-          {problemIndex + 1}/{problemCount}
-        </span>
-        {pattern && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-accentbg px-2 py-0.5 text-[length:var(--fs-2xs)] font-medium text-accent">
-            <Sparkles className="h-3 w-3" />
-            {pattern}
+    <div className="mobile-card-shell mobile-read-card flex min-h-0 flex-1 flex-col px-4 pt-3">
+      <div className="shrink-0">
+        <div className="flex items-center gap-2">
+          <span className="text-[length:var(--fs-tight)] font-semibold tabular-nums text-ink3">
+            {problemIndex + 1}/{problemCount}
           </span>
+          {pattern && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-accentbg px-2 py-0.5 text-[length:var(--fs-2xs)] font-medium text-accent">
+              <Sparkles className="h-3 w-3" />
+              {pattern}
+            </span>
+          )}
+          <DiffChip item={item} />
+        </div>
+        <h2 className="mt-1 text-[17px] font-semibold leading-snug tracking-tight text-ink">
+          {item.title}
+        </h2>
+        {summary && (
+          <p className="mt-0.5 text-[length:var(--fs-xs)] leading-snug text-ink3 line-clamp-2">
+            {summary}
+          </p>
         )}
-        <DiffChip item={item} />
       </div>
 
-      <h2 className="mt-1.5 text-[19px] font-semibold leading-snug tracking-tight text-ink">
-        {item.title}
-      </h2>
-      {summary && (
-        <p className="mt-1 text-[length:var(--fs-sm)] leading-relaxed text-ink2">{summary}</p>
-      )}
-
-      {concept.visual && (
-        <p className="mt-2 rounded-xl border border-edge bg-panel2/40 px-3 py-2 text-[length:var(--fs-sm)] leading-relaxed text-ink2">
-          {concept.visual}
-        </p>
-      )}
-
-      {steps.length > 0 && (
-        <ol className="mt-3 flex flex-col gap-2.5">
-          {steps.map((s, i) => (
-            <li key={i} className="flex gap-2.5">
-              <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-panel2 text-[length:var(--fs-tight)] font-bold text-ink2">
-                {i + 1}
-              </span>
-              <div className="min-w-0">
-                {s.title && (
-                  <div className="text-[length:var(--fs-sm)] font-semibold text-ink">{s.title}</div>
-                )}
-                {s.caption && (
-                  <p className="text-[length:var(--fs-sm)] leading-relaxed text-ink2">
-                    {s.caption}
-                  </p>
-                )}
-                {s.state && s.state.length > 0 && (
-                  <div className="mt-1 flex flex-wrap gap-1">
-                    {s.state.map((chip, j) => (
-                      <span
-                        key={j}
-                        className="inline-flex items-center gap-1 rounded-md border border-edge bg-panel2/60 px-1.5 py-0.5 text-[length:var(--fs-2xs)]"
-                      >
-                        <span className="text-ink3">{chip.k}</span>
-                        <span className="font-mono text-ink">{chip.v}</span>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </li>
-          ))}
-        </ol>
-      )}
-
-      {concept.memorize && (
-        <div className="mt-3 rounded-2xl border border-accentbg bg-accentbg/40 px-3.5 py-2.5">
-          <div className="flex items-center gap-1.5 text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-accent">
-            <Brain className="h-3.5 w-3.5" />
-            Remember
-          </div>
-          <p className="mt-1 text-[length:var(--fs-sm)] leading-relaxed text-ink2">
-            {concept.memorize}
-          </p>
-        </div>
-      )}
-
-      {concept.keyPoints && concept.keyPoints.length > 0 && (
-        <div className="mt-3">
-          <div className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">
-            Key points
-          </div>
-          <ul className="mt-1.5 flex list-disc flex-col gap-1 pl-5">
-            {concept.keyPoints.map((p, i) => (
-              <li key={i} className="text-[length:var(--fs-sm)] leading-relaxed text-ink2">
-                {p}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {code && (
-        <div className="mt-3">
-          <div className="text-[length:var(--fs-2xs)] font-semibold uppercase tracking-wide text-ink3">
-            Code to recall
-          </div>
-          <pre
-            className="ws-scroll mt-1.5 max-h-64 overflow-auto rounded-xl border border-edge bg-panel2/50 p-3"
+      <div className="mobile-read-split mt-2 flex min-h-0 flex-1 flex-col">
+        {code && (
+          <div
+            className="mobile-read-tabs shrink-0"
+            role="tablist"
+            aria-label="Concept or code"
             data-noswipe
           >
-            <code className="font-mono text-[length:var(--fs-tight)] leading-relaxed text-ink2">
-              {code}
-            </code>
-          </pre>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === 'concept'}
+              data-on={tab === 'concept'}
+              onClick={() => setTab('concept')}
+              className="mobile-read-tab"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              Concept
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={tab === 'code'}
+              data-on={tab === 'code'}
+              onClick={() => setTab('code')}
+              className="mobile-read-tab"
+            >
+              <Code2 className="h-3.5 w-3.5" />
+              Code
+            </button>
+          </div>
+        )}
+
+        <div className="mobile-read-cols mt-2 min-h-0 flex-1">
+          <div className="mobile-read-pane" data-active={!code || tab === 'concept'} data-noswipe>
+            <ConceptText concept={concept} />
+          </div>
+          {code && (
+            <div
+              className="mobile-read-pane mobile-read-codepane"
+              data-active={tab === 'code'}
+              data-noswipe
+            >
+              <div className="mobile-read-codeframe flex min-h-0 flex-1 overflow-hidden rounded-xl border border-edge bg-panel">
+                <HighlightedCode
+                  code={code}
+                  lang={lang}
+                  gutter
+                  className="ws-scroll min-h-0 flex-1 overflow-auto p-3 font-mono"
+                />
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
-      <div className="mt-auto" />
-
-      <div
-        className="sticky bottom-0 -mx-5 mt-3 flex shrink-0 flex-col gap-2 border-t border-edge/60 bg-[var(--surface-glass)] px-5 py-3 backdrop-blur-xl"
-        data-noswipe
-      >
+      <div className="mt-2 flex shrink-0 flex-col gap-1.5 pb-1" data-noswipe>
         <button
           type="button"
           onClick={onContinue}
-          className="inline-flex items-center justify-center gap-2 self-stretch rounded-full px-5 py-3 text-[length:var(--fs-title)] font-semibold text-[var(--accent-contrast)] shadow-theme-md transition hover:-translate-y-0.5 hover:shadow-theme-lg"
+          className="inline-flex items-center justify-center gap-2 self-stretch rounded-full px-5 py-2.5 text-[length:var(--fs-title)] font-semibold text-[var(--accent-contrast)] shadow-theme-md transition hover:-translate-y-0.5 hover:shadow-theme-lg"
           style={{ background: tint }}
         >
           {hasReassemble ? 'Rebuild from memory' : 'Continue'}
@@ -408,7 +375,7 @@ export function ReadCardView({
           <button
             type="button"
             onClick={onOpenStudio}
-            className="inline-flex items-center justify-center gap-1.5 self-center rounded-full px-4 py-1.5 text-[length:var(--fs-sm)] font-medium text-ink3 hover:bg-panel2 hover:text-ink"
+            className="inline-flex items-center justify-center gap-1.5 self-center rounded-full px-4 py-1 text-[length:var(--fs-sm)] font-medium text-ink3 hover:bg-panel2 hover:text-ink"
           >
             <LayoutGrid className="h-3.5 w-3.5" />
             Open in studio

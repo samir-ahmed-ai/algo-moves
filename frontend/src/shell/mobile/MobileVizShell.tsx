@@ -6,6 +6,7 @@ import { usePluginFrames } from '@/hooks';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { FlipFrame } from '@/components/shared/FlipFrame';
 import { VizFitBox } from '@/components/shared/vizFit';
+import { useDesignHybridHidesTransport } from '@/plugins/imported/prepSimulators/designDiagrams/designHybridState';
 
 /** Lightweight plugin animation runner for the mobile swipe deck. */
 export function MobileVizShell({
@@ -28,12 +29,14 @@ export function MobileVizShell({
   const isAtEnd = hasFrames && player.index === player.total - 1;
   const onWatchedRef = useRef(onWatched);
   onWatchedRef.current = onWatched;
+  const hybridHidesTransport = useDesignHybridHidesTransport(plugin.meta.designHybrid);
+  const staticLike = !!plugin.meta.static || hybridHidesTransport;
 
   useEffect(() => {
     if (!hasFrames) return;
-    if (plugin.meta.static) return;
+    if (staticLike) return;
     if (baseFrames.length > 1 && !player.isPlaying) player.togglePlay();
-  }, [plugin.meta.id]);
+  }, [plugin.meta.id, staticLike]);
 
   // Fire onWatched once the last frame is reached and playback stops.
   useEffect(() => {
@@ -62,8 +65,8 @@ export function MobileVizShell({
         )}
         data-noswipe
       >
-        {plugin.meta.static ? (
-          // Static design diagrams self-measure and fill; skip fit/flip wrappers.
+        {staticLike ? (
+          // Static / architecture diagram: self-measured layout, no flip wrapper.
           <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
             <ErrorBoundary resetKey={`${plugin.meta.id}:${player.index}`} label={plugin.meta.id}>
               <View frame={frame} />
@@ -83,7 +86,7 @@ export function MobileVizShell({
         )}
       </div>
 
-      {!plugin.meta.static && (
+      {!staticLike && (
         <div
           className="mobile-viz-transport mt-2 shrink-0 rounded-2xl border border-edge bg-panel px-3 py-2"
           data-noswipe

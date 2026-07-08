@@ -8,7 +8,15 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  vizText,
+} from '../../../_shared/vizKit';
 
 interface ParkingInput {
   big: number;
@@ -79,17 +87,26 @@ function record({ big, medium, small, cars }: ParkingInput): Frame<ParkingState>
 
 function View({ frame }: PluginViewProps<ParkingState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+      </RailGroup>
+      {s.allowed !== null && (
+        <RailGroup label="result">
+          <RailStat k="ok" v={s.allowed ? 'true' : 'false'} tone={s.allowed ? 'good' : 'bad'} />
+        </RailGroup>
+      )}
+      <RailGroup label="slots">
+        <RailStat k="big" v={s.slots[1]!} />
+        <RailStat k="med" v={s.slots[2]!} />
+        <RailStat k="sm" v={s.slots[3]!} />
+      </RailGroup>
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.allowed !== null && (
-          <span className={cn('ml-2 font-mono', s.allowed ? 'text-good' : 'text-bad')}>
-            → {s.allowed ? 'true' : 'false'}
-          </span>
-        )}
-      </div>
-      <div className="mt-2 flex gap-3">
+    <VizStage rail={rail} railWidth={168}>
+      <div className="flex gap-3">
         {(['big', 'medium', 'small'] as const).map((label, i) => (
           <div
             key={label}
@@ -103,7 +120,7 @@ function View({ frame }: PluginViewProps<ParkingState>) {
           </div>
         ))}
       </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -127,105 +144,86 @@ export const title = 'Design Parking System';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Design Parking System"?',
+    prompt: 'How does the parking system track availability?',
     choices: [
       {
-        label: 'Design — fits this problem',
+        label: 'Per-type slot counters — big medium small remaining counts',
         correct: true,
       },
       {
-        label: 'Two Heaps — different approach',
+        label: 'Sorted interval timeline — book half-open parking spans',
       },
       {
-        label: 'Round-robin load balancer — different approach',
+        label: 'Round-robin stall index — cycle physical spot ids',
       },
       {
-        label: 'Bijective tiny URL encode/decode — different approach',
+        label: 'Lazy min/max heaps — stale timestamp cleanup on query',
       },
     ],
-    explain: 'See Design Parking System pattern',
-  },
-  {
-    id: 'init',
-    prompt: 'At the start of a run (Design Parking System), what strategy is established?',
-    choices: [
-      {
-        label: 'See Design Parking System pattern — described in INIT caption',
-        correct: true,
-      },
-      {
-        label: 'Precomputed final answer — before scanning input',
-      },
-      {
-        label: 'Descending sort required — as mandatory first step',
-      },
-      {
-        label: 'Every element visited upfront — marked from the start',
-      },
-    ],
-    explain:
-      'Parking System: slots[1..3]! track remaining big/medium/small spots. AddCar(type) decrements if available.',
+    explain: 'slots[1..3] initialize to capacities; AddCar(type) decrements when a spot exists.',
   },
   {
     id: 'key-step',
-    prompt: 'On the "REJECT" step ( full), what happens?',
+    prompt: 'On successful AddCar when slots[type] > 0, what happens?',
     choices: [
       {
-        label: 'AddCar(=): no spots left → return — this move caption',
+        label: 'Decrement slots[type] — emit allowed true for that car type',
         correct: true,
       },
       {
-        label: 'Run terminates immediately — no further frames',
+        label: 'Increment slots[type] — counters grow when car enters',
       },
       {
-        label: 'Pointers reset to zero — restart scan',
+        label: 'Reset all slots — reinitialize capacities after each car',
       },
       {
-        label: 'Remaining input skipped — early return path',
-      },
-    ],
-    explain: 'AddCar(=): no  spots left → return false.',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `slots` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field slots in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
+        label: 'Reject always — return false even when spots remain',
       },
     ],
     explain:
-      'The recorder snapshots `slots` on every emit so each frame shows the algorithm mid-step.',
+      'Successful AddCar decrements the matching type counter and returns true in the ADD frame.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'complexity',
+    prompt: 'What are the bounds for Design Parking System?',
     choices: [
       {
-        label: 'Done. Remaining: big=, medium=, small=. — final DONE caption',
+        label: 'O(1) per AddCar, O(1) space — three integer counters',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'O(n) per car, O(n) space — list of occupied stall ids',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'O(log n) per car, O(n) space — heap of free stall numbers',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'O(cars) setup, O(1) space — no state beyond input array',
       },
     ],
-    explain: 'Done. Remaining: big=, medium=, small=.',
+    explain:
+      'Each car checks one counter and optionally decrements; storage is fixed three slot counts.',
+  },
+  {
+    id: 'edge',
+    prompt: 'What happens on AddCar when the requested type has zero slots left?',
+    choices: [
+      {
+        label: 'REJECT frame — return false without changing counters',
+        correct: true,
+      },
+      {
+        label: 'Borrow from other type — steal medium spot for big car',
+      },
+      {
+        label: 'Wrap to type 1 — reuse big counter when small empty',
+      },
+      {
+        label: 'Allow anyway — negative counters represent overbooking',
+      },
+    ],
+    explain:
+      'When slots[carType]===0 the recorder emits REJECT with allowed false and leaves counts unchanged.',
   },
 ];
 export const simulator: ProblemSimulator = {

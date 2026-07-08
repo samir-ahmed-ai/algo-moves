@@ -180,104 +180,85 @@ export const title = 'Tiny URL';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Tiny url"?',
+    prompt: 'How are long URLs mapped to short links here?',
     choices: [
       {
-        label: 'Bijective tiny URL encode/decode — fits this problem',
+        label: 'Counter plus base62 — toShort and toLong bidirectional maps',
         correct: true,
       },
       {
-        label: 'Copy-on-write version snapshots — different approach',
+        label: 'Sorted interval merge — addRange combines overlapping spans',
       },
       {
-        label: 'Trie dictionary + spell suggest — different approach',
+        label: 'Reservoir sampling — uniform random index over matches',
       },
       {
-        label: 'Hash map + doubly linked list LRU — different approach',
+        label: 'Jump-pointer line — skip painted cells on a number axis',
       },
     ],
-    explain: 'Counter -> base62 code; two maps wire short<->long both ways',
+    explain: 'Each new long URL gets nextID encoded to base62 and stored in both map directions.',
   },
   {
     id: 'key-step',
-    prompt: 'On the "ENCODE" step (id ), what happens?',
+    prompt: 'On ENCODE for a brand-new long URL, what happens?',
     choices: [
       {
-        label: 'encode(""): nextID= → base62 "" → — this move caption',
+        label: 'Increment nextID — base62 code, store host/code in both maps',
         correct: true,
       },
       {
-        label: 'Run terminates immediately — no further frames',
+        label: 'Hash the URL body — derive code without a running counter',
       },
       {
-        label: 'Pointers reset to zero — restart scan',
+        label: 'Push snapshot copy — append new version to history stack',
       },
       {
-        label: 'Remaining input skipped — early return path',
-      },
-    ],
-    explain: 'encode(""): nextID= → base62 "" → short URL . Store both directions in maps.',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `host` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field host in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
+        label: 'Walk digit trie — collect names at prefix node',
       },
     ],
     explain:
-      'The recorder snapshots `host` on every emit so each frame shows the algorithm mid-step.',
+      'nextID increments, encodeID produces the path segment, and both toShort and toLong update.',
   },
   {
     id: 'complexity',
-    prompt: 'What are the time and space complexities for "Tiny url"?',
+    prompt: 'What are the time and space complexities for Tiny URL?',
     choices: [
       {
-        label: 'O(1) time, O(urls) space — standard bounds here',
+        label: 'O(1) encode/decode time, O(urls) space — two hash maps',
         correct: true,
       },
       {
-        label: 'O(logs) time, O(n) space — wrong order of growth',
+        label: 'O(log n) pick time, O(n) space — prefix binary search',
       },
       {
-        label: 'O(n³) time, O(n) space — wrong order of growth',
+        label: 'O(digits) time, O(contacts) space — trie per phone digit',
       },
       {
-        label: 'O(1) get/put time, O(capacity) space — wrong order of growth',
+        label: 'O(n log n) time, O(n) space — resort all codes each encode',
       },
     ],
-    explain: 'O(1). O(urls). encode: id++ -> base62; decode: toShort lookup',
+    explain:
+      'Map lookups and counter increment are constant; storage grows with distinct URLs encoded.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'edge',
+    prompt: 'What happens when encode is called again on the same long URL?',
     choices: [
       {
-        label: 'Done. URL(s) encoded. — final DONE caption',
+        label: 'Return cached short link — nextID does not increment again',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'Assign fresh code — duplicate long URLs get new IDs',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'Return empty string — treat duplicate as encode failure',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'Overwrite toLong map — invalidate prior short mapping',
       },
     ],
-    explain: 'Done.  URL(s) encoded.',
+    explain: 'toLong already holds the short URL, so encode returns it without bumping nextID.',
   },
 ];
 export const simulator: ProblemSimulator = {

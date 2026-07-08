@@ -8,7 +8,15 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  vizText,
+} from '../../../_shared/vizKit';
 
 type RangeOp =
   | { kind: 'add'; left: number; right: number }
@@ -147,17 +155,24 @@ function record({ ops }: RangeInput): Frame<RangeState>[] {
 
 function View({ frame }: PluginViewProps<RangeState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+      </RailGroup>
+      {s.result !== null && (
+        <RailGroup label="result">
+          <RailStat k="val" v={String(s.result)} tone={s.result ? 'good' : 'bad'} />
+        </RailGroup>
+      )}
+      <RailGroup label="ranges">
+        <RailStat k="count" v={s.intervals.length} />
+      </RailGroup>
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.result !== null && (
-          <span className={cn('ml-2 font-mono', s.result ? 'text-good' : 'text-bad')}>
-            {String(s.result)}
-          </span>
-        )}
-      </div>
-      <div className="mt-2 space-y-1">
+    <VizStage rail={rail} railWidth={168}>
+      <div className="space-y-1">
         {s.intervals.map(([a, b], i) => (
           <div
             key={i}
@@ -174,7 +189,7 @@ function View({ frame }: PluginViewProps<RangeState>) {
         ))}
         {s.intervals.length === 0 && <span className={cn(vizText.sm, 'text-ink3')}>empty</span>}
       </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -196,84 +211,86 @@ export const title = 'Range Module';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Range Module"?',
+    prompt: 'How does Range Module represent tracked numbers?',
     choices: [
       {
-        label: 'Design — fits this problem',
+        label: 'Sorted merged intervals — non-overlapping inclusive ranges',
         correct: true,
       },
       {
-        label: 'Hash map + doubly linked list LRU — different approach',
+        label: 'Jump-pointer on a line — skip painted coordinate cells',
       },
       {
-        label: 'Heap + Sorted Available Set — different approach',
+        label: 'Per-cell snap history — binary search by snapId',
       },
       {
-        label: 'Trie phone directory autocomplete — different approach',
-      },
-    ],
-    explain: 'See Range Module pattern',
-  },
-  {
-    id: 'key-step',
-    prompt: 'On the "REMOVE" step ([,]), what happens?',
-    choices: [
-      {
-        label: 'RemoveRange(,): carve hole → — this move caption',
-        correct: true,
-      },
-      {
-        label: 'Run terminates immediately — no further frames',
-      },
-      {
-        label: 'Pointers reset to zero — restart scan',
-      },
-      {
-        label: 'Remaining input skipped — early return path',
-      },
-    ],
-    explain: 'RemoveRange(,): carve hole → [${intervals.map((x) => ',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `intervals` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field intervals in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
+        label: 'Point frequency map — count diagonal square partners',
       },
     ],
     explain:
-      'The recorder snapshots `intervals` on every emit so each frame shows the algorithm mid-step.',
+      'AddRange merges overlaps; RemoveRange splits intervals; QueryRange checks one covering interval.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'key-step',
+    prompt: 'What does RemoveRange do to overlapping intervals?',
     choices: [
       {
-        label: 'Done. — final DONE caption',
+        label: 'Carve a hole — split intervals that straddle the removed span',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'Delete entire list — clear all intervals on any remove',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'Merge removed span — AddRange treats remove like add',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'Binary search query path — lookup without mutating storage',
       },
     ],
-    explain: 'Done.',
+    explain:
+      'Intervals fully outside the hole stay; partial overlaps become left and right remnant pieces.',
+  },
+  {
+    id: 'complexity',
+    prompt: 'What are typical bounds for Range Module operations?',
+    choices: [
+      {
+        label: 'O(n) per op time, O(n) intervals space — linear scan or merge',
+        correct: true,
+      },
+      {
+        label: 'O(1) all ops, O(1) space — constant-size interval store',
+      },
+      {
+        label: 'O(log n) only, O(1) space — tree without stored intervals',
+      },
+      {
+        label: 'O(n log n) per query, O(n²) space — materialize every integer',
+      },
+    ],
+    explain:
+      'Add, remove, and query each walk the interval list; count stays bounded by interval count.',
+  },
+  {
+    id: 'edge',
+    prompt: 'How does QueryRange decide full coverage of [left, right]?',
+    choices: [
+      {
+        label: 'Binary search interval — one interval covers left through right',
+        correct: true,
+      },
+      {
+        label: 'Sum interval lengths — total width must equal right minus left',
+      },
+      {
+        label: 'Check left endpoint alone — ignore right boundary alignment',
+      },
+      {
+        label: 'Require exact interval match — query span equals stored span',
+      },
+    ],
+    explain: 'queryRange binary-searches for an interval with start ≤ left and end ≥ right.',
   },
 ];
 export const simulator: ProblemSimulator = {

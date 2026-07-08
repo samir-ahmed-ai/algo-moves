@@ -741,6 +741,96 @@
   backdrop-filter: blur(4px);
 }
 
+/* read card — recall-first Go Course: concept text + colored code. Tabs on a
+   narrow phone, two side-by-side columns once the card is wide enough. */
+.mobile-read-tabs {
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--panel2) 60%, transparent);
+}
+.mobile-read-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 13px;
+  border-radius: 999px;
+  font-size: var(--fs-tight);
+  font-weight: 600;
+  color: var(--ink3);
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+.mobile-read-tab[data-on='true'] {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+.mobile-read-split {
+  container-type: inline-size;
+}
+.mobile-read-cols {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  min-height: 0;
+}
+.mobile-read-pane {
+  display: none;
+  min-width: 0;
+  min-height: 0;
+}
+.mobile-read-pane[data-active='true'] {
+  display: block;
+  overflow: auto;
+}
+.mobile-read-codepane[data-active='true'] {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.mobile-read-codeframe {
+  font-size: var(--fs-2xs);
+  line-height: 1.55;
+}
+.mobile-read-codeframe .highlighted-code.piece-code {
+  font-size: var(--fs-2xs);
+  line-height: 1.55;
+}
+/* Keep tokens intact — scroll the frame horizontally rather than wrap mid-word. */
+.mobile-read-codeframe .highlighted-code .piece-code-line {
+  white-space: pre;
+  word-break: normal;
+  gap: 0.55rem;
+}
+.mobile-read-codeframe .highlighted-code .piece-code-text {
+  flex: none;
+}
+/* Two columns once the card is wide enough — drop the tabs, show both panes.
+   The mobile deck caps card width near 470px, so the threshold sits just under
+   that: narrow phones keep the Concept/Code tabs, roomier ones split. */
+@container (min-width: 420px) {
+  .mobile-read-tabs {
+    display: none;
+  }
+  .mobile-read-cols {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: stretch;
+  }
+  .mobile-read-pane {
+    display: block;
+    overflow: auto;
+  }
+  .mobile-read-codepane {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+}
+
 /* animate card — viz board + transport */
 .mobile-animate-card {
   min-height: 0;

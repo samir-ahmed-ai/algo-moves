@@ -8,7 +8,16 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailStack,
+  vizText,
+} from '../../../_shared/vizKit';
 
 interface PaintInput {
   paint: [number, number][];
@@ -85,19 +94,21 @@ function record({ paint }: PaintInput): Frame<PaintState>[] {
 function View({ frame }: PluginViewProps<PaintState>) {
   const s = frame.state;
   const painted = s.jump.filter((v, i) => v > i).length;
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+        {s.day > 0 && <RailStat k="day" v={`+${s.newCount}`} tone="good" />}
+      </RailGroup>
+      <RailGroup label="line">
+        <RailStat k="range" v={`[0..${s.maxR})`} />
+        <RailStat k="painted" v={painted} />
+      </RailGroup>
+      {s.results.length > 0 && <RailStack label="results" items={s.results.map(String)} />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.day > 0 && (
-          <span className="ml-2 font-mono text-good">
-            day {s.day}: +{s.newCount}
-          </span>
-        )}
-      </div>
-      <div className={cn('mt-1', vizText.sm, 'text-ink3')}>
-        line [0..{s.maxR}) · {painted} painted cells
-      </div>
+    <VizStage rail={rail} railWidth={168}>
       <div className="mt-1 flex flex-wrap gap-0.5">
         {Array.from({ length: Math.min(s.maxR, 40) }, (_, i) => (
           <span
@@ -112,12 +123,7 @@ function View({ frame }: PluginViewProps<PaintState>) {
         ))}
         {s.maxR > 40 && <span className={cn(vizText.sm, 'text-ink3')}>…</span>}
       </div>
-      {s.results.length > 0 && (
-        <div className={cn('mt-2 font-mono', vizText.sm, 'text-ink')}>
-          results: [{s.results.join(', ')}]
-        </div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 
@@ -140,128 +146,87 @@ export const title = 'Amount of New Area Painted Each Day';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Amount of New Area Painted Each Day"?',
+    prompt: 'Which technique counts newly painted area each day?',
     choices: [
       {
-        label: 'Jump Array — fits this problem',
+        label: 'Jump-pointer array — skip cells already painted on the line',
         correct: true,
       },
       {
-        label: 'Bijective tiny URL encode/decode — different approach',
+        label: 'Sorted merged intervals — AddRange merges overlaps',
       },
       {
-        label: 'Trie dictionary + spell suggest — different approach',
+        label: 'Copy-on-write snapshots — versioned map per paint stroke',
       },
       {
-        label: 'Hash map + doubly linked list LRU — different approach',
-      },
-    ],
-    explain: 'See Amount Of New Area Painted Each Day pattern',
-  },
-  {
-    id: 'init',
-    prompt:
-      'At the start of a run (Amount of New Area Painted Each Day), what strategy is established?',
-    choices: [
-      {
-        label: 'See Amount Of New Area Painted — described in INIT caption',
-        correct: true,
-      },
-      {
-        label: 'Precomputed final answer — before scanning input',
-      },
-      {
-        label: 'Descending sort required — as mandatory first step',
-      },
-      {
-        label: 'Every element visited upfront — marked from the start',
+        label: 'Reservoir sampling — uniform pick among painted indices',
       },
     ],
     explain:
-      'Amount of New Area Painted Each Day: jump[] skips already-painted segments. For each [l,r), walk with jump pointers — count only cells where jump[i]!==0 (fresh paint).',
+      'jump[i] links forward across painted runs so each cell is charged to the first day covering it.',
   },
   {
     id: 'key-step',
-    prompt: 'On the "PAINT" step (day : [,) → ), what happens?',
+    prompt: 'During PAINT on interval [l, r), when is a cell counted as new?',
     choices: [
       {
-        label: 'Day : paint [, ). Jump-pointer — this move caption',
+        label: 'jump[i] is zero — first time cell i receives paint',
         correct: true,
       },
       {
-        label: 'Run terminates immediately — no further frames',
+        label: 'i equals l always — only left endpoint counts once',
       },
       {
-        label: 'Pointers reset to zero — restart scan',
+        label: 'jump[i] equals r — cell touched by current right boundary',
       },
       {
-        label: 'Remaining input skipped — early return path',
+        label: 'Every index in range — overlap days still add full width',
       },
     ],
     explain:
-      'Day : paint [, ). Jump-pointer walk finds  newly painted cell(s). Overlaps skip via jump[i]!=r.',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `maxR` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field maxR in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
-      },
-    ],
-    explain:
-      'The recorder snapshots `maxR` on every emit so each frame shows the algorithm mid-step.',
+      'Fresh cells have jump[i]===0; painted cells redirect i via jump[i] to skip overlapping coverage.',
   },
   {
     id: 'complexity',
-    prompt: 'What are the time and space complexities for "Amount of New Area Painted Each Day"?',
+    prompt: 'What are the time and space bounds for this paint problem?',
     choices: [
       {
-        label: 'O(total painted) time, O(max coordinate) — standard bounds here',
+        label: 'O(total newly painted) time, O(maxR) space — jump array size',
         correct: true,
       },
       {
-        label: 'O(logs) time, O(n) space — wrong order of growth',
+        label: 'O(days × maxR) worst paint, O(1) space — no auxiliary array',
       },
       {
-        label: 'O(n²) time, O(n) space — wrong order of growth',
+        label: 'O(log maxR) per day, O(days) space — heap of intervals',
       },
       {
-        label: 'O(1) get/put time, O(capacity) space — wrong order of growth',
-      },
-    ],
-    explain: 'O(total painted). O(max coordinate). Amount Of New Area Painted Each Day',
-  },
-  {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
-    choices: [
-      {
-        label: 'Day : paint [, ). Jump-pointer — final DONE caption',
-        correct: true,
-      },
-      {
-        label: 'Incomplete partial result — more steps needed',
-      },
-      {
-        label: 'Input left unchanged — no mutations applied',
-      },
-      {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'O(1) per day always, O(paints) space — hash each cell only',
       },
     ],
     explain:
-      'Day : paint [, ). Jump-pointer walk finds  newly painted cell(s). Overlaps skip via jump[i]!=r.',
+      'Each cell is visited at most once when first painted; jump array spans coordinates up to maxR.',
+  },
+  {
+    id: 'edge',
+    prompt: 'When walk hits an already-painted cell inside [l, r), what happens?',
+    choices: [
+      {
+        label: 'Follow jump[i] forward — no increment to new area count',
+        correct: true,
+      },
+      {
+        label: 'Count again — overlapping days double-charge the cell',
+      },
+      {
+        label: 'Abort the day — stop painting remainder of interval',
+      },
+      {
+        label: 'Reset jump[i] to zero — erase prior paint marker',
+      },
+    ],
+    explain:
+      'Non-zero jump[i] means already painted; the loop sets jump[i]=r and jumps to the next index.',
   },
 ];
 export const simulator: ProblemSimulator = {

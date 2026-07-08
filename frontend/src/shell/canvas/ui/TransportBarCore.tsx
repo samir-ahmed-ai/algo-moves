@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils/cn';
 import { CHROME_BTN } from '../../chrome';
 import { ChromeHint } from '../../chromeUi';
 import { HudBtn } from './CanvasTools';
+import { useDesignHybridHidesTransport } from '@/plugins/imported/prepSimulators/designDiagrams/designHybridState';
 
 const icon = 'h-2.5 w-2.5';
 
@@ -47,7 +48,8 @@ export function TransportBar({
     });
   }, [item.title, player.index]);
 
-  if (plugin.meta.static) return null;
+  const hybridHidesTransport = useDesignHybridHidesTransport(plugin.meta.designHybrid);
+  if (plugin.meta.static || hybridHidesTransport) return null;
 
   const transportBtns = (
     <>

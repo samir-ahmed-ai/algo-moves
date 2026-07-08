@@ -8,7 +8,15 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  vizText,
+} from '../../../_shared/vizKit';
 
 type VcOp =
   { kind: 'set'; key: string; value: number } | { kind: 'get'; key: string; version: number };
@@ -94,18 +102,21 @@ function View({ frame }: PluginViewProps<VcState>) {
   const s = frame.state;
   const ver = s.version;
   const cur = s.history[ver]! ?? {};
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+        {s.found && s.result !== null && <RailStat k="val" v={s.result} tone="good" />}
+      </RailGroup>
+      <RailGroup label="version">
+        <RailStat k="cur" v={`v${ver}`} />
+        <RailStat k="snaps" v={s.history.length} />
+      </RailGroup>
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.found && s.result !== null && (
-          <span className="ml-2 font-mono text-good">{s.result}</span>
-        )}
-      </div>
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>
-        version {ver} · {s.history.length} snapshot(s)
-      </div>
-      <div className="mt-1 space-y-1">
+    <VizStage rail={rail} railWidth={168}>
+      <div className="space-y-1">
         {Object.entries(cur).map(([k, v]) => (
           <div
             key={k}
@@ -118,8 +129,7 @@ function View({ frame }: PluginViewProps<VcState>) {
           <span className={cn(vizText.sm, 'text-ink3')}>empty</span>
         )}
       </div>
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>history timeline</div>
-      <div className="mt-1 flex gap-1">
+      <div className="mt-2 flex gap-1">
         {s.history.map((h, i) => (
           <span
             key={i}
@@ -133,7 +143,7 @@ function View({ frame }: PluginViewProps<VcState>) {
           </span>
         ))}
       </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -156,105 +166,86 @@ export const title = 'Version control snapshot';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Version control snapshot"?',
+    prompt: 'How does version control snapshot store history?',
     choices: [
       {
-        label: 'Copy-on-write version snapshots — fits this problem',
+        label: 'Stack of map snapshots — copy-on-write append per set',
         correct: true,
       },
       {
-        label: 'Stack — different approach',
+        label: 'Per-index snap tuples — binary search by snapId',
       },
       {
-        label: 'Two Heaps — different approach',
+        label: 'Message timestamp map — ten-second dedupe window',
       },
       {
-        label: 'Jump Array — different approach',
+        label: 'Point count hash — diagonal square partner lookup',
       },
     ],
-    explain: 'Stack of maps; each set pushes a fresh copied snapshot layer',
+    explain:
+      'history[] holds immutable map layers; set copies the latest map and pushes a new version.',
   },
   {
     id: 'key-step',
-    prompt: 'On the "SET" step (=), what happens?',
+    prompt: 'On SET(key, value), how is a new version created?',
     choices: [
       {
-        label: 'set("", ): copy-on-write → version . — this move caption',
+        label: 'Copy latest map — spread prior keys then write updated key',
         correct: true,
       },
       {
-        label: 'Run terminates immediately — no further frames',
+        label: 'Mutate latest map in place — overwrite without new layer',
       },
       {
-        label: 'Pointers reset to zero — restart scan',
+        label: 'Delete prior versions — keep only current key/value pair',
       },
       {
-        label: 'Remaining input skipped — early return path',
-      },
-    ],
-    explain: 'set("", ): copy-on-write → version .',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `history` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field history in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
+        label: 'Merge all versions — fold history into one map first',
       },
     ],
     explain:
-      'The recorder snapshots `history` on every emit so each frame shows the algorithm mid-step.',
+      'const next = { ...cur, [key]: value }; history.push(next) appends an immutable snapshot.',
   },
   {
     id: 'complexity',
-    prompt: 'What are the time and space complexities for "Version control snapshot"?',
+    prompt: 'What are typical bounds for version snapshot storage?',
     choices: [
       {
-        label: 'O(versions) get time, O(changes) space — standard bounds here',
+        label: 'O(changes) per set, O(V×keys) space — layered map copies',
         correct: true,
       },
       {
-        label: 'O(1) time, O(n) space — wrong order of growth',
+        label: 'O(1) set and get, O(1) space — single mutable hash only',
       },
       {
-        label: 'O(n) time, O(n) space — wrong order of growth',
+        label: 'O(V log V) set, O(1) space — sort versions each write',
       },
       {
-        label: 'O(2ⁿ) time, O(n) space — wrong order of growth',
+        label: 'O(n) get only, O(1) space — recompute from empty each read',
+      },
+    ],
+    explain: 'Each set copies the prior map plus one change; get reads history[version] directly.',
+  },
+  {
+    id: 'edge',
+    prompt: 'What does get(key, version) return when the key was never set in that version?',
+    choices: [
+      {
+        label: 'MISS — key missing even if version index is valid',
+        correct: true,
+      },
+      {
+        label: 'Zero default — undefined keys read as numeric zero',
+      },
+      {
+        label: 'Latest value — fall forward to current version automatically',
+      },
+      {
+        label: 'Invalid version error — reject any key not in v0 map',
       },
     ],
     explain:
-      'O(versions) get. O(changes). copy latest, set key, append; get reads history[version]!',
-  },
-  {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
-    choices: [
-      {
-        label: 'Done. Current version = . — final DONE caption',
-        correct: true,
-      },
-      {
-        label: 'Incomplete partial result — more steps needed',
-      },
-      {
-        label: 'Input left unchanged — no mutations applied',
-      },
-      {
-        label: 'Aborted run on failure — infinite loop detected',
-      },
-    ],
-    explain: 'Done. Current version = .',
+      'Valid version with val === undefined emits MISS because that key absent in that snapshot.',
   },
 ];
 export const simulator: ProblemSimulator = {

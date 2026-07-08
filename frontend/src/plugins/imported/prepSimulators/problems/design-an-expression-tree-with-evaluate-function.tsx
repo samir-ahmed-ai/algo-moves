@@ -8,7 +8,15 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  vizText,
+} from '../../../_shared/vizKit';
 
 interface ExprInput {
   postfix: string[];
@@ -109,13 +117,23 @@ function record({ postfix }: ExprInput): Frame<ExprState>[] {
 
 function View({ frame }: PluginViewProps<ExprState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+      </RailGroup>
+      {s.result !== null && (
+        <RailGroup label="result">
+          <RailStat k="val" v={s.result} tone="good" />
+        </RailGroup>
+      )}
+      <RailGroup label="stack">
+        <RailStat k="depth" v={s.stack.length} />
+      </RailGroup>
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.result !== null && <span className="ml-2 font-mono text-good">= {s.result}</span>}
-      </div>
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>stack</div>
+    <VizStage rail={rail} railWidth={168}>
       <div className="mt-1 flex flex-wrap gap-1">
         {s.stack.map((x, i) => (
           <span
@@ -131,7 +149,7 @@ function View({ frame }: PluginViewProps<ExprState>) {
           tree: {treeLabel(s.tree)}
         </div>
       )}
-    </div>
+    </VizStage>
   );
 }
 
@@ -153,105 +171,86 @@ export const title = 'Design an Expression Tree With Evaluate Function';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Expression Tree / Design an Expression Tree"?',
+    prompt: 'How is the expression tree built from postfix tokens?',
     choices: [
       {
-        label: 'Stack — fits this problem',
+        label: 'Operand/operator stack — push leaves, pop two for ops',
         correct: true,
       },
       {
-        label: 'Log parsing aggregation — different approach',
+        label: 'Recursive descent parser — top-down grammar on infix',
       },
       {
-        label: 'Copy-on-write version snapshots — different approach',
+        label: 'Copy-on-write map stack — versioned snapshot per token',
       },
       {
-        label: 'Trie dictionary + spell suggest — different approach',
+        label: 'Merge-walk index pairs — multiply matching sparse entries',
       },
     ],
-    explain: 'See Design An Expression Tree With Evaluate Function pattern',
+    explain: 'Numbers push ExprNode leaves; operators pop right then left and push a subtree node.',
   },
   {
     id: 'key-step',
-    prompt: 'On the "EVAL" step (=), what happens?',
+    prompt: 'On OP for operator token, what stack operations occur?',
     choices: [
       {
-        label: 'Evaluate tree → . — this move caption',
+        label: 'Pop right and left subtrees — push combined operator node',
         correct: true,
       },
       {
-        label: 'Run terminates immediately — no further frames',
+        label: 'Pop one operand path — unary operators in this postfix',
       },
       {
-        label: 'Pointers reset to zero — restart scan',
+        label: 'Push operator without pops — defer combine until EVAL',
       },
       {
-        label: 'Remaining input skipped — early return path',
-      },
-    ],
-    explain: 'Evaluate tree  → .',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `stack` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field stack in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
+        label: 'Clear stack — rebuild from postfix scratch each operator',
       },
     ],
     explain:
-      'The recorder snapshots `stack` on every emit so each frame shows the algorithm mid-step.',
+      'const r = pop(); const l = pop(); push({ val: tok, left: l, right: r }) wires the subtree.',
   },
   {
     id: 'complexity',
-    prompt:
-      'What are the time and space complexities for "Expression Tree / Design an Expression Tree"?',
+    prompt: 'What are the bounds to build and evaluate the expression tree?',
     choices: [
       {
-        label: 'O(n) time, O(n) space — standard bounds here',
+        label: 'O(n) time, O(n) space — one stack pass over n tokens',
         correct: true,
       },
       {
-        label: 'O(versions) get time, O(changes) space — wrong order of growth',
+        label: 'O(n log n) time, O(1) space — sort tokens before build',
       },
       {
-        label: 'O(logs) time, O(n) space — wrong order of growth',
+        label: 'O(n²) time, O(n) space — reparse entire postfix each token',
       },
       {
-        label: 'O(n³) time, O(n) space — wrong order of growth',
+        label: 'O(1) time, O(n²) space — materialize all subtrees upfront',
       },
     ],
-    explain: 'O(n). O(n). Design An Expression Tree With Evaluate Function',
+    explain:
+      'Each token does constant stack work; final evaluate walks tree size proportional to n.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'edge',
+    prompt: 'How does evaluate handle division in this simulator?',
     choices: [
       {
-        label: 'Evaluate tree → . — final DONE caption',
+        label: 'Math.trunc toward zero — integer division on child values',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'Floating round nearest — preserve fractional quotients',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'Floor division — always round toward negative infinity',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'Reject division — abort when denominator non-zero',
       },
     ],
-    explain: 'Evaluate tree  → .',
+    explain:
+      'The evaluate switch uses Math.trunc(l / r) for / tokens after recursive child evaluation.',
   },
 ];
 export const simulator: ProblemSimulator = {

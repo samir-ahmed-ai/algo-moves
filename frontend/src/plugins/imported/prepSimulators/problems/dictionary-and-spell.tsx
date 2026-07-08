@@ -8,7 +8,16 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailStack,
+  vizText,
+} from '../../../_shared/vizKit';
 
 type DictOp = { kind: 'search'; word: string } | { kind: 'suggest'; prefix: string; limit: number };
 
@@ -116,18 +125,25 @@ function record({ words, ops }: DictInput): Frame<DictState>[] {
 
 function View({ frame }: PluginViewProps<DictState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+      </RailGroup>
+      {s.found !== null && (
+        <RailGroup label="result">
+          <RailStat k="val" v={s.result} tone={s.found ? 'good' : 'bad'} />
+        </RailGroup>
+      )}
+      <RailGroup label="dict">
+        <RailStat k="words" v={s.words.length} />
+      </RailGroup>
+      {s.suggestions.length > 0 && <RailStack label="suggest" items={s.suggestions} />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.found !== null && (
-          <span className={cn('ml-2 font-mono', s.found ? 'text-good' : 'text-bad')}>
-            {s.result}
-          </span>
-        )}
-      </div>
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>dictionary ({s.words.length} words)</div>
-      <div className="mt-1 flex flex-wrap gap-1">
+    <VizStage rail={rail} railWidth={168}>
+      <div className="flex flex-wrap gap-1">
         {s.words.map((w) => (
           <span
             key={w}
@@ -137,12 +153,7 @@ function View({ frame }: PluginViewProps<DictState>) {
           </span>
         ))}
       </div>
-      {s.suggestions.length > 0 && (
-        <div className={cn('mt-2', vizText.sm, 'text-good')}>
-          suggestions: {s.suggestions.join(', ')}
-        </div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 
@@ -164,107 +175,87 @@ export const title = 'Dictionary and Spell';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Dictionary and spell"?',
+    prompt: 'Which structure stores the dictionary words?',
     choices: [
       {
-        label: 'Trie dictionary + spell suggest — fits this problem',
+        label: 'Prefix trie with word flags — char edges and terminal markers',
         correct: true,
       },
       {
-        label: 'Design — different approach',
+        label: 'Sorted merged intervals — coverage queries on ranges',
       },
       {
-        label: 'Hash map + doubly linked list LRU — different approach',
+        label: 'Message timestamp map — ten-second rate limit window',
       },
       {
-        label: 'Heap + Sorted Available Set — different approach',
-      },
-    ],
-    explain: 'Prefix tree of words; DFS from the prefix node to collect suggestions',
-  },
-  {
-    id: 'init',
-    prompt: 'At the start of a run (Dictionary and spell), what strategy is established?',
-    choices: [
-      {
-        label: 'Prefix tree of words; DFS — described in INIT caption',
-        correct: true,
-      },
-      {
-        label: 'Precomputed final answer — before scanning input',
-      },
-      {
-        label: 'Descending sort required — as mandatory first step',
-      },
-      {
-        label: 'Every element visited upfront — marked from the start',
+        label: 'Index-value pair lists — merge-walk for dot product',
       },
     ],
     explain:
-      'Dictionary & Spell: trie stores words. search() walks prefix; suggest(prefix, limit) DFS-collects words under prefix.',
+      'buildTrie inserts each word char-by-char; node.word marks complete dictionary entries.',
   },
   {
-    id: 'state',
-    prompt: 'What does the `words` field track in the visualization state?',
+    id: 'key-step',
+    prompt: 'On SUGGEST(prefix, limit), how are words collected?',
     choices: [
       {
-        label: 'Field words in state — updated each frame',
+        label: 'DFS from prefix node — gather words until limit reached',
         correct: true,
       },
       {
-        label: 'Fixed display label — unchanged each frame',
+        label: 'Binary search sorted array — locate prefix by name only',
       },
       {
-        label: 'Shuffle seed value — for random ordering',
+        label: 'Scan every map entry — filter strings starting with prefix',
       },
       {
-        label: 'Failure error code — set once at end',
+        label: 'Pop stack operands — build expression subtree nodes',
       },
     ],
     explain:
-      'The recorder snapshots `words` on every emit so each frame shows the algorithm mid-step.',
+      'After walking to the prefix node, DFS accumulates complete words up to the requested limit.',
   },
   {
     id: 'complexity',
-    prompt: 'What are the time and space complexities for "Dictionary and spell"?',
+    prompt: 'What are the time and space complexities for Dictionary and Spell?',
     choices: [
       {
-        label: 'O(word len) insert/lookup time, O(total — standard bounds here',
+        label: 'O(word len) search, O(total chars) space — trie node storage',
         correct: true,
       },
       {
-        label: 'O(n²) time, O(n) space — wrong order of growth',
+        label: 'O(1) all ops, O(words) space — flat hash of whole strings',
       },
       {
-        label: 'O(1) get/put time, O(capacity) space — wrong order of growth',
+        label: 'O(n²) suggest, O(1) space — compare all pairs each call',
       },
       {
-        label: 'O(1) time, O(n) space — wrong order of growth',
+        label: 'O(log n) book, O(n) space — interval overlap scan only',
       },
     ],
     explain:
-      'O(word len) insert/lookup. O(total chars). addWord char-by-char; suggest = DFS collecting words under prefix',
+      'search walks one path; suggest DFS touches nodes under the prefix; trie size scales with characters.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'edge',
+    prompt: 'Why does search("ca") return false for dictionary {cat, car}?',
     choices: [
       {
-        label: 'Dictionary & Spell: trie stores words. — final DONE caption',
+        label: 'Prefix node lacks word flag — ca is not a complete word',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'Trie missing ca branch — path not created during build',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'Limit zero on suggest — search shares suggest limit rules',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'Lowercase ca mismatch — case differs from stored CAT node',
       },
     ],
     explain:
-      'Dictionary & Spell: trie stores words. search() walks prefix; suggest(prefix, limit) DFS-collects words under prefix.',
+      'Walking reaches the ca node, but search requires node.word true at the terminal character.',
   },
 ];
 export const simulator: ProblemSimulator = {

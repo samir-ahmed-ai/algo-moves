@@ -8,7 +8,15 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  vizText,
+} from '../../../_shared/vizKit';
 
 interface Move {
   row: number;
@@ -95,14 +103,25 @@ function record({ n, moves }: TttInput): Frame<TttState>[] {
 
 function View({ frame }: PluginViewProps<TttState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+      </RailGroup>
+      {s.winner && (
+        <RailGroup label="winner">
+          <RailStat k="player" v={`P${s.winner}`} tone="good" />
+        </RailGroup>
+      )}
+      <RailGroup label="board">
+        <RailStat k="n" v={s.n} />
+      </RailGroup>
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.winner && <span className="ml-2 font-mono text-good">winner P{s.winner}</span>}
-      </div>
+    <VizStage rail={rail} railWidth={168}>
       <div
-        className="mt-2 inline-grid gap-0.5"
+        className="inline-grid gap-0.5"
         style={{ gridTemplateColumns: `repeat(${s.n}, minmax(0, 1fr))` }}
       >
         {s.board.flatMap((row, r) =>
@@ -124,7 +143,7 @@ function View({ frame }: PluginViewProps<TttState>) {
           )),
         )}
       </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -148,104 +167,87 @@ export const title = 'Design Tic-Tac-Toe';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Design Tic-Tac-Toe"?',
+    prompt: 'How does Design Tic-Tac-Toe detect wins in O(1)?',
     choices: [
       {
-        label: 'Design — fits this problem',
+        label: 'Row/col/diag sums — +1 for P1 and -1 for P2 per cell',
         correct: true,
       },
       {
-        label: 'Stack — different approach',
+        label: 'DFS full board — scan all lines after every move',
       },
       {
-        label: 'Two Heaps — different approach',
+        label: 'Hash of coordinates — store every occupied cell set',
       },
       {
-        label: 'Round-robin load balancer — different approach',
-      },
-    ],
-    explain: 'See Design Tic Tac Toe pattern',
-  },
-  {
-    id: 'init',
-    prompt: 'At the start of a run (Design Tic-Tac-Toe), what strategy is established?',
-    choices: [
-      {
-        label: 'See Design Tic Tac Toe pattern — described in INIT caption',
-        correct: true,
-      },
-      {
-        label: 'Precomputed final answer — before scanning input',
-      },
-      {
-        label: 'Descending sort required — as mandatory first step',
-      },
-      {
-        label: 'Every element visited upfront — marked from the start',
+        label: 'Union-find components — merge adjacent same-player cells',
       },
     ],
     explain:
-      'Design Tic-Tac-Toe: track row/col/diag sums (+1 player1, -1 player2). |sum|==n means win — O(1) per move.',
+      'Each move updates rows[row], cols[col], and diagonals; |sum|===n signals a completed line.',
   },
   {
     id: 'key-step',
-    prompt: 'On the "MOVE" step (P @(,)), what happens?',
+    prompt: 'On MOVE(row, col, player), when is a win declared?',
     choices: [
       {
-        label: 'Move(,, player=): rows[]=, cols[]=. ${w ? — this move caption',
+        label: 'Absolute row col or diag sum equals n — line fully owned',
         correct: true,
       },
       {
-        label: 'Run terminates immediately — no further frames',
+        label: 'Board full — win only when no empty cells remain',
       },
       {
-        label: 'Pointers reset to zero — restart scan',
+        label: 'Player one never wins — second player required for victory check',
       },
       {
-        label: 'Remaining input skipped — early return path',
+        label: 'Center cell taken — middle square controls outcome',
       },
     ],
-    explain: 'Move(,, player=): rows[]=, cols[]=. ${w ? ',
+    explain:
+      'After adding ±1 to line counters, abs(rows[row])===n or col/diag checks set winner to player.',
   },
   {
-    id: 'state',
-    prompt: 'What does the `n` field track in the visualization state?',
+    id: 'complexity',
+    prompt: 'What are the bounds per move in Design Tic-Tac-Toe?',
     choices: [
       {
-        label: 'Field n in state — updated each frame',
+        label: 'O(1) move time, O(n) space — row col and diag counters',
         correct: true,
       },
       {
-        label: 'Fixed display label — unchanged each frame',
+        label: 'O(n²) move, O(n²) space — scan entire board each turn',
       },
       {
-        label: 'Shuffle seed value — for random ordering',
+        label: 'O(log n) move, O(1) space — binary search win lines',
       },
       {
-        label: 'Failure error code — set once at end',
+        label: 'O(n) move only, O(1) space — no auxiliary counters kept',
       },
     ],
-    explain: 'The recorder snapshots `n` on every emit so each frame shows the algorithm mid-step.',
+    explain:
+      'Move updates O(1) counters and checks four sums; storage is linear in board dimension n.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'edge',
+    prompt: 'When does antiDiag receive an update on a move?',
     choices: [
       {
-        label: 'Move(,, player=): rows[]=, cols[]=. ${w ? — final DONE caption',
+        label: 'row + col equals n - 1 — cell lies on anti-diagonal',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'row equals col always — main and anti diag update together',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'col equals zero — only left edge touches antiDiag',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'player equals two — antiDiag tracks second player only',
       },
     ],
-    explain: 'Move(,, player=): rows[]=, cols[]=. ${w ? ',
+    explain:
+      'Main diag updates when row===col; antiDiag updates when row+col===n-1 for the n×n board.',
   },
 ];
 export const simulator: ProblemSimulator = {

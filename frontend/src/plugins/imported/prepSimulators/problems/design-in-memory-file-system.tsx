@@ -340,44 +340,87 @@ export const title = 'Design In-Memory File System';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Design In-Memory File System"?',
+    prompt: 'Which data structure backs the in-memory file system?',
     choices: [
       {
-        label: 'Design — fits this problem',
+        label: 'Path trie of fsNodes — directories and file content at leaves',
         correct: true,
       },
       {
-        label: 'Two Heaps — different approach',
+        label: 'Hash map plus LRU list — key eviction at capacity',
       },
       {
-        label: 'Round-robin load balancer — different approach',
+        label: 'Sorted interval list — merge overlapping ranges',
       },
       {
-        label: 'Bijective tiny URL encode/decode — different approach',
-      },
-    ],
-    explain: 'See Design In Memory File System pattern',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `tree` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field tree in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
+        label: 'Copy-on-write map stack — versioned snapshots per set',
       },
     ],
     explain:
-      'The recorder snapshots `tree` on every emit so each frame shows the trie mid-step along the active path.',
+      'Each path segment descends one trie level; files store appended content and an isFile flag.',
+  },
+  {
+    id: 'key-step',
+    prompt: 'On the ADD step, what does AddContentToFile do?',
+    choices: [
+      {
+        label: 'Walk/create path nodes — append content to the file node',
+        correct: true,
+      },
+      {
+        label: 'Replace entire file body — discard previous content first',
+      },
+      {
+        label: 'Return sorted child names — list directory entries only',
+      },
+      {
+        label: 'Binary-search snap history — read value at old version',
+      },
+    ],
+    explain:
+      'walkPath creates missing directories on write, then node.content grows with each append.',
+  },
+  {
+    id: 'complexity',
+    prompt: 'What are typical time and space bounds per operation?',
+    choices: [
+      {
+        label: 'O(path depth) time, O(total nodes) space — walk the trie',
+        correct: true,
+      },
+      {
+        label: 'O(1) time, O(capacity) space — constant hash lookup only',
+      },
+      {
+        label: 'O(n log n) time, O(n) space — resort all paths each call',
+      },
+      {
+        label: 'O(log snapshots) time, O(length) space — binary search history',
+      },
+    ],
+    explain:
+      'find and walkPath cost one step per path segment; space grows with created dirs and files.',
+  },
+  {
+    id: 'edge',
+    prompt: 'What does Ls return when the path points to a file?',
+    choices: [
+      {
+        label: 'Just the filename — not the sorted children of a directory',
+        correct: true,
+      },
+      {
+        label: 'Empty list always — files cannot be listed',
+      },
+      {
+        label: 'Full absolute path string — including every parent segment',
+      },
+      {
+        label: 'All sibling names — every entry sharing the parent dir',
+      },
+    ],
+    explain:
+      'When the target node is a file, ls returns a one-element list containing that file name.',
   },
 ];
 export const simulator: ProblemSimulator = {

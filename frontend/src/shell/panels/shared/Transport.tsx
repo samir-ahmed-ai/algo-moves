@@ -24,6 +24,7 @@ import { useWorkspace } from '@/store/workspace';
 import { cn } from '@/lib/utils/cn';
 import { CHROME_BTN } from '../../chrome';
 import { moveToneChipClass } from './frameChips';
+import { useDesignHybridHidesTransport } from '@/plugins/imported/prepSimulators/designDiagrams/designHybridState';
 
 const SPEEDS = [0.25, 0.5, 1, 1.5, 2, 4];
 
@@ -31,7 +32,8 @@ export function Transport() {
   const { player, frame } = useCanvasFrame();
   const { plugin } = useCanvasStatic();
   const { tweaks, toggleTweak } = useWorkspace();
-  if (plugin.meta.static) return null;
+  const hybridHidesTransport = useDesignHybridHidesTransport(plugin.meta.designHybrid);
+  if (plugin.meta.static || hybridHidesTransport) return null;
   const bookmarked = player.bookmarks.has(player.index);
   const frameType = frame.move?.type ?? 'frame';
   const frameToneClass = moveToneChipClass(frame.move?.tone);

@@ -8,7 +8,15 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  vizText,
+} from '../../../_shared/vizKit';
 
 interface MeetInput {
   n: number;
@@ -130,13 +138,25 @@ function record({ n, meetings }: MeetInput): Frame<MeetState>[] {
 
 function View({ frame }: PluginViewProps<MeetState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+        {s.assigned !== null && <RailStat k="room" v={s.assigned} tone="good" />}
+      </RailGroup>
+      {s.winner !== null && (
+        <RailGroup label="most">
+          <RailStat k="room" v={s.winner} tone="good" />
+        </RailGroup>
+      )}
+      <RailGroup label="rooms">
+        <RailStat k="n" v={s.n} />
+      </RailGroup>
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.assigned !== null && <span className="ml-2 font-mono text-good">room {s.assigned}</span>}
-      </div>
-      <div className="mt-2 flex flex-wrap gap-1">
+    <VizStage rail={rail} railWidth={168}>
+      <div className="flex flex-wrap gap-1">
         {s.cnt.map((c, i) => (
           <span
             key={i}
@@ -154,12 +174,7 @@ function View({ frame }: PluginViewProps<MeetState>) {
           </span>
         ))}
       </div>
-      {s.winner !== null && (
-        <div className={cn('mt-2 font-mono', vizText.sm, 'text-good')}>
-          most booked: room {s.winner}
-        </div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 
@@ -182,124 +197,85 @@ export const title = 'Meeting Rooms III';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Meeting Rooms III"?',
+    prompt: 'Which structures assign meetings to rooms here?',
     choices: [
       {
-        label: 'Two Heaps — fits this problem',
+        label: 'Sorted avail list plus busy heap — free rooms and earliest end times',
         correct: true,
       },
       {
-        label: 'Round-robin load balancer — different approach',
+        label: 'Round-robin index — cycle servers without tracking busy until',
       },
       {
-        label: 'Copy-on-write version snapshots — different approach',
+        label: 'Half-open calendar events — reject overlapping bookings only',
       },
       {
-        label: 'Trie dictionary + spell suggest — different approach',
-      },
-    ],
-    explain: 'See Meeting Rooms Iii pattern',
-  },
-  {
-    id: 'init',
-    prompt: 'At the start of a run (Meeting Rooms III), what strategy is established?',
-    choices: [
-      {
-        label: 'See Meeting Rooms Iii pattern — described in INIT caption',
-        correct: true,
-      },
-      {
-        label: 'Precomputed final answer — before scanning input',
-      },
-      {
-        label: 'Descending sort required — as mandatory first step',
-      },
-      {
-        label: 'Every element visited upfront — marked from the start',
+        label: 'Reservoir sampling — pick uniform random meeting room id',
       },
     ],
     explain:
-      'Meeting Rooms III: min-heap avail rooms, busy heap by end time. Assign earliest free room; if none, delay meeting on earliest-ending room.',
+      'Meetings sorted by start; freed rooms rejoin avail; busy heap orders rooms by meeting end.',
   },
   {
     id: 'key-step',
-    prompt: 'On the "DELAY" step (room ), what happens?',
+    prompt: 'On DELAY when no room is free at meeting start, what happens?',
     choices: [
       {
-        label: 'Meeting [,]: all busy — reuse — this move caption',
+        label: 'Reuse earliest-ending busy room — extend its end by meeting duration',
         correct: true,
       },
       {
-        label: 'Run terminates immediately — no further frames',
+        label: 'Drop the meeting — skip assignment when avail is empty',
       },
       {
-        label: 'Pointers reset to zero — restart scan',
+        label: 'Wait without assigning — leave meeting unscheduled forever',
       },
       {
-        label: 'Remaining input skipped — early return path',
+        label: 'Add new virtual room — grow n dynamically for each delay',
       },
     ],
-    explain: 'Meeting [,]: all busy — reuse room , ends at . cnt[]=.',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `n` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field n in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
-      },
-    ],
-    explain: 'The recorder snapshots `n` on every emit so each frame shows the algorithm mid-step.',
+    explain: 'busy sorted by end; shift earliest finisher and push new end = oldEnd + (e - s).',
   },
   {
     id: 'complexity',
-    prompt: 'What are the time and space complexities for "Meeting Rooms III"?',
+    prompt: 'What are the bounds for Meeting Rooms III?',
     choices: [
       {
-        label: 'O(m log n) time, O(n) space — standard bounds here',
+        label: 'O(m log n) time, O(n) space — heap ops per m meetings',
         correct: true,
       },
       {
-        label: 'O(m+n) time, O(n) space — wrong order of growth',
+        label: 'O(m) time, O(1) space — constant work without heap sorting',
       },
       {
-        label: 'O(versions) get time, O(changes) space — wrong order of growth',
+        label: 'O(n²) time, O(m) space — scan all rooms linearly each meeting',
       },
       {
-        label: 'O(logs) time, O(n) space — wrong order of growth',
+        label: 'O(log m) time, O(m) space — binary search meeting starts only',
       },
     ],
-    explain: 'O(m log n). O(n). Meeting Rooms Iii',
+    explain: 'Each meeting may sort or filter busy rooms; counts array size is number of rooms n.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'edge',
+    prompt: 'Before assigning a meeting, how are rooms freed at its start time?',
     choices: [
       {
-        label: 'Done. Room held the most meetings — final DONE caption',
+        label: 'Remove busy entries with end ≤ start — merge ids back into avail sorted',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'Clear all busy rooms — reset every room to available each step',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'Free only lowest room id — ignore end times when releasing',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'Never free early — busy until explicit DONE frame runs',
       },
     ],
-    explain: 'Done. Room  held the most meetings (). Counts: [].',
+    explain:
+      'The loop filters busy where b.end <= s, pushes freed.room into avail, then sorts avail ascending.',
   },
 ];
 export const simulator: ProblemSimulator = {

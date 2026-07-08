@@ -8,7 +8,15 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  vizText,
+} from '../../../_shared/vizKit';
 
 interface PickIdxInput {
   nums: number[];
@@ -79,13 +87,21 @@ function record({ nums, target, draws = [] }: PickIdxInput): Frame<PickIdxState>
 
 function View({ frame }: PluginViewProps<PickIdxState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="pick">
+        <RailStat k="target" v={s.target} tone="accent" />
+        {s.picked !== null && <RailStat k="idx" v={s.picked} tone="good" />}
+      </RailGroup>
+      <RailGroup label="reservoir">
+        <RailStat k="cnt" v={s.cnt} />
+        <RailStat k="res" v={s.res} />
+      </RailGroup>
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        target = <span className="font-mono text-ink">{s.target}</span>
-        {s.picked !== null && <span className="ml-2 font-mono text-good">picked @{s.picked}</span>}
-      </div>
-      <div className="mt-2 flex flex-wrap gap-1">
+    <VizStage rail={rail} railWidth={168}>
+      <div className="flex flex-wrap gap-1">
         {s.nums.map((v, i) => (
           <span
             key={i}
@@ -103,10 +119,7 @@ function View({ frame }: PluginViewProps<PickIdxState>) {
           </span>
         ))}
       </div>
-      <div className={cn('mt-2 font-mono', vizText.sm, 'text-ink')}>
-        cnt={s.cnt} · res={s.res}
-      </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -129,105 +142,87 @@ export const title = 'Random Pick Index';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Random Pick Index"?',
+    prompt: 'How does Random Pick Index achieve uniform choice?',
     choices: [
       {
-        label: 'Design — fits this problem',
+        label: 'Reservoir sampling — replace res with prob 1/cnt on each hit',
         correct: true,
       },
       {
-        label: 'Bijective tiny URL encode/decode — different approach',
+        label: 'Prefix sum buckets — binary search random target draw',
       },
       {
-        label: 'Trie dictionary + spell suggest — different approach',
+        label: 'Sorted avail list — assign request to server i mod k',
       },
       {
-        label: 'Hash map + doubly linked list LRU — different approach',
-      },
-    ],
-    explain: 'See Random Pick Index pattern',
-  },
-  {
-    id: 'init',
-    prompt: 'At the start of a run (Random Pick Index), what strategy is established?',
-    choices: [
-      {
-        label: 'See Random Pick Index pattern — described in INIT caption',
-        correct: true,
-      },
-      {
-        label: 'Precomputed final answer — before scanning input',
-      },
-      {
-        label: 'Descending sort required — as mandatory first step',
-      },
-      {
-        label: 'Every element visited upfront — marked from the start',
+        label: 'Lazy min/max heaps — pop stale timestamp entries',
       },
     ],
     explain:
-      'Random Pick Index: reservoir sampling — for each nums[i]!==target, cnt++; with prob 1/cnt replace res with i.',
+      'Scanning target indices increments cnt; when draw is 0, res becomes the current index i.',
   },
   {
     id: 'key-step',
-    prompt: 'On the "HIT" step (i= cnt=), what happens?',
+    prompt: 'On HIT when nums[i] equals target, when does res update?',
     choices: [
       {
-        label: 'nums[]=: cnt→. ${replace ? — this move caption',
+        label: 'Deterministic draw equals zero — treat as 1/cnt acceptance',
         correct: true,
       },
       {
-        label: 'Run terminates immediately — no further frames',
+        label: 'Every hit always — res becomes latest matching index',
       },
       {
-        label: 'Pointers reset to zero — restart scan',
+        label: 'Only first hit — ignore later equal target indices',
       },
       {
-        label: 'Remaining input skipped — early return path',
-      },
-    ],
-    explain: 'nums[]=: cnt→. ${replace ? ',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `nums` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field nums in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
+        label: 'When cnt is even — alternate updates on parity of cnt',
       },
     ],
     explain:
-      'The recorder snapshots `nums` on every emit so each frame shows the algorithm mid-step.',
+      'The demo uses draws[]; draw===0 means replace res with i, modeling uniform reservoir replacement.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'complexity',
+    prompt: 'What are the time and space bounds for Random Pick Index?',
     choices: [
       {
-        label: 'Pick() → index (uniform over — final DONE caption',
+        label: 'O(n) pick time, O(1) extra space — single pass with cnt/res',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'O(log n) pick, O(n) space — prefix array of all indices',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'O(1) pick, O(n) space — precompute all target positions',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'O(n log n) pick, O(n) space — sort values before sampling',
       },
     ],
-    explain: 'Pick() → index  (uniform over  occurrence(s)).',
+    explain:
+      'One linear scan counts matches; only cnt and res are kept besides the input array snapshot.',
+  },
+  {
+    id: 'edge',
+    prompt: 'Which indices participate in the reservoir scan?',
+    choices: [
+      {
+        label: 'Only i where nums[i] equals target — others are skipped',
+        correct: true,
+      },
+      {
+        label: 'Every array index — cnt increments on all positions',
+      },
+      {
+        label: 'Endpoint targets alone — first and last index anchor sample',
+      },
+      {
+        label: 'Random shuffle order — visit indices in permuted sequence',
+      },
+    ],
+    explain:
+      'The for-loop continues immediately when nums[i] differs from target, so cnt counts matches only.',
   },
 ];
 export const simulator: ProblemSimulator = {

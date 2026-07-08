@@ -11,20 +11,22 @@ describe('prep-design-amount-of-new-area-painted-each-day preview', () => {
     expect(resolvePrepSimulator(id)).toBeDefined();
   });
 
-  it('uses the static design diagram instead of the step animation', async () => {
+  it('uses hybrid design plugin with diagram and step simulator', async () => {
     const plugin = await loadPlugin('prep-design-amount-of-new-area-painted-each-day');
     expect(plugin).toBeDefined();
-    expect(plugin!.meta.static).toBe(true);
-    expect(plugin!.inputs.map((i) => i.id)).toContain('design');
+    expect(plugin!.meta.designHybrid).toBe(true);
+    expect(plugin!.meta.static).toBeFalsy();
 
     const input = plugin!.inputs[0]!;
     const frames = plugin!.record(input.value);
-    expect(frames).toHaveLength(1);
-    expect(frames[0]!.move.type).toBe('DESIGN');
+    expect(frames.length).toBeGreaterThanOrEqual(3);
 
     const View = plugin!.View;
     const html = renderToStaticMarkup(createElement(View, { frame: frames[0]! }));
+    expect(html).toContain('design-hybrid');
     expect(html).toContain('design-flow');
     expect(html).toContain('Amount of New Area Painted Each Day');
+    expect(html).toContain('Architecture');
+    expect(html).toContain('Walkthrough');
   });
 });

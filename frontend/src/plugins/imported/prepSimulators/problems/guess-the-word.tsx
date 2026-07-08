@@ -8,7 +8,15 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  vizText,
+} from '../../../_shared/vizKit';
 
 interface GuessInput {
   secret: string;
@@ -95,19 +103,26 @@ function record({ secret, words }: GuessInput): Frame<GuessState>[] {
 
 function View({ frame }: PluginViewProps<GuessState>) {
   const s = frame.state;
-  return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.found && <span className="ml-2 font-mono text-good">found!</span>}
-      </div>
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+        {s.found && <RailStat k="status" v="found!" tone="good" />}
+      </RailGroup>
       {s.guess && (
-        <div className={cn('mt-1 font-mono', vizText.sm, 'text-ink')}>
-          guess: {s.guess} · matches: {s.matches}
-        </div>
+        <RailGroup label="guess">
+          <RailStat k="word" v={s.guess} />
+          <RailStat k="match" v={s.matches} />
+        </RailGroup>
       )}
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>{s.cands.length} candidate(s)</div>
-      <div className="mt-1 flex flex-wrap gap-1">
+      <RailGroup label="cands">
+        <RailStat k="count" v={s.cands.length} />
+      </RailGroup>
+    </>
+  );
+  return (
+    <VizStage rail={rail} railWidth={168}>
+      <div className="flex flex-wrap gap-1">
         {s.cands.slice(0, 12).map((w) => (
           <span
             key={w}
@@ -122,7 +137,7 @@ function View({ frame }: PluginViewProps<GuessState>) {
         ))}
         {s.cands.length > 12 && <span className={cn(vizText.sm, 'text-ink3')}>…</span>}
       </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -146,105 +161,87 @@ export const title = 'Guess the Word';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Guess the Word"?',
+    prompt: 'How does Guess the Word narrow the secret?',
     choices: [
       {
-        label: 'Design — fits this problem',
+        label: 'Filter candidates — keep words matching master overlap count',
         correct: true,
       },
       {
-        label: 'Heap + Sorted Available Set — different approach',
+        label: 'Digit trie autocomplete — prefix walk returns names',
       },
       {
-        label: 'Trie phone directory autocomplete — different approach',
+        label: 'Merge-walk sparse pairs — multiply matching indices',
       },
       {
-        label: 'Jump Array — different approach',
-      },
-    ],
-    explain: 'See Guess The Word pattern',
-  },
-  {
-    id: 'init',
-    prompt: 'At the start of a run (Guess the Word), what strategy is established?',
-    choices: [
-      {
-        label: 'See Guess The Word pattern — described in INIT caption',
-        correct: true,
-      },
-      {
-        label: 'Precomputed final answer — before scanning input',
-      },
-      {
-        label: 'Descending sort required — as mandatory first step',
-      },
-      {
-        label: 'Every element visited upfront — marked from the start',
+        label: 'Call stack timing — credit elapsed to active function',
       },
     ],
     explain:
-      'Guess the Word: filter candidates by match count with each guess. Master returns positions where guess[i]!==secret[i]!.',
+      'Each guess compares position matches with the secret; survivors must share that same count.',
   },
   {
     id: 'key-step',
-    prompt: 'On the "FILTER" step ( left), what happens?',
+    prompt: 'On the FILTER step after a guess, which words remain?',
     choices: [
       {
-        label: 'Keep words w≠guess where match(w, guess)=. — this move caption',
+        label: 'w ≠ guess and match(w, guess) equals master count — shrink pool',
         correct: true,
       },
       {
-        label: 'Run terminates immediately — no further frames',
+        label: 'Only the guessed word — discard every other candidate',
       },
       {
-        label: 'Pointers reset to zero — restart scan',
+        label: 'Words longer than guess — drop shorter candidates first',
       },
       {
-        label: 'Remaining input skipped — early return path',
-      },
-    ],
-    explain: 'Keep words w≠guess where match(w, guess)=.  candidate(s) remain.',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `secret` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field secret in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
+        label: 'Alphabetical first half — binary partition by lex order',
       },
     ],
     explain:
-      'The recorder snapshots `secret` on every emit so each frame shows the algorithm mid-step.',
+      'The filter removes the guessed word and keeps words whose overlap with it equals the reported matches.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'complexity',
+    prompt: 'What are typical bounds for Guess the Word?',
     choices: [
       {
-        label: 'Keep words w≠guess where match(w, guess)=. — final DONE caption',
+        label: 'O(rounds × words × len) time, O(words) space — scan and filter',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'O(1) per guess, O(1) space — constant candidate pool',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'O(log n) pick, O(n) space — prefix-sum binary search',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'O(total painted) time, O(max coord) space — jump array walk',
       },
     ],
-    explain: 'Keep words w≠guess where match(w, guess)=.  candidate(s) remain.',
+    explain:
+      'Each round scans candidates comparing every character position against the current guess.',
+  },
+  {
+    id: 'edge',
+    prompt: 'When does the simulation stop early with a WIN frame?',
+    choices: [
+      {
+        label: 'All positions match guess length — secret equals current guess',
+        correct: true,
+      },
+      {
+        label: 'Candidate list empty — no words left after filtering',
+      },
+      {
+        label: 'Ten rounds elapsed — always stop regardless of matches',
+      },
+      {
+        label: 'First guess chosen — win declared before master responds',
+      },
+    ],
+    explain:
+      'When matchCount equals guess.length, the recorder emits WIN and breaks out of the round loop.',
   },
 ];
 export const simulator: ProblemSimulator = {

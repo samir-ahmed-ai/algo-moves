@@ -39,6 +39,8 @@ export interface PluginMeta {
    * hidden and autoplay is skipped when this is set.
    */
   static?: boolean;
+  /** Design-topic plugin with Architecture diagram + step Walkthrough tabs. */
+  designHybrid?: boolean;
 }
 
 export interface PluginViewProps<S = unknown> {

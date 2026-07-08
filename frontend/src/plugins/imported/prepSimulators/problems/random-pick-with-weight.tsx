@@ -8,7 +8,15 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  vizText,
+} from '../../../_shared/vizKit';
 
 interface PickWInput {
   weights: number[];
@@ -74,14 +82,21 @@ function record({ weights, targets }: PickWInput): Frame<PickWState>[] {
 function View({ frame }: PluginViewProps<PickWState>) {
   const s = frame.state;
   const total = s.prefix[s.prefix.length - 1]! ?? 0;
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+        {s.picked >= 0 && <RailStat k="idx" v={s.picked} tone="good" />}
+      </RailGroup>
+      <RailGroup label="draw">
+        <RailStat k="sum" v={total} />
+        {s.target > 0 && <RailStat k="target" v={s.target} />}
+      </RailGroup>
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.picked >= 0 && <span className="ml-2 font-mono text-good">index {s.picked}</span>}
-      </div>
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>weights & prefix (sum={total})</div>
-      <div className="mt-1 space-y-1">
+    <VizStage rail={rail} railWidth={168}>
+      <div className="space-y-1">
         {s.weights.map((w, i) => (
           <div
             key={i}
@@ -97,10 +112,7 @@ function View({ frame }: PluginViewProps<PickWState>) {
           </div>
         ))}
       </div>
-      {s.target > 0 && (
-        <div className={cn('mt-2 font-mono', vizText.sm, 'text-ink')}>target draw = {s.target}</div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 
@@ -122,105 +134,86 @@ export const title = 'Random Pick with Weight';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Random Pick with Weight"?',
+    prompt: 'How does Random Pick with Weight map a draw to an index?',
     choices: [
       {
-        label: 'Design — fits this problem',
+        label: 'Prefix sum buckets — binary search target in [1, total weight]',
         correct: true,
       },
       {
-        label: 'Heap + Sorted Available Set — different approach',
+        label: 'Reservoir over indices — uniform among equal weights',
       },
       {
-        label: 'Trie phone directory autocomplete — different approach',
+        label: 'Sorted interval merge — coverage query on numeric range',
       },
       {
-        label: 'Jump Array — different approach',
-      },
-    ],
-    explain: 'See Random Pick With Weight pattern',
-  },
-  {
-    id: 'init',
-    prompt: 'At the start of a run (Random Pick with Weight), what strategy is established?',
-    choices: [
-      {
-        label: 'See Random Pick With Weight pattern — described in INIT caption',
-        correct: true,
-      },
-      {
-        label: 'Precomputed final answer — before scanning input',
-      },
-      {
-        label: 'Descending sort required — as mandatory first step',
-      },
-      {
-        label: 'Every element visited upfront — marked from the start',
+        label: 'Jump array on line — skip painted cells for overlap',
       },
     ],
     explain:
-      'Random Pick with Weight: prefix sums define buckets. PickIndex draws target in [1,sum], binary search prefix for index.',
+      'prefix[i] holds cumulative weight; PickIndex draws target and binary-searches the first prefix ≥ target.',
   },
   {
     id: 'key-step',
-    prompt: 'On the "PICK" step (target= → ), what happens?',
+    prompt: 'On PICK with target draw, how is the index chosen?',
     choices: [
       {
-        label: 'PickIndex(): target= in [1,]. Binary — this move caption',
+        label: 'Binary search prefix — smallest index with prefix[mid] ≥ target',
         correct: true,
       },
       {
-        label: 'Run terminates immediately — no further frames',
+        label: 'Linear scan weights — pick first w strictly greater than target',
       },
       {
-        label: 'Pointers reset to zero — restart scan',
+        label: 'Hash target modulo n — map draw directly to index',
       },
       {
-        label: 'Remaining input skipped — early return path',
-      },
-    ],
-    explain: 'PickIndex(): target= in [1,]. Binary search prefix → index  (weight ).',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `weights` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field weights in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
+        label: 'Always index zero — ignore weights after prefix build',
       },
     ],
     explain:
-      'The recorder snapshots `weights` on every emit so each frame shows the algorithm mid-step.',
+      'Standard lower-bound binary search on prefix returns the bucket containing the random target.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'complexity',
+    prompt: 'What are the bounds for Random Pick with Weight?',
     choices: [
       {
-        label: 'PickIndex(): target= in [1,]. Binary — final DONE caption',
+        label: 'O(n) build, O(log n) pick, O(n) space — prefix array storage',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'O(1) build and pick, O(1) space — no prefix preprocessing',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'O(n log n) every pick, O(n²) space — resort weights each draw',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'O(n) pick only, O(1) space — scan without prefix sums',
       },
     ],
-    explain: 'PickIndex(): target= in [1,]. Binary search prefix → index  (weight ).',
+    explain: 'Prefix construction is linear once; each pick is a logarithmic search on that array.',
+  },
+  {
+    id: 'edge',
+    prompt: 'What range must the random target fall into?',
+    choices: [
+      {
+        label: 'Closed interval [1, sum of weights] — inclusive bucket draw',
+        correct: true,
+      },
+      {
+        label: '[0, n-1] index range — target is array index not weight mass',
+      },
+      {
+        label: '[0, sum) half-open — zero never selected in any bucket',
+      },
+      {
+        label: 'Any integer — modulo wraps targets outside total weight',
+      },
+    ],
+    explain:
+      'INIT states PickIndex draws target in [1, total] where total is the last prefix entry.',
   },
 ];
 export const simulator: ProblemSimulator = {

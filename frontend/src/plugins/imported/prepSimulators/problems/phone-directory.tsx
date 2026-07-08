@@ -8,7 +8,16 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  RailStack,
+  vizText,
+} from '../../../_shared/vizKit';
 
 type PhoneOp =
   | { kind: 'add'; number: string; name: string }
@@ -113,14 +122,21 @@ function record({ ops }: PhoneInput): Frame<PhoneState>[] {
 function View({ frame }: PluginViewProps<PhoneState>) {
   const s = frame.state;
   const entries = Object.entries(s.contacts);
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+        {s.result && <RailStat k="out" v={s.result} tone="good" />}
+      </RailGroup>
+      <RailGroup label="book">
+        <RailStat k="contacts" v={entries.length} />
+      </RailGroup>
+      {s.suggestions.length > 0 && <RailStack label="suggest" items={s.suggestions} />}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.result && <span className="ml-2 font-mono text-ink">{s.result}</span>}
-      </div>
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>{entries.length} contact(s)</div>
-      <div className="mt-1 space-y-1">
+    <VizStage rail={rail} railWidth={168}>
+      <div className="space-y-1">
         {entries.map(([num, name]) => (
           <div
             key={num}
@@ -130,12 +146,7 @@ function View({ frame }: PluginViewProps<PhoneState>) {
           </div>
         ))}
       </div>
-      {s.suggestions.length > 0 && (
-        <div className={cn('mt-2', vizText.sm, 'text-good')}>
-          suggest: {s.suggestions.join(', ')}
-        </div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 
@@ -158,105 +169,86 @@ export const title = 'Phone directory';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Phone directory"?',
+    prompt: 'Which structures power the phone directory?',
     choices: [
       {
-        label: 'Trie phone directory autocomplete — fits this problem',
+        label: 'Hash map plus digit trie — O(1) lookup and prefix suggest',
         correct: true,
       },
       {
-        label: 'Log parsing aggregation — different approach',
+        label: 'Sorted interval list — half-open booking overlap checks',
       },
       {
-        label: 'Stack — different approach',
+        label: 'Dual lazy heaps — track min and max stock prices',
       },
       {
-        label: 'Two Heaps — different approach',
+        label: 'Reservoir over array — uniform random target index',
       },
     ],
-    explain: 'Map number->name plus a digit trie holding names for prefix suggestions',
+    explain:
+      'contacts maps number to name; the trie stores names at every prefix along the digit path.',
   },
   {
     id: 'key-step',
-    prompt: 'On the "ADD" step (→), what happens?',
+    prompt: 'On ADD, what happens besides storing in the contacts map?',
     choices: [
       {
-        label: 'addContact("", ""): store in map — this move caption',
+        label: 'Append name at each trie node — along the number digit path',
         correct: true,
       },
       {
-        label: 'Run terminates immediately — no further frames',
+        label: 'Binary-search insert rank — sort by score then name',
       },
       {
-        label: 'Pointers reset to zero — restart scan',
+        label: 'Copy prior map snapshot — push new version layer',
       },
       {
-        label: 'Remaining input skipped — early return path',
+        label: 'Swap with last array slot — O(1) deletion trick',
       },
     ],
-    explain: 'addContact("", ""): store in map and append name along digit trie path.',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `contacts` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field contacts in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
-      },
-    ],
-    explain:
-      'The recorder snapshots `contacts` on every emit so each frame shows the algorithm mid-step.',
+    explain: 'Each digit descends the trie and pushes the contact name into that node names list.',
   },
   {
     id: 'complexity',
-    prompt: 'What are the time and space complexities for "Phone directory"?',
+    prompt: 'What are the time and space complexities for the phone directory?',
     choices: [
       {
-        label: 'O(digits) time, O(contacts) space — standard bounds here',
+        label: 'O(digits) per op time, O(contacts) space — map plus trie nodes',
         correct: true,
       },
       {
-        label: 'O(lines) time, O(unique keys) space — wrong order of growth',
+        label: 'O(1) all ops, O(1) space — single flat hash only',
       },
       {
-        label: 'O(1) time, O(n) space — wrong order of growth',
+        label: 'O(n log n) suggest, O(n) space — resort all names each prefix',
       },
       {
-        label: 'O(n) time, O(n) space — wrong order of growth',
+        label: 'O(log snaps) get, O(length) space — per-cell snap history',
       },
     ],
     explain:
-      'O(digits). O(contacts). store contacts; each digit node keeps names; suggest returns node.names',
+      'add, lookup, and suggest walk at most the number length; trie nodes scale with stored prefixes.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'edge',
+    prompt: 'What does suggest return when the prefix path is missing in the trie?',
     choices: [
       {
-        label: 'Done. — final DONE caption',
+        label: 'Empty suggestion list — prefix walk stopped at a missing child',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'All contacts in map — ignore prefix and return everyone',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'Error and abort — treat missing prefix as fatal failure',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'Random subset — reservoir sample from global contact list',
       },
     ],
-    explain: 'Done.',
+    explain:
+      'If any prefix digit has no child, node is undefined and suggestions become an empty array.',
   },
 ];
 export const simulator: ProblemSimulator = {

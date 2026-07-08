@@ -8,7 +8,15 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  vizText,
+} from '../../../_shared/vizKit';
 
 type SqOp = { kind: 'add'; point: [number, number] } | { kind: 'count'; point: [number, number] };
 
@@ -81,14 +89,24 @@ function record({ ops }: SqInput): Frame<SqState>[] {
 
 function View({ frame }: PluginViewProps<SqState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+      </RailGroup>
+      {s.result !== null && (
+        <RailGroup label="result">
+          <RailStat k="val" v={s.result} tone="good" />
+        </RailGroup>
+      )}
+      <RailGroup label="points">
+        <RailStat k="count" v={s.points.length} />
+      </RailGroup>
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.result !== null && <span className="ml-2 font-mono text-good">→ {s.result}</span>}
-      </div>
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>{s.points.length} point(s)</div>
-      <div className="mt-1 flex flex-wrap gap-1">
+    <VizStage rail={rail} railWidth={168}>
+      <div className="flex flex-wrap gap-1">
         {Object.entries(s.counts).map(([k, c]) => (
           <span
             key={k}
@@ -101,7 +119,7 @@ function View({ frame }: PluginViewProps<SqState>) {
           <span className={cn(vizText.sm, 'text-ink3')}>empty</span>
         )}
       </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -123,86 +141,84 @@ export const title = 'Detect Squares';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Detect Squares"?',
+    prompt: 'How does Detect Squares store and query points?',
     choices: [
       {
-        label: 'Design — fits this problem',
+        label: 'Point count map — tally repeats at each coordinate key',
         correct: true,
       },
       {
-        label: 'Hash map + doubly linked list LRU — different approach',
+        label: 'Sorted interval merge — union of painted segments',
       },
       {
-        label: 'Heap + Sorted Available Set — different approach',
+        label: 'Dual heap median — split stream into low and high halves',
       },
       {
-        label: 'Trie phone directory autocomplete — different approach',
+        label: 'Postfix node stack — build expression tree bottom-up',
       },
     ],
-    explain: 'See Detect Squares pattern',
+    explain: 'counts maps "x,y" to frequency; Count sums products of diagonal partner counts.',
   },
   {
     id: 'key-step',
-    prompt: 'On the "COUNT" step ((,) → ), what happens?',
+    prompt: 'On COUNT(q), how is the answer computed?',
     choices: [
       {
-        label: 'Count(,): scan diagonal partners p — this move caption',
+        label: 'Scan diagonal partners p — add cnt[p1]×cnt[p2] when |dx|=|dy|',
         correct: true,
       },
       {
-        label: 'Run terminates immediately — no further frames',
+        label: 'Sort all points — binary search axis-aligned square corners',
       },
       {
-        label: 'Pointers reset to zero — restart scan',
+        label: 'DFS four corners — enumerate every 4-point combination',
       },
       {
-        label: 'Remaining input skipped — early return path',
+        label: 'Hash only query point — ignore stored partner coordinates',
       },
     ],
     explain:
-      'Count(,): scan diagonal partners p where |px-qx|=|py-qy| and px≠qx. Sum cnt[px,qy]!×cnt[qx,py]! = .',
+      'For each stored point p forming a diagonal with q, multiply counts at the two completing corners.',
   },
   {
-    id: 'state',
-    prompt: 'What does the `points` field track in the visualization state?',
+    id: 'complexity',
+    prompt: 'What are typical bounds for Detect Squares?',
     choices: [
       {
-        label: 'Field points in state — updated each frame',
+        label: 'O(points) per count, O(points) space — scan stored list',
         correct: true,
       },
       {
-        label: 'Fixed display label — unchanged each frame',
+        label: 'O(1) count always, O(1) space — constant lookup table',
       },
       {
-        label: 'Shuffle seed value — for random ordering',
+        label: 'O(log n) count, O(n) space — interval binary search',
       },
       {
-        label: 'Failure error code — set once at end',
+        label: 'O(n log n) add, O(1) space — resort coordinates each add',
       },
     ],
-    explain:
-      'The recorder snapshots `points` on every emit so each frame shows the algorithm mid-step.',
+    explain: 'Count iterates all stored points; Add is O(1) map update plus append to pts.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'edge',
+    prompt: 'Which pairs are skipped when scanning for squares with query q?',
     choices: [
       {
-        label: 'Count(,): scan diagonal partners p — final DONE caption',
+        label: 'Same x as q or unequal |dx| and |dy| — not a diagonal partner',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'Points with count zero — already removed from map entries',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'All points below q.y — only upper half-plane considered',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'Duplicate coordinates — second copy never counted again',
       },
     ],
-    explain:
-      'Count(,): scan diagonal partners p where |px-qx|=|py-qy| and px≠qx. Sum cnt[px,qy]!×cnt[qx,py]! = .',
+    explain: 'The loop continues when px equals qx or when absolute row and column deltas differ.',
   },
 ];
 export const simulator: ProblemSimulator = {

@@ -8,7 +8,15 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  vizText,
+} from '../../../_shared/vizKit';
 
 interface LogOp {
   ts: number;
@@ -80,18 +88,24 @@ function record({ ops }: LoggerInput): Frame<LoggerState>[] {
 function View({ frame }: PluginViewProps<LoggerState>) {
   const s = frame.state;
   const entries = Object.entries(s.logs).sort((a, b) => a[1]! - b[1]!);
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+      </RailGroup>
+      {s.allowed !== null && (
+        <RailGroup label="result">
+          <RailStat k="ok" v={s.allowed ? 'print' : 'blocked'} tone={s.allowed ? 'good' : 'bad'} />
+        </RailGroup>
+      )}
+      <RailGroup label="logs">
+        <RailStat k="size" v={Object.keys(s.logs).length} />
+      </RailGroup>
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.allowed !== null && (
-          <span className={cn('ml-2 font-mono', s.allowed ? 'text-good' : 'text-bad')}>
-            → {s.allowed ? 'print' : 'blocked'}
-          </span>
-        )}
-      </div>
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>logs (msg → last ts)</div>
-      <div className="mt-1 space-y-1">
+    <VizStage rail={rail} railWidth={168}>
+      <div className="space-y-1">
         {entries.length === 0 ? (
           <span className={cn(vizText.sm, 'text-ink3')}>empty</span>
         ) : (
@@ -109,7 +123,7 @@ function View({ frame }: PluginViewProps<LoggerState>) {
           ))
         )}
       </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -132,84 +146,85 @@ export const title = 'Logger Rate Limiter';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Logger Rate Limiter"?',
+    prompt: 'How does the logger rate limiter remember recent prints?',
     choices: [
       {
-        label: 'Design — fits this problem',
+        label: 'Message-to-timestamp map — per-msg last printed time',
         correct: true,
       },
       {
-        label: 'Copy-on-write version snapshots — different approach',
+        label: 'Level counter hash — aggregate INFO WARN ERROR totals',
       },
       {
-        label: 'Stack — different approach',
+        label: 'Sorted booking intervals — half-open overlap rejection',
       },
       {
-        label: 'Two Heaps — different approach',
-      },
-    ],
-    explain: 'See Logger Rate Limiter pattern',
-  },
-  {
-    id: 'key-step',
-    prompt: 'On the "PRINT" step (print @), what happens?',
-    choices: [
-      {
-        label: 'ts=, msg="": ${last === undefined ? — this move caption',
-        correct: true,
-      },
-      {
-        label: 'Run terminates immediately — no further frames',
-      },
-      {
-        label: 'Pointers reset to zero — restart scan',
-      },
-      {
-        label: 'Remaining input skipped — early return path',
-      },
-    ],
-    explain: 'ts=, msg="": ${last === undefined ? \'first time\' : ',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `logs` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field logs in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
+        label: 'Index-value pair lists — merge-walk sparse vectors',
       },
     ],
     explain:
-      'The recorder snapshots `logs` on every emit so each frame shows the algorithm mid-step.',
+      'logs[msg] stores last allowed timestamp; ShouldPrintMessage compares ts against last+10.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'key-step',
+    prompt: 'When does ShouldPrintMessage return false (BLOCK frame)?',
     choices: [
       {
-        label: 'Done. distinct message(s) recorded — final DONE caption',
+        label: 'Same msg within 10 sec — ts < lastPrinted + 10',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'Any repeat message — second print always blocked',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'Timestamp decreases — reject non-monotonic ts only',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'Map size exceeds ten — cap distinct messages at ten',
       },
     ],
-    explain: 'Done.  distinct message(s) recorded in the map.',
+    explain:
+      'BLOCK emits when last is defined and ts is still inside the ten-second window after last.',
+  },
+  {
+    id: 'complexity',
+    prompt: 'What are the bounds for Logger Rate Limiter?',
+    choices: [
+      {
+        label: 'O(1) per message, O(distinct msgs) space — hash map lookup',
+        correct: true,
+      },
+      {
+        label: 'O(n) per message, O(n) space — scan all prior timestamps',
+      },
+      {
+        label: 'O(log n) per message, O(1) space — heap of recent events',
+      },
+      {
+        label: 'O(messages) time, O(1) space — single last-global timestamp',
+      },
+    ],
+    explain: 'Each op is one map get/set; storage scales with distinct messages ever printed.',
+  },
+  {
+    id: 'edge',
+    prompt: 'What happens on the first print of a new message?',
+    choices: [
+      {
+        label: 'Always allowed — last undefined so window check is skipped',
+        correct: true,
+      },
+      {
+        label: 'Blocked until ten seconds — even first print waits',
+      },
+      {
+        label: 'Requires empty map — reject if any other msg was printed',
+      },
+      {
+        label: 'Print but do not store — map updated only on second print',
+      },
+    ],
+    explain: 'When last === undefined the else branch prints and sets logs[msg] = ts.',
   },
 ];
 export const simulator: ProblemSimulator = {

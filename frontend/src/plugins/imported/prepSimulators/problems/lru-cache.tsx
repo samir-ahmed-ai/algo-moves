@@ -8,7 +8,15 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  vizText,
+} from '../../../_shared/vizKit';
 
 type LruOp = { kind: 'get'; key: number } | { kind: 'put'; key: number; val: number };
 
@@ -134,20 +142,30 @@ function record({ cap, ops }: LruInput): Frame<LruState>[] {
 
 function View({ frame }: PluginViewProps<LruState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+      </RailGroup>
+      {s.out !== null && (
+        <RailGroup label="result">
+          <RailStat k="val" v={s.out} tone="good" />
+        </RailGroup>
+      )}
+      <RailGroup label="cache">
+        <RailStat k="cap" v={s.cap} />
+        <RailStat k="used" v={s.list.length} />
+      </RailGroup>
+      {s.evicted && (
+        <RailGroup label="evict">
+          <RailStat k="key" v={`${s.evicted.key}:${s.evicted.val}`} tone="bad" />
+        </RailGroup>
+      )}
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        op = <span className="font-mono text-ink">{s.op || '—'}</span>
-        {s.out !== null && (
-          <>
-            {' · '}returned <span className="font-mono text-ink">{s.out}</span>
-          </>
-        )}
-      </div>
-      <div className={cn('mt-1', vizText.sm, 'text-ink3')}>
-        MRU → LRU (cap {s.cap}, {s.list.length} used)
-      </div>
-      <div className="mt-1 flex flex-wrap gap-1">
+    <VizStage rail={rail} railWidth={168}>
+      <div className="flex flex-wrap gap-1">
         {s.list.length === 0 ? (
           <span className={cn(vizText.sm, 'text-ink3')}>empty</span>
         ) : (
@@ -170,12 +188,7 @@ function View({ frame }: PluginViewProps<LruState>) {
           ))
         )}
       </div>
-      {s.evicted && (
-        <div className={cn('mt-1', vizText.sm, 'text-bad')}>
-          evicted {s.evicted.key}:{s.evicted.val}
-        </div>
-      )}
-    </div>
+    </VizStage>
   );
 }
 
@@ -207,126 +220,84 @@ export const title = 'LRU Cache';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "LRU Cache"?',
+    prompt: 'Which structures implement LRU Cache here?',
     choices: [
       {
-        label: 'Hash map + doubly linked list LRU — fits this problem',
+        label: 'Hash map plus linked list — map key to node, MRU at front',
         correct: true,
       },
       {
-        label: 'Round-robin load balancer — different approach',
+        label: 'Two lazy heaps — track min and max price by timestamp',
       },
       {
-        label: 'Copy-on-write version snapshots — different approach',
+        label: 'Round-robin server index — cycle through backend pool',
       },
       {
-        label: 'Trie dictionary + spell suggest — different approach',
+        label: 'Per-index snap history — versioned array entries',
       },
     ],
-    explain: 'Map key->node; the list keeps MRU at the front, LRU at the tail',
-  },
-  {
-    id: 'init',
-    prompt: 'At the start of a run (LRU Cache), what strategy is established?',
-    choices: [
-      {
-        label: 'Map key->node; the list keeps MRU — described in INIT caption',
-        correct: true,
-      },
-      {
-        label: 'Precomputed final answer — before scanning input',
-      },
-      {
-        label: 'Descending sort required — as mandatory first step',
-      },
-      {
-        label: 'Every element visited upfront — marked from the start',
-      },
-    ],
-    explain:
-      'LRU Cache (capacity ): a hash map points to nodes in a doubly-linked list. MRU sits at the front, LRU at the tail. Get/Put move a node to the front; Put evicts tail.prev when full.',
+    explain: 'The map finds nodes in O(1); the list order encodes recency with LRU at the tail.',
   },
   {
     id: 'key-step',
-    prompt: 'On the "PUT" step (put = update), what happens?',
+    prompt: 'When Put inserts a new key at full capacity, what happens first?',
     choices: [
       {
-        label: 'Put(, ): key exists — update — this move caption',
+        label: 'Evict LRU tail key — remove from map before inserting',
         correct: true,
       },
       {
-        label: 'Run terminates immediately — no further frames',
+        label: 'Reject the Put outright — return false without changes',
       },
       {
-        label: 'Pointers reset to zero — restart scan',
+        label: 'Double capacity silently — grow list without eviction',
       },
       {
-        label: 'Remaining input skipped — early return path',
-      },
-    ],
-    explain: 'Put(, ): key exists — update value and move to MRU front.',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `cap` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field cap in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
+        label: 'Move every node one slot — shift entire list right',
       },
     ],
     explain:
-      'The recorder snapshots `cap` on every emit so each frame shows the algorithm mid-step.',
+      'At capacity the tail node is removed from both list and map, then the new key is inserted at MRU.',
   },
   {
     id: 'complexity',
-    prompt: 'What are the time and space complexities for "LRU Cache"?',
+    prompt: 'What are the time and space complexities for LRU Cache?',
     choices: [
       {
-        label: 'O(1) get/put time, O(capacity) space — standard bounds here',
+        label: 'O(1) get/put time, O(capacity) space — map plus list nodes',
         correct: true,
       },
       {
-        label: 'O(1) time, O(servers) space — wrong order of growth',
+        label: 'O(log n) get/put time, O(n) space — heap rebalancing each touch',
       },
       {
-        label: 'O(m+n) time, O(n) space — wrong order of growth',
+        label: 'O(n) get time, O(1) space — scan list for every lookup',
       },
       {
-        label: 'O(versions) get time, O(changes) space — wrong order of growth',
+        label: 'O(path depth) time, O(nodes) space — trie walk per access',
       },
     ],
-    explain:
-      'O(1) get/put. O(capacity). get/put -> remove+insertFront; over capacity -> evict tail.prev',
+    explain: 'Map lookup and list splice are constant time; storage is bounded by capacity.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'edge',
+    prompt: 'What does Get return on a cache miss?',
     choices: [
       {
-        label: 'Done. Final order MRU → LRU: — final DONE caption',
+        label: 'Return -1 — list order stays unchanged on a miss',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'Insert default value zero — treat miss like Put',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'Evict LRU entry — make room for the missing key',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'Throw error — abort the simulation run immediately',
       },
     ],
-    explain: 'Done. Final order MRU → LRU: ${list.map((n) => ',
+    explain: 'A missing key emits a miss frame with out=-1 and does not reorder the list.',
   },
 ];
 export const simulator: ProblemSimulator = {

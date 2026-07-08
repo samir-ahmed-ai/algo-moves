@@ -2,28 +2,106 @@ import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils/cn';
 import { isEditableTarget } from '@/lib/utils/keyboard';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
+import { HighlightedCode } from '@/components/code/HighlightedCode';
+import { ConceptText, conceptFromPlugin } from '@/components/shared/ConceptText';
+import { isTextOnlyCourse } from '@/lib/canvas/conceptCourse';
 import { ProblemPanelBody } from './ProblemPanelBody';
-import { OverviewContentColumn, OverviewProblemColumn } from './overviewColumns';
+import {
+  OverviewContentColumn,
+  OverviewProblemColumn,
+  ProblemStatementColumn,
+} from './overviewColumns';
 import { INSPECTOR_TABS, StudioInspectorRail, StudioPanelDock } from './StudioInspectorRail';
 import { StudioNextFooter } from './StudioNextFooter';
-import { StudioSplitLayout } from './studioSplitLayout';
+import { StudioContentPanel, StudioSplitLayout } from './studioSplitLayout';
 import { useOverviewView } from './useOverviewView';
 import { useStudioNextShortcut } from './useStudioNextShortcut';
 import { useCodeStudioContent } from '@/shell/study/CodeStudio';
 import { useCanvasFrame, useCanvasStatic } from '@/shell/canvas';
 
-/** Learn Overview tab — problem statement beside the live animation board. */
-export function ProblemOverviewBody({
-  nextLabel,
-  onNext,
-  nextAllLabel,
-  onNextAll,
-}: {
+interface OverviewNav {
   nextLabel?: string | undefined;
   onNext?: (() => void) | undefined;
   nextAllLabel?: string | undefined;
   onNextAll?: (() => void) | undefined;
-} = {}) {
+}
+
+/**
+ * Learn Overview. Recall-first (text-only) courses like the Go Course get a
+ * static concept-text + sample-code layout with no animation; every other
+ * problem keeps the live animation board.
+ */
+export function ProblemOverviewBody(props: OverviewNav = {}) {
+  const { item } = useCanvasStatic();
+  return isTextOnlyCourse(item.courseId) ? (
+    <ConceptReadOverview {...props} />
+  ) : (
+    <AnimatedOverviewBody {...props} />
+  );
+}
+
+/** Text-only Overview: concept walkthrough as prose beside the syntax-colored sample code. */
+function ConceptReadOverview({ nextLabel, onNext, nextAllLabel, onNextAll }: OverviewNav) {
+  const { item, plugin } = useCanvasStatic();
+  const isMobile = useIsMobile();
+  const concept = conceptFromPlugin(plugin);
+  const code = plugin.code?.text?.trim() ?? '';
+  const lang = plugin.code?.lang ?? 'go';
+  useStudioNextShortcut(onNext, onNextAll);
+
+  return (
+    <StudioSplitLayout
+      footer={
+        <StudioNextFooter
+          nextLabel={nextLabel}
+          onNext={onNext}
+          nextAllLabel={nextAllLabel}
+          onNextAll={onNextAll}
+        />
+      }
+      problem={
+        <ProblemStatementColumn
+          className={cn(isMobile && 'max-h-[45vh] shrink-0 border-b border-edge')}
+        >
+          <div className="flex flex-col gap-2">
+            <div>
+              <h2 className="text-[length:var(--fs-title)] font-semibold leading-tight text-ink">
+                {item.title}
+              </h2>
+              {item.summary && (
+                <p className="mt-0.5 text-[length:var(--fs-sm)] leading-relaxed text-ink3">
+                  {item.summary}
+                </p>
+              )}
+            </div>
+            <ConceptText concept={concept} />
+          </div>
+        </ProblemStatementColumn>
+      }
+      second={
+        <StudioContentPanel>
+          {code ? (
+            <div className="source-code-frame flex min-h-0 flex-1 overflow-hidden">
+              <HighlightedCode
+                code={code}
+                lang={lang}
+                gutter
+                className="ws-scroll min-h-0 flex-1 overflow-auto p-3 font-mono sm:p-4"
+              />
+            </div>
+          ) : (
+            <div className="grid min-h-0 flex-1 place-items-center p-6 text-[length:var(--fs-sm)] text-ink3">
+              No sample code for this concept.
+            </div>
+          )}
+        </StudioContentPanel>
+      }
+    />
+  );
+}
+
+/** Learn Overview tab — problem statement beside the live animation board. */
+function AnimatedOverviewBody({ nextLabel, onNext, nextAllLabel, onNextAll }: OverviewNav = {}) {
   const isMobile = useIsMobile();
   const [inspectorOpen, setInspectorOpen] = useState(false);
   const [inspTab, setInspTab] = useState(INSPECTOR_TABS[0]?.id ?? 'bigo');

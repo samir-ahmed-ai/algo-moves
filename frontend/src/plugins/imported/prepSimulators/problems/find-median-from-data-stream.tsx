@@ -96,23 +96,87 @@ export const title = 'Find Median From Data Stream';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Find Median from Data Stream"?',
+    prompt: 'Which structure tracks the running median from a stream?',
     choices: [
       {
-        label: 'Design — fits this problem',
+        label: 'Dual heaps — max-heap low half, min-heap high half',
         correct: true,
       },
       {
-        label: 'Log parsing aggregation — different approach',
+        label: 'Sorted merged intervals — AddRange maintains coverage',
       },
       {
-        label: 'Copy-on-write version snapshots — different approach',
+        label: 'Lazy price heaps — pop stale min/max on stock query',
       },
       {
-        label: 'Stack — different approach',
+        label: 'Flat RLE pairs — count-value runs consumed by Next',
       },
     ],
-    explain: 'See Find Median From Data Stream pattern',
+    explain:
+      'low holds smaller half (max at top); high holds larger half (min at top); rebalance keeps sizes balanced.',
+  },
+  {
+    id: 'key-step',
+    prompt: 'After pushing into low, why move the max to high (MOVE frame)?',
+    choices: [
+      {
+        label: 'Maintain invariant — every low value must be ≤ every high value',
+        correct: true,
+      },
+      {
+        label: 'Compute maximum — track global max of entire stream',
+      },
+      {
+        label: 'Delete smallest — discard min before median query',
+      },
+      {
+        label: 'Sort full stream — rebuild array each AddNum call',
+      },
+    ],
+    explain:
+      'Pop max from low and pushHigh ensures the partition between halves respects sorted order.',
+  },
+  {
+    id: 'complexity',
+    prompt: 'What are the bounds for Find Median from Data Stream?',
+    choices: [
+      {
+        label: 'O(log n) add, O(1) median query, O(n) space — two heaps',
+        correct: true,
+      },
+      {
+        label: 'O(1) add and median, O(1) space — single variable tracker',
+      },
+      {
+        label: 'O(n) add, O(n) median, O(1) space — resort array each insert',
+      },
+      {
+        label: 'O(log n) median only, O(1) space — no stored elements kept',
+      },
+    ],
+    explain:
+      'Each AddNum does heap push/pop; median reads heap tops after rebalance without full sort.',
+  },
+  {
+    id: 'edge',
+    prompt: 'When high.size exceeds low.size after a move, what happens?',
+    choices: [
+      {
+        label: 'REBALANCE — pop smallest from high back into low',
+        correct: true,
+      },
+      {
+        label: 'Discard new value — reject AddNum until sizes equal',
+      },
+      {
+        label: 'Merge heaps — combine into one sorted array',
+      },
+      {
+        label: 'Swap heap roles — exchange low and high identifiers',
+      },
+    ],
+    explain:
+      'Rebalance moves smallest of high back to low so low has at least as many elements as high.',
   },
 ];
 export const simulator: ProblemSimulator = {

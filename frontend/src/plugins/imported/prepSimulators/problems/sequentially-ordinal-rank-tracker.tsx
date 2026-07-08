@@ -8,7 +8,15 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  vizText,
+} from '../../../_shared/vizKit';
 
 type SorOp = { kind: 'add'; name: string; score: number } | { kind: 'get' };
 
@@ -92,14 +100,21 @@ function record({ ops }: SorInput): Frame<SorState>[] {
 
 function View({ frame }: PluginViewProps<SorState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+        {s.result && <RailStat k="out" v={s.result} tone="good" />}
+      </RailGroup>
+      <RailGroup label="rank">
+        <RailStat k="idx" v={s.idx} />
+        <RailStat k="size" v={s.locs.length} />
+      </RailGroup>
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.result && <span className="ml-2 font-mono text-good">{s.result}</span>}
-      </div>
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>idx = {s.idx} · sorted ranks</div>
-      <div className="mt-1 space-y-0.5">
+    <VizStage rail={rail} railWidth={168}>
+      <div className="space-y-0.5">
         {s.locs.map((loc, i) => (
           <div
             key={`${loc.name}-${i}`}
@@ -114,7 +129,7 @@ function View({ frame }: PluginViewProps<SorState>) {
         ))}
         {s.locs.length === 0 && <span className={cn(vizText.sm, 'text-ink3')}>empty</span>}
       </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -137,84 +152,85 @@ export const title = 'Sequentially Ordinal Rank Tracker';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Sequentially Ordinal Rank Tracker"?',
+    prompt: 'How are locations ordered in the rank tracker?',
     choices: [
       {
-        label: 'Design — fits this problem',
+        label: 'Sorted by score asc — tie-break name descending lex order',
         correct: true,
       },
       {
-        label: 'Trie dictionary + spell suggest — different approach',
+        label: 'Insertion order queue — FIFO list of added names',
       },
       {
-        label: 'Hash map + doubly linked list LRU — different approach',
+        label: 'Hash by name — unsorted map iteration for Get calls',
       },
       {
-        label: 'Heap + Sorted Available Set — different approach',
-      },
-    ],
-    explain: 'See Sequentially Ordinal Rank Tracker pattern',
-  },
-  {
-    id: 'key-step',
-    prompt: 'On the "ADD" step (@), what happens?',
-    choices: [
-      {
-        label: 'Add("", ): binary-search insert. Rank — this move caption',
-        correct: true,
-      },
-      {
-        label: 'Run terminates immediately — no further frames',
-      },
-      {
-        label: 'Pointers reset to zero — restart scan',
-      },
-      {
-        label: 'Remaining input skipped — early return path',
-      },
-    ],
-    explain: 'Add("", ): binary-search insert. Rank list: [${locs.map((x) => ',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `locs` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field locs in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
+        label: 'Min-heap by score — pop smallest on every Get request',
       },
     ],
     explain:
-      'The recorder snapshots `locs` on every emit so each frame shows the algorithm mid-step.',
+      'insertSorted binary-searches the rank list using (score, name) ordering from the comparator.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'key-step',
+    prompt: 'On GET, how is the next ordinal rank returned?',
     choices: [
       {
-        label: 'Add("", ): binary-search insert. Rank — final DONE caption',
+        label: 'Return locs[idx].name — then increment idx for next Get',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'Pop front of list — remove returned name from ranks',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'Random index pick — uniform among remaining locs',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'Highest score always — ignore idx sequential counter',
       },
     ],
-    explain: 'Add("", ): binary-search insert. Rank list: [${locs.map((x) => ',
+    explain: 'Get reads locs[idx]?.name, emits result, and idx++ walks ranks in sorted order.',
+  },
+  {
+    id: 'complexity',
+    prompt: 'What are the bounds for Sequentially Ordinal Rank Tracker?',
+    choices: [
+      {
+        label: 'O(n) add insert, O(1) get, O(n) space — sorted array storage',
+        correct: true,
+      },
+      {
+        label: 'O(log n) add and get, O(1) space — tree without stored list',
+      },
+      {
+        label: 'O(1) add, O(n) get, O(1) space — scan unsorted array each get',
+      },
+      {
+        label: 'O(n log n) every op, O(n²) space — duplicate sorted copies',
+      },
+    ],
+    explain: 'Add splices into sorted locs; Get is O(1) array access at moving idx pointer.',
+  },
+  {
+    id: 'edge',
+    prompt: 'When two locations share the same score, who ranks earlier?',
+    choices: [
+      {
+        label: 'Lexicographically larger name — name desc breaks score ties',
+        correct: true,
+      },
+      {
+        label: 'Earlier Add call — insertion order overrides score ties',
+      },
+      {
+        label: 'Smaller name first — ascending lex tie-break rule',
+      },
+      {
+        label: 'Random tie shuffle — reorder equal scores each Add',
+      },
+    ],
+    explain:
+      'Comparator treats cur.score === score && cur.name > name as before, placing larger names first.',
   },
 ];
 export const simulator: ProblemSimulator = {

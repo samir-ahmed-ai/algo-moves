@@ -176,106 +176,84 @@ export const title = 'Dot Product of Two Sparse Vectors';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Dot Product of Two Sparse Vectors"?',
+    prompt: 'How are sparse vectors stored for dot product?',
     choices: [
       {
-        label: 'Design — fits this problem',
+        label: 'Sorted index-value pairs — only non-zero entries kept',
         correct: true,
       },
       {
-        label: 'Bijective tiny URL encode/decode — different approach',
+        label: 'Dense length-n arrays — scan every index including zeros',
       },
       {
-        label: 'Trie dictionary + spell suggest — different approach',
+        label: 'Hash map per vector — unsorted random index iteration',
       },
       {
-        label: 'Hash map + doubly linked list LRU — different approach',
+        label: 'RLE count-value runs — flat encoding consumed by Next',
       },
     ],
-    explain: 'See Dot Product Of Two Sparse Vectors pattern',
-  },
-  {
-    id: 'init',
-    prompt:
-      'At the start of a run (Dot Product of Two Sparse Vectors), what strategy is established?',
-    choices: [
-      {
-        label: 'See Dot Product Of Two Sparse — described in INIT caption',
-        correct: true,
-      },
-      {
-        label: 'Precomputed final answer — before scanning input',
-      },
-      {
-        label: 'Descending sort required — as mandatory first step',
-      },
-      {
-        label: 'Every element visited upfront — marked from the start',
-      },
-    ],
-    explain:
-      'Sparse Vector Dot Product: store (index,value) pairs. Merge-walk both sorted lists — multiply when indices match.',
+    explain: 'toPairs filters nonzeros; merge-walk advances i or j comparing index keys.',
   },
   {
     id: 'key-step',
-    prompt: 'On the "SKIP" step (skip v1 @), what happens?',
+    prompt: 'On MATCH when i1 equals i2, what contributes to the dot product?',
     choices: [
       {
-        label: 'Index only in vec1 — advance — this move caption',
+        label: 'Multiply v1 times v2 — add product to running accumulator acc',
         correct: true,
       },
       {
-        label: 'Run terminates immediately — no further frames',
+        label: 'Add v1 plus v2 — sum values at shared index only',
       },
       {
-        label: 'Pointers reset to zero — restart scan',
+        label: 'Skip both pointers — ignore equal indices entirely',
       },
       {
-        label: 'Remaining input skipped — early return path',
+        label: 'Take max of v1 v2 — larger magnitude wins at index',
       },
     ],
-    explain: 'Index  only in vec1 — advance i.',
+    explain: 'Matching indices emit prod = v1*v2, acc += prod, then both i and j advance.',
   },
   {
-    id: 'state',
-    prompt: 'What does the `pairs1` field track in the visualization state?',
+    id: 'complexity',
+    prompt: 'What are the bounds for sparse vector dot product?',
     choices: [
       {
-        label: 'Field pairs1 in state — updated each frame',
+        label: 'O(n1 + n2) time, O(nonzeros) space — merge walk both lists',
         correct: true,
       },
       {
-        label: 'Fixed display label — unchanged each frame',
+        label: 'O(n1 × n2) time, O(1) space — cross multiply all pairs',
       },
       {
-        label: 'Shuffle seed value — for random ordering',
+        label: 'O(n log n) time, O(n) space — sort full dense vectors',
       },
       {
-        label: 'Failure error code — set once at end',
+        label: 'O(1) time, O(n) space — hash lookup per dense index',
       },
     ],
     explain:
-      'The recorder snapshots `pairs1` on every emit so each frame shows the algorithm mid-step.',
+      'Each pointer moves forward at least one step per iteration; storage is pair lists only.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'edge',
+    prompt: 'When i1 < i2 during the merge walk, what happens?',
     choices: [
       {
-        label: 'Dot product = . Only overlapping — final DONE caption',
+        label: 'Advance i pointer — index exists solely in first vector list',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'Advance j pointer — treat smaller index as vec2-only skip',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'Stop walk early — unequal indices end dot product',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'Insert zero pair — synthesize missing index in vec2',
       },
     ],
-    explain: 'Dot product = . Only overlapping indices contributed.',
+    explain: 'SKIP frame advances i when the smaller index appears only in pairs1.',
   },
 ];
 export const simulator: ProblemSimulator = {

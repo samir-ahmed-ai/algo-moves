@@ -8,7 +8,15 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  vizText,
+} from '../../../_shared/vizKit';
 
 interface Read4Input {
   /** Chunks returned by each read4 call (each up to 4 chars). */
@@ -94,19 +102,25 @@ function record({ chunks, reads }: Read4Input): Frame<Read4State>[] {
 
 function View({ frame }: PluginViewProps<Read4State>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+        {s.out && <RailStat k="out" v={`"${s.out}"`} tone="good" />}
+      </RailGroup>
+      <RailGroup label="buf4">
+        <RailStat k="buf" v={s.buf4 || '—'} />
+        <RailStat k="i4" v={s.i4} />
+        <RailStat k="n4" v={s.n4} />
+      </RailGroup>
+      <RailGroup label="chunks">
+        <RailStat k="idx" v={`${s.chunkIdx}/${s.chunks.length}`} />
+      </RailGroup>
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.out && <span className="ml-2 font-mono text-good">&quot;{s.out}&quot;</span>}
-      </div>
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>
-        buf4: &quot;{s.buf4 || '—'}&quot; · i4={s.i4} n4={s.n4}
-      </div>
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>
-        read4 chunks ({s.chunkIdx}/{s.chunks.length} used)
-      </div>
-      <div className="mt-1 flex flex-wrap gap-1">
+    <VizStage rail={rail} railWidth={168}>
+      <div className="flex flex-wrap gap-1">
         {s.chunks.map((c, i) => (
           <span
             key={i}
@@ -124,7 +138,7 @@ function View({ frame }: PluginViewProps<Read4State>) {
           </span>
         ))}
       </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -147,106 +161,87 @@ export const title = 'Read N Characters Given read4 II Call Multiple Times';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Read N Characters Given Read4 II - Call Multiple Times"?',
+    prompt: 'How does Read4 II buffer characters between calls?',
     choices: [
       {
-        label: 'Design — fits this problem',
+        label: 'Internal buf4 with i4/n4 — refill when i4 equals n4',
         correct: true,
       },
       {
-        label: 'Log parsing aggregation — different approach',
+        label: 'Per-index snap history — binary search prior versions',
       },
       {
-        label: 'Copy-on-write version snapshots — different approach',
+        label: 'RLE count-value pairs — consume runs from flat encoding',
       },
       {
-        label: 'Stack — different approach',
-      },
-    ],
-    explain: 'See Read N Characters Given Read4 Ii Call Multiple Times pattern',
-  },
-  {
-    id: 'init',
-    prompt:
-      'At the start of a run (Read N Characters Given Read4 II - Call Multiple Times), what strategy is established?',
-    choices: [
-      {
-        label: 'See Read N Characters Given Read4 — described in INIT caption',
-        correct: true,
-      },
-      {
-        label: 'Precomputed final answer — before scanning input',
-      },
-      {
-        label: 'Descending sort required — as mandatory first step',
-      },
-      {
-        label: 'Every element visited upfront — marked from the start',
+        label: 'Row/col/diag sums — track tic-tac-toe win lines',
       },
     ],
     explain:
-      'Read4 II: internal buf4 buffer. When i4==n4, call read4() to refill. Copy chars into user buf until n chars or EOF.',
+      'read4 fills buf4; Read copies from buf4[i4] until n chars or EOF when refill returns zero.',
   },
   {
     id: 'key-step',
-    prompt: 'On the "READ" step ( chars), what happens?',
+    prompt: 'When does the recorder emit a REFILL frame?',
     choices: [
       {
-        label: 'Read(buf, ): copied char(s) "" — this move caption',
+        label: 'i4 equals n4 — buffer empty before next character copy',
         correct: true,
       },
       {
-        label: 'Run terminates immediately — no further frames',
+        label: 'Every Read call — refill even if buf4 still has chars',
       },
       {
-        label: 'Pointers reset to zero — restart scan',
+        label: 'chunkIdx exceeds chunks — only after all chunks consumed',
       },
       {
-        label: 'Remaining input skipped — early return path',
-      },
-    ],
-    explain: 'Read(buf, ): copied  char(s) "" from buf4.',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `chunks` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field chunks in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
+        label: 'Copied n chars — refill only after full user request',
       },
     ],
     explain:
-      'The recorder snapshots `chunks` on every emit so each frame shows the algorithm mid-step.',
+      'Inside the read loop, empty buffer triggers read4(), resets i4, and sets n4 from returned length.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'complexity',
+    prompt: 'What are the time and space bounds for Read4 II?',
     choices: [
       {
-        label: 'Read(buf, ): copied char(s) "" — final DONE caption',
+        label: 'O(total chars read) time, O(1) extra space — fixed buf4',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'O(n log n) time, O(n) space — sort chunks before read',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'O(1) per char worst case, O(chunks) space — store all input',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'O(path depth) time, O(nodes) space — trie walk per char',
       },
     ],
-    explain: 'Read(buf, ): copied  char(s) "" from buf4.',
+    explain:
+      'Each source character is copied once; only buf4, indices, and chunk pointer are retained.',
+  },
+  {
+    id: 'edge',
+    prompt: 'What happens when read4 returns 0 during a Read(n) call?',
+    choices: [
+      {
+        label: 'Stop copying early — return fewer than n chars at EOF',
+        correct: true,
+      },
+      {
+        label: 'Pad with null bytes — always fill exactly n characters',
+      },
+      {
+        label: 'Retry read4 forever — spin until non-zero length returns',
+      },
+      {
+        label: 'Reset chunkIdx to zero — wrap and reread from first chunk',
+      },
+    ],
+    explain:
+      'After refill returns n4===0, the while loop breaks and Read reports how many chars were copied.',
   },
 ];
 export const simulator: ProblemSimulator = {

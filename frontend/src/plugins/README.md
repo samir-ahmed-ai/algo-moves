@@ -84,6 +84,13 @@ problem has a bespoke step-simulator in `imported/prepSimulators/problems/<slug>
 manifest id, e.g. `prep-design-lru-cache`). `prepScene.tsx` is the animated Scene fallback for future
 imports that do not yet have a simulator.
 
+**Design-topic hybrid:** problems with `topic: "design"` ship both a static architecture diagram
+(`imported/prepSimulators/designDiagrams/registry.ts` → `DesignFlow`) and a step simulator.
+`makePrepPlugin()` wires them via `DesignHybridView` with **Architecture | Walkthrough** tabs.
+The plugin gets `meta.designHybrid: true` (not `static`); transport is hidden on the Architecture tab
+only. Author both the diagram registry entry and the simulator file; quizzes live on the simulator's
+`practice.quiz`.
+
 To add a prep simulator: `npm run scaffold-prep-sim -- <slug-or-manifestId>`, implement
 `record` / `View` / `Inspector`, then run `npm run check-prep-sim-coverage` (also in `check:all`).
 
@@ -140,6 +147,7 @@ If plugin metadata, quiz text, prep data, or catalog placement changes, regenera
 | Native plugin or simulator UI | `npm run check-plugin-typography` |
 | Quiz labels or practice content | `npm run check:quiz-labels` |
 | Prep simulator coverage | `npm run check-prep-sim-coverage` |
+| Design hybrid wiring (diagram + sim, not static) | `npm test` → `design-hybrid.test.ts`, `integrity.test.ts` |
 | Generated plugin/course metadata | `npm run check-plugin-meta` |
 | Generated problem briefs | `npm run check-problem-briefs` |
 | Full content quality sweep | `npm run check:content` |

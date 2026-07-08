@@ -8,7 +8,15 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  vizText,
+} from '../../../_shared/vizKit';
 
 type SnapOp =
   | { kind: 'set'; index: number; val: number }
@@ -105,21 +113,32 @@ function record({ length, ops }: SnapInput): Frame<SnapState>[] {
 
 function View({ frame }: PluginViewProps<SnapState>) {
   const s = frame.state;
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+      </RailGroup>
+      {s.result !== null && (
+        <RailGroup label="result">
+          <RailStat k="val" v={s.result} tone="good" />
+        </RailGroup>
+      )}
+      <RailGroup label="snap">
+        <RailStat k="id" v={s.sid} />
+        <RailStat k="len" v={s.length} />
+      </RailGroup>
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.result !== null && <span className="ml-2 font-mono text-good">{s.result}</span>}
-      </div>
-      <div className={cn('mt-2', vizText.sm, 'text-ink3')}>snapId = {s.sid}</div>
-      <div className="mt-1 space-y-1">
+    <VizStage rail={rail} railWidth={168}>
+      <div className="space-y-1">
         {s.snaps.map((arr, i) => (
           <div key={i} className={cn('font-mono', vizText.sm, 'text-ink')}>
             [{i}]: {arr.map(([sid, val]) => `@${sid}:${val}`).join(' → ')}
           </div>
         ))}
       </div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -142,105 +161,87 @@ export const title = 'Snapshot Array';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Snapshot Array"?',
+    prompt: 'How does Snapshot Array store values over time?',
     choices: [
       {
-        label: 'Design — fits this problem',
+        label: 'Per-index snap history — list of (snapId, val) pairs per cell',
         correct: true,
       },
       {
-        label: 'Hash map + doubly linked list LRU — different approach',
+        label: 'Single flat array — overwrite in place on every Set',
       },
       {
-        label: 'Heap + Sorted Available Set — different approach',
+        label: 'Copy-on-write map stack — full map snapshot per change',
       },
       {
-        label: 'Trie phone directory autocomplete — different approach',
-      },
-    ],
-    explain: 'See Snapshot Array pattern',
-  },
-  {
-    id: 'init',
-    prompt: 'At the start of a run (Snapshot Array), what strategy is established?',
-    choices: [
-      {
-        label: 'See Snapshot Array pattern — described in INIT caption',
-        correct: true,
-      },
-      {
-        label: 'Precomputed final answer — before scanning input',
-      },
-      {
-        label: 'Descending sort required — as mandatory first step',
-      },
-      {
-        label: 'Every element visited upfront — marked from the start',
+        label: 'Point count hash map — tally diagonal square partners',
       },
     ],
     explain:
-      'Snapshot Array: each index stores [(snapId,val),...]. Set updates latest entry or appends; Snap() increments sid; Get binary-searches history.',
+      'Each index keeps a time-ordered history; Snap() bumps sid so later Sets append new entries.',
   },
   {
     id: 'key-step',
-    prompt: 'On the "SNAP" step (id=), what happens?',
+    prompt: 'On GET(index, snapId), how is the answer found?',
     choices: [
       {
-        label: 'Snap(): snapshot id saved, sid→. — this move caption',
+        label: 'Binary search history — largest snapId ≤ query wins',
         correct: true,
       },
       {
-        label: 'Run terminates immediately — no further frames',
+        label: 'Linear scan all cells — return current array slot only',
       },
       {
-        label: 'Pointers reset to zero — restart scan',
+        label: 'Merge sorted intervals — check full range coverage',
       },
       {
-        label: 'Remaining input skipped — early return path',
-      },
-    ],
-    explain: 'Snap(): snapshot id  saved, sid→.',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `length` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field length in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
+        label: 'Pop lazy heap tops — discard stale timestamp prices',
       },
     ],
     explain:
-      'The recorder snapshots `length` on every emit so each frame shows the algorithm mid-step.',
+      'Binary search on the index history finds the latest entry at or before the requested snapId.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'complexity',
+    prompt: 'What are typical time and space bounds for Snapshot Array?',
     choices: [
       {
-        label: 'Done. — final DONE caption',
+        label: 'O(log snaps) get, O(length × snaps) space — history per index',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'O(1) all ops, O(length) space — one value per index only',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'O(n log n) every Set, O(1) space — resort entire array',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'O(points) per query, O(points) space — diagonal scan map',
       },
     ],
-    explain: 'Done.',
+    explain:
+      'Set is O(1) amortized append; Get binary-searches one index history; space stores all versions.',
+  },
+  {
+    id: 'edge',
+    prompt: 'When Set runs twice at the same snapId, what happens?',
+    choices: [
+      {
+        label: 'Update latest entry — no new history tuple is appended',
+        correct: true,
+      },
+      {
+        label: 'Reject second Set — return false on duplicate snap write',
+      },
+      {
+        label: 'Always append — even if snapId matches the tail entry',
+      },
+      {
+        label: 'Reset entire array — clear all prior snapshots first',
+      },
+    ],
+    explain:
+      'If the last history pair already has the current sid, only its value field is overwritten.',
   },
 ];
 export const simulator: ProblemSimulator = {

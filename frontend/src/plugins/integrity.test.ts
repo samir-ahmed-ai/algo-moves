@@ -15,6 +15,7 @@ import { resolveSimulator } from './imported/simulators';
 import { SIMULATED_CATEGORIES } from './imported/factory';
 import { resolvePracticeBundle } from './imported/practice';
 import { PROBLEM_GLYPHS } from '../content/glyphs';
+import { designDiagrams } from './imported/prepSimulators/designDiagrams/registry';
 
 // Load every plugin's implementation once (all group chunks) for the integrity checks.
 const plugins = await loadAllPlugins();
@@ -386,14 +387,18 @@ describe('prep simulator quality', () => {
 
 function stateImpliesVerdictOk(state: Record<string, unknown> | undefined): boolean | null {
   if (!state) return null;
+  if (typeof state.done === 'boolean' && 'hit' in state) {
+    return state.done === true && state.hit !== null && state.hit !== undefined;
+  }
+  if ('result' in state && typeof state.result === 'boolean') {
+    return state.result;
+  }
+  if (typeof state.done === 'boolean') return state.done;
   if ('result' in state) {
     const r = state.result;
     if (r === null || r === undefined || r === false) return false;
     if (Array.isArray(r)) return r.length > 0;
     return true;
-  }
-  if (typeof state.done === 'boolean' && 'hit' in state) {
-    return state.done === true && state.hit !== null && state.hit !== undefined;
   }
   if (typeof state.found === 'boolean') return state.found;
   return null;
@@ -411,6 +416,7 @@ const VERDICT_SAMPLE_IDS = new Set([
   'prep-trees-binary-tree-maximum-path-sum',
   'prep-intervals-merge-intervals',
   'prep-hash-maps-find-top-k-frequent-elements',
+  ...PREP_DATA.filter((p) => p.topic === 'design').map((p) => p.id),
 ]);
 
 describe('verdict truthfulness sampling', () => {
@@ -434,6 +440,42 @@ describe('verdict truthfulness sampling', () => {
   }
   it('sampled prep simulators verdict.ok matches terminal state oracle', () => {
     expect(bad, bad.join('\n')).toEqual([]);
+  });
+});
+
+describe('design hybrid wiring', () => {
+  const designIds = PREP_DATA.filter((p) => p.topic === 'design').map((p) => p.id);
+
+  it('design manifest ids match diagram registry', () => {
+    const missing = designIds.filter((id) => !designDiagrams[id]);
+    expect(missing, missing.join('\n')).toEqual([]);
+  });
+
+  it('design plugins with simulators are hybrid, not static', () => {
+    const bad: string[] = [];
+    for (const id of designIds) {
+      const plugin = pluginById.get(id);
+      if (!plugin) {
+        bad.push(`${id}: plugin not loaded`);
+        continue;
+      }
+      if (plugin.meta.static) bad.push(`${id}: static flag should be unset`);
+      if (!plugin.meta.designHybrid) bad.push(`${id}: expected designHybrid`);
+    }
+    expect(bad, bad.join('\n')).toEqual([]);
+  });
+
+  it('design hybrid plugins pass frame-quality gate', () => {
+    const bad: string[] = [];
+    for (const plugin of plugins) {
+      if (!plugin.meta.designHybrid) continue;
+      for (const input of plugin.inputs) {
+        const frames = plugin.record(input.value);
+        const tag = `${plugin.meta.id} · "${input.label}"`;
+        if (frames.length < 3) bad.push(`${tag}: only ${frames.length} frame(s)`);
+      }
+    }
+    expect(bad, bad.slice(0, 12).join('\n')).toEqual([]);
   });
 });
 

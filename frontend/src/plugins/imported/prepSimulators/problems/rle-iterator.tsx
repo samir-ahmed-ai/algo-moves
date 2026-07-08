@@ -8,7 +8,15 @@ import {
 import { createPrepRecorder } from '../strictHelpers';
 import type { ProblemSimulator } from '../types';
 import { cn } from '@/lib/utils/cn';
-import { InspectorRow, VarGrid, VizEmpty, vizText } from '../../../_shared/vizKit';
+import {
+  InspectorRow,
+  VarGrid,
+  VizEmpty,
+  VizStage,
+  RailGroup,
+  RailStat,
+  vizText,
+} from '../../../_shared/vizKit';
 
 interface RleInput {
   encoding: number[];
@@ -85,13 +93,24 @@ function View({ frame }: PluginViewProps<RleState>) {
   for (let i = 0; i < s.enc.length; i += 2) {
     pairs.push({ count: s.enc[i]!, val: s.enc[i + 1]!, i });
   }
+  const rail = (
+    <>
+      <RailGroup label="op">
+        <RailStat k="cmd" v={s.op || '—'} tone="accent" />
+      </RailGroup>
+      {s.result !== null && (
+        <RailGroup label="result">
+          <RailStat k="val" v={s.result} tone="good" />
+        </RailGroup>
+      )}
+      <RailGroup label="iter">
+        <RailStat k="idx" v={s.idx} />
+      </RailGroup>
+    </>
+  );
   return (
-    <div className="board-area">
-      <div className={cn(vizText.sm, 'text-ink3')}>
-        {s.op || '—'}
-        {s.result !== null && <span className="ml-2 font-mono text-good">→ {s.result}</span>}
-      </div>
-      <div className="mt-2 flex flex-wrap gap-1">
+    <VizStage rail={rail} railWidth={168}>
+      <div className="flex flex-wrap gap-1">
         {pairs.map(({ count, val, i }) => (
           <span
             key={i}
@@ -109,8 +128,7 @@ function View({ frame }: PluginViewProps<RleState>) {
           </span>
         ))}
       </div>
-      <div className={cn('mt-1', vizText.sm, 'text-ink3')}>idx = {s.idx}</div>
-    </div>
+    </VizStage>
   );
 }
 
@@ -132,105 +150,87 @@ export const title = 'RLE Iterator';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "RLE Iterator"?',
+    prompt: 'How is the RLE encoding represented for Next(n)?',
     choices: [
       {
-        label: 'Design — fits this problem',
+        label: 'Flat count-value pairs — idx points at current run head',
         correct: true,
       },
       {
-        label: 'Trie dictionary + spell suggest — different approach',
+        label: 'Nested linked list — separate node per repeated value',
       },
       {
-        label: 'Hash map + doubly linked list LRU — different approach',
+        label: 'Prefix sum buckets — binary search weighted index',
       },
       {
-        label: 'Heap + Sorted Available Set — different approach',
-      },
-    ],
-    explain: 'See Rle Iterator pattern',
-  },
-  {
-    id: 'init',
-    prompt: 'At the start of a run (RLE Iterator), what strategy is established?',
-    choices: [
-      {
-        label: 'See Rle Iterator pattern — described in INIT caption',
-        correct: true,
-      },
-      {
-        label: 'Precomputed final answer — before scanning input',
-      },
-      {
-        label: 'Descending sort required — as mandatory first step',
-      },
-      {
-        label: 'Every element visited upfront — marked from the start',
+        label: 'Versioned map snapshots — copy-on-write per consume',
       },
     ],
     explain:
-      'RLE Iterator: encoding is [count,val,count,val,...]. Next(n) consumes counts; returns val when enough remain, else -1.',
+      'encoding alternates [count, val, count, val, ...]; Next decrements counts or advances idx by two.',
   },
   {
     id: 'key-step',
-    prompt: 'On the "NEXT" step (n= → ), what happens?',
+    prompt: 'When Next(n) fits in the current run, what happens?',
     choices: [
       {
-        label: 'Next(): consume from pair [,] → — this move caption',
+        label: 'Subtract n from enc[idx] — return value at enc[idx+1]',
         correct: true,
       },
       {
-        label: 'Run terminates immediately — no further frames',
+        label: 'Advance idx by two always — skip entire run regardless of n',
       },
       {
-        label: 'Pointers reset to zero — restart scan',
+        label: 'Return -1 immediately — partial consume is forbidden',
       },
       {
-        label: 'Remaining input skipped — early return path',
-      },
-    ],
-    explain: 'Next(): consume  from pair [,] → return .',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `enc` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field enc in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
+        label: 'Rebuild encoding array — recompress after every call',
       },
     ],
     explain:
-      'The recorder snapshots `enc` on every emit so each frame shows the algorithm mid-step.',
+      'Enough count at idx lets the iterator subtract remaining and return the paired value without moving idx.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'complexity',
+    prompt: 'What are the bounds for RLE Iterator?',
     choices: [
       {
-        label: 'Next(): consume from pair [,] → — final DONE caption',
+        label: 'O(1) amortized Next, O(pairs) space — skip exhausted runs',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'O(n) every Next, O(n) space — scan full encoding each call',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'O(log n) Next, O(1) space — heap of runs by value',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'O(path) Next, O(nodes) space — trie walk per character',
       },
     ],
-    explain: 'Next(): consume  from pair [,] → return .',
+    explain:
+      'Each pair index advances only when its count is fully consumed; storage is the encoding array.',
+  },
+  {
+    id: 'edge',
+    prompt: 'When does Next emit EOF with result -1?',
+    choices: [
+      {
+        label: 'Requested n exceeds remaining encoded values — encoding exhausted',
+        correct: true,
+      },
+      {
+        label: 'Current count equals zero — treat zero run as success',
+      },
+      {
+        label: 'n equals zero — always return -1 on zero request',
+      },
+      {
+        label: 'idx at array end with count left — still return last value',
+      },
+    ],
+    explain:
+      'After walking pairs, leftover remaining>0 means not enough values were left to satisfy n.',
   },
 ];
 export const simulator: ProblemSimulator = {

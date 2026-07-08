@@ -121,125 +121,85 @@ export const title = 'Log analyzer';
 const practiceQuiz: QuizQuestion[] = [
   {
     id: 'pattern',
-    prompt: 'Which approach fits "Log analyzer"?',
+    prompt: 'How does the log analyzer aggregate lines?',
     choices: [
       {
-        label: 'Log parsing aggregation — fits this problem',
+        label: 'Level hash counters — first token parsed as log level',
         correct: true,
       },
       {
-        label: 'Two Heaps — different approach',
+        label: 'Message timestamp map — ten-second dedupe window',
       },
       {
-        label: 'Heap + Sorted Available Set — different approach',
+        label: 'Copy-on-write snapshots — versioned map per ingest',
       },
       {
-        label: 'Bijective tiny URL encode/decode — different approach',
-      },
-    ],
-    explain: 'Parse each line; bucket counts by log level',
-  },
-  {
-    id: 'init',
-    prompt: 'At the start of a run (Log analyzer), what strategy is established?',
-    choices: [
-      {
-        label: 'Parse each line; bucket counts — described in INIT caption',
-        correct: true,
-      },
-      {
-        label: 'Precomputed final answer — before scanning input',
-      },
-      {
-        label: 'Descending sort required — as mandatory first step',
-      },
-      {
-        label: 'Every element visited upfront — marked from the start',
+        label: 'RLE pair iterator — consume count-value encoding',
       },
     ],
     explain:
-      'Log Analyzer: ingest each line, parse level from first token, increment counters. report() returns TOTAL + per-level counts.',
+      'parseLevel uppercases the first field; byLevel[level] increments while total counts all lines.',
   },
   {
     id: 'key-step',
-    prompt: 'On the "REPORT" step ( total), what happens?',
+    prompt: 'On INGEST, what is updated for each line?',
     choices: [
       {
-        label: 'report(): TOTAL=, levels: — this move caption',
+        label: 'Increment total — bump level bucket when parse succeeds',
         correct: true,
       },
       {
-        label: 'Run terminates immediately — no further frames',
+        label: 'Replace byLevel entirely — rebuild counters from scratch',
       },
       {
-        label: 'Pointers reset to zero — restart scan',
+        label: 'Append line to stack — defer counting until report',
       },
       {
-        label: 'Remaining input skipped — early return path',
-      },
-    ],
-    explain: 'report(): TOTAL=, levels: ${Object.entries(byLevel).map(([k, v]) => ',
-  },
-  {
-    id: 'state',
-    prompt: 'What does the `total` field track in the visualization state?',
-    choices: [
-      {
-        label: 'Field total in state — updated each frame',
-        correct: true,
-      },
-      {
-        label: 'Fixed display label — unchanged each frame',
-      },
-      {
-        label: 'Shuffle seed value — for random ordering',
-      },
-      {
-        label: 'Failure error code — set once at end',
+        label: 'Binary search levels — insert into sorted level array',
       },
     ],
     explain:
-      'The recorder snapshots `total` on every emit so each frame shows the algorithm mid-step.',
+      'total always increases; if parseLevel returns a level string, that bucket count increases too.',
   },
   {
     id: 'complexity',
-    prompt: 'What are the time and space complexities for "Log analyzer"?',
+    prompt: 'What are the bounds for the log analyzer?',
     choices: [
       {
-        label: 'O(lines) time, O(unique keys) space — standard bounds here',
+        label: 'O(lines) ingest, O(unique levels) space — one pass hash',
         correct: true,
       },
       {
-        label: 'O(m log n) time, O(n) space — wrong order of growth',
+        label: 'O(lines log lines) time, O(lines) space — sort each ingest',
       },
       {
-        label: 'O(total painted) time, O(max coordinate) — wrong order of growth',
+        label: 'O(1) per line, O(1) space — fixed three level slots only',
       },
       {
-        label: 'O(log n) time, O(n) space — wrong order of growth',
+        label: 'O(levels²) time, O(1) space — pairwise level comparisons',
       },
     ],
-    explain: 'O(lines). O(unique keys). Fields; level=upper(first); ByLevel[level]!++',
+    explain: 'Each line is parsed once; storage is proportional to distinct level keys seen.',
   },
   {
-    id: 'outcome',
-    prompt: 'When the run completes, what does the final step convey?',
+    id: 'edge',
+    prompt: 'What does report() summarize at the end?',
     choices: [
       {
-        label: 'report(): TOTAL=, levels: — final DONE caption',
+        label: 'TOTAL line count plus per-level counts — aggregated buckets',
         correct: true,
       },
       {
-        label: 'Incomplete partial result — more steps needed',
+        label: 'Last ingested line report — discard prior level statistics',
       },
       {
-        label: 'Input left unchanged — no mutations applied',
+        label: 'Longest line length — ignore level token parsing entirely',
       },
       {
-        label: 'Aborted run on failure — infinite loop detected',
+        label: 'Sorted raw lines — return full text not numeric counts',
       },
     ],
-    explain: 'report(): TOTAL=, levels: ${Object.entries(byLevel).map(([k, v]) => ',
+    explain: 'The REPORT frame caption lists TOTAL and each level=v from the byLevel hash.',
   },
 ];
 export const simulator: ProblemSimulator = {
