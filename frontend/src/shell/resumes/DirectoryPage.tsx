@@ -2,19 +2,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FileText, Loader2, Search, Users } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '@/shell/chromeUi';
+import { Avatar } from '@/design/components';
 import type { Resume, ResumeDirectoryEntry } from './data/resumesApi';
 import { getResume, listResumeDirectory } from './data/resumesApi';
 
 interface DirectoryPageProps {
   onSelect: (resume: Resume) => void;
   onCustomize: (resume: Resume) => void;
-}
-
-function avatarColor(seed: string): string {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) hash = seed.charCodeAt(i) + ((hash << 5) - hash);
-  const hue = Math.abs(hash) % 360;
-  return `hsl(${hue} 45% 45%)`;
 }
 
 export function DirectoryPage({ onSelect, onCustomize }: DirectoryPageProps) {
@@ -111,12 +105,12 @@ export function DirectoryPage({ onSelect, onCustomize }: DirectoryPageProps) {
                 className="resume-directory-card rounded-xl border border-edge bg-panel p-4 flex flex-col gap-3 transition hover:border-accent/30"
               >
                 <div className="flex items-center gap-3">
-                  <div
-                    className="resume-directory-card__avatar h-10 w-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
-                    style={{ backgroundColor: avatarColor(e.ownerAvatarSeed) }}
-                  >
-                    {e.ownerDisplayName.slice(0, 1).toUpperCase()}
-                  </div>
+                  <Avatar
+                    seed={e.ownerAvatarSeed}
+                    name={e.ownerDisplayName}
+                    size={40}
+                    className="resume-directory-card__avatar shrink-0"
+                  />
                   <div className="min-w-0">
                     <p className="font-medium text-ink truncate">{e.title}</p>
                     <p className={cn('text-ink3 truncate', chromeText.sm)}>{e.ownerDisplayName}</p>

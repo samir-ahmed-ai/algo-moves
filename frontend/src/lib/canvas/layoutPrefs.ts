@@ -84,6 +84,9 @@ export function normalizeEdgeOpts(value: Partial<EdgeOpts> | undefined): EdgeOpt
  * homed here so the store's CanvasToolsProps contract doesn't import shell. */
 export type AlignKind = 'left' | 'hcenter' | 'right' | 'top' | 'vmiddle' | 'bottom';
 
+/** Named arrangements for the fill-canvas tiler (see shell/canvas tileCanvasNodes). */
+export type CanvasFillPreset = 'auto' | 'board' | 'code' | 'split';
+
 /** Viewport snap regions for single-node canvas docking. */
 export type CanvasSnapRegion =
   | 'left'

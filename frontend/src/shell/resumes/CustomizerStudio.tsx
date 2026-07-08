@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   BookmarkPlus,
+  Check,
   Clock,
   Download,
   KeyRound,
@@ -35,8 +36,10 @@ export function CustomizerStudio({
   const [targetRole, setTargetRole] = useState('Senior Java Engineer');
   const [mode, setMode] = useState<'rules' | 'ai'>('rules');
   const [preview, setPreview] = useState<ResumeMapping>(resume.mapping);
+  const [label, setLabel] = useState('');
   const [busy, setBusy] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [savedFlash, setSavedFlash] = useState(false);
   const [error, setError] = useState('');
   const [variants, setVariants] = useState<ResumeVariant[]>([]);
 
@@ -83,7 +86,14 @@ export function CustomizerStudio({
     }
     setSaving(true);
     setError('');
-    const res = await customizeResume(resume.id, { focus, targetRole, mode, save: true });
+    const trimmedLabel = label.trim();
+    const res = await customizeResume(resume.id, {
+      focus,
+      targetRole,
+      mode,
+      save: true,
+      ...(trimmedLabel ? { label: trimmedLabel } : {}),
+    });
     setSaving(false);
     if (!res.ok) {
       setError(formatResumeAiError(res.error));
@@ -91,8 +101,11 @@ export function CustomizerStudio({
     }
     setPreview(res.result.mapping);
     onMappingChange?.(res.result.mapping);
+    setLabel('');
+    setSavedFlash(true);
+    setTimeout(() => setSavedFlash(false), 1800);
     refreshVariants();
-  }, [resume.id, focus, targetRole, mode, onMappingChange, refreshVariants]);
+  }, [resume.id, focus, targetRole, mode, label, onMappingChange, refreshVariants]);
 
   const selectPreset = (preset: (typeof FOCUS_PRESETS)[number]) => {
     setFocus(preset.focus);
@@ -122,6 +135,16 @@ export function CustomizerStudio({
   const exportPdf = useCallback(async () => {
     if (!previewRef.current) return;
     setError('');
+    // html2canvas always reads `document.body`'s computed background-color to
+    // composite transparent regions — even in foreignObject mode. This app's
+    // themes set `--bg`/`--text` (and therefore body's background/color) as
+    // oklch(), which html2canvas's parser can't read and throws on. Pin body
+    // to a plain color for the duration of the export, then restore it.
+    const bodyStyle = document.body.style;
+    const prevBg = bodyStyle.backgroundColor;
+    const prevColor = bodyStyle.color;
+    bodyStyle.backgroundColor = '#ffffff';
+    bodyStyle.color = '#111827';
     try {
       const html2pdf = (await import('html2pdf.js')).default;
       const safeName = `${resume.title}-${focus}`.replace(/[^a-z0-9\-_]+/gi, '_');
@@ -130,14 +153,26 @@ export function CustomizerStudio({
           margin: 0.4,
           filename: `${safeName}.pdf`,
           image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+          // Native SVG foreignObject rendering also delegates color parsing
+          // for the rest of the tree to the browser instead of html2canvas's
+          // own CSS parser.
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            foreignObjectRendering: true,
+          },
           jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
           pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
         } as Record<string, unknown>)
         .from(previewRef.current)
         .save();
-    } catch {
-      setError('PDF export failed');
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : '';
+      setError(detail ? `PDF export failed: ${detail}` : 'PDF export failed');
+    } finally {
+      bodyStyle.backgroundColor = prevBg;
+      bodyStyle.color = prevColor;
     }
   }, [resume.title, focus]);
 
@@ -192,6 +227,20 @@ export function CustomizerStudio({
           />
         </div>
 
+        {canSave && (
+          <div className="resume-customizer-card space-y-2">
+            <label className={cn('block text-xs font-medium text-ink2', chromeText.base)}>
+              Variant label <span className="text-ink3">(optional)</span>
+            </label>
+            <input
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              className="resume-customizer-input w-full rounded-lg border border-edge bg-panel2 px-3 py-2 text-sm text-ink outline-none focus:border-accent/60"
+              placeholder={targetRole ? `${focus} — ${targetRole}` : focus || 'e.g. Java resume v2'}
+            />
+          </div>
+        )}
+
         <div className="resume-customizer-card">
           <div className="flex gap-2">
             <button
@@ -244,14 +293,21 @@ export function CustomizerStudio({
               type="button"
               onClick={saveVariant}
               disabled={saving}
-              className="resume-customizer-secondary flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-edge bg-panel2 px-3 py-2 text-sm font-medium text-ink transition hover:border-accent/40 disabled:opacity-50"
+              className={cn(
+                'resume-customizer-secondary flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition disabled:opacity-50',
+                savedFlash
+                  ? 'border-good/40 bg-goodbg text-good'
+                  : 'border-edge bg-panel2 text-ink hover:border-accent/40',
+              )}
             >
               {saving ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
+              ) : savedFlash ? (
+                <Check className="h-4 w-4" />
               ) : (
                 <BookmarkPlus className="h-4 w-4" />
               )}
-              Save
+              {saving ? 'Saving…' : savedFlash ? 'Saved' : 'Save'}
             </button>
           )}
           <button

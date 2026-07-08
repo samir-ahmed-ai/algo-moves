@@ -180,18 +180,18 @@ function ExampleInputPicker() {
     return (
       <>
         {hasDescription && (
-          <ControlsAccordion title="Example description" defaultOpen bodyClassName="pt-1">
+          <ControlsAccordion title="Example description" defaultOpen bodyClassName="pt-1.5">
             <p className={cn('leading-relaxed text-ink2', nodeText.sm)}>{description}</p>
           </ControlsAccordion>
         )}
         {hasPreview && (
           <ControlsAccordion
-            title="Input preview"
-            defaultOpen={!hasDescription}
+            title="Input & output"
+            defaultOpen
             {...(hasDescription ? { className: 'border-t-0' } : {})}
-            bodyClassName="pt-1"
+            bodyClassName="pt-1.5"
           >
-            <JsonBlock value={previewValue} />
+            <JsonBlock value={previewValue} maxHeight="360px" />
           </ControlsAccordion>
         )}
       </>
@@ -237,22 +237,22 @@ function ExampleInputPicker() {
             title="Example description"
             defaultOpen
             className="mt-1.5 border-t-0"
-            bodyClassName="pt-1"
+            bodyClassName="pt-1.5"
           >
             <p className={cn('leading-relaxed text-ink2', nodeText.sm)}>{description}</p>
           </ControlsAccordion>
         )}
         {hasPreview && (
           <ControlsAccordion
-            title="Input preview"
-            defaultOpen={!hasDescription}
+            title="Input & output"
+            defaultOpen
             className={cn(
               'border-t-0',
               (hasDescription || usePills || inputs.length > 4) && 'mt-1.5',
             )}
-            bodyClassName="pt-1"
+            bodyClassName="pt-1.5"
           >
-            <JsonBlock value={previewValue} />
+            <JsonBlock value={previewValue} maxHeight="360px" />
           </ControlsAccordion>
         )}
       </Section>

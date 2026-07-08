@@ -26,6 +26,8 @@ export interface PanelNodeData extends Record<string, unknown> {
   locked?: boolean;
   /** When true, panel fills the snapped viewport height instead of auto-sizing to content. */
   snapFill?: boolean;
+  /** Freshly seeded interview-board panel — retiled to the real viewport once, then cleared. */
+  interviewSeed?: boolean;
   /** 9 slot indices (0=top-left … 8=bottom-right). Values are child node ids. */
   layoutSlots?: (string | null)[];
   /** Which slot this node occupies when parented (0–8). */

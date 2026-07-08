@@ -29,6 +29,7 @@ export function snapNodeLayout(n: PanelFlowNode): {
   slotIndex?: number;
   collapsed?: boolean;
   locked?: boolean;
+  snapFill?: boolean;
   accent?: string;
   style?: PanelNodeStyle;
 } {
@@ -43,6 +44,7 @@ export function snapNodeLayout(n: PanelFlowNode): {
     slotIndex?: number;
     collapsed?: boolean;
     locked?: boolean;
+    snapFill?: boolean;
     accent?: string;
     style?: PanelNodeStyle;
   } = { position: safePosition(n.position) };
@@ -57,6 +59,7 @@ export function snapNodeLayout(n: PanelFlowNode): {
   if (Number.isInteger(data.slotIndex)) entry.slotIndex = data.slotIndex as number;
   if (data.collapsed) entry.collapsed = true;
   if (data.locked) entry.locked = true;
+  if (data.snapFill) entry.snapFill = true;
   if (data.accent) entry.accent = data.accent;
   if (data.style && Object.keys(data.style).length > 0) entry.style = { ...data.style };
   return entry;

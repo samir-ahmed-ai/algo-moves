@@ -66,17 +66,23 @@ const interviewGate = () => {
 
 /* -------------------------------------------------- shared debounced patch */
 
+type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+
 function usePatchSession(sessionId?: string) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pending = useRef<UpdateInterviewPatch>({});
   const flushRef = useRef<() => void>(() => {});
+  const [status, setStatus] = useState<SaveStatus>('idle');
 
   flushRef.current = () => {
     timer.current = null;
     const patch = pending.current;
     pending.current = {};
     if (!sessionId || Object.keys(patch).length === 0) return;
-    void updateInterviewSession(sessionId, patch);
+    setStatus('saving');
+    void updateInterviewSession(sessionId, patch)
+      .then((r) => setStatus(r ? 'saved' : 'error'))
+      .catch(() => setStatus('error'));
   };
 
   useEffect(
@@ -87,12 +93,35 @@ function usePatchSession(sessionId?: string) {
     [],
   );
 
-  return useCallback((patch: UpdateInterviewPatch, debounceMs = 1000) => {
-    pending.current = { ...pending.current, ...patch };
+  const patch = useCallback((p: UpdateInterviewPatch, debounceMs = 1000) => {
+    pending.current = { ...pending.current, ...p };
     if (timer.current) clearTimeout(timer.current);
     if (debounceMs <= 0) flushRef.current();
     else timer.current = setTimeout(() => flushRef.current(), debounceMs);
   }, []);
+
+  return { patch, status };
+}
+
+/** Tiny autosave state line: silent when idle/saved, explicit when in flight or failed. */
+function SaveStatusChip({ status }: { status: SaveStatus }) {
+  if (status === 'idle') return null;
+  return (
+    <span
+      role="status"
+      className={cn(
+        'interview-save-status block',
+        chromeText.xs,
+        status === 'error' ? 'text-bad' : 'text-ink3',
+      )}
+    >
+      {status === 'saving'
+        ? 'Saving…'
+        : status === 'saved'
+          ? 'Saved'
+          : 'Couldn’t save — retries on your next edit'}
+    </span>
+  );
 }
 
 /* ---------------------------------------------------------- room controls */
@@ -151,12 +180,13 @@ function RoomControlsBody() {
   const { readBoard, canSend } = useSendToBoard();
   const sessionId = session.sessionId;
   const runtime = session.interviewRuntime;
-  const patch = usePatchSession(sessionId);
+  const { patch } = usePatchSession(sessionId);
 
   const [guestLinkEnabled, setGuestLinkEnabled] = useState(true);
   const [status, setStatus] = useState<'active' | 'ended'>('active');
   const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
   const loadedId = useRef<string>();
 
   // Hydrate the toggle + lifecycle state from the durable session (esp. on resume).
@@ -228,10 +258,18 @@ function RoomControlsBody() {
     setBusy(false);
   };
 
-  const doExport = (fmt: 'svg' | 'json') => {
+  const doExport = async (fmt: 'svg' | 'json') => {
     const board = readBoard();
-    if (!board) return;
-    void exportInterviewBoard(board, 'interview-board', fmt);
+    if (!board) {
+      setExportError('No whiteboard on the canvas to export.');
+      return;
+    }
+    try {
+      await exportInterviewBoard(board, 'interview-board', fmt);
+      setExportError(null);
+    } catch {
+      setExportError('Export failed — try again.');
+    }
   };
 
   if (!isHost) return null;
@@ -329,8 +367,9 @@ function RoomControlsBody() {
       <div className="interview-room-controls__exports flex items-center gap-1.5">
         <button
           type="button"
-          onClick={() => doExport('svg')}
+          onClick={() => void doExport('svg')}
           disabled={!canSend}
+          title={canSend ? 'Download the whiteboard as SVG' : 'Requires a whiteboard on the canvas'}
           className={cn(
             'inline-flex flex-1 items-center justify-center gap-1 border border-edge bg-panel2 px-2 py-1 font-medium text-ink2 hover:text-ink disabled:opacity-40',
             RADIUS_CTRL,
@@ -341,8 +380,11 @@ function RoomControlsBody() {
         </button>
         <button
           type="button"
-          onClick={() => doExport('json')}
+          onClick={() => void doExport('json')}
           disabled={!canSend}
+          title={
+            canSend ? 'Download the whiteboard as JSON' : 'Requires a whiteboard on the canvas'
+          }
           className={cn(
             'inline-flex flex-1 items-center justify-center gap-1 border border-edge bg-panel2 px-2 py-1 font-medium text-ink2 hover:text-ink disabled:opacity-40',
             RADIUS_CTRL,
@@ -352,6 +394,11 @@ function RoomControlsBody() {
           <Download className="h-3 w-3" /> JSON
         </button>
       </div>
+      {exportError ? (
+        <p role="alert" className={cn('interview-room-controls__error text-bad', chromeText.xs)}>
+          {exportError}
+        </p>
+      ) : null}
       {sessionId ? (
         <button
           type="button"
@@ -379,12 +426,21 @@ function QuestionsBody() {
   const { session } = useCanvasCollab();
   const { sendQuestion, canSend } = useSendToBoard();
   const sessionId = session.sessionId;
-  const patch = usePatchSession(sessionId);
+  const { patch, status } = usePatchSession(sessionId);
 
   const [questions, setQuestions] = useState<InterviewQuestion[]>([]);
   const [text, setText] = useState('');
   const [category, setCategory] = useState<QuestionCategory>('general');
+  const [sendError, setSendError] = useState<string | null>(null);
+  const sendErrorTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loadedId = useRef<string>();
+
+  useEffect(
+    () => () => {
+      if (sendErrorTimer.current) clearTimeout(sendErrorTimer.current);
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!sessionId || loadedId.current === sessionId) return;
@@ -407,7 +463,13 @@ function QuestionsBody() {
   };
 
   const send = (q: InterviewQuestion) => {
-    if (!sendQuestion(q.text, q.category)) return;
+    if (!sendQuestion(q.text, q.category)) {
+      setSendError('Couldn’t send — add a whiteboard panel to the canvas first.');
+      if (sendErrorTimer.current) clearTimeout(sendErrorTimer.current);
+      sendErrorTimer.current = setTimeout(() => setSendError(null), 4000);
+      return;
+    }
+    setSendError(null);
     save(
       questions.map((it) => (it.id === q.id ? { ...it, asked: true } : it)),
       0,
@@ -459,6 +521,12 @@ function QuestionsBody() {
           <Plus className="h-3 w-3" /> Add
         </button>
       </div>
+      {sendError ? (
+        <p role="alert" className={cn('interview-questions__error text-bad', chromeText.xs)}>
+          {sendError}
+        </p>
+      ) : null}
+      <SaveStatusChip status={status} />
       {questions.length === 0 ? (
         <p className={cn('interview-questions__empty py-2 text-center text-ink3', chromeText.xs)}>
           Prepare questions here, then send them to the board one at a time. The candidate only sees
@@ -533,7 +601,7 @@ function QuestionsBody() {
 function NotesBody() {
   const { session } = useCanvasCollab();
   const sessionId = session.sessionId;
-  const patch = usePatchSession(sessionId);
+  const { patch, status } = usePatchSession(sessionId);
   const [notes, setNotes] = useState('');
   const loadedId = useRef<string>();
 
@@ -565,6 +633,7 @@ function NotesBody() {
           chromeText.sm,
         )}
       />
+      <SaveStatusChip status={status} />
     </div>
   );
 }
@@ -574,7 +643,7 @@ function NotesBody() {
 function RubricBody() {
   const { session } = useCanvasCollab();
   const sessionId = session.sessionId;
-  const patch = usePatchSession(sessionId);
+  const { patch, status } = usePatchSession(sessionId);
   const [rubric, setRubric] = useState<RubricCriterion[]>(() =>
     DEFAULT_RUBRIC.map((r) => ({ ...r, id: newId() })),
   );
@@ -608,6 +677,7 @@ function RubricBody() {
       <p className={cn('interview-rubric__hint text-ink3', chromeText.xs)}>
         Private scorecard — saves automatically.
       </p>
+      <SaveStatusChip status={status} />
       {rubric.map((c) => (
         <div
           key={c.id}

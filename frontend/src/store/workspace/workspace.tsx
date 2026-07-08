@@ -10,6 +10,7 @@ import type { ProjectState } from '@/store/project-state/projectState';
 import type {
   AlignKind,
   BgVariant,
+  CanvasFillPreset,
   CanvasSnapRegion,
   EdgeOpts,
   LayoutPreset,
@@ -36,7 +37,7 @@ export type Palette = 'default' | 'cb';
 /** Which top-level surface is showing: home launchpad, canvas workspace, the mobile swipe deck, the Vim dojo, the two-player games arcade, the interview prep plans hub, or the user profile. */
 export type AppRoute =
   'home' | 'workspace' | 'mobile' | 'vim' | 'dojo' | 'games' | 'plans' | 'resumes' | 'profile';
-export type { ThemePreset, LayoutPreset, CanvasSnapRegion };
+export type { ThemePreset, LayoutPreset, CanvasSnapRegion, CanvasFillPreset };
 export { DEFAULT_THEME_PRESET, THEME_META, THEME_PRESETS, normalizeThemePreset };
 
 export interface WorkspaceDefaults {
@@ -129,6 +130,8 @@ export interface CanvasHudProps {
   onTidy: () => void;
   onCanvasSnap: (region: CanvasSnapRegion) => void;
   canCanvasSnap: boolean;
+  /** Tile every top-level panel to fill the visible canvas (optionally with a named arrangement). */
+  onFillCanvas: (preset?: CanvasFillPreset) => void;
   tools: CanvasToolsProps;
 }
 

@@ -214,7 +214,7 @@ export function PanelNode({ id, data, selected, width, height }: NodeProps<Panel
             color="var(--accent)"
             isVisible={selected}
             {...(maxPanelW != null ? { maxWidth: maxPanelW } : {})}
-            handleClassName="!h-2 !w-2 !rounded-sm !border-accent !bg-panel"
+            handleClassName="!h-2.5 !w-2.5 !rounded-full !border-2 !border-accent !bg-panel !shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
           />
         )}
 

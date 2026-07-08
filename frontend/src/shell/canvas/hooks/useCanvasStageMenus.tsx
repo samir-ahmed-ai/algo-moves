@@ -6,12 +6,16 @@ import {
   Trash2,
   Palette,
   Maximize,
+  Maximize2,
+  LayoutDashboard,
   LayoutGrid,
   Lock,
+  PanelLeft,
+  PanelRight,
 } from 'lucide-react';
 import { isEditableTarget } from '@/lib/utils/keyboard';
 import { FIT_VIEW_DURATION_MS } from '../ui/canvasTokens';
-import { FIT_PADDING_VIEW } from '../layout/layout';
+import { FIT_PADDING_VIEW, type CanvasSnapRegion } from '../layout/layout';
 import type { PanelNodeData } from '../nodes';
 import type { MenuItem } from '../ui';
 
@@ -34,6 +38,8 @@ export function useCanvasStageMenus({
   minimizeNode,
   removeNode,
   toggleNodeLock,
+  onCanvasSnap,
+  onFillCanvas,
 }: {
   wrapperRef: React.RefObject<HTMLDivElement | null>;
   focusNode: (id: string) => void;
@@ -47,6 +53,8 @@ export function useCanvasStageMenus({
   minimizeNode: (id: string) => void;
   removeNode: (id: string) => void;
   toggleNodeLock: (id: string) => void;
+  onCanvasSnap: (region: CanvasSnapRegion) => void;
+  onFillCanvas: () => void;
 }) {
   const menuPos = (e: { clientX: number; clientY: number }) => {
     const r = wrapperRef.current?.getBoundingClientRect();
@@ -58,6 +66,12 @@ export function useCanvasStageMenus({
       e.preventDefault();
       const d = node.data as PanelNodeData;
       const { x, y } = menuPos(e);
+      // Snapping targets the single selected node — select the right-clicked
+      // node first so the snap applies to it regardless of prior selection.
+      const snapTo = (region: CanvasSnapRegion) => {
+        setNodes((nds) => nds.map((n) => ({ ...n, selected: n.id === node.id })));
+        onCanvasSnap(region);
+      };
       setMenu({
         x,
         y,
@@ -66,6 +80,21 @@ export function useCanvasStageMenus({
             label: 'Focus',
             icon: <Crosshair className="h-4 w-4" />,
             onClick: () => focusNode(node.id),
+          },
+          {
+            label: 'Snap to left half',
+            icon: <PanelLeft className="h-4 w-4" />,
+            onClick: () => snapTo('left'),
+          },
+          {
+            label: 'Snap to right half',
+            icon: <PanelRight className="h-4 w-4" />,
+            onClick: () => snapTo('right'),
+          },
+          {
+            label: 'Fill view',
+            icon: <Maximize2 className="h-4 w-4" />,
+            onClick: () => snapTo('maximize'),
           },
           {
             label: 'Recolour',
@@ -95,7 +124,16 @@ export function useCanvasStageMenus({
         ],
       });
     },
-    [focusNode, recolorNode, minimizeNode, removeNode, toggleNodeLock, setMenu],
+    [
+      focusNode,
+      recolorNode,
+      minimizeNode,
+      removeNode,
+      toggleNodeLock,
+      setMenu,
+      setNodes,
+      onCanvasSnap,
+    ],
   );
 
   const onPaneContextMenu = useCallback(
@@ -117,6 +155,11 @@ export function useCanvasStageMenus({
             onClick: () => reset(),
           },
           {
+            label: 'Fill canvas with panels',
+            icon: <LayoutDashboard className="h-4 w-4" />,
+            onClick: () => onFillCanvas(),
+          },
+          {
             label: lock ? 'Unlock canvas' : 'Lock canvas',
             icon: <Lock className="h-4 w-4" />,
             onClick: () => setLock((l) => !l),
@@ -124,7 +167,7 @@ export function useCanvasStageMenus({
         ],
       });
     },
-    [fitView, reset, lock, setLock, setMenu],
+    [fitView, reset, lock, setLock, setMenu, onFillCanvas],
   );
 
   useEffect(() => {

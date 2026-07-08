@@ -1,13 +1,108 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check, CloudOff, Copy, Lock, LockOpen, LogOut, Navigation } from 'lucide-react';
+import {
+  Check,
+  CloudOff,
+  Code2,
+  Columns2,
+  Copy,
+  LayoutDashboard,
+  Lock,
+  LockOpen,
+  LogOut,
+  Navigation,
+  PenLine,
+} from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '@/shell/chromeUi';
+import { useWorkspace, type CanvasFillPreset } from '@/store/workspace';
 import { RADIUS_CTRL, RADIUS_SHELL } from '@/shell/canvas/ui/nodeui';
 import { useCanvasCollab } from '@/shell/collab/CanvasCollabProvider';
+import { usePopoverDismiss } from '@/shell/ui/usePopoverDismiss';
 import { PresenceBar } from './PresenceBar';
 import { TimerWidget } from './TimerWidget';
 import { useInterviewInviteUrl } from './useInterviewInviteUrl';
 import { copyTextToClipboard, endInterview } from './interviewControls';
+
+const LAYOUT_PRESETS: {
+  preset: CanvasFillPreset;
+  label: string;
+  hint: string;
+  icon: React.ReactNode;
+}[] = [
+  {
+    preset: 'auto',
+    label: 'Auto fill',
+    hint: 'Tile every panel to fill the canvas',
+    icon: <LayoutDashboard className="h-3.5 w-3.5" />,
+  },
+  {
+    preset: 'board',
+    label: 'Board focus',
+    hint: 'Whiteboard front and centre',
+    icon: <PenLine className="h-3.5 w-3.5" />,
+  },
+  {
+    preset: 'code',
+    label: 'Code focus',
+    hint: 'Editor front and centre',
+    icon: <Code2 className="h-3.5 w-3.5" />,
+  },
+  {
+    preset: 'split',
+    label: 'Split 50/50',
+    hint: 'Even columns',
+    icon: <Columns2 className="h-3.5 w-3.5" />,
+  },
+];
+
+/** Host-only canvas layout presets: one click re-tiles the board to fill the view. */
+function LayoutPresetsButton() {
+  const { canvasHud } = useWorkspace();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  usePopoverDismiss(ref, open, () => setOpen(false));
+  if (!canvasHud) return null;
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        title="Board layout — tile panels to fill the canvas"
+        aria-label="Board layout"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+        className={cn(HUD_BTN, open && 'interview-hud__btn--active bg-accentbg text-accent')}
+      >
+        <LayoutDashboard className="h-3.5 w-3.5" />
+      </button>
+      {open && (
+        <div
+          className={cn(
+            'interview-hud__layouts absolute left-1/2 top-full z-30 mt-1.5 w-52 -translate-x-1/2 border border-edge bg-panel p-1 shadow-[var(--shadow-lg)]',
+            RADIUS_SHELL,
+          )}
+        >
+          {LAYOUT_PRESETS.map((p) => (
+            <button
+              key={p.preset}
+              type="button"
+              onClick={() => {
+                canvasHud.onFillCanvas(p.preset);
+                setOpen(false);
+              }}
+              className="flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-panel2"
+            >
+              <span className="mt-0.5 shrink-0 text-ink3">{p.icon}</span>
+              <span className="min-w-0">
+                <span className={cn('block font-medium text-ink', chromeText.sm)}>{p.label}</span>
+                <span className={cn('block text-ink3', chromeText.xs)}>{p.hint}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const HUD_BTN =
   'interview-hud__btn grid h-7 w-7 shrink-0 place-items-center rounded-md text-ink3 transition-colors hover:bg-panel2 hover:text-ink';
@@ -113,6 +208,7 @@ function InterviewHudBar() {
         {isHost ? (
           <>
             <span className="interview-hud__divider h-5 w-px shrink-0 bg-edge" aria-hidden />
+            <LayoutPresetsButton />
             <button
               type="button"
               title={locked ? 'Unlock board' : 'Lock board — candidate becomes view-only'}

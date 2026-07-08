@@ -16,6 +16,8 @@ export interface SavedNode {
   slotIndex?: number;
   collapsed?: boolean;
   locked?: boolean;
+  /** Panel was snapped/tiled to fill a viewport region — keep its explicit height on restore. */
+  snapFill?: boolean;
   accent?: string;
   style?: PanelNodeStyle;
 }
@@ -110,6 +112,7 @@ function normalizeSavedNode(value: unknown): SavedNode | null {
     ...(slotIndex !== undefined ? { slotIndex } : {}),
     ...(value.collapsed === true ? { collapsed: true } : {}),
     ...(value.locked === true ? { locked: true } : {}),
+    ...(value.snapFill === true ? { snapFill: true } : {}),
     ...(accent ? { accent } : {}),
     ...(value.style ? { style: value.style as PanelNodeStyle } : {}),
   };

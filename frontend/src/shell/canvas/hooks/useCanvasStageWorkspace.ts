@@ -8,7 +8,7 @@ import {
   type RefObject,
   type SetStateAction,
 } from 'react';
-import type { Edge, Node } from '@xyflow/react';
+import { useReactFlow, type Edge, type Node } from '@xyflow/react';
 import type { CanvasMode, Player, ProblemPlugin } from '@/core';
 import type { Item } from '@/content';
 import { buildMinimalProjectState, sanitizeLoadedNodes } from '@/store/project-state';
@@ -20,7 +20,9 @@ import { EFFECTS } from '@/effects/registry';
 import { togglePanelCollapse, createEffectByType, type PanelFlowNode } from '../nodes';
 import { applyAlign, applyDistribute, type AlignKind } from '../layout/align';
 import {
+  applyCanvasSnap,
   edgesForKind,
+  fillPresetOptions,
   FIT_PADDING_FOCUS,
   isMultiInstancePanel,
   kindTitle,
@@ -31,8 +33,13 @@ import {
   sidePanelTabs,
   standaloneNodeIds,
   styleEdges,
+  tileCanvasNodes,
+  visibleFlowRect,
   type BgVariant,
+  type CanvasFillPreset,
+  type CanvasSnapRegion,
   type EdgeOpts,
+  type FlowRect,
   type LayoutPreset,
 } from '../layout/layout';
 import type { RightSidebarTab } from '@/store/workspace/workspace';
@@ -368,6 +375,41 @@ export function useCanvasStageWorkspace({
   );
   const selCount = nodes.filter((n) => n.selected).length;
 
+  const { getViewport } = useReactFlow();
+  const visibleRect = useCallback((): FlowRect => {
+    const r = wrapperRef.current?.getBoundingClientRect();
+    return visibleFlowRect(getViewport(), r?.width ?? 800, r?.height ?? 600);
+  }, [getViewport, wrapperRef]);
+
+  // Brief transform/size transition on all nodes so programmatic layout reads
+  // as a glide instead of a teleport (see [data-canvas-tiling] in theme.css).
+  const animateTiling = useCallback(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    el.setAttribute('data-canvas-tiling', '');
+    window.setTimeout(() => el.removeAttribute('data-canvas-tiling'), 400);
+  }, [wrapperRef]);
+
+  const onCanvasSnap = useCallback(
+    (region: CanvasSnapRegion) => {
+      if (!canModifyCanvas) return;
+      animateTiling();
+      setNodes((nds) => applyCanvasSnap(nds as PanelFlowNode[], region, visibleRect()));
+    },
+    [canModifyCanvas, animateTiling, setNodes, visibleRect],
+  );
+
+  const onFillCanvas = useCallback(
+    (preset: CanvasFillPreset = 'auto') => {
+      if (!canModifyCanvas) return;
+      animateTiling();
+      setNodes((nds) =>
+        tileCanvasNodes(nds as PanelFlowNode[], visibleRect(), fillPresetOptions(preset)),
+      );
+    },
+    [canModifyCanvas, animateTiling, setNodes, visibleRect],
+  );
+
   useEffect(() => {
     setCanvasHud({
       edgeOpts,
@@ -378,8 +420,9 @@ export function useCanvasStageWorkspace({
       setSnap,
       onPreset: applyPreset,
       onTidy: reset,
-      onCanvasSnap: () => {},
-      canCanvasSnap: false,
+      onCanvasSnap,
+      canCanvasSnap: selCount === 1 && canModifyCanvas,
+      onFillCanvas,
       tools: {
         selCount,
         onAlign: align,
@@ -400,6 +443,9 @@ export function useCanvasStageWorkspace({
     setSnap,
     applyPreset,
     reset,
+    onCanvasSnap,
+    onFillCanvas,
+    canModifyCanvas,
     selCount,
     align,
     distribute,
@@ -517,5 +563,7 @@ export function useCanvasStageWorkspace({
     focusNode,
     onMinimapClick,
     onMinimapNodeClick,
+    onCanvasSnap,
+    onFillCanvas,
   };
 }

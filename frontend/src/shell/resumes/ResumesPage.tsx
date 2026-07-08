@@ -209,7 +209,7 @@ function ResumeCard({
 }
 
 export function ResumesPage() {
-  const { configured, isAnonymous, loading } = useAuth();
+  const { configured, isAnonymous, loading, profile } = useAuth();
   const { goHome, openSettings } = useWorkspace();
 
   const [view, setView] = useState<View>('hub');
@@ -273,7 +273,9 @@ export function ResumesPage() {
     view === 'directory'
       ? 'Resume Directory'
       : view === 'editor'
-        ? 'Edit Mapping'
+        ? activeResume && activeResume.ownerProfileId !== profile?.id
+          ? 'View Resume'
+          : 'Edit Mapping'
         : view === 'customizer'
           ? 'Customizer Studio'
           : 'Resume Template Creator';
@@ -338,6 +340,8 @@ export function ResumesPage() {
       ) : view === 'editor' && activeResume ? (
         <ResumeEditor
           resume={activeResume}
+          readOnly={activeResume.ownerProfileId !== profile?.id}
+          onCustomize={() => setView('customizer')}
           onSaved={(r) => {
             setActiveResume(r);
             setResumes((prev) =>

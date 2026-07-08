@@ -4289,7 +4289,24 @@ circle {
   box-shadow: var(--node-shadow-hover);
 }
 .algo-canvas .panel-node.selected {
-  box-shadow: var(--node-shadow-selected);
+  box-shadow:
+    0 0 0 1.5px color-mix(in srgb, var(--accent) 60%, transparent),
+    var(--node-shadow-selected);
+}
+
+/* Programmatic tiling/snap glide — the fill actions set this attribute on the
+   canvas wrapper for ~400ms so panels slide into their cells instead of
+   teleporting. Kept off the base rules so drags stay latency-free. */
+[data-canvas-tiling] .react-flow__node {
+  transition:
+    transform 0.32s cubic-bezier(0.22, 0.9, 0.26, 1),
+    width 0.32s cubic-bezier(0.22, 0.9, 0.26, 1),
+    height 0.32s cubic-bezier(0.22, 0.9, 0.26, 1);
+}
+[data-canvas-tiling] .panel-node {
+  transition:
+    height 0.32s cubic-bezier(0.22, 0.9, 0.26, 1),
+    box-shadow 0.15s ease;
 }
 .algo-canvas .react-flow__controls {
   border-radius: var(--radius);
@@ -11139,6 +11156,10 @@ circle {
 .problem-brief-case {
   padding-inline: var(--space-2) !important;
   padding-bottom: var(--space-2) !important;
+}
+
+.problem-brief-io .json-block {
+  min-height: 4.5rem;
 }
 
 .problem-brief-case-index,

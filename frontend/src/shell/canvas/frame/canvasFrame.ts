@@ -30,6 +30,7 @@ export type SavedNodeLayout = Record<
     slotIndex?: number;
     collapsed?: boolean;
     locked?: boolean;
+    snapFill?: boolean;
     accent?: string;
     style?: PanelNodeStyle;
   }
@@ -132,6 +133,7 @@ export function buildCanvasFrame(
           ...(slotIndex != null ? { slotIndex } : {}),
           ...(s.collapsed ? { collapsed: true } : {}),
           ...(s.locked ? { locked: true } : {}),
+          ...(s.snapFill && !s.collapsed ? { snapFill: true } : {}),
           ...(s.accent ? { accent: s.accent } : {}),
           ...(s.style ? { style: { ...n.data.style, ...s.style } } : {}),
         },

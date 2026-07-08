@@ -25,20 +25,24 @@ function InfoParagraphs({ lines }: { lines: string[] }) {
 
 function CaseIo({ c }: { c: ProblemBriefCase }) {
   return (
-    <>
-      <JsonBlock value={c.input} size="xs" variant="nested" maxHeight="200px" />
+    <div className="problem-brief-io flex flex-col gap-2">
+      <div className="min-w-0 flex-1">
+        <p className={cn('mb-1 text-ink3', nodeText.xs)}>Input</p>
+        <JsonBlock value={c.input} size="sm" variant="nested" maxHeight="320px" />
+      </div>
       {c.output &&
         (looksLikeJson(c.output) ? (
-          <div className="mt-1.5">
-            <p className={cn('mb-0.5 text-ink3', nodeText.xs)}>Output</p>
-            <JsonBlock value={c.output} size="xs" variant="nested" maxHeight="120px" />
+          <div className="min-w-0 flex-1">
+            <p className={cn('mb-1 text-ink3', nodeText.xs)}>Output</p>
+            <JsonBlock value={c.output} size="sm" variant="nested" maxHeight="240px" />
           </div>
         ) : (
-          <p className={cn('mt-0.5 text-ink3', nodeText.xs)}>
-            → <span className="font-mono text-ink">{c.output}</span>
-          </p>
+          <div className="min-w-0">
+            <p className={cn('mb-1 text-ink3', nodeText.xs)}>Output</p>
+            <p className={cn('font-mono text-ink', nodeText.sm)}>{c.output}</p>
+          </div>
         ))}
-    </>
+    </div>
   );
 }
 
@@ -46,11 +50,21 @@ function CaseContent({ c }: { c: ProblemBriefCase }) {
   return (
     <>
       {c.note ? (
-        <ControlsAccordion title="Example description" defaultOpen className="border-t-0">
-          <p className={cn('leading-relaxed text-ink2', nodeText.xs)}>{c.note}</p>
+        <ControlsAccordion
+          title="Example description"
+          defaultOpen
+          className="border-t-0"
+          bodyClassName="pt-1.5"
+        >
+          <p className={cn('leading-relaxed text-ink2', nodeText.sm)}>{c.note}</p>
         </ControlsAccordion>
       ) : null}
-      <ControlsAccordion title="Input & output" defaultOpen={!c.note} className="border-t-0">
+      <ControlsAccordion
+        title="Input & output"
+        defaultOpen
+        className="border-t-0"
+        bodyClassName="pt-1.5"
+      >
         <CaseIo c={c} />
       </ControlsAccordion>
     </>

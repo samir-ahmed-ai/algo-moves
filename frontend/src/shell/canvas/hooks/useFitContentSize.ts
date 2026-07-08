@@ -38,10 +38,21 @@ export function useFitContentSize(id: string, kind: string, collapsed: boolean, 
         return mapped;
       });
     };
-    const ro = new ResizeObserver(() => requestAnimationFrame(sync));
+    // The disposed guard matters for snap/tile: disconnect() doesn't cancel an
+    // already-scheduled rAF, and a stale sync would overwrite the explicit
+    // height the tiler just set.
+    let disposed = false;
+    const ro = new ResizeObserver(() =>
+      requestAnimationFrame(() => {
+        if (!disposed) sync();
+      }),
+    );
     ro.observe(el);
     sync();
-    return () => ro.disconnect();
+    return () => {
+      disposed = true;
+      ro.disconnect();
+    };
   }, [collapsed, enabled, id, kind, layoutVisualizeOptions, mode, setNodes]);
 
   return panelRef;

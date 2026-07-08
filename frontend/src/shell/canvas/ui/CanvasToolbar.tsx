@@ -6,6 +6,7 @@ import {
   Undo2,
   Redo2,
   Users,
+  LayoutDashboard,
   LayoutGrid,
   PanelRight,
   Plus,
@@ -203,6 +204,18 @@ export function CanvasToolbar({
       >
         <LayoutGrid className="h-4 w-4" />
       </button>
+
+      {mode === 'visualize' && (
+        <button
+          type="button"
+          title="Fill canvas — tile all panels to fill the view"
+          aria-label="Fill canvas"
+          onClick={() => canvasHud.onFillCanvas()}
+          className={btnClass}
+        >
+          <LayoutDashboard className="h-4 w-4" />
+        </button>
+      )}
 
       <button
         type="button"

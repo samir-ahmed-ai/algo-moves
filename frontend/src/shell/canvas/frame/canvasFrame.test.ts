@@ -41,15 +41,18 @@ describe('buildCanvasFrame', () => {
     expect(nodes).toHaveLength(0);
   });
 
-  it('seeds the interview canvas with the board layout and preset positions', () => {
+  it('seeds the interview canvas with the board layout marked for viewport tiling', () => {
     const { nodes, edges } = buildCanvasFrame(stubPlugin, 'visualize', {
       ...baseInput,
       seedInterviewCanvas: true,
     });
     expect(nodes.map(kindOf)).toEqual(['whiteboard', 'notes', 'collab-code']);
-    // Preset positions from buildInterviewBoardNodes are preserved (no auto-layout).
+    // Fallback positions from buildInterviewBoardNodes are preserved (no
+    // auto-layout here); every seeded node carries the retile marker so
+    // CanvasStage tiles them to the measured viewport on mount.
     const whiteboard = nodes.find((n) => kindOf(n) === 'whiteboard')!;
-    expect(whiteboard.position).toEqual({ x: 40, y: 40 });
+    expect(whiteboard.position).toEqual({ x: 0, y: 0 });
+    expect(nodes.every((n) => n.data.interviewSeed)).toBe(true);
     expect(edges).toHaveLength(0);
   });
 

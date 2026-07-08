@@ -54,6 +54,7 @@ import {
   FIT_PADDING,
   STANDALONE_CANVAS_KEY,
   STANDALONE_INTERVIEW_CANVAS_KEY,
+  tileCanvasNodes,
   type BgVariant,
 } from './layout/layout';
 import {
@@ -272,25 +273,16 @@ function Inner({
       }
 
       onNodesChange(changes);
-      const manualIds = new Set<string>();
+      // snapFill is sticky "explicit height" mode: drags keep the tiled size and
+      // NodeResizer edits track through it, so only hosts need slot relayout here.
       const relayoutIds = new Set<string>();
       for (const c of changes) {
-        if (c.type === 'position' && 'dragging' in c && c.dragging === false) manualIds.add(c.id);
-        if (c.type === 'dimensions') {
-          manualIds.add(c.id);
-          relayoutIds.add(c.id);
-        }
+        if (c.type === 'dimensions') relayoutIds.add(c.id);
       }
-      if (!manualIds.size) return;
+      if (!relayoutIds.size) return;
       setNodes((nds) => {
         let next = nds;
         let changed = false;
-        next = next.map((n) => {
-          if (!manualIds.has(n.id) || !n.data.snapFill) return n;
-          changed = true;
-          const { snapFill: _, ...rest } = n.data;
-          return { ...n, data: rest };
-        });
         for (const id of relayoutIds) {
           const host = next.find((n) => n.id === id);
           if (host?.data.layoutSlots?.some(Boolean)) {
@@ -337,6 +329,50 @@ function Inner({
   );
 
   const nodesInitialized = useNodesInitialized();
+
+  // A freshly seeded interview board tiles itself to fill the measured viewport
+  // exactly once (the seed marker is dropped by the tiler); manual drags and
+  // resizes take over from there. The sidebar and other chrome mount a beat
+  // after the canvas, so wait until the wrapper size holds still for a frame
+  // before tiling — otherwise the board is cut for the wrong pane width.
+  useEffect(() => {
+    if (!isInterviewCanvas || !nodesInitialized || !canModifyCanvas) return;
+    if (!nodes.some((n) => n.data.interviewSeed)) return;
+    let raf = 0;
+    let tries = 0;
+    let prev = viewportSize();
+    const attempt = () => {
+      const cur = viewportSize();
+      const settled =
+        Math.abs(cur.width - prev.width) < 1 && Math.abs(cur.height - prev.height) < 1;
+      prev = cur;
+      if (!settled && tries++ < 60) {
+        raf = requestAnimationFrame(attempt);
+        return;
+      }
+      setNodes((nds) =>
+        tileCanvasNodes(nds as PanelFlowNode[], {
+          x: 0,
+          y: 0,
+          width: cur.width,
+          height: cur.height,
+        }),
+      );
+      raf = requestAnimationFrame(() => {
+        raf = requestAnimationFrame(() => setViewport({ x: 0, y: 0, zoom: 1 }));
+      });
+    };
+    raf = requestAnimationFrame(attempt);
+    return () => cancelAnimationFrame(raf);
+  }, [
+    isInterviewCanvas,
+    nodesInitialized,
+    nodes,
+    canModifyCanvas,
+    viewportSize,
+    setNodes,
+    setViewport,
+  ]);
 
   const {
     nodesRef,
@@ -390,6 +426,8 @@ function Inner({
     focusNode,
     onMinimapClick,
     onMinimapNodeClick,
+    onCanvasSnap,
+    onFillCanvas,
   } = useCanvasStageWorkspace({
     plugin,
     item,
@@ -544,6 +582,8 @@ function Inner({
     minimizeNode,
     removeNode,
     toggleNodeLock,
+    onCanvasSnap,
+    onFillCanvas,
   });
 
   const staticValue = useMemo(

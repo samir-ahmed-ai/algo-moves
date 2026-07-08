@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { UserCheck, CalendarX } from 'lucide-react';
+import { UserCheck, CalendarX, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { chromeText } from '@/shell/chromeUi';
 import { RADIUS_CTRL, RADIUS_SHELL } from '@/shell/canvas/ui/nodeui';
@@ -14,7 +14,23 @@ export function GuestNameGate() {
   const gate = useInterviewGuestGate();
   const [name, setName] = useState('');
 
-  if (gate.phase === 'inactive' || gate.phase === 'loading') return null;
+  if (gate.phase === 'inactive') return null;
+
+  // Keep the board covered while the invite is validated so nothing leaks
+  // before the candidate has joined (and the gate doesn't flash in).
+  if (gate.phase === 'loading') {
+    return (
+      <div className="guest-name-gate absolute inset-0 z-[60] grid place-items-center bg-bg/70 backdrop-blur-sm">
+        <span
+          className={cn('inline-flex items-center gap-2 text-ink3', chromeText.sm)}
+          role="status"
+        >
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Checking your invite…
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div className="guest-name-gate absolute inset-0 z-[60] grid place-items-center bg-bg/70 backdrop-blur-sm">
