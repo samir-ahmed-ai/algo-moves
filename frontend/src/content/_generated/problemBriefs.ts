@@ -2344,8 +2344,14 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "[[1,4],[2,5]]",
+        "output": "[3, 1]",
+        "note": "See Amount Of New Area Painted Each Day pattern."
+      },
+      {
+        "label": "Example 2",
+        "input": "[[1,4],[4,7]]",
+        "output": "[3, 3]",
         "note": "See Amount Of New Area Painted Each Day pattern."
       }
     ]
@@ -2358,8 +2364,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"ops\": [\n    {\"kind\": \"mkdir\", \"path\": \"/a/b\"},\n    {\"kind\": \"add\", \"path\": \"/a/b/c\", \"content\": \"hello\"},\n    {\"kind\": \"add\", \"path\": \"/a/b/c\", \"content\": \" world\"},\n    {\"kind\": \"ls\", \"path\": \"/a/b\"},\n    {\"kind\": \"read\", \"path\": \"/a/b/c\"}\n  ]\n}",
+        "output": "done",
         "note": "See Design In Memory File System pattern."
       }
     ]
@@ -2372,8 +2378,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"big\": 1,\n  \"medium\": 1,\n  \"small\": 0,\n  \"cars\": [1, 2, 1, 3]\n}",
+        "output": "0/0/0 left",
         "note": "See Design Parking System pattern."
       }
     ]
@@ -2386,8 +2392,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"n\": 3,\n  \"moves\": [\n    {\"row\": 0, \"col\": 0, \"player\": 1},\n    {\"row\": 1, \"col\": 0, \"player\": 2},\n    {\"row\": 0, \"col\": 1, \"player\": 1},\n    {\"row\": 1, \"col\": 1, \"player\": 2},\n    {\"row\": 0, \"col\": 2, \"player\": 1}\n  ]\n}",
+        "output": "P1 wins",
         "note": "See Design Tic Tac Toe pattern."
       }
     ]
@@ -2400,8 +2406,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"ops\": [\n    {\"kind\": \"add\", \"point\": [0, 0]},\n    {\"kind\": \"add\", \"point\": [0, 1]},\n    {\"kind\": \"add\", \"point\": [1, 0]},\n    {\"kind\": \"count\", \"point\": [1, 1]}\n  ]\n}",
+        "output": "done",
         "note": "See Detect Squares pattern."
       }
     ]
@@ -2414,8 +2420,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"words\": [\"cat\", \"cats\", \"car\", \"card\"],\n  \"ops\": [\n    {\"kind\": \"search\", \"word\": \"cat\"},\n    {\"kind\": \"search\", \"word\": \"ca\"},\n    {\"kind\": \"suggest\", \"prefix\": \"ca\", \"limit\": 3}\n  ]\n}",
+        "output": "done",
         "note": "Prefix tree of words; DFS from the prefix node to collect suggestions."
       }
     ]
@@ -2428,8 +2434,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "[1,0,0,2,3] · [0,3,0,4,0]",
+        "output": "dot=8",
         "note": "See Dot Product Of Two Sparse Vectors pattern."
       }
     ]
@@ -2442,8 +2448,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"n\": 2,\n  \"logs\": [\"0:start:0\", \"1:start:2\", \"1:end:5\", \"0:end:6\"]\n}",
+        "output": "[3, 4]",
         "note": "See Exclusive Time Of Functions pattern."
       }
     ]
@@ -2456,8 +2462,14 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"postfix\": [\"3\", \"4\", \"+\", \"2\", \"*\"]\n}",
+        "output": "=14",
+        "note": "See Design An Expression Tree With Evaluate Function pattern."
+      },
+      {
+        "label": "Example 2",
+        "input": "{\n  \"postfix\": [\"10\", \"2\", \"/\", \"3\", \"+\"]\n}",
+        "output": "=8",
         "note": "See Design An Expression Tree With Evaluate Function pattern."
       }
     ]
@@ -2470,8 +2482,14 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"nums\": [1, 2, 3, 4, 5]\n}",
+        "output": "median = 3",
+        "note": "See Find Median From Data Stream pattern."
+      },
+      {
+        "label": "Example 2",
+        "input": "{\n  \"nums\": [5, 15, 1, 3]\n}",
+        "output": "median = 4",
         "note": "See Find Median From Data Stream pattern."
       }
     ]
@@ -2484,8 +2502,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "k=3 · 5 requests",
+        "output": "[1]",
         "note": "See Find Servers That Handled Most Number Of Requests pattern."
       }
     ]
@@ -2498,8 +2516,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"secret\": \"acckzz\",\n  \"words\": [\"acckzz\", \"ccbazz\", \"eiowzz\", \"abcczz\"]\n}",
+        "output": "found",
         "note": "See Guess The Word pattern."
       }
     ]
@@ -2512,8 +2530,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"ops\": [\n    {\"kind\": \"insert\", \"val\": 1},\n    {\"kind\": \"insert\", \"val\": 2},\n    {\"kind\": \"insert\", \"val\": 3},\n    {\"kind\": \"remove\", \"val\": 2},\n    {\"kind\": \"getRandom\"}\n  ],\n  \"randomIdx\": 0\n}",
+        "output": "size 2",
         "note": "See Insert Delete Getrandom O1 pattern."
       }
     ]
@@ -2526,8 +2544,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"servers\": [\"A\", \"B\"],\n  \"ops\": [\n    {\"kind\": \"next\"},\n    {\"kind\": \"next\"},\n    {\"kind\": \"next\"},\n    {\"kind\": \"add\", \"server\": \"C\"},\n    {\"kind\": \"next\"}\n  ]\n}",
+        "output": "3 servers",
         "note": "Circular index cycling through the backend list."
       }
     ]
@@ -2540,8 +2558,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"lines\": [\"INFO: started\", \"WARN: slow query\", \"ERROR: timeout\", \"INFO: retry ok\"]\n}",
+        "output": "4 lines",
         "note": "Parse each line; bucket counts by log level."
       }
     ]
@@ -2554,8 +2572,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"ops\": [\n    {\"ts\": 1, \"msg\": \"foo\"},\n    {\"ts\": 8, \"msg\": \"foo\"},\n    {\"ts\": 9, \"msg\": \"foo\"},\n    {\"ts\": 5, \"msg\": \"bar\"}\n  ]\n}",
+        "output": "2 msgs",
         "note": "See Logger Rate Limiter pattern."
       }
     ]
@@ -2568,8 +2586,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"cap\": 2,\n  \"ops\": [\n    {\"kind\": \"put\", \"key\": 1, \"val\": 1},\n    {\"kind\": \"put\", \"key\": 2, \"val\": 2},\n    {\"kind\": \"get\", \"key\": 1},\n    {\"kind\": \"put\", \"key\": 3, \"val\": 3},\n    {\"kind\": \"get\", \"key\": 2}\n  ]\n}",
+        "output": "2 in cache",
         "note": "Map key->node; the list keeps MRU at the front, LRU at the tail."
       }
     ]
@@ -2582,8 +2600,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"n\": 2,\n  \"meetings\": [\n    [0, 10],\n    [1, 5],\n    [2, 7],\n    [3, 4]\n  ]\n}",
+        "output": "room 0",
         "note": "See Meeting Rooms Iii pattern."
       }
     ]
@@ -2596,8 +2614,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"books\": [\n    [10, 20],\n    [15, 25],\n    [20, 30]\n  ]\n}",
+        "output": "2 booked",
         "note": "See My Calendar I pattern."
       }
     ]
@@ -2610,8 +2628,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"ops\": [\n    {\"kind\": \"add\", \"number\": \"123\", \"name\": \"Alice\"},\n    {\"kind\": \"add\", \"number\": \"124\", \"name\": \"Bob\"},\n    {\"kind\": \"lookup\", \"number\": \"123\"},\n    {\"kind\": \"suggest\", \"prefix\": \"12\"}\n  ]\n}",
+        "output": "2 contacts",
         "note": "Map number->name plus a digit trie holding names for prefix suggestions."
       }
     ]
@@ -2624,8 +2642,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "[1,2,3,3,3] target 3",
+        "output": "index 3",
         "note": "See Random Pick Index pattern."
       }
     ]
@@ -2638,8 +2656,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"weights\": [1, 3],\n  \"targets\": [1, 4]\n}",
+        "output": "done",
         "note": "See Random Pick With Weight pattern."
       }
     ]
@@ -2652,8 +2670,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"ops\": [\n    {\"kind\": \"add\", \"left\": 10, \"right\": 20},\n    {\"kind\": \"add\", \"left\": 15, \"right\": 25},\n    {\"kind\": \"query\", \"left\": 12, \"right\": 18},\n    {\"kind\": \"remove\", \"left\": 14, \"right\": 16}\n  ]\n}",
+        "output": "2 intervals",
         "note": "See Range Module pattern."
       }
     ]
@@ -2666,8 +2684,14 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"chunks\": [\"abc\"],\n  \"reads\": [1, 3, 1]\n}",
+        "output": "done",
+        "note": "See Read N Characters Given Read4 Ii Call Multiple Times pattern."
+      },
+      {
+        "label": "Example 2",
+        "input": "{\n  \"chunks\": [\"ab\", \"cd\"],\n  \"reads\": [3, 2]\n}",
+        "output": "done",
         "note": "See Read N Characters Given Read4 Ii Call Multiple Times pattern."
       }
     ]
@@ -2680,8 +2704,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "[3,0,2,2,1,1] · next 4,2",
+        "output": "done",
         "note": "See Rle Iterator pattern."
       }
     ]
@@ -2694,8 +2718,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"ops\": [\n    {\"kind\": \"add\", \"name\": \"bradford\", \"score\": 2},\n    {\"kind\": \"add\", \"name\": \"branta\", \"score\": 3},\n    {\"kind\": \"add\", \"name\": \"alameda\", \"score\": 3},\n    {\"kind\": \"get\"},\n    {\"kind\": \"get\"}\n  ]\n}",
+        "output": "done",
         "note": "See Sequentially Ordinal Rank Tracker pattern."
       }
     ]
@@ -2708,8 +2732,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"length\": 3,\n  \"ops\": [\n    {\"kind\": \"set\", \"index\": 0, \"val\": 5},\n    {\"kind\": \"snap\"},\n    {\"kind\": \"set\", \"index\": 0, \"val\": 6},\n    {\"kind\": \"get\", \"index\": 0, \"snapId\": 0}\n  ]\n}",
+        "output": "sid=1",
         "note": "See Snapshot Array pattern."
       }
     ]
@@ -2722,8 +2746,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"ops\": [\n    {\"kind\": \"update\", \"timestamp\": 1, \"price\": 10},\n    {\"kind\": \"update\", \"timestamp\": 2, \"price\": 5},\n    {\"kind\": \"maximum\"},\n    {\"kind\": \"minimum\"},\n    {\"kind\": \"current\"}\n  ]\n}",
+        "output": "done",
         "note": "See Stock Price Fluctuation pattern."
       }
     ]
@@ -2736,8 +2760,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"host\": \"https://tiny.example\",\n  \"ops\": [\n    {\"kind\": \"encode\", \"url\": \"https://leetcode.com/problems/design-tiny-url\"},\n    {\"kind\": \"encode\", \"url\": \"https://google.com\"},\n    {\"kind\": \"decode\", \"short\": \"https://tiny.example/1\"}\n  ]\n}",
+        "output": "2 urls",
         "note": "Counter -> base62 code; two maps wire short<->long both ways."
       }
     ]
@@ -2750,8 +2774,8 @@ export const GENERATED_PROBLEM_BRIEFS: Record<string, GeneratedProblemBrief> = {
     "cases": [
       {
         "label": "Example 1",
-        "input": "",
-        "output": "medium",
+        "input": "{\n  \"ops\": [\n    {\"kind\": \"set\", \"key\": \"a\", \"value\": 1},\n    {\"kind\": \"set\", \"key\": \"b\", \"value\": 2},\n    {\"kind\": \"get\", \"key\": \"a\", \"version\": 0},\n    {\"kind\": \"get\", \"key\": \"b\", \"version\": 1}\n  ]\n}",
+        "output": "v2",
         "note": "Stack of maps; each set pushes a fresh copied snapshot layer."
       }
     ]

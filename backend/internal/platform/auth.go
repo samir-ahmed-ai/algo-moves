@@ -174,9 +174,19 @@ func (s *Service) HandleMe(w http.ResponseWriter, r *http.Request) {
 		WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
 	}
-	p, code, msg := s.ProfileFromRequest(r.Context(), r)
-	if code != 0 {
-		WriteErr(w, code, msg)
+	pid := s.profileIDFromContext(r.Context())
+	if pid == "" {
+		// No session is normal on first load; 204 avoids a red console error in dev.
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	p, err := s.store.ProfileByID(r.Context(), pid)
+	if err != nil {
+		WriteErr(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	if p == nil {
+		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 	WriteJSON(w, http.StatusOK, p)

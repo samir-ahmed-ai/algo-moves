@@ -114,7 +114,7 @@ export function RecallToolbarMenu({
           )}
         />
         {badge != null && badge > 0 && (
-          <span className="recall-toolbar-menu-badge ml-0.5 rounded-full bg-accent/20 px-1 font-mono text-[9px] tabular-nums text-accent">
+          <span className="recall-toolbar-menu-badge ml-0.5 rounded-full bg-accent/20 px-1 font-mono text-[length:var(--fs-2xs)] tabular-nums text-accent">
             {badge}
           </span>
         )}
