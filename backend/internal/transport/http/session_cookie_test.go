@@ -8,9 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"algomoves.dev/realtime/hub"
 	"algomoves/gameserver/internal/app"
 	"algomoves/gameserver/internal/config"
+
+	"algomoves.dev/realtime/hub"
 )
 
 // Integration test — skipped unless DATABASE_URL is set.
@@ -34,7 +35,7 @@ func TestGuestSessionCookieCrossSite(t *testing.T) {
 	}
 	defer app.Close()
 
-	ts := httptest.NewServer(Handler(hub.New(), app))
+	ts := httptest.NewServer(Handler(hub.New(), app, config.Config{WSRateLimit: 60, APIRateLimit: 120, TokenRateLimit: 30, NewRoomRateLimit: 20}))
 	defer ts.Close()
 
 	req, err := http.NewRequest(http.MethodPost, ts.URL+"/api/auth/guest", nil)

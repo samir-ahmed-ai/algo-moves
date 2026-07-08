@@ -1,3 +1,4 @@
+// Package prep manages study plans, daily questions, and user preparation tracking.
 package prep
 
 import (
@@ -27,6 +28,7 @@ func sanitizePrepPlanTitle(s string) string {
 	return s
 }
 
+// Store defines the data access methods required by this domain.
 type Store interface {
 	ListPrepPlans(ctx context.Context, ownerID string) ([]PrepPlanSummary, error)
 	CreatePrepPlan(ctx context.Context, ownerID, title string) (*PrepPlan, error)
@@ -45,14 +47,14 @@ func NewHandler(repo Store, auth profile.Authenticator) *Handler {
 }
 
 func (h *Handler) Register(mux *http.ServeMux) {
-	mux.HandleFunc("GET /api/prep-plans", h.HandleListPrepPlans)
-	mux.HandleFunc("POST /api/prep-plans", h.HandleCreatePrepPlan)
-	mux.HandleFunc("GET /api/prep-plans/{id}", h.HandleGetPrepPlan)
-	mux.HandleFunc("PUT /api/prep-plans/{id}", h.HandleUpdatePrepPlan)
-	mux.HandleFunc("DELETE /api/prep-plans/{id}", h.HandleDeletePrepPlan)
+	mux.HandleFunc("GET /api/prep-plans", h.handleListPrepPlans)
+	mux.HandleFunc("POST /api/prep-plans", h.handleCreatePrepPlan)
+	mux.HandleFunc("GET /api/prep-plans/{id}", h.handleGetPrepPlan)
+	mux.HandleFunc("PUT /api/prep-plans/{id}", h.handleUpdatePrepPlan)
+	mux.HandleFunc("DELETE /api/prep-plans/{id}", h.handleDeletePrepPlan)
 }
 
-func (h *Handler) HandleListPrepPlans(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleListPrepPlans(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 	if code != 0 {
@@ -67,7 +69,7 @@ func (h *Handler) HandleListPrepPlans(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, list)
 }
 
-func (h *Handler) HandleCreatePrepPlan(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleCreatePrepPlan(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 	if code != 0 {
@@ -105,7 +107,7 @@ func (h *Handler) HandleCreatePrepPlan(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, plan)
 }
 
-func (h *Handler) HandleGetPrepPlan(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleGetPrepPlan(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := r.PathValue("id")
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
@@ -125,7 +127,7 @@ func (h *Handler) HandleGetPrepPlan(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, plan)
 }
 
-func (h *Handler) HandleUpdatePrepPlan(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleUpdatePrepPlan(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := r.PathValue("id")
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
@@ -171,7 +173,7 @@ func (h *Handler) HandleUpdatePrepPlan(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, plan)
 }
 
-func (h *Handler) HandleDeletePrepPlan(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleDeletePrepPlan(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := r.PathValue("id")
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)

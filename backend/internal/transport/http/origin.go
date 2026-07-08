@@ -2,26 +2,8 @@ package server
 
 import (
 	"net/http"
-	"os"
 	"strings"
 )
-
-// allowedOriginsFromEnv reads ALLOWED_ORIGINS (comma-separated). An empty value
-// means allow any origin — the LAN-dev default.
-func allowedOriginsFromEnv() []string {
-	raw := strings.TrimSpace(os.Getenv("ALLOWED_ORIGINS"))
-	if raw == "" {
-		return nil
-	}
-	parts := strings.Split(raw, ",")
-	out := make([]string, 0, len(parts))
-	for _, p := range parts {
-		if o := strings.TrimSpace(p); o != "" {
-			out = append(out, o)
-		}
-	}
-	return out
-}
 
 func originAllowed(origin string, allowed []string) bool {
 	if len(allowed) == 0 {

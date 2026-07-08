@@ -1,3 +1,4 @@
+// Package canvas provides realtime collaborative whiteboard functionality.
 package canvas
 
 import (
@@ -11,6 +12,7 @@ import (
 	"algomoves/gameserver/internal/profile"
 )
 
+// Store defines the data access methods required by this domain.
 type Store interface {
 	ListCanvases(ctx context.Context, profileID string) ([]map[string]any, error)
 	CreateCanvas(ctx context.Context, ownerProfileID, title string, doc json.RawMessage, roomCode *string) (string, time.Time, error)
@@ -29,14 +31,14 @@ func NewHandler(repo Store, auth profile.Authenticator) *Handler {
 }
 
 func (h *Handler) Register(mux *http.ServeMux) {
-	mux.HandleFunc("GET /api/canvases", h.HandleListCanvases)
-	mux.HandleFunc("POST /api/canvases", h.HandleCreateCanvas)
-	mux.HandleFunc("GET /api/canvases/{id}", h.HandleGetCanvas)
-	mux.HandleFunc("PUT /api/canvases/{id}", h.HandleUpdateCanvas)
-	mux.HandleFunc("DELETE /api/canvases/{id}", h.HandleDeleteCanvas)
+	mux.HandleFunc("GET /api/canvases", h.handleListCanvases)
+	mux.HandleFunc("POST /api/canvases", h.handleCreateCanvas)
+	mux.HandleFunc("GET /api/canvases/{id}", h.handleGetCanvas)
+	mux.HandleFunc("PUT /api/canvases/{id}", h.handleUpdateCanvas)
+	mux.HandleFunc("DELETE /api/canvases/{id}", h.handleDeleteCanvas)
 }
 
-func (h *Handler) HandleListCanvases(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleListCanvases(w http.ResponseWriter, r *http.Request) {
 	p, code, msg := h.auth.ProfileFromRequest(r.Context(), r)
 	if code != 0 {
 		httputil.WriteErr(w, code, msg)
@@ -53,7 +55,7 @@ func (h *Handler) HandleListCanvases(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, list)
 }
 
-func (h *Handler) HandleCreateCanvas(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleCreateCanvas(w http.ResponseWriter, r *http.Request) {
 	p, code, msg := h.auth.ProfileFromRequest(r.Context(), r)
 	if code != 0 {
 		httputil.WriteErr(w, code, msg)
@@ -80,7 +82,7 @@ func (h *Handler) HandleCreateCanvas(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, map[string]any{"id": id, "title": title, "updatedAt": updated})
 }
 
-func (h *Handler) HandleGetCanvas(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleGetCanvas(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	c, err := h.repo.GetCanvas(r.Context(), id)
 	if err != nil {
@@ -101,7 +103,7 @@ func (h *Handler) HandleGetCanvas(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (h *Handler) HandleUpdateCanvas(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleUpdateCanvas(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	p, code, msg := h.auth.ProfileFromRequest(r.Context(), r)
 	if code != 0 {
@@ -129,7 +131,7 @@ func (h *Handler) HandleUpdateCanvas(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, map[string]any{"id": id, "updatedAt": updated})
 }
 
-func (h *Handler) HandleDeleteCanvas(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleDeleteCanvas(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	p, code, msg := h.auth.ProfileFromRequest(r.Context(), r)
 	if code != 0 {

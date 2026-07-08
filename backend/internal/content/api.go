@@ -1,3 +1,4 @@
+// Package content provides static and dynamic algorithmic challenges, courses, and resources.
 package content
 
 import (
@@ -7,6 +8,7 @@ import (
 	"algomoves.dev/shared/httputil"
 )
 
+// Store defines the data access methods required by this domain.
 type Store interface {
 	ContentCatalog(ctx context.Context) ([]ContentCourse, error)
 	ContentProblemByID(ctx context.Context, id string) (*ContentProblem, error)
@@ -21,11 +23,11 @@ func NewHandler(repo Store) *Handler {
 }
 
 func (h *Handler) Register(mux *http.ServeMux) {
-	mux.HandleFunc("GET /api/content/catalog", h.HandleContentCatalog)
-	mux.HandleFunc("GET /api/content/problems/{id}", h.HandleContentProblem)
+	mux.HandleFunc("GET /api/content/catalog", h.handleContentCatalog)
+	mux.HandleFunc("GET /api/content/problems/{id}", h.handleContentProblem)
 }
 
-func (h *Handler) HandleContentCatalog(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleContentCatalog(w http.ResponseWriter, r *http.Request) {
 	courses, err := h.repo.ContentCatalog(r.Context())
 	if err != nil {
 		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "query failed")
@@ -39,7 +41,7 @@ func (h *Handler) HandleContentCatalog(w http.ResponseWriter, r *http.Request) {
 
 // handleContentProblem: GET /api/content/problems/{id} — one problem with
 // solutions, tags and quiz.
-func (h *Handler) HandleContentProblem(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleContentProblem(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if id == "" {
 		httputil.WriteErr(w, http.StatusBadRequest, "missing id")

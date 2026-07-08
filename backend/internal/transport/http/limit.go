@@ -3,6 +3,7 @@ package server
 import (
 	"net"
 	"net/http"
+	"algomoves.dev/shared/httputil"
 	"sync"
 	"time"
 
@@ -78,7 +79,7 @@ func clientIP(r *http.Request) string {
 func rateLimit(next http.HandlerFunc, limiter *ipRateLimiter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if limiter != nil && !limiter.allow(clientIP(r)) {
-			http.Error(w, "rate limit exceeded", http.StatusTooManyRequests)
+			httputil.WriteErr(w, http.StatusTooManyRequests, "rate limit exceeded")
 			return
 		}
 		next(w, r)

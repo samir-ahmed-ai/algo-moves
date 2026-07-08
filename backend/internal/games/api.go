@@ -1,3 +1,4 @@
+// Package games handles multiplayer algorithmic games and matchmaking.
 package games
 
 import (
@@ -10,6 +11,7 @@ import (
 	"algomoves/gameserver/internal/profile"
 )
 
+// Store defines the data access methods required by this domain.
 type Store interface {
 	GameStats(ctx context.Context, profileID string) ([]map[string]any, error)
 	MatchHistory(ctx context.Context, profileID string, limit int) ([]map[string]any, error)
@@ -42,33 +44,33 @@ func NewHandler(repo Store, auth profile.Authenticator) *Handler {
 }
 
 func (h *Handler) Register(mux *http.ServeMux) {
-	mux.HandleFunc("GET /api/stats/me", h.HandleStatsMe)
-	mux.HandleFunc("GET /api/matches/me", h.HandleMatchesMe)
-	mux.HandleFunc("POST /api/matches", h.HandleSubmitMatch)
+	mux.HandleFunc("GET /api/stats/me", h.handleStatsMe)
+	mux.HandleFunc("GET /api/matches/me", h.handleMatchesMe)
+	mux.HandleFunc("POST /api/matches", h.handleSubmitMatch)
 	
-	mux.HandleFunc("GET /api/leaderboard/game/{game}", h.HandleLeaderboardGame)
-	mux.HandleFunc("GET /api/leaderboard/global", h.HandleLeaderboardGlobal)
-	mux.HandleFunc("GET /api/leaderboard/recent", h.HandleLeaderboardRecent)
+	mux.HandleFunc("GET /api/leaderboard/game/{game}", h.handleLeaderboardGame)
+	mux.HandleFunc("GET /api/leaderboard/global", h.handleLeaderboardGlobal)
+	mux.HandleFunc("GET /api/leaderboard/recent", h.handleLeaderboardRecent)
 	
-	mux.HandleFunc("GET /api/achievements", h.HandleAchievements)
-	mux.HandleFunc("POST /api/achievements/{achID}", h.HandleAchievementAction)
+	mux.HandleFunc("GET /api/achievements", h.handleAchievements)
+	mux.HandleFunc("POST /api/achievements/{achID}", h.handleAchievementAction)
 	
-	mux.HandleFunc("GET /api/rooms/public", h.HandleRoomsPublic)
-	mux.HandleFunc("GET /api/rooms/{code}", h.HandleGetRoom)
-	mux.HandleFunc("PUT /api/rooms/{code}", h.HandleUpsertRoom)
-	mux.HandleFunc("POST /api/rooms/{code}/touch", h.HandleRoomTouch)
+	mux.HandleFunc("GET /api/rooms/public", h.handleRoomsPublic)
+	mux.HandleFunc("GET /api/rooms/{code}", h.handleGetRoom)
+	mux.HandleFunc("PUT /api/rooms/{code}", h.handleUpsertRoom)
+	mux.HandleFunc("POST /api/rooms/{code}/touch", h.handleRoomTouch)
 	
-	mux.HandleFunc("GET /api/friends", h.HandleGetFriends)
-	mux.HandleFunc("POST /api/friends", h.HandleAddFriend)
+	mux.HandleFunc("GET /api/friends", h.handleGetFriends)
+	mux.HandleFunc("POST /api/friends", h.handleAddFriend)
 	
-	mux.HandleFunc("GET /api/daily-challenge", h.HandleDailyChallenge)
-	mux.HandleFunc("POST /api/daily-challenge/score", h.HandleDailyScore)
+	mux.HandleFunc("GET /api/daily-challenge", h.handleDailyChallenge)
+	mux.HandleFunc("POST /api/daily-challenge/score", h.handleDailyScore)
 	
-	mux.HandleFunc("GET /api/games", h.HandleListGames)
-	mux.HandleFunc("GET /api/games/{id}", h.HandleGetGame)
+	mux.HandleFunc("GET /api/games", h.handleListGames)
+	mux.HandleFunc("GET /api/games/{id}", h.handleGetGame)
 }
 
-func (h *Handler) HandleStatsMe(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleStatsMe(w http.ResponseWriter, r *http.Request) {
 	p, code, msg := h.auth.ProfileFromRequest(r.Context(), r)
 	if code != 0 {
 		httputil.WriteErr(w, code, msg)
@@ -85,7 +87,7 @@ func (h *Handler) HandleStatsMe(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, stats)
 }
 
-func (h *Handler) HandleMatchesMe(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleMatchesMe(w http.ResponseWriter, r *http.Request) {
 	p, code, msg := h.auth.ProfileFromRequest(r.Context(), r)
 	if code != 0 {
 		httputil.WriteErr(w, code, msg)
@@ -103,7 +105,7 @@ func (h *Handler) HandleMatchesMe(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, history)
 }
 
-func (h *Handler) HandleSubmitMatch(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleSubmitMatch(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		GameID       string          `json:"gameId"`
 		RoomCode     *string         `json:"roomCode"`
@@ -131,7 +133,7 @@ func (h *Handler) HandleSubmitMatch(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, out)
 }
 
-func (h *Handler) HandleLeaderboardGame(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleLeaderboardGame(w http.ResponseWriter, r *http.Request) {
 	game := r.PathValue("game")
 	rows, err := h.repo.LeaderboardGame(r.Context(), game, 50)
 	if err != nil {
@@ -141,7 +143,7 @@ func (h *Handler) HandleLeaderboardGame(w http.ResponseWriter, r *http.Request) 
 	httputil.WriteJSON(w, http.StatusOK, rows)
 }
 
-func (h *Handler) HandleLeaderboardGlobal(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleLeaderboardGlobal(w http.ResponseWriter, r *http.Request) {
 	rows, err := h.repo.LeaderboardGlobal(r.Context(), 50)
 	if err != nil {
 		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "query failed")
@@ -150,7 +152,7 @@ func (h *Handler) HandleLeaderboardGlobal(w http.ResponseWriter, r *http.Request
 	httputil.WriteJSON(w, http.StatusOK, rows)
 }
 
-func (h *Handler) HandleLeaderboardRecent(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleLeaderboardRecent(w http.ResponseWriter, r *http.Request) {
 	sinceStr := r.URL.Query().Get("since")
 	since, err := time.Parse(time.RFC3339, sinceStr)
 	if err != nil {
@@ -169,7 +171,7 @@ func (h *Handler) HandleLeaderboardRecent(w http.ResponseWriter, r *http.Request
 	httputil.WriteJSON(w, http.StatusOK, rows)
 }
 
-func (h *Handler) HandleAchievements(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleAchievements(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Get("unlocked") == "1" {
 		p, code, msg := h.auth.ProfileFromRequest(r.Context(), r)
 		if code != 0 {
@@ -192,7 +194,7 @@ func (h *Handler) HandleAchievements(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, list)
 }
 
-func (h *Handler) HandleAchievementAction(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleAchievementAction(w http.ResponseWriter, r *http.Request) {
 	achID := r.PathValue("achID")
 	if achID == "" {
 		httputil.WriteErr(w, http.StatusBadRequest, "missing achID")
@@ -210,7 +212,7 @@ func (h *Handler) HandleAchievementAction(w http.ResponseWriter, r *http.Request
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (h *Handler) HandleRoomsPublic(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleRoomsPublic(w http.ResponseWriter, r *http.Request) {
 	list, err := h.repo.ListPublicRooms(r.Context(), 20)
 	if err != nil {
 		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "query failed")
@@ -219,7 +221,7 @@ func (h *Handler) HandleRoomsPublic(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, list)
 }
 
-func (h *Handler) HandleRoomTouch(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleRoomTouch(w http.ResponseWriter, r *http.Request) {
 	code := r.PathValue("code")
 	if err := h.repo.TouchRoom(r.Context(), code); err != nil {
 		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "touch failed")
@@ -228,7 +230,7 @@ func (h *Handler) HandleRoomTouch(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (h *Handler) HandleGetRoom(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleGetRoom(w http.ResponseWriter, r *http.Request) {
 	code := r.PathValue("code")
 	row, err := h.repo.GetRoom(r.Context(), code)
 	if err != nil {
@@ -242,7 +244,7 @@ func (h *Handler) HandleGetRoom(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, row)
 }
 
-func (h *Handler) HandleUpsertRoom(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleUpsertRoom(w http.ResponseWriter, r *http.Request) {
 	code := r.PathValue("code")
 	var body map[string]any
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -258,7 +260,7 @@ func (h *Handler) HandleUpsertRoom(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, row)
 }
 
-func (h *Handler) HandleGetFriends(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleGetFriends(w http.ResponseWriter, r *http.Request) {
 	p, code, msg := h.auth.ProfileFromRequest(r.Context(), r)
 	if code != 0 {
 		httputil.WriteErr(w, code, msg)
@@ -272,7 +274,7 @@ func (h *Handler) HandleGetFriends(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, list)
 }
 
-func (h *Handler) HandleAddFriend(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleAddFriend(w http.ResponseWriter, r *http.Request) {
 	p, code, msg := h.auth.ProfileFromRequest(r.Context(), r)
 	if code != 0 {
 		httputil.WriteErr(w, code, msg)
@@ -297,7 +299,7 @@ func (h *Handler) HandleAddFriend(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (h *Handler) HandleDailyChallenge(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleDailyChallenge(w http.ResponseWriter, r *http.Request) {
 	date := r.URL.Query().Get("date")
 	if date == "" {
 		date = time.Now().UTC().Format("2006-01-02")
@@ -310,7 +312,7 @@ func (h *Handler) HandleDailyChallenge(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, row)
 }
 
-func (h *Handler) HandleDailyScore(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleDailyScore(w http.ResponseWriter, r *http.Request) {
 	p, code, msg := h.auth.ProfileFromRequest(r.Context(), r)
 	if code != 0 {
 		httputil.WriteErr(w, code, msg)
@@ -331,7 +333,7 @@ func (h *Handler) HandleDailyScore(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (h *Handler) HandleListGames(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleListGames(w http.ResponseWriter, r *http.Request) {
 	games, err := h.repo.ListGames(r.Context())
 	if err != nil {
 		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "query failed")
@@ -343,7 +345,7 @@ func (h *Handler) HandleListGames(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, games)
 }
 
-func (h *Handler) HandleGetGame(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleGetGame(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	game, err := h.repo.GetGame(r.Context(), id)
 	if err != nil {

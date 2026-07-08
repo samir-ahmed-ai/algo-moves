@@ -1,3 +1,4 @@
+// Package resume handles resume parsing, generation, and AI-driven feedback.
 package resume
 
 import (
@@ -16,6 +17,7 @@ import (
 const maxResumeTitle = 200
 const errOpenAINotConfigured = "Add your OpenAI API key in Settings → Profile"
 
+// Store defines the data access methods required by this domain.
 type Store interface {
 	ListResumes(ctx context.Context, ownerID string) ([]ResumeSummary, error)
 	ListResumeDirectory(ctx context.Context) ([]ResumeDirectoryEntry, error)
@@ -46,15 +48,15 @@ func NewHandler(repo Store, profiles ProfileStore, auth profile.Authenticator, a
 }
 
 func (h *Handler) Register(mux *http.ServeMux) {
-	mux.HandleFunc("GET /api/resumes", h.HandleListResumes)
-	mux.HandleFunc("POST /api/resumes", h.HandleCreateResume)
-	mux.HandleFunc("GET /api/resumes/directory", h.HandleResumeDirectory)
-	mux.HandleFunc("GET /api/resumes/{id}", h.HandleGetResume)
-	mux.HandleFunc("PUT /api/resumes/{id}", h.HandleUpdateResume)
-	mux.HandleFunc("DELETE /api/resumes/{id}", h.HandleDeleteResume)
-	mux.HandleFunc("POST /api/resumes/{id}/customize", h.HandleCustomize)
-	mux.HandleFunc("GET /api/resumes/{id}/variants", h.HandleListVariants)
-	mux.HandleFunc("DELETE /api/resumes/{id}/variants/{variantID}", h.HandleDeleteVariant)
+	mux.HandleFunc("GET /api/resumes", h.handleListResumes)
+	mux.HandleFunc("POST /api/resumes", h.handleCreateResume)
+	mux.HandleFunc("GET /api/resumes/directory", h.handleResumeDirectory)
+	mux.HandleFunc("GET /api/resumes/{id}", h.handleGetResume)
+	mux.HandleFunc("PUT /api/resumes/{id}", h.handleUpdateResume)
+	mux.HandleFunc("DELETE /api/resumes/{id}", h.handleDeleteResume)
+	mux.HandleFunc("POST /api/resumes/{id}/customize", h.handleCustomize)
+	mux.HandleFunc("GET /api/resumes/{id}/variants", h.handleListVariants)
+	mux.HandleFunc("DELETE /api/resumes/{id}/variants/{variantID}", h.handleDeleteVariant)
 }
 
 func (h *Handler) resolveAIClient(ctx context.Context, profileID string) (*resumeopenai.Client, error) {
@@ -87,7 +89,7 @@ func sanitizeResumeTitle(title string) string {
 	return title
 }
 
-func (h *Handler) HandleListResumes(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleListResumes(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 	if code != 0 {
@@ -102,7 +104,7 @@ func (h *Handler) HandleListResumes(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, list)
 }
 
-func (h *Handler) HandleCreateResume(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleCreateResume(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 	if code != 0 {
@@ -181,7 +183,7 @@ func (h *Handler) HandleCreateResume(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, resume)
 }
 
-func (h *Handler) HandleResumeDirectory(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleResumeDirectory(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 	if code != 0 {
@@ -200,7 +202,7 @@ func (h *Handler) HandleResumeDirectory(w http.ResponseWriter, r *http.Request) 
 	httputil.WriteJSON(w, http.StatusOK, list)
 }
 
-func (h *Handler) HandleGetResume(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleGetResume(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := r.PathValue("id")
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
@@ -227,7 +229,7 @@ func (h *Handler) HandleGetResume(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, resume)
 }
 
-func (h *Handler) HandleUpdateResume(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleUpdateResume(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := r.PathValue("id")
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
@@ -264,7 +266,7 @@ func (h *Handler) HandleUpdateResume(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, resume)
 }
 
-func (h *Handler) HandleDeleteResume(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleDeleteResume(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := r.PathValue("id")
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
@@ -288,7 +290,7 @@ func (h *Handler) HandleDeleteResume(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, map[string]bool{"ok": true})
 }
 
-func (h *Handler) HandleCustomize(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleCustomize(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	resumeID := r.PathValue("id")
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
@@ -389,7 +391,7 @@ func (h *Handler) HandleCustomize(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, resp)
 }
 
-func (h *Handler) HandleListVariants(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleListVariants(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	resumeID := r.PathValue("id")
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
@@ -409,7 +411,7 @@ func (h *Handler) HandleListVariants(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, list)
 }
 
-func (h *Handler) HandleDeleteVariant(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleDeleteVariant(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	variantID := r.PathValue("variantID")
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)

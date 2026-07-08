@@ -1,6 +1,7 @@
 package server
 
 import (
+	"algomoves/gameserver/internal/config"
 	"bufio"
 	"encoding/binary"
 	"encoding/json"
@@ -124,7 +125,7 @@ func (c *wsClient) readMessage(t *testing.T) map[string]any {
 func (c *wsClient) close() { c.conn.Close() }
 
 func newTestServer() *httptest.Server {
-	return httptest.NewServer(Handler(hub.New(), nil))
+	return httptest.NewServer(Handler(hub.New(), nil, config.Config{WSRateLimit: 60, APIRateLimit: 120, TokenRateLimit: 30, NewRoomRateLimit: 20}))
 }
 
 func TestNewCodeEndpoint(t *testing.T) {
@@ -252,7 +253,7 @@ func TestNewAndHealthzRejectNonGET(t *testing.T) {
 // must keep serving plain infra healthchecks that never send one.
 func TestCorsJSONRequiresOriginOnNewWhenAllowlisted(t *testing.T) {
 	t.Setenv("ALLOWED_ORIGINS", "https://good.example")
-	ts := httptest.NewServer(Handler(hub.New(), nil))
+	ts := httptest.NewServer(Handler(hub.NewWithMaxRooms(10), nil, config.Config{WSRateLimit: 60, APIRateLimit: 120, TokenRateLimit: 30, NewRoomRateLimit: 20, AllowedOrigins: []string{"https://good.example"}}))
 	defer ts.Close()
 
 	resp, err := http.Get(ts.URL + "/new")

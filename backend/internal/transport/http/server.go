@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"algomoves.dev/shared/httputil"
 	"strconv"
 	"strings"
 	"time"
@@ -14,13 +15,14 @@ import (
 	"algomoves.dev/realtime/hub"
 	"algomoves.dev/realtime/ws"
 	"algomoves/gameserver/internal/app"
+	"algomoves/gameserver/internal/config"
 )
 
 // Handler returns the HTTP handler serving /ws, /new, /healthz, /api/* and /.
-func Handler(h *hub.Hub, api *app.Service) http.Handler {
-	allowed := allowedOriginsFromEnv()
-	wsLimit := newIPRateLimiter(60, time.Minute)
-	newLimit := newIPRateLimiter(20, time.Minute)
+func Handler(h *hub.Hub, api *app.Service, cfg config.Config) http.Handler {
+	allowed := cfg.AllowedOrigins
+	wsLimit := newIPRateLimiter(cfg.WSRateLimit, time.Minute)
+	newLimit := newIPRateLimiter(cfg.NewRoomRateLimit, time.Minute)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/ws", rateLimit(wsHandler(h, allowed), wsLimit))
@@ -36,21 +38,29 @@ func Handler(h *hub.Hub, api *app.Service) http.Handler {
 	if api != nil && api.Enabled() {
 		apiMux := http.NewServeMux()
 		api.Register(apiMux)
-		mux.Handle("/api/", corsAPI(allowed, api.SessionMiddleware(apiMux)))
+		
+		apiHandler := http.TimeoutHandler(api.SessionMiddleware(apiMux), 10*time.Second, `{"error": "request timeout"}`)
+		apiHandler = maxBytes(apiHandler)
+		apiHandler = corsAPI(allowed, apiHandler, cfg.APIRateLimit, cfg.TokenRateLimit)
+		
+		mux.Handle("/api/", apiHandler)
 	}
 	mux.HandleFunc("/", bannerHandler)
-	return mux
+	
+	// Global middlewares applied to ALL routes (WS + API)
+	globalMux := requestLogger(recoverPanic(securityHeaders(mux)))
+	return globalMux
 }
 
 func wsHandler(h *hub.Hub, allowed []string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !originAllowed(r.Header.Get("Origin"), allowed) {
-			http.Error(w, "origin not allowed", http.StatusForbidden)
+			httputil.WriteErr(w, http.StatusForbidden, "origin not allowed")
 			return
 		}
 		code := strings.ToUpper(strings.TrimSpace(r.URL.Query().Get("room")))
 		if code == "" || len(code) > 12 {
-			http.Error(w, "missing or invalid room code", http.StatusBadRequest)
+			httputil.WriteErr(w, http.StatusBadRequest, "missing or invalid room code")
 			return
 		}
 		name := sanitizeName(r.URL.Query().Get("name"))
@@ -74,7 +84,7 @@ func wsHandler(h *hub.Hub, allowed []string) http.HandlerFunc {
 func newCodeHandler(h *hub.Hub) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			httputil.WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
 			return
 		}
 		writeJSON(w, map[string]any{"code": h.FreshCode()})
@@ -84,7 +94,7 @@ func newCodeHandler(h *hub.Hub) http.HandlerFunc {
 func healthHandler(h *hub.Hub, app *app.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			httputil.WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
 			return
 		}
 		body := map[string]any{"status": "ok", "rooms": h.RoomCount()}
@@ -125,7 +135,7 @@ func corsJSON(next http.HandlerFunc, allowed []string, limiter *ipRateLimiter, r
 			rejected = origin != "" && !originAllowed(origin, allowed)
 		}
 		if rejected {
-			http.Error(w, "origin not allowed", http.StatusForbidden)
+			httputil.WriteErr(w, http.StatusForbidden, "origin not allowed")
 			return
 		}
 		setCORS(w, origin, allowed)
@@ -141,14 +151,51 @@ func corsJSON(next http.HandlerFunc, allowed []string, limiter *ipRateLimiter, r
 // corsAPI wraps the /api subtree so the static frontend can call arcade endpoints.
 // A general API rate limit applies to all routes; guest token lookups get a
 // stricter per-IP budget to slow enumeration.
-func corsAPI(allowed []string, next http.Handler) http.Handler {
-	apiLimit := newIPRateLimiter(120, time.Minute)
-	tokenLimit := newIPRateLimiter(30, time.Minute)
+
+func securityHeaders(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-Frame-Options", "DENY")
+		next.ServeHTTP(w, r)
+	})
+}
+
+func recoverPanic(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				slog.Error("panic recovered", "error", err, "path", r.URL.Path)
+				httputil.WriteErr(w, http.StatusInternalServerError, "internal server error")
+			}
+		}()
+		next.ServeHTTP(w, r)
+	})
+}
+
+func requestLogger(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		next.ServeHTTP(w, r)
+		slog.Info("request", "method", r.Method, "path", r.URL.Path, "duration", time.Since(start).String())
+	})
+}
+
+func maxBytes(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.Body = http.MaxBytesReader(w, r.Body, 2<<20) // 2MB
+		next.ServeHTTP(w, r)
+	})
+}
+
+func corsAPI(allowed []string, next http.Handler, apiLimitRate, tokenLimitRate int) http.Handler {
+	apiLimit := newIPRateLimiter(apiLimitRate, time.Minute)
+	tokenLimit := newIPRateLimiter(tokenLimitRate, time.Minute)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
 		rejected := !originAllowed(origin, allowed)
 		if rejected {
-			http.Error(w, "origin not allowed", http.StatusForbidden)
+			httputil.WriteErr(w, http.StatusForbidden, "origin not allowed")
 			return
 		}
 		limiter := apiLimit
@@ -156,7 +203,7 @@ func corsAPI(allowed []string, next http.Handler) http.Handler {
 			limiter = tokenLimit
 		}
 		if limiter != nil && !limiter.allow(clientIP(r)) {
-			http.Error(w, "rate limit exceeded", http.StatusTooManyRequests)
+			httputil.WriteErr(w, http.StatusTooManyRequests, "rate limit exceeded")
 			return
 		}
 		setCORS(w, origin, allowed)

@@ -22,16 +22,26 @@ import (
 const bcryptCost = 12
 const sessionProfileKey = "profile_id"
 
-// Service manages auth HTTP handlers and session cookies.
-type Service struct {
-	profiles *profile.Repository
+// Handler manages auth HTTP handlers and session cookies.
+
+// Store defines the data access methods required by the auth service.
+type Store interface {
+	SetAdmin(ctx context.Context, email string) (bool, error)
+	ProfileByID(ctx context.Context, id string) (*profile.Profile, error)
+	CreateEmailUser(ctx context.Context, email, passwordHash, displayName string) (*profile.GuestSession, error)
+	ProfileByEmail(ctx context.Context, email string) (*profile.Profile, string, error)
+	CreateGuest(ctx context.Context) (*profile.GuestSession, error)
+}
+
+type Handler struct {
+	profiles Store
 	sessions *scs.SessionManager
 	sqlDB    *sql.DB
 }
 
-// NewService constructs an auth service with optional session storage.
-func NewService(profiles *profile.Repository, databaseURL string) (*Service, error) {
-	svc := &Service{profiles: profiles}
+// NewHandler constructs an auth handler with optional session storage.
+func NewHandler(profiles Store, databaseURL string) (*Handler, error) {
+	svc := &Handler{profiles: profiles}
 	if strings.TrimSpace(databaseURL) == "" {
 		return svc, nil
 	}
@@ -46,15 +56,15 @@ func NewService(profiles *profile.Repository, databaseURL string) (*Service, err
 
 // Close shuts down the session SQL connection.
 
-func (s *Service) Register(mux *http.ServeMux) {
-	mux.HandleFunc("POST /api/auth/signup", s.HandleSignup)
-	mux.HandleFunc("POST /api/auth/login", s.HandleLogin)
-	mux.HandleFunc("POST /api/auth/guest", s.HandleGuest)
-	mux.HandleFunc("POST /api/auth/logout", s.HandleLogout)
-	mux.HandleFunc("GET /api/auth/me", s.HandleMe)
+func (s *Handler) Register(mux *http.ServeMux) {
+	mux.HandleFunc("POST /api/auth/signup", s.handleSignup)
+	mux.HandleFunc("POST /api/auth/login", s.handleLogin)
+	mux.HandleFunc("POST /api/auth/guest", s.handleGuest)
+	mux.HandleFunc("POST /api/auth/logout", s.handleLogout)
+	mux.HandleFunc("GET /api/auth/me", s.handleMe)
 }
 
-func (s *Service) Close() {
+func (s *Handler) Close() {
 	if s != nil && s.sqlDB != nil {
 		s.sqlDB.Close()
 	}
@@ -73,7 +83,7 @@ func ValidEmail(email string) bool {
 	return strings.Contains(email[at+1:], ".")
 }
 
-func (s *Service) maybePromotePlatformAdmin(ctx context.Context, email string) {
+func (s *Handler) maybePromotePlatformAdmin(ctx context.Context, email string) {
 	adminEmail := strings.TrimSpace(strings.ToLower(os.Getenv("PLATFORM_ADMIN_EMAIL")))
 	email = strings.TrimSpace(strings.ToLower(email))
 	if adminEmail == "" || email != adminEmail {
@@ -84,7 +94,7 @@ func (s *Service) maybePromotePlatformAdmin(ctx context.Context, email string) {
 	}
 }
 
-func (s *Service) refreshSessionProfile(ctx context.Context, sess *profile.GuestSession) {
+func (s *Handler) refreshSessionProfile(ctx context.Context, sess *profile.GuestSession) {
 	if sess == nil {
 		return
 	}
@@ -95,7 +105,7 @@ func (s *Service) refreshSessionProfile(ctx context.Context, sess *profile.Guest
 	sess.Profile = *p
 }
 
-func (s *Service) HandleSignup(w http.ResponseWriter, r *http.Request) {
+func (s *Handler) handleSignup(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		httputil.WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -142,7 +152,7 @@ func (s *Service) HandleSignup(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, sess)
 }
 
-func (s *Service) HandleLogin(w http.ResponseWriter, r *http.Request) {
+func (s *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		httputil.WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -190,7 +200,7 @@ func (s *Service) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, sess)
 }
 
-func (s *Service) HandleGuest(w http.ResponseWriter, r *http.Request) {
+func (s *Handler) handleGuest(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		httputil.WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -207,7 +217,7 @@ func (s *Service) HandleGuest(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, sess)
 }
 
-func (s *Service) HandleLogout(w http.ResponseWriter, r *http.Request) {
+func (s *Handler) handleLogout(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		httputil.WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -218,7 +228,7 @@ func (s *Service) HandleLogout(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (s *Service) HandleMe(w http.ResponseWriter, r *http.Request) {
+func (s *Handler) handleMe(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		httputil.WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -241,7 +251,7 @@ func (s *Service) HandleMe(w http.ResponseWriter, r *http.Request) {
 }
 
 // ProfileFromRequest implements Authenticator.
-func (s *Service) ProfileFromRequest(ctx context.Context, r *http.Request) (*profile.Profile, int, string) {
+func (s *Handler) ProfileFromRequest(ctx context.Context, r *http.Request) (*profile.Profile, int, string) {
 	pid := s.profileIDFromContext(ctx)
 	if pid == "" {
 		return nil, http.StatusUnauthorized, "missing session"
@@ -257,7 +267,7 @@ func (s *Service) ProfileFromRequest(ctx context.Context, r *http.Request) (*pro
 }
 
 // SessionMiddleware loads SCS sessions from the session cookie.
-func (s *Service) SessionMiddleware(next http.Handler) http.Handler {
+func (s *Handler) SessionMiddleware(next http.Handler) http.Handler {
 	if s == nil || s.sessions == nil {
 		return next
 	}
@@ -353,7 +363,7 @@ func (sw *sessionResponseWriter) commit() {
 	}
 }
 
-func (s *Service) issueSession(ctx context.Context, profileID string) (string, error) {
+func (s *Handler) issueSession(ctx context.Context, profileID string) (string, error) {
 	loaded, err := s.sessions.Load(ctx, "")
 	if err != nil {
 		return "", err
@@ -363,7 +373,7 @@ func (s *Service) issueSession(ctx context.Context, profileID string) (string, e
 	return token, err
 }
 
-func (s *Service) profileIDFromContext(ctx context.Context) string {
+func (s *Handler) profileIDFromContext(ctx context.Context) string {
 	if s == nil || s.sessions == nil {
 		return ""
 	}

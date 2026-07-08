@@ -5,39 +5,6 @@ import (
 	"testing"
 )
 
-func TestAllowedOriginsFromEnv(t *testing.T) {
-	tests := []struct {
-		name string
-		env  string
-		want []string
-	}{
-		{"unset", "", nil},
-		{"whitespace only", "   ", nil},
-		{"single origin", "https://a.example", []string{"https://a.example"}},
-		{
-			"multiple with spacing",
-			" https://a.example, https://b.example ,https://c.example",
-			[]string{"https://a.example", "https://b.example", "https://c.example"},
-		},
-		{"drops empty entries", "https://a.example,,https://b.example", []string{"https://a.example", "https://b.example"}},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Setenv("ALLOWED_ORIGINS", tt.env)
-			got := allowedOriginsFromEnv()
-			if len(got) != len(tt.want) {
-				t.Fatalf("allowedOriginsFromEnv(%q) = %v, want %v", tt.env, got, tt.want)
-			}
-			for i := range got {
-				if got[i] != tt.want[i] {
-					t.Fatalf("allowedOriginsFromEnv(%q) = %v, want %v", tt.env, got, tt.want)
-				}
-			}
-		})
-	}
-}
-
 func TestOriginAllowed(t *testing.T) {
 	tests := []struct {
 		name    string

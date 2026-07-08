@@ -42,8 +42,10 @@ func main() {
 
 	srv := &http.Server{
 		Addr:              *addr,
-		Handler:           httptransport.Handler(hub.NewWithMaxRooms(cfg.MaxRooms), api),
+		Handler:           httptransport.Handler(hub.NewWithMaxRooms(cfg.MaxRooms), api, cfg),
 		ReadHeaderTimeout: 10 * time.Second,
+		ReadTimeout:       10 * time.Second,
+		IdleTimeout:       120 * time.Second,
 	}
 
 	go func() {

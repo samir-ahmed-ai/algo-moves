@@ -44,16 +44,16 @@ func requireSignedInProfile(p *Profile) (int, string) {
 
 // Register mounts the profile routes onto the given mux.
 func (h *Handler) Register(mux *http.ServeMux) {
-	mux.HandleFunc("GET /api/profiles/me/integrations", h.HandleProfileIntegrations)
-	mux.HandleFunc("PUT /api/profiles/me/integrations", h.HandleProfileIntegrations)
-	mux.HandleFunc("GET /api/profiles/me/settings", h.HandleProfileSettings)
-	mux.HandleFunc("PUT /api/profiles/me/settings", h.HandleProfileSettings)
-	mux.HandleFunc("PATCH /api/profiles/me", h.HandleUpdateMe)
-	mux.HandleFunc("GET /api/profiles/{id}", h.HandleGetProfile)
-	mux.HandleFunc("GET /api/profiles", h.HandleGetProfiles)
+	mux.HandleFunc("GET /api/profiles/me/integrations", h.handleProfileIntegrations)
+	mux.HandleFunc("PUT /api/profiles/me/integrations", h.handleProfileIntegrations)
+	mux.HandleFunc("GET /api/profiles/me/settings", h.handleProfileSettings)
+	mux.HandleFunc("PUT /api/profiles/me/settings", h.handleProfileSettings)
+	mux.HandleFunc("PATCH /api/profiles/me", h.handleUpdateMe)
+	mux.HandleFunc("GET /api/profiles/{id}", h.handleGetProfile)
+	mux.HandleFunc("GET /api/profiles", h.handleGetProfiles)
 }
 
-func (h *Handler) HandleUpdateMe(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleUpdateMe(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 	if code != 0 {
@@ -76,7 +76,7 @@ func (h *Handler) HandleUpdateMe(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, updated)
 }
 
-func (h *Handler) HandleGetProfiles(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleGetProfiles(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	idsParam := r.URL.Query().Get("ids")
 	if idsParam == "" {
@@ -92,7 +92,7 @@ func (h *Handler) HandleGetProfiles(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, list)
 }
 
-func (h *Handler) HandleGetProfile(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleGetProfile(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := r.PathValue("id")
 	if id == "" {
@@ -112,7 +112,7 @@ func (h *Handler) HandleGetProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandleProfileSettings serves GET/PUT /api/profiles/me/settings.
-func (h *Handler) HandleProfileSettings(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleProfileSettings(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 	if code != 0 {
@@ -161,7 +161,7 @@ func (h *Handler) HandleProfileSettings(w http.ResponseWriter, r *http.Request) 
 }
 
 // HandleProfileIntegrations serves GET/PUT /api/profiles/me/integrations.
-func (h *Handler) HandleProfileIntegrations(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleProfileIntegrations(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 	if code != 0 {

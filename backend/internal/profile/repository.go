@@ -424,7 +424,7 @@ func (r *Repository) GetOpenAIKeyForProfile(ctx context.Context, profileID strin
 	if err != nil {
 		return "", false, err
 	}
-	if row == nil || len(row) == 0 {
+	if len(row) == 0 {
 		return "", false, nil
 	}
 	plain, err := crypto.DecryptSecret(row)

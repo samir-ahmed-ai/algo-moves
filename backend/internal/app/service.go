@@ -23,7 +23,7 @@ import (
 // Service is the composition root for durable REST APIs.
 type Service struct {
 	db        *database.DB
-	auth      *auth.Service
+	auth      *auth.Handler
 	profiles  *profile.Handler
 	games     *games.Handler
 	interview *interview.Handler
@@ -42,7 +42,7 @@ func Open(ctx context.Context, cfg config.Config) (*Service, error) {
 
 	databaseURL := strings.TrimSpace(cfg.DatabaseURL)
 	profileRepo := profile.NewRepository(db)
-	authSvc, err := auth.NewService(profileRepo, databaseURL)
+	authSvc, err := auth.NewHandler(profileRepo, databaseURL)
 	if err != nil {
 		slog.Warn("app: session manager disabled", "error", err)
 	}

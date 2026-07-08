@@ -13,7 +13,7 @@ func TestInterviewAPIOriginRejectedWhenAllowlisted(t *testing.T) {
 	mux := http.NewServeMux()
 	mux.Handle("/api/", corsAPI([]string{"https://good.example"}, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-	})))
+	}), 120, 30))
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
@@ -44,7 +44,7 @@ func TestInterviewTokenLookupRateLimit(t *testing.T) {
 	mux := http.NewServeMux()
 	mux.Handle("/api/", corsAPI(allowed, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-	})))
+	}), 120, 30))
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 

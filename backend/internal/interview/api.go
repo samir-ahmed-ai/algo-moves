@@ -1,3 +1,4 @@
+// Package interview handles mock interviews, peer-to-peer coding sessions, and feedback.
 package interview
 
 import (
@@ -31,6 +32,7 @@ func sanitizeInterviewTitle(s string) string {
 	return s
 }
 
+// Store defines the data access methods required by this domain.
 type Store interface {
 	ListInterviewSessions(ctx context.Context, ownerProfileID string) ([]InterviewSummary, error)
 	CreateInterviewSession(ctx context.Context, ownerProfileID, title string) (*InterviewSession, error)
@@ -52,17 +54,17 @@ func NewHandler(repo Store, auth profile.Authenticator) *Handler {
 }
 
 func (h *Handler) Register(mux *http.ServeMux) {
-	mux.HandleFunc("GET /api/interviews", h.HandleListInterviews)
-	mux.HandleFunc("POST /api/interviews", h.HandleCreateInterview)
-	mux.HandleFunc("GET /api/interviews/token/{token}", h.HandleGetInterviewByToken)
-	mux.HandleFunc("GET /api/interviews/{id}", h.HandleGetInterview)
-	mux.HandleFunc("PATCH /api/interviews/{id}", h.HandleUpdateInterview)
-	mux.HandleFunc("POST /api/interviews/{id}/end", h.HandleEndInterview)
-	mux.HandleFunc("POST /api/interviews/{id}/reopen", h.HandleReopenInterview)
-	mux.HandleFunc("POST /api/interviews/{id}/rotate-token", h.HandleRotateToken)
+	mux.HandleFunc("GET /api/interviews", h.handleListInterviews)
+	mux.HandleFunc("POST /api/interviews", h.handleCreateInterview)
+	mux.HandleFunc("GET /api/interviews/token/{token}", h.handleGetInterviewByToken)
+	mux.HandleFunc("GET /api/interviews/{id}", h.handleGetInterview)
+	mux.HandleFunc("PATCH /api/interviews/{id}", h.handleUpdateInterview)
+	mux.HandleFunc("POST /api/interviews/{id}/end", h.handleEndInterview)
+	mux.HandleFunc("POST /api/interviews/{id}/reopen", h.handleReopenInterview)
+	mux.HandleFunc("POST /api/interviews/{id}/rotate-token", h.handleRotateToken)
 }
 
-func (h *Handler) HandleListInterviews(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleListInterviews(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 	if code != 0 {
@@ -77,7 +79,7 @@ func (h *Handler) HandleListInterviews(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, list)
 }
 
-func (h *Handler) HandleCreateInterview(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleCreateInterview(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 	if code != 0 {
@@ -99,7 +101,7 @@ func (h *Handler) HandleCreateInterview(w http.ResponseWriter, r *http.Request) 
 	httputil.WriteJSON(w, http.StatusOK, session)
 }
 
-func (h *Handler) HandleGetInterviewByToken(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleGetInterviewByToken(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	token := r.PathValue("token")
 	session, err := h.repo.GetInterviewSessionByToken(ctx, token)
@@ -122,7 +124,7 @@ func (h *Handler) HandleGetInterviewByToken(w http.ResponseWriter, r *http.Reque
 	})
 }
 
-func (h *Handler) HandleGetInterview(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleGetInterview(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 	if code != 0 {
@@ -142,7 +144,7 @@ func (h *Handler) HandleGetInterview(w http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(w, http.StatusOK, session)
 }
 
-func (h *Handler) HandleUpdateInterview(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleUpdateInterview(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 	if code != 0 {
@@ -228,14 +230,14 @@ func (h *Handler) handleAction(w http.ResponseWriter, r *http.Request, actionFun
 	httputil.WriteJSON(w, http.StatusOK, session)
 }
 
-func (h *Handler) HandleEndInterview(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleEndInterview(w http.ResponseWriter, r *http.Request) {
 	h.handleAction(w, r, h.repo.EndInterviewSession)
 }
 
-func (h *Handler) HandleReopenInterview(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleReopenInterview(w http.ResponseWriter, r *http.Request) {
 	h.handleAction(w, r, h.repo.ReopenInterviewSession)
 }
 
-func (h *Handler) HandleRotateToken(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) handleRotateToken(w http.ResponseWriter, r *http.Request) {
 	h.handleAction(w, r, h.repo.RotateInterviewToken)
 }
