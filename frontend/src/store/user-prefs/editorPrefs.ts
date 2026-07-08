@@ -28,6 +28,8 @@ export interface EditorPrefs {
   showLineNumbers: boolean;
   /** Highlight changed lines in the merge diff view. */
   highlightChanges: boolean;
+  /** Ignore leading/trailing whitespace and indentation when diffing the recall attempt. */
+  recallIgnoreWhitespace: boolean;
   /** Strict recall: reset the attempt to empty on any typing mistake (reset-on-mistake mode). */
   strictRecall: boolean;
 }
@@ -44,6 +46,7 @@ const DEFAULTS: Readonly<EditorPrefs> = {
   lineHeight: 'normal',
   showLineNumbers: true,
   highlightChanges: true,
+  recallIgnoreWhitespace: true,
   strictRecall: false,
 };
 
@@ -68,6 +71,10 @@ function normalizePrefs(data: Partial<EditorPrefs> | null | undefined): EditorPr
     lineHeight: isRecallLineHeight(data.lineHeight) ? data.lineHeight : DEFAULTS.lineHeight,
     showLineNumbers: booleanPref(data.showLineNumbers, DEFAULTS.showLineNumbers),
     highlightChanges: booleanPref(data.highlightChanges, DEFAULTS.highlightChanges),
+    recallIgnoreWhitespace: booleanPref(
+      data.recallIgnoreWhitespace,
+      DEFAULTS.recallIgnoreWhitespace,
+    ),
     strictRecall: booleanPref(data.strictRecall, DEFAULTS.strictRecall),
   };
 }

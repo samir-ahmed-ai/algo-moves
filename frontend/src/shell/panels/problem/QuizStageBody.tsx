@@ -73,7 +73,7 @@ export function QuizStageBody({
       }
       problem={
         <ProblemStatementColumn
-          className={cn(isMobile && 'max-h-[40vh] shrink-0 border-b border-edge')}
+          className={cn(isMobile && 'max-h-[min(40vh,50%)] min-h-0 border-b border-edge')}
         >
           <ProblemPanelBody />
         </ProblemStatementColumn>

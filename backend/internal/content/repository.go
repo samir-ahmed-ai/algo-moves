@@ -1,0 +1,231 @@
+package content
+
+import (
+	"context"
+
+	"algomoves/gameserver/internal/database"
+	"github.com/jackc/pgx/v5/pgtype"
+)
+
+// Learning content is public, read-only data mirrored from the frontend catalog.
+
+type ContentItem struct {
+	ID         string  `json:"id"`
+	Kind       string  `json:"kind"`
+	ProblemID  *string `json:"problemId,omitempty"`
+	Title      string  `json:"title"`
+	Difficulty *string `json:"difficulty,omitempty"`
+}
+
+type ContentTopic struct {
+	ID      string        `json:"id"`
+	Title   string        `json:"title"`
+	Summary string        `json:"summary,omitempty"`
+	Items   []ContentItem `json:"items"`
+}
+
+type ContentCourse struct {
+	ID           string         `json:"id"`
+	Title        string         `json:"title"`
+	Summary      string         `json:"summary,omitempty"`
+	Icon         string         `json:"icon,omitempty"`
+	Group        string         `json:"group"`
+	Family       string         `json:"family"`
+	ProblemCount int            `json:"problemCount"`
+	Topics       []ContentTopic `json:"topics"`
+}
+
+type ContentSolution struct {
+	Language  string `json:"language"`
+	File      string `json:"file"`
+	Code      string `json:"code"`
+	IsPrimary bool   `json:"isPrimary"`
+}
+
+type ContentChoice struct {
+	Label     string `json:"label"`
+	IsCorrect bool   `json:"isCorrect"`
+}
+
+type ContentQuestion struct {
+	ID      string          `json:"id"`
+	Prompt  string          `json:"prompt"`
+	Explain string          `json:"explain,omitempty"`
+	Choices []ContentChoice `json:"choices"`
+}
+
+type ContentProblem struct {
+	ID          string            `json:"id"`
+	Title       string            `json:"title"`
+	Difficulty  string            `json:"difficulty"`
+	Summary     string            `json:"summary,omitempty"`
+	Pattern     string            `json:"pattern,omitempty"`
+	SourceURL   string            `json:"sourceUrl,omitempty"`
+	Narrative   string            `json:"narrative,omitempty"`
+	RegionID    string            `json:"regionId,omitempty"`
+	RegionTitle string            `json:"regionTitle,omitempty"`
+	Tags        []string          `json:"tags"`
+	Solutions   []ContentSolution `json:"solutions"`
+	Quiz        []ContentQuestion `json:"quiz"`
+}
+
+// ContentCatalog returns the whole course/topic/item spine (metadata only, no
+// solution code) in sidebar order.
+
+type Repository struct{ db *database.DB }
+
+func NewRepository(db *database.DB) *Repository { return &Repository{db: db} }
+
+func (r *Repository) ContentCatalog(ctx context.Context) ([]ContentCourse, error) {
+	courseRows, err := r.db.Q.ContentCourses(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var courses []ContentCourse
+	index := map[string]int{}
+	for _, row := range courseRows {
+		c := ContentCourse{
+			ID:           row.ID,
+			Title:        row.Title,
+			Summary:      row.Summary,
+			Icon:         row.Icon,
+			Group:        row.Group,
+			Family:       row.Family,
+			ProblemCount: int(row.ProblemCount),
+			Topics:       []ContentTopic{},
+		}
+		index[c.ID] = len(courses)
+		courses = append(courses, c)
+	}
+
+	topicRows, err := r.db.Q.ContentTopics(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	topicIndex := map[string]struct{ course, topic int }{}
+	for _, row := range topicRows {
+		ci, ok := index[row.CourseID]
+		if !ok {
+			continue
+		}
+		courses[ci].Topics = append(courses[ci].Topics, ContentTopic{
+			ID:      row.ID,
+			Title:   row.Title,
+			Summary: row.Summary,
+			Items:   []ContentItem{},
+		})
+		topicIndex[row.ID] = struct{ course, topic int }{ci, len(courses[ci].Topics) - 1}
+	}
+
+	itemRows, err := r.db.Q.ContentItems(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, row := range itemRows {
+		if !row.TopicID.Valid {
+			continue
+		}
+		topicID := row.TopicID.String
+		loc, ok := topicIndex[topicID]
+		if !ok {
+			continue
+		}
+		it := ContentItem{
+			ID:    row.ID,
+			Kind:  row.Kind,
+			Title: row.Title,
+		}
+		if row.ProblemID.Valid {
+			s := row.ProblemID.String
+			it.ProblemID = &s
+		}
+		if row.Difficulty.Valid {
+			s := row.Difficulty.String
+			it.Difficulty = &s
+		}
+		courses[loc.course].Topics[loc.topic].Items = append(courses[loc.course].Topics[loc.topic].Items, it)
+	}
+	return courses, nil
+}
+
+// ContentProblemByID returns a full problem with its tags, per-language solutions
+// and quiz. Returns (nil, nil) when the id does not exist.
+
+func (r *Repository) ContentProblemByID(ctx context.Context, id string) (*ContentProblem, error) {
+	row, err := r.db.Q.ContentProblemByID(ctx, id)
+	if database.IsNoRows(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	p := ContentProblem{
+		ID:          row.ID,
+		Title:       row.Title,
+		Difficulty:  row.Difficulty,
+		Summary:     row.Summary,
+		Pattern:     row.Pattern,
+		SourceURL:   row.SourceUrl,
+		Narrative:   row.Narrative,
+		RegionID:    row.RegionID,
+		RegionTitle: row.RegionTitle,
+		Tags:        []string{},
+		Solutions:   []ContentSolution{},
+		Quiz:        []ContentQuestion{},
+	}
+
+	tags, err := r.db.Q.ContentProblemTags(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	p.Tags = tags
+
+	sols, err := r.db.Q.ContentProblemSolutions(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	for _, sol := range sols {
+		p.Solutions = append(p.Solutions, ContentSolution{
+			Language:  sol.Language,
+			File:      sol.File,
+			Code:      sol.Code,
+			IsPrimary: sol.IsPrimary,
+		})
+	}
+
+	questions, err := r.db.Q.ContentProblemQuizQuestions(ctx, pgtype.Text{String: id, Valid: true})
+	if err != nil {
+		return nil, err
+	}
+	qIndex := map[string]int{}
+	for _, qq := range questions {
+		qIndex[qq.ID] = len(p.Quiz)
+		p.Quiz = append(p.Quiz, ContentQuestion{
+			ID:      qq.ID,
+			Prompt:  qq.Prompt,
+			Explain: qq.Explain,
+			Choices: []ContentChoice{},
+		})
+	}
+
+	if len(p.Quiz) > 0 {
+		choices, err := r.db.Q.ContentProblemQuizChoices(ctx, pgtype.Text{String: id, Valid: true})
+		if err != nil {
+			return nil, err
+		}
+		for _, ch := range choices {
+			if i, ok := qIndex[ch.QuestionID]; ok {
+				p.Quiz[i].Choices = append(p.Quiz[i].Choices, ContentChoice{
+					Label:     ch.Label,
+					IsCorrect: ch.IsCorrect,
+				})
+			}
+		}
+	}
+
+	return &p, nil
+}

@@ -126,7 +126,7 @@ export function CodeStudioProvider({
     ...(phaseLock ? { phaseLock } : {}),
   });
 
-  const score = reference ? matchScore(reference, draft) : 0;
+  const score = reference ? matchScore(reference, draft, editorPrefs.recallIgnoreWhitespace) : 0;
   const parsed = parseComplexity(reference);
   const cards = patternsForTags(item.tags);
   const fallbackTime = cards.map((c) => c.complexity.match(/O\([^)]*\)/)?.[0]).find(Boolean);
@@ -297,7 +297,7 @@ export function CodeStudioBody() {
   const { onAnswer: relayQuizAnswer } = useQuizHostRelay(item.id);
 
   return (
-    <div className="code-studio-body relative flex min-h-[280px] flex-1 flex-col px-3 pb-2 pt-1.5">
+    <div className="code-studio-body relative flex min-h-0 flex-1 flex-col px-3 pb-2 pt-1.5 sm:min-h-[280px]">
       <div
         key={phase}
         className={cn(

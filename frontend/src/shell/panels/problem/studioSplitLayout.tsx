@@ -101,7 +101,7 @@ function SecondColumn({ header, children }: { header?: ReactNode; children: Reac
           {header}
         </div>
       ) : null}
-      <div className="studio-split-second__body flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="studio-split-second__body ws-scroll flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto">
         {children}
       </div>
     </div>

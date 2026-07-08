@@ -32,6 +32,16 @@ describe('diffChangedLines', () => {
     expect(matchScore(ref, draft)).toBeLessThan(100);
     expect(matchScore(ref, draft)).toBeGreaterThan(0);
   });
+
+  it('ignores indentation differences by default but flags them when ignoreWhitespace is false', () => {
+    const ref = 'func f() {\n\treturn 1\n}';
+    const draft = 'func f() {\n  return 1\n}';
+    expect(matchScore(ref, draft)).toBe(100);
+    expect(diffChangedLines(ref, draft).draft.size).toBe(0);
+
+    expect(matchScore(ref, draft, false)).toBeLessThan(100);
+    expect(diffChangedLines(ref, draft, false).draft.has(2)).toBe(true);
+  });
 });
 
 describe('computeRecallProgress', () => {
@@ -88,5 +98,12 @@ describe('computeRecallProgress', () => {
     expect(progress.completedLines).toEqual([]);
     expect(progress.currentLine).toBe(1);
     expect(progress.matchedPrefixLen).toBe(0);
+  });
+
+  it('treats an indentation-only completed line as diverging when ignoreWhitespace is false', () => {
+    const wsRef = 'func main() {\n\tx := 1\n\treturn x\n}';
+    const progress = computeRecallProgress(wsRef, 'func main() {\n  x := 1', false);
+    expect(progress.completedLines).toEqual([1]);
+    expect(progress.currentLine).toBe(2);
   });
 });

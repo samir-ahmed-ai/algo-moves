@@ -76,7 +76,7 @@ export function ArcadeView() {
           </div>
         ) : null}
 
-        <section className="relative z-10 min-h-0 flex-1 overflow-hidden rounded-[2rem] border border-white/60 bg-white/72 shadow-[0_24px_80px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/58 dark:shadow-[0_24px_90px_rgba(0,0,0,0.36)]">
+        <section className="relative z-10 min-h-0 flex-1 overflow-y-auto rounded-[2rem] border border-white/60 bg-white/72 shadow-[0_24px_80px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/58 dark:shadow-[0_24px_90px_rgba(0,0,0,0.36)]">
           <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/70 to-transparent" />
           {!live ? (
             <Lobby prefillRoom={prefillRoom} />

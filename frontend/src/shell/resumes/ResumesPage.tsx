@@ -314,122 +314,125 @@ export function ResumesPage() {
         }
       />
 
-      {loading ? (
-        <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
-          <div className="grid h-14 w-14 place-items-center rounded-3xl border border-edge bg-panel/80 shadow-theme-md">
-            <Loader2 className="h-6 w-6 animate-spin text-accent" />
+      <main className="flex flex-1 min-h-0 flex-col overflow-auto">
+        {loading ? (
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
+            <div className="grid h-14 w-14 place-items-center rounded-3xl border border-edge bg-panel/80 shadow-theme-md">
+              <Loader2 className="h-6 w-6 animate-spin text-accent" />
+            </div>
+            <p className="text-sm font-medium text-ink2">Loading resume studio…</p>
           </div>
-          <p className="text-sm font-medium text-ink2">Loading resume studio…</p>
-        </div>
-      ) : needsAuth ? (
-        <SignInGate />
-      ) : view === 'directory' ? (
-        <>
-          <DirectoryHeader />
-          <DirectoryPage
-            onSelect={(r) => {
+        ) : needsAuth ? (
+          <SignInGate />
+        ) : view === 'directory' ? (
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            <DirectoryHeader />
+            <DirectoryPage
+              onSelect={(r) => {
+                setActiveResume(r);
+                setView('editor');
+              }}
+              onCustomize={(r) => {
+                setActiveResume(r);
+                setView('customizer');
+              }}
+            />
+          </div>
+        ) : view === 'editor' && activeResume ? (
+          <ResumeEditor
+            resume={activeResume}
+            readOnly={activeResume.ownerProfileId !== profile?.id}
+            onCustomize={() => setView('customizer')}
+            onSaved={(r) => {
               setActiveResume(r);
-              setView('editor');
-            }}
-            onCustomize={(r) => {
-              setActiveResume(r);
-              setView('customizer');
+              setResumes((prev) =>
+                prev.map((s) =>
+                  s.id === r.id
+                    ? {
+                        ...s,
+                        title: r.title,
+                        isPublic: r.isPublic,
+                        updatedAt: r.updatedAt,
+                      }
+                    : s,
+                ),
+              );
             }}
           />
-        </>
-      ) : view === 'editor' && activeResume ? (
-        <ResumeEditor
-          resume={activeResume}
-          readOnly={activeResume.ownerProfileId !== profile?.id}
-          onCustomize={() => setView('customizer')}
-          onSaved={(r) => {
-            setActiveResume(r);
-            setResumes((prev) =>
-              prev.map((s) =>
-                s.id === r.id
-                  ? {
-                      ...s,
-                      title: r.title,
-                      isPublic: r.isPublic,
-                      updatedAt: r.updatedAt,
-                    }
-                  : s,
-              ),
-            );
-          }}
-        />
-      ) : view === 'customizer' && activeResume ? (
-        <CustomizerStudio resume={activeResume} />
-      ) : (
-        <div className="product-hub-shell mx-auto w-full max-w-3xl flex-1 space-y-6 overflow-y-auto p-4">
-          {openaiConfigured === false && (
-            <div className="product-hub-notice flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/30 bg-accent/5 px-4 py-3">
-              <div className="flex items-start gap-2">
-                <KeyRound className="h-4 w-4 shrink-0 text-accent mt-0.5" />
-                <p className={cn('text-ink2', chromeText.sm)}>
-                  Add your OpenAI API key to parse resumes and use AI customization.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => openSettings('profile')}
-                className="shrink-0 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 transition"
-              >
-                Add API key
-              </button>
-            </div>
-          )}
-
-          <section className="product-hub-card">
-            <div className="product-hub-card__head">
-              <div>
-                <span className="product-hub-card__eyebrow">resume intake</span>
-                <h2>Upload source resume</h2>
-              </div>
-              <Upload className="h-4 w-4 text-accent" />
-            </div>
-            <UploadZone
-              onUploaded={handleUploaded}
-              onOpenSettings={() => openSettings('profile')}
-            />
-          </section>
-
-          <section className="product-hub-card">
-            <div className="product-hub-card__head mb-3">
-              <div>
-                <span className="product-hub-card__eyebrow">library</span>
-                <h2>My resumes</h2>
-              </div>
-              <FileText className="h-4 w-4 text-accent" />
-            </div>
-            {fetching ? (
-              <Loader2 className="h-6 w-6 animate-spin text-ink3" />
-            ) : resumes.length === 0 ? (
-              <div className="product-empty-state">
-                <div className="product-empty-state__icon">
-                  <FileText className="h-7 w-7" />
+        ) : view === 'customizer' && activeResume ? (
+          <CustomizerStudio resume={activeResume} />
+        ) : (
+          <div className="product-hub-shell mx-auto w-full max-w-3xl flex-1 space-y-6 p-4">
+            {openaiConfigured === false && (
+              <div className="product-hub-notice flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/30 bg-accent/5 px-4 py-3">
+                <div className="flex items-start gap-2">
+                  <KeyRound className="h-4 w-4 shrink-0 text-accent mt-0.5" />
+                  <p className={cn('text-ink2', chromeText.sm)}>
+                    Add your OpenAI API key to parse resumes and use AI customization.
+                  </p>
                 </div>
-                <h3>No resumes yet</h3>
-                <p className={chromeText.base}>
-                  Upload a source resume above to unlock editing, AI parsing, and targeted versions.
-                </p>
-              </div>
-            ) : (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {resumes.map((r) => (
-                  <ResumeCard
-                    key={r.id}
-                    summary={r}
-                    onEdit={() => openResume(r, 'editor')}
-                    onCustomize={() => openResume(r, 'customizer')}
-                    onDelete={() => setDeleteTarget({ id: r.id, title: r.title })}
-                  />
-                ))}
+                <button
+                  type="button"
+                  onClick={() => openSettings('profile')}
+                  className="shrink-0 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 transition"
+                >
+                  Add API key
+                </button>
               </div>
             )}
-          </section>
-        </div>
-      )}
+
+            <section className="product-hub-card">
+              <div className="product-hub-card__head">
+                <div>
+                  <span className="product-hub-card__eyebrow">resume intake</span>
+                  <h2>Upload source resume</h2>
+                </div>
+                <Upload className="h-4 w-4 text-accent" />
+              </div>
+              <UploadZone
+                onUploaded={handleUploaded}
+                onOpenSettings={() => openSettings('profile')}
+              />
+            </section>
+
+            <section className="product-hub-card">
+              <div className="product-hub-card__head mb-3">
+                <div>
+                  <span className="product-hub-card__eyebrow">library</span>
+                  <h2>My resumes</h2>
+                </div>
+                <FileText className="h-4 w-4 text-accent" />
+              </div>
+              {fetching ? (
+                <Loader2 className="h-6 w-6 animate-spin text-ink3" />
+              ) : resumes.length === 0 ? (
+                <div className="product-empty-state">
+                  <div className="product-empty-state__icon">
+                    <FileText className="h-7 w-7" />
+                  </div>
+                  <h3>No resumes yet</h3>
+                  <p className={chromeText.base}>
+                    Upload a source resume above to unlock editing, AI parsing, and targeted
+                    versions.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {resumes.map((r) => (
+                    <ResumeCard
+                      key={r.id}
+                      summary={r}
+                      onEdit={() => openResume(r, 'editor')}
+                      onCustomize={() => openResume(r, 'customizer')}
+                      onDelete={() => setDeleteTarget({ id: r.id, title: r.title })}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
+        )}
+      </main>
       {deleteTarget && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-bg/70 p-4 backdrop-blur-md"

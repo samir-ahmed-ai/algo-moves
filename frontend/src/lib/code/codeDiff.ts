@@ -1,14 +1,21 @@
 import { diffArrays } from 'diff';
 
-/** Normalize a line for comparison (trim whitespace). */
-export function normLine(line: string): string {
-  return line.trim();
+/**
+ * Normalize a line for comparison. Drops a trailing `\r` (so CRLF vs LF never differs) and,
+ * when `ignoreWhitespace` is true (the default), also trims leading/trailing whitespace so
+ * indentation and tab-vs-space differences don't register as changes. Pass `false` for a
+ * whitespace-sensitive comparison.
+ */
+export function normLine(line: string, ignoreWhitespace = true): string {
+  const withoutCr = line.endsWith('\r') ? line.slice(0, -1) : line;
+  return ignoreWhitespace ? withoutCr.trim() : withoutCr;
 }
 
 export function linesWithoutTrailingBlanks(source: string): string[] {
   const lines = source.split('\n');
   let end = lines.length;
-  while (end > 0 && normLine(lines[end - 1] ?? '') === '') end--;
+  // Trailing blank lines at end-of-file are always noise, regardless of whitespace mode.
+  while (end > 0 && normLine(lines[end - 1] ?? '', true) === '') end--;
   return lines.slice(0, end);
 }
 
@@ -22,9 +29,10 @@ export interface DiffLines {
 function collectLineDiff(
   refLines: string[],
   draftLines: string[],
+  ignoreWhitespace = true,
 ): { reference: Set<number>; draft: Set<number> } {
-  const refNorm = refLines.map(normLine);
-  const draftNorm = draftLines.map(normLine);
+  const refNorm = refLines.map((l) => normLine(l, ignoreWhitespace));
+  const draftNorm = draftLines.map((l) => normLine(l, ignoreWhitespace));
   const changes = diffArrays(refNorm, draftNorm);
 
   const reference = new Set<number>();
@@ -57,18 +65,22 @@ function collectLineDiff(
 }
 
 /** Line diff via jsdiff: returns 1-based line numbers that differ in each file. */
-export function diffChangedLines(reference: string, draft: string): DiffLines {
+export function diffChangedLines(
+  reference: string,
+  draft: string,
+  ignoreWhitespace = true,
+): DiffLines {
   const refLines = linesWithoutTrailingBlanks(reference);
   const draftLines = linesWithoutTrailingBlanks(draft);
-  return collectLineDiff(refLines, draftLines);
+  return collectLineDiff(refLines, draftLines, ignoreWhitespace);
 }
 
 /** Similarity score 0–100 based on aligned matching lines. */
-export function matchScore(reference: string, draft: string): number {
+export function matchScore(reference: string, draft: string, ignoreWhitespace = true): number {
   const refLines = linesWithoutTrailingBlanks(reference);
   const draftLines = linesWithoutTrailingBlanks(draft);
-  const refNorm = refLines.map(normLine);
-  const draftNorm = draftLines.map(normLine);
+  const refNorm = refLines.map((l) => normLine(l, ignoreWhitespace));
+  const draftNorm = draftLines.map((l) => normLine(l, ignoreWhitespace));
   const changes = diffArrays(refNorm, draftNorm);
   const max = Math.max(refLines.length, draftLines.length);
   if (max === 0) return 100;
@@ -99,9 +111,13 @@ export interface RecallProgress {
  * the reference, so an over-typed or divergent draft can't produce phantom "completed" lines
  * or a bogus matched prefix.
  */
-export function computeRecallProgress(reference: string, draft: string): RecallProgress {
-  const refNorm = linesWithoutTrailingBlanks(reference).map(normLine);
-  const draftNorm = linesWithoutTrailingBlanks(draft).map(normLine);
+export function computeRecallProgress(
+  reference: string,
+  draft: string,
+  ignoreWhitespace = true,
+): RecallProgress {
+  const refNorm = linesWithoutTrailingBlanks(reference).map((l) => normLine(l, ignoreWhitespace));
+  const draftNorm = linesWithoutTrailingBlanks(draft).map((l) => normLine(l, ignoreWhitespace));
   const total = refNorm.length;
 
   if (draftNorm.length === 0) {

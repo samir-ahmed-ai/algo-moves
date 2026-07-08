@@ -9,6 +9,7 @@ import {
   Hash,
   Highlighter,
   Minimize2,
+  Pilcrow,
   RotateCcw,
   SplitSquareHorizontal,
   Target,
@@ -159,6 +160,15 @@ export function diffMenuItems(ctx: RecallMenuContext): RecallEditorMenuItem[] {
       onClick: () => setEditorPrefs({ showLineNumbers: !editorPrefs.showLineNumbers }),
     },
     {
+      label: editorPrefs.recallIgnoreWhitespace
+        ? 'Include whitespace in diff'
+        : 'Ignore whitespace',
+      icon: <Pilcrow className={MENU_ICON_CLASS} />,
+      active: !editorPrefs.recallIgnoreWhitespace,
+      onClick: () =>
+        setEditorPrefs({ recallIgnoreWhitespace: !editorPrefs.recallIgnoreWhitespace }),
+    },
+    {
       label: 'Reset split to 50/50',
       icon: <SplitSquareHorizontal className={MENU_ICON_CLASS} />,
       onClick: () => setEditorPrefs({ splitPct: 50 }),
@@ -209,6 +219,7 @@ export function activeDiffToggleCount(editorPrefs: EditorPrefs): number {
   if (editorPrefs.mergeGutter) count++;
   if (editorPrefs.mergeCollapse) count++;
   if (editorPrefs.showLineNumbers) count++;
+  if (!editorPrefs.recallIgnoreWhitespace) count++;
   return count;
 }
 

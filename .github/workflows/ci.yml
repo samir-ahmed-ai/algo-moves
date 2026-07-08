@@ -45,12 +45,15 @@ jobs:
       - name: Install sqlc
         run: go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.31.1
       - name: Vet backend
-        run: go vet ./...
+        run: |
+          for m in . realtime shared; do (cd "$m" && go vet ./...); done
       - name: Test backend
-        run: go test ./...
+        run: |
+          for m in . realtime shared; do (cd "$m" && go test ./...); done
       - name: Build backend
-        run: go build ./...
+        run: |
+          for m in . realtime shared; do (cd "$m" && go build ./...); done
       - name: Verify sqlc generated code is up to date
         run: |
           sqlc generate
-          git diff --exit-code internal/platform/arcadedb/
+          git diff --exit-code internal/database/postgres/

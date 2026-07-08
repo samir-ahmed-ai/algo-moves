@@ -7,10 +7,10 @@ The realtime relay (moves, presence, spectators) runs in the Go server under
 `backend/`. Without `DATABASE_URL`, the backend still runs for zero-config LAN play —
 profiles, leaderboards, interview tokens, and content API are unavailable.
 
-## Migrations (001–013)
+## Migrations (001–016)
 
 Canonical copies for review and manual runs live in [`db/migrations/`](migrations/).
-The backend embeds identical files in `backend/internal/arcade/migrations/`.
+The backend embeds identical files in `backend/db/migrations/` (synced via `./scripts/migrate-db.sh`).
 Sync with `./scripts/migrate-db.sh` or `make db-migrate`.
 
 | # | File | Purpose |
@@ -28,15 +28,18 @@ Sync with `./scripts/migrate-db.sh` or `make db-migrate`.
 | 011 | `011_scs_sessions.sql` | HTTP session store for alexedwards/scs |
 | 012 | `012_yjs_documents.sql` | Yjs binary state for Hocuspocus collab |
 | 013 | `013_schema_migrations.sql` | Migration audit table (`schema_migrations`) |
+| 014 | `014_resumes_schema.sql` | Resume upload, mapping, variants |
+| 015 | `015_profile_openai_key.sql` | Encrypted per-user OpenAI API keys |
+| 016 | `016_profile_settings.sql` | JSON settings blob on profiles |
 
 Applied versions are recorded in `public.schema_migrations`. DDL remains idempotent;
 re-deploy skips already-recorded files.
 
 ## Migration ownership
 
-`db/migrations/` is the reviewable source tree. `backend/internal/arcade/migrations/`
-is the embedded runtime copy used by the Go service. Keep them byte-for-byte aligned
-when adding or changing migrations; never patch only one side.
+`db/migrations/` is the reviewable source tree. `backend/db/migrations/` and
+`backend/db/seeds/` are the embedded runtime copies used by the Go service. Keep them
+byte-for-byte aligned when adding or changing migrations; never patch only one side.
 
 `010_games_catalog.sql` is also the source for `frontend/src/shell/games/_generated/gameIds.ts`
 via `frontend/scripts/generate-game-ids.mjs`.
@@ -100,7 +103,7 @@ Generated seed files:
 | File | Owner |
 |------|-------|
 | `db/content_seed.sql` | Reviewable SQL seed artifact |
-| `backend/internal/arcade/seeds/content_seed.sql` | Embedded runtime copy |
+| `backend/db/seeds/content_seed.sql` | Embedded runtime copy |
 
 Do not hand-edit either file. Update frontend catalog/plugin data or the exporter,
 then rerun `npm --prefix frontend run export-content-sql`.

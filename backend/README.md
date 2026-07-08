@@ -85,7 +85,7 @@ and is closed.
 
 ## Room contract
 
-These rules are enforced in `internal/hub/room.go` and matter to every arcade game:
+These rules are enforced in `internal/realtime/hub/room.go` and matter to every arcade game:
 
 - **Seat 0 is always the host.** The first player to claim slot 0 gets `role: "host"`.
   Seat 1 keeps the historical `"guest"` name; seats 2–7 are `"player"`.
@@ -105,36 +105,60 @@ These rules are enforced in `internal/hub/room.go` and matter to every arcade ga
 
 ## Architecture
 
+The backend is a Go workspace (`go.work`) with three modules rooted at `backend/`:
+
+- `algomoves/gameserver` (this directory) - the API service, `cmd`, and all `/api` domains.
+- `algomoves.dev/realtime` (`realtime/`) - the in-memory room engine, no DB dependency.
+- `algomoves.dev/shared` (`shared/`) - stdlib-only helpers reused across modules.
+
+`realtime` and `shared` live outside `internal/` so they are importable across module
+boundaries (Go's `internal/` rule blocks cross-module imports). The `api -> realtime` and
+`api -> shared` dependency edges are acyclic. Local resolution is handled by both the committed
+`go.work` and `replace` directives in [`go.mod`](go.mod), so builds work with or without the
+workspace (e.g. inside the Docker image).
+
 ```
-cmd/gameserver      entrypoint (flags, http.Server)
-internal/ws         RFC 6455 handshake + framing (stdlib only)
-internal/hub        rooms, presence, relay, shared state
-internal/server     HTTP routes (testable handler)
-internal/arcade     composition root: route table wiring /api/* to domain packages
-internal/platform   auth, profiles, sessions, migrations, shared Postgres store
-  arcadedb/         sqlc-generated queries
-  migrations/       embedded SQL schema (001–013)
-  seeds/            achievement + content seed SQL
-internal/games      games catalog, stats, matches, leaderboards, social
-internal/interview  interview sessions + guest tokens
-internal/content    learning catalog reads (/api/content/*)
-internal/canvas     saved canvas CRUD
-internal/prep       prep plan CRUD
+go.work                     workspace: use (. ./realtime ./shared)
+cmd/gameserver              entrypoint (flags, http.Server)
+db/                         migrations, sqlc queries, embedded seeds (synced from repo-root db/)
+internal/app                composition root: Open, Register, route table
+internal/auth               login, signup, guest, sessions, admin bootstrap
+internal/profile            profiles, settings, integrations
+internal/database           Postgres pool, migrations, seeds
+  postgres/                 sqlc-generated queries
+internal/games              games catalog, stats, matches, leaderboards, social
+internal/interview          interview sessions + guest tokens
+internal/content            learning catalog reads (/api/content/*)
+internal/canvas             saved canvas CRUD
+internal/prep               prep plan CRUD
+internal/resume             resume upload, CRUD, OpenAI customization
+internal/transport/http     HTTP routes (testable handler)
+
+realtime/                   module algomoves.dev/realtime
+  hub                       rooms, presence, relay, shared state
+  ws                        RFC 6455 handshake + framing
+
+shared/                     module algomoves.dev/shared
+  config                    env helpers
+  crypto                    AES secret encryption
+  httputil                  shared JSON HTTP helpers
 ```
 
 ### Domain package map
 
 | Package | Responsibility | Key routes |
 | ------- | -------------- | ---------- |
-| `platform` | Postgres pool, profiles, guest/email auth, SCS sessions, migrations | `/api/auth/*`, `/api/profiles/*` |
+| `auth` | Guest/email auth, SCS sessions | `/api/auth/*` |
+| `profile` | Profiles, settings, OpenAI key integrations | `/api/profiles/*` |
 | `games` | Arcade stats, match history, leaderboards, achievements, rooms, friends, daily challenge, games catalog | `/api/stats/*`, `/api/matches/*`, `/api/leaderboard/*`, `/api/achievements/*`, `/api/rooms/*`, `/api/friends`, `/api/daily-challenge/*`, `/api/games/*` |
 | `interview` | Durable interview whiteboard sessions | `/api/interviews/*` |
 | `content` | Read-only learning catalog mirror | `/api/content/catalog`, `/api/content/problems/*` |
 | `canvas` | Named saved canvas documents | `/api/canvases/*` |
 | `prep` | Owner-held ordered prep plans | `/api/prep-plans/*` |
-| `arcade` | Thin facade: `Open`, `Register`, route table delegating to packages above | (mounts all `/api/*`) |
+| `resume` | Resume upload, mapping, variants | `/api/resumes/*` |
+| `app` | Thin facade: `Open`, `Register`, route table delegating to packages above | (mounts all `/api/*`) |
 
-Domain packages depend on `platform` only — not on each other. `arcade` is the single composition root consumed by `cmd/gameserver` and `internal/server`.
+Each domain package owns its repository. `app` is the single composition root consumed by `cmd/gameserver` and `internal/transport/http`.
 
 ## Persistence and generated seeds
 
@@ -142,7 +166,7 @@ Without `DATABASE_URL`, the server runs in realtime-only mode and `/api/*`
 durable features are unavailable. With `DATABASE_URL`, the server opens Postgres,
 registers REST routes, and can apply embedded migrations on startup.
 
-`internal/arcade/seeds/content_seed.sql` mirrors `../db/content_seed.sql` and is generated from the frontend catalog by:
+`backend/db/seeds/content_seed.sql` mirrors `../db/content_seed.sql` and is generated from the frontend catalog by:
 
 ```bash
 cd ../frontend
@@ -166,9 +190,15 @@ The frontend calls these APIs on the same origin as `VITE_API_SERVER_URL`.
 
 ## Test command
 
+`go test ./...` operates on the current module only, so run it per workspace module:
+
 ```bash
-go test ./...   # unit tests for framing + hub, plus a real two-client socket relay
+for m in . realtime shared; do (cd "$m" && go test ./...); done
 ```
+
+This covers the API domains, the framing + hub unit tests, and a real two-client socket relay.
+Use `go build ./cmd/gameserver` from `backend/` to build the server binary; the workspace
+resolves `realtime` and `shared` locally.
 
 ## Production deploy
 

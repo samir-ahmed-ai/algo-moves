@@ -17,10 +17,10 @@ for f in "$ROOT/db/migrations/"*.sql; do
 done
 
 echo "==> Syncing embedded backend copies..."
-cp "$ROOT/db/migrations/"*.sql "$ROOT/backend/internal/arcade/migrations/"
-mkdir -p "$ROOT/backend/internal/arcade/seeds"
+mkdir -p "$ROOT/backend/db/migrations" "$ROOT/backend/db/seeds"
+cp "$ROOT/db/migrations/"*.sql "$ROOT/backend/db/migrations/"
 if [[ -f "$ROOT/db/content_seed.sql" ]]; then
-  cp "$ROOT/db/content_seed.sql" "$ROOT/backend/internal/arcade/seeds/content_seed.sql"
+  cp "$ROOT/db/content_seed.sql" "$ROOT/backend/db/seeds/content_seed.sql"
 fi
 
 echo "==> Seeding achievements..."

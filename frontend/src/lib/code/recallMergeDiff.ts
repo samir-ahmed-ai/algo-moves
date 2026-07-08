@@ -139,15 +139,16 @@ function clampRange(from: number, to: number, docLen: number): [number, number] 
 }
 
 /**
- * Line-based merge diff for recall mode: compares trimmed lines so leading/trailing
- * whitespace on a line does not produce highlights. Tab vs space indentation also
- * matches after trim (aligned with matchScore).
+ * Line-based merge diff for recall mode. With `ignoreWhitespace` (the default) it compares
+ * trimmed lines so leading/trailing whitespace and tab-vs-space indentation don't produce
+ * highlights (aligned with matchScore). Pass `false` for a whitespace-sensitive diff where
+ * indentation differences are highlighted.
  */
-export function recallMergeDiff(a: string, b: string): Change[] {
+export function recallMergeDiff(a: string, b: string, ignoreWhitespace = true): Change[] {
   const refLines = linesWithoutTrailingBlanks(a);
   const draftLines = linesWithoutTrailingBlanks(b);
-  const refNorm = refLines.map(normLine);
-  const draftNorm = draftLines.map(normLine);
+  const refNorm = refLines.map((l) => normLine(l, ignoreWhitespace));
+  const draftNorm = draftLines.map((l) => normLine(l, ignoreWhitespace));
   const chunks = buildAlignChunks(diffArrays(refNorm, draftNorm));
 
   const refRanges = lineCharRanges(a, refLines.length);
@@ -182,25 +183,34 @@ export function recallMergeDiff(a: string, b: string): Change[] {
   return out;
 }
 
-/** diffConfig for MergeView — trim-per-line comparison aligned with matchScore. */
-export const recallMergeDiffConfig = { override: recallMergeDiff };
+/**
+ * diffConfig for MergeView — line comparison aligned with matchScore. Defaults to the
+ * whitespace-insensitive comparison; pass `ignoreWhitespace: false` to highlight
+ * indentation / whitespace-only differences.
+ */
+export function recallMergeDiffConfig(ignoreWhitespace = true) {
+  return { override: (a: string, b: string) => recallMergeDiff(a, b, ignoreWhitespace) };
+}
 
 export interface RecallMergeViewOptions {
   highlightChanges?: boolean;
   mergeGutter?: boolean;
   mergeCollapse?: boolean;
+  /** When false, indentation / whitespace differences are highlighted (default true). */
+  ignoreWhitespace?: boolean;
 }
 
-/** MergeView.reconfigure payload — always keeps recall trim diff enabled. */
+/** MergeView.reconfigure payload — always keeps recall line diff enabled. */
 export function buildRecallMergeReconfigure({
   highlightChanges = true,
   mergeGutter = true,
   mergeCollapse = true,
+  ignoreWhitespace = true,
 }: RecallMergeViewOptions = {}) {
   return {
     highlightChanges,
     gutter: mergeGutter,
-    diffConfig: recallMergeDiffConfig,
+    diffConfig: recallMergeDiffConfig(ignoreWhitespace),
     ...(mergeCollapse ? { collapseUnchanged: { margin: 3, minSize: 4 } } : {}),
   };
 }

@@ -202,7 +202,7 @@ export function ResumeEditor({
     }));
 
   return (
-    <div className="resume-editor-shell flex flex-col gap-4 overflow-y-auto p-4 max-w-3xl mx-auto w-full">
+    <div className="resume-editor-shell flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4 max-w-3xl mx-auto w-full">
       {readOnly && (
         <div className="resume-editor-readonly-banner flex flex-wrap items-center gap-3 rounded-xl border border-accent/30 bg-accent/5 px-4 py-3">
           <Eye className="h-4 w-4 shrink-0 text-accent" />

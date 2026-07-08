@@ -65,7 +65,7 @@ function ConceptReadOverview({ nextLabel, onNext, nextAllLabel, onNextAll }: Ove
         <ProblemStatementColumn
           className={cn(
             'concept-read-overview',
-            isMobile && 'max-h-[45vh] shrink-0 border-b border-edge',
+            isMobile && 'max-h-[min(40vh,50%)] min-h-0 border-b border-edge',
           )}
         >
           <div className="flex flex-col gap-3">
@@ -220,7 +220,7 @@ function AnimatedOverviewBody({ nextLabel, onNext, nextAllLabel, onNextAll }: Ov
       footer={footer}
       problem={
         <OverviewProblemColumn
-          className={cn(isMobile && 'max-h-[40vh] shrink-0 border-b border-edge')}
+          className={cn(isMobile && 'max-h-[min(40vh,50%)] min-h-0 border-b border-edge')}
           view={view}
           onView={setView}
           canToggle={canToggle}

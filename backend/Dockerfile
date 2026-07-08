@@ -1,6 +1,8 @@
 FROM golang:1.25-alpine AS build
 WORKDIR /src
-COPY go.mod go.sum ./
+COPY go.work go.mod go.sum ./
+COPY realtime/go.mod realtime/
+COPY shared/go.mod shared/
 RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 go build -o /gameserver ./cmd/gameserver

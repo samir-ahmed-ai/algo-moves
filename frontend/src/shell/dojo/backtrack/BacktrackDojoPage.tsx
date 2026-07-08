@@ -82,7 +82,7 @@ function BacktrackDojoPageBody() {
       <div className="flex justify-center px-3 pb-1 pt-16 min-[720px]:pt-3">
         <LevelStrip />
       </div>
-      <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 px-3 pb-3">
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2 overflow-y-auto px-3 pb-3">
         <DeadEndBanner />
         <QueensBoard />
         <StatusBar />

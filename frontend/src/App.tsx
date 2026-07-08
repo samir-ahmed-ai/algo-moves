@@ -47,7 +47,7 @@ function AppFrame() {
   return (
     <div className="h-[100dvh] min-h-[100dvh] w-screen overflow-hidden bg-bg font-sans text-ink antialiased">
       <ErrorBoundary label="app">
-        <main aria-label={routeLabel} className="h-full min-w-0" data-route={route}>
+        <main aria-label={routeLabel} className="h-full min-h-0 min-w-0" data-route={route}>
           <Shell />
         </main>
         <SettingsDialog />

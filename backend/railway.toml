@@ -8,7 +8,7 @@
 #   RUN_MIGRATIONS     — true
 #   RUN_CONTENT_SEED   — true
 #
-# RUN_CONTENT_SEED uses backend/internal/arcade/seeds/content_seed.sql.
+# RUN_CONTENT_SEED uses backend/db/seeds/content_seed.sql.
 # Refresh it with: npm --prefix frontend run export-content-sql
 
 [build]

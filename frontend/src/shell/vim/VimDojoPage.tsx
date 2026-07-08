@@ -131,7 +131,7 @@ export function VimDojoPage() {
           className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_0%,color-mix(in_srgb,var(--accent)_22%,transparent),transparent_28rem),radial-gradient(circle_at_90%_88%,rgba(248,214,121,0.12),transparent_24rem)]"
         />
         <VimLevelSidebar />
-        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col min-[960px]:col-start-2 min-[960px]:row-start-1">
+        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col max-[959px]:overflow-y-auto min-[960px]:col-start-2 min-[960px]:row-start-1">
           <VimMobileTopBar />
           <div className="relative min-h-0 flex-1">
             <VimDojoCanvas className="absolute inset-0" />

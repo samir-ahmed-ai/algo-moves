@@ -246,7 +246,7 @@ Generated artifacts are downstream outputs. Do not hand-edit them; change the ge
 | `frontend/src/styles/themes/sources/index.ts` | `frontend/scripts/generate-themes.mjs` |
 | `frontend/src/shell/games/_generated/gameIds.ts` | `frontend/scripts/generate-game-ids.mjs` |
 | `db/content_seed.sql` | `frontend/scripts/export-content-sql.mts` |
-| `backend/internal/arcade/seeds/content_seed.sql` | `frontend/scripts/export-content-sql.mts` |
+| `backend/db/seeds/content_seed.sql` | `frontend/scripts/export-content-sql.mts` |
 
 ## Quality guardrails
 

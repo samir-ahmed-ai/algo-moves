@@ -405,8 +405,7 @@ const embedPath = join(
   '..',
   '..',
   'backend',
-  'internal',
-  'arcade',
+  'db',
   'seeds',
   'content_seed.sql',
 );
@@ -428,7 +427,5 @@ if (check) {
   mkdirSync(dirname(embedPath), { recursive: true });
   writeFileSync(outPath, sql);
   writeFileSync(embedPath, sql);
-  console.log(
-    `✓ wrote db/content_seed.sql and backend/internal/arcade/seeds/content_seed.sql — ${counts}.`,
-  );
+  console.log(`✓ wrote db/content_seed.sql and backend/db/seeds/content_seed.sql — ${counts}.`);
 }

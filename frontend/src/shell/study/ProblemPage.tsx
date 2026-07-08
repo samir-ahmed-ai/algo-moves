@@ -112,7 +112,7 @@ function ProblemPageShell() {
       <StudioSplitLayout
         problem={
           <OverviewProblemColumn
-            className={cn(isMobile && 'max-h-[40vh] shrink-0 border-b border-edge')}
+            className={cn(isMobile && 'max-h-[min(40vh,50%)] min-h-0 border-b border-edge')}
             view={view}
             onView={setView}
             canToggle={canToggle}

@@ -11,9 +11,9 @@ import (
 	"syscall"
 	"time"
 
-	"algomoves/gameserver/internal/arcade"
-	"algomoves/gameserver/internal/hub"
-	"algomoves/gameserver/internal/server"
+	"algomoves/gameserver/internal/app"
+	"algomoves.dev/realtime/hub"
+	httptransport "algomoves/gameserver/internal/transport/http"
 )
 
 // defaultMaxRooms bounds steady-state memory/goroutine growth: the /ws
@@ -39,20 +39,19 @@ func main() {
 	}
 
 	ctx := context.Background()
-	arc, err := arcade.Open(ctx)
+	api, err := app.Open(ctx)
 	if err != nil {
-		log.Fatalf("arcade database: %v", err)
+		log.Fatalf("app database: %v", err)
 	}
-	if arc != nil {
-		defer arc.Close()
-		arc.BootstrapPlatformAdmin(ctx)
+	if api != nil {
+		defer api.Close()
+		api.BootstrapPlatformAdmin(ctx)
 	}
 
 	srv := &http.Server{
 		Addr:              *addr,
-		Handler:           server.Handler(hub.NewWithMaxRooms(maxRooms), arc),
+		Handler:           httptransport.Handler(hub.NewWithMaxRooms(maxRooms), api),
 		ReadHeaderTimeout: 10 * time.Second,
-		// No overall write timeout: hijacked WebSocket connections are long-lived.
 	}
 
 	go func() {

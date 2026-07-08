@@ -3,19 +3,29 @@ module algomoves/gameserver
 go 1.25.0
 
 require (
+	algomoves.dev/realtime v0.0.0
+	algomoves.dev/shared v0.0.0
 	github.com/alexedwards/scs/postgresstore v0.0.0-20251002162104-209de6e426de
 	github.com/alexedwards/scs/v2 v2.9.0
-	github.com/coder/websocket v1.8.14
 	github.com/jackc/pgx/v5 v5.10.0
+	github.com/ledongthuc/pdf v0.0.0-20250511090121-5959a4027728
 	golang.org/x/crypto v0.53.0
 	golang.org/x/time v0.15.0
 )
 
 require (
+	github.com/coder/websocket v1.8.14 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
-	github.com/ledongthuc/pdf v0.0.0-20250511090121-5959a4027728 // indirect
 	golang.org/x/sync v0.21.0 // indirect
 	golang.org/x/text v0.38.0 // indirect
+)
+
+// Local-only modules resolved from sibling directories. These paths are never
+// published; replace makes `go mod tidy` and non-workspace builds resolve them
+// locally, while go.work governs day-to-day multi-module development.
+replace (
+	algomoves.dev/realtime => ./realtime
+	algomoves.dev/shared => ./shared
 )

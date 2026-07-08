@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { Puzzle } from 'lucide-react';
+import { cn } from '@/lib/utils/cn';
 import { ASSEMBLE_GAMES } from '@/components/puzzle/assemble';
 import { EmptyState, MiniTabs } from '@/shell/canvas';
 import { useIsMobile } from '@/lib/utils/useMediaQuery';
@@ -73,7 +74,12 @@ export function AssembleModes() {
         <MiniTabs value={mode} options={MODES} onChange={setMode} />
       </div>
       {GAME_MODE_IDS.has(mode) ? (
-        <div className="assemble-mode-workspace flex min-h-0 flex-1 flex-col overflow-hidden p-2 sm:p-3">
+        <div
+          className={cn(
+            'assemble-mode-workspace flex min-h-0 flex-1 flex-col p-2 sm:p-3',
+            isMobile ? 'ws-scroll overflow-y-auto' : 'overflow-hidden',
+          )}
+        >
           <GameMode mode={mode} />
         </div>
       ) : (

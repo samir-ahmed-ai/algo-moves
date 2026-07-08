@@ -31,7 +31,7 @@ export function ProductAuthGate({
 
   return (
     <section
-      className={`product-auth-gate product-auth-gate--${variant} relative isolate flex min-h-full items-center justify-center overflow-hidden px-4 py-10`}
+      className={`product-auth-gate product-auth-gate--${variant} relative isolate flex flex-1 min-h-0 items-center justify-center overflow-y-auto px-4 py-10`}
       aria-labelledby={`product-auth-gate-${variant}-title`}
     >
       <div className="product-auth-gate__glow product-auth-gate__glow--one" aria-hidden="true" />

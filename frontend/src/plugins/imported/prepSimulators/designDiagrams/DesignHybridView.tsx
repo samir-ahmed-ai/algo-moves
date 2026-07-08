@@ -60,7 +60,7 @@ export function DesignHybridView<S>({
         ))}
       </div>
 
-      <div className="design-hybrid-body mt-1.5 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="design-hybrid-body ws-scroll mt-1.5 flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto">
         {mode === 'architecture' ? (
           <DesignFlow spec={spec} />
         ) : (

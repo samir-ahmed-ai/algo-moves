@@ -53,6 +53,8 @@ export interface SplitCodeEditorProps {
   lineHeight?: RecallLineHeight;
   showLineNumbers?: boolean;
   highlightChanges?: boolean;
+  /** When false, indentation / whitespace differences are highlighted in the diff. */
+  ignoreWhitespace?: boolean;
   /** Receives the editable draft editor view for toolbar format/align actions. */
   draftViewRef?: MutableRefObject<EditorView | null>;
   /** Formats both reference + draft panes with matching spacing. */
@@ -109,6 +111,7 @@ export function SplitCodeEditor({
   lineHeight = 'normal',
   showLineNumbers = true,
   highlightChanges = true,
+  ignoreWhitespace = true,
   draftViewRef,
   formatBothRef,
   foldBothRef,
@@ -145,6 +148,8 @@ export function SplitCodeEditor({
   mergeCollapseRef.current = mergeCollapse;
   const highlightChangesRef = useRef(highlightChanges);
   highlightChangesRef.current = highlightChanges;
+  const ignoreWhitespaceRef = useRef(ignoreWhitespace);
+  ignoreWhitespaceRef.current = ignoreWhitespace;
   const showLineNumbersRef = useRef(showLineNumbers);
   showLineNumbersRef.current = showLineNumbers;
   const fontSizeRef = useRef(fontSize);
@@ -158,8 +163,9 @@ export function SplitCodeEditor({
     highlightChanges,
     mergeGutter,
     mergeCollapse,
+    ignoreWhitespace,
   });
-  mergeOptionsRef.current = { highlightChanges, mergeGutter, mergeCollapse };
+  mergeOptionsRef.current = { highlightChanges, mergeGutter, mergeCollapse, ignoreWhitespace };
 
   const afterMergeRefreshRef = useRef<(view: MergeView) => void>(() => {});
   afterMergeRefreshRef.current = (view: MergeView) => {
@@ -217,6 +223,7 @@ export function SplitCodeEditor({
         highlightChanges: highlightChangesRef.current,
         mergeGutter: mergeGutterRef.current,
         mergeCollapse: mergeCollapseRef.current,
+        ignoreWhitespace: ignoreWhitespaceRef.current,
       }),
       a: {
         doc: reference,
@@ -352,7 +359,7 @@ export function SplitCodeEditor({
 
   useEffect(() => {
     mergeSchedulerRef.current?.flush();
-  }, [mergeGutter, mergeCollapse, highlightChanges]);
+  }, [mergeGutter, mergeCollapse, highlightChanges, ignoreWhitespace]);
 
   useEffect(() => {
     const view = mergeViewRef.current;

@@ -1,7 +1,8 @@
 package prep
 
 import (
-	"algomoves/gameserver/internal/platform"
+	"algomoves.dev/shared/httputil"
+	"algomoves/gameserver/internal/profile"
 	"encoding/json"
 	"errors"
 	"io"
@@ -10,12 +11,12 @@ import (
 )
 
 type Handler struct {
-	store *platform.Store
-	auth  platform.Authenticator
+	repo *Repository
+	auth profile.Authenticator
 }
 
-func NewHandler(store *platform.Store, auth platform.Authenticator) *Handler {
-	return &Handler{store: store, auth: auth}
+func NewHandler(repo *Repository, auth profile.Authenticator) *Handler {
+	return &Handler{repo: repo, auth: auth}
 }
 
 const maxPrepPlanTitle = 200
@@ -38,18 +39,18 @@ func (h *Handler) HandlePrepPlans(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 	if code != 0 {
-		platform.WriteErr(w, code, msg)
+		httputil.WriteErr(w, code, msg)
 		return
 	}
 
 	switch r.Method {
 	case http.MethodGet:
-		list, err := h.store.ListPrepPlans(ctx, p.ID)
+		list, err := h.repo.ListPrepPlans(ctx, p.ID)
 		if err != nil {
-			platform.WriteErr(w, http.StatusInternalServerError, "query failed")
+			httputil.WriteErr(w, http.StatusInternalServerError, "query failed")
 			return
 		}
-		platform.WriteJSON(w, http.StatusOK, list)
+		httputil.WriteJSON(w, http.StatusOK, list)
 
 	case http.MethodPost:
 		var body struct {
@@ -57,13 +58,13 @@ func (h *Handler) HandlePrepPlans(w http.ResponseWriter, r *http.Request) {
 			ItemIDs []string `json:"itemIds"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil && !errors.Is(err, io.EOF) {
-			platform.WriteErr(w, http.StatusBadRequest, "invalid json")
+			httputil.WriteErr(w, http.StatusBadRequest, "invalid json")
 			return
 		}
 		title := sanitizePrepPlanTitle(body.Title)
-		plan, err := h.store.CreatePrepPlan(ctx, p.ID, title)
+		plan, err := h.repo.CreatePrepPlan(ctx, p.ID, title)
 		if err != nil {
-			platform.WriteErr(w, http.StatusInternalServerError, "create failed")
+			httputil.WriteErr(w, http.StatusInternalServerError, "create failed")
 			return
 		}
 		// If initial items were supplied, save them immediately.
@@ -71,19 +72,19 @@ func (h *Handler) HandlePrepPlans(w http.ResponseWriter, r *http.Request) {
 			if len(body.ItemIDs) > maxPrepPlanItems {
 				body.ItemIDs = body.ItemIDs[:maxPrepPlanItems]
 			}
-			updated, ok, err := h.store.UpdatePrepPlan(ctx, plan.ID, p.ID, nil, nil, body.ItemIDs, nil)
+			updated, ok, err := h.repo.UpdatePrepPlan(ctx, plan.ID, p.ID, nil, nil, body.ItemIDs, nil)
 			if err != nil {
-				platform.WriteErr(w, http.StatusInternalServerError, "save failed")
+				httputil.WriteErr(w, http.StatusInternalServerError, "save failed")
 				return
 			}
 			if ok {
 				plan = updated
 			}
 		}
-		platform.WriteJSON(w, http.StatusOK, plan)
+		httputil.WriteJSON(w, http.StatusOK, plan)
 
 	default:
-		platform.WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
+		httputil.WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
 	}
 }
 
@@ -96,28 +97,28 @@ func (h *Handler) HandlePrepPlan(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := strings.TrimPrefix(r.URL.Path, "/api/prep-plans/")
 	if id == "" || strings.Contains(id, "/") {
-		platform.WriteErr(w, http.StatusNotFound, "not found")
+		httputil.WriteErr(w, http.StatusNotFound, "not found")
 		return
 	}
 
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 	if code != 0 {
-		platform.WriteErr(w, code, msg)
+		httputil.WriteErr(w, code, msg)
 		return
 	}
 
 	switch r.Method {
 	case http.MethodGet:
-		plan, err := h.store.GetPrepPlan(ctx, id, p.ID)
+		plan, err := h.repo.GetPrepPlan(ctx, id, p.ID)
 		if err != nil {
-			platform.WriteErr(w, http.StatusInternalServerError, "query failed")
+			httputil.WriteErr(w, http.StatusInternalServerError, "query failed")
 			return
 		}
 		if plan == nil {
-			platform.WriteErr(w, http.StatusNotFound, "not found")
+			httputil.WriteErr(w, http.StatusNotFound, "not found")
 			return
 		}
-		platform.WriteJSON(w, http.StatusOK, plan)
+		httputil.WriteJSON(w, http.StatusOK, plan)
 
 	case http.MethodPut:
 		var body struct {
@@ -127,7 +128,7 @@ func (h *Handler) HandlePrepPlan(w http.ResponseWriter, r *http.Request) {
 			CompletedItems []string `json:"completedItems"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			platform.WriteErr(w, http.StatusBadRequest, "invalid json")
+			httputil.WriteErr(w, http.StatusBadRequest, "invalid json")
 			return
 		}
 		if body.Title != nil {
@@ -135,41 +136,41 @@ func (h *Handler) HandlePrepPlan(w http.ResponseWriter, r *http.Request) {
 			body.Title = &t
 		}
 		if body.Notes != nil && len(*body.Notes) > maxPrepPlanNotes {
-			platform.WriteErr(w, http.StatusBadRequest, "notes too large")
+			httputil.WriteErr(w, http.StatusBadRequest, "notes too large")
 			return
 		}
 		if len(body.ItemIDs) > maxPrepPlanItems {
-			platform.WriteErr(w, http.StatusBadRequest, "too many items")
+			httputil.WriteErr(w, http.StatusBadRequest, "too many items")
 			return
 		}
 		completedSet := make(map[string]bool, len(body.CompletedItems))
 		for _, cid := range body.CompletedItems {
 			completedSet[cid] = true
 		}
-		plan, ok, err := h.store.UpdatePrepPlan(ctx, id, p.ID, body.Title, body.Notes, body.ItemIDs, completedSet)
+		plan, ok, err := h.repo.UpdatePrepPlan(ctx, id, p.ID, body.Title, body.Notes, body.ItemIDs, completedSet)
 		if err != nil {
-			platform.WriteErr(w, http.StatusInternalServerError, "save failed")
+			httputil.WriteErr(w, http.StatusInternalServerError, "save failed")
 			return
 		}
 		if !ok {
-			platform.WriteErr(w, http.StatusNotFound, "not found")
+			httputil.WriteErr(w, http.StatusNotFound, "not found")
 			return
 		}
-		platform.WriteJSON(w, http.StatusOK, plan)
+		httputil.WriteJSON(w, http.StatusOK, plan)
 
 	case http.MethodDelete:
-		ok, err := h.store.DeletePrepPlan(ctx, id, p.ID)
+		ok, err := h.repo.DeletePrepPlan(ctx, id, p.ID)
 		if err != nil {
-			platform.WriteErr(w, http.StatusInternalServerError, "delete failed")
+			httputil.WriteErr(w, http.StatusInternalServerError, "delete failed")
 			return
 		}
 		if !ok {
-			platform.WriteErr(w, http.StatusNotFound, "not found")
+			httputil.WriteErr(w, http.StatusNotFound, "not found")
 			return
 		}
-		platform.WriteJSON(w, http.StatusOK, map[string]bool{"ok": true})
+		httputil.WriteJSON(w, http.StatusOK, map[string]bool{"ok": true})
 
 	default:
-		platform.WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
+		httputil.WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
 	}
 }

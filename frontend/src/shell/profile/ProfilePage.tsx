@@ -326,7 +326,7 @@ export function ProfilePage() {
         title="Your Profile"
       />
 
-      <main className="flex flex-1 flex-col overflow-auto">
+      <main className="flex flex-1 min-h-0 flex-col overflow-auto">
         {loading ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
             <div className="grid h-14 w-14 place-items-center rounded-3xl border border-edge bg-panel/80 shadow-theme-md">

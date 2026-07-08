@@ -92,7 +92,7 @@ export function OverviewAnimateColumn() {
   return (
     <StudioContentPanel>
       <StageCaption />
-      <div className="overview-content-column overview-content-column--animate flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="overview-content-column overview-content-column--animate ws-scroll flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto">
         <VizPanelBody showTransport={false} />
       </div>
       {!isStatic && (

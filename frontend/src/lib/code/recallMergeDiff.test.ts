@@ -2,10 +2,24 @@ import { describe, expect, it } from 'vitest';
 import { buildRecallMergeReconfigure, recallMergeDiff } from './recallMergeDiff';
 
 describe('buildRecallMergeReconfigure', () => {
-  it('always includes recall trim diff override', () => {
+  it('always includes a recall diff override', () => {
     const opts = buildRecallMergeReconfigure({ mergeCollapse: false });
-    expect(opts.diffConfig?.override).toBe(recallMergeDiff);
+    expect(typeof opts.diffConfig?.override).toBe('function');
     expect(opts.collapseUnchanged).toBeUndefined();
+  });
+
+  it('override ignores whitespace by default', () => {
+    const opts = buildRecallMergeReconfigure({});
+    const ref = 'func f() {\n\treturn 1\n}';
+    const draft = 'func f() {\n  return 1\n}';
+    expect(opts.diffConfig?.override?.(ref, draft)).toEqual([]);
+  });
+
+  it('override highlights whitespace when ignoreWhitespace is false', () => {
+    const opts = buildRecallMergeReconfigure({ ignoreWhitespace: false });
+    const ref = 'func f() {\n\treturn 1\n}';
+    const draft = 'func f() {\n  return 1\n}';
+    expect(opts.diffConfig?.override?.(ref, draft)?.length).toBeGreaterThan(0);
   });
 
   it('includes collapseUnchanged when mergeCollapse is true', () => {
@@ -39,6 +53,27 @@ describe('recallMergeDiff', () => {
     const ref = 'func f() {\n\treturn 1\n}';
     const draft = 'func f() {\n  return 1\n}';
     expect(recallMergeDiff(ref, draft)).toEqual([]);
+  });
+
+  it('highlights leading/trailing whitespace differences when ignoreWhitespace is false', () => {
+    const ref = 'func main() {\n\treturn 42\n}';
+    const draft = '  func main() {\n\treturn 42  \n}';
+    expect(recallMergeDiff(ref, draft, false).length).toBeGreaterThan(0);
+  });
+
+  it('highlights tab vs space indentation when ignoreWhitespace is false', () => {
+    const ref = 'func f() {\n\treturn 1\n}';
+    const draft = 'func f() {\n  return 1\n}';
+    const changes = recallMergeDiff(ref, draft, false);
+    expect(changes.length).toBeGreaterThan(0);
+    const coversLine2 = changes.some((c) => c.fromA <= 11 && c.toA >= 11);
+    expect(coversLine2).toBe(true);
+  });
+
+  it('still ignores CRLF vs LF even when ignoreWhitespace is false', () => {
+    const ref = 'a\r\nb\r\nc';
+    const draft = 'a\nb\nc';
+    expect(recallMergeDiff(ref, draft, false)).toEqual([]);
   });
 
   it('flags inserted lines', () => {

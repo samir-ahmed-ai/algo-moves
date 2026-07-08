@@ -108,7 +108,7 @@ export function GistCardView({
   const summary = block.plugin.meta.summary;
 
   return (
-    <div className="mobile-card-shell mobile-gist-card flex flex-1 flex-col px-5 pt-3">
+    <div className="mobile-card-shell mobile-gist-card ws-scroll flex min-h-0 flex-1 flex-col overflow-y-auto px-5 pt-3">
       <div className="flex shrink-0 items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           {block.pattern && (
@@ -281,7 +281,7 @@ export function ReadCardView({
   const [tab, setTab] = useState<'concept' | 'code'>('concept');
 
   return (
-    <div className="mobile-card-shell mobile-read-card flex min-h-0 flex-1 flex-col px-4 pt-3">
+    <div className="mobile-card-shell mobile-read-card ws-scroll flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pt-3">
       <div className="shrink-0">
         <div className="flex items-center gap-2">
           <span className="text-[length:var(--fs-tight)] font-semibold tabular-nums text-ink3">

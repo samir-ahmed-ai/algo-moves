@@ -65,7 +65,7 @@ export function VizPanelBody({
       {isStatic ? (
         // Static design diagrams fill their own area (self-measured layout), so
         // skip VizFitBox letterbox scaling and hand them the whole panel.
-        <div className="viz-design-stage flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="viz-design-stage ws-scroll flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto">
           {viewEl}
         </div>
       ) : inVisualize ? (

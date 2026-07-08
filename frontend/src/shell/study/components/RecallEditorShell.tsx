@@ -63,6 +63,7 @@ export function RecallEditorShell({
         mergeGutter={editorPrefs.mergeGutter}
         mergeCollapse={editorPrefs.mergeCollapse}
         highlightChanges={editorPrefs.highlightChanges}
+        ignoreWhitespace={editorPrefs.recallIgnoreWhitespace}
         showLineNumbers={editorPrefs.showLineNumbers}
         fontSize={editorPrefs.fontSize}
         lineHeight={editorPrefs.lineHeight}
