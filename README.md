@@ -2,344 +2,431 @@
 
 **Visual algorithm mastery for interviews.**
 
-Step through algorithms like a chess transcript: watch the move, predict the next one, rebuild the code, and repeat until the pattern sticks.
+Step through algorithms like a chess transcript — watch the move, predict the next one, rebuild the code, and repeat until the pattern sticks. Algo Moves is a plugin-driven learning environment: the shell is algorithm-agnostic, every problem is a self-contained plugin, and the engine replays every pointer move, push/pop, and state change as a first-class **move transcript** you can scrub, drill, and share.
 
-Algo Moves is a plugin-driven learning environment for coding interview prep. Each problem replays as a sequence of **moves** — state snapshots with captions — that you can scrub, play, quiz, rebuild, and drill. The shell knows nothing about any specific algorithm; every problem is a self-contained **plugin**.
-
-The library includes ~400 problems from [LeetCode](https://leetcode.com/), [HackerRank](https://www.hackerrank.com/), and original exercises, plus a real-time Games Arcade for lightweight multiplayer practice.
-
-**Deploy:** run the frontend and backend together on [Railway](#deploying-to-railway). GitHub Pages is not supported for the realtime app.
+~**400 problems** · real-time multiplayer arcade · collaborative canvas · interview facilitation · mobile swipe deck · Vim Dojo
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Go](https://img.shields.io/badge/Go-1.25-00ADD8?logo=go&logoColor=white)](https://go.dev/)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Railway](https://img.shields.io/badge/Deploy-Railway-B847FF?logo=railway&logoColor=white)](https://railway.com)
 
 ```bash
 make install && make dev   # → http://localhost:4321
 ```
 
-**Contents:** [Learn the way AI learns](#learn-the-way-ai-learns) · [Features](#features) · [Problem library](#problem-library) · [Stack](#technology-stack) · [Quick start](#quick-start) · [Scripts](#npm-scripts) · [Architecture](#plugin-architecture) · [New plugin](#add-a-new-problem-plugin) · [Folder map](#folder-map) · [Docs](#documentation)
+---
+
+## Contents
+
+| | |
+|---|---|
+| [The Learning Loop](#the-learning-loop) | How mastery works |
+| [Features](#features) | All modes at a glance |
+| [Problem Library](#problem-library) | 400 problems across three layers |
+| [Technology Stack](#technology-stack) | React · Go · Postgres · Hocuspocus |
+| [Architecture](#architecture) | System overview + links to deep-dive docs |
+| [Quick Start](#quick-start) | Install · dev · build · test |
+| [Deployment](#deploying-to-railway) | Railway 4-service deploy |
+| [Plugin System](#plugin-system) | How to add a problem |
+| [Scripts Reference](#scripts-reference) | All npm scripts |
+| [Folder Map](#folder-map) | Directory layout |
+| [Documentation](#documentation) | All docs |
 
 ---
 
-## Learn the way AI learns
+## The Learning Loop
 
-How does a model get good? It tries, gets a signal, adjusts, and tries again. Reinforcement learning is not magic — it is **structured repetition with honest feedback**.
+How does a model get good? It tries, gets a signal, adjusts, and tries again — structured repetition with honest feedback. Algo Moves applies the same loop to human study:
 
-Algo Moves applies the same loop to human study:
+```
+  Watch ──▶ Quiz ──▶ Miss? ──▶ Restart from Q1
+              │                    (score resets, choices shuffle)
+              ▼
+           3-streak ──▶ 🏆 Mastered
+```
 
-1. **Watch** the algorithm move by move on a live canvas.
-2. **Quiz** yourself — predict the next step, the complexity, the key line.
-3. **Miss?** The run **restarts from question 1** — score resets, choices shuffle. You do not skip past the gap; you run the pattern again until it lands.
-4. **Master** it — three correct answers in a row marks a problem mastered.
+1. **Watch** the algorithm step-by-step on a live canvas.
+2. **Quiz** yourself — predict the next move, the complexity, the key line.
+3. **Miss?** The run restarts from question 1. You don't skip the gap; you run the pattern again until recall is automatic.
+4. **Master** — three correct answers in a row marks a problem mastered.
 
-That is not punishment. It is how memory forms: testing your brain over and over, learning from each mistake, and rebuilding the path until recall is automatic. On desktop, **Code Studio** walks the same ladder — quiz → reassemble → blind recall. On your phone, **Swipe mode** runs animate → quiz → rebuild in a full-screen deck.
+On desktop, **Code Studio** runs the same ladder as a gated phase: quiz → reassemble → blind recall. On your phone, **Swipe mode** runs animate → quiz → rebuild in a full-screen deck.
 
-Most visualizers show you the *answer*. Algo Moves shows you the **process** — every pointer move, every push/pop, every relaxation — as a first-class move transcript you can replay, share, and drill.
+> Most visualizers show you the *answer*. Algo Moves shows you the **process** — every pointer move, every state change — as a replay transcript you can share, scrub, and drill.
 
-![The learning loop](frontend/public/assets/learning-loop.svg)
-
-> **Built into the product:** wrong quiz answers trigger an automatic full restart (~1.9 s feedback, then back to Q1 with reshuffled choices). Mastery unlocks at a **3-streak**. See [Quiz & Code Studio](docs/quiz-and-code-studio.md) for the full rules.
+---
 
 ## Features
 
-Every problem is a **move transcript** you can scrub, replay, and drill:
-
 | Mode | What you get |
-|------|--------------|
-| **Visualize** | Step player, move log, inspector, shareable replay URLs — replay algorithms on graphs, grids, arrays, and trees |
+|------|-------------|
+| **Visualize** | Step player · move log · inspector · shareable replay URLs — replay on graphs, grids, arrays, trees |
 | **Learn** | Cases · quiz · simulate-next-move · Code Studio (quiz → reassemble → blind recall) |
 | **Practice** | Wrong answer → full restart · shuffled choices · 3-streak mastery |
 | **Mobile deck** | Full-screen swipe deck for drilling a topic on the go (`#mobile`) |
 | **Vim Dojo** | Keyboard-only maze puzzles that teach Vim motions (`#vim`) |
-| **Games** | Real-time two-player games — Would You Rather, Number Duel, RPS, Tic-Tac-Toe, Mind Meld, Reaction Duel (`#games`) |
+| **Dojo** | 12 algorithm pattern modules for blind practice (`#dojo`) |
+| **Games Arcade** | Real-time two-player games — Would You Rather, Number Duel, RPS, Tic-Tac-Toe, Mind Meld, Reaction Duel (`#games`) |
+| **Canvas** | Freeform React Flow workspace with collaborative editing |
+| **Interview** | Host + candidate on a shared problem with shared timer, lock, and viewport follow |
 | **Home** | Course catalog with progress meters, difficulty breakdown, and resume-last |
-
-![Swipe mode mobile deck](frontend/public/assets/mobile-swipe-deck.svg)
-
-Built with React 18 · TypeScript 5 · Vite 5 · Tailwind · Radix UI · CodeMirror 6 · React Flow.
 
 ---
 
-## Problem library
+## Problem Library
 
 ~**400 problems** across three layers:
 
 | Layer | Count | Location | Simulators |
 |-------|-------|----------|------------|
-| **Prep library** | 271 | `frontend/src/plugins/imported/prepManifest.ts` | 271/271 bespoke step-sims in `prepSimulators/problems/` |
-| **Progress library** | 91 | `frontend/src/plugins/imported/manifest.ts` | Hand-built sims in `simulators/problems/` |
-| **Curated plugins** | 18 | Hand-authored (`binary-search`, six sorts, `n-queens`, `tree-traversals`, …) | Native `record()` + `View` in `frontend/src/plugins/<id>/` |
+| **Prep library** | 271 | `frontend/src/plugins/imported/prepManifest.ts` *(generated)* | 271/271 bespoke step-simulators in `prepSimulators/problems/` |
+| **Progress library** | 91 | `frontend/src/plugins/imported/manifest.ts` *(generated)* | Hand-built simulators in `simulators/problems/` |
+| **Curated plugins** | 18 | Hand-authored in `frontend/src/plugins/<id>/` | Native `record()` + `View` |
 
-Generated manifests are downstream artifacts. Update the generator in `frontend/scripts/`, then regenerate; do not hand-edit `manifest.ts`, `prepManifest.ts`, `_generated/*`, or generated theme CSS.
+Problems draw from [LeetCode](https://leetcode.com/), [HackerRank](https://www.hackerrank.com/), and original teaching exercises. Solutions, simulators, quizzes, and visualizations are original implementations — study aids, not copies of platform editorials. Full attribution: [`ATTRIBUTIONS.md`](ATTRIBUTIONS.md).
 
----
-
-## References & attribution
-
-Problems draw from industry interview platforms and original teaching exercises. **Solutions, simulators, quizzes, and visualizations in this repo are original implementations** — they are study aids, not copies of platform editorials.
-
-### External problem sources
-
-| Platform | Examples in this repo | In-app link |
-|----------|----------------------|-------------|
-| [**LeetCode**](https://leetcode.com/) | Two Sum, LRU Cache, Word Search, Alien Dictionary, Clone Graph, … (~100 in the progress library) | **Open on LeetCode ↗** on imported problem cards |
-| [**HackerRank**](https://www.hackerrank.com/) | BFS Shortest Reach, Floyd: City of Blinding Lights, Merging Communities, Subset Component, Array Manipulation | Tagged `(HackerRank)` in titles |
-| **Educational** | Unweighted shortest path, graph traversal, topological sort, reachability — pattern-first scaffolding | Marked `Educational` in manifests |
-
-Each plugin's `meta.source` records the canonical reference. When a LeetCode URL exists, the imported factory surfaces it directly:
-
-```124:126:frontend/src/plugins/imported/factory.tsx
-      {p.leetcode && (
-        <a href={p.leetcode} target="_blank" rel="noreferrer" className={cn('nodrag mt-auto inline-flex items-center gap-1 self-start text-accent hover:underline', vizText.base)}>
-          Open on LeetCode ↗
-```
-
-> **Trademarks:** LeetCode is a trademark of LeetCode, LLC. HackerRank is a trademark of HackerRank, Inc. This project is not affiliated with, endorsed by, or sponsored by either platform. Full notice: [`ATTRIBUTIONS.md`](ATTRIBUTIONS.md).
+> **Generated manifests are downstream artifacts.** Run the generator (`import-problems.mjs` / `import-prep.mjs`), then regenerate — never hand-edit `manifest.ts`, `prepManifest.ts`, or any file in `_generated/`.
 
 ---
 
-## Technology stack
+## Technology Stack
 
-Built as a modern React SPA with a strict plugin contract and a token-driven design system.
-
-| Category | Libraries |
+| Category | Technology |
 |----------|-----------|
-| **Core** | React 18, TypeScript 5, Vite 5 |
-| **Styling** | Tailwind CSS 3, PostCSS — design tokens in `frontend/src/design/tokens.ts` and `frontend/src/styles/theme.css` |
-| **Components** | Radix UI (accordion, switch), Lucide icons, `clsx` + `tailwind-merge` |
-| **Code editing** | CodeMirror 6 (+ `@replit/codemirror-vim`), autocomplete, One Dark theme |
-| **Graph canvas** | `@xyflow/react`, `@dagrejs/dagre` for layout |
-| **Utilities** | `html-to-image` (export), `lz-string` (compact share URLs) |
-| **Testing & CI scripts** | Vitest; `check:all` runs simulator coverage, typography lint, token guards, and quiz label quality |
-| **Reference solutions** | Go (`solution.go` embedded in generated manifests) |
+| **SPA** | React 18 · TypeScript 5 · Vite 8 |
+| **Styling** | Tailwind CSS 3 · PostCSS · design token system (`design/tokens.ts`) |
+| **Components** | Radix UI · Lucide icons · `clsx` + `tailwind-merge` · CVA |
+| **Code editing** | CodeMirror 6 · `@replit/codemirror-vim` · One Dark · Go/Python/JS langs |
+| **Graph canvas** | `@xyflow/react` 12 · `@dagrejs/dagre` · elkjs |
+| **Collaboration** | `@hocuspocus/provider` · Yjs |
+| **State** | Zustand |
+| **Flashcard engine** | `ts-fsrs` (FSRS spaced repetition) |
+| **Backend** | Go 1.25 · stdlib WebSocket · `pgx/v5` · `alexedwards/scs` |
+| **Database** | PostgreSQL 16 · sqlc · 16 migrations |
+| **Realtime collab** | Hocuspocus (Node.js · `@hocuspocus/server` 3.4) |
+| **Deploy** | Railway (4 services: frontend, backend, hocuspocus, Postgres) |
+| **Testing** | Vitest 4 · Go `testing` |
+| **Quality** | ESLint 9 · `eslint-plugin-boundaries` · Husky · lint-staged · knip · madge |
 
 ---
 
-## Monorepo layout
+## Architecture
 
-The project is split into two apps:
+Four deployed services — a React SPA, a Go game server, Hocuspocus (Yjs CRDT), and Postgres.
 
+```mermaid
+graph TB
+    Browser["🌐 Browser\nReact 18 SPA"]
+
+    subgraph services ["Railway Services"]
+        Frontend["Frontend\nReact + Vite"]
+        Backend["Go Game Server\nWebSocket · REST API"]
+        Hocuspocus["Hocuspocus\nYjs CRDT collab"]
+        Postgres[("PostgreSQL")]
+    end
+
+    Browser -->|"HTTPS — SPA"| Frontend
+    Browser -->|"wss:// — Arcade rooms"| Backend
+    Browser -->|"wss:// — Canvas collab"| Hocuspocus
+    Backend -->|"pgx/v5"| Postgres
+    Hocuspocus -->|"pg"| Postgres
+
+    style Frontend fill:#646CFF,color:#fff
+    style Backend fill:#00ADD8,color:#fff
+    style Hocuspocus fill:#FF6B35,color:#fff
+    style Postgres fill:#336791,color:#fff
 ```
-├── frontend/   React + Vite SPA — the whole learning app
-├── backend/    Go realtime game server + optional Postgres arcade API
-└── db/         Arcade Postgres schema (see db/README.md)
-```
 
-A top-level `Makefile` wraps both (`make dev`, `make dev-all`, `make backend-dev`, `make build`, `make backend-test`, `make check`).
+**Deep-dive architecture docs:**
 
-**Production games:** deploy both services on Railway with cross-service env vars (see [Deploying to Railway](#deploying-to-railway)).
+| Doc | What's inside |
+|-----|--------------|
+| [**Frontend Architecture**](docs/ARCHITECTURE-FRONTEND.md) | Layer dependency graph · route map · plugin system · state management · data flow · design tokens · generated artifacts pipeline · quality guardrails |
+| [**Backend Architecture**](docs/ARCHITECTURE-BACKEND.md) | Go workspace · module dependency graph · HTTP surface · WebSocket protocol · room lifecycle · domain packages · database schema · deployment diagrams |
+| [**Architecture Overview**](docs/architecture.md) | Combined session model (solo / collab / interview) · Postgres stores · shell/canvas/plugin/games boundaries |
 
-## Quick start
+---
+
+## Quick Start
 
 ```bash
-# Frontend (from repo root)
+# 1. Install all dependencies (frontend + backend Go deps)
 make install
-make dev             # Vite dev server (Network URL printed for phone/QR)
-make typecheck       # tsc --noEmit
-make build           # production bundle
-cd frontend && npm test
-cd frontend && npm run check:all    # simulators, prep coverage, typography, tokens, quiz labels
 
-# Backend — only needed for the two-player Games arcade
-make backend-dev     # listens on :8080
-make backend-test    # framing + hub + a real two-client socket relay test
+# 2. Start frontend dev server
+make dev                   # → http://localhost:4321
+
+# 3. (Optional) Start the backend — only needed for multiplayer Games arcade
+make backend-dev           # → :8080
+
+# 4. (Optional) Full stack with Hocuspocus canvas collab
+make dev-all               # frontend + backend + hocuspocus
 ```
 
-**Playing the games:** run both services with `make dev-all`, or `make dev` + `make backend-dev` in separate terminals. Open the frontend on the host machine's LAN IP from both phones/iPads — the client auto-connects to `ws://<that-host>:8080`. For internet play, deploy both services on Railway (see [Deploying to Railway](#deploying-to-railway) below).
+### Other common commands
 
-### Deploying to Railway
+```bash
+# Typecheck
+make typecheck             # tsc --noEmit
 
-Deploy the **frontend** and **game server** on [Railway](https://railway.com). Pushes to **`main`** auto-deploy via Railway's GitHub integration — no GitHub Actions deploy workflow and no Railway tokens in GitHub secrets. CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) still runs tests on push/PR.
+# Production build
+make build
 
-1. Create a Railway project with four resources: **frontend**, **backend**, **hocuspocus**, and **Postgres**.
-2. **Connect GitHub** for each app service (Settings → Source):
-   - Link your GitHub repo
-   - **Root Directory:** `backend`, `frontend`, or `services/hocuspocus`
-   - **Config file path:** `/backend/railway.toml`, `/frontend/railway.toml`, or `/services/hocuspocus/railway.toml`
-   - **Branch:** `main`
-   - Enable **Deploy on push**
-3. Generate a public domain for frontend, backend, and hocuspocus (Settings → Networking).
-4. Set **service variables** (or run `./scripts/railway-deploy.sh --vars`):
+# Frontend tests
+cd frontend && npm test
+
+# All quality checks (CI gate)
+cd frontend && npm run check:all   # boundaries · circular · typography · tokens · quiz labels · simulators
+
+# Backend tests (per Go module)
+cd backend
+for m in . realtime shared; do (cd "$m" && go test ./...); done
+
+# Backend build
+cd backend && go build ./cmd/gameserver
+```
+
+### LAN / Multi-Device Play
+
+Run `make dev` + `make backend-dev`. Open the frontend on your laptop's LAN IP from other phones/tablets — the client auto-connects to `ws://<that-host>:8080`.
+
+---
+
+## Deploying to Railway
+
+Deploy all four services on [Railway](https://railway.com). Pushes to **`main`** auto-deploy via Railway's GitHub integration.
+
+```mermaid
+flowchart LR
+    GitHub["GitHub\nbranch: main\npush → auto-deploy"]
+
+    subgraph railway ["Railway Project"]
+        FE["frontend\nRoot dir: frontend"]
+        BE["backend\nRoot dir: backend"]
+        HP["hocuspocus\nRoot dir: services/hocuspocus"]
+        PG[("Postgres")]
+    end
+
+    GitHub -->|"CI + deploy"| FE & BE & HP
+    BE --> PG
+    HP --> PG
+```
+
+**Setup steps:**
+
+1. Create a Railway project with four resources: **frontend**, **backend**, **hocuspocus**, **Postgres**.
+2. Connect GitHub for each service (Settings → Source → Root Directory → branch `main` → Deploy on push).
+3. Generate public domains for frontend, backend, and hocuspocus (Settings → Networking).
+4. Set service variables:
 
    | Service | Variable | Value |
    |---------|----------|-------|
-   | **backend** | `ALLOWED_ORIGINS` | `https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}` |
-   | **backend** | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` |
-   | **backend** | `RUN_MIGRATIONS` | `true` |
-   | **backend** | `RUN_CONTENT_SEED` | `true` |
-   | **hocuspocus** | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` |
-   | **hocuspocus** | `HOCUSPOCUS_ALLOWED_ORIGINS` | `https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}` |
-   | **frontend** | `VITE_API_SERVER_URL` | `https://${{backend.RAILWAY_PUBLIC_DOMAIN}}` |
-   | **frontend** | `VITE_HOCUSPOCUS_URL` | `wss://${{hocuspocus.RAILWAY_PUBLIC_DOMAIN}}` |
+   | `backend` | `ALLOWED_ORIGINS` | `https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}` |
+   | `backend` | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` |
+   | `backend` | `RUN_MIGRATIONS` | `true` |
+   | `backend` | `RUN_CONTENT_SEED` | `true` |
+   | `hocuspocus` | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` |
+   | `hocuspocus` | `HOCUSPOCUS_ALLOWED_ORIGINS` | `https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}` |
+   | `frontend` | `VITE_API_SERVER_URL` | `https://${{backend.RAILWAY_PUBLIC_DOMAIN}}` |
+   | `frontend` | `VITE_HOCUSPOCUS_URL` | `wss://${{hocuspocus.RAILWAY_PUBLIC_DOMAIN}}` |
 
-   Service names in `${{…}}` must match your Railway service names exactly (`frontend`, `backend`, `hocuspocus`, `Postgres`).
-
-5. **One-shot deploy** (from repo root, Railway CLI logged in):
+5. Deploy (Railway CLI):
 
    ```bash
-   chmod +x scripts/railway-deploy.sh
-   ./scripts/railway-deploy.sh
-   ```
-
-   Or deploy individually:
-
-   ```bash
-   # Upload the full monorepo; backend/frontend use Root Directory from step 2.
    railway up . --service backend --detach
    railway up . --service frontend --detach
-   # hocuspocus has no Root Directory — upload its folder as the snapshot root.
    railway up services/hocuspocus --path-as-root --service hocuspocus --detach
    ```
 
-See [`backend/README.md`](backend/README.md) for endpoint and Docker details.
+   Or run the deploy script: `./scripts/railway-deploy.sh`
 
-### Import & scaffold scripts
-
-```bash
-cd frontend
-npm run import-prep                              # regenerate prepManifest.ts
-npm run import-problems                          # regenerate progress manifest.ts
-npm run build-plugin-meta                        # refresh lightweight registry/course metadata
-npm run build-problem-briefs                     # refresh generated problem statements
-npm run export-content-sql                       # refresh db/backend content seed SQL
-npm run scaffold-prep-sim -- lru-cache           # stub a new prep simulator
-npm run check-prep-sim-coverage                  # fail if any prep id lacks a simulator
-npm run new-problem -- two-sum "Two Sum"         # scaffold a native plugin
-```
+See [Backend Architecture → Deployment](docs/ARCHITECTURE-BACKEND.md#deployment) for Docker and env var details.
 
 ---
 
-## npm scripts
+## Plugin System
 
-Run from `frontend/` (or via `make` for common targets):
-
-| Script | Purpose |
-|--------|---------|
-| `dev` | Vite dev server (`http://localhost:4321`) |
-| `build` | Typecheck + production bundle |
-| `preview` | Preview production build |
-| `typecheck` | `tsc --noEmit` |
-| `test` | Vitest + orphan plugin check |
-| `check:all` | Simulators, prep coverage, typography, tokens, quiz labels, lighthouse budget |
-| `check:quiz-labels` | Quiz choice format + integrity label tests |
-| `draft-quiz-from-frames -- <id>` | Draft quiz from recorder captions |
-| `import-prep` | Regenerate `prepManifest.ts` |
-| `import-problems` | Regenerate progress `manifest.ts` |
-| `scaffold-prep-sim -- <slug>` | Stub a new prep simulator |
-| `check-prep-sim-coverage` | Fail if any prep id lacks a simulator |
-| `check-mobile-decks` | Validate mobile deck coverage |
-| `new-problem -- <slug> "<title>"` | Scaffold a native plugin |
-| `new-effect -- <slug>` | Scaffold a canvas effect plugin |
-| `check-simulators` | Progress-library simulator integrity |
-| `check-plugin-typography` | Lint plugin UI for hardcoded font sizes |
-| `check-shell-typography` | Ban hardcoded px font sizes in shell |
-| `check:lighthouse-budget` | Static HTML/PWA/a11y budget guard |
-| `check:tokens` | Design-token guard |
-| `generate-themes` | Regenerate theme CSS from token source |
-| `build-plugin-meta` | Regenerate lightweight plugin/course metadata |
-| `build-problem-briefs` | Regenerate problem statements and examples |
-| `export-content-sql` | Regenerate Postgres content seed SQL |
-
----
-
-## Plugin architecture
-
-The engine never inspects algorithm state — it only steps an array of `Frame`s and asks the plugin's `View` to draw the current one.
+The engine is **completely algorithm-agnostic** — it steps an array of `Frame`s and asks the plugin's `View` to render the current one.
 
 ```
-                 ┌──────────────────────────────────────────┐
-   core/         │ types.ts   ProblemPlugin contract          │
-   (engine,      │ registry.ts  sync meta, lazy loading       │
-    contracts)   │ usePlayer.ts  prev / next / play over frames│
-                 └──────────────────────────────────────────┘
-                        ▲                         ▲
-                        │ implements              │ renders
-   plugins/<name>/ ─────┘                         │
-     index.tsx    meta + inputs + record + View   │
-     recorder.ts  algorithm → Frame[]             │
-     graphs.ts    sample inputs                   │
-     <Name>View   draws one frame ────────────────┘ via shared components/
+                ┌─────────────────────────────────┐
+  core/         │ types.ts   ProblemPlugin contract │
+  (engine,      │ registry.ts  lazy loading         │
+   contracts)   │ usePlayer.ts  step/play/reset      │
+                └─────────────────────────────────┘
+                       ▲                    ▲
+                       │ implements         │ renders
+  plugins/<name>/ ─────┘                   │
+    index.tsx    meta + inputs + record + View
+    recorder.ts  algorithm → Frame[]       │
+    <Name>View   draws one frame ──────────┘ via shared components/
 ```
 
 A plugin satisfies `ProblemPlugin<Input, State>`:
 
 | Field | Responsibility |
 |-------|----------------|
-| `meta` | id, title, difficulty, tags, **source**, summary |
+| `meta` | id · title · difficulty · tags · source · summary |
 | `inputs` | named sample inputs for the input dropdown |
-| `record` | run the algorithm once, emitting one `Frame` per move |
-| `View` | render a single frame's state (reuses `components/` and `_shared/vizKit`) |
-| `verdict` | optional — derive pass/fail from the final frames |
-| `code` / `quiz` / `tabs` | optional — Code Studio and Learn-mode panels via `wireTeachingStack` |
+| `record` | run the algorithm, `emit` one `Frame` per move |
+| `View` | render a single frame's state (uses `components/` and `_shared/vizKit`) |
+| `verdict` | optional — derive pass/fail from final frames |
+| `code` / `quiz` / `codePieces` | optional — Code Studio and Learn-mode panels |
 
-### A `Frame` is one move
+### Add a new plugin
 
-```ts
-interface Move  { type; note; caption; team?; tone? }   // generic, shell renders it
-interface Frame { move: Move; state: S }                // state is plugin-specific
+```bash
+# Scaffold a native plugin
+npm run new-problem -- two-sum "Two Sum"
+# → creates frontend/src/plugins/two-sum/{index.tsx,recorder.ts,cases.ts,practice.ts}
+
+# Then register it:
+# 1. Append to curatedPlugins in frontend/src/plugins/index.ts
+# 2. Add { id, kind, pluginId } in frontend/src/content/courses.ts
+# 3. npm run build-plugin-meta
+
+# Or scaffold a prep simulator
+npm run scaffold-prep-sim -- lru-cache
 ```
 
-`record()` is the heart: your algorithm with `emit(...)` calls where state changes, instead of a bare `return`. See [`binary-search/index.tsx`](frontend/src/plugins/binary-search/index.tsx) — the search is line-for-line the reference solution, snapshotting `(lo, mid, hi)` on every move.
-
-Two generated import paths produce the reference libraries:
-
-- **`makeImportedPlugin`** (`imported/factory.tsx`) — progress library via `scripts/import-problems.mjs` → `manifest.ts`
-- **`makePrepPlugin`** (`imported/prepFactory.tsx`) — prep library via `scripts/import-prep.mjs` → `prepManifest.ts`
-
-Full authoring guide: [`frontend/src/plugins/README.md`](frontend/src/plugins/README.md) · worked example: [`frontend/src/plugins/EXAMPLE.md`](frontend/src/plugins/EXAMPLE.md).
+See [Plugin Authoring](frontend/src/plugins/README.md) · [Worked Example](frontend/src/plugins/EXAMPLE.md) · [Frontend Architecture → Plugin System](docs/ARCHITECTURE-FRONTEND.md#plugin-system).
 
 ---
 
-## Add a new problem plugin
+## Scripts Reference
 
-1. `mkdir frontend/src/plugins/<name>/`
-2. Write `recorder.ts` — port the algorithm, `emit` a frame per move.
-3. Write `<Name>View.tsx` — render `frame.state` using `components/` or `_shared/vizKit`.
-4. Write `index.tsx` — `definePlugin({ meta, inputs, record, View, verdict })`.
-5. Register in [`frontend/src/plugins/index.ts`](frontend/src/plugins/index.ts) and [`frontend/src/content/courses.ts`](frontend/src/content/courses.ts).
+Run from `frontend/` (or via `make` for common targets):
 
-No shell changes — sidebar, player, move log, input picker, and verdict badge wire up automatically.
+### Development
 
-Or scaffold: `npm run new-problem -- <slug> "<Title>"`.
+| Script | Purpose |
+|--------|---------|
+| `dev` | Vite dev server → `http://localhost:4321` |
+| `build` | Typecheck + production bundle |
+| `preview` | Preview production build |
+| `typecheck` | `tsc --noEmit` |
+| `test` | Vitest + orphan plugin check |
+
+### Quality Checks
+
+| Script | Purpose |
+|--------|---------|
+| `check:all` | All guards: boundaries · circular · orphans · typography · tokens · quiz labels · simulators · lighthouse · plugin meta |
+| `check:quiz-labels` | Quiz choice format + integrity label tests |
+| `check-plugin-typography` | Lint plugin UI for hardcoded font sizes |
+| `check-shell-typography` | Ban hardcoded px font sizes in shell |
+| `check:tokens` | Design-token guard |
+| `check:lighthouse-budget` | Static HTML · PWA · a11y budget guard |
+| `check-simulators` | Progress-library simulator integrity |
+| `check-prep-sim-coverage` | Fail if any prep id lacks a simulator |
+| `check-mobile-decks` | Validate mobile deck coverage |
+
+### Content Pipeline
+
+| Script | Purpose |
+|--------|---------|
+| `import-prep` | Regenerate `prepManifest.ts` (271 prep problems) |
+| `import-problems` | Regenerate progress `manifest.ts` (91 problems) |
+| `build-plugin-meta` | Regenerate lightweight plugin + course metadata |
+| `build-problem-briefs` | Regenerate problem statements and examples |
+| `export-content-sql` | Regenerate Postgres content seed SQL |
+| `generate-themes` | Regenerate theme CSS from token source |
+
+### Authoring / Scaffolding
+
+| Script | Purpose |
+|--------|---------|
+| `new-problem -- <slug> "<Title>"` | Scaffold a native plugin |
+| `new-effect -- <slug>` | Scaffold a canvas effect plugin |
+| `scaffold-prep-sim -- <slug>` | Stub a new prep simulator |
+| `draft-quiz-from-frames -- <id>` | Draft quiz choices from recorder captions |
 
 ---
 
-## Folder map
+## Folder Map
 
 ```
+algo-moves/
+├── Makefile                     wraps frontend + backend + db targets
+├── docker-compose.yml           local full-stack
+├── CHANGELOG.md
 ├── ATTRIBUTIONS.md              LeetCode / HackerRank / OSS notices
-├── Makefile                     wraps frontend + backend targets
-├── backend/                     Go realtime game server (stdlib-only WebSocket)
-│   ├── cmd/gameserver/          entrypoint (flags, http.Server)
-│   └── internal/{ws,hub,server} RFC 6455 framing · room relay · HTTP routes
-└── frontend/                    React + Vite SPA
-    ├── index.html
-    ├── package.json · tsconfig*.json · vite.config.ts
-    └── src/
-        ├── main.tsx             app entry
-        ├── App.tsx              shell router: home / workspace / mobile / vim / games
-        ├── core/                plugin-agnostic engine
-        │   ├── types.ts         ProblemPlugin / Frame / Move contracts
-        │   ├── registry.ts      sync meta index + async per-group loadPlugin
-        │   └── usePlayer.ts     step / play / pause / reset
-        ├── shell/               home, workspace canvas, mobile deck, vim dojo, games arcade, docks
-        │   └── games/           two-player arcade: net (WebSocket room hook), lobby, games/<id>/
-        ├── design/              token system (see design/README.md)
-        ├── components/          reusable UI (GraphBoard, QueueTape, MoveLog, …)
-        ├── content/             course catalog + merge with imported problems
-        ├── plugins/
-        │   ├── index.ts         plugin manifest
-        │   ├── binary-search/   curated native plugin
-        │   ├── _shared/         vizKit, pluginKit, practice factories
-        │   └── imported/        generated reference libraries
-        │       ├── factory.tsx  makeImportedPlugin → manifest.ts
-        │       ├── prepFactory.tsx  makePrepPlugin → prepManifest.ts
-        │       ├── prepScene.tsx    Scene fallback view
-        │       └── {simulators,prepSimulators}/problems/
-        └── styles/
-            └── theme.css        tokens + light/dark mode
+│
+├── frontend/                    React + Vite SPA
+│   ├── index.html
+│   ├── package.json · vite.config.ts · tsconfig*.json
+│   ├── scripts/                 25+ build · check · import scripts
+│   └── src/
+│       ├── main.tsx             app entry
+│       ├── App.tsx              route switch (useWorkspace().route)
+│       ├── core/                ProblemPlugin contract · usePlayer · registry
+│       ├── design/              token system (tokens.ts → theme.css)
+│       ├── lib/                 session · quiz · canvas · utils
+│       ├── platform/api/        typed REST clients for all backend domains
+│       ├── content/             course catalog + _generated/problemBriefs.ts
+│       ├── components/          GraphBoard · CodeMirror · puzzle · ui
+│       ├── store/               Zustand slices (workspace · replay · canvas · games · …)
+│       ├── effects/             canvas animation effect plugins
+│       ├── hooks/               app-wide React hooks
+│       ├── plugins/
+│       │   ├── index.ts         plugin manifest
+│       │   ├── _shared/         vizKit · pluginKit · recorders
+│       │   ├── _generated/      ⚠️ pluginMeta.ts · courses.ts (generated)
+│       │   ├── binary-search/   ) 18 curated native plugins
+│       │   └── imported/        ) generated reference libraries
+│       │       ├── manifest.ts          ⚠️ 91 progress problems (generated)
+│       │       ├── prepManifest.ts      ⚠️ 271 prep problems (generated)
+│       │       ├── simulators/          hand-built progress simulators
+│       │       └── prepSimulators/      bespoke prep step-simulators
+│       ├── shell/               all routes + app chrome
+│       │   ├── home/            course catalog · landing
+│       │   ├── workspace/       algorithm workspace mode router
+│       │   ├── study/           Learn Studio · Play · Code Studio
+│       │   ├── canvas/          React Flow workspace
+│       │   ├── collab/          Yjs + relay collaboration transport
+│       │   ├── interview/       interview facilitation UI
+│       │   ├── panels/          shared panel bodies
+│       │   ├── realtime/        WebSocket room transport
+│       │   ├── mobile/          swipe deck (animate → quiz → rebuild)
+│       │   ├── vim/             Vim Dojo maze puzzles
+│       │   ├── dojo/            12 algo pattern practice modules
+│       │   ├── games/           multiplayer arcade (6 games)
+│       │   ├── plans/           study prep plans
+│       │   ├── resumes/         resume workspace + OpenAI
+│       │   └── profile/         user profile
+│       └── styles/
+│           └── theme.css        CSS custom properties · light + dark
+│
+├── backend/                     Go realtime game server + REST API
+│   ├── go.work · go.mod         Go 1.25 workspace (3 modules)
+│   ├── Dockerfile · railway.toml
+│   ├── cmd/gameserver/          entrypoint
+│   ├── internal/                auth · profile · games · interview · canvas · prep · resume · database · transport · config
+│   ├── realtime/                hub (room engine) · ws (RFC 6455 framing)
+│   └── shared/                  crypto · httputil · config helpers
+│
+├── db/                          PostgreSQL schema
+│   ├── migrations/              001–016 canonical migration files
+│   ├── content_seed.sql         ⚠️ generated learning catalog seed
+│   └── seed.sql                 achievement seed
+│
+├── services/
+│   └── hocuspocus/              Yjs CRDT collaborative canvas service
+│       └── package.json         @hocuspocus/server 3.4 · pg 8
+│
+├── docs/                        all documentation
+│   ├── ARCHITECTURE-FRONTEND.md ← frontend deep dive (new)
+│   ├── ARCHITECTURE-BACKEND.md  ← backend deep dive (new)
+│   ├── architecture.md          combined overview
+│   ├── quiz-and-code-studio.md
+│   ├── visual-qa-checklist.md
+│   ├── backlog.md
+│   └── roadmap/                 01–09 execution waves
+│
+└── scripts/                     migrate-db.sh · railway-deploy.sh
 ```
 
 ---
@@ -348,15 +435,21 @@ Or scaffold: `npm run new-problem -- <slug> "<Title>"`.
 
 | Guide | Description |
 |-------|-------------|
-| [**Plugin authoring**](frontend/src/plugins/README.md) | `ProblemPlugin` contract, vizKit, teaching stack |
-| [**Worked example**](frontend/src/plugins/EXAMPLE.md) | Native + imported plugin end-to-end |
-| [**Quiz & Code Studio**](docs/quiz-and-code-studio.md) | Choice labels, shuffle/restart, syntax highlighting, reassemble |
-| [**Design tokens**](frontend/src/design/README.md) | Typography and layout token hierarchy |
-| [**Architecture**](docs/architecture.md) | Shell, plugins, canvas, and content pipeline |
-| [**Visual QA checklist**](docs/visual-qa-checklist.md) | Release checklist for density, themes, mobile, and presentation |
+| [**Frontend Architecture**](docs/ARCHITECTURE-FRONTEND.md) | Layer graph · route map · plugin system · state management · design tokens · generated artifacts |
+| [**Backend Architecture**](docs/ARCHITECTURE-BACKEND.md) | Go workspace · WebSocket protocol · room lifecycle · domain packages · database schema · deployment |
+| [**Architecture Overview**](docs/architecture.md) | Combined session model · Postgres stores · shell/canvas/plugin/games boundaries |
+| [**Plugin Authoring**](frontend/src/plugins/README.md) | `ProblemPlugin` contract · vizKit · teaching stack · quality gates |
+| [**Plugin Example**](frontend/src/plugins/EXAMPLE.md) | Native + imported plugin end-to-end walkthrough |
+| [**Quiz & Code Studio**](docs/quiz-and-code-studio.md) | Choice label format · shuffle/restart · Code Studio phases |
+| [**Design Tokens**](frontend/src/design/README.md) | Typography and layout token hierarchy · three token layers |
+| [**Database / Migrations**](db/README.md) | 16 migrations · Railway Postgres setup · dual canvas path |
+| [**Games Arcade**](frontend/src/shell/games/README.md) | Multiplayer game layout · game contract · adding a game |
+| [**Visual QA Checklist**](docs/visual-qa-checklist.md) | Release checklist for density, themes, mobile, presentation |
 | [**Backlog**](docs/backlog.md) | Future ideas — not yet built |
 | [**Attributions**](ATTRIBUTIONS.md) | LeetCode, HackerRank, and third-party notices |
 
+---
+
 ## License
 
-Copyright (c) 2026 Ahmed Samir · [GNU Affero General Public License v3.0](LICENSE)
+Copyright © 2026 Ahmed Samir · [GNU Affero General Public License v3.0](LICENSE)

@@ -1,7 +1,10 @@
 # Architecture
 
-Three layers in the frontend SPA, plus Go services for realtime rooms, optional
-Postgres persistence, and collaborative documents.
+> **Detailed architecture docs:**
+> - [Frontend Architecture](ARCHITECTURE-FRONTEND.md) — layer graph · route map · plugin system · state management · data flow · design tokens · generated artifacts · quality guardrails
+> - [Backend Architecture](ARCHITECTURE-BACKEND.md) — Go workspace · module graph · HTTP surface · WebSocket protocol · room lifecycle · domain packages · database schema · deployment
+
+Three layers in the frontend SPA, plus Go services for realtime rooms, optional Postgres persistence, and collaborative documents.
 
 ```mermaid
 flowchart TB

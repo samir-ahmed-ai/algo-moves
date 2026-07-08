@@ -1,9 +1,8 @@
 # Algo Moves Game Server
 
-The backend is a lean Go service for realtime arcade rooms and optional durable
-arcade data. It pairs players into rooms, relays game-owned JSON, and exposes
-REST APIs for profiles, leaderboards, match history, content, canvases, interview
-sessions, and prep plans when Postgres is configured.
+> **Deep-dive diagrams:** [Backend Architecture](../docs/ARCHITECTURE-BACKEND.md) — Go workspace · WebSocket protocol · room lifecycle · domain packages · database schema · deployment diagrams.
+
+The backend is a lean Go service for realtime arcade rooms and optional durable arcade data. It pairs players into rooms, relays game-owned JSON, and exposes REST APIs for profiles, leaderboards, match history, content, canvases, interview sessions, and prep plans when Postgres is configured.
 
 ## Operating model
 
