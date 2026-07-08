@@ -4,8 +4,8 @@ import { linesWithoutTrailingBlanks, normLine } from './codeDiff';
 export function strictRecallDraft(reference: string, draft: string, resetTo = ''): string {
   if (draft === resetTo) return draft;
 
-  const refLines = linesWithoutTrailingBlanks(reference).map(normLine);
-  const draftLines = linesWithoutTrailingBlanks(draft).map(normLine);
+  const refLines = linesWithoutTrailingBlanks(reference).map((l) => normLine(l));
+  const draftLines = linesWithoutTrailingBlanks(draft).map((l) => normLine(l));
 
   if (draftLines.length > refLines.length) return resetTo;
 

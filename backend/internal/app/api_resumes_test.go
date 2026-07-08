@@ -11,6 +11,8 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"algomoves/gameserver/internal/config"
 	"time"
 
 	"algomoves/gameserver/internal/resume"
@@ -58,7 +60,7 @@ func TestProfileIntegrationsFlow(t *testing.T) {
 	setTestSecretsKey(t)
 
 	ctx := context.Background()
-	svc, err := Open(ctx)
+	svc, err := Open(ctx, config.Load())
 	if err != nil {
 		t.Fatalf("open: %v", err)
 	}
@@ -120,7 +122,7 @@ func TestArcadeResumeFlow(t *testing.T) {
 	setTestSecretsKey(t)
 
 	ctx := context.Background()
-	svc, err := Open(ctx)
+	svc, err := Open(ctx, config.Load())
 	if err != nil {
 		t.Fatalf("open: %v", err)
 	}

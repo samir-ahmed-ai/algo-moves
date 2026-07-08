@@ -3,45 +3,37 @@ package main
 import (
 	"context"
 	"flag"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 	"time"
 
-	"algomoves/gameserver/internal/app"
 	"algomoves.dev/realtime/hub"
+	"algomoves/gameserver/internal/app"
+	"algomoves/gameserver/internal/config"
 	httptransport "algomoves/gameserver/internal/transport/http"
 )
 
-// defaultMaxRooms bounds steady-state memory/goroutine growth: the /ws
-// upgrade-rate limiter only caps burst rate, not how many rooms accumulate
-// over the process lifetime. Override with MAX_ROOMS.
-const defaultMaxRooms = 5000
-
 func main() {
-	defaultAddr := ":8080"
-	if p := os.Getenv("PORT"); p != "" {
-		defaultAddr = ":" + p
-	}
-	addr := flag.String("addr", defaultAddr, "listen address, e.g. :8080")
+	// Setup structured logging
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
+
+	// Load centralized configuration
+	cfg := config.Load()
+
+	addr := flag.String("addr", ":"+cfg.Port, "listen address, e.g. :8080")
 	flag.Parse()
 
-	maxRooms := defaultMaxRooms
-	if v := os.Getenv("MAX_ROOMS"); v != "" {
-		if n, err := strconv.Atoi(v); err == nil && n > 0 {
-			maxRooms = n
-		} else {
-			log.Printf("ignoring invalid MAX_ROOMS=%q, using default %d", v, defaultMaxRooms)
-		}
-	}
-
 	ctx := context.Background()
-	api, err := app.Open(ctx)
+	
+	// Pass config to the app service
+	api, err := app.Open(ctx, cfg)
 	if err != nil {
-		log.Fatalf("app database: %v", err)
+		slog.Error("app database initialization failed", "error", err)
+		os.Exit(1)
 	}
 	if api != nil {
 		defer api.Close()
@@ -50,14 +42,15 @@ func main() {
 
 	srv := &http.Server{
 		Addr:              *addr,
-		Handler:           httptransport.Handler(hub.NewWithMaxRooms(maxRooms), api),
+		Handler:           httptransport.Handler(hub.NewWithMaxRooms(cfg.MaxRooms), api),
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 
 	go func() {
-		log.Printf("gameserver listening on %s", *addr)
+		slog.Info("gameserver listening", "addr", *addr)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("server error: %v", err)
+			slog.Error("server error", "error", err)
+			os.Exit(1)
 		}
 	}()
 
@@ -65,10 +58,10 @@ func main() {
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 	<-stop
 
-	log.Printf("gameserver shutting down")
+	slog.Info("gameserver shutting down")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Printf("shutdown error: %v", err)
+		slog.Error("shutdown error", "error", err)
 	}
 }

@@ -38,6 +38,38 @@ export function lineNumberExtensions(enabled: boolean): Extension[] {
   return enabled ? [lineNumbers(), highlightActiveLineGutter()] : [];
 }
 
+/** Block pointer/focus on the reference pane — wheel scroll on the scroller still works. */
+export const blockReferencePaneInteraction: Extension = EditorView.domEventHandlers({
+  mousedown: () => true,
+  click: () => true,
+  dblclick: () => true,
+  focus: (_e, view) => {
+    view.dom.blur();
+    return true;
+  },
+});
+
+/** Display-only extensions for the merge reference pane (no typing, selection, or keymaps). */
+export function mergeReferenceCoreExtensions(
+  langExt: Extension | null,
+  opts?: { lineNumbers?: boolean; lang?: string },
+): Extension[] {
+  const showLineNumbers = opts?.lineNumbers !== false;
+  const lang = opts?.lang?.trim() || undefined;
+  return [
+    blockReferencePaneInteraction,
+    EditorView.contentAttributes.of({ tabindex: '-1', 'aria-readonly': 'true' }),
+    ...indentExtensionsForLang(lang),
+    ...lineNumberExtensions(showLineNumbers),
+    highlightSpecialChars(),
+    foldGutter({ openText: '▾', closedText: '▸' }),
+    ...sectionFoldExtensions(lang),
+    syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+    bracketMatching(),
+    ...(langExt ? [langExt] : []),
+  ];
+}
+
 /** Core Code Studio extensions — mirrors basicSetup minus autocompletion. */
 export function coreEditorExtensions(
   langExt: Extension | null,

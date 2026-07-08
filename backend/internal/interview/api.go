@@ -1,23 +1,16 @@
 package interview
 
 import (
-	"algomoves.dev/shared/httputil"
-	"algomoves/gameserver/internal/profile"
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
 	"strings"
+
+	"algomoves.dev/shared/httputil"
+	"algomoves/gameserver/internal/profile"
 )
-
-type Handler struct {
-	repo *Repository
-	auth profile.Authenticator
-}
-
-func NewHandler(repo *Repository, auth profile.Authenticator) *Handler {
-	return &Handler{repo: repo, auth: auth}
-}
 
 // Advisory size bounds mirroring the interview-canvas reference.
 const (
@@ -38,199 +31,211 @@ func sanitizeInterviewTitle(s string) string {
 	return s
 }
 
-// handleInterviews: list the caller's sessions (GET) or create one (POST).
-func (h *Handler) HandleInterviews(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
-	if code != 0 {
-		httputil.WriteErr(w, code, msg)
-		return
-	}
-	switch r.Method {
-	case http.MethodGet:
-		list, err := h.repo.ListInterviewSessions(ctx, p.ID)
-		if err != nil {
-			httputil.WriteErr(w, http.StatusInternalServerError, "query failed")
-			return
-		}
-		httputil.WriteJSON(w, http.StatusOK, list)
-	case http.MethodPost:
-		var body struct {
-			Title string `json:"title"`
-		}
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil && !errors.Is(err, io.EOF) {
-			httputil.WriteErr(w, http.StatusBadRequest, "invalid json")
-			return
-		}
-		session, err := h.repo.CreateInterviewSession(ctx, p.ID, sanitizeInterviewTitle(body.Title))
-		if err != nil {
-			httputil.WriteErr(w, http.StatusInternalServerError, "create failed")
-			return
-		}
-		httputil.WriteJSON(w, http.StatusOK, session)
-	default:
-		httputil.WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
-	}
+type Store interface {
+	ListInterviewSessions(ctx context.Context, ownerProfileID string) ([]InterviewSummary, error)
+	CreateInterviewSession(ctx context.Context, ownerProfileID, title string) (*InterviewSession, error)
+	GetInterviewSessionByToken(ctx context.Context, token string) (*InterviewSession, error)
+	GetInterviewSession(ctx context.Context, id string) (*InterviewSession, error)
+	UpdateInterviewSession(ctx context.Context, id, ownerProfileID string, patch InterviewPatch) (*InterviewSession, bool, error)
+	EndInterviewSession(ctx context.Context, id, ownerProfileID string) (*InterviewSession, bool, error)
+	ReopenInterviewSession(ctx context.Context, id, ownerProfileID string) (*InterviewSession, bool, error)
+	RotateInterviewToken(ctx context.Context, id, ownerProfileID string) (*InterviewSession, bool, error)
 }
 
-// handleInterview: item routes under /api/interviews/.
-//
-//	token/{token}          GET   public sanitized read (guest join)
-//	{id}                   GET   owner full read
-//	{id}                   PATCH owner partial update
-//	{id}/end|reopen|rotate-token  POST owner actions
-func (h *Handler) HandleInterview(w http.ResponseWriter, r *http.Request) {
+type Handler struct {
+	repo Store
+	auth profile.Authenticator
+}
+
+func NewHandler(repo Store, auth profile.Authenticator) *Handler {
+	return &Handler{repo: repo, auth: auth}
+}
+
+func (h *Handler) Register(mux *http.ServeMux) {
+	mux.HandleFunc("GET /api/interviews", h.HandleListInterviews)
+	mux.HandleFunc("POST /api/interviews", h.HandleCreateInterview)
+	mux.HandleFunc("GET /api/interviews/token/{token}", h.HandleGetInterviewByToken)
+	mux.HandleFunc("GET /api/interviews/{id}", h.HandleGetInterview)
+	mux.HandleFunc("PATCH /api/interviews/{id}", h.HandleUpdateInterview)
+	mux.HandleFunc("POST /api/interviews/{id}/end", h.HandleEndInterview)
+	mux.HandleFunc("POST /api/interviews/{id}/reopen", h.HandleReopenInterview)
+	mux.HandleFunc("POST /api/interviews/{id}/rotate-token", h.HandleRotateToken)
+}
+
+func (h *Handler) HandleListInterviews(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	path := strings.TrimPrefix(r.URL.Path, "/api/interviews/")
-	if path == "" {
-		httputil.WriteErr(w, http.StatusNotFound, "not found")
-		return
-	}
-	parts := strings.Split(path, "/")
-
-	// Public guest read by token — no auth.
-	if parts[0] == "token" {
-		if len(parts) != 2 || r.Method != http.MethodGet {
-			httputil.WriteErr(w, http.StatusNotFound, "not found")
-			return
-		}
-		session, err := h.repo.GetInterviewSessionByToken(ctx, parts[1])
-		if err != nil {
-			httputil.WriteErr(w, http.StatusInternalServerError, "query failed")
-			return
-		}
-		// Disabled / ended / missing links are indistinguishable to guests.
-		if session == nil || !session.GuestLinkEnabled || session.Status != "active" {
-			httputil.WriteErr(w, http.StatusNotFound, "not found")
-			return
-		}
-		httputil.WriteJSON(w, http.StatusOK, map[string]any{
-			"id":           session.ID,
-			"title":        session.Title,
-			"status":       session.Status,
-			"canvasLocked": session.CanvasLocked,
-			"roomCode":     session.RoomCode,
-			"canvas":       session.Canvas,
-		})
-		return
-	}
-
-	// Everything else is owner-guarded.
 	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
 	if code != 0 {
 		httputil.WriteErr(w, code, msg)
 		return
 	}
-	id := parts[0]
-
-	// Action sub-routes: {id}/end | {id}/reopen | {id}/rotate-token
-	if len(parts) == 2 {
-		if r.Method != http.MethodPost {
-			httputil.WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
-			return
-		}
-		var (
-			session *InterviewSession
-			ok      bool
-			err     error
-		)
-		switch parts[1] {
-		case "end":
-			session, ok, err = h.repo.EndInterviewSession(ctx, id, p.ID)
-		case "reopen":
-			session, ok, err = h.repo.ReopenInterviewSession(ctx, id, p.ID)
-		case "rotate-token":
-			session, ok, err = h.repo.RotateInterviewToken(ctx, id, p.ID)
-		default:
-			httputil.WriteErr(w, http.StatusNotFound, "not found")
-			return
-		}
-		if err != nil {
-			httputil.WriteErr(w, http.StatusInternalServerError, "update failed")
-			return
-		}
-		if !ok {
-			httputil.WriteErr(w, http.StatusNotFound, "not found")
-			return
-		}
-		httputil.WriteJSON(w, http.StatusOK, session)
+	list, err := h.repo.ListInterviewSessions(ctx, p.ID)
+	if err != nil {
+		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "query failed")
 		return
 	}
-	if len(parts) != 1 {
+	httputil.WriteJSON(w, http.StatusOK, list)
+}
+
+func (h *Handler) HandleCreateInterview(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
+	if code != 0 {
+		httputil.WriteErr(w, code, msg)
+		return
+	}
+	var body struct {
+		Title string `json:"title"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil && !errors.Is(err, io.EOF) {
+		httputil.WriteErr(w, http.StatusBadRequest, "invalid json")
+		return
+	}
+	session, err := h.repo.CreateInterviewSession(ctx, p.ID, sanitizeInterviewTitle(body.Title))
+	if err != nil {
+		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "create failed")
+		return
+	}
+	httputil.WriteJSON(w, http.StatusOK, session)
+}
+
+func (h *Handler) HandleGetInterviewByToken(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	token := r.PathValue("token")
+	session, err := h.repo.GetInterviewSessionByToken(ctx, token)
+	if err != nil {
+		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "query failed")
+		return
+	}
+	// Disabled / ended / missing links are indistinguishable to guests.
+	if session == nil || !session.GuestLinkEnabled || session.Status != "active" {
 		httputil.WriteErr(w, http.StatusNotFound, "not found")
 		return
 	}
+	httputil.WriteJSON(w, http.StatusOK, map[string]any{
+		"id":           session.ID,
+		"title":        session.Title,
+		"status":       session.Status,
+		"canvasLocked": session.CanvasLocked,
+		"roomCode":     session.RoomCode,
+		"canvas":       session.Canvas,
+	})
+}
 
-	switch r.Method {
-	case http.MethodGet:
-		session, err := h.repo.GetInterviewSession(ctx, id)
-		if err != nil {
-			httputil.WriteErr(w, http.StatusInternalServerError, "query failed")
-			return
-		}
-		if session == nil || session.OwnerProfileID == nil || *session.OwnerProfileID != p.ID {
-			httputil.WriteErr(w, http.StatusNotFound, "not found")
-			return
-		}
-		httputil.WriteJSON(w, http.StatusOK, session)
-	case http.MethodPatch:
-		var body struct {
-			Title            *string         `json:"title"`
-			Canvas           json.RawMessage `json:"canvas"`
-			Questions        json.RawMessage `json:"questions"`
-			Notes            *string         `json:"notes"`
-			Rubric           json.RawMessage `json:"rubric"`
-			Recommendation   *string         `json:"recommendation"`
-			CanvasLocked     *bool           `json:"canvasLocked"`
-			GuestLinkEnabled *bool           `json:"guestLinkEnabled"`
-			RoomCode         *string         `json:"roomCode"`
-		}
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			httputil.WriteErr(w, http.StatusBadRequest, "invalid json")
-			return
-		}
-		if len(body.Canvas) > maxInterviewCanvas {
-			httputil.WriteErr(w, http.StatusBadRequest, "canvas too large")
-			return
-		}
-		if len(body.Questions) > maxInterviewJSON || len(body.Rubric) > maxInterviewJSON {
-			httputil.WriteErr(w, http.StatusBadRequest, "payload too large")
-			return
-		}
-		if body.Notes != nil && len(*body.Notes) > maxInterviewNotes {
-			httputil.WriteErr(w, http.StatusBadRequest, "notes too large")
-			return
-		}
-		if body.Title != nil {
-			t := sanitizeInterviewTitle(*body.Title)
-			body.Title = &t
-		}
-		patch := InterviewPatch{
-			Title:            body.Title,
-			Canvas:           body.Canvas,
-			Questions:        body.Questions,
-			Notes:            body.Notes,
-			Rubric:           body.Rubric,
-			Recommendation:   body.Recommendation,
-			CanvasLocked:     body.CanvasLocked,
-			GuestLinkEnabled: body.GuestLinkEnabled,
-			RoomCode:         body.RoomCode,
-		}
-		if patch.IsEmpty() {
-			httputil.WriteErr(w, http.StatusBadRequest, "no fields to update")
-			return
-		}
-		session, ok, err := h.repo.UpdateInterviewSession(ctx, id, p.ID, patch)
-		if err != nil {
-			httputil.WriteErr(w, http.StatusInternalServerError, "update failed")
-			return
-		}
-		if !ok {
-			httputil.WriteErr(w, http.StatusNotFound, "not found")
-			return
-		}
-		httputil.WriteJSON(w, http.StatusOK, session)
-	default:
-		httputil.WriteErr(w, http.StatusMethodNotAllowed, "method not allowed")
+func (h *Handler) HandleGetInterview(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
+	if code != 0 {
+		httputil.WriteErr(w, code, msg)
+		return
 	}
+	id := r.PathValue("id")
+	session, err := h.repo.GetInterviewSession(ctx, id)
+	if err != nil {
+		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "query failed")
+		return
+	}
+	if session == nil || session.OwnerProfileID == nil || *session.OwnerProfileID != p.ID {
+		httputil.WriteErr(w, http.StatusNotFound, "not found")
+		return
+	}
+	httputil.WriteJSON(w, http.StatusOK, session)
+}
+
+func (h *Handler) HandleUpdateInterview(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
+	if code != 0 {
+		httputil.WriteErr(w, code, msg)
+		return
+	}
+	id := r.PathValue("id")
+	var body struct {
+		Title            *string         `json:"title"`
+		Canvas           json.RawMessage `json:"canvas"`
+		Questions        json.RawMessage `json:"questions"`
+		Notes            *string         `json:"notes"`
+		Rubric           json.RawMessage `json:"rubric"`
+		Recommendation   *string         `json:"recommendation"`
+		CanvasLocked     *bool           `json:"canvasLocked"`
+		GuestLinkEnabled *bool           `json:"guestLinkEnabled"`
+		RoomCode         *string         `json:"roomCode"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		httputil.WriteErr(w, http.StatusBadRequest, "invalid json")
+		return
+	}
+	if len(body.Canvas) > maxInterviewCanvas {
+		httputil.WriteErr(w, http.StatusBadRequest, "canvas too large")
+		return
+	}
+	if len(body.Questions) > maxInterviewJSON || len(body.Rubric) > maxInterviewJSON {
+		httputil.WriteErr(w, http.StatusBadRequest, "payload too large")
+		return
+	}
+	if body.Notes != nil && len(*body.Notes) > maxInterviewNotes {
+		httputil.WriteErr(w, http.StatusBadRequest, "notes too large")
+		return
+	}
+	if body.Title != nil {
+		t := sanitizeInterviewTitle(*body.Title)
+		body.Title = &t
+	}
+	patch := InterviewPatch{
+		Title:            body.Title,
+		Canvas:           body.Canvas,
+		Questions:        body.Questions,
+		Notes:            body.Notes,
+		Rubric:           body.Rubric,
+		Recommendation:   body.Recommendation,
+		CanvasLocked:     body.CanvasLocked,
+		GuestLinkEnabled: body.GuestLinkEnabled,
+		RoomCode:         body.RoomCode,
+	}
+	if patch.IsEmpty() {
+		httputil.WriteErr(w, http.StatusBadRequest, "no fields to update")
+		return
+	}
+	session, ok, err := h.repo.UpdateInterviewSession(ctx, id, p.ID, patch)
+	if err != nil {
+		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "update failed")
+		return
+	}
+	if !ok {
+		httputil.WriteErr(w, http.StatusNotFound, "not found")
+		return
+	}
+	httputil.WriteJSON(w, http.StatusOK, session)
+}
+
+func (h *Handler) handleAction(w http.ResponseWriter, r *http.Request, actionFunc func(ctx context.Context, id, ownerProfileID string) (*InterviewSession, bool, error)) {
+	ctx := r.Context()
+	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
+	if code != 0 {
+		httputil.WriteErr(w, code, msg)
+		return
+	}
+	id := r.PathValue("id")
+	session, ok, err := actionFunc(ctx, id, p.ID)
+	if err != nil {
+		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "update failed")
+		return
+	}
+	if !ok {
+		httputil.WriteErr(w, http.StatusNotFound, "not found")
+		return
+	}
+	httputil.WriteJSON(w, http.StatusOK, session)
+}
+
+func (h *Handler) HandleEndInterview(w http.ResponseWriter, r *http.Request) {
+	h.handleAction(w, r, h.repo.EndInterviewSession)
+}
+
+func (h *Handler) HandleReopenInterview(w http.ResponseWriter, r *http.Request) {
+	h.handleAction(w, r, h.repo.ReopenInterviewSession)
+}
+
+func (h *Handler) HandleRotateToken(w http.ResponseWriter, r *http.Request) {
+	h.handleAction(w, r, h.repo.RotateInterviewToken)
 }

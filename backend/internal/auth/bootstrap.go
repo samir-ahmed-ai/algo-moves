@@ -3,7 +3,7 @@ package auth
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -23,7 +23,7 @@ func BootstrapPlatformAdmin(ctx context.Context, profiles *profile.Repository) {
 		return
 	}
 	if !ValidEmail(email) {
-		log.Printf("app: admin bootstrap warning: invalid PLATFORM_ADMIN_EMAIL")
+		slog.Warn("app: admin bootstrap warning: invalid PLATFORM_ADMIN_EMAIL")
 		return
 	}
 
@@ -31,23 +31,23 @@ func BootstrapPlatformAdmin(ctx context.Context, profiles *profile.Repository) {
 	if password == "" {
 		ok, err := profiles.SetAdmin(ctx, email)
 		if err != nil {
-			log.Printf("app: admin bootstrap warning: %v", err)
+			slog.Warn("app: admin bootstrap warning", "error", err)
 		} else if ok {
-			log.Printf("app: admin granted for %s", email)
+			slog.Info("app: admin granted for", "email", email)
 		} else {
-			log.Printf("app: admin email configured (%s) — waiting for account signup", email)
+			slog.Info("app: admin email configured — waiting for account signup", "email", email)
 		}
 		return
 	}
 
 	if len(password) < 8 {
-		log.Printf("app: admin bootstrap warning: PLATFORM_ADMIN_PASSWORD must be at least 8 characters")
+		slog.Warn("app: admin bootstrap warning: PLATFORM_ADMIN_PASSWORD must be at least 8 characters")
 		return
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcryptCost)
 	if err != nil {
-		log.Printf("app: admin bootstrap warning: could not hash password: %v", err)
+		slog.Warn("app: admin bootstrap warning: could not hash password", "error", err)
 		return
 	}
 
@@ -58,31 +58,31 @@ func BootstrapPlatformAdmin(ctx context.Context, profiles *profile.Repository) {
 
 	p, _, err := profiles.ProfileByEmail(ctx, email)
 	if err != nil {
-		log.Printf("app: admin bootstrap warning: %v", err)
+		slog.Warn("app: admin bootstrap warning", "error", err)
 		return
 	}
 
 	if p == nil {
 		if _, err := profiles.CreateEmailUser(ctx, email, string(hash), displayName); err != nil {
-			log.Printf("app: admin bootstrap warning: could not create admin account: %v", err)
+			slog.Warn("app: admin bootstrap warning: could not create admin account", "error", err)
 			return
 		}
-		log.Printf("app: platform admin account created for %s", email)
+		slog.Info("app: platform admin account created for", "email", email)
 	} else if err := profiles.UpdatePasswordHash(ctx, email, string(hash)); err != nil {
-		log.Printf("app: admin bootstrap warning: could not update admin password: %v", err)
+		slog.Warn("app: admin bootstrap warning: could not update admin password", "error", err)
 		return
 	} else {
-		log.Printf("app: platform admin password synced for %s", email)
+		slog.Info("app: platform admin password synced for", "email", email)
 	}
 
 	ok, err := profiles.SetAdmin(ctx, email)
 	if err != nil {
-		log.Printf("app: admin bootstrap warning: %v", err)
+		slog.Warn("app: admin bootstrap warning", "error", err)
 		return
 	}
 	if !ok {
-		log.Printf("app: admin bootstrap warning: %s", fmt.Sprintf("admin flag not set for %s", email))
+		slog.Warn("app: admin bootstrap warning", "error", fmt.Sprintf("admin flag not set for %s", email))
 		return
 	}
-	log.Printf("app: admin granted for %s", email)
+	slog.Info("app: admin granted for", "email", email)
 }

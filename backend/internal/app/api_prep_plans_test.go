@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"algomoves/gameserver/internal/config"
 )
 
 // Integration test for interview prep plans — skipped unless DATABASE_URL is set.
@@ -19,7 +21,7 @@ func TestArcadePrepPlanFlow(t *testing.T) {
 	t.Setenv("RUN_MIGRATIONS", "true")
 
 	ctx := context.Background()
-	svc, err := Open(ctx)
+	svc, err := Open(ctx, config.Load())
 	if err != nil {
 		t.Fatalf("open: %v", err)
 	}

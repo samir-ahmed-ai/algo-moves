@@ -8,8 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"algomoves/gameserver/internal/app"
 	"algomoves.dev/realtime/hub"
+	"algomoves/gameserver/internal/app"
+	"algomoves/gameserver/internal/config"
 )
 
 // Integration test — skipped unless DATABASE_URL is set.
@@ -24,7 +25,7 @@ func TestGuestSessionCookieCrossSite(t *testing.T) {
 	t.Setenv("COOKIE_CROSS_SITE", "")
 
 	ctx := context.Background()
-	app, err := app.Open(ctx)
+	app, err := app.Open(ctx, config.Load())
 	if err != nil {
 		t.Fatalf("open: %v", err)
 	}

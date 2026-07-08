@@ -36,7 +36,7 @@ export interface EditorPrefs {
 
 const KEY = STORAGE_KEYS.EDITOR_PREFS;
 const DEFAULTS: Readonly<EditorPrefs> = {
-  vim: false,
+  vim: true,
   wrap: false,
   splitPct: 50,
   recallCompact: true,

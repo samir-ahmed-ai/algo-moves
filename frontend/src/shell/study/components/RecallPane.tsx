@@ -53,6 +53,7 @@ export function RecallPane({ className, showTitle }: { className?: string; showT
     >
       <RecallToolbar
         className="border-b border-edge px-2"
+        center
         {...(showTitle !== undefined ? { showTitle } : {})}
         blind={blind}
         setBlind={setBlind}

@@ -3,12 +3,12 @@ package database
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"os"
 	"strings"
 
-	"algomoves/gameserver/db"
 	"algomoves.dev/shared/config"
+	"algomoves/gameserver/db"
 	"algomoves/gameserver/internal/database/postgres"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -55,16 +55,16 @@ func Open(ctx context.Context) (*DB, error) {
 			pool.Close()
 			return nil, err
 		}
-		log.Printf("database: migrations and achievement seed applied")
+		slog.Info("database: migrations and achievement seed applied")
 	}
 	if config.Enabled("RUN_CONTENT_SEED") {
 		if err := SeedContent(ctx, pool); err != nil {
 			pool.Close()
 			return nil, err
 		}
-		log.Printf("database: learning content seed applied")
+		slog.Info("database: learning content seed applied")
 	}
-	log.Printf("database: connected to postgres")
+	slog.Info("database: connected to postgres")
 	return NewDB(pool), nil
 }
 

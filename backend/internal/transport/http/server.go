@@ -5,15 +5,15 @@ package server
 
 import (
 	"encoding/json"
-	"log"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
-	"algomoves/gameserver/internal/app"
 	"algomoves.dev/realtime/hub"
 	"algomoves.dev/realtime/ws"
+	"algomoves/gameserver/internal/app"
 )
 
 // Handler returns the HTTP handler serving /ws, /new, /healthz, /api/* and /.
@@ -62,12 +62,12 @@ func wsHandler(h *hub.Hub, allowed []string) http.HandlerFunc {
 
 		conn, err := ws.Upgrade(w, r)
 		if err != nil {
-			log.Printf("upgrade failed from %s: %v", r.RemoteAddr, err)
+			slog.Warn("upgrade failed", "remoteAddr", r.RemoteAddr, "error", err)
 			return
 		}
-		log.Printf("room %s: %s connected from %s", code, name, conn.RemoteAddr())
+		slog.Info("room connected", "room", code, "name", name, "remoteAddr", conn.RemoteAddr())
 		hub.Serve(h, conn, code, name, pid, opts)
-		log.Printf("room %s: %s disconnected", code, name)
+		slog.Info("room disconnected", "room", code, "name", name)
 	}
 }
 

@@ -10,6 +10,7 @@ import {
   buildRecallFontTheme,
   collapseMergeSections,
   coreEditorExtensions,
+  mergeReferenceCoreExtensions,
   expandMergeSections,
   formatMergeViews,
   languageExtension,
@@ -19,6 +20,7 @@ import {
   vimExtensions,
   wrapExtensions,
   createRecallMergeRefreshScheduler,
+  preserveCaretViewport,
   remeasureMergeViews,
   refreshRecallMergeView,
   syncDraftToEditorView,
@@ -182,8 +184,10 @@ export function SplitCodeEditor({
     // Re-sync spacers when line count shifts — stale spacers look like extra-tall blank lines.
     if (lenChanged) {
       requestAnimationFrame(() => {
+        const settleCaret = preserveCaretViewport(view);
         remeasureMergeViews(view);
         refreshRecallMergeView(view, mergeOptionsRef.current);
+        settleCaret();
       });
     }
   };
@@ -229,7 +233,7 @@ export function SplitCodeEditor({
         doc: reference,
         extensions: [
           readOnlyCompA.current.of(mergeReferenceReadOnly),
-          ...coreEditorExtensions(langExt, coreOptions),
+          ...mergeReferenceCoreExtensions(langExt, coreOptions),
           lineNumCompA.current.of(lineNumberExtensions(showLineNumbersRef.current)),
           mergeEditorChrome,
           themeCompA.current.of(buildEditorTheme(isDark)),

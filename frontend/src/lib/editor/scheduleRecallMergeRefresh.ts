@@ -2,6 +2,7 @@ import type { MergeView } from '@codemirror/merge';
 import type { RecallMergeViewOptions } from '@/lib/code/recallMergeDiff';
 import { refreshRecallMergeView } from '@/lib/editor/refreshRecallMergeView';
 import {
+  preserveCaretViewport,
   remeasureMergeViews,
   remeasureMergeViewsAfterPaint,
 } from '@/lib/editor/syncDraftToEditorView';
@@ -31,10 +32,14 @@ export function createRecallMergeRefreshScheduler(
     if (disposed) return;
     const view = getView();
     if (!view) return;
-    if ('a' in view && 'b' in view) remeasureMergeViews(view);
+    const isMerge = 'a' in view && 'b' in view;
+    // Anchor the caret before the diff/spacer layout shifts, then restore after it settles.
+    const settleCaret = isMerge ? preserveCaretViewport(view) : () => {};
+    if (isMerge) remeasureMergeViews(view);
     refreshRecallMergeView(view, getOptions());
     onAfterRefresh?.(view);
-    if ('a' in view && 'b' in view) remeasureMergeViewsAfterPaint(view);
+    if (isMerge) remeasureMergeViewsAfterPaint(view);
+    settleCaret();
   };
 
   return {

@@ -1899,10 +1899,31 @@ circle {
 .cm-merge-compact .cm-mergeView .cm-gutters {
   padding-left: 2px;
 }
-/* Reference pane is read-only — no text cursor or drag-select. */
-.cm-merge-diff-host .cm-mergeViewEditor:first-child .cm-content {
+/* Reference pane is read-only — no cursor, selection, or click-to-focus. */
+.cm-merge-diff-host .cm-mergeViewEditor:first-child {
+  cursor: default;
+}
+.cm-merge-diff-host .cm-mergeViewEditor:first-child .cm-scroller {
+  cursor: default;
+}
+.cm-merge-diff-host .cm-mergeViewEditor:first-child .cm-content,
+.cm-merge-diff-host .cm-mergeViewEditor:first-child .cm-gutters,
+.cm-merge-diff-host .cm-mergeViewEditor:first-child .cm-line {
   cursor: default;
   user-select: none;
+  -webkit-user-select: none;
+}
+.cm-merge-diff-host .cm-mergeViewEditor:first-child .cm-cursor,
+.cm-merge-diff-host .cm-mergeViewEditor:first-child .cm-dropCursor {
+  display: none !important;
+}
+.cm-merge-diff-host .cm-mergeViewEditor:first-child .cm-selectionBackground,
+.cm-merge-diff-host .cm-mergeViewEditor:first-child .cm-selectionMatch {
+  background: transparent !important;
+}
+.cm-merge-diff-host .cm-mergeViewEditor:first-child .cm-foldGutter span {
+  cursor: default;
+  pointer-events: none;
 }
 
 /* Diff highlights — deletions on reference, insertions/changes on your attempt. */

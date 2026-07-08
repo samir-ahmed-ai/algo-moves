@@ -101,6 +101,7 @@ export function RecallToolbar({
   scorePct,
   className,
   trailing,
+  center,
   draftViewRef,
   formatBothRef,
   foldBothRef,
@@ -121,6 +122,8 @@ export function RecallToolbar({
   scorePct?: number;
   className?: string;
   trailing?: ReactNode;
+  /** Center the control group horizontally (standalone bar sitting on top of the editor). */
+  center?: boolean;
   draftViewRef?: MutableRefObject<EditorView | null>;
   formatBothRef?: MutableRefObject<(() => void) | null>;
   foldBothRef?: MutableRefObject<{ collapse: () => void; expand: () => void } | null>;
@@ -149,6 +152,89 @@ export function RecallToolbar({
   const diffActiveCount = activeDiffToggleCount(editorPrefs);
   const displayActive = editorPrefs.lineHeight !== 'normal' || editorPrefs.recallCompact !== false;
 
+  const titleNode = showTitle ? (
+    <>
+      <Keyboard className="h-3.5 w-3.5 shrink-0 text-accent" />
+      <span className={cn('mr-0.5 shrink-0 truncate font-medium text-ink', chromeText.xs)}>
+        Recall
+      </span>
+      <div className="recall-toolbar-divider mx-0.5 h-3.5 w-px shrink-0 bg-edge" />
+    </>
+  ) : null;
+
+  const controlsNode = (
+    <ToolbarGroup title="Recall editor controls">
+      <ToolbarGroupBtn
+        active={blind}
+        aria-label={blind ? 'Blind recall on' : 'Blind recall off'}
+        title={blind ? 'Blind recall (⌘\\)' : 'Reference mode (⌘\\)'}
+        onClick={() => setBlind((b) => !b)}
+      >
+        {blind ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+      </ToolbarGroupBtn>
+      <ToolbarGroupBtn
+        active={peek}
+        aria-label="Peek at reference"
+        title="Hold to peek at reference (Enter/Space)"
+        {...peekProps}
+      >
+        <ScanEye className="h-3 w-3" />
+      </ToolbarGroupBtn>
+      <ToolbarGroupBtn
+        active={editorPrefs.vim}
+        aria-label={editorPrefs.vim ? 'Vim mode on' : 'Vim mode off'}
+        title={
+          editorPrefs.vim ? 'Vim mode on — modal editing (⌘⌥V)' : 'Enable Vim keybindings (⌘⌥V)'
+        }
+        onClick={() => setEditorPrefs({ vim: !editorPrefs.vim })}
+      >
+        <SquareTerminal className="h-3 w-3" />
+        {!compact && <span className="font-semibold">Vim</span>}
+      </ToolbarGroupBtn>
+      <RecallToolbarMenu
+        label="Format"
+        icon={<TextQuote className="h-3 w-3" />}
+        items={formatMenuItems(menuCtx)}
+        {...(compact !== undefined ? { compact } : {})}
+      />
+
+      <RecallToolbarMenu
+        label="Display"
+        icon={<SlidersHorizontal className="h-3 w-3" />}
+        items={displayMenuItems(menuCtx)}
+        active={displayActive}
+        title={displayMenuTriggerTitle(editorPrefs)}
+        {...(compact !== undefined ? { compact } : {})}
+        panelWidth={260}
+        header={<FontSizeStepper fontSize={editorPrefs.fontSize} setEditorPrefs={setEditorPrefs} />}
+      />
+
+      <RecallToolbarMenu
+        label="Diff"
+        icon={<Highlighter className="h-3 w-3" />}
+        items={diffMenuItems(menuCtx)}
+        active={diffActiveCount > 0}
+        badge={diffActiveCount}
+        {...(compact !== undefined ? { compact } : {})}
+      />
+
+      <RecallToolbarMenu
+        label="Session"
+        icon={<Timer className="h-3 w-3" />}
+        items={sessionMenuItems(menuCtx)}
+        active={timerRunning || editorPrefs.strictRecall}
+        {...(compact !== undefined ? { compact } : {})}
+      />
+    </ToolbarGroup>
+  );
+
+  const scoreNode =
+    safeScorePct !== undefined ? (
+      <Chip tone={safeScorePct >= 80 ? 'good' : safeScorePct >= 50 ? 'accent' : 'muted'} mono>
+        {compact ? `${safeScorePct}%` : `${safeScorePct}% match`}
+      </Chip>
+    ) : null;
+
   return (
     <div
       className={cn(
@@ -157,90 +243,25 @@ export function RecallToolbar({
         className,
       )}
     >
-      {showTitle && (
+      {center ? (
         <>
-          <Keyboard className="h-3.5 w-3.5 shrink-0 text-accent" />
-          <span className={cn('mr-0.5 shrink-0 truncate font-medium text-ink', chromeText.xs)}>
-            Recall
-          </span>
-          <div className="recall-toolbar-divider mx-0.5 h-3.5 w-px shrink-0 bg-edge" />
+          {/* Balanced side rails keep the control group optically centered over the editor. */}
+          <div className="flex min-w-0 flex-1 items-center gap-1.5">{titleNode}</div>
+          <div className="flex shrink-0 items-center gap-1.5">{controlsNode}</div>
+          <div className="flex min-w-0 flex-1 items-center justify-end gap-1.5">
+            {scoreNode}
+            {trailing}
+          </div>
+        </>
+      ) : (
+        <>
+          {titleNode}
+          {controlsNode}
+          <div className="min-w-0 flex-1" />
+          {scoreNode}
+          {trailing}
         </>
       )}
-
-      <ToolbarGroup title="Recall editor controls">
-        <ToolbarGroupBtn
-          active={blind}
-          aria-label={blind ? 'Blind recall on' : 'Blind recall off'}
-          title={blind ? 'Blind recall (⌘\\)' : 'Reference mode (⌘\\)'}
-          onClick={() => setBlind((b) => !b)}
-        >
-          {blind ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-        </ToolbarGroupBtn>
-        <ToolbarGroupBtn
-          active={peek}
-          aria-label="Peek at reference"
-          title="Hold to peek at reference (Enter/Space)"
-          {...peekProps}
-        >
-          <ScanEye className="h-3 w-3" />
-        </ToolbarGroupBtn>
-        <ToolbarGroupBtn
-          active={editorPrefs.vim}
-          aria-label={editorPrefs.vim ? 'Vim mode on' : 'Vim mode off'}
-          title={
-            editorPrefs.vim ? 'Vim mode on — modal editing (⌘⌥V)' : 'Enable Vim keybindings (⌘⌥V)'
-          }
-          onClick={() => setEditorPrefs({ vim: !editorPrefs.vim })}
-        >
-          <SquareTerminal className="h-3 w-3" />
-          {!compact && <span className="font-semibold">Vim</span>}
-        </ToolbarGroupBtn>
-        <RecallToolbarMenu
-          label="Format"
-          icon={<TextQuote className="h-3 w-3" />}
-          items={formatMenuItems(menuCtx)}
-          {...(compact !== undefined ? { compact } : {})}
-        />
-
-        <RecallToolbarMenu
-          label="Display"
-          icon={<SlidersHorizontal className="h-3 w-3" />}
-          items={displayMenuItems(menuCtx)}
-          active={displayActive}
-          title={displayMenuTriggerTitle(editorPrefs)}
-          {...(compact !== undefined ? { compact } : {})}
-          panelWidth={260}
-          header={
-            <FontSizeStepper fontSize={editorPrefs.fontSize} setEditorPrefs={setEditorPrefs} />
-          }
-        />
-
-        <RecallToolbarMenu
-          label="Diff"
-          icon={<Highlighter className="h-3 w-3" />}
-          items={diffMenuItems(menuCtx)}
-          active={diffActiveCount > 0}
-          badge={diffActiveCount}
-          {...(compact !== undefined ? { compact } : {})}
-        />
-
-        <RecallToolbarMenu
-          label="Session"
-          icon={<Timer className="h-3 w-3" />}
-          items={sessionMenuItems(menuCtx)}
-          active={timerRunning || editorPrefs.strictRecall}
-          {...(compact !== undefined ? { compact } : {})}
-        />
-      </ToolbarGroup>
-
-      <div className="min-w-0 flex-1" />
-
-      {safeScorePct !== undefined && (
-        <Chip tone={safeScorePct >= 80 ? 'good' : safeScorePct >= 50 ? 'accent' : 'muted'} mono>
-          {compact ? `${safeScorePct}%` : `${safeScorePct}% match`}
-        </Chip>
-      )}
-      {trailing}
     </div>
   );
 }

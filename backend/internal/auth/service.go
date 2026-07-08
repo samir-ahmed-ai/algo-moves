@@ -45,6 +45,15 @@ func NewService(profiles *profile.Repository, databaseURL string) (*Service, err
 }
 
 // Close shuts down the session SQL connection.
+
+func (s *Service) Register(mux *http.ServeMux) {
+	mux.HandleFunc("POST /api/auth/signup", s.HandleSignup)
+	mux.HandleFunc("POST /api/auth/login", s.HandleLogin)
+	mux.HandleFunc("POST /api/auth/guest", s.HandleGuest)
+	mux.HandleFunc("POST /api/auth/logout", s.HandleLogout)
+	mux.HandleFunc("GET /api/auth/me", s.HandleMe)
+}
+
 func (s *Service) Close() {
 	if s != nil && s.sqlDB != nil {
 		s.sqlDB.Close()
@@ -112,7 +121,7 @@ func (s *Service) HandleSignup(w http.ResponseWriter, r *http.Request) {
 	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcryptCost)
 	if err != nil {
-		httputil.WriteErr(w, http.StatusInternalServerError, "could not hash password")
+		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "could not hash password")
 		return
 	}
 	sess, err := s.profiles.CreateEmailUser(r.Context(), email, string(hash), body.DisplayName)
@@ -121,13 +130,13 @@ func (s *Service) HandleSignup(w http.ResponseWriter, r *http.Request) {
 			httputil.WriteErr(w, http.StatusConflict, "email already registered")
 			return
 		}
-		httputil.WriteErr(w, http.StatusInternalServerError, "could not create account")
+		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "could not create account")
 		return
 	}
 	s.maybePromotePlatformAdmin(r.Context(), email)
 	s.refreshSessionProfile(r.Context(), sess)
 	if _, err := s.issueSession(r.Context(), sess.ProfileID); err != nil {
-		httputil.WriteErr(w, http.StatusInternalServerError, "could not create session")
+		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "could not create session")
 		return
 	}
 	httputil.WriteJSON(w, http.StatusOK, sess)
@@ -153,7 +162,7 @@ func (s *Service) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	p, hash, err := s.profiles.ProfileByEmail(r.Context(), email)
 	if err != nil {
-		httputil.WriteErr(w, http.StatusInternalServerError, "database error")
+		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "database error")
 		return
 	}
 	if p == nil {
@@ -175,7 +184,7 @@ func (s *Service) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	s.refreshSessionProfile(r.Context(), &sess)
 	if _, err := s.issueSession(r.Context(), p.ID); err != nil {
-		httputil.WriteErr(w, http.StatusInternalServerError, "could not create session")
+		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "could not create session")
 		return
 	}
 	httputil.WriteJSON(w, http.StatusOK, sess)
@@ -188,11 +197,11 @@ func (s *Service) HandleGuest(w http.ResponseWriter, r *http.Request) {
 	}
 	sess, err := s.profiles.CreateGuest(r.Context())
 	if err != nil {
-		httputil.WriteErr(w, http.StatusInternalServerError, "could not create guest profile")
+		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "could not create guest profile")
 		return
 	}
 	if _, err := s.issueSession(r.Context(), sess.ProfileID); err != nil {
-		httputil.WriteErr(w, http.StatusInternalServerError, "could not create session")
+		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "could not create session")
 		return
 	}
 	httputil.WriteJSON(w, http.StatusOK, sess)
@@ -221,7 +230,7 @@ func (s *Service) HandleMe(w http.ResponseWriter, r *http.Request) {
 	}
 	p, err := s.profiles.ProfileByID(r.Context(), pid)
 	if err != nil {
-		httputil.WriteErr(w, http.StatusInternalServerError, "database error")
+		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "database error")
 		return
 	}
 	if p == nil {

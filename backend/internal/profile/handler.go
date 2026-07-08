@@ -2,6 +2,7 @@
 package profile
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"strings"
@@ -12,14 +13,25 @@ import (
 
 const maxSettingsBytes = 64 * 1024
 
+// Store defines the data access methods required by the profile handler.
+type Store interface {
+	UpdateProfile(ctx context.Context, id string, displayName, avatarSeed *string) (*Profile, error)
+	ProfilesByIDs(ctx context.Context, ids []string) ([]Profile, error)
+	ProfileByID(ctx context.Context, id string) (*Profile, error)
+	GetProfileSettings(ctx context.Context, profileID string) (json.RawMessage, error)
+	SetProfileSettings(ctx context.Context, profileID string, settings json.RawMessage) error
+	OpenAIKeyStatus(ctx context.Context, profileID string) (OpenAIKeyIntegrationStatus, error)
+	SetOpenAIKeyForProfile(ctx context.Context, profileID, key string) error
+}
+
 // Handler serves profile-related HTTP routes.
 type Handler struct {
-	repo *Repository
+	repo Store
 	auth Authenticator
 }
 
 // NewHandler constructs a profile HTTP handler.
-func NewHandler(repo *Repository, authenticator Authenticator) *Handler {
+func NewHandler(repo Store, authenticator Authenticator) *Handler {
 	return &Handler{repo: repo, auth: authenticator}
 }
 
@@ -30,64 +42,73 @@ func requireSignedInProfile(p *Profile) (int, string) {
 	return 0, ""
 }
 
-// HandleProfiles serves /api/profiles/* routes.
-func (h *Handler) HandleProfiles(w http.ResponseWriter, r *http.Request) {
+// Register mounts the profile routes onto the given mux.
+func (h *Handler) Register(mux *http.ServeMux) {
+	mux.HandleFunc("GET /api/profiles/me/integrations", h.HandleProfileIntegrations)
+	mux.HandleFunc("PUT /api/profiles/me/integrations", h.HandleProfileIntegrations)
+	mux.HandleFunc("GET /api/profiles/me/settings", h.HandleProfileSettings)
+	mux.HandleFunc("PUT /api/profiles/me/settings", h.HandleProfileSettings)
+	mux.HandleFunc("PATCH /api/profiles/me", h.HandleUpdateMe)
+	mux.HandleFunc("GET /api/profiles/{id}", h.HandleGetProfile)
+	mux.HandleFunc("GET /api/profiles", h.HandleGetProfiles)
+}
+
+func (h *Handler) HandleUpdateMe(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	path := strings.TrimPrefix(r.URL.Path, "/api/profiles/")
-	if path == "me/integrations" {
-		h.HandleProfileIntegrations(w, r)
+	p, code, msg := h.auth.ProfileFromRequest(ctx, r)
+	if code != 0 {
+		httputil.WriteErr(w, code, msg)
 		return
 	}
-	if path == "me/settings" {
-		h.HandleProfileSettings(w, r)
+	var body struct {
+		DisplayName *string `json:"display_name"`
+		AvatarSeed  *string `json:"avatar_seed"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		httputil.WriteErr(w, http.StatusBadRequest, "invalid json")
 		return
 	}
-	if path == "me" && r.Method == http.MethodPatch {
-		p, code, msg := h.auth.ProfileFromRequest(ctx, r)
-		if code != 0 {
-			httputil.WriteErr(w, code, msg)
-			return
-		}
-		var body struct {
-			DisplayName *string `json:"display_name"`
-			AvatarSeed  *string `json:"avatar_seed"`
-		}
-		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			httputil.WriteErr(w, http.StatusBadRequest, "invalid json")
-			return
-		}
-		updated, err := h.repo.UpdateProfile(ctx, p.ID, body.DisplayName, body.AvatarSeed)
-		if err != nil {
-			httputil.WriteErr(w, http.StatusInternalServerError, "update failed")
-			return
-		}
-		httputil.WriteJSON(w, http.StatusOK, updated)
+	updated, err := h.repo.UpdateProfile(ctx, p.ID, body.DisplayName, body.AvatarSeed)
+	if err != nil {
+		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "update failed", "profile_id", p.ID)
 		return
 	}
-	if r.Method == http.MethodGet && strings.Contains(path, ",") {
-		ids := strings.Split(path, ",")
-		list, err := h.repo.ProfilesByIDs(ctx, ids)
-		if err != nil {
-			httputil.WriteErr(w, http.StatusInternalServerError, "query failed")
-			return
-		}
-		httputil.WriteJSON(w, http.StatusOK, list)
+	httputil.WriteJSON(w, http.StatusOK, updated)
+}
+
+func (h *Handler) HandleGetProfiles(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	idsParam := r.URL.Query().Get("ids")
+	if idsParam == "" {
+		httputil.WriteErr(w, http.StatusBadRequest, "missing ids parameter")
 		return
 	}
-	if r.Method == http.MethodGet && path != "" && !strings.Contains(path, "/") {
-		p, err := h.repo.ProfileByID(ctx, path)
-		if err != nil {
-			httputil.WriteErr(w, http.StatusInternalServerError, "query failed")
-			return
-		}
-		if p == nil {
-			httputil.WriteErr(w, http.StatusNotFound, "not found")
-			return
-		}
-		httputil.WriteJSON(w, http.StatusOK, p)
+	ids := strings.Split(idsParam, ",")
+	list, err := h.repo.ProfilesByIDs(ctx, ids)
+	if err != nil {
+		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "query failed")
 		return
 	}
-	httputil.WriteErr(w, http.StatusNotFound, "not found")
+	httputil.WriteJSON(w, http.StatusOK, list)
+}
+
+func (h *Handler) HandleGetProfile(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := r.PathValue("id")
+	if id == "" {
+		httputil.WriteErr(w, http.StatusBadRequest, "missing id")
+		return
+	}
+	p, err := h.repo.ProfileByID(ctx, id)
+	if err != nil {
+		httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "query failed", "profile_id", id)
+		return
+	}
+	if p == nil {
+		httputil.WriteErr(w, http.StatusNotFound, "not found")
+		return
+	}
+	httputil.WriteJSON(w, http.StatusOK, p)
 }
 
 // HandleProfileSettings serves GET/PUT /api/profiles/me/settings.
@@ -107,7 +128,7 @@ func (h *Handler) HandleProfileSettings(w http.ResponseWriter, r *http.Request) 
 	case http.MethodGet:
 		raw, err := h.repo.GetProfileSettings(ctx, p.ID)
 		if err != nil {
-			httputil.WriteErr(w, http.StatusInternalServerError, "query failed")
+			httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "query failed", "profile_id", p.ID)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -127,7 +148,7 @@ func (h *Handler) HandleProfileSettings(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 		if err := h.repo.SetProfileSettings(ctx, p.ID, raw); err != nil {
-			httputil.WriteErr(w, http.StatusInternalServerError, "save failed")
+			httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "save failed", "profile_id", p.ID)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -156,7 +177,7 @@ func (h *Handler) HandleProfileIntegrations(w http.ResponseWriter, r *http.Reque
 	case http.MethodGet:
 		status, err := h.repo.OpenAIKeyStatus(ctx, p.ID)
 		if err != nil {
-			httputil.WriteErr(w, http.StatusInternalServerError, "query failed")
+			httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "query failed", "profile_id", p.ID)
 			return
 		}
 		httputil.WriteJSON(w, http.StatusOK, map[string]any{
@@ -184,12 +205,12 @@ func (h *Handler) HandleProfileIntegrations(w http.ResponseWriter, r *http.Reque
 				httputil.WriteErr(w, http.StatusServiceUnavailable, "secret encryption not configured")
 				return
 			}
-			httputil.WriteErr(w, http.StatusInternalServerError, "save failed")
+			httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "save failed", "profile_id", p.ID)
 			return
 		}
 		status, err := h.repo.OpenAIKeyStatus(ctx, p.ID)
 		if err != nil {
-			httputil.WriteErr(w, http.StatusInternalServerError, "query failed")
+			httputil.LogAndWriteErr(w, err, http.StatusInternalServerError, "query failed", "profile_id", p.ID)
 			return
 		}
 		httputil.WriteJSON(w, http.StatusOK, map[string]any{

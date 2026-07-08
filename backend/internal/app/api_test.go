@@ -11,6 +11,8 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"algomoves/gameserver/internal/config"
 )
 
 // Integration test — skipped unless DATABASE_URL is set and RUN_MIGRATIONS=true.
@@ -23,7 +25,7 @@ func TestArcadeGuestFlow(t *testing.T) {
 	t.Setenv("RUN_MIGRATIONS", "true")
 
 	ctx := context.Background()
-	svc, err := Open(ctx)
+	svc, err := Open(ctx, config.Load())
 	if err != nil {
 		t.Fatalf("open: %v", err)
 	}
@@ -71,7 +73,7 @@ func TestArcadeCanvasFlow(t *testing.T) {
 	t.Setenv("RUN_MIGRATIONS", "true")
 
 	ctx := context.Background()
-	svc, err := Open(ctx)
+	svc, err := Open(ctx, config.Load())
 	if err != nil {
 		t.Fatalf("open: %v", err)
 	}
@@ -188,7 +190,7 @@ func TestArcadeInterviewFlow(t *testing.T) {
 	t.Setenv("RUN_MIGRATIONS", "true")
 
 	ctx := context.Background()
-	svc, err := Open(ctx)
+	svc, err := Open(ctx, config.Load())
 	if err != nil {
 		t.Fatalf("open: %v", err)
 	}
@@ -442,7 +444,7 @@ func TestContentCatalogSeed(t *testing.T) {
 	t.Setenv("RUN_CONTENT_SEED", "true")
 
 	ctx := context.Background()
-	svc, err := Open(ctx)
+	svc, err := Open(ctx, config.Load())
 	if err != nil {
 		t.Fatalf("open: %v", err)
 	}

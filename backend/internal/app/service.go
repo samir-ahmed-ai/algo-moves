@@ -3,13 +3,13 @@ package app
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"net/http"
-	"os"
 	"strings"
 
 	"algomoves/gameserver/internal/auth"
 	"algomoves/gameserver/internal/canvas"
+	"algomoves/gameserver/internal/config"
 	"algomoves/gameserver/internal/content"
 	"algomoves/gameserver/internal/database"
 	"algomoves/gameserver/internal/games"
@@ -34,17 +34,17 @@ type Service struct {
 }
 
 // Open connects optional Postgres persistence and domain handlers.
-func Open(ctx context.Context) (*Service, error) {
+func Open(ctx context.Context, cfg config.Config) (*Service, error) {
 	db, err := database.Open(ctx)
 	if err != nil || db == nil {
 		return nil, err
 	}
 
-	databaseURL := strings.TrimSpace(os.Getenv("DATABASE_URL"))
+	databaseURL := strings.TrimSpace(cfg.DatabaseURL)
 	profileRepo := profile.NewRepository(db)
 	authSvc, err := auth.NewService(profileRepo, databaseURL)
 	if err != nil {
-		log.Printf("app: session manager disabled: %v", err)
+		slog.Warn("app: session manager disabled", "error", err)
 	}
 
 	gamesRepo := games.NewRepository(db)
@@ -101,47 +101,15 @@ func (s *Service) SessionMiddleware(next http.Handler) http.Handler {
 	return s.auth.SessionMiddleware(next)
 }
 
-type route struct {
-	pattern string
-	handler http.HandlerFunc
-}
-
 // Register mounts all /api/* routes on mux.
 func (s *Service) Register(mux *http.ServeMux) {
-	for _, r := range s.routes() {
-		mux.HandleFunc(r.pattern, r.handler)
-	}
-}
-
-func (s *Service) routes() []route {
-	return []route{
-		{"/api/auth/guest", s.auth.HandleGuest},
-		{"/api/auth/signup", s.auth.HandleSignup},
-		{"/api/auth/login", s.auth.HandleLogin},
-		{"/api/auth/logout", s.auth.HandleLogout},
-		{"/api/auth/me", s.auth.HandleMe},
-		{"/api/profiles/", s.profiles.HandleProfiles},
-		{"/api/stats/me", s.games.HandleStatsMe},
-		{"/api/matches/me", s.games.HandleMatchesMe},
-		{"/api/matches", s.games.HandleSubmitMatch},
-		{"/api/leaderboard/", s.games.HandleLeaderboard},
-		{"/api/achievements", s.games.HandleAchievements},
-		{"/api/achievements/", s.games.HandleAchievementAction},
-		{"/api/rooms/", s.games.HandleRooms},
-		{"/api/friends", s.games.HandleFriends},
-		{"/api/daily-challenge", s.games.HandleDailyChallenge},
-		{"/api/daily-challenge/score", s.games.HandleDailyScore},
-		{"/api/games", s.games.HandleGames},
-		{"/api/games/", s.games.HandleGames},
-		{"/api/canvases", s.canvas.HandleCanvases},
-		{"/api/canvases/", s.canvas.HandleCanvas},
-		{"/api/interviews", s.interview.HandleInterviews},
-		{"/api/interviews/", s.interview.HandleInterview},
-		{"/api/content/catalog", s.content.HandleContentCatalog},
-		{"/api/content/problems/", s.content.HandleContentProblem},
-		{"/api/prep-plans", s.prep.HandlePrepPlans},
-		{"/api/prep-plans/", s.prep.HandlePrepPlan},
-		{"/api/resumes", s.resume.HandleResumes},
-		{"/api/resumes/", s.resume.HandleResume},
-	}
+	// Register domain-specific routes using 1.22 mux features
+	s.profiles.Register(mux)
+	s.games.Register(mux)
+	s.canvas.Register(mux)
+	s.interview.Register(mux)
+	s.content.Register(mux)
+	s.prep.Register(mux)
+	s.resume.Register(mux)
+	s.auth.Register(mux)
 }
