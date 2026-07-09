@@ -16,6 +16,8 @@ export interface ItemDef {
   id: string;
   kind: ItemKind;
   pluginId?: string;
+  /** For a `reading` item: the LessonDef id (defaults to the item id). */
+  lessonId?: string;
   title?: string;
   summary?: string;
   difficulty?: Difficulty;
@@ -47,6 +49,8 @@ export interface Item {
   id: string;
   kind: ItemKind;
   pluginId?: string;
+  /** For a `reading` item: the LessonDef id (defaults to the item id). */
+  lessonId?: string;
   title: string;
   summary?: string;
   difficulty?: Difficulty;

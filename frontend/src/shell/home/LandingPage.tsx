@@ -24,6 +24,7 @@ export function LandingPage() {
     enterVim,
     enterDojo,
     enterGames,
+    enterLearn,
   } = useWorkspace();
   const isMobile = useIsMobile();
   const progress = useProgress();
@@ -39,6 +40,7 @@ export function LandingPage() {
   const handleExplore = (id: string) => {
     setExploreId(id);
     if (id === 'swipe') enterMobile();
+    else if (id === 'learn') enterLearn();
     else if (id === 'games') enterGames();
     else if (id === 'vim') enterVim();
     else if (id === 'dojo') enterDojo();

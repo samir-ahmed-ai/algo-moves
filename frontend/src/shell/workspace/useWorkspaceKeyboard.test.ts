@@ -16,8 +16,9 @@ describe('resolveWorkspaceKeyboardAction', () => {
     });
   }
 
-  it('keeps command palette toggle available inside editable targets', () => {
-    expect(action({ key: 'k', metaKey: true, editableTarget: true })).toBe('toggle-palette');
+  it('defers command palette toggle to GlobalSearchHost', () => {
+    expect(action({ key: 'k', metaKey: true, editableTarget: true })).toBe('none');
+    expect(action({ key: 'k', metaKey: true })).toBe('none');
   });
 
   it('closes the topmost overlay before presentation mode', () => {

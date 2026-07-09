@@ -4,6 +4,7 @@ import { EXPLORE_GROUPS, PALETTE_GROUPS, THEME_GROUPS } from './landingFeatureGr
 import { catalog } from '../../content';
 import { EagleMark } from '@/shell/EagleMark';
 import { AuthButton } from '@/shell/auth';
+import { SearchTrigger, openGlobalSearch } from '@/shell/search';
 import { SwipeModeQrPromo } from './SwipeModeQrPromo';
 import type { Item } from '../../content/types';
 
@@ -90,6 +91,7 @@ export function LandingToolbar({
           </ToolbarSegment>
         </div>
         <div className="ml-auto flex shrink-0 items-center gap-2">
+          <SearchTrigger onOpen={openGlobalSearch} className="hidden sm:inline-flex" />
           <ToolbarSegment>
             <FeatureSelectorPopover
               groups={EXPLORE_GROUPS}

@@ -23,3 +23,24 @@ export {
   DEFAULT_USER_SETTINGS,
   type UserSettings,
 } from './api/userSettingsApi';
+export { searchServer, type SearchApiResponse } from './api/searchApi';
+export {
+  pullProgress,
+  pushProgress,
+  pushAttempts,
+  pullMistakes,
+  pullReviews,
+  pushReviews,
+  pullDueReviews,
+  pullNotes,
+  pushNotes,
+  pullBookmarks,
+  pushBookmarks,
+  pullEnrollments,
+  pushEnrollments,
+  type ProblemProgressRow,
+  type ReviewCardRow,
+  type AttemptRow,
+  type NoteRow,
+  type EnrollmentRow,
+} from './api/learningApi';

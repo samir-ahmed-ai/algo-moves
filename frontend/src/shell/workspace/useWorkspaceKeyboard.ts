@@ -54,7 +54,8 @@ export interface WorkspaceKeyboardSnapshot {
 export function resolveWorkspaceKeyboardAction(
   input: WorkspaceKeyboardSnapshot,
 ): WorkspaceKeyboardAction {
-  if ((input.metaKey || input.ctrlKey) && input.key.toLowerCase() === 'k') return 'toggle-palette';
+  // ⌘K is owned by GlobalSearchHost (app-wide); workspace must not also toggle.
+  if ((input.metaKey || input.ctrlKey) && input.key.toLowerCase() === 'k') return 'none';
   if (input.editableTarget) return 'none';
 
   if (input.key === 'Escape') {

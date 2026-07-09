@@ -22,7 +22,8 @@ import {
 } from '@/store/user-prefs';
 import { usePhaseTransition } from './usePhaseTransition';
 import { loadPersistedDraft, savePersistedDraft } from '@/store/persistence/draftPersistence';
-import { recordAttempt } from '@/store/persistence';
+import { recordAttempt, scheduleReviewRating } from '@/store/persistence';
+import { Rating } from 'ts-fsrs';
 
 /**
  * The Code Studio phase state machine (Quiz → Structure → Recall), extracted from
@@ -50,6 +51,7 @@ export function useCodeStudioMachine({
   const { scheduleTransition, clearTransition } = usePhaseTransition();
   const [phaseTransition, setPhaseTransition] = useState(false);
   const [reassembleKey, setReassembleKey] = useState(0);
+  const [recallRated, setRecallRated] = useState(false);
 
   const [phase, setPhase] = useState<CodeStudioPhase>(
     () => phaseLock ?? loadPhase(itemId, active, av),
@@ -68,6 +70,7 @@ export function useCodeStudioMachine({
     setDraft(loadDraft({ itemSwitch: true }));
     setPhase(phaseLock ?? loadPhase(itemId, active, av));
     setReassembleKey((k) => k + 1);
+    setRecallRated(false);
   }, [loadDraft, itemId, active, av, clearTransition, phaseLock]);
 
   const persistDraft = useCallback(
@@ -158,6 +161,23 @@ export function useCodeStudioMachine({
     [enterRecall, itemId, phaseLock],
   );
 
+  /**
+   * Grade a from-memory recall via the learner's self-rating (Again/Hard/Good/Easy).
+   * The rating is authoritative: it records the attempt AND schedules the next FSRS
+   * review. `recallRated` (reset on item switch) guards against double-counting a
+   * single recall session.
+   */
+  const onRecallComplete = useCallback(
+    (rating: Rating) => {
+      if (recallRated) return;
+      recordAttempt(itemId, rating >= Rating.Good);
+      scheduleReviewRating(itemId, rating);
+      setTimerRunning(false);
+      setRecallRated(true);
+    },
+    [itemId, recallRated, setTimerRunning],
+  );
+
   const onQuizProgress = useCallback(
     (p: QuizProgress) => saveQuizProgress(itemId, active, p),
     [itemId, active],
@@ -186,6 +206,8 @@ export function useCodeStudioMachine({
     advance,
     resetReassemble,
     onReassembleComplete,
+    onRecallComplete,
+    recallRated,
     onQuizProgress,
     onQuizContinue,
     savedReassembleProgress,

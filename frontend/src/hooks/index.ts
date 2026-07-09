@@ -5,3 +5,4 @@ export { useNarration } from './useNarration';
 export { useSoundCues } from './useSoundCues';
 export { useWorkspacePlugin } from './useWorkspacePlugin';
 export { useWorkspaceUrlState } from './useWorkspaceUrlState';
+export { useLearningSync } from './useLearningSync';

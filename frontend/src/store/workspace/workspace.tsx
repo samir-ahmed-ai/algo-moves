@@ -36,7 +36,16 @@ export type Density = 'compact' | 'ultra' | 'spacious';
 export type Palette = 'default' | 'cb';
 /** Which top-level surface is showing: home launchpad, canvas workspace, the mobile swipe deck, the Vim dojo, the two-player games arcade, the interview prep plans hub, or the user profile. */
 export type AppRoute =
-  'home' | 'workspace' | 'mobile' | 'vim' | 'dojo' | 'games' | 'plans' | 'resumes' | 'profile';
+  | 'home'
+  | 'workspace'
+  | 'learn'
+  | 'mobile'
+  | 'vim'
+  | 'dojo'
+  | 'games'
+  | 'plans'
+  | 'resumes'
+  | 'profile';
 export type { ThemePreset, LayoutPreset, CanvasSnapRegion, CanvasFillPreset };
 export { DEFAULT_THEME_PRESET, THEME_META, THEME_PRESETS, normalizeThemePreset };
 

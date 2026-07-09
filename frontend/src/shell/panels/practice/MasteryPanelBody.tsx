@@ -1,8 +1,11 @@
 import { useEffect, useRef } from 'react';
 import { Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
-import { useProgress, statFor, setMastered } from '@/store/persistence';
+import { useProgress, statFor, setMastered, useSrsData } from '@/store/persistence';
+import { proficiency, masteryBand } from '@/lib/mastery/proficiency';
 import { PRACTICE_ADVANCE_MS } from '../shared/practiceConstants';
+
+const DAY_MS = 86_400_000;
 
 import {
   useCanvasActions,
@@ -19,11 +22,25 @@ import {
 export function MasteryPanelBody() {
   const { item } = useCanvasStatic();
   const progress = useProgress();
+  const srs = useSrsData();
   const { focusPanel, advancePractice } = useCanvasActions();
   const s = statFor(progress, item.id);
   const advancedRef = useRef(false);
   const wasMasteredRef = useRef(s.mastered);
   const acc = s.attempts ? Math.round((s.correct / s.attempts) * 100) : 0;
+
+  const card = srs.cards[item.id];
+  const lastReview = card?.fsrs?.last_review ? new Date(card.fsrs.last_review).getTime() : 0;
+  const band = masteryBand(
+    proficiency({
+      stability: card?.fsrs?.stability ?? 0,
+      elapsedDays: lastReview ? Math.max(0, (Date.now() - lastReview) / DAY_MS) : 0,
+      reps: card?.reps ?? 0,
+      attempts: s.attempts,
+      correct: s.correct,
+    }),
+  );
+  const dueForReview = card ? card.due <= Date.now() : false;
 
   useEffect(() => {
     const wasMastered = wasMasteredRef.current;
@@ -47,6 +64,18 @@ export function MasteryPanelBody() {
         <span className="flex-1" />
         <span className={cn('font-mono tabular-nums text-good', nodeText.base)}>{acc}%</span>
       </div>
+      {(card || s.attempts > 0) && (
+        <div className="mastery-band-row flex items-center gap-1.5">
+          <span className="rounded bg-panel2 px-1.5 py-0.5 text-xs font-semibold text-ink2">
+            {band}
+          </span>
+          {dueForReview && (
+            <span className="rounded bg-warnbg px-1.5 py-0.5 text-xs font-semibold text-warn">
+              Due for review
+            </span>
+          )}
+        </div>
+      )}
       <Meter value={acc} max={100} tone="good" />
       <StatGrid cols={2}>
         <Stat k="attempts" v={s.attempts} />

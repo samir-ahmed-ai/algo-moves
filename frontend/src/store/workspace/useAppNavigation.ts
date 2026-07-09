@@ -90,6 +90,7 @@ export function useAppNavigation(shared: ShareState | null): NavigationState {
       if (page === 'vim') return 'vim';
       if (page === 'dojo') return 'dojo';
       if (page === 'games') return 'games';
+      if (page === 'learn') return 'learn';
       if (page === 'plans') return 'plans';
       if (page === 'resumes') return 'resumes';
       if (page === 'profile') return 'profile';
@@ -212,6 +213,14 @@ export function useAppNavigation(shared: ShareState | null): NavigationState {
     writeGamesHash(room ? { room } : null);
   }, []);
 
+  const enterLearn = useCallback(() => {
+    setActiveTrackId(null);
+    setActiveCategoryId(null);
+    setProblemFocused(false);
+    setRoute('learn');
+    writeAppUrl('learn');
+  }, []);
+
   const enterPlans = useCallback(() => {
     setRoute('plans');
     writeAppUrl('plans');
@@ -260,6 +269,7 @@ export function useAppNavigation(shared: ShareState | null): NavigationState {
     enterVim,
     enterDojo,
     enterGames,
+    enterLearn,
     enterPlans,
     enterResumes,
     enterProfile,

@@ -120,6 +120,8 @@ export interface WorkspaceNavigationCtx {
   enterDojo: (gameId?: string, levelId?: string) => void;
   /** Enter the two-player games arcade; pass a room code to join that room directly. */
   enterGames: (roomCode?: string) => void;
+  /** Enter the "My Learning" dashboard. */
+  enterLearn: () => void;
   /** Enter the interview prep plans hub. */
   enterPlans: () => void;
   /** Enter the resume template creator hub. */

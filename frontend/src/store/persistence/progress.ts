@@ -1,5 +1,9 @@
 import { STORAGE_KEYS } from '@/store/storageKeys';
 import { createSyncStore } from '@/store/createSyncStore';
+import { createServerSync } from '@/store/persistence/sync/syncEngine';
+import { mergeProgress } from '@/store/persistence/sync/mergeStrategies';
+import { pullProgress, pushProgress, type ProblemProgressRow } from '@/platform';
+import { logActivityToday } from './activity';
 import { readStorageJson } from './storage';
 
 export interface ProblemStat {
@@ -8,6 +12,8 @@ export interface ProblemStat {
   streak: number;
   bestStreak: number;
   mastered: boolean;
+  /** Epoch ms of the most recent attempt — drives the server-side streak merge. */
+  lastAttemptAt?: number;
 }
 
 export interface Mistake {
@@ -50,12 +56,19 @@ function normalizeStat(stat: ProblemStat): ProblemStat {
   const attempts = nonNegativeInt(stat.attempts);
   const correct = Math.min(nonNegativeInt(stat.correct), attempts);
   const streak = Math.min(nonNegativeInt(stat.streak), attempts);
+  const lastAttemptAt =
+    typeof stat.lastAttemptAt === 'number' &&
+    Number.isFinite(stat.lastAttemptAt) &&
+    stat.lastAttemptAt > 0
+      ? Math.round(stat.lastAttemptAt)
+      : undefined;
   return {
     attempts,
     correct,
     streak,
     bestStreak: Math.min(attempts, Math.max(nonNegativeInt(stat.bestStreak), streak)),
     mastered: Boolean(stat.mastered),
+    ...(lastAttemptAt !== undefined ? { lastAttemptAt } : {}),
   };
 }
 
@@ -119,13 +132,59 @@ function load(): ProgressData {
   };
 }
 
-const store = createSyncStore<ProgressData>(KEY, load);
+function statsToRows(stats: Record<string, ProblemStat>): ProblemProgressRow[] {
+  const now = new Date().toISOString();
+  return Object.entries(stats).map(([problemId, s]) => ({
+    problemId,
+    attempts: s.attempts,
+    correct: s.correct,
+    streak: s.streak,
+    bestStreak: s.bestStreak,
+    mastered: s.mastered,
+    updatedAt: now,
+    ...(s.lastAttemptAt ? { lastAttemptAt: new Date(s.lastAttemptAt).toISOString() } : {}),
+  }));
+}
+
+function rowsToStats(rows: ProblemProgressRow[]): Record<string, ProblemStat> {
+  const stats: Record<string, ProblemStat> = {};
+  for (const r of rows) {
+    const id = normalizeProblemId(r.problemId);
+    if (!id) continue;
+    const parsedTs = r.lastAttemptAt ? Date.parse(r.lastAttemptAt) : NaN;
+    stats[id] = normalizeStat({
+      attempts: r.attempts,
+      correct: r.correct,
+      streak: r.streak,
+      bestStreak: r.bestStreak,
+      mastered: r.mastered,
+      ...(Number.isFinite(parsedTs) ? { lastAttemptAt: parsedTs } : {}),
+    });
+  }
+  return stats;
+}
+
+// Server sync: stats round-trip to /api/progress; mistakes stay local (the server
+// returns none via pull, so mergeProgress preserves the local list).
+const progressSync = createServerSync<ProgressData>({
+  key: KEY,
+  pull: async () => {
+    const rows = await pullProgress();
+    return rows == null ? null : { stats: rowsToStats(rows), mistakes: [] };
+  },
+  push: (data) => pushProgress(statsToRows(data.stats)),
+  merge: mergeProgress,
+});
+
+const store = createSyncStore<ProgressData>(KEY, load, progressSync.save);
+progressSync.attach(store);
 
 let mistakeSeq = readMistakeSeq(store.get().mistakes);
 
 export function recordAttempt(problemId: string, correct: boolean): void {
   const id = normalizeProblemId(problemId);
   if (!id) return;
+  logActivityToday();
   store.update((data) => {
     const prev = data.stats[id] ?? emptyStat();
     const streak = correct ? prev.streak + 1 : 0;
@@ -135,6 +194,7 @@ export function recordAttempt(problemId: string, correct: boolean): void {
       streak,
       bestStreak: Math.max(prev.bestStreak, streak),
       mastered: prev.mastered || streak >= 3,
+      lastAttemptAt: Date.now(),
     };
     return { ...data, stats: { ...data.stats, [id]: stat } };
   });

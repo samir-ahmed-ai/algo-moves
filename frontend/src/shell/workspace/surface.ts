@@ -1,8 +1,17 @@
 import type { CanvasMode } from '@/core';
-import type { TrackId } from '@/content';
+import type { ItemKind, TrackId } from '@/content';
 
 export type WorkspaceSurface =
-  'track-board' | 'category-board' | 'canvas' | 'play' | 'learn' | 'loading' | 'error' | 'empty';
+  | 'track-board'
+  | 'category-board'
+  | 'canvas'
+  | 'play'
+  | 'learn'
+  | 'reading'
+  | 'assessment'
+  | 'loading'
+  | 'error'
+  | 'empty';
 
 export type WorkspaceFallbackTarget = 'catalog' | 'home';
 
@@ -10,6 +19,8 @@ export interface ModeRouterInput {
   activeTrackId: TrackId | null;
   activeCategoryId: string | null;
   problemFocused: boolean;
+  /** Kind of the focused item — reading items route to their own surface. */
+  itemKind?: ItemKind;
   mode: CanvasMode;
   ready: boolean;
   pluginLoading: boolean;
@@ -28,6 +39,10 @@ export function resolveWorkspaceSurface(input: ModeRouterInput): WorkspaceSurfac
   } = input;
   if (activeTrackId && !activeCategoryId && !problemFocused) return 'track-board';
   if (activeCategoryId && !problemFocused) return 'category-board';
+  // Reading / quiz items have no plugin — route them to their own surfaces before
+  // the plugin-ready gate (which would otherwise fall through to 'empty').
+  if (problemFocused && input.itemKind === 'reading') return 'reading';
+  if (problemFocused && input.itemKind === 'quiz') return 'assessment';
   if (mode === 'visualize' && !problemFocused) return 'canvas';
   if (runtimeError) return 'error';
   if (mode === 'visualize') {

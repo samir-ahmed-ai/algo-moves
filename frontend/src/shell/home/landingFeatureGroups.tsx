@@ -1,9 +1,28 @@
-import { Contrast, Gamepad2, Keyboard, Moon, Palette, Smartphone, Sun } from 'lucide-react';
+import {
+  Contrast,
+  Gamepad2,
+  GraduationCap,
+  Keyboard,
+  Moon,
+  Palette,
+  Smartphone,
+  Sun,
+} from 'lucide-react';
 import type { FeatureGroup } from '@/components/shared';
 
 export const EXPLORE_GROUPS: FeatureGroup[] = [
   {
     options: [
+      {
+        id: 'learn',
+        icon: <GraduationCap />,
+        title: 'My Learning',
+        subtitle: 'Progress & reviews',
+        tone: 'accent',
+        detailTitle: 'My Learning',
+        detailDescription:
+          'Your personal dashboard — day streak, reviews due, course mastery, and where to pick up next.',
+      },
       {
         id: 'swipe',
         icon: <Smartphone />,

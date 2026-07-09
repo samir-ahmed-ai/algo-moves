@@ -5,6 +5,8 @@ import type { Item } from '@/content';
 import { CategoryBoard, TrackCategoryBoard } from '../CategoryBoard';
 import { LearnStudio } from '@/shell/study';
 import { ProblemPage } from '@/shell/study';
+import { LessonSurface } from '@/shell/study/LessonSurface';
+import { CheckpointSurface } from '@/shell/study/CheckpointSurface';
 import {
   resolveWorkspaceFallbackTarget,
   resolveWorkspaceSurface,
@@ -12,7 +14,10 @@ import {
 } from './surface';
 
 import { CanvasStage, Btn, EmptyState } from '@/shell/canvas';
-export interface ModeRouterProps extends Omit<ModeRouterInput, 'ready' | 'runtimeError'> {
+export interface ModeRouterProps extends Omit<
+  ModeRouterInput,
+  'ready' | 'runtimeError' | 'itemKind'
+> {
   plugin: ProblemPlugin<any, any> | null | undefined;
   item: Item;
   inputId: string;
@@ -45,6 +50,7 @@ export function ModeRouter(props: ModeRouterProps) {
   const problemReady = !!props.plugin && !!props.frame;
   const surface = resolveWorkspaceSurface({
     ...props,
+    itemKind: props.item.kind,
     ready: problemReady,
     runtimeError: !!props.runtimeError,
   });
@@ -107,6 +113,10 @@ export function ModeRouter(props: ModeRouterProps) {
         />
       );
     }
+    case 'reading':
+      return <LessonSurface item={props.item} />;
+    case 'assessment':
+      return <CheckpointSurface item={props.item} />;
     case 'loading':
       return (
         <WorkspaceFallback

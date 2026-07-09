@@ -1,4 +1,6 @@
 import { getPluginMeta } from '../core';
+import { getLesson } from './lessons';
+import { getCheckpoint } from './checkpoints';
 import type { Course, CourseDef, Item, ItemDef, Topic } from './types';
 
 function uniqueIds(ids: readonly string[]): string[] {
@@ -16,7 +18,9 @@ function hydrateItem(def: ItemDef, courseId: string, topicId: string): Item {
   let summary = def.summary;
   let difficulty = def.difficulty;
   let source = def.source;
-  let pluginTags: string[] = [];
+  let inheritedTags: string[] = [];
+  let inheritedEstimate: number | undefined;
+  let lessonId: string | undefined;
 
   if (def.kind === 'problem' && def.pluginId) {
     const p = getPluginMeta(def.pluginId);
@@ -24,22 +28,38 @@ function hydrateItem(def: ItemDef, courseId: string, topicId: string): Item {
       title = title ?? p.title;
       summary = summary ?? p.summary;
       difficulty = difficulty ?? p.difficulty;
-      pluginTags = p.tags ?? [];
+      inheritedTags = p.tags ?? [];
       if (!source && p.source) source = { label: 'Source', url: p.source };
     }
+  } else if (def.kind === 'reading') {
+    lessonId = def.lessonId ?? def.id;
+    const lesson = getLesson(lessonId);
+    if (lesson) {
+      title = title ?? lesson.title;
+      summary = summary ?? lesson.summary;
+      inheritedTags = lesson.tags ?? [];
+      inheritedEstimate = lesson.estimatedMinutes;
+    }
+  } else if (def.kind === 'quiz') {
+    const checkpoint = getCheckpoint(def.lessonId ?? def.id);
+    if (checkpoint) {
+      title = title ?? checkpoint.title;
+      summary = summary ?? checkpoint.summary;
+    }
   }
-  const estimatedMinutes = normalizeEstimatedMinutes(def.estimatedMinutes);
+  const estimatedMinutes = normalizeEstimatedMinutes(def.estimatedMinutes ?? inheritedEstimate);
 
   return {
     id: def.id,
     kind: def.kind,
     title: title ?? def.id,
-    tags: uniqueIds([...pluginTags, ...(def.tags ?? [])]),
+    tags: uniqueIds([...inheritedTags, ...(def.tags ?? [])]),
     status: def.status ?? 'todo',
     prereqs: uniqueIds(def.prereqs ?? []),
     courseId,
     topicId,
     ...(def.pluginId ? { pluginId: def.pluginId } : {}),
+    ...(lessonId ? { lessonId } : {}),
     ...(summary ? { summary } : {}),
     ...(difficulty ? { difficulty } : {}),
     ...(source ? { source } : {}),

@@ -1,5 +1,7 @@
 import type { Catalog } from './catalog';
 import type { Item, Topic } from './types';
+import { parseSearchTerms, scoreDocument } from '@/lib/search/score';
+import type { SearchDocument } from '@/lib/search/types';
 import {
   browseTopicId,
   categoryIdFromBrowseTopic,
@@ -27,18 +29,6 @@ export {
   getTracks,
   isBrowseTopicId,
 };
-
-function normalizeSearch(value: string | undefined): string {
-  return (value ?? '').trim().toLowerCase();
-}
-
-function itemMatchesQuery(item: Item, q: string): boolean {
-  return (
-    item.title.toLowerCase().includes(q) ||
-    item.summary?.toLowerCase().includes(q) === true ||
-    item.tags.some((tag) => tag.toLowerCase().includes(q))
-  );
-}
 
 /** Collect all drillable problems for a browse category, deduped and sorted. */
 export function getItemsForCategory(categoryId: string, catalog: Catalog): Item[] {
@@ -108,35 +98,68 @@ export function countItemsForCategory(categoryId: string, catalog: Catalog): num
   return getItemsForCategory(categoryId, catalog).length;
 }
 
-/** Search categories and problems across all tracks. */
+function itemSearchDoc(item: Item): SearchDocument {
+  return {
+    kind: 'problem',
+    id: item.id,
+    title: item.title,
+    subtitle: item.difficulty ?? item.kind,
+    keywords: [item.summary, ...item.tags].filter((v): v is string => !!v),
+  };
+}
+
+function categorySearchDoc(cat: BrowseCategory): SearchDocument {
+  return {
+    kind: 'category',
+    id: cat.id,
+    title: cat.title,
+    subtitle: 'category',
+    keywords: [cat.summary, cat.description].filter((v): v is string => !!v),
+  };
+}
+
+/** Search categories and problems across all tracks (ranked). */
 export function searchBrowse(
   query: string,
   catalog: Catalog,
 ): { categories: BrowseCategory[]; items: Item[] } {
-  const q = normalizeSearch(query);
-  if (!q) return { categories: getAllCategories(), items: [] };
+  const terms = parseSearchTerms(query);
+  if (terms.length === 0) return { categories: getAllCategories(), items: [] };
 
-  const categories = getAllCategories().filter(
-    (c) =>
-      c.title.toLowerCase().includes(q) ||
-      c.summary?.toLowerCase().includes(q) ||
-      c.description?.toLowerCase().includes(q) ||
-      getItemsForCategory(c.id, catalog).some((it) => itemMatchesQuery(it, q)),
-  );
+  const scoredCats: Array<{ cat: BrowseCategory; score: number }> = [];
+  for (const cat of getAllCategories()) {
+    const score = scoreDocument(categorySearchDoc(cat), terms);
+    if (score > 0) scoredCats.push({ cat, score });
+  }
 
   const itemSeen = new Set<string>();
-  const items: Item[] = [];
+  const scoredItems: Array<{ item: Item; score: number }> = [];
   for (const cat of getAllCategories()) {
     for (const item of getItemsForCategory(cat.id, catalog)) {
       if (itemSeen.has(item.id)) continue;
-      if (itemMatchesQuery(item, q)) {
-        itemSeen.add(item.id);
-        items.push(item);
-      }
+      itemSeen.add(item.id);
+      const score = scoreDocument(itemSearchDoc(item), terms);
+      if (score > 0) scoredItems.push({ item, score });
     }
   }
 
-  return { categories, items: items.sort((a, b) => collator.compare(a.title, b.title)) };
+  scoredCats.sort((a, b) => b.score - a.score || collator.compare(a.cat.title, b.cat.title));
+  scoredItems.sort((a, b) => b.score - a.score || collator.compare(a.item.title, b.item.title));
+
+  const categories = scoredCats.map((r) => r.cat);
+  const items = scoredItems.map((r) => r.item);
+
+  // Include categories that contain a matching problem even if the category title didn't match.
+  const catIdsFromItems = new Set(
+    items.map((it) => categoryIdForItem(it.id, catalog)).filter((id): id is string => !!id),
+  );
+  for (const id of catIdsFromItems) {
+    if (categories.some((c) => c.id === id)) continue;
+    const cat = getCategoryById(id);
+    if (cat) categories.push(cat);
+  }
+
+  return { categories, items };
 }
 
 let itemToCategoryCache: WeakMap<Catalog, Map<string, string>> | null = null;

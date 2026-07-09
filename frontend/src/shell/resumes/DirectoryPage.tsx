@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FileText, Loader2, Search, Users } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { matchesSearchFields } from '@/lib/search/score';
 import { chromeText } from '@/shell/chromeUi';
 import { Avatar } from '@/design/components';
 import type { Resume, ResumeDirectoryEntry } from './data/resumesApi';
@@ -29,13 +30,9 @@ export function DirectoryPage({ onSelect, onCustomize }: DirectoryPageProps) {
   }, [fetchDirectory]);
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return entries;
-    return entries.filter(
-      (e) =>
-        e.title.toLowerCase().includes(q) ||
-        e.ownerDisplayName.toLowerCase().includes(q) ||
-        e.originalFilename.toLowerCase().includes(q),
+    if (!query.trim()) return entries;
+    return entries.filter((e) =>
+      matchesSearchFields(query, e.title, e.ownerDisplayName, e.originalFilename),
     );
   }, [entries, query]);
 

@@ -1,6 +1,15 @@
 /** Top-level app pages — pathname segment before the hash. */
 export type AppPage =
-  'home' | 'mobile' | 'vim' | 'dojo' | 'games' | 'workspace' | 'plans' | 'resumes' | 'profile';
+  | 'home'
+  | 'mobile'
+  | 'vim'
+  | 'dojo'
+  | 'games'
+  | 'workspace'
+  | 'learn'
+  | 'plans'
+  | 'resumes'
+  | 'profile';
 
 const PAGE_SEGMENTS: Readonly<Record<AppPage, string>> = {
   home: 'home',
@@ -9,6 +18,7 @@ const PAGE_SEGMENTS: Readonly<Record<AppPage, string>> = {
   dojo: 'dojo',
   games: 'games',
   workspace: 'workspace',
+  learn: 'learn',
   plans: 'plans',
   resumes: 'resumes',
   profile: 'profile',

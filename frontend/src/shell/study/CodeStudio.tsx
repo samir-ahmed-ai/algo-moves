@@ -38,6 +38,7 @@ import { useCodeStudioTimer } from './hooks/useCodeStudioTimer';
 import { useCodeStudioRecallShortcuts } from './hooks/useCodeStudioRecallShortcuts';
 import { useRecallDraftHandler } from './hooks/useRecallDraftHandler';
 import { useCodeStudioMachine } from './hooks/useCodeStudioMachine';
+import { RecallSelfRate } from './components/RecallSelfRate';
 import { RecallEditorShell } from './components/RecallEditorShell';
 
 export {
@@ -112,6 +113,8 @@ export function CodeStudioProvider({
     advance,
     resetReassemble,
     onReassembleComplete,
+    onRecallComplete,
+    recallRated,
     onQuizProgress,
     onQuizContinue,
     savedReassembleProgress,
@@ -197,6 +200,8 @@ export function CodeStudioProvider({
       resetReassemble,
       reassembleKey,
       onReassembleComplete,
+      onRecallComplete,
+      recallRated,
       savedReassembleProgress,
       phaseLocked: !!phaseLock,
     }),
@@ -217,6 +222,8 @@ export function CodeStudioProvider({
       resetReassemble,
       reassembleKey,
       onReassembleComplete,
+      onRecallComplete,
+      recallRated,
       savedReassembleProgress,
       phaseLock,
     ],
@@ -368,7 +375,7 @@ const PHASE_HINT: Record<CodeStudioPhase, string> = {
 export function CodeStudioFooter() {
   const { stat, timeLabel, spaceLabel } = useCodeStudioContent();
   const { score, timerRunning, timerLabel } = useCodeStudioDraft();
-  const { phase } = useCodeStudioPhase();
+  const { phase, onRecallComplete, recallRated } = useCodeStudioPhase();
 
   return (
     <div className="code-studio-footer nodrag flex shrink-0 flex-wrap items-center gap-2 border-t border-edge/60 px-2 py-1.5">
@@ -395,6 +402,9 @@ export function CodeStudioFooter() {
         >
           {timerLabel}
         </span>
+      )}
+      {phase === 'recall' && (
+        <RecallSelfRate score={score} rated={recallRated} onRate={onRecallComplete} />
       )}
       {stat.streak > 0 && (
         <span

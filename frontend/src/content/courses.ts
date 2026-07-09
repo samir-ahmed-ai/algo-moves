@@ -55,6 +55,8 @@ export const curatedCourses: CourseDef[] = [
         title: 'Traversal & colouring',
         summary: 'BFS / DFS sweeps and 2-colouring.',
         items: [
+          { id: 'graphs-modeling', kind: 'reading' },
+          { id: 'graphs-bfs-vs-dfs', kind: 'reading' },
           {
             id: 'is-bipartite',
             kind: 'problem',
@@ -62,6 +64,7 @@ export const curatedCourses: CourseDef[] = [
             tags: ['queue'],
             status: 'in-progress',
             estimatedMinutes: 20,
+            prereqs: ['graphs-bfs-vs-dfs'],
           },
           {
             id: 'number-of-islands',
@@ -78,6 +81,7 @@ export const curatedCourses: CourseDef[] = [
         title: 'Ordering & cycles',
         summary: 'Directed-graph dependency order and cycle detection.',
         items: [
+          { id: 'graphs-cycles-topo', kind: 'reading' },
           {
             id: 'topological-sort',
             kind: 'problem',
@@ -120,6 +124,12 @@ export const curatedCourses: CourseDef[] = [
           },
         ],
       },
+      {
+        id: 'graphs-assessment',
+        title: 'Checkpoint',
+        summary: 'A graded check — pass to certify the Graphs course.',
+        items: [{ id: 'graphs-checkpoint', kind: 'quiz', estimatedMinutes: 8 }],
+      },
     ],
   },
   {
@@ -155,12 +165,15 @@ export const curatedCourses: CourseDef[] = [
         title: '1-D tables',
         summary: 'A single dp array filled left to right.',
         items: [
+          { id: 'dp-overlapping-subproblems', kind: 'reading' },
+          { id: 'dp-1d-tables', kind: 'reading' },
           {
             id: 'climbing-stairs',
             kind: 'problem',
             pluginId: 'imp-58-climbing-stairs',
             status: 'todo',
             estimatedMinutes: 15,
+            prereqs: ['dp-overlapping-subproblems'],
           },
         ],
       },
@@ -169,13 +182,14 @@ export const curatedCourses: CourseDef[] = [
         title: '2-D tables',
         summary: 'A grid dp filled row by row, then traced back.',
         items: [
+          { id: 'dp-2d-reconstruction', kind: 'reading' },
           {
             id: 'edit-distance',
             kind: 'problem',
             pluginId: 'imp-61-edit-distance',
             status: 'todo',
             estimatedMinutes: 25,
-            prereqs: ['climbing-stairs'],
+            prereqs: ['climbing-stairs', 'dp-2d-reconstruction'],
           },
         ],
       },

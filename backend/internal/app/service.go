@@ -14,10 +14,12 @@ import (
 	"algomoves/gameserver/internal/database"
 	"algomoves/gameserver/internal/games"
 	"algomoves/gameserver/internal/interview"
+	"algomoves/gameserver/internal/learning"
 	"algomoves/gameserver/internal/prep"
 	"algomoves/gameserver/internal/profile"
 	"algomoves/gameserver/internal/resume"
 	resumeopenai "algomoves/gameserver/internal/resume/openai"
+	"algomoves/gameserver/internal/search"
 )
 
 // Service is the composition root for durable REST APIs.
@@ -30,7 +32,9 @@ type Service struct {
 	content   *content.Handler
 	canvas    *canvas.Handler
 	prep      *prep.Handler
+	learning  *learning.Handler
 	resume    *resume.Handler
+	search    *search.Handler
 }
 
 // Open connects optional Postgres persistence and domain handlers.
@@ -52,7 +56,9 @@ func Open(ctx context.Context, cfg config.Config) (*Service, error) {
 	contentRepo := content.NewRepository(db)
 	canvasRepo := canvas.NewRepository(db)
 	prepRepo := prep.NewRepository(db)
+	learningRepo := learning.NewRepository(db)
 	resumeRepo := resume.NewRepository(db)
+	searchRepo := search.NewRepository(db)
 
 	return &Service{
 		db:        db,
@@ -63,7 +69,9 @@ func Open(ctx context.Context, cfg config.Config) (*Service, error) {
 		content:   content.NewHandler(contentRepo),
 		canvas:    canvas.NewHandler(canvasRepo, authSvc),
 		prep:      prep.NewHandler(prepRepo, authSvc),
+		learning:  learning.NewHandler(learningRepo, authSvc),
 		resume:    resume.NewHandler(resumeRepo, profileRepo, authSvc, resumeopenai.NewClient()),
+		search:    search.NewHandler(searchRepo, authSvc),
 	}, nil
 }
 
@@ -110,6 +118,8 @@ func (s *Service) Register(mux *http.ServeMux) {
 	s.interview.Register(mux)
 	s.content.Register(mux)
 	s.prep.Register(mux)
+	s.learning.Register(mux)
 	s.resume.Register(mux)
+	s.search.Register(mux)
 	s.auth.Register(mux)
 }

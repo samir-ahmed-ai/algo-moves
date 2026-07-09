@@ -12,8 +12,11 @@ import { PlanProvider } from './shell/plans/PlanContext';
 import { PlansPage } from './shell/plans/PlansPage';
 import { ResumesPage } from './shell/resumes/ResumesPage';
 import { ProfilePage } from './shell/profile/ProfilePage';
+import { LearnDashboard } from './shell/learn';
 import { SettingsDialog } from '@/shell/canvas';
 import { useUserSettingsSync } from '@/shell/settings/useUserSettingsSync';
+import { useLearningSync } from '@/hooks';
+import { GlobalSearchHost } from '@/shell/search';
 
 const ROUTE_LABELS = {
   home: 'Algo Moves landing page',
@@ -21,6 +24,7 @@ const ROUTE_LABELS = {
   vim: 'Vim dojo',
   dojo: 'Practice dojo',
   games: 'Algorithm games',
+  learn: 'My Learning',
   plans: 'Study plans',
   resumes: 'Resume workspace',
   profile: 'Your profile',
@@ -33,6 +37,7 @@ function Shell() {
   if (route === 'vim') return <VimDojoPage />;
   if (route === 'dojo') return <DojoHubPage />;
   if (route === 'games') return <GamesPage />;
+  if (route === 'learn') return <LearnDashboard />;
   if (route === 'plans') return <PlansPage />;
   if (route === 'resumes') return <ResumesPage />;
   if (route === 'profile') return <ProfilePage />;
@@ -43,6 +48,7 @@ function AppFrame() {
   const { route } = useWorkspace();
   const routeLabel = ROUTE_LABELS[route as keyof typeof ROUTE_LABELS] ?? 'Algorithm workspace';
   useUserSettingsSync();
+  useLearningSync();
 
   return (
     <div className="h-[100dvh] min-h-[100dvh] w-screen overflow-hidden bg-bg font-sans text-ink antialiased">
@@ -63,6 +69,7 @@ function AppFrame() {
           <Shell />
         </main>
         <SettingsDialog />
+        <GlobalSearchHost />
       </ErrorBoundary>
     </div>
   );

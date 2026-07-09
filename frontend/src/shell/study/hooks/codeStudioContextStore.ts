@@ -1,5 +1,6 @@
 import { createContext, type Dispatch, type MutableRefObject, type SetStateAction } from 'react';
 import type { EditorView } from '@codemirror/view';
+import type { Rating } from 'ts-fsrs';
 import type { QuizQuestion } from '@/core/types';
 import type { CodePiece } from '@/lib/code';
 import type {
@@ -47,6 +48,10 @@ export interface CodeStudioPhaseContextValue {
   resetReassemble: () => void;
   reassembleKey: number;
   onReassembleComplete: (placed: CodePiece[], mistakes: number) => void;
+  /** Grade a from-memory recall via the learner's FSRS self-rating. */
+  onRecallComplete: (rating: Rating) => void;
+  /** True once the current recall has been rated (guards double-counting). */
+  recallRated: boolean;
   savedReassembleProgress: ReturnType<typeof loadReassembleProgress>;
   /** When set, the studio stays on this phase (standalone Structure panel). */
   phaseLocked: boolean;

@@ -1,5 +1,6 @@
 import { Lock, Trophy } from 'lucide-react';
 import { catalog } from '../../../content';
+import { unmetPrereqs } from '@/content/unlock';
 import { useWorkspace } from '@/store/workspace';
 import { useProgress, statFor } from '@/store/persistence';
 import { cn } from '@/lib/utils/cn';
@@ -10,9 +11,10 @@ export function PathPanelBody() {
   const { item } = useCanvasStatic();
   const { openProblem } = useWorkspace();
   const progress = useProgress();
+  const isMastered = (id: string): boolean => statFor(progress, id).mastered;
   const items = catalog.items.filter((it) => it.pluginId);
   const idx = items.findIndex((it) => it.id === item.id);
-  const masteredCount = items.filter((it) => statFor(progress, it.id).mastered).length;
+  const masteredCount = items.filter((it) => isMastered(it.id)).length;
   return (
     <section className="reference-panel reference-panel--path nodrag learning-path-panel">
       <div className="learning-path-panel__hero">
@@ -30,8 +32,8 @@ export function PathPanelBody() {
       <div className="learning-path-list">
         {items.map((it, i) => {
           const current = it.id === item.id;
-          const mastered = statFor(progress, it.id).mastered;
-          const unmet = it.prereqs.filter((p) => !statFor(progress, p).mastered);
+          const mastered = isMastered(it.id);
+          const unmet = unmetPrereqs(it.id, isMastered);
           const locked = unmet.length > 0 && !mastered;
           return (
             <button

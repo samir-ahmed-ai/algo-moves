@@ -18,6 +18,9 @@ export const STORAGE_KEYS = {
   // store / persistence
   PROJECTS: k('projects'),
   PROGRESS: k('progress'),
+  ACTIVITY: k('activity'),
+  READINGS: k('readings'),
+  ASSESSMENTS: k('assessments'),
   PREP_PLAN_ACTIVE: k('prep-plan-active'),
 
   // store / canvas-layout
@@ -36,6 +39,7 @@ export const STORAGE_KEYS = {
   REASSEMBLE_PROGRESS: (itemId: string, langIdx: number) =>
     k('reassemble-progress', itemId, langIdx),
   CODE_QUIZ: (itemId: string, langIdx: number) => k('code-quiz', itemId, langIdx),
+  RECALL_RATED: (itemId: string, langIdx: number) => k('recall-rated', itemId, langIdx),
 
   // shell / canvas
   STUDIO_TAB: k('studio-tab'),

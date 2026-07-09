@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { BookMarked } from 'lucide-react';
 import { GLOSSARY } from '../../../content';
+import { matchesSearchFields } from '@/lib/search/score';
 
 import {
   useCanvasStatic,
@@ -14,12 +15,7 @@ export function GlossaryPanelBody() {
   const { item } = useCanvasStatic();
   const [q, setQ] = useState('');
   const tagSet = new Set(item.tags);
-  const filtered = GLOSSARY.filter(
-    (t) =>
-      !q ||
-      t.term.toLowerCase().includes(q.toLowerCase()) ||
-      t.def.toLowerCase().includes(q.toLowerCase()),
-  );
+  const filtered = GLOSSARY.filter((t) => matchesSearchFields(q, t.term, t.def, ...(t.tags ?? [])));
   const relevant = filtered.filter((t) => t.tags?.some((tag) => tagSet.has(tag)));
   const rest = filtered.filter((t) => !t.tags?.some((tag) => tagSet.has(tag)));
   return (

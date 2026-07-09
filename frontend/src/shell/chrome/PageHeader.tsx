@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { SearchTrigger, openGlobalSearch } from '@/shell/search';
 
 export interface PageHeaderProps {
   /** Leading back/home action. Omitted → no leading button. */
@@ -17,6 +18,8 @@ export interface PageHeaderProps {
   /** Right-aligned, page-specific controls. */
   actions?: ReactNode;
   className?: string;
+  /** Show the global search trigger (default true). */
+  showSearch?: boolean;
 }
 
 /**
@@ -32,6 +35,7 @@ export function PageHeader({
   title,
   actions,
   className,
+  showSearch = true,
 }: PageHeaderProps) {
   return (
     <header
@@ -72,7 +76,10 @@ export function PageHeader({
         </span>
       </div>
 
-      {actions ? <div className="ml-auto flex shrink-0 items-center gap-1.5">{actions}</div> : null}
+      <div className="ml-auto flex shrink-0 items-center gap-1.5">
+        {showSearch ? <SearchTrigger onOpen={openGlobalSearch} /> : null}
+        {actions}
+      </div>
     </header>
   );
 }

@@ -1,6 +1,10 @@
 import { createEmptyCard, fsrs, Rating, type Card } from 'ts-fsrs';
 import { createSyncStore } from '@/store/createSyncStore';
+import { createServerSync } from '@/store/persistence/sync/syncEngine';
+import { mergeSrs } from '@/store/persistence/sync/mergeStrategies';
+import { pullReviews, pushReviews, type ReviewCardRow } from '@/platform';
 import { STORAGE_KEYS } from '@/store/storageKeys';
+import { logActivityToday } from './activity';
 import { readStorageJson } from './storage';
 
 export interface SrsCard {
@@ -83,7 +87,53 @@ function load(): SrsData {
   return { cards };
 }
 
-const store = createSyncStore<SrsData>(KEY, load);
+function cardToRow(card: SrsCard): ReviewCardRow {
+  return {
+    problemId: card.problemId,
+    due: new Date(card.due).toISOString(),
+    intervalDays: card.intervalDays,
+    reps: card.reps,
+    fsrs: card.fsrs ?? {},
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function rowToCard(row: ReviewCardRow): SrsCard | null {
+  const id = normalizeProblemId(row.problemId);
+  if (!id) return null;
+  const dueMs = Date.parse(row.due);
+  return hydrateCard(
+    {
+      problemId: id,
+      due: Number.isFinite(dueMs) ? dueMs : Date.now(),
+      intervalDays: row.intervalDays,
+      reps: row.reps,
+      fsrs: row.fsrs,
+    },
+    id,
+  );
+}
+
+// Server sync: the FSRS deck round-trips to /api/reviews. Card Dates rehydrate
+// through the same hydrateCard path the localStorage load uses.
+const reviewSync = createServerSync<SrsData>({
+  key: KEY,
+  pull: async () => {
+    const rows = await pullReviews();
+    if (rows == null) return null;
+    const cards: Record<string, SrsCard> = {};
+    for (const row of rows) {
+      const card = rowToCard(row);
+      if (card) cards[card.problemId] = card;
+    }
+    return { cards };
+  },
+  push: (data) => pushReviews(Object.values(data.cards).map(cardToRow)),
+  merge: mergeSrs,
+});
+
+const store = createSyncStore<SrsData>(KEY, load, reviewSync.save);
+reviewSync.attach(store);
 
 export function useSrsData(): SrsData {
   return store.use();
@@ -99,27 +149,32 @@ function toSrsCard(problemId: string, card: Card): SrsCard {
   };
 }
 
-/** FSRS: correct → Good; wrong → Again (resets short-term learning). */
-export function scheduleReview(problemId: string, correct: boolean): SrsCard {
+/**
+ * Schedule the next review from an explicit FSRS grade (Again/Hard/Good/Easy).
+ * The post-recall self-rating feeds this directly; `scheduleReview` is the
+ * correct/wrong shorthand.
+ */
+export function scheduleReviewRating(problemId: string, rating: Rating): SrsCard {
   const id = normalizeProblemId(problemId);
   if (!id) return toSrsCard('', createEmptyCard());
+  logActivityToday();
   let next!: SrsCard;
   store.update((data) => {
     const prev = data.cards[id];
     const fsrsCard: Card = prev?.fsrs ?? createEmptyCard();
-    const grade = correct ? Rating.Good : Rating.Again;
     const preview = scheduler.repeat(fsrsCard, new Date()) as Partial<
       Record<Rating, { card: Card }>
     >;
-    const item = preview[grade];
-    if (!item?.card) {
-      next = toSrsCard(id, fsrsCard);
-      return { cards: { ...data.cards, [id]: next } };
-    }
-    next = toSrsCard(id, item.card);
+    const item = preview[rating];
+    next = toSrsCard(id, item?.card ?? fsrsCard);
     return { cards: { ...data.cards, [id]: next } };
   });
   return next;
+}
+
+/** FSRS: correct → Good; wrong → Again (resets short-term learning). */
+export function scheduleReview(problemId: string, correct: boolean): SrsCard {
+  return scheduleReviewRating(problemId, correct ? Rating.Good : Rating.Again);
 }
 
 export function srsSortKey(problemId: string, cards: Record<string, SrsCard>): number {

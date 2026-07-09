@@ -18,6 +18,16 @@ export const catalog = buildCatalog([
 ]);
 
 export type { Catalog } from './catalog';
+export {
+  checkCatalogIntegrity,
+  checkBindings,
+  checkPrereqRefs,
+  checkPrereqDag,
+  checkCategoriesNonEmpty,
+  type IntegrityBinders,
+} from './integrity';
+export { getLesson, hasLesson, LESSONS, LESSON_LIST } from './lessons';
+export type { LessonDef, LessonBlock } from './lessons/types';
 export * from './types';
 export * from './tags';
 export * from './tagColors';
