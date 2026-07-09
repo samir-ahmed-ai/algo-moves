@@ -32,4 +32,10 @@ describe('proficiency', () => {
     expect(masteryBand(p)).not.toBe('Mastered');
     expect(masteryBand(p)).not.toBe('Proficient');
   });
+
+  it('never returns NaN for a malformed card (non-finite stability/elapsed)', () => {
+    const p = proficiency({ stability: NaN, elapsedDays: NaN, reps: 1, attempts: 2, correct: 2 });
+    expect(Number.isFinite(p)).toBe(true);
+    expect(masteryBand(p)).not.toBe('New'); // NaN would have misclassified as 'New'
+  });
 });

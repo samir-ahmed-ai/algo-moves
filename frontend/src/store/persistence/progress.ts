@@ -168,11 +168,12 @@ function rowsToStats(rows: ProblemProgressRow[]): Record<string, ProblemStat> {
 // returns none via pull, so mergeProgress preserves the local list).
 const progressSync = createServerSync<ProgressData>({
   key: KEY,
+  empty: { stats: {}, mistakes: [] },
   pull: async () => {
     const rows = await pullProgress();
     return rows == null ? null : { stats: rowsToStats(rows), mistakes: [] };
   },
-  push: (data) => pushProgress(statsToRows(data.stats)),
+  push: (data, opts) => pushProgress(statsToRows(data.stats), opts),
   merge: mergeProgress,
 });
 

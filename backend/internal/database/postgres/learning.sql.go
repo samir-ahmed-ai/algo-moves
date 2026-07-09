@@ -575,13 +575,17 @@ values
    $4, $5, $6, now())
 on conflict (profile_id, problem_id) do update set
   reps          = greatest(public.review_schedule.reps, excluded.reps),
-  due           = case
-                    when excluded.reps > public.review_schedule.reps then excluded.due
-                    when excluded.reps < public.review_schedule.reps then public.review_schedule.due
-                    else greatest(public.review_schedule.due, excluded.due) end,
-  interval_days = case when excluded.reps >= public.review_schedule.reps
+  due           = case when excluded.reps > public.review_schedule.reps
+                         or (excluded.reps = public.review_schedule.reps
+                             and excluded.due > public.review_schedule.due)
+                       then excluded.due else public.review_schedule.due end,
+  interval_days = case when excluded.reps > public.review_schedule.reps
+                         or (excluded.reps = public.review_schedule.reps
+                             and excluded.due > public.review_schedule.due)
                        then excluded.interval_days else public.review_schedule.interval_days end,
-  fsrs          = case when excluded.reps >= public.review_schedule.reps
+  fsrs          = case when excluded.reps > public.review_schedule.reps
+                         or (excluded.reps = public.review_schedule.reps
+                             and excluded.due > public.review_schedule.due)
                        then excluded.fsrs else public.review_schedule.fsrs end,
   updated_at    = now()
 returning problem_id, due, interval_days, reps, fsrs, updated_at
@@ -606,6 +610,9 @@ type UpsertReviewCardRow struct {
 }
 
 // Higher reps wins; tie -> later due. Mirrors the client mergeSrsCard.
+// Whole-card merge: the winner (higher reps, or on a tie the later due) supplies
+// due, interval_days AND fsrs together, so the row is never a mix of two cards. This
+// mirrors the client mergeSrsCard exactly so both sides converge.
 func (q *Queries) UpsertReviewCard(ctx context.Context, arg UpsertReviewCardParams) (UpsertReviewCardRow, error) {
 	row := q.db.QueryRow(ctx, upsertReviewCard,
 		arg.ProfileID,

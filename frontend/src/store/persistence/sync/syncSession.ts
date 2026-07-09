@@ -6,8 +6,12 @@
  */
 
 export interface SyncEngineHandle {
-  /** Pull server state, merge with local, apply, and converge-push. */
+  /** Guest → account: merge local into the account and converge-push. */
   hydrate: () => Promise<void>;
+  /** Account load / switch: replace local with the server value. */
+  hydrateReplace: () => Promise<void>;
+  /** Sign-out: clear the store to empty. */
+  reset: () => void;
   /** Drain any pending debounced push immediately (tab close / visibility change). */
   flush: () => void;
 }

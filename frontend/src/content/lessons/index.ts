@@ -1,6 +1,13 @@
 import type { LessonDef } from './types';
 import { graphsLessons } from './graphs';
 import { dynamicProgrammingLessons } from './dynamic-programming';
+import { backtrackingLessons } from './backtracking';
+import { binarySearchLessons } from './binary-search';
+import { arraysLessons } from './arrays';
+import { treesLessons } from './trees';
+import { heapsLessons } from './heaps';
+import { linkedListsLessons } from './linked-lists';
+import { greedyLessons } from './greedy';
 
 export type { LessonDef, LessonBlock } from './types';
 
@@ -9,7 +16,17 @@ export type { LessonDef, LessonBlock } from './types';
  * of the plugin chunks (mirrors `_generated/courses`). Add a course by importing its
  * array here.
  */
-const ALL: LessonDef[] = [...graphsLessons, ...dynamicProgrammingLessons];
+const ALL: LessonDef[] = [
+  ...graphsLessons,
+  ...dynamicProgrammingLessons,
+  ...backtrackingLessons,
+  ...binarySearchLessons,
+  ...arraysLessons,
+  ...treesLessons,
+  ...heapsLessons,
+  ...linkedListsLessons,
+  ...greedyLessons,
+];
 
 export const LESSONS: Record<string, LessonDef> = Object.fromEntries(
   ALL.map((lesson) => [lesson.id, lesson]),

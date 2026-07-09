@@ -63,10 +63,12 @@ export async function pullProgress(): Promise<ProblemProgressRow[] | null> {
 
 export async function pushProgress(
   rows: ProblemProgressRow[],
+  opts?: { keepalive?: boolean },
 ): Promise<ProblemProgressRow[] | null> {
   const res = await arcadeFetch<{ problems: ProblemProgressRow[] }>('/api/progress', {
     method: 'PUT',
     body: JSON.stringify({ problems: rows }),
+    ...(opts?.keepalive ? { keepalive: true } : {}),
   });
   return res?.problems ?? null;
 }
@@ -93,10 +95,14 @@ export async function pullReviews(): Promise<ReviewCardRow[] | null> {
   return res?.cards ?? null;
 }
 
-export async function pushReviews(cards: ReviewCardRow[]): Promise<ReviewCardRow[] | null> {
+export async function pushReviews(
+  cards: ReviewCardRow[],
+  opts?: { keepalive?: boolean },
+): Promise<ReviewCardRow[] | null> {
   const res = await arcadeFetch<{ cards: ReviewCardRow[] }>('/api/reviews', {
     method: 'PUT',
     body: JSON.stringify({ cards }),
+    ...(opts?.keepalive ? { keepalive: true } : {}),
   });
   return res?.cards ?? null;
 }

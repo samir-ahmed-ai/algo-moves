@@ -12,6 +12,7 @@ function setup(remote: Box | null) {
   let pulls = 0;
   const engine = createServerSync<Box>({
     key: 'algo-moves:test-sync',
+    empty: { n: 0 },
     pull: async () => {
       pulls++;
       return remote;
@@ -71,5 +72,34 @@ describe('createServerSync', () => {
     await engine.hydrate();
     expect(store.get().n).toBe(9); // unchanged
     expect(pushes).toHaveLength(0); // nothing pushed on unavailable pull
+  });
+
+  it('hydrateReplace overwrites local with server state and does NOT push (account switch)', async () => {
+    const { engine, store, pushes } = setup({ n: 4 });
+    store.set({ n: 99 }); // previous account's data lingering in the singleton
+    setSyncActive(true);
+    await engine.hydrateReplace();
+    expect(store.get().n).toBe(4); // replaced, not merged (would be 99)
+    expect(pushes).toHaveLength(0); // never pushes the previous account's data
+  });
+
+  it('hydrateReplace clears to empty when the backend is unavailable (no data leak)', async () => {
+    const { engine, store, pushes } = setup(null);
+    store.set({ n: 99 });
+    setSyncActive(true);
+    await engine.hydrateReplace();
+    expect(store.get().n).toBe(0); // cleared to empty rather than keeping prior data
+    expect(pushes).toHaveLength(0);
+  });
+
+  it('reset clears the store to empty and does not push (sign-out)', () => {
+    const { engine, store, pushes } = setup(null);
+    setSyncActive(true);
+    store.set({ n: 42 });
+    pushes.length = 0;
+    engine.reset();
+    expect(store.get().n).toBe(0);
+    expect(pushes).toHaveLength(0);
+    expect(JSON.parse(localStorage.getItem('algo-moves:test-sync') ?? '{}').n).toBe(0);
   });
 });

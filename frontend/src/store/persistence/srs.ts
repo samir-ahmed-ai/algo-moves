@@ -54,6 +54,10 @@ function isSrsData(value: unknown): value is StoredSrsData {
 function hydrateFsrsCard(value: unknown): Card | undefined {
   if (!isRecord(value)) return undefined;
   const card = value as unknown as Card;
+  // An empty/incomplete blob (e.g. `{}` sent for a legacy card that had no fsrs, or a
+  // partial object) is NOT a valid FSRS Card — treat it as absent so scheduling falls
+  // back to createEmptyCard() instead of feeding ts-fsrs a card it rejects.
+  if (typeof card.state !== 'number' || typeof card.stability !== 'number') return undefined;
   return {
     ...card,
     due: validDate(card.due),
@@ -118,6 +122,7 @@ function rowToCard(row: ReviewCardRow): SrsCard | null {
 // through the same hydrateCard path the localStorage load uses.
 const reviewSync = createServerSync<SrsData>({
   key: KEY,
+  empty: { cards: {} },
   pull: async () => {
     const rows = await pullReviews();
     if (rows == null) return null;
@@ -128,7 +133,7 @@ const reviewSync = createServerSync<SrsData>({
     }
     return { cards };
   },
-  push: (data) => pushReviews(Object.values(data.cards).map(cardToRow)),
+  push: (data, opts) => pushReviews(Object.values(data.cards).map(cardToRow), opts),
   merge: mergeSrs,
 });
 

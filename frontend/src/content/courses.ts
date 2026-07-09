@@ -19,6 +19,7 @@ export const curatedCourses: CourseDef[] = [
         title: 'Constraint placement',
         summary: 'Place items subject to constraints, backtracking on conflicts.',
         items: [
+          { id: 'backtracking-pruning', kind: 'reading' },
           {
             id: 'n-queens',
             kind: 'problem',
@@ -33,6 +34,8 @@ export const curatedCourses: CourseDef[] = [
         title: 'Enumeration',
         summary: 'Generate every combination by including/excluding each choice.',
         items: [
+          { id: 'backtracking-choose-explore-unchoose', kind: 'reading' },
+          { id: 'backtracking-recursion-tree', kind: 'reading' },
           {
             id: 'subsets',
             kind: 'problem',
@@ -143,6 +146,9 @@ export const curatedCourses: CourseDef[] = [
         title: 'Fundamentals',
         summary: 'Classic binary search on a sorted array.',
         items: [
+          { id: 'binary-search-monotonic-predicate', kind: 'reading' },
+          { id: 'binary-search-boundaries-without-off-by-one', kind: 'reading' },
+          { id: 'binary-search-on-the-answer', kind: 'reading' },
           {
             id: 'binary-search',
             kind: 'problem',
@@ -206,6 +212,7 @@ export const curatedCourses: CourseDef[] = [
         title: 'Searching',
         summary: 'Shrink the search space with ordered structure.',
         items: [
+          { id: 'arrays-two-pointer-sorted', kind: 'reading' },
           {
             id: 'two-sum-sorted',
             kind: 'problem',
@@ -220,6 +227,8 @@ export const curatedCourses: CourseDef[] = [
         title: 'Sliding window',
         summary: 'Slide a contiguous window and maintain a running answer.',
         items: [
+          { id: 'arrays-fixed-window', kind: 'reading' },
+          { id: 'arrays-sliding-window-invariant', kind: 'reading' },
           {
             id: 'max-subarray-sum-k',
             kind: 'problem',
@@ -301,6 +310,8 @@ export const curatedCourses: CourseDef[] = [
         title: 'Traversal',
         summary: 'Depth-first and breadth-first visit orders.',
         items: [
+          { id: 'trees-recursion-subtree', kind: 'reading' },
+          { id: 'trees-four-traversals', kind: 'reading' },
           {
             id: 'tree-traversals',
             kind: 'problem',
@@ -315,6 +326,7 @@ export const curatedCourses: CourseDef[] = [
         title: 'Prefix trees',
         summary: 'Tries for word insert and search.',
         items: [
+          { id: 'trees-trie-tree-of-characters', kind: 'reading' },
           {
             id: 'trie',
             kind: 'problem',
@@ -337,6 +349,9 @@ export const curatedCourses: CourseDef[] = [
         title: 'Operations',
         summary: 'Insert (sift-up) and extract (sift-down).',
         items: [
+          { id: 'heaps-invariant-sift', kind: 'reading' },
+          { id: 'heaps-priority-queue-top-k', kind: 'reading' },
+          { id: 'heaps-streaming-median', kind: 'reading' },
           {
             id: 'heap-operations',
             kind: 'problem',
@@ -359,6 +374,7 @@ export const curatedCourses: CourseDef[] = [
         title: 'Rewiring',
         summary: 'Reverse and restructure by moving next-pointers.',
         items: [
+          { id: 'linked-lists-save-next-first', kind: 'reading' },
           {
             id: 'reverse-linked-list',
             kind: 'problem',
@@ -373,6 +389,8 @@ export const curatedCourses: CourseDef[] = [
         title: 'Fast & slow pointers',
         summary: "Floyd's cycle detection.",
         items: [
+          { id: 'linked-lists-cycle-detection', kind: 'reading' },
+          { id: 'linked-lists-find-middle', kind: 'reading' },
           {
             id: 'linked-list-cycle',
             kind: 'problem',
@@ -395,6 +413,9 @@ export const curatedCourses: CourseDef[] = [
         title: 'Scheduling',
         summary: 'Pick a maximal non-conflicting set.',
         items: [
+          { id: 'greedy-exchange-argument', kind: 'reading' },
+          { id: 'greedy-interval-scheduling', kind: 'reading' },
+          { id: 'greedy-scheduling-wrong-heuristics', kind: 'reading' },
           {
             id: 'interval-scheduling',
             kind: 'problem',
