@@ -107,7 +107,7 @@ export function MobileVizShell({
               className={cn(
                 btn,
                 !player.isPlaying &&
-                  'bg-accent text-white enabled:hover:bg-accent enabled:hover:text-white',
+                  'bg-accent text-[var(--accent-contrast)] enabled:hover:bg-accent enabled:hover:text-[var(--accent-contrast)]',
               )}
               aria-label={player.isPlaying ? 'Pause' : 'Play'}
             >

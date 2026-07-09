@@ -123,7 +123,9 @@ function ExampleList({
             <span
               className={cn(
                 'problem-example-index grid size-[17px] shrink-0 place-items-center rounded-full border text-[length:var(--fs-2xs)] font-semibold',
-                on ? 'border-accent bg-accent text-white' : 'border-edge bg-panel2/60 text-ink3',
+                on
+                  ? 'border-accent bg-accent text-[var(--accent-contrast)]'
+                  : 'border-edge bg-panel2/60 text-ink3',
               )}
             >
               {idx + 1}

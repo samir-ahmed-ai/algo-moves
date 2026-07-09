@@ -352,7 +352,7 @@ export function LandingHero({
         <button
           type="button"
           onClick={() => onOpenItem((lastItem ?? firstProblem)?.id ?? catalog.firstItemId)}
-          className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-accent px-3 py-2 font-medium text-white shadow-[var(--shadow-sm)] transition-opacity hover:opacity-90"
+          className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-accent px-3 py-2 font-medium text-[var(--accent-contrast)] shadow-[var(--shadow-sm)] transition-opacity hover:opacity-90"
         >
           <Play className="h-3.5 w-3.5" />
           {lastItem

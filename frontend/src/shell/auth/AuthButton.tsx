@@ -110,7 +110,7 @@ export function AuthButton({
           aria-haspopup="dialog"
           onClick={() => setAuthOpen((open) => !open)}
           className={cn(
-            'auth-button auth-button--signin inline-flex items-center gap-1.5 text-white touch-manipulation bg-accent transition-all',
+            'auth-button auth-button--signin inline-flex items-center gap-1.5 text-[var(--accent-contrast)] touch-manipulation bg-accent transition-all',
             isHeader
               ? 'shrink-0 rounded-md px-2.5 py-1.5 text-xs font-medium transition-opacity hover:opacity-90 sm:gap-1.5 sm:px-3 sm:text-sm'
               : cn(

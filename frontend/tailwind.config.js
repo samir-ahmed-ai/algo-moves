@@ -22,6 +22,8 @@ export default {
         accentbg: 'var(--accent-bg)',
         good: 'var(--good)',
         goodbg: 'var(--good-bg)',
+        warn: 'var(--warn)',
+        warnbg: 'var(--warn-bg)',
         bad: 'var(--bad)',
         badbg: 'var(--bad-bg)',
       },
@@ -55,6 +57,7 @@ export default {
         productive: 'cubic-bezier(0.16, 1, 0.3, 1)',
         precise: 'cubic-bezier(0.22, 1, 0.36, 1)',
         soft: 'cubic-bezier(0.4, 0, 0.2, 1)',
+        flip: 'cubic-bezier(0.2, 0.7, 0.3, 1)',
       },
       keyframes: {
         'accordion-down': {

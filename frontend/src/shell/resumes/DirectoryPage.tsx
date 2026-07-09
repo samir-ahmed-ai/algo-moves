@@ -136,7 +136,7 @@ export function DirectoryPage({ onSelect, onCustomize }: DirectoryPageProps) {
                     type="button"
                     onClick={() => openResume(e.id, true)}
                     disabled={loadingId === e.id}
-                    className="resume-directory-card__primary flex-1 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 transition disabled:opacity-50"
+                    className="resume-directory-card__primary flex-1 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-[var(--accent-contrast)] hover:opacity-90 transition disabled:opacity-50"
                   >
                     Customize
                   </button>

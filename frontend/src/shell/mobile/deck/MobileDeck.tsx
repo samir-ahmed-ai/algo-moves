@@ -26,6 +26,9 @@ import {
   ReadCardView,
   ReassembleCardView,
 } from './MobileCards';
+import { SwipeHint } from '@/components/shared';
+import { readStorageJson, writeStorageJson } from '@/store/persistence/storage';
+import { STORAGE_KEYS } from '@/store/storageKeys';
 
 function initialIndices(
   topicId: string,
@@ -102,6 +105,11 @@ export function MobileDeck({
   const [quizRunSeed, setQuizRunSeed] = useState(() => newQuizRunSeed());
   const [quizAttempt, setQuizAttempt] = useState(0);
   const [quizNavLocked, setQuizNavLocked] = useState(false);
+  // First-run swipe affordance: shown only on the very first card until the
+  // user moves once, then persisted as seen so it never reappears.
+  const [showSwipeHint, setShowSwipeHint] = useState(
+    () => !readStorageJson<boolean>(STORAGE_KEYS.MOBILE_SWIPE_HINT_SEEN, false),
+  );
   const done = pIdx >= blocks.length;
   const block = done ? null : blocks[pIdx];
   const card = block?.cards[cIdx];
@@ -111,6 +119,14 @@ export function MobileDeck({
     setQuizRunSeed(newQuizRunSeed());
     setQuizAttempt(0);
   }, [pIdx]);
+
+  // Dismiss + remember the swipe hint the moment the learner moves off card 1.
+  useEffect(() => {
+    if (showSwipeHint && (pIdx !== 0 || cIdx !== 0)) {
+      writeStorageJson(STORAGE_KEYS.MOBILE_SWIPE_HINT_SEEN, true);
+      setShowSwipeHint(false);
+    }
+  }, [showSwipeHint, pIdx, cIdx]);
 
   useEffect(() => {
     if (done) {
@@ -276,7 +292,7 @@ export function MobileDeck({
           <button
             type="button"
             onClick={onExit}
-            className="grid h-8 w-8 place-items-center rounded-full text-ink3 hover:bg-panel2 hover:text-ink"
+            className="relative grid h-8 w-8 place-items-center rounded-full text-ink3 before:absolute before:-inset-1.5 before:content-[''] hover:bg-panel2 hover:text-ink"
             aria-label="Back to categories"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -292,7 +308,7 @@ export function MobileDeck({
                   onClick={goToNextProblem}
                   title="Next problem"
                   aria-label="Next problem"
-                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink3 hover:bg-panel2 hover:text-ink"
+                  className="relative grid h-8 w-8 shrink-0 place-items-center rounded-full text-ink3 before:absolute before:-inset-1.5 before:content-[''] hover:bg-panel2 hover:text-ink"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </button>
@@ -432,6 +448,12 @@ export function MobileDeck({
           ) : null}
         </div>
       </div>
+
+      {showSwipeHint && !done && pIdx === 0 && cIdx === 0 && (
+        <div className="shrink-0 pb-2">
+          <SwipeHint message="Swipe left or right to move between cards" />
+        </div>
+      )}
     </div>
   );
 }

@@ -128,7 +128,7 @@ function SavedCanvasesBody() {
             onClick={() => void save()}
             disabled={disabled}
             title="Save current canvas"
-            className="saved-canvases__save flex items-center gap-1 rounded-md bg-accent px-2 py-1.5 text-white disabled:opacity-50"
+            className="saved-canvases__save flex items-center gap-1 rounded-md bg-accent px-2 py-1.5 text-[var(--accent-contrast)] disabled:opacity-50"
           >
             {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
             <span className={chromeText.sm}>Save</span>

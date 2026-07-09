@@ -51,6 +51,7 @@ export const STORAGE_KEYS = {
   MOBILE_SESSION: k('mobile-session'),
   SRS_DECK: k('srs-deck'),
   INSTALL_PROMPT_DISMISSED: k('install-prompt-dismissed'),
+  MOBILE_SWIPE_HINT_SEEN: k('mobile-swipe-hint-seen'),
 
   // shell / home
   SWIPE_QR_DISMISSED: k('swipe-qr-dismissed'),

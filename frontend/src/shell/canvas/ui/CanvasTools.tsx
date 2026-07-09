@@ -19,7 +19,7 @@ import type { CanvasToolsProps } from '@/store/workspace';
 export type { CanvasToolsProps };
 
 const HUD_BTN =
-  'grid place-items-center rounded-[calc(var(--radius)-2px)] transition-colors disabled:opacity-30';
+  'grid place-items-center rounded-[calc(var(--radius)-2px)] transition-[background-color,color,box-shadow,transform] active:scale-95 disabled:opacity-30 motion-reduce:active:scale-100';
 
 export function HudBtn({
   onClick,
@@ -60,7 +60,7 @@ export function HudBtn({
         tone === 'play' && 'hud-btn--play',
         tone === 'play' && active && 'bg-good text-white',
         tone === 'play' && !active && 'text-ink2 hover:bg-panel2 hover:text-ink',
-        !tone && variant === 'solid' && active && 'bg-accent text-white',
+        !tone && variant === 'solid' && active && 'bg-accent text-[var(--accent-contrast)]',
         !tone && variant === 'solid' && !active && 'text-ink2 hover:bg-panel2 hover:text-ink',
         !tone && variant === 'soft' && active && 'bg-accentbg text-accent',
         !tone &&

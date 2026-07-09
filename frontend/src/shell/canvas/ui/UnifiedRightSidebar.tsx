@@ -303,7 +303,7 @@ export function UnifiedRightSidebar() {
                 chromeText.xs,
                 `right-sidebar-panel__mode flex min-h-[var(--row)] items-center justify-center gap-0.5 px-1 py-0 font-medium transition-colors ${RADIUS_CTRL}`,
                 mode === m.id
-                  ? 'right-sidebar-panel__mode--active bg-accent text-white shadow-sm'
+                  ? 'right-sidebar-panel__mode--active bg-accent text-[var(--accent-contrast)] shadow-sm'
                   : 'text-ink2 hover:bg-panel2 hover:text-ink',
               )}
             >
@@ -423,7 +423,7 @@ export function UnifiedRightSidebar() {
                     chromeText.sm,
                     `flex min-h-[var(--row)] flex-1 items-center justify-center gap-0.5 px-1 py-0 font-medium transition-colors ${RADIUS_CTRL}`,
                     mode === m.id
-                      ? 'bg-accent text-white shadow-sm'
+                      ? 'bg-accent text-[var(--accent-contrast)] shadow-sm'
                       : 'text-ink2 hover:bg-panel2 hover:text-ink',
                   )}
                 >

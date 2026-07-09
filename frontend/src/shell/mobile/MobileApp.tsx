@@ -242,7 +242,7 @@ export function MobileApp() {
               <button
                 type="button"
                 onClick={goHome}
-                className="grid h-8 w-8 place-items-center rounded-full text-ink3 hover:bg-panel2 hover:text-ink"
+                className="relative grid h-8 w-8 place-items-center rounded-full text-ink3 before:absolute before:-inset-1.5 before:content-[''] hover:bg-panel2 hover:text-ink"
                 title="Home"
                 aria-label="Return to landing page"
               >

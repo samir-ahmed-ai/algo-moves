@@ -79,7 +79,7 @@ export function CanvasToolbar({
               canvasInterview.start();
             }}
             className={cn(
-              'canvas-toolbar__interview inline-flex h-8 items-center gap-1.5 rounded-md bg-accent px-2.5 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60',
+              'canvas-toolbar__interview inline-flex h-8 items-center gap-1.5 rounded-md bg-accent px-2.5 font-semibold text-[var(--accent-contrast)] transition-opacity hover:opacity-90 disabled:opacity-60',
               chromeText.sm,
             )}
           >

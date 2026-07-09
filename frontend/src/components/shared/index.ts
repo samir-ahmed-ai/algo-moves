@@ -1,5 +1,7 @@
 export * from './CategorySelectItems';
+export * from './ConnectionDot';
 export * from './ExcalidrawWrapper';
+export * from './SwipeHint';
 export * from './FeatureSelectorPopover';
 export * from './MoveLog';
 export * from './QuizChoiceLabel';

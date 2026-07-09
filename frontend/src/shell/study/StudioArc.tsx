@@ -121,7 +121,7 @@ export function StudioArc({
                     : 'h-[18px] w-[18px] [&>svg]:h-[11px] [&>svg]:w-[11px]',
                   state === 'active'
                     ? cn(
-                        'border-accent bg-accent text-white',
+                        'border-accent bg-accent text-[var(--accent-contrast)]',
                         dense
                           ? 'shadow-[0_0_0_3px_var(--accent-bg)]'
                           : 'shadow-[0_0_0_4px_var(--accent-bg)]',

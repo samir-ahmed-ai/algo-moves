@@ -6,14 +6,18 @@ function splitCombo(label: string): string[] {
   return label.split('+').filter(Boolean);
 }
 
+type Outcome = 'ok' | 'blocked' | null;
+
 function KeyCombo({
   label,
   variant,
   pulse,
+  outcome,
 }: {
   label: string | null;
   variant: 'prev' | 'current';
   pulse?: boolean;
+  outcome?: Outcome;
 }) {
   if (!label) {
     return (
@@ -39,6 +43,8 @@ function KeyCombo({
         'vim-key-hud__combo',
         `vim-key-hud__combo--${variant}`,
         pulse && variant === 'current' && 'vim-key-hud__combo--pulse',
+        variant === 'current' && outcome === 'ok' && 'vim-key-hud__combo--ok',
+        variant === 'current' && outcome === 'blocked' && 'vim-key-hud__combo--blocked',
       )}
       aria-label={variant === 'current' ? `Current key: ${label}` : `Previous key: ${label}`}
     >
@@ -57,7 +63,7 @@ function KeyCombo({
 }
 
 export function KeyboardHud() {
-  const { prevKey, currentKey } = useVimGame();
+  const { prevKey, currentKey, error, lastMotionOk } = useVimGame();
   const [pulse, setPulse] = useState(false);
 
   useEffect(() => {
@@ -67,11 +73,13 @@ export function KeyboardHud() {
     return () => window.clearTimeout(t);
   }, [currentKey]);
 
+  const outcome: Outcome = currentKey ? (error ? 'blocked' : lastMotionOk ? 'ok' : null) : null;
+
   return (
     <div className="vim-key-hud" role="status" aria-live="polite" aria-atomic="true">
       <KeyCombo label={prevKey} variant="prev" />
       <span className="vim-key-hud__sep" aria-hidden />
-      <KeyCombo label={currentKey} variant="current" pulse={pulse} />
+      <KeyCombo label={currentKey} variant="current" pulse={pulse} outcome={outcome} />
     </div>
   );
 }

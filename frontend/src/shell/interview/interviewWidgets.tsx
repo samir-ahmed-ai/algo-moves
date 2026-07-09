@@ -512,7 +512,7 @@ function QuestionsBody() {
           onClick={add}
           disabled={!text.trim()}
           className={cn(
-            'inline-flex items-center gap-1 bg-accent px-2.5 py-1 font-medium text-white disabled:opacity-40',
+            'inline-flex items-center gap-1 bg-accent px-2.5 py-1 font-medium text-[var(--accent-contrast)] disabled:opacity-40',
             'interview-questions__add',
             RADIUS_CTRL,
             chromeText.sm,

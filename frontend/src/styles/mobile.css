@@ -1,6 +1,9 @@
 /* Mobile Mode — swipe deck chrome, card transitions, and little flourishes. */
 
 .mobile-frame {
+  /* Keep chrome clear of the notch / status bar and the home indicator in
+     standalone (installed) PWA mode. */
+  padding-top: env(safe-area-inset-top, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 

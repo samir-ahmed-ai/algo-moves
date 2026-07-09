@@ -513,7 +513,7 @@ export function ImposterGame({
           <button
             type="button"
             onClick={onContinue}
-            className="mt-1 inline-flex min-h-[48px] items-center justify-center rounded-full bg-accent px-6 text-[14px] font-semibold text-white"
+            className="mt-1 inline-flex min-h-[48px] items-center justify-center rounded-full bg-accent px-6 text-[14px] font-semibold text-[var(--accent-contrast)]"
           >
             Continue
           </button>

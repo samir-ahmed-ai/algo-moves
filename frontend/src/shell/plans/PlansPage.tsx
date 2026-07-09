@@ -101,7 +101,7 @@ function CreatePlanForm({ onCreated }: { onCreated: (id: string) => void }) {
         type="button"
         onClick={() => void submit()}
         disabled={!title.trim() || busy}
-        className="plan-create-form__button inline-flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-50"
+        className="plan-create-form__button inline-flex items-center gap-1.5 rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-[var(--accent-contrast)] shadow-sm transition hover:opacity-90 disabled:opacity-50"
       >
         {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
         Create
@@ -155,7 +155,7 @@ function PlanCard({
             e.stopPropagation();
             onDelete();
           }}
-          className="plan-card__delete shrink-0 rounded-lg p-1.5 text-ink3 opacity-0 transition hover:bg-panel2 hover:text-red-500 group-hover:opacity-100"
+          className="plan-card__delete shrink-0 rounded-lg p-1.5 text-ink3 opacity-0 transition hover:bg-panel2 hover:text-bad group-hover:opacity-100"
         >
           <Trash2 className="h-4 w-4" />
         </button>
@@ -203,7 +203,7 @@ function PlanCard({
           onClick={onStart}
           disabled={plan.itemCount === 0}
           className={cn(
-            'plan-card__primary flex w-full items-center justify-center gap-1.5 rounded-xl bg-accent py-2 text-sm font-semibold text-white shadow-sm',
+            'plan-card__primary flex w-full items-center justify-center gap-1.5 rounded-xl bg-accent py-2 text-sm font-semibold text-[var(--accent-contrast)] shadow-sm',
             'transition hover:opacity-90 disabled:opacity-40',
           )}
         >
@@ -368,7 +368,7 @@ function PlanDetailView({
             <button
               type="button"
               onClick={onDelete}
-              className="ml-auto inline-flex items-center gap-2 rounded-xl border border-edge px-4 py-2.5 text-sm font-medium text-ink3 transition hover:border-red-500/50 hover:bg-panel2 hover:text-red-500"
+              className="ml-auto inline-flex items-center gap-2 rounded-xl border border-edge px-4 py-2.5 text-sm font-medium text-ink3 transition hover:border-bad/50 hover:bg-panel2 hover:text-bad"
             >
               <Trash2 className="h-4 w-4" />
               Delete plan
@@ -610,7 +610,7 @@ export function PlansPage() {
               <button
                 type="button"
                 onClick={() => void handleDelete(deleteConfirm)}
-                className="product-confirm-modal__danger rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-red-600"
+                className="product-confirm-modal__danger rounded-xl bg-bad px-4 py-2 text-sm font-semibold text-badbg shadow-theme-sm transition hover:opacity-90"
               >
                 Delete
               </button>

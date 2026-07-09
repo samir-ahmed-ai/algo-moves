@@ -46,9 +46,10 @@ describe('design density integration', () => {
   });
 
   it('shares a stable semantic tone vocabulary', () => {
-    expect(UI_TONES).toEqual(['default', 'accent', 'good', 'bad', 'muted']);
+    expect(UI_TONES).toEqual(['default', 'accent', 'good', 'warn', 'bad', 'muted']);
     expect(normalizeUiTone('good')).toBe('good');
     expect(normalizeUiTone('unknown', 'muted')).toBe('muted');
     expect(difficultyTone(' Hard ')).toBe('bad');
+    expect(difficultyTone('Medium')).toBe('warn');
   });
 });

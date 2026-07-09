@@ -99,7 +99,7 @@ function CaseTab({
         'problem-brief-tab flex shrink-0 items-center gap-1.5 rounded-[calc(var(--radius)-2px)] border px-2 py-1 font-medium transition-colors',
         nodeText.xs,
         active
-          ? 'problem-brief-tab--active border-accent/25 bg-accent text-white shadow-sm'
+          ? 'problem-brief-tab--active border-accent/25 bg-accent text-[var(--accent-contrast)] shadow-sm'
           : 'problem-brief-tab--idle border-transparent bg-transparent text-ink2 hover:bg-panel hover:text-ink',
       )}
     >

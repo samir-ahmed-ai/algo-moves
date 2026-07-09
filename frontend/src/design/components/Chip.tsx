@@ -1,5 +1,13 @@
 import type { ReactNode } from 'react';
-import { AlertCircle, CheckCircle2, Circle, Sparkles, Tag, type LucideIcon } from 'lucide-react';
+import {
+  AlertCircle,
+  AlertTriangle,
+  CheckCircle2,
+  Circle,
+  Sparkles,
+  Tag,
+  type LucideIcon,
+} from 'lucide-react';
 import { nodeText } from '@/design/typography';
 import { normalizeUiTone, TONE_CHIP, type UiTone } from '@/design/tone';
 
@@ -10,6 +18,7 @@ const TONE_ICON: Readonly<Record<UiTone, LucideIcon>> = {
   default: Tag,
   accent: Sparkles,
   good: CheckCircle2,
+  warn: AlertTriangle,
   bad: AlertCircle,
   muted: Circle,
 };

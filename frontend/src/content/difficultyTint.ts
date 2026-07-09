@@ -3,7 +3,7 @@ import type { Difficulty } from './types';
 /** Difficulty → accent color (CSS var), shared by browse rails and mobile card tints. */
 export const DIFFICULTY_TINT: Readonly<Record<Difficulty, string>> = {
   Easy: 'var(--good)',
-  Medium: 'var(--edge-active)',
+  Medium: 'var(--warn)',
   Hard: 'var(--bad)',
 };
 

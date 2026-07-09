@@ -46,8 +46,20 @@ function AppFrame() {
 
   return (
     <div className="h-[100dvh] min-h-[100dvh] w-screen overflow-hidden bg-bg font-sans text-ink antialiased">
+      <a
+        href="#main-content"
+        className="sr-only fixed left-4 top-4 z-[100] rounded-full bg-accent px-4 py-2 text-sm font-semibold text-bg shadow-theme-md focus:not-sr-only"
+      >
+        Skip to content
+      </a>
       <ErrorBoundary label="app">
-        <main aria-label={routeLabel} className="h-full min-h-0 min-w-0" data-route={route}>
+        <main
+          id="main-content"
+          tabIndex={-1}
+          aria-label={routeLabel}
+          className="h-full min-h-0 min-w-0 outline-none"
+          data-route={route}
+        >
           <Shell />
         </main>
         <SettingsDialog />

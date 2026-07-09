@@ -52,3 +52,14 @@ export const MOBILE_QUERY = '(max-width: 767px)';
 export function useIsMobile(): boolean {
   return useMediaQuery(MOBILE_QUERY);
 }
+
+export const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+
+/**
+ * Single reactive source of truth for the user's reduced-motion preference.
+ * Re-renders when the OS setting flips — use this to gate JS/rAF/WAAPI motion
+ * (the CSS layer is handled by `@media (prefers-reduced-motion)`).
+ */
+export function useReducedMotion(): boolean {
+  return useMediaQuery(REDUCED_MOTION_QUERY);
+}

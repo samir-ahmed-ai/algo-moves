@@ -12,6 +12,7 @@ const SAMPLE: AlgoTokens = {
   'text-3': 'oklch(0.6 0 0)',
   accent: 'oklch(0.55 0.2 260)',
   'accent-bg': 'color-mix(in srgb, oklch(0.55 0.2 260) 16%, transparent)',
+  'accent-contrast': 'oklch(1 0 0)',
   'team0-bg': 'oklch(0.92 0 0)',
   'team0-stroke': 'oklch(0.9 0 0)',
   'team1-bg': 'color-mix(in srgb, oklch(0.6 0.15 30) 22%, transparent)',
@@ -56,6 +57,7 @@ describe('mapTokens utilities', () => {
         --text-3: oklch(0.6 0 0);
         --accent: oklch(0.55 0.2 260);
         --accent-bg: color-mix(in srgb, oklch(0.55 0.2 260) 16%, transparent);
+        --accent-contrast: oklch(1 0 0);
         --team0-bg: oklch(0.92 0 0);
         --team0-stroke: oklch(0.9 0 0);
         --team1-bg: color-mix(in srgb, oklch(0.6 0.15 30) 22%, transparent);

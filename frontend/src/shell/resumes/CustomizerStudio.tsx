@@ -281,7 +281,7 @@ export function CustomizerStudio({
           type="button"
           onClick={applyCustomize}
           disabled={busy}
-          className="resume-customizer-primary inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-50"
+          className="resume-customizer-primary inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-[var(--accent-contrast)] shadow-sm transition hover:opacity-90 disabled:opacity-50"
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
           {busy ? 'Working…' : mode === 'ai' ? 'Generate with AI' : 'Apply reorder'}

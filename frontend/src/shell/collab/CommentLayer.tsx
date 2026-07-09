@@ -58,7 +58,9 @@ export function CommentLayer() {
           'comment-layer-toggle',
           chromeText.sm,
           RADIUS_CTRL,
-          placing ? 'bg-accent text-white' : 'bg-panel text-ink2 hover:text-accent',
+          placing
+            ? 'bg-accent text-[var(--accent-contrast)]'
+            : 'bg-panel text-ink2 hover:text-accent',
         )}
       >
         <MessageSquarePlus className="h-3.5 w-3.5" />
@@ -116,7 +118,7 @@ export function CommentLayer() {
                 'comment-composer__post',
                 chromeText.tight,
                 RADIUS_CTRL,
-                'bg-accent text-white hover:bg-accent/90',
+                'bg-accent text-[var(--accent-contrast)] hover:bg-accent/90',
               )}
             >
               Post

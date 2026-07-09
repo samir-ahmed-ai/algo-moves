@@ -257,7 +257,7 @@ export function makeQuizPanel(quiz: QuizQuestion[], config: QuizConfig = {}) {
               type="button"
               onClick={afterAnswer}
               className={cn(
-                'inline-flex shrink-0 items-center gap-0.5 rounded-md bg-accent px-2 py-0.5 font-medium text-white hover:opacity-90',
+                'inline-flex shrink-0 items-center gap-0.5 rounded-md bg-accent px-2 py-0.5 font-medium text-[var(--accent-contrast)] hover:opacity-90',
                 vizText['2xs'],
               )}
             >

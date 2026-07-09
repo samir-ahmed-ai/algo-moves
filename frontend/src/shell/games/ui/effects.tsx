@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import { cn } from '@/lib/utils/cn';
 import { usePrefersReducedMotion } from './hooks';
 
 /**
@@ -119,28 +118,6 @@ export function CountdownRing({
   );
 }
 
-/** A small dot conveying live connection quality. */
-export function ConnectionDot({
-  status,
-  className,
-}: {
-  status: 'open' | 'connecting' | 'closed' | 'error';
-  className?: string;
-}) {
-  const tone =
-    status === 'open'
-      ? 'bg-emerald-500 shadow-[0_0_16px_rgba(16,185,129,0.7)]'
-      : status === 'connecting'
-        ? 'animate-pulse bg-amber-400 shadow-[0_0_16px_rgba(251,191,36,0.7)]'
-        : 'bg-red-500 shadow-[0_0_16px_rgba(239,68,68,0.55)]';
-  return (
-    <span
-      className={cn(
-        'inline-block h-2.5 w-2.5 rounded-full ring-2 ring-white/70 dark:ring-slate-950/80',
-        tone,
-        className,
-      )}
-      aria-hidden
-    />
-  );
-}
+// ConnectionDot moved to the shared components layer so non-games features
+// (collab, interview) can consume it without crossing shell-feature boundaries.
+export { ConnectionDot } from '@/components/shared';

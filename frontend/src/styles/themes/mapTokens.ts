@@ -14,6 +14,7 @@ export type AlgoTokens = {
   'text-3': string;
   accent: string;
   'accent-bg': string;
+  'accent-contrast': string;
   'team0-bg': string;
   'team0-stroke': string;
   'team1-bg': string;
@@ -52,6 +53,7 @@ export type ColorTokens = Pick<
   | 'text-3'
   | 'accent'
   | 'accent-bg'
+  | 'accent-contrast'
   | 'team0-bg'
   | 'team0-stroke'
   | 'team1-bg'
@@ -93,6 +95,7 @@ const COLOR_KEYS: readonly (keyof ColorTokens)[] = [
   'text-3',
   'accent',
   'accent-bg',
+  'accent-contrast',
   'team0-bg',
   'team0-stroke',
   'team1-bg',

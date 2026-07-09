@@ -78,7 +78,7 @@ export function GuestNameGate() {
               type="button"
               onClick={() => gate.submit(name.trim() || 'Guest')}
               className={cn(
-                'inline-flex items-center justify-center gap-1.5 bg-accent px-3 py-2 font-medium text-white transition-opacity hover:opacity-90',
+                'inline-flex items-center justify-center gap-1.5 bg-accent px-3 py-2 font-medium text-[var(--accent-contrast)] transition-opacity hover:opacity-90',
                 'guest-name-gate__submit',
                 RADIUS_CTRL,
                 chromeText.sm,

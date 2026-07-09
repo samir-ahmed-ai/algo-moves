@@ -1,4 +1,5 @@
 import { Brain } from 'lucide-react';
+import { measure } from '@/design/typography';
 import type { ProblemPlugin } from '../../core/types';
 
 const STATE_CHIP_TINTS = [
@@ -50,7 +51,7 @@ export function conceptFromPlugin(plugin: ProblemPlugin<any, any>): ReadConcept 
 export function ConceptText({ concept }: { concept: ReadConcept }) {
   const steps = concept.walkthrough ?? [];
   return (
-    <div className="concept-text flex flex-col gap-3 pb-1 pr-0.5">
+    <div className={`concept-text flex flex-col gap-3 pb-1 pr-0.5 ${measure}`}>
       {concept.visual && (
         <p className="concept-text__visual rounded-lg border border-edge bg-panel2/40 px-3 py-2 text-[length:var(--fs-sm)] leading-relaxed text-ink2">
           {concept.visual}

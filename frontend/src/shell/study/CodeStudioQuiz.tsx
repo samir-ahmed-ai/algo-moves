@@ -273,7 +273,7 @@ export function CodeStudioQuiz({
                 onClick={() => onContinue(score)}
                 title={`Continue to ${nextLabel}`}
                 className={cn(
-                  'code-studio-quiz-results__continue nodrag inline-flex items-center gap-1 rounded-md bg-accent px-3 py-1.5 font-medium text-white transition-opacity hover:opacity-90',
+                  'code-studio-quiz-results__continue nodrag inline-flex items-center gap-1 rounded-md bg-accent px-3 py-1.5 font-medium text-[var(--accent-contrast)] transition-opacity hover:opacity-90',
                   chromeText.tight,
                 )}
               >
@@ -419,7 +419,7 @@ export function CodeStudioQuiz({
                   type="button"
                   onClick={afterAnswer}
                   className={cn(
-                    'quiz-explain__action nodrag mt-0.5 inline-flex w-fit items-center gap-0.5 self-end rounded-md bg-accent px-2.5 py-1 font-medium text-white transition-opacity hover:opacity-90',
+                    'quiz-explain__action nodrag mt-0.5 inline-flex w-fit items-center gap-0.5 self-end rounded-md bg-accent px-2.5 py-1 font-medium text-[var(--accent-contrast)] transition-opacity hover:opacity-90',
                     chromeText.sm,
                   )}
                 >

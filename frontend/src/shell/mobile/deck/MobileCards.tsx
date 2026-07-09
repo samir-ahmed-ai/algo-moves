@@ -532,18 +532,23 @@ export function QuizCardView({
                 onClick={() => onGoToQuestion(i + 1)}
                 aria-label={`Go to question ${i + 1}`}
                 aria-current={active ? 'step' : undefined}
-                className="rounded-full transition-all"
-                style={{
-                  width: active ? 16 : 6,
-                  height: 6,
-                  background:
-                    i < card.qIndex - 1
-                      ? 'var(--good)'
-                      : active
-                        ? 'var(--accent)'
-                        : 'var(--border-strong)',
-                }}
-              />
+                className="grid min-h-[24px] place-items-center rounded-full px-1"
+              >
+                <span
+                  aria-hidden
+                  className="block rounded-full transition-all"
+                  style={{
+                    width: active ? 16 : 6,
+                    height: 6,
+                    background:
+                      i < card.qIndex - 1
+                        ? 'var(--good)'
+                        : active
+                          ? 'var(--accent)'
+                          : 'var(--border-strong)',
+                  }}
+                />
+              </button>
             );
           })}
         </span>

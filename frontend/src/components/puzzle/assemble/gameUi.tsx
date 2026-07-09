@@ -321,7 +321,7 @@ export function WinCard({
         <button
           type="button"
           onClick={onPrimary}
-          className="asm-win-card__primary inline-flex min-h-[48px] items-center justify-center rounded-full bg-accent px-5 text-[14px] font-semibold text-white"
+          className="asm-win-card__primary inline-flex min-h-[48px] items-center justify-center rounded-full bg-accent px-5 text-[14px] font-semibold text-[var(--accent-contrast)]"
         >
           {primaryLabel}
         </button>

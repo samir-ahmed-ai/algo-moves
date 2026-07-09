@@ -184,14 +184,16 @@ export function CatalogTree({ searchQuery = '' }: { searchQuery?: string }) {
   }
 
   return (
-    <Accordion.Root
-      type="single"
-      collapsible
-      value={expandedTrackId}
-      onValueChange={(v) => setExpandedTrackId(v as TrackId | '')}
-      className="catalog-tree py-1"
-    >
-      {trackItems}
-    </Accordion.Root>
+    <nav aria-label="Catalog">
+      <Accordion.Root
+        type="single"
+        collapsible
+        value={expandedTrackId}
+        onValueChange={(v) => setExpandedTrackId(v as TrackId | '')}
+        className="catalog-tree py-1"
+      >
+        {trackItems}
+      </Accordion.Root>
+    </nav>
   );
 }

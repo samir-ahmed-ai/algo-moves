@@ -71,7 +71,7 @@ function TabBtn({
       className={cn(
         'flex flex-1 items-center justify-center gap-1.5 rounded-[calc(var(--radius)-2px)] border px-2 py-1 text-xs font-medium transition-colors',
         active
-          ? 'overview-view-tab overview-view-tab--active border-accent/25 bg-accent text-white shadow-sm'
+          ? 'overview-view-tab overview-view-tab--active border-accent/25 bg-accent text-[var(--accent-contrast)] shadow-sm'
           : 'overview-view-tab overview-view-tab--idle border-transparent bg-transparent text-ink2 hover:bg-panel hover:text-ink',
       )}
       aria-pressed={active}

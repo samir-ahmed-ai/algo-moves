@@ -182,7 +182,7 @@ export function TimerWidget() {
               onClick={startCustom}
               disabled={!(Number(custom) > 0)}
               className={cn(
-                'bg-accent px-2.5 py-1 font-medium text-white disabled:opacity-40',
+                'bg-accent px-2.5 py-1 font-medium text-[var(--accent-contrast)] disabled:opacity-40',
                 'interview-timer__start',
                 RADIUS_CTRL,
                 chromeText.sm,

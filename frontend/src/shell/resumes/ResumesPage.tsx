@@ -374,7 +374,7 @@ export function ResumesPage() {
                 <button
                   type="button"
                   onClick={() => openSettings('profile')}
-                  className="shrink-0 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 transition"
+                  className="shrink-0 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-[var(--accent-contrast)] hover:opacity-90 transition"
                 >
                   Add API key
                 </button>
@@ -466,7 +466,7 @@ export function ResumesPage() {
               <button
                 type="button"
                 onClick={confirmDelete}
-                className="rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-theme-sm transition hover:bg-red-600"
+                className="rounded-xl bg-bad px-4 py-2 text-sm font-semibold text-badbg shadow-theme-sm transition hover:opacity-90"
               >
                 Delete
               </button>

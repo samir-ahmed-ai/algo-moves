@@ -143,7 +143,7 @@ export function PlanProblemsTable() {
                   <button
                     type="button"
                     onClick={() => removeItem(id)}
-                    className="rounded-full p-1 text-ink3 opacity-0 transition hover:bg-panel hover:text-red-500 group-hover:opacity-100"
+                    className="rounded-full p-1 text-ink3 opacity-0 transition hover:bg-panel hover:text-bad group-hover:opacity-100"
                     title="Remove from plan"
                   >
                     <X className="h-3.5 w-3.5" />

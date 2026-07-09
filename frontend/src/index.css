@@ -73,6 +73,20 @@ canvas {
   max-width: 100%;
 }
 
+/* Theme/preset switches crossfade the whole surface via the View Transitions API. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 200ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
 :root {
   color-scheme: light;
   --space-1: 0.25rem;
@@ -81,6 +95,8 @@ canvas {
   --space-4: 1rem;
   --space-5: 1.5rem;
   --space-6: 2rem;
+  /* Comfortable reading measure for body prose (~60-68 characters). */
+  --measure: 64ch;
 }
 :root.dark {
   color-scheme: dark;
@@ -502,5 +518,5 @@ canvas {
 }
 
 .browse-problem-grid {
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
 }

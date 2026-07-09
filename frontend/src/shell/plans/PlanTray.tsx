@@ -160,7 +160,7 @@ function ItemRow({
       <button
         type="button"
         onClick={onRemove}
-        className="plan-tray-row__remove shrink-0 rounded-full p-0.5 text-ink3 opacity-0 transition hover:bg-panel hover:text-red-500 group-hover:opacity-100"
+        className="plan-tray-row__remove shrink-0 rounded-full p-0.5 text-ink3 opacity-0 transition hover:bg-panel hover:text-bad group-hover:opacity-100"
         title="Remove from plan"
       >
         <X className="h-3 w-3" />

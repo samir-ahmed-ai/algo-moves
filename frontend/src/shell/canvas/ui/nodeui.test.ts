@@ -10,14 +10,13 @@ describe('difficultyTone', () => {
   it('maps known difficulties to semantic tones', () => {
     expect(difficultyTone('easy')).toBe('good');
     expect(difficultyTone('Easy')).toBe('good');
-    expect(difficultyTone('medium')).toBe('accent');
+    expect(difficultyTone('medium')).toBe('warn');
     expect(difficultyTone('hard')).toBe('bad');
   });
 
-  it('defaults to accent for medium and unknown values', () => {
+  it('defaults to accent for unknown values', () => {
     expect(difficultyTone(undefined)).toBe('accent');
     expect(difficultyTone('')).toBe('accent');
-    expect(difficultyTone('medium')).toBe('accent');
     expect(difficultyTone('unknown')).toBe('accent');
   });
 });

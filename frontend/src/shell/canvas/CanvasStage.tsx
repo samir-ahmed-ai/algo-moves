@@ -1,3 +1,4 @@
+import { Lock } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { computeInputFrameCounts, buildFrameContextValue } from '@/lib/canvas';
 import { chromeText } from '../chromeUi';
@@ -773,10 +774,30 @@ function Inner({
                 </ConnectedComponentsProvider>
 
                 {lock && (
-                  <div
-                    className="pointer-events-none absolute inset-0 z-[5] bg-bg/20 backdrop-blur-[1px]"
-                    aria-hidden
-                  />
+                  <>
+                    <div
+                      className="pointer-events-none absolute inset-0 z-[5] bg-bg/20 backdrop-blur-[1px]"
+                      aria-hidden
+                    />
+                    <div className="pointer-events-none absolute inset-x-0 top-3 z-[6] flex justify-center">
+                      <div
+                        role="status"
+                        className="pointer-events-auto flex items-center gap-2 rounded-full border border-edge bg-[var(--surface-glass)] px-3 py-1.5 shadow-theme-md backdrop-blur-xl"
+                      >
+                        <Lock className="h-3.5 w-3.5 text-ink3" aria-hidden />
+                        <span className={cn('font-medium text-ink2', chromeText.xs)}>
+                          Canvas locked
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setLock(false)}
+                          className="rounded-full bg-accent px-2.5 py-0.5 text-[length:var(--fs-xs)] font-semibold text-[var(--accent-contrast)] transition hover:opacity-90"
+                        >
+                          Unlock
+                        </button>
+                      </div>
+                    </div>
+                  </>
                 )}
 
                 <TracePreviewPanel />
@@ -809,7 +830,7 @@ function Inner({
                         <button
                           type="button"
                           onClick={restoreProblemStarterPanels}
-                          className="pointer-events-auto rounded-full bg-accent px-3 py-1 text-[length:var(--fs-xs)] font-semibold text-white"
+                          className="pointer-events-auto rounded-full bg-accent px-3 py-1 text-[length:var(--fs-xs)] font-semibold text-[var(--accent-contrast)]"
                         >
                           Restore starter panels
                         </button>

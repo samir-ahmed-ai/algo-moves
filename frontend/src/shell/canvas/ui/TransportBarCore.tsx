@@ -66,7 +66,7 @@ export function TransportBar({
         aria-label={player.isPlaying ? 'Pause playback' : 'Play playback'}
         aria-pressed={player.isPlaying}
         className={cn(
-          'transport-bar__play nodrag grid place-items-center rounded-full bg-accent text-[var(--accent-contrast)] shadow-theme-sm transition hover:scale-105 hover:shadow-theme-md motion-reduce:transition-none motion-reduce:hover:scale-100',
+          'transport-bar__play nodrag grid place-items-center rounded-full bg-accent text-[var(--accent-contrast)] shadow-theme-sm transition hover:scale-105 hover:shadow-theme-md active:scale-95 active:translate-y-px motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:active:scale-100 motion-reduce:active:translate-y-0',
           CHROME_BTN,
         )}
       >

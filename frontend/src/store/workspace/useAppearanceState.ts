@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { normalizeThemePreset, type ThemePreset } from '@/styles/themes/registry';
 import type { ShareState } from '@/store/navigation/shareState';
 import { normalizeLayoutPreset, type LayoutPreset } from '@/lib/canvas/layoutPrefs';
@@ -11,6 +11,27 @@ import {
   type WorkspaceDefaults,
 } from './workspace';
 import type { WorkspaceAppearanceCtx } from './workspaceContextTypes';
+
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' &&
+  window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+
+/**
+ * Apply an appearance mutation, crossfading the whole surface via the View
+ * Transitions API when supported. Skipped on the initial mount (`animate`
+ * false) and under prefers-reduced-motion so only deliberate theme switches
+ * dissolve; unsupported browsers just apply the change instantly.
+ */
+function applyAppearance(mutate: () => void, animate: boolean) {
+  const doc = document as Document & {
+    startViewTransition?: (cb: () => void) => { finished?: Promise<unknown> };
+  };
+  if (animate && typeof doc.startViewTransition === 'function' && !prefersReducedMotion()) {
+    doc.startViewTransition(mutate);
+  } else {
+    mutate();
+  }
+}
 
 /** Theme, palette, density and display tweaks, plus the document-element sync effects. */
 export function useAppearanceState(
@@ -44,16 +65,32 @@ export function useAppearanceState(
     [],
   );
 
+  const themeMounted = useRef(false);
+  const paletteMounted = useRef(false);
+  const presetMounted = useRef(false);
+
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
+    applyAppearance(
+      () => document.documentElement.classList.toggle('dark', theme === 'dark'),
+      themeMounted.current,
+    );
+    themeMounted.current = true;
   }, [theme]);
 
   useEffect(() => {
-    document.documentElement.classList.toggle('cb', palette === 'cb');
+    applyAppearance(
+      () => document.documentElement.classList.toggle('cb', palette === 'cb'),
+      paletteMounted.current,
+    );
+    paletteMounted.current = true;
   }, [palette]);
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', themePreset);
+    applyAppearance(
+      () => document.documentElement.setAttribute('data-theme', themePreset),
+      presetMounted.current,
+    );
+    presetMounted.current = true;
   }, [themePreset]);
 
   return {

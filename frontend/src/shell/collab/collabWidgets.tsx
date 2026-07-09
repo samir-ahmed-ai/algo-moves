@@ -30,8 +30,30 @@ import {
 } from '@/store/navigation/shareState';
 import { chromeText } from '@/shell/chromeUi';
 import { Chip, RADIUS_CTRL, RADIUS_SHELL } from '@/shell/canvas/ui/nodeui';
-import { useRoomComms } from '@/shell/realtime';
+import { useRoomComms, type RoomStatus } from '@/shell/realtime';
+import { ConnectionDot } from '@/components/shared';
 import { useCanvasCollab } from './CanvasCollabProvider';
+
+/** Map the room's lifecycle status onto the ConnectionDot's tri-state tone. */
+function roomDotStatus(status: RoomStatus): 'open' | 'connecting' | 'closed' | 'error' {
+  if (status === 'open') return 'open';
+  if (status === 'connecting') return 'connecting';
+  if (status === 'error' || status === 'full') return 'error';
+  return 'closed';
+}
+
+function roomStatusLabel(status: RoomStatus): string {
+  switch (status) {
+    case 'connecting':
+      return 'Reconnecting…';
+    case 'error':
+      return 'Connection error';
+    case 'full':
+      return 'Room full';
+    default:
+      return 'Disconnected';
+  }
+}
 import { buildInterviewBoardNodes, mergeInterviewNodes } from '@/shell/interview/interviewLayout';
 import type { PanelFlowNode } from '@/shell/panels/panelTypes';
 import type { CanvasWidget } from '@/shell/canvas/widgets/types';
@@ -55,6 +77,7 @@ export function SessionBody() {
     followId,
     setFollowId,
     session,
+    status,
   } = collab;
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
@@ -157,7 +180,7 @@ export function SessionBody() {
           onClick={start}
           disabled={busy}
           className={cn(
-            'inline-flex items-center justify-center gap-1.5 bg-accent px-2.5 py-1.5 font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-40',
+            'inline-flex items-center justify-center gap-1.5 bg-accent px-2.5 py-1.5 font-medium text-[var(--accent-contrast)] transition-opacity hover:opacity-90 disabled:opacity-40',
             'collab-session__primary',
             RADIUS_CTRL,
             chromeText.sm,
@@ -321,9 +344,20 @@ export function SessionBody() {
         </div>
       ) : null}
 
-      <div className="collab-session__live flex items-center gap-1.5 text-ink3">
-        <Eye className="h-3 w-3" />
-        <span className={chromeText.xs}>{live} live</span>
+      <div
+        className="collab-session__live flex items-center gap-1.5 text-ink3"
+        role="status"
+        aria-live="polite"
+      >
+        <ConnectionDot status={roomDotStatus(status)} />
+        {status === 'open' ? (
+          <>
+            <Eye className="h-3 w-3" />
+            <span className={chromeText.xs}>{live} live</span>
+          </>
+        ) : (
+          <span className={chromeText.xs}>{roomStatusLabel(status)}</span>
+        )}
       </div>
 
       {session.kind === 'interview' && session.activeProblemId ? (

@@ -1,4 +1,13 @@
-export { RADIUS_CTRL, RADIUS_SHELL, nodeIconGlyph, nodeText, nodeTextWrap } from './typography';
+export {
+  RADIUS_CTRL,
+  RADIUS_SHELL,
+  focusRing,
+  measure,
+  nodeIconGlyph,
+  nodeText,
+  nodeTextWrap,
+} from './typography';
+export { DURATION, EASING } from './motion';
 export { vizText, vizPad } from './vizText';
 export {
   CANVAS_CHROME_MARGIN,

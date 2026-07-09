@@ -700,7 +700,11 @@ export function OneStrokeGame({
               }}
               className={cn(
                 'flex flex-1 items-center justify-center gap-1 rounded-full text-[12px] font-semibold',
-                tier === t.id ? 'bg-accent text-white' : locked ? 'text-ink3' : 'text-ink2',
+                tier === t.id
+                  ? 'bg-accent text-[var(--accent-contrast)]'
+                  : locked
+                    ? 'text-ink3'
+                    : 'text-ink2',
               )}
             >
               {t.name}
@@ -775,7 +779,7 @@ export function OneStrokeGame({
               >
                 <div className="blk-face">
                   {isCap && (
-                    <span className="stroke-order asm-stamp inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold tabular-nums text-white">
+                    <span className="stroke-order asm-stamp inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold tabular-nums text-[var(--accent-contrast)]">
                       {idx + 1}
                     </span>
                   )}

@@ -107,7 +107,7 @@ export function SwipeModeQrPromo({ onOpenDevice }: { onOpenDevice: () => void })
                 closePanel();
                 onOpenDevice();
               }}
-              className="inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-accent px-2 py-1.5 text-xs font-medium text-white hover:opacity-90"
+              className="inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-accent px-2 py-1.5 text-xs font-medium text-[var(--accent-contrast)] hover:opacity-90"
             >
               Open here
             </button>

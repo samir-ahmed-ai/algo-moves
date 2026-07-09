@@ -88,7 +88,7 @@ function ProblemCard({
           className={cn(
             'problem-card__plan-toggle absolute left-1.5 top-1.5 z-10 grid h-6 w-6 place-items-center rounded-md border transition-all',
             inPlan
-              ? 'border-accent/60 bg-accent text-white shadow-sm'
+              ? 'border-accent/60 bg-accent text-[var(--accent-contrast)] shadow-sm'
               : 'border-edge bg-panel/80 text-ink3 opacity-0 backdrop-blur-sm group-hover:opacity-100 hover:border-accent/50 hover:bg-panel hover:text-accent',
           )}
         >

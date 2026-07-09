@@ -33,7 +33,7 @@ export function DojoGameChrome({
         <ArrowLeft className="h-3.5 w-3.5" />
       </button>
       <div className="vim-floating-brand pointer-events-auto flex items-center gap-[var(--gap)] rounded-md border border-edge bg-panel/90 px-[var(--pad)] py-[var(--gap)] shadow-sm backdrop-blur">
-        <span className="grid h-6 w-6 place-items-center rounded bg-accent text-white">
+        <span className="grid h-6 w-6 place-items-center rounded bg-accent text-[var(--accent-contrast)]">
           <Icon className="h-3.5 w-3.5" />
         </span>
         <div className="min-w-0">
